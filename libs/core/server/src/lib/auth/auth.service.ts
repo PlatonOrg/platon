@@ -5,6 +5,7 @@ import { AuthToken, ForbiddenResponse, NotFoundResponse, ResetPasswordInput, Sig
 import * as bcrypt from 'bcrypt';
 import { Configuration } from '../config/configuration';
 import { UserService } from '../users/user.service';
+import { UserRoles } from '@platon/core/common';
 
 
 @Injectable()
@@ -42,6 +43,25 @@ export class AuthService {
     });
 
     return this.authenticate(user.id, user.username);
+  }
+
+  async signInDemo(): Promise<AuthToken> {
+    const anonymousUser = await this.userService.create(
+        {
+            username: "anon",
+            firstName: "anon",
+            lastName: "ymous",
+            active: true,
+            role: UserRoles.student,
+        }
+    );
+
+    anonymousUser.lastLogin = new Date();
+    if (!anonymousUser.firstLogin) {
+        anonymousUser.firstLogin = new Date();
+    }
+
+    return this.authenticate(anonymousUser.id, anonymousUser.username);
   }
 
   async resetPassword(input: ResetPasswordInput): Promise<AuthToken> {

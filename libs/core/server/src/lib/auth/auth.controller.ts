@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller, Post, Req
+  Controller, Post, Req, Get
 } from '@nestjs/common';
 import { CreatedResponse, ItemResponse } from '@platon/core/common';
 import { AuthTokenDTO, ResetPasswordInputDTO, SignInInputDTO, SignUpInputDTO } from './auth.dto';
@@ -26,6 +26,14 @@ export class AuthController {
   async signIn(@Body() input: SignInInputDTO): Promise<ItemResponse<AuthTokenDTO>> {
     return new ItemResponse({
       resource: await this.authService.signIn(input)
+    });
+  }
+
+  @Public()
+  @Get('signindemo')
+  async signInDemo(): Promise<ItemResponse<AuthTokenDTO>> {
+    return new ItemResponse({
+      resource: await this.authService.signInDemo()
     });
   }
 
