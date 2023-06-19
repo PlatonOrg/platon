@@ -79,10 +79,4 @@ export class PlayerController {
       navigation: Array.isArray(response) ? response[1] : undefined,
     };
   }
-
-  @Public()
-  @Get('/demo')
-  demo() {
-    return { hello: 'world' };
-  }
 }
