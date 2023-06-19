@@ -5,7 +5,8 @@ import { Topic } from "./topic.model";
 export enum UserRoles {
   admin = 'admin',
   teacher = 'teacher',
-  student = 'student'
+  student = 'student',
+  demo = 'demo'
 }
 
 export enum UserOrderings {
