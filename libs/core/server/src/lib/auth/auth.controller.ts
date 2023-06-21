@@ -1,12 +1,13 @@
 import {
   Body,
-  Controller, Post, Req, Get
+  Controller, Post, Req, Get, Res
 } from '@nestjs/common';
 import { CreatedResponse, ItemResponse } from '@platon/core/common';
 import { AuthTokenDTO, ResetPasswordInputDTO, SignInInputDTO, SignUpInputDTO } from './auth.dto';
 import { AuthService } from './auth.service';
 import { IRequest } from './auth.types';
 import { Public } from './decorators/public.decorator';
+import {Response } from 'express';
 
 
 @Controller('auth')
@@ -31,10 +32,13 @@ export class AuthController {
 
   @Public()
   @Get('signindemo')
-  async signInDemo(): Promise<ItemResponse<AuthTokenDTO>> {
-    return new ItemResponse({
-      resource: await this.authService.signInDemo()
-    });
+  async signInDemo(@Res() res: Response) {
+    const token = await this.authService.signInDemo();
+    const nextUrl = '/';
+    return res.redirect(
+        302,
+        `/login?lti-launch=true&access-token=${token.accessToken}&refresh-token=${token.refreshToken}&next=${nextUrl}`
+      )
   }
 
   @Public()
