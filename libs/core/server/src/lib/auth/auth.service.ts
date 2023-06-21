@@ -59,7 +59,7 @@ export class AuthService {
 
   async signInDemo(): Promise<AuthToken> {
     const anonymousUser = await this.userService.create({
-      username: 'demo.' + randomUUID(),
+      username: 'demo.' + randomUUID().split('-').join('_'),
       firstName: 'anon',
       lastName: 'ymous',
       active: true,
