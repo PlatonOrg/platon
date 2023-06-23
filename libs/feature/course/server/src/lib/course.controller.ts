@@ -84,11 +84,16 @@ export class CourseController {
     return new CreatedResponse({ resource });
   }
 
+  @Roles(UserRoles.teacher, UserRoles.admin)
   @Patch('/:id')
   async update(
+    @Req() req: IRequest,
     @Param('id') id: string,
     @Body() input: UpdateCourseDTO
   ): Promise<ItemResponse<CourseDTO>> {
+    if (!(await this.courseMemberService.isMember(id, req.user.id))) {
+      throw new ForbiddenResponse(`You are not a member of this course`);
+    }
     const resource = Mapper.map(
       await this.courseService.update(id, input),
       CourseDTO
