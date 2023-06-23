@@ -57,6 +57,13 @@ export default [
           '../admin/admin.routes'
         )
       },
+      {
+        path: 'assets',
+        loadChildren: () => import(
+          /* webpackChunkName: "assets" */
+          '../assets/assets.routes'
+        )
+      },
       { path: '**', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

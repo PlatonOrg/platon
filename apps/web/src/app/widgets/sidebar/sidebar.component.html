@@ -26,6 +26,12 @@
     </a>
   </ng-container>
   <ng-container *ngIf="user.role === 'admin'">
+    <a class="nav-link" mat-button [routerLink]="'/assets'" [routerLinkActive]="'active'">
+      <mat-icon>category</mat-icon>
+      Assets
+    </a>
+  </ng-container>
+  <ng-container *ngIf="user.role === 'admin'">
     <a class="nav-link" mat-button [routerLink]="'/admin'" [routerLinkActive]="'active'">
       <mat-icon>admin_panel_settings</mat-icon>
       Administration
