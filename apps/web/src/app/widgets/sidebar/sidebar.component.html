@@ -31,6 +31,10 @@
       Assets
     </a>
   </ng-container>
+  <a class="nav-link" mat-button [routerLink]="'/room'" [routerLinkActive]="'active'">
+    <mat-icon>local_library</mat-icon>
+    Classe
+  </a>
   <ng-container *ngIf="user.role === 'admin'">
     <a class="nav-link" mat-button [routerLink]="'/admin'" [routerLinkActive]="'active'">
       <mat-icon>admin_panel_settings</mat-icon>

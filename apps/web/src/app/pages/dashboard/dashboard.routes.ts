@@ -64,6 +64,13 @@ export default [
           '../assets/assets.routes'
         )
       },
+      {
+        path: 'room',
+        loadChildren: () => import(
+          /* webpackChunkName: "room" */
+          '../room/room.routes'
+        )
+      },
       { path: '**', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
