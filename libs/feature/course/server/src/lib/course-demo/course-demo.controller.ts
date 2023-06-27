@@ -10,7 +10,11 @@ import {
 } from '@platon/core/common';
 import { CourseService } from '../course.service';
 import { CourseMemberService } from '../course-member/course-member.service';
-import { CourseDemoDTO } from './course-demo.dto';
+import {
+  CourseDemoCreateDTO,
+  CourseDemoDTO,
+  CourseDemoGetDTO,
+} from './course-demo.dto';
 
 @Controller('courses/demo')
 export class CourseDemoController {
@@ -22,8 +26,9 @@ export class CourseDemoController {
 
   @Public()
   @Get(':uri')
-  async accessDemo(@Param('uri') uri: string): Promise<any> {
-    const demo = await this.courseDemoService.findByUri(uri);
+  async accessDemo(@Param() params: CourseDemoGetDTO): Promise<any> {
+    const demo = await this.courseDemoService.findByUri(params.uri);
+
     return { courseId: demo.course.id };
   }
 
@@ -31,14 +36,14 @@ export class CourseDemoController {
   @Post(':id')
   async createDemo(
     @Req() req: IRequest,
-    @Param('id') id: string
+    @Param() params: CourseDemoCreateDTO
   ): Promise<CreatedResponse<CourseDemoDTO>> {
-    const optional = await this.courseService.findById(id);
+    const optional = await this.courseService.findById(params.id);
     const course = optional.orElseThrow(
-      () => new NotFoundResponse(`Course not found: ${id}`)
+      () => new NotFoundResponse(`Course not found: ${params.id}`)
     );
 
-    if (!(await this.courseMemberService.isMember(id, req.user.id))) {
+    if (!(await this.courseMemberService.isMember(params.id, req.user.id))) {
       throw new ForbiddenResponse(`You are not a member of this course`);
     }
 

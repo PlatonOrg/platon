@@ -11,3 +11,13 @@ export class CourseDemoDTO implements CourseDemo {
   @ApiProperty()
   uri!: string;
 }
+
+export class CourseDemoGetDTO {
+  @IsUUID()
+  uri!: string;
+}
+
+export class CourseDemoCreateDTO {
+  @IsUUID()
+  id!: string;
+}
