@@ -16,7 +16,7 @@ import {
   NotFoundResponse,
   UserRoles,
 } from '@platon/core/common';
-import { IRequest, Mapper, Roles } from '@platon/core/server';
+import { IRequest, Mapper, Roles, Public } from '@platon/core/server';
 import { CourseMemberService } from './course-member/course-member.service';
 import {
   CourseDTO,
@@ -25,12 +25,14 @@ import {
   UpdateCourseDTO,
 } from './course.dto';
 import { CourseService } from './course.service';
+import { CourseDemoService } from './course-demo/course-demo.service';
 
 @Controller('courses')
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
-    private readonly courseMemberService: CourseMemberService
+    private readonly courseMemberService: CourseMemberService,
+    private readonly courseDemoService: CourseDemoService
   ) {}
 
   @Get()
@@ -99,5 +101,20 @@ export class CourseController {
       CourseDTO
     );
     return new ItemResponse({ resource });
+  }
+
+  @Public()
+  @Get('/:id/temp')
+  async createDemo(@Param('id') id: string): Promise<any> {
+    const optional = await this.courseService.findById(id);
+    const course = optional.orElseThrow(
+      () => new NotFoundResponse(`Course not found: ${id}`)
+    );
+
+    console.log(JSON.stringify(course, null, 4));
+
+    const demo = await this.courseDemoService.create(course);
+
+    return demo;
   }
 }
