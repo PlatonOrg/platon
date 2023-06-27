@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CourseDemoEntity } from './course-demo.entity';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CourseEntity } from '../course.entity';
 import { NotFoundResponse } from '@platon/core/common';
@@ -8,8 +8,6 @@ import { NotFoundResponse } from '@platon/core/common';
 @Injectable()
 export class CourseDemoService {
   constructor(
-    private readonly dataSource: DataSource,
-
     @InjectRepository(CourseDemoEntity)
     private readonly repository: Repository<CourseDemoEntity>
   ) {}
