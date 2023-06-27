@@ -6,6 +6,7 @@ import {
   ForbiddenResponse,
   NotFoundResponse,
   ResetPasswordInput,
+  SignInDemoOutput,
   SignInInput,
   SignUpInput,
 } from '@platon/core/common';
@@ -57,7 +58,7 @@ export class AuthService {
     return this.authenticate(user.id, user.username);
   }
 
-  async signInDemo(): Promise<AuthToken> {
+  async signInDemo(): Promise<SignInDemoOutput> {
     const anonymousUser = await this.userService.create({
       username: 'demo.' + randomUUID().split('-').join('_'),
       firstName: 'anon',
@@ -71,7 +72,15 @@ export class AuthService {
       anonymousUser.firstLogin = new Date();
     }
 
-    return this.authenticate(anonymousUser.id, anonymousUser.username);
+    const token = await this.authenticate(
+      anonymousUser.id,
+      anonymousUser.username
+    );
+
+    return {
+      authToken: token,
+      userId: anonymousUser.id,
+    };
   }
 
   async resetPassword(input: ResetPasswordInput): Promise<AuthToken> {

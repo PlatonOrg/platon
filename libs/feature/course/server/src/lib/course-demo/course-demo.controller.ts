@@ -1,10 +1,9 @@
-import { Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { CourseDemoService } from './course-demo.service';
 import { IRequest, Mapper, Public, Roles } from '@platon/core/server';
 import {
   CreatedResponse,
   ForbiddenResponse,
-  ItemResponse,
   NotFoundResponse,
   UserRoles,
 } from '@platon/core/common';
@@ -15,6 +14,7 @@ import {
   CourseDemoDTO,
   CourseDemoGetDTO,
 } from './course-demo.dto';
+import { Response } from 'express';
 
 @Controller('courses/demo')
 export class CourseDemoController {
@@ -26,10 +26,14 @@ export class CourseDemoController {
 
   @Public()
   @Get(':uri')
-  async accessDemo(@Param() params: CourseDemoGetDTO): Promise<any> {
+  async accessDemo(@Param() params: CourseDemoGetDTO, @Res() res: Response) {
     const demo = await this.courseDemoService.findByUri(params.uri);
-
-    return { courseId: demo.course.id };
+    const token = await this.courseDemoService.registerToDemo(demo);
+    const nextUrl = `/courses/${demo.course.id}`;
+    return res.redirect(
+      302,
+      `/login?lti-launch=true&access-token=${token.accessToken}&refresh-token=${token.refreshToken}&next=${nextUrl}`
+    );
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)
