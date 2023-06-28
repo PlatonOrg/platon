@@ -15,6 +15,7 @@ import {
   CourseDemoGetDTO,
 } from './course-demo.dto';
 import { Response } from 'express';
+import { Request } from 'express';
 
 @Controller('courses/demo')
 export class CourseDemoController {
@@ -26,10 +27,25 @@ export class CourseDemoController {
 
   @Public()
   @Get(':uri')
-  async accessDemo(@Param() params: CourseDemoGetDTO, @Res() res: Response) {
+  async accessDemo(
+    @Param() params: CourseDemoGetDTO,
+    @Res() res: Response,
+    @Req() req: IRequest
+  ) {
     const demo = await this.courseDemoService.findByUri(params.uri);
-    const token = await this.courseDemoService.registerToDemo(demo);
     const nextUrl = `/courses/${demo.course.id}`;
+    if (req.user) {
+      const isMember = await this.courseMemberService.isMember(
+        demo.course.id,
+        req.user.id
+      );
+      if (!isMember) {
+        await this.courseMemberService.addUser(demo.course.id, req.user.id);
+      }
+      return res.redirect(302, nextUrl);
+    }
+
+    const token = await this.courseDemoService.registerToDemo(demo);
     return res.redirect(
       302,
       `/login?lti-launch=true&access-token=${token.accessToken}&refresh-token=${token.refreshToken}&next=${nextUrl}`
