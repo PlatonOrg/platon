@@ -3,7 +3,7 @@ import { CourseDemoPage } from './demo.page';
 
 export default [
   {
-    path: '',
+    path: ':id',
     component: CourseDemoPage,
   },
 ] as Routes;
