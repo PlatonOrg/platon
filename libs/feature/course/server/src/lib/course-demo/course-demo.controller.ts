@@ -4,18 +4,19 @@ import { IRequest, Mapper, Public, Roles } from '@platon/core/server';
 import {
   CreatedResponse,
   ForbiddenResponse,
+  ItemResponse,
   NotFoundResponse,
   UserRoles,
 } from '@platon/core/common';
 import { CourseService } from '../course.service';
 import { CourseMemberService } from '../course-member/course-member.service';
 import {
+  CourseDemoAccessAnswerDTO,
   CourseDemoCreateDTO,
   CourseDemoDTO,
   CourseDemoGetDTO,
 } from './course-demo.dto';
 import { Response } from 'express';
-import { Request } from 'express';
 
 @Controller('courses/demo')
 export class CourseDemoController {
@@ -29,27 +30,28 @@ export class CourseDemoController {
   @Get(':uri')
   async accessDemo(
     @Param() params: CourseDemoGetDTO,
-    @Res() res: Response,
     @Req() req: IRequest
-  ) {
+  ): Promise<ItemResponse<CourseDemoAccessAnswerDTO>> {
     const demo = await this.courseDemoService.findByUri(params.uri);
-    const nextUrl = `/courses/${demo.course.id}`;
     if (req.user) {
-      const isMember = await this.courseMemberService.isMember(
-        demo.course.id,
-        req.user.id
-      );
-      if (!isMember) {
+      if (
+        !(await this.courseMemberService.isMember(demo.course.id, req.user.id))
+      ) {
         await this.courseMemberService.addUser(demo.course.id, req.user.id);
       }
-      return res.redirect(302, nextUrl);
+      const resource = Mapper.map(
+        { courseId: demo.course.id },
+        CourseDemoAccessAnswerDTO
+      );
+      return new ItemResponse({ resource });
     }
 
     const token = await this.courseDemoService.registerToDemo(demo);
-    return res.redirect(
-      302,
-      `/login?lti-launch=true&access-token=${token.accessToken}&refresh-token=${token.refreshToken}&next=${nextUrl}`
+    const resource = Mapper.map(
+      { courseId: demo.course.id, ...token },
+      CourseDemoAccessAnswerDTO
     );
+    return new ItemResponse({ resource });
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)
