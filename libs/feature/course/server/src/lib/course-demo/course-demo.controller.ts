@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { CourseDemoService } from './course-demo.service';
 import { IRequest, Mapper, Public, Roles } from '@platon/core/server';
 import {
@@ -55,17 +55,17 @@ export class CourseDemoController {
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)
-  @Post(':id')
+  @Post()
   async createDemo(
     @Req() req: IRequest,
-    @Param() params: CourseDemoCreateDTO
+    @Body() body: CourseDemoCreateDTO
   ): Promise<CreatedResponse<CourseDemoDTO>> {
-    const optional = await this.courseService.findById(params.id);
+    const optional = await this.courseService.findById(body.id);
     const course = optional.orElseThrow(
-      () => new NotFoundResponse(`Course not found: ${params.id}`)
+      () => new NotFoundResponse(`Course not found: ${body.id}`)
     );
 
-    if (!(await this.courseMemberService.isMember(params.id, req.user.id))) {
+    if (!(await this.courseMemberService.isMember(body.id, req.user.id))) {
       throw new ForbiddenResponse(`You are not a member of this course`);
     }
 
