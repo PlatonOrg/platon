@@ -41,7 +41,7 @@ export const appRoutes: Route[] = [
     loadChildren: () =>
       import(
         /* webpackChunkName: "course-demo" */
-        './pages/courses/demo/demo.routes'
+        './pages/demo/demo.routes'
       ),
   },
   withAuthGuard(
