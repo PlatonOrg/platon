@@ -5,7 +5,7 @@ import {
   CourseDemo,
   CourseDemoAccessAnswer,
 } from '@platon/feature/course/common';
-import { IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsString, IsUUID } from 'class-validator';
 
 export class CourseDemoDTO implements CourseDemo {
   @IsUUID()
@@ -19,11 +19,13 @@ export class CourseDemoDTO implements CourseDemo {
 
 export class CourseDemoGetDTO {
   @IsUUID()
+  @ApiProperty()
   uri!: string;
 }
 
 export class CourseDemoCreateDTO {
   @IsUUID()
+  @ApiProperty()
   id!: string;
 }
 
@@ -32,9 +34,15 @@ export class CourseDemoAccessAnswerDTO implements CourseDemoAccessAnswer {
   @ApiProperty()
   courseId!: string;
 
+  @IsBoolean()
+  @ApiProperty()
+  auth!: boolean;
+
   @IsString()
+  @ApiProperty()
   readonly accessToken?: string;
 
   @IsString()
+  @ApiProperty()
   readonly refreshToken?: string;
 }

@@ -5,6 +5,7 @@ export interface CourseDemo {
 
 export interface CourseDemoAccessAnswer {
   readonly courseId: string;
-  readonly accesstoken?: string;
+  readonly auth: boolean;
+  readonly accessToken?: string;
   readonly refreshToken?: string;
 }

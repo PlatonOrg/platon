@@ -40,7 +40,7 @@ export class CourseDemoController {
         await this.courseMemberService.addUser(demo.course.id, req.user.id);
       }
       const resource = Mapper.map(
-        { courseId: demo.course.id },
+        { courseId: demo.course.id, auth: false },
         CourseDemoAccessAnswerDTO
       );
       return new ItemResponse({ resource });
@@ -48,7 +48,7 @@ export class CourseDemoController {
 
     const token = await this.courseDemoService.registerToDemo(demo);
     const resource = Mapper.map(
-      { courseId: demo.course.id, ...token },
+      { courseId: demo.course.id, auth: true, ...token },
       CourseDemoAccessAnswerDTO
     );
     return new ItemResponse({ resource });

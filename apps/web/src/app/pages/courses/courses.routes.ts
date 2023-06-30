@@ -15,14 +15,6 @@ export default [
       ),
   },
   {
-    path: 'demo',
-    loadChildren: () =>
-      import(
-        /* webpackChunkName: "course-demo" */
-        './demo/demo.routes'
-      ),
-  },
-  {
     path: ':id',
     loadChildren: () =>
       import(
