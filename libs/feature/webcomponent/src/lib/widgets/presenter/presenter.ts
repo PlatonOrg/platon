@@ -14,14 +14,18 @@ export const PresenterComponentDefinition = defineWebComponent({
   name: 'Presenter',
   icon: 'assets/images/components/widgets/presenter/presenter.svg',
   selector: 'wc-presenter',
-  description: "Permets de créer des presentations.",
+  description: 'Permets de créer des presentations.',
   fullDescriptionUrl: 'assets/docs/components/widgets/presenter/presenter.md',
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
     required: [],
     properties: {
-      template: { type: 'string', default: '', description: 'Presenter content' },
+      template: {
+        type: 'string',
+        default: '',
+        description: 'Presenter content',
+      },
     },
   },
   showcase: {
@@ -48,7 +52,7 @@ export const PresenterComponentDefinition = defineWebComponent({
           [Documentation](https://revealjs.com/code/)
           ---
           ## Math plugin
-          \`$$ J(\\theta_0,\\theta_1) = \\sum_{i=0} $$\`
+          \`$$ J(\theta_0,\theta_1) = \\sum_{i=0} $$\`
           [Documentation](https://revealjs.com/math/)
         </textarea>
       </section>
