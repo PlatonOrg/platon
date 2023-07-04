@@ -20,17 +20,51 @@ export class CourseDemoService {
     return this.repository.save(this.repository.create({ course }));
   }
 
+  async existsForCourseId(courseId: string): Promise<boolean> {
+    const demo = await this.repository.findOne({
+      where: {
+        course: {
+          id: courseId,
+        },
+      },
+      relations: { course: true },
+    });
+
+    if (!demo) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async findByCourseId(courseId: string): Promise<CourseDemoEntity> {
+    const demo = await this.repository.findOne({
+      where: {
+        course: {
+          id: courseId,
+        },
+      },
+      relations: { course: true },
+    });
+
+    if (!demo) {
+      throw new NotFoundResponse(`No demo found for this course.`);
+    }
+
+    return demo;
+  }
+
   async findByUri(uri: string): Promise<CourseDemoEntity> {
-    const course = await this.repository.findOne({
+    const demo = await this.repository.findOne({
       where: { id: uri },
       relations: { course: true },
     });
 
-    if (!course) {
+    if (!demo) {
       throw new NotFoundResponse(`No demo found at this location.`);
     }
 
-    return course;
+    return demo;
   }
 
   async registerToDemo(demo: CourseDemoEntity): Promise<AuthToken> {

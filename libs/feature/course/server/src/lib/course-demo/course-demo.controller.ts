@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { CourseDemoService } from './course-demo.service';
 import { IRequest, Mapper, Public, Roles } from '@platon/core/server';
 import {
@@ -67,6 +76,10 @@ export class CourseDemoController {
 
     if (!(await this.courseMemberService.isMember(body.id, req.user.id))) {
       throw new ForbiddenResponse(`You are not a member of this course`);
+    }
+
+    if (await this.courseDemoService.existsForCourseId(course.id)) {
+      throw new BadRequestException(`A demo already exists for this course`);
     }
 
     const demo = await this.courseDemoService.create(course);
