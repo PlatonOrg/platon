@@ -9,6 +9,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { CoursePresenter } from '../../course.presenter';
 import { CourseService } from '@platon/feature/course/browser';
+import { UserRoles } from '@platon/core/common';
 
 @Component({
   standalone: true,
@@ -30,6 +31,12 @@ export class CourseDemoPage implements OnInit, OnDestroy {
     private readonly courseService: CourseService
   ) {}
 
+  protected get canEdit(): boolean {
+    const { user } = this.context;
+    if (!user) return false;
+    return user.role === UserRoles.teacher || user.role === UserRoles.admin;
+  }
+
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
@@ -49,7 +56,8 @@ export class CourseDemoPage implements OnInit, OnDestroy {
   }
 
   // mettre dans presse papier ou icone copier coller
-  // ne pas afficher si non teacher/admin
+  // one link per course
+  // can disable demo
   async createDemo() {
     const demo = await firstValueFrom(
       this.courseService.createDemo(this.courseId)
