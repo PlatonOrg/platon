@@ -30,6 +30,7 @@ import { CourseMemberProvider } from '../models/course-member-provider';
 import { CourseProvider } from '../models/course-provider';
 import { CourseSectionProvider } from '../models/course-section-provider';
 import { CourseDemoProvider } from '../models/course-demo-provider';
+import { Optional } from 'typescript-optional';
 
 @Injectable({ providedIn: 'root' })
 export class CourseService {
@@ -69,6 +70,10 @@ export class CourseService {
 
   accessDemo(uri: string): Observable<CourseDemoAccessAnswer> {
     return this.courseDemoProvider.access(uri);
+  }
+
+  getDemo(courseId: string): Observable<Optional<CourseDemo>> {
+    return this.courseDemoProvider.get(courseId);
   }
   //#endregion
 
