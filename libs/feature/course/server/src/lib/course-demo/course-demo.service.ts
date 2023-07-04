@@ -6,6 +6,7 @@ import { CourseEntity } from '../course.entity';
 import { AuthToken, NotFoundResponse } from '@platon/core/common';
 import { AuthService } from '@platon/core/server';
 import { CourseMemberService } from '../course-member/course-member.service';
+import { Optional } from 'typescript-optional';
 
 @Injectable()
 export class CourseDemoService {
@@ -20,7 +21,7 @@ export class CourseDemoService {
     return this.repository.save(this.repository.create({ course }));
   }
 
-  async existsForCourseId(courseId: string): Promise<boolean> {
+  async findByCourseId(courseId: string): Promise<Optional<CourseDemoEntity>> {
     const demo = await this.repository.findOne({
       where: {
         course: {
@@ -30,41 +31,16 @@ export class CourseDemoService {
       relations: { course: true },
     });
 
-    if (!demo) {
-      return false;
-    }
-
-    return true;
+    return Optional.ofNullable(demo);
   }
 
-  async findByCourseId(courseId: string): Promise<CourseDemoEntity> {
-    const demo = await this.repository.findOne({
-      where: {
-        course: {
-          id: courseId,
-        },
-      },
-      relations: { course: true },
-    });
-
-    if (!demo) {
-      throw new NotFoundResponse(`No demo found for this course.`);
-    }
-
-    return demo;
-  }
-
-  async findByUri(uri: string): Promise<CourseDemoEntity> {
+  async findByUri(uri: string): Promise<Optional<CourseDemoEntity>> {
     const demo = await this.repository.findOne({
       where: { id: uri },
       relations: { course: true },
     });
 
-    if (!demo) {
-      throw new NotFoundResponse(`No demo found at this location.`);
-    }
-
-    return demo;
+    return Optional.ofNullable(demo);
   }
 
   async registerToDemo(demo: CourseDemoEntity): Promise<AuthToken> {

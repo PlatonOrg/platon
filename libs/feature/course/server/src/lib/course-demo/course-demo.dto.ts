@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthToken } from '@platon/core/common';
-import { AuthTokenDTO } from '@platon/core/server';
 import {
   CourseDemo,
   CourseDemoAccessAnswer,
@@ -17,10 +15,16 @@ export class CourseDemoDTO implements CourseDemo {
   uri!: string;
 }
 
-export class CourseDemoGetDTO {
+export class CourseDemoAccessDTO {
   @IsUUID()
   @ApiProperty()
   uri!: string;
+}
+
+export class CourseDemoGetDTO {
+  @IsUUID()
+  @ApiProperty()
+  courseId!: string;
 }
 
 export class CourseDemoCreateDTO {
@@ -40,9 +44,9 @@ export class CourseDemoAccessAnswerDTO implements CourseDemoAccessAnswer {
 
   @IsString()
   @ApiProperty()
-  readonly accessToken?: string;
+  accessToken?: string;
 
   @IsString()
   @ApiProperty()
-  readonly refreshToken?: string;
+  refreshToken?: string;
 }

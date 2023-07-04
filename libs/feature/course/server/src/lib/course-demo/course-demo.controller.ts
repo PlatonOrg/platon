@@ -21,6 +21,7 @@ import { CourseService } from '../course.service';
 import { CourseMemberService } from '../course-member/course-member.service';
 import {
   CourseDemoAccessAnswerDTO,
+  CourseDemoAccessDTO,
   CourseDemoCreateDTO,
   CourseDemoDTO,
   CourseDemoGetDTO,
@@ -36,12 +37,15 @@ export class CourseDemoController {
   ) {}
 
   @Public()
-  @Get(':uri')
+  @Get('access/:uri')
   async accessDemo(
-    @Param() params: CourseDemoGetDTO,
+    @Param() params: CourseDemoAccessDTO,
     @Req() req: IRequest
   ): Promise<ItemResponse<CourseDemoAccessAnswerDTO>> {
-    const demo = await this.courseDemoService.findByUri(params.uri);
+    const demo = (
+      await this.courseDemoService.findByUri(params.uri)
+    ).orElseThrow(() => new NotFoundResponse(`Demo not found: ${params.uri}`));
+
     if (req.user) {
       if (
         !(await this.courseMemberService.isMember(demo.course.id, req.user.id))
@@ -63,6 +67,24 @@ export class CourseDemoController {
     return new ItemResponse({ resource });
   }
 
+  @Get(':courseId')
+  async getDemo(
+    @Param() params: CourseDemoGetDTO
+  ): Promise<ItemResponse<CourseDemoDTO>> {
+    const demo = (
+      await this.courseDemoService.findByCourseId(params.courseId)
+    ).orElseThrow(
+      () =>
+        new NotFoundResponse(`Demo not found for course: ${params.courseId}`)
+    );
+
+    const resource = Mapper.map(
+      { courseId: demo.course.id, uri: demo.id },
+      CourseDemoDTO
+    );
+    return new ItemResponse({ resource });
+  }
+
   @Roles(UserRoles.teacher, UserRoles.admin)
   @Post()
   async createDemo(
@@ -78,7 +100,7 @@ export class CourseDemoController {
       throw new ForbiddenResponse(`You are not a member of this course`);
     }
 
-    if (await this.courseDemoService.existsForCourseId(course.id)) {
+    if ((await this.courseDemoService.findByCourseId(course.id)).isPresent()) {
       throw new BadRequestException(`A demo already exists for this course`);
     }
 
