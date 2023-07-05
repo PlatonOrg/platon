@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  Inject,
   OnDestroy,
   OnInit,
 } from '@angular/core';
@@ -10,6 +11,16 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { CoursePresenter } from '../../course.presenter';
 import { CourseService } from '@platon/feature/course/browser';
 import { UserRoles } from '@platon/core/common';
+import { CommonModule } from '@angular/common';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { DOCUMENT } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @Component({
   standalone: true,
@@ -17,18 +28,32 @@ import { UserRoles } from '@platon/core/common';
   templateUrl: './demo.page.html',
   styleUrls: ['./demo.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NzButtonModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NzButtonModule,
+    NzInputModule,
+    NzIconModule,
+    NzSpinModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatFormFieldModule,
+  ],
 })
 export class CourseDemoPage implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = [];
 
   protected context = this.presenter.defaultContext();
   protected courseId = '';
+  protected demoUri = '';
+  protected hasDemo = false;
+  protected saving = false;
 
   constructor(
     private readonly presenter: CoursePresenter,
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly courseService: CourseService
+    private readonly clipboard: Clipboard,
+    @Inject(DOCUMENT) private document: any
   ) {}
 
   protected get canEdit(): boolean {
@@ -41,9 +66,17 @@ export class CourseDemoPage implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context;
-        const { course } = context;
+        const { course, demo } = context;
         if (course) {
           this.courseId = course.id;
+        }
+        if (!!demo && demo.isPresent()) {
+          this.hasDemo = true;
+          this.demoUri =
+            this.document.location.hostname + '/demo/' + demo.get().uri;
+        } else {
+          this.hasDemo = false;
+          this.demoUri = '';
         }
 
         this.changeDetectorRef.markForCheck();
@@ -59,10 +92,16 @@ export class CourseDemoPage implements OnInit, OnDestroy {
   // one link per course
   // can disable demo
   async createDemo() {
-    const demo = await firstValueFrom(
-      this.courseService.createDemo(this.courseId)
-    );
-    alert(`Demo URI: demo/${demo.uri}`);
-    this.changeDetectorRef.markForCheck();
+    try {
+      this.saving = true;
+      await this.presenter.createDemo();
+    } finally {
+      this.saving = false;
+      this.changeDetectorRef.markForCheck();
+    }
+  }
+
+  copyUri(): void {
+    this.clipboard.copy(this.demoUri);
   }
 }
