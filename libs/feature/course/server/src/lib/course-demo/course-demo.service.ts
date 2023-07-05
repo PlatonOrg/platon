@@ -49,7 +49,7 @@ export class CourseDemoService {
     return authToken;
   }
 
-  async delete(uri: string) {
-    return this.repository.delete(uri);
+  async delete(courseId: string) {
+    return this.repository.delete({ course: { id: courseId } });
   }
 }

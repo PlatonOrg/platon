@@ -24,7 +24,7 @@ export class RemoteCourseDemoProvider extends CourseDemoProvider {
   }
   override create(courseId: string): Observable<CourseDemo> {
     return this.http
-      .post<ItemResponse<CourseDemo>>('/api/v1/courses/demo', { id: courseId })
+      .post<ItemResponse<CourseDemo>>('/api/v1/courses/demo', { courseId })
       .pipe(map((response) => response.resource));
   }
 
@@ -41,5 +41,8 @@ export class RemoteCourseDemoProvider extends CourseDemoProvider {
           return throwError(() => err);
         })
       );
+  }
+  override delete(courseId: string): Observable<void> {
+    return this.http.delete<void>(`/api/v1/courses/demo/${courseId}`);
   }
 }

@@ -101,12 +101,14 @@ export class CourseDemoController {
     @Req() req: IRequest,
     @Body() body: CourseDemoCreateDTO
   ): Promise<CreatedResponse<CourseDemoDTO>> {
-    const optional = await this.courseService.findById(body.id);
+    const optional = await this.courseService.findById(body.courseId);
     const course = optional.orElseThrow(
-      () => new NotFoundResponse(`Course not found: ${body.id}`)
+      () => new NotFoundResponse(`Course not found: ${body.courseId}`)
     );
 
-    if (!(await this.courseMemberService.isMember(body.id, req.user.id))) {
+    if (
+      !(await this.courseMemberService.isMember(body.courseId, req.user.id))
+    ) {
       throw new ForbiddenResponse(`You are not a member of this course`);
     }
 
@@ -124,22 +126,26 @@ export class CourseDemoController {
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)
-  @Delete()
+  @Delete(':courseId')
   async deleteDemo(
     @Req() req: IRequest,
-    @Body() body: CourseDemoDeleteDTO
+    @Param() params: CourseDemoDeleteDTO
   ): Promise<NoContentResponse> {
-    if (!(await this.courseMemberService.isMember(body.id, req.user.id))) {
+    if (
+      !(await this.courseMemberService.isMember(params.courseId, req.user.id))
+    ) {
       throw new ForbiddenResponse(`You are not a member of this course`);
     }
 
-    if ((await this.courseDemoService.findByCourseId(body.id)).isEmpty()) {
+    if (
+      (await this.courseDemoService.findByCourseId(params.courseId)).isEmpty()
+    ) {
       throw new BadRequestException(
         `A demo does not exist yet for this course`
       );
     }
 
-    await this.courseDemoService.delete(body.id);
+    await this.courseDemoService.delete(params.courseId);
     return new NoContentResponse();
   }
 }

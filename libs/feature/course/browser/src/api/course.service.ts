@@ -75,6 +75,10 @@ export class CourseService {
   getDemo(courseId: string): Observable<Optional<CourseDemo>> {
     return this.courseDemoProvider.get(courseId);
   }
+
+  deleteDemo(courseId: string): Observable<void> {
+    return this.courseDemoProvider.delete(courseId);
+  }
   //#endregion
 
   //#region Members

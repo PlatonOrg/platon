@@ -30,13 +30,13 @@ export class CourseDemoGetDTO {
 export class CourseDemoCreateDTO {
   @IsUUID()
   @ApiProperty()
-  id!: string;
+  courseId!: string;
 }
 
 export class CourseDemoDeleteDTO {
   @IsUUID()
   @ApiProperty()
-  id!: string;
+  courseId!: string;
 }
 
 export class CourseDemoAccessAnswerDTO implements CourseDemoAccessAnswer {

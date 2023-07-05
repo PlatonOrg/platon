@@ -88,13 +88,21 @@ export class CourseDemoPage implements OnInit, OnDestroy {
     this.subscriptions.forEach((s) => s.unsubscribe());
   }
 
-  // mettre dans presse papier ou icone copier coller
-  // one link per course
-  // can disable demo
   async createDemo() {
     try {
       this.saving = true;
       await this.presenter.createDemo();
+    } finally {
+      this.saving = false;
+      this.changeDetectorRef.markForCheck();
+      this.clipboard.copy(this.demoUri);
+    }
+  }
+
+  async deleteDemo() {
+    try {
+      this.saving = true;
+      await this.presenter.deleteDemo();
     } finally {
       this.saving = false;
       this.changeDetectorRef.markForCheck();

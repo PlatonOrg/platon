@@ -171,6 +171,24 @@ export class CoursePresenter implements OnDestroy {
     }
   }
 
+  async deleteDemo(): Promise<boolean> {
+    const { course } = this.context.value as Required<Context>;
+    try {
+      await firstValueFrom(this.courseService.deleteDemo(course.id));
+
+      this.context.next({
+        ...this.context.value,
+        demo: Optional.empty(),
+      });
+
+      this.dialogService.success('La démo a bien été supprimée!');
+      return true;
+    } catch {
+      this.alertError();
+      return false;
+    }
+  }
+
   private async refresh(id: string): Promise<void> {
     const [user, course] = await Promise.all([
       this.authService.ready(),
