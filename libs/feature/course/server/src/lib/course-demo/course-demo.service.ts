@@ -48,4 +48,8 @@ export class CourseDemoService {
     await this.courseMemberService.addUser(demo.course.id, userId);
     return authToken;
   }
+
+  async delete(uri: string) {
+    return this.repository.delete(uri);
+  }
 }

@@ -33,6 +33,12 @@ export class CourseDemoCreateDTO {
   id!: string;
 }
 
+export class CourseDemoDeleteDTO {
+  @IsUUID()
+  @ApiProperty()
+  id!: string;
+}
+
 export class CourseDemoAccessAnswerDTO implements CourseDemoAccessAnswer {
   @IsUUID()
   @ApiProperty()

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -14,6 +15,7 @@ import {
   CreatedResponse,
   ForbiddenResponse,
   ItemResponse,
+  NoContentResponse,
   NotFoundResponse,
   UserRoles,
 } from '@platon/core/common';
@@ -24,6 +26,7 @@ import {
   CourseDemoAccessDTO,
   CourseDemoCreateDTO,
   CourseDemoDTO,
+  CourseDemoDeleteDTO,
   CourseDemoGetDTO,
 } from './course-demo.dto';
 import { Response } from 'express';
@@ -69,6 +72,7 @@ export class CourseDemoController {
 
   @Get(':courseId')
   async getDemo(
+    @Req() req: IRequest,
     @Param() params: CourseDemoGetDTO
   ): Promise<ItemResponse<CourseDemoDTO>> {
     const demo = (
@@ -77,6 +81,12 @@ export class CourseDemoController {
       () =>
         new NotFoundResponse(`Demo not found for course: ${params.courseId}`)
     );
+
+    if (
+      !(await this.courseMemberService.isMember(params.courseId, req.user.id))
+    ) {
+      throw new ForbiddenResponse(`You are not a member of this course`);
+    }
 
     const resource = Mapper.map(
       { courseId: demo.course.id, uri: demo.id },
@@ -111,5 +121,25 @@ export class CourseDemoController {
     );
 
     return new CreatedResponse({ resource });
+  }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Delete()
+  async deleteDemo(
+    @Req() req: IRequest,
+    @Body() body: CourseDemoDeleteDTO
+  ): Promise<NoContentResponse> {
+    if (!(await this.courseMemberService.isMember(body.id, req.user.id))) {
+      throw new ForbiddenResponse(`You are not a member of this course`);
+    }
+
+    if ((await this.courseDemoService.findByCourseId(body.id)).isEmpty()) {
+      throw new BadRequestException(
+        `A demo does not exist yet for this course`
+      );
+    }
+
+    await this.courseDemoService.delete(body.id);
+    return new NoContentResponse();
   }
 }
