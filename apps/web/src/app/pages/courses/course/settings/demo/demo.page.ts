@@ -21,6 +21,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { DialogService } from '@platon/core/browser';
 
 @Component({
   standalone: true,
@@ -53,6 +54,7 @@ export class CourseDemoPage implements OnInit, OnDestroy {
     private readonly presenter: CoursePresenter,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly clipboard: Clipboard,
+    private readonly dialogService: DialogService,
     @Inject(DOCUMENT) private document: any
   ) {}
 
@@ -111,5 +113,6 @@ export class CourseDemoPage implements OnInit, OnDestroy {
 
   copyUri(): void {
     this.clipboard.copy(this.demoUri);
+    this.dialogService.info('URL copiée');
   }
 }
