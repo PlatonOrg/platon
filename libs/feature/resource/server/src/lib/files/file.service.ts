@@ -7,6 +7,7 @@ import { ResourcePermissionService } from '../permissions/permissions.service'
 import { ResourceEntity } from '../resource.entity'
 import { ResourceService } from '../resource.service'
 import { LATEST, Repo } from './repo'
+import { FileNotFoundError } from '@platon/shared/server'
 
 interface CompileInput {
   resourceId: string
@@ -63,6 +64,26 @@ export class ResourceFileService {
     }
   }
 
+  // Finds the id of the resource which contains a file. Starts by checking the current resource, and if it doesn't
+  // find the file, tries to go the parent circle and etc. until the root.
+  private async findFileFromPath(resourceId: string, path: string, user: User | undefined): Promise<string> {
+    while (true) {
+      const { repo } = await this.repo(resourceId, user)
+      if (await repo.exists(path)) {
+        return resourceId
+      }
+
+      const { parentId } = (await this.resourceService.findByIdOrCode(resourceId)).orElseThrow(
+        () => new NotFoundResponse(`Resource not found: ${resourceId}`)
+      )
+      if (!parentId || parentId == resourceId) {
+        throw new FileNotFoundError(path)
+      }
+      resourceId = parentId;
+    }
+
+  }
+
   async compile(input: CompileInput): Promise<CompileOutput> {
     const { resourceId, version, user, overrides } = input
     const { repo, resource } = await this.repo(resourceId, user)
@@ -81,13 +102,17 @@ export class ResourceFileService {
     }
 
     const resolver: PLReferenceResolver = {
-      resolveUrl: async (resource, version, path) => {
-        const { repo } = await this.repo(resource, user)
+      resolveUrl: async (resourceId, version, path) => {
+        const realResourceId = await this.findFileFromPath(resourceId, path, user)
+
+        const { repo } = await this.repo(realResourceId, user)
         const [file] = await repo.read(path, version || LATEST)
         return file.downloadUrl
       },
-      resolveContent: async (resource, version, path) => {
-        const { repo } = await this.repo(resource, user)
+
+      resolveContent: async (resourceId, version, path) => {
+        const realResourceId = await this.findFileFromPath(resourceId, path, user)
+        const { repo } = await this.repo(realResourceId, user)
         const [, content] = await repo.read(path, version || LATEST)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return Buffer.from((await content!).buffer).toString()
