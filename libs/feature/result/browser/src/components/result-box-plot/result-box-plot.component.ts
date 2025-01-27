@@ -76,10 +76,6 @@ export class ResultBoxPlotComponent implements AfterViewInit {
       return [min, Q1, median, Q3, max]
     })
 
-    console.error('data', data)
-
-    console.error('preparedData', preparedData)
-
     const option = {
       title: {
         text: 'Diagramme à moustaches',
@@ -100,7 +96,7 @@ export class ResultBoxPlotComponent implements AfterViewInit {
           show: true,
         },
         axisLabel: {
-          rotate: 45,
+          rotate: 25,
           fontSize: 10,
           interval: 0,
           formatter: (value: string) => (value.length > 17 ? value.slice(0, 17) + '...' : value),
@@ -109,6 +105,8 @@ export class ResultBoxPlotComponent implements AfterViewInit {
       yAxis: {
         type: 'value',
         name: 'Score',
+        min: -1,
+        max: 100,
         splitArea: {
           show: true,
         },
@@ -120,6 +118,7 @@ export class ResultBoxPlotComponent implements AfterViewInit {
           data: preparedData,
           colorBy: 'data',
           tooltip: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter: (params: any) =>
               `Min: ${params.data[1]}<br>Q1: ${params.data[2]}<br>Median: ${params.data[3]}<br>Q3: ${params.data[4]}<br>Max: ${params.data[5]}`,
           },

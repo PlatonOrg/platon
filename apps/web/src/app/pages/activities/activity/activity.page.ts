@@ -30,6 +30,7 @@ import { NzSelectModule, NzSelectOptionInterface } from 'ng-zorro-antd/select'
 import { UserActivityResultsDistribution } from '@platon/feature/result/common'
 import { NzSliderModule } from 'ng-zorro-antd/slider'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
+import { PeerTreeComponent } from '@platon/feature/peer/browser'
 
 @Component({
   standalone: true,
@@ -64,6 +65,7 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
     ResultLegendComponent,
     KCileComponent,
     ResultBoxPlotComponent,
+    PeerTreeComponent,
 
     UiStatisticCardComponent,
     UiLayoutBlockComponent,
@@ -98,14 +100,6 @@ export class CourseActivityPage implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
-        const nbperson = this.context.results?.users.length ?? 0
-        this.KCileInsightsOption.possibleBucket.map((bucket) => {
-          bucket.disabled = bucket.value > nbperson
-        })
-        this.KCileInsightsOption.selectedBucket = this.KCileInsightsOption.possibleBucket.reduce(
-          (acc, curr) => (curr.disabled ? acc : curr.value),
-          0
-        )
         this.onDateChange([
           this.context.activity?.createdAt ?? this.today,
           this.context.activity?.closeAt ?? this.today,
@@ -132,6 +126,14 @@ export class CourseActivityPage implements OnInit, OnDestroy {
     this.userDistribution = await firstValueFrom(
       this.resultService.activityResultsForDate(this.context.activity?.id, this.dates[0], this.dates[1])
     )
+    const nbperson = this.userDistribution.filter((user) => Object.keys(user.nbSuccess).length !== 0).length
+    this.KCileInsightsOption.possibleBucket = this.KCileInsightsOption.possibleBucket.filter(
+      (bucket) => nbperson / bucket.value >= 1
+    )
+    this.KCileInsightsOption.selectedBucket =
+      this.KCileInsightsOption.possibleBucket[this.KCileInsightsOption.possibleBucket.length - 1]?.value ?? 0
+
+    this.changeDetectorRef.markForCheck()
   }
 
   protected disabledDate = (current: Date) => {
