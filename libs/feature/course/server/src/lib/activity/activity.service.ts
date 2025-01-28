@@ -8,6 +8,7 @@ import {
   ActivityFilters,
   CreateActivity,
   ReloadActivity,
+  Restriction,
   UpdateActivity,
   calculateActivityOpenState,
 } from '@platon/feature/course/common'
@@ -186,6 +187,15 @@ export class ActivityService {
     const result = await this.repository.save(activity)
     await this.addVirtualColumns(result)
     return result
+  }
+
+  async updateRestrictions(
+    courseId: string,
+    activityId: string,
+    restrictions: Restriction[],
+    guard?: ActivityGuard
+  ): Promise<ActivityEntity> {
+    return this.update(courseId, activityId, { restrictions }, guard)
   }
 
   async reload(
