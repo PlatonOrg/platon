@@ -1,0 +1,93 @@
+
+.restriction-container {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  min-height: 40px;
+}
+
+.restriction-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
+.restriction-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  color: #003366;
+  font-size: 14px;
+  white-space: nowrap;
+
+  i {
+    font-size: 16px;
+    color: #003366;
+  }
+}
+
+.date-picker-compact {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
+
+  .separator {
+    color: #003366;
+    font-weight: 500;
+  }
+
+  nz-date-picker {
+    flex: 1;
+  }
+}
+
+.select-container {
+  flex: 1;
+}
+
+.delete-button {
+  margin-left: 8px;
+  padding: 4px 8px;
+
+  i {
+    font-size: 16px;
+  }
+}
+
+:host ::ng-deep {
+  .ant-picker {
+    border: 1px solid #e8e8e8;
+    height: 28px;
+
+    input {
+      font-size: 13px;
+    }
+  }
+
+  course-member-select,
+  course-group-select {
+    .ant-select {
+      width: 100%;
+    }
+
+    .ant-select-selector {
+      height: 28px !important;
+      padding: 0 8px !important;
+
+      .ant-select-selection-search-input {
+        height: 26px !important;
+      }
+
+      .ant-select-selection-placeholder {
+        line-height: 28px !important;
+      }
+    }
+  }
+}

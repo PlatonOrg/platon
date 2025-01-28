@@ -11,6 +11,7 @@ import {
   UpdateCourseActivityDTO,
 } from './activity.dto'
 import { ActivityService } from './activity.service'
+import { RestrictionDTO } from './activity-restriction.dto'
 
 @Controller('courses/:courseId/activities')
 @ApiTags('Courses')
@@ -146,6 +147,22 @@ export class ActivityController {
     @UUIDParam('activityId') activityId: string
   ): Promise<ItemResponse<ActivityDTO>> {
     const activity = await this.activityService.reopen(courseId, activityId, (activity) =>
+      this.permissionsService.ensureActivityWritePermission(activity, req)
+    )
+    return new ItemResponse({
+      resource: Mapper.map(activity, ActivityDTO),
+    })
+  }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Patch('/:activityId/restrictions')
+  async updateRestrictions(
+    @Req() req: IRequest,
+    @UUIDParam('courseId') courseId: string,
+    @UUIDParam('activityId') activityId: string,
+    @Body() restrictions: RestrictionDTO[]
+  ): Promise<ItemResponse<ActivityDTO>> {
+    const activity = await this.activityService.updateRestrictions(courseId, activityId, restrictions, (activity) =>
       this.permissionsService.ensureActivityWritePermission(activity, req)
     )
     return new ItemResponse({
