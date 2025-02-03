@@ -60,24 +60,24 @@ export class RestrictionManagerComponent implements OnInit {
       restrictions: this.restrictions,
     }
 
-    const traverseRestrictions = (restrictions: Restriction[]): any[] => {
-      return restrictions.map((restriction) => {
-        if (restriction.type === 'Jeu') {
-          return {
-            condition: restriction.condition,
-            allConditions: restriction.allConditions,
-            restrictions: traverseRestrictions(restriction.restrictions || []),
-          }
-        } else {
-          return {
-            type: restriction.type,
-            config: restriction.config,
-          }
-        }
-      })
-    }
+    // const traverseRestrictions = (restrictions: Restriction[]): any[] => {
+    //   return restrictions.map((restriction) => {
+    //     if (restriction.type === 'Jeu') {
+    //       return {
+    //         condition: restriction.condition,
+    //         allConditions: restriction.allConditions,
+    //         restrictions: traverseRestrictions(restriction.restrictions || []),
+    //       }
+    //     } else {
+    //       return {
+    //         type: restriction.type,
+    //         config: restriction.config,
+    //       }
+    //     }
+    //   })
+    // }
 
-    data.restrictions = traverseRestrictions(this.restrictions)
+    // data.restrictions = traverseRestrictions(this.restrictions)
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const fileName = 'restrictions.json'
     saveAs(blob, fileName)
