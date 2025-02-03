@@ -113,6 +113,7 @@ import { ActivityListeners } from './activity/activity.listeners'
     ActivityCorrectorService,
     CourseNotificationService,
     ActivityGroupService,
+    CourseGroupMemberService,
   ],
 })
 export class FeatureCourseServerModule {}
