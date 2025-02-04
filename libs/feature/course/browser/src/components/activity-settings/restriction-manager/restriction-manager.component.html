@@ -1,7 +1,7 @@
 <nz-row [nzGutter]="16" class="restrictions-container">
   <div nz-col [nzSpan]="24">
     <!-- La restriction principale -->
-    <nz-card *ngIf="!isSubRestriction" [nzBordered]="false" [nzTitle]="titleTemplate">
+    <nz-card *ngIf="!isSubRestriction && restrictions.length > 0" [nzBordered]="false" [nzTitle]="titleTemplate">
       <ng-template #titleTemplate>
         <h4 nz-typography>Restriction principale</h4>
       </ng-template>

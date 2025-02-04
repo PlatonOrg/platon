@@ -22,7 +22,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzCardModule } from 'ng-zorro-antd/card'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
-import { Activity, CourseGroup, CourseMember, Restriction } from '@platon/feature/course/common'
+import { Activity, CourseGroup, CourseMember, Restriction, RestrictionConfig } from '@platon/feature/course/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
@@ -107,9 +107,50 @@ export class CourseActivitySettingsComponent implements OnInit {
       groups: activityGroups.resources.map((g) => g.groupId),
     })
 
-    console.log('Restrictions from activité : \n\n', this.activity.restrictions)
-    if (this.activity.restrictions) {
+    console.log('Members 1 : \n', this.form.get('members')?.value)
+    console.log('Correctors 1 : \n', this.form.get('correctors')?.value)
+    console.log('Groups 1 : \n', this.form.get('groups')?.value)
+    if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
+      //console.log('Restrictions from activité : \n\n', this.activity.restrictions)
       this.restrictions = this.activity.restrictions
+      this.addRest = true
+    } else {
+      if (this.form.get('openAt')?.value && this.form.get('closeAt')?.value) {
+        const startAt = this.form.get('openAt')?.value
+        const closeAt = this.form.get('closeAt')?.value
+        this.restrictions.push({
+          type: 'DateRange',
+          config: {
+            start: startAt instanceof Date ? startAt : undefined,
+            end: closeAt instanceof Date ? closeAt : undefined,
+          },
+        })
+      }
+      if (this.form.get('members')?.value) {
+        this.restrictions.push({
+          type: 'Members',
+          config: {
+            members: this.form.get('members')?.value || undefined,
+          },
+        })
+      }
+      if (this.form.get('correctors')?.value) {
+        this.restrictions.push({
+          type: 'Correctors',
+          config: {
+            correctors: this.form.get('correctors')?.value || undefined,
+          },
+        })
+      }
+      if (this.form.get('groups')?.value) {
+        this.restrictions.push({
+          type: 'Group',
+          config: {
+            groups: this.form.get('groups')?.value || undefined,
+          },
+        })
+      }
+      console.log('Restrictions testings \n\n :', this.restrictions)
       this.addRest = true
     }
 
@@ -169,6 +210,42 @@ export class CourseActivitySettingsComponent implements OnInit {
     console.log('Restrictions 0 :', this.restrictions)
   }
 
+  private getDate(): RestrictionConfig['DateRange'] | null {
+    for (const restriction of this.restrictions) {
+      if (restriction.type === 'DateRange') {
+        return restriction.config as RestrictionConfig['DateRange']
+      }
+    }
+    return null
+  }
+
+  private getMembers(): RestrictionConfig['Members'] | null {
+    for (const restriction of this.restrictions) {
+      if (restriction.type === 'Members') {
+        return restriction.config as RestrictionConfig['Members']
+      }
+    }
+    return null
+  }
+
+  private getCorrectors(): RestrictionConfig['Correctors'] | null {
+    for (const restriction of this.restrictions) {
+      if (restriction.type === 'Correctors') {
+        return restriction.config as RestrictionConfig['Correctors']
+      }
+    }
+    return null
+  }
+
+  private getGroups(): RestrictionConfig['Groups'] | null {
+    for (const restriction of this.restrictions) {
+      if (restriction.type === 'Group') {
+        return restriction.config as RestrictionConfig['Groups']
+      }
+    }
+    return null
+  }
+
   protected async update(): Promise<void> {
     this.updating = true
     this.changeDetectorRef.markForCheck()
@@ -176,11 +253,18 @@ export class CourseActivitySettingsComponent implements OnInit {
 
     try {
       const { value } = this.form
+      const dateRange = this.getDate()
+      const members = this.getMembers()?.members
+      const correctors = this.getCorrectors()?.correctors
+      const groups = this.getGroups()?.groups
+      console.log('Members :\n', members)
+      console.log('Correctors  : \n', correctors)
+      console.log('Groups  : \n', groups)
       const res = await Promise.all([
         firstValueFrom(
           this.courseService.updateActivity(this.activity, {
-            openAt: value.openAt,
-            closeAt: value.closeAt,
+            openAt: dateRange?.start || undefined,
+            closeAt: dateRange?.end || undefined,
           })
         ),
         ...(!this.activity.isChallenge
@@ -188,7 +272,7 @@ export class CourseActivitySettingsComponent implements OnInit {
               firstValueFrom(
                 this.courseService.updateActivityMembers(
                   this.activity,
-                  value.members?.map((m) => {
+                  members?.map((m) => {
                     const [memberId, userId] = m.split(':')
                     return {
                       userId,
@@ -200,7 +284,7 @@ export class CourseActivitySettingsComponent implements OnInit {
               firstValueFrom(
                 this.courseService.updateActivityCorrectors(
                   this.activity,
-                  value.correctors?.map((m) => {
+                  correctors?.map((m) => {
                     const [memberId, userId] = m.split(':')
                     return {
                       userId,
@@ -209,7 +293,8 @@ export class CourseActivitySettingsComponent implements OnInit {
                   }) || []
                 )
               ),
-              firstValueFrom(this.courseService.updateActivityGroups(this.activity.id, value.groups || [])),
+              //firstValueFrom(this.courseService.updateActivityGroups(this.activity.id, value.groups || [])),
+              firstValueFrom(this.courseService.updateActivityGroups(this.activity.id, groups || [])),
               firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.restrictions)),
             ]
           : []),

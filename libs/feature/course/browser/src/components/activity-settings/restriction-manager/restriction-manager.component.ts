@@ -49,7 +49,6 @@ export class RestrictionManagerComponent implements OnInit {
 
   constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
   ngOnInit(): void {
-    console.log('Restrictions in manager \n\n:', this.restrictions)
     this.changeDetectorRef.markForCheck()
   }
 
