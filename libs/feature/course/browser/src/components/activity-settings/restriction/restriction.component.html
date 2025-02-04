@@ -10,7 +10,7 @@
         <div class="date-picker-compact" *ngIf="isDateRangeConfig(restriction.config)">
           <nz-date-picker
             [nzShowTime]="true"
-            [nzDisabledDate]="disabledDate"
+            [nzDisabledDate]="disabledDateStart"
             [(ngModel)]="restriction.config.start"
             nzPlaceHolder="Date d'ouverture"
             nzFormat="dd/MM/yyyy HH:mm"
@@ -19,7 +19,7 @@
           <span class="separator">→</span>
           <nz-date-picker
             [nzShowTime]="true"
-            [nzDisabledDate]="disabledDate"
+            [nzDisabledDate]="disabledDateEnd"
             [(ngModel)]="restriction.config.end"
             nzPlaceHolder="Date de fermeture"
             nzFormat="dd/MM/yyyy HH:mm"

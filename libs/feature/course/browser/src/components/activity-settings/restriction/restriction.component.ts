@@ -42,7 +42,12 @@ export class RestrictionComponent {
 
   size: NzButtonSize = 'large'
 
-  protected disabledDate = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
+  protected disabledDateStart = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
+
+  protected disabledDateEnd = (current: Date): boolean => {
+    const start = (this.restriction.config as RestrictionConfig['DateRange']).start
+    return start ? differenceInCalendarDays(current, start) < 0 : differenceInCalendarDays(current, new Date()) < 0
+  }
 
   removeRestriction() {
     this.remove.emit()
