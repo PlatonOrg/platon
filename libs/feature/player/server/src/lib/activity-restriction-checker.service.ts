@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { User, UserRoles } from '@platon/core/common'
 import { Activity, Restriction, RestrictionConfig } from '@platon/feature/course/common'
-import { CourseGroupMemberService, CourseGroupService, CourseMemberService } from '@platon/feature/course/server'
+import { CourseGroupService, CourseMemberService } from '@platon/feature/course/server'
 
 @Injectable()
 export class ActivityRestrictionCheckerService {
