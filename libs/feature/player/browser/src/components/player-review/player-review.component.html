@@ -1,0 +1,190 @@
+<mat-card #container>
+  <mat-card-header>
+    <div>
+      <div>
+        <mat-card-title>
+          <mat-icon *ngIf="state" [style.color]="state | answerStateColor" [nz-tooltip]="state | answerStateLabel">
+            {{ state | answerStateIcon }}
+          </mat-icon>
+          {{ player?.title }}
+        </mat-card-title>
+        <mat-card-subtitle *ngIf="player?.author">
+          @if (player!.author!|isUUID) {
+          <user-avatar [userIdOrName]="player!.author!" [size]="24" /> } @else {
+          {{ player?.author }}
+          }
+        </mat-card-subtitle>
+        <mat-card-subtitle>
+          <nz-countdown *ngIf="countdownValue" [nzValue]="countdownValue" [nzValueStyle]="{ color: countdownColor }" />
+        </mat-card-subtitle>
+      </div>
+      <div>
+        <button *ngIf="canRequestFullscreen" nz-tooltip="Plein écran" (click)="toggleFullscreen()" mat-icon-button>
+          <mat-icon>{{ fullscreen ? 'fullscreen' : 'fullscreen_exit' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-card-header>
+  <mat-card-content>
+    <nz-tabset>
+      <nz-tab nzTitle="Réponse">
+        <nz-skeleton [nzActive]="loading" [nzLoading]="loading" [nzParagraph]="{ rows: 5 }">
+          <section>
+            <div id="form" class="exercise-form">
+              <nge-markdown [data]="player?.form" (render)="onRender()" />
+            </div>
+          </section>
+        </nz-skeleton>
+      </nz-tab>
+
+      <nz-tab nzTitle="Énoncé">
+        <nz-skeleton [nzActive]="loading" [nzLoading]="loading" [nzParagraph]="{ rows: 5 }">
+          <section>
+            <ng-container *ngIf="player?.statement">
+              <div class="exercise-statement">
+                <nge-markdown [data]="player?.statement" />
+              </div>
+            </ng-container>
+          </section>
+        </nz-skeleton>
+      </nz-tab>
+
+      <nz-tab nzTitle="Retour">
+        <nz-skeleton [nzActive]="loading" [nzLoading]="loading" [nzParagraph]="{ rows: 5 }">
+          <section #containerFeedbacks>
+            <ng-container *ngIf="player?.feedbacks">
+              <ng-container *ngFor="let feedback of player?.feedbacks">
+                <nz-alert
+                  *ngIf="feedback.content && feedback.type !== 'none'"
+                  nzShowIcon
+                  [nzType]="feedback.type"
+                  [nzMessage]="content"
+                >
+                  <ng-template #content>
+                    <nge-markdown [data]="feedback.content" />
+                  </ng-template>
+                </nz-alert>
+              </ng-container>
+            </ng-container>
+          </section>
+          <section #containerHints>
+            <ng-container *ngIf="player?.hints">
+              <div class="exercise-hints">
+                <ng-container *ngFor="let hint of player?.hints">
+                  <nz-alert nzShowIcon [nzType]="'info'" [nzMessage]="content">
+                    <ng-template #content>
+                      <nge-markdown [data]="hint" />
+                    </ng-template>
+                  </nz-alert>
+                </ng-container>
+              </div>
+            </ng-container>
+          </section>
+          <section #containerSolution>
+            <ng-container *ngIf="player?.solution">
+              <mat-accordion class="exercise-solution">
+                <mat-expansion-panel expanded>
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>Solution</mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div class="exercise-form">
+                    <nge-markdown [data]="player!.solution!" />
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </ng-container>
+          </section>
+        </nz-skeleton>
+      </nz-tab>
+    </nz-tabset>
+  </mat-card-content>
+  <nz-skeleton
+    class="skeleton-actions"
+    [class.active]="loading"
+    [nzActive]="loading"
+    [nzLoading]="loading"
+    [nzParagraph]="{ rows: 1 }"
+  >
+    <mat-card-actions>
+      <div class="exercice-actions">
+        <div class="exercice-actions-list">
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions }" />
+        </div>
+        <div class="exercice-actions-list">
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: primaryActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: reviewModeActions }" />
+          <div class="spacer"></div>
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: secondaryActions }" />
+        </div>
+      </div>
+    </mat-card-actions>
+  </nz-skeleton>
+</mat-card>
+<!-- <mat-menu #theories="matMenu">
+  <ng-container *ngFor="let item of player?.theories; trackBy: trackTheory">
+    @if (item.url|filePreviewSupported) {
+    <button mat-menu-item (click)="selectedTheory = item; modalPlayerTheory.open()">
+      <mat-icon>preview</mat-icon> {{ item.title }}
+    </button>
+    } @else {
+    <a mat-menu-item [href]="item.url" target="_blank"> <mat-icon>open_in_new</mat-icon>{{ item.title }}</a>
+    }
+  </ng-container>
+</mat-menu> -->
+<ui-modal-drawer #commentDrawer title="Commentaires">
+  <ng-template>
+    <player-comments
+      *ngIf="player"
+      [canComment]="canComment"
+      [answerId]="player.answerId!"
+      [sessionId]="player.sessionId"
+    />
+  </ng-template>
+</ui-modal-drawer>
+<ng-template #errorTemplate let-data="data">
+  <pre>{{ data.message }}</pre>
+</ng-template>
+
+<ng-template #actionList let-actions>
+  <ng-container *ngFor="let action of actions; trackBy: trackAction">
+    <button
+      *ngIf="action.visible"
+      [id]="action.id ?? null"
+      mat-raised-button
+      (click)="action.run?.()"
+      [color]="action.color"
+      [class.danger]="action.danger"
+      [disabled]="action.disabled"
+      [nz-tooltip]="action.tooltip"
+      [matMenuTriggerFor]="action.menu ?? null"
+    >
+      <nz-spin *ngIf="runningAction && runningAction === action.playerAction" nzSpinning nzSimple nzSize="small" />
+      <ng-container *ngIf="!runningAction || runningAction !== action.playerAction">
+        <mat-icon>{{ action.icon }}</mat-icon>
+        <ng-container *ngIf="action.showLabel">{{ action.label }}</ng-container>
+      </ng-container>
+    </button>
+  </ng-container>
+</ng-template>
+
+<!-- <ui-modal-template
+  #modalPlayerTheory
+  closable
+  height="70vh"
+  width="80vw"
+  (closed)="selectedTheory = undefined"
+  [title]="selectedTheory?.title || ''"
+>
+  <ng-template>
+    <ng-container *ngIf="selectedTheory">
+      @defer (on viewport) {
+      <player-theory [theory]="selectedTheory" />
+      } @placeholder {
+      <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 5 }"></nz-skeleton>
+      }
+    </ng-container>
+  </ng-template>
+  <ng-template>
+    <a mat-button [href]="selectedTheory?.url" target="_blank"><mat-icon>download</mat-icon> Télécharger</a>
+  </ng-template>
+</ui-modal-template> -->
