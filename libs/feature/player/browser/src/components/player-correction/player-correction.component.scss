@@ -2,7 +2,12 @@
   display: block;
   width: 100vw;
   height: 100vh;
+
+  ::ng-deep .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+    color: white;
+  }
 }
+
 
 mat-drawer {
   width: 220px;
@@ -14,10 +19,13 @@ nav {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: scroll;
   h2 {
     color: white !important;
   }
 }
+
+
 
 main {
   padding: 2rem;
@@ -54,20 +62,111 @@ nz-segmented {
 }
 
 .nav-link {
-  height: 3.5rem !important;
-  width: 100%;
-  justify-content: flex-start;
-  display: flex;
+  height:max-content;
   color: white !important;
-
   &.active {
-    border-left: 4px solid var(--brand-text-primary);
+    position: relative;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+
+    border-left: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(45deg, #ff008c, #ff6f00);
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
   }
+
 
   mat-icon {
     display: block;
-    margin: 0 1rem;
+    margin: 0 0.5rem;
+  }
+}
+
+.nav-link-content {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.icon-container {
+  flex: 0 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.exercise-name {
+  flex: 1;
+}
+
+.activity-name {
+  display: flex;
+  text-align: center;
+  background: inherit;
+  padding: 0.2rem;
+  font-weight: bold;
+  margin-top: 0.8rem;
+  color: white;
+}
+
+.student-name {
+  padding: 0.2rem;
+  font-weight: bold;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 15vw;
+  text-align: center;
+}
+
+
+.sized {
+  height: 300px;
+}
+
+mat-toolbar {
+  background-color: #3c2864 !important;
+  color: white;
+
+  .setting-button {
+    margin-left: auto;
+  }
+}
+
+.panel-wrapper {
+  background-color: inherit;
+}
+
+.horizontal-flex-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  .comment-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .divider {
+    height: 15vh;
+    border-color:black;
+    border-width: 2px;
+  }
+
+  .grade-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
   }
 }

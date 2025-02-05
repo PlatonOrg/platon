@@ -36,6 +36,10 @@ export interface ActivityCorrection {
   exercises: ExerciseCorrection[]
 }
 
+export interface CourseCorrection {
+  ActivityCorrections: ActivityCorrection[]
+}
+
 /**
  * Represent information about an exercise to correct.
  */

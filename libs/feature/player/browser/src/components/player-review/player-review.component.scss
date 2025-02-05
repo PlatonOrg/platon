@@ -1,0 +1,189 @@
+@keyframes animate {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+@mixin animate {
+  animation-name: animate;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  transform-origin: center;
+  animation-iteration-count: infinite;
+}
+
+:host {
+  display: block;
+  transition: transform 0.5s ease-out;
+  &.animate {
+    @include animate;
+  }
+  &::ng-deep {
+    .mdc-button__label {
+      display: flex;
+      align-items: center;
+      mat-icon {
+        margin: 8px;
+      }
+    }
+  }
+
+}
+
+button {
+  margin-right: 8px;
+}
+
+section {
+  transition: transform 0.5s ease-out;
+  &.animate {
+    @include animate;
+  }
+}
+
+mat-card-header {
+  > div {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+mat-divider {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-width: 1px;
+}
+
+nz-alert {
+  margin-bottom: 0.5rem;
+}
+
+nz-skeleton {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+mat-card-content {
+  min-height: 200px;
+}
+
+pre {
+  overflow-y: auto;
+  max-height: 75vh;
+  color: red;
+  margin: 2rem 0;
+}
+
+.exercise-title {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.exercise-statement {
+  display: block;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.exercise-form {
+  display: block;
+  margin-bottom: 1.5rem !important;
+}
+
+.exercise-solution {
+  display: block;
+  margin-bottom: 1.5rem !important;
+}
+
+.exercice-actions {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0.5rem 0;
+  overflow-x: auto;
+}
+
+.exercice-actions-list {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  &.align-right {
+    justify-content: flex-end;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.danger {
+  background-color: #ff4d4f !important;
+}
+
+button.primary {
+  color: var(--brand-text-primary) !important;
+}
+
+.skeleton-actions {
+  margin: 0;
+  &.active {
+    margin: 0 16px;
+  }
+}
+
+// TABLET
+@media (max-width: 768px) {
+  :host::ng-deep {
+    button {
+      .mat-icon {
+        margin: 0;
+      }
+    }
+  }
+}
+
+@keyframes fillButton {
+  from {
+    background-position: 100% 0%;
+  }
+  to {
+    background-position: 0% 0%;
+  }
+}
+
+#next-exercise-button {
+  background: linear-gradient(to right, #171c8f 50%, transparent 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0%;
+  transition: background-position 0s;
+  mat-icon {
+    background: linear-gradient(to right, white 50%, black 50%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+  }
+}
+
+#next-exercise-button.fill {
+  background-position: 0% 0%;
+  transition: background-position 2s linear;
+  mat-icon {
+    background-position: 0% 0%;
+    transition: background-position calc(2s / 3) linear calc(2s / 3);
+  }
+}

@@ -1,44 +1,124 @@
 <mat-drawer-container>
   <mat-drawer mode="side" opened #drawer>
+    <!-- <nav>
+      <ng-container *ngFor="let entry of exerciseGroups.entries()">
+        <span class="nav-link activity-name">{{ entry[0] }}</span>
+        <ng-container *ngFor="let ex of entry[1]">
+          <button
+            (click)="onChooseGroup(ex)"
+            mat-button
+            class="nav-link"
+            [class.active]="ex.exerciseId === currentGroup?.exerciseId"
+          >
+            <div class="nav-link-content">
+              <div class="icon-container">
+                <mat-icon [style.color]="ex.graded ? 'green' : 'white'">
+                  {{ ex.graded ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+              </div>
+              <div class="exercise-name">
+                {{ ex.exerciseName }}
+              </div>
+            </div>
+          </button>
+        </ng-container>
+      </ng-container>
+    </nav> -->
     <nav>
       <img class="logo" src="assets/images/logo/platon.svg" alt="Logo PLaTon" [routerLink]="'/dashboard'" />
-      <h2>Exercices</h2>
-      <ng-container *ngFor="let group of exerciseGroups; trackBy: trackByExerciseId">
-        <button
-          (click)="onChooseGroup(group)"
-          mat-button
-          class="nav-link"
-          [class.active]="group.exerciseId === currentGroup?.exerciseId"
+      <h2>Corrections</h2>
+      <nz-collapse class="panel-wrapper" [nzBordered]="false">
+        @for (entry of activityExercisesMap.entries(); track entry[0]) {
+        <nz-collapse-panel
+          [nzHeader]="entry[1].name"
+          [nzActive]="entry[0] === activityExercisesMap.keys().next().value"
         >
-          <mat-icon [style.color]="group.graded ? 'green' : 'white'">
-            {{ group.graded ? 'check_circle' : 'cancel' }}
-          </mat-icon>
-          {{ group.exerciseName }}
-        </button>
-      </ng-container>
+          <ng-container *ngFor="let ex of entry[1].map.entries()">
+            <button
+              (click)="onChooseGroup(ex[1])"
+              mat-button
+              class="nav-link"
+              [class.active]="ex[0] === currentGroup?.exerciseId"
+            >
+              <div class="nav-link-content">
+                <div class="icon-container">
+                  <mat-icon [style.color]="ex[1].graded ? 'green' : 'white'">
+                    {{ ex[1].graded ? 'check_circle' : 'cancel' }}
+                  </mat-icon>
+                </div>
+                <div class="exercise-name">{{ ex[1].exerciseName }}</div>
+              </div>
+            </button>
+          </ng-container>
+        </nz-collapse-panel>
+        }
+      </nz-collapse>
     </nav>
   </mat-drawer>
   <mat-drawer-content>
     <mat-toolbar>
-      <nz-breadcrumb>
-        <nz-breadcrumb-item>
-          <a [routerLink]="['/corrections']">
-            <span nz-icon nzType="link" nzTheme="outline"></span>
-            <span>Corrections</span>
-          </a>
-        </nz-breadcrumb-item>
-        <nz-breadcrumb-item>
-          <a [routerLink]="['/courses', correction.courseId]">
-            <span nz-icon nzType="link" nzTheme="outline"></span>
-            <span> {{ correction.courseName }}</span>
-          </a>
-        </nz-breadcrumb-item>
-        <nz-breadcrumb-item>{{ correction.activityName }}</nz-breadcrumb-item>
-        <nz-breadcrumb-item *ngIf="currentGroup?.exerciseName">
-          <b>{{ currentGroup!.exerciseName }}</b>
-        </nz-breadcrumb-item>
-      </nz-breadcrumb>
+      <button mat-icon-button>
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <h3 class="student-name">Aurélien BERNIER</h3>
+      <button mat-icon-button>
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      <div class="setting-button">
+        <button mat-icon-button>
+          <mat-icon>settings</mat-icon>
+        </button>
+      </div>
     </mat-toolbar>
+    <main>
+      <div class="horizontal-flex-wrapper">
+        <div class="comment-wrapper">
+          <h3>Commentaire</h3>
+          <!-- TODO : Fix this, it's weird -->
+          <player-comments
+            *ngIf="answers.length > 0"
+            [canComment]="true"
+            [answerId]="answers[0].answerId!"
+            [sessionId]="currentExercise?.exerciseSessionId || answers[0].sessionId"
+          />
+        </div>
+
+        <mat-divider class="divider" [vertical]="true"></mat-divider>
+
+        <div class="grade-wrapper">
+          <h3>Note</h3>
+          <nz-input-number [(ngModel)]="grade" nzMin="0" nzMax="100" />
+        </div>
+      </div>
+
+      <nz-row>
+        <nz-col nzSpan="17">
+          <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" class="sized" />
+        </nz-col>
+        <nz-col nzSpan="7">
+          <div class="label-container">
+            <div class="palier-wrapper">
+              <h3>Palier</h3>
+              <!-- <ng-container *ngFor="let palier of paliers">
+              <nz-tag [nzColor]="palier.color" nzMode="checkable" [nzChecked]="palier.checked" (nzChange)="handleChange($event, palier)">
+                {{ palier.label }}
+              </nz-tag>
+            </ng-container> -->
+            </div>
+            <div class="etiquette-wrapper">
+              <h3>Étiquette</h3>
+              <!-- <ng-container *ngFor="let etiquette of etiquettes">
+              <nz-tag [nzColor]="etiquette.color" nzMode="checkable" [nzChecked]="etiquette.checked" (nzChange)="handleChange($event, etiquette)">
+                {{ etiquette.label }}
+              </nz-tag>
+            </ng-container> -->
+            </div>
+          </div>
+        </nz-col>
+      </nz-row>
+    </main>
+    <!--
     <main>
       <nz-segmented
         #segmented
@@ -53,7 +133,9 @@
               Exercice : {{ selectedExerciseIndex + 1 }}/{{ exerciseCount }}&nbsp; Réponse :
               {{ player.currentAttemptIndex + 1 }}/{{ answerCount }}
             </ng-template>
-            <player-exercise #player [players]="answers" [reviewMode]="true" [canComment]="true" />
+            <h1>aaaaa</h1>
+            <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" class="sized" />
+            <h1>aaaaa</h1>
           </nz-ribbon>
           <footer *ngIf="currentExercise">
             <h3>Note grader ({{ currentExercise.grade }})</h3>
@@ -92,7 +174,7 @@
           </nz-ribbon>
         </ng-template>
       </ng-container>
-    </main>
+    </main>-->
   </mat-drawer-content>
 </mat-drawer-container>
 
