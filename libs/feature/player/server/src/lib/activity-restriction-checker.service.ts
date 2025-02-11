@@ -34,7 +34,6 @@ export class ActivityRestrictionCheckerService {
   }
 
   // Check if the user is in the group
-  // Code Dangereux (Dangerous Code) // À revoir (To Review)
   private async checkGroups(config: RestrictionConfig['Groups'], user: User): Promise<boolean> {
     if (!config.groups?.length) return false // À revoir (To Review)
     if (this.activity) {
@@ -107,10 +106,10 @@ export class ActivityRestrictionCheckerService {
       if (!activity.restrictions) {
         return { isAllowed: true }
       }
-      if (user.role === UserRoles.teacher || user.role === UserRoles.admin) {
+      /*if (user.role === UserRoles.teacher || user.role === UserRoles.admin) {
         // Donne un droit d'office à tous/toutes les profs et admins
         return { isAllowed: true }
-      }
+      }*/
 
       const dataRange = await this.findUserAccess(activity.restrictions, user)
       console.log(dataRange)

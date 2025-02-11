@@ -35,7 +35,26 @@ export class PropositionsComponent {
   }
 
   sendAndClose(type: string) {
-    this.sendEvent.emit(type)
+    switch (type) {
+      case 'Date':
+        this.sendEvent.emit('DateRange')
+        break
+      case 'Correcteurs':
+        this.sendEvent.emit('Correctors')
+        break
+      case 'Groupe':
+        this.sendEvent.emit('Group')
+        break
+      case 'Membres':
+        this.sendEvent.emit('Members')
+        break
+      case 'Jeu de restriction':
+        this.sendEvent.emit('Jeu')
+        break
+      default:
+        break
+    }
+    //this.sendEvent.emit(type)
     this.close()
   }
 }

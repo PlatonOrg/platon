@@ -98,6 +98,27 @@ def jsonify(d, keep_classes=True):
 
     return jsonpickle.encode(d, unpicklable=False)
 
+list_platon_logs = []
+def platon_log(*args, **kwargs):
+    """
+    Helper function to log messages to the Platon platform console.
+
+    Args:
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Notes:
+        - This function is intended for use within the Platon platform environment to log messages to the console.
+        - The function signature is similar to the built-in 'print' function in Python.
+        - The messages logged using this function are displayed in the platform's console output.
+
+    Example:
+        platon_log("This is a log message.")
+        platon_log("Value of x:", x)
+    """
+    list_platon_logs.append([*args, kwargs])
+    print(*args, **kwargs)
+
 if __name__ == "__main__":
     """
     Main function to execute the script.
@@ -141,6 +162,7 @@ if __name__ == "__main__":
     #variables.Object = Object
     variables['component'] = component
     variables['StopExec'] = StopExec
+    variables['platon_log'] = platon_log
 
     exec(with_try_clause(script, StopExec), variables)
     exec("", glob)
