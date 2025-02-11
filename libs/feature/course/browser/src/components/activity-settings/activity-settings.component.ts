@@ -211,100 +211,34 @@ export class CourseActivitySettingsComponent implements OnInit {
   }
 
   private getDate(): RestrictionConfig['DateRange'] | null {
-    for (const restriction of this.restrictions) {
-      if (restriction.type === 'DateRange') {
-        return restriction.config as RestrictionConfig['DateRange']
-      }
-    }
-    return null
-  }
-
-  private getMembers(): RestrictionConfig['Members'] | null {
-    for (const restriction of this.restrictions) {
-      if (restriction.type === 'Members') {
-        return restriction.config as RestrictionConfig['Members']
-      }
-    }
-    return null
-  }
-
-  private getCorrectors(): RestrictionConfig['Correctors'] | null {
-    for (const restriction of this.restrictions) {
-      if (restriction.type === 'Correctors') {
-        return restriction.config as RestrictionConfig['Correctors']
-      }
-    }
-    return null
-  }
-
-  private getGroups(): RestrictionConfig['Groups'] | null {
-    for (const restriction of this.restrictions) {
-      if (restriction.type === 'Group') {
-        return restriction.config as RestrictionConfig['Groups']
-      }
-    }
-    return null
+    const dateRange = this.restrictions.find((restriction) => restriction.type === 'DateRange')
+    return dateRange ? (dateRange.config as RestrictionConfig['DateRange']) : null
   }
 
   protected async update(): Promise<void> {
     this.updating = true
     this.changeDetectorRef.markForCheck()
-    console.log('Restrictions 1 :', this.restrictions)
 
     try {
       const { value } = this.form
       const dateRange = this.getDate()
-      const members = this.getMembers()?.members
-      const correctors = this.getCorrectors()?.correctors
-      const groups = this.getGroups()?.groups
-      console.log('Members :\n', members)
-      console.log('Correctors  : \n', correctors)
-      console.log('Groups  : \n', groups)
       const res = await Promise.all([
-        firstValueFrom(
+        /*firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             openAt: dateRange?.start || undefined,
             closeAt: dateRange?.end || undefined,
           })
-        ),
+        ),*/
         ...(!this.activity.isChallenge
-          ? [
-              firstValueFrom(
-                this.courseService.updateActivityMembers(
-                  this.activity,
-                  members?.map((m) => {
-                    const [memberId, userId] = m.split(':')
-                    return {
-                      userId,
-                      memberId,
-                    }
-                  }) || []
-                )
-              ),
-              firstValueFrom(
-                this.courseService.updateActivityCorrectors(
-                  this.activity,
-                  correctors?.map((m) => {
-                    const [memberId, userId] = m.split(':')
-                    return {
-                      userId,
-                      memberId,
-                    }
-                  }) || []
-                )
-              ),
-              //firstValueFrom(this.courseService.updateActivityGroups(this.activity.id, value.groups || [])),
-              firstValueFrom(this.courseService.updateActivityGroups(this.activity.id, groups || [])),
-              firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.restrictions)),
-            ]
+          ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.restrictions))]
           : []),
       ])
 
       this.activityChange.emit(
         (this.activity = {
           ...this.activity,
-          openAt: value.openAt || undefined,
-          closeAt: value.closeAt || undefined,
+          openAt: dateRange?.start || undefined,
+          closeAt: dateRange?.end || undefined,
           state: res[0].state,
         })
       )

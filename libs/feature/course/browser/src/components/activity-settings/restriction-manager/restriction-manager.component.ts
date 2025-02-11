@@ -108,35 +108,42 @@ export class RestrictionManagerComponent implements OnInit {
     }
   }
 
+  CantAddRestriction(restrictions: Restriction[], type: string): boolean {
+    return restrictions.some((restriction) => restriction.type === type)
+  }
+
   addRestriction(type: string): void {
     let newRestriction: Restriction
-
+    if (type !== 'Jeu' && this.CantAddRestriction(this.restrictions, type)) {
+      console.log('Cette restriction existe déjà.')
+      return
+    }
     switch (type) {
-      case 'Date':
+      case 'DateRange':
         newRestriction = {
           type: 'DateRange',
           config: { start: undefined, end: undefined },
         }
         break
-      case 'Correcteurs':
+      case 'Correctors':
         newRestriction = {
           type: 'Correctors',
           config: { correctors: [] },
         }
         break
-      case 'Groupe':
+      case 'Group':
         newRestriction = {
           type: 'Group',
           config: { groups: [] },
         }
         break
-      case 'Membres':
+      case 'Members':
         newRestriction = {
           type: 'Members',
           config: { members: [] },
         }
         break
-      case 'Jeu de restriction':
+      case 'Jeu':
         newRestriction = {
           type: 'Jeu',
           config: {},
@@ -168,30 +175,34 @@ export class RestrictionManagerComponent implements OnInit {
     if (parentRestriction.type === 'Jeu') {
       parentRestriction.restrictions = parentRestriction.restrictions || []
 
+      if (this.selectedType !== 'Jeu' && this.CantAddRestriction(parentRestriction.restrictions, this.selectedType)) {
+        console.log('Cette restriction existe déjà.')
+        return
+      }
       let newSubRestriction: Restriction
       switch (this.selectedType) {
-        case 'Date':
+        case 'DateRange':
           newSubRestriction = {
             type: 'DateRange',
             config: { start: undefined, end: undefined },
           }
           break
-        case 'Correcteurs':
+        case 'Correctors':
           newSubRestriction = {
             type: 'Correctors',
             config: { correctors: [] },
           }
           break
-        case 'Groupe':
+        case 'Group':
           newSubRestriction = { type: 'Group', config: { groups: [] } }
           break
-        case 'Membres':
+        case 'Members':
           newSubRestriction = {
             type: 'Members',
             config: { members: [] },
           }
           break
-        case 'Jeu de restriction':
+        case 'Jeu':
           newSubRestriction = {
             type: 'Jeu',
             config: {},
