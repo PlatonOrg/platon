@@ -6,6 +6,12 @@
   ::ng-deep .ant-collapse > .ant-collapse-item > .ant-collapse-header {
     color: white;
   }
+  ::ng-deep .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    border: none;
+    background-color: inherit;
+    color: white;
+    font-size: medium;
+  }
 }
 
 
@@ -29,6 +35,7 @@ nav {
 
 main {
   padding: 2rem;
+  height:100%
 }
 
 footer {
@@ -152,21 +159,27 @@ mat-toolbar {
   justify-content: space-evenly;
   align-items: center;
   margin-bottom: 2rem;
+}
 
-  .comment-wrapper {
-    display: flex;
-    flex-direction: column;
-  }
+.flex-wrapper {
+  display: flex;
+}
 
-  .divider {
-    height: 15vh;
-    border-color:black;
-    border-width: 2px;
-  }
+.grade-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
 
-  .grade-wrapper {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-  }
+.comment-wrapper {
+  height: 300px;
+  overflow: auto;
+  padding-inline: 1rem;
+}
+
+
+.button-wrapper {
+  display: flex;
+  flex-direction: column-reverse ;
 }

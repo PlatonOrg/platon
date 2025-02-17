@@ -53,9 +53,9 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
-import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
+import { NzEmptyModule } from 'ng-zorro-antd/empty'
 
 type Action = {
   id?: string
@@ -104,6 +104,7 @@ type FullscreenElement = HTMLElement & {
     NzSkeletonModule,
     NzStatisticModule,
     NzTabsModule,
+    NzEmptyModule,
 
     SafePipe,
     IsUUIDPipe,
@@ -115,7 +116,6 @@ type FullscreenElement = HTMLElement & {
     PlayerTheoryComponent,
     FilePreviewSupportedPipe,
     AnswerStatePipesModule,
-    PlayerCommentsComponent,
   ],
 })
 export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
@@ -130,7 +130,7 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() player?: ExercisePlayer
   @Input() players: ExercisePlayer[] = []
 
-  @Input() reviewMode = false
+  @Input() reviewMode = true
   @Input() canComment = false
 
   @Input() hasNext?: boolean
@@ -157,9 +157,6 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
 
   @ViewChild('containerSolution', { read: ElementRef })
   protected containerSolution!: ElementRef<HTMLElement>
-
-  @ViewChild('commentDrawer')
-  protected commentDrawer!: UiModalDrawerComponent
 
   @ViewChild('theories')
   protected theoriesMenu!: MatMenu
@@ -216,13 +213,6 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
   protected get secondaryActions(): Action[] {
     if (!this.player) return []
     return [
-      {
-        icon: 'reviews',
-        label: 'Commentaires',
-        tooltip: 'Commentaires',
-        visible: !!this.player.answerId,
-        run: () => this.commentDrawer.open(),
-      },
       {
         icon: 'menu_book',
         label: 'Théorie',
@@ -347,10 +337,8 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    this.index = this.reviewMode ? this.players.length - 1 : 0
-    if (!this.player) {
-      this.player = this.players[this.index]
-    }
+    this.index = this.players.length - 1
+    this.player = this.players[this.index]
     this.requestFullscreen =
       this.container.nativeElement.requestFullscreen ||
       this.container.nativeElement.webkitRequestFullscreen ||
@@ -365,6 +353,7 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
         }
       })
     )
+    this.changeDetectorRef.markForCheck()
   }
 
   ngOnDestroy(): void {
@@ -377,6 +366,8 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
       this.player = this.players[this.index]
       this.clearNotification?.()
       this.clearNotification = undefined
+    } else {
+      this.player = undefined
     }
   }
 
