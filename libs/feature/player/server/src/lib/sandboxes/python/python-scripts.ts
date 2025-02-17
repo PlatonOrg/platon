@@ -116,8 +116,7 @@ def platon_log(*args, **kwargs):
         platon_log("This is a log message.")
         platon_log("Value of x:", x)
     """
-    list_platon_logs.append([*args, kwargs])
-    print(*args, **kwargs)
+    list_platon_logs.append(' '.join(map(str, args)))
 
 if __name__ == "__main__":
     """
@@ -166,6 +165,9 @@ if __name__ == "__main__":
 
     exec(with_try_clause(script, StopExec), variables)
     exec("", glob)
+
+    #if 'platon_log' in variables:
+    variables['platon_logs'] = list_platon_logs
 
     for key in glob:
         if key in variables and variables[key] == glob[key]:
