@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core'
 import { firstValueFrom } from 'rxjs'
 
 import { MatButtonModule } from '@angular/material/button'
@@ -14,19 +22,22 @@ import { ResultService } from '@platon/feature/result/browser'
 
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
-import { DialogModule, DialogService } from '@platon/core/browser'
+import { DialogModule, DialogService, UserService } from '@platon/core/browser'
 import { CourseCorrection, ExerciseCorrection } from '@platon/feature/result/common'
-import { UiModalTemplateComponent } from '@platon/shared/ui'
+import { UiModalTemplateComponent, UiStatisticCardComponent } from '@platon/shared/ui'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { PlayerService } from '../../api/player.service'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { PlayerReviewComponent } from '../player-review/player-review.component'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzSelectModule } from 'ng-zorro-antd/select'
 import { MatDividerModule } from '@angular/material/divider'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
+import { User } from '@platon/core/common'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 
 interface ExerciseGroup {
   exerciseId: string
@@ -59,12 +70,15 @@ interface ExerciseGroup {
     NzInputModule,
     NzGridModule,
     NzCollapseModule,
+    NzSelectModule,
+    NzButtonModule,
 
     DialogModule,
 
     PlayerReviewComponent,
     PlayerCommentsComponent,
     UiModalTemplateComponent,
+    UiStatisticCardComponent,
   ],
 })
 export class PlayerCorrectionComponent implements OnInit {
@@ -72,15 +86,17 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly resultService = inject(ResultService)
   private readonly playerService = inject(PlayerService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly userService = inject(UserService)
 
   protected answers: ExercisePlayer[] = []
-  protected currentPlayer?: ExercisePlayer
 
   protected currentGroup?: ExerciseGroup | null = null
+  protected currentExercise?: ExerciseCorrection | null = null
+  protected currentUser?: User | null = null
+
   protected exerciseGroups: Map<string, ExerciseGroup[]> = new Map()
 
   protected exercises: ExerciseCorrection[] = []
-  protected currentExercise?: ExerciseCorrection | null = null
 
   protected correctedGrade?: number
 
@@ -88,15 +104,16 @@ export class PlayerCorrectionComponent implements OnInit {
   protected selectedExerciseIndex = 0
 
   protected correction?: CourseCorrection
-  protected comment = ''
   protected grade = 0
+
   protected activityExercisesMap: Map<string, { name: string; map: Map<string, ExerciseGroup> }> = new Map()
+  protected userMap: Map<string, User> = new Map()
 
   @Input() courseCorrection!: CourseCorrection
 
   async ngOnInit(): Promise<void> {
-    console.error('this.courseCorrection', this.courseCorrection)
     this.buildGroups()
+    await this.getUsers()
     const firstGroup = this.activityExercisesMap
       .get(this.activityExercisesMap.keys().next().value as string)
       ?.map.values()
@@ -148,12 +165,8 @@ export class PlayerCorrectionComponent implements OnInit {
         )
       ).exercises
     }
-
+    this.currentUser = this.userMap.get(this.currentExercise?.userId as string)
     this.changeDetectorRef.markForCheck()
-  }
-
-  protected onPanelClick(activityId: string): void {
-    console.error('activityId', activityId)
   }
 
   protected onChooseTab(index: number): void {
@@ -173,12 +186,55 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected async onChooseExercise(index: number): Promise<void> {
-    this.selectedExerciseIndex = index
-    const exercise = this.exercises[index]
+    this.selectedExerciseIndex = (index + this.exercises.length) % this.exercises.length
+    const exercise = this.exercises[this.selectedExerciseIndex]
     if (exercise) {
       await this.loadAnswers(exercise)
     }
     this.changeDetectorRef.markForCheck()
+  }
+
+  protected async onChooseNextUserExercise(): Promise<void> {
+    await this.onChooseExercise(this.selectedExerciseIndex + 1)
+  }
+
+  protected async onChoosePreviousUserExercise(): Promise<void> {
+    await this.onChooseExercise(this.selectedExerciseIndex - 1)
+  }
+
+  private async getUsers() {
+    const userIds = new Set<string>()
+    for (const activity of this.courseCorrection.ActivityCorrections) {
+      for (const exercise of activity.exercises) {
+        userIds.add(exercise.userId)
+      }
+    }
+    const users = await firstValueFrom(this.userService.findAllByUserNames([...userIds]))
+    for (const user of users) {
+      this.userMap.set(user.id, user)
+    }
+    this.changeDetectorRef.markForCheck()
+  }
+
+  get userOptions() {
+    return (
+      this.currentGroup?.users?.map((user) => ({
+        label: this.userMap.get(user.userId)?.firstName + ' ' + this.userMap.get(user.userId)?.lastName,
+        value: user.userId,
+      })) ?? []
+    )
+  }
+
+  protected loadUserExercise(userId: string) {
+    const exercise = this.currentGroup?.users.find((exercise) => exercise.userId === userId)
+    if (exercise) {
+      this.onChooseExercise(this.exercises.indexOf(exercise)).catch(console.error)
+    }
+  }
+
+  @HostListener('window:keydown.meta.enter')
+  protected async handleKeyDown(): Promise<void> {
+    console.error('coucou Thomas')
   }
 
   // protected onChoosePreviousExercise(): void {

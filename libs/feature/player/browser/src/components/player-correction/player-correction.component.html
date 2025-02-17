@@ -57,11 +57,17 @@
   </mat-drawer>
   <mat-drawer-content>
     <mat-toolbar>
-      <button mat-icon-button>
+      <button mat-icon-button (click)="onChoosePreviousUserExercise()">
         <mat-icon>chevron_left</mat-icon>
       </button>
-      <h3 class="student-name">Aurélien BERNIER</h3>
-      <button mat-icon-button>
+      <nz-select
+        class="student-name"
+        [ngModel]="currentUser?.id"
+        (ngModelChange)="loadUserExercise($event)"
+        [nzOptions]="userOptions"
+      >
+      </nz-select>
+      <button mat-icon-button (click)="onChooseNextUserExercise()">
         <mat-icon>chevron_right</mat-icon>
       </button>
 
@@ -72,40 +78,48 @@
       </div>
     </mat-toolbar>
     <main>
-      <div class="horizontal-flex-wrapper">
-        <div class="comment-wrapper">
+      <nz-row>
+        <nz-col nzSpan="17" class="comment-wrapper">
           <h3>Commentaire</h3>
           <!-- TODO : Fix this, it's weird -->
           <player-comments
             *ngIf="answers.length > 0"
             [canComment]="true"
-            [answerId]="answers[0].answerId!"
-            [sessionId]="currentExercise?.exerciseSessionId || answers[0].sessionId"
+            [answerId]="answers[answers.length - 1].answerId!"
+            [sessionId]="answers[answers.length - 1].sessionId"
           />
-        </div>
-
-        <mat-divider class="divider" [vertical]="true"></mat-divider>
-
-        <div class="grade-wrapper">
-          <h3>Note</h3>
-          <nz-input-number [(ngModel)]="grade" nzMin="0" nzMax="100" />
-        </div>
-      </div>
-
+        </nz-col>
+        <nz-col nzSpan="6">
+          <div class="grade-wrapper">
+            <h3>Note</h3>
+            <ui-statistic-card
+              matIcon="check_circle"
+              ribbonColor="#8e44ad"
+              description="Note attribuées à l'élève"
+              [value]="grade"
+              shouldBePositive
+            />
+          </div>
+        </nz-col>
+        <nz-col nzSpan="1">
+          <nz-button-group nzSize="small" class="button-wrapper">
+            <button
+              nz-button
+              nzBlock
+              *ngFor="let i of [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]"
+              (click)="grade = i"
+            >
+              {{ i }}
+            </button>
+          </nz-button-group>
+        </nz-col>
+      </nz-row>
       <nz-row>
         <nz-col nzSpan="17">
           <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" class="sized" />
         </nz-col>
         <nz-col nzSpan="7">
           <div class="label-container">
-            <div class="palier-wrapper">
-              <h3>Palier</h3>
-              <!-- <ng-container *ngFor="let palier of paliers">
-              <nz-tag [nzColor]="palier.color" nzMode="checkable" [nzChecked]="palier.checked" (nzChange)="handleChange($event, palier)">
-                {{ palier.label }}
-              </nz-tag>
-            </ng-container> -->
-            </div>
             <div class="etiquette-wrapper">
               <h3>Étiquette</h3>
               <!-- <ng-container *ngFor="let etiquette of etiquettes">

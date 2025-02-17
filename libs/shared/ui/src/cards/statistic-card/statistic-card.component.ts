@@ -7,6 +7,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 export const positiveGreenColor = (value: number) => {
   if (value >= 80) return '#52C41A'
   if (value > 40 && value < 90) return 'var(--brand-text-primary, #090A39D9)'
+  if (value == 0) return '#FF1414'
   return '#FAAD14'
 }
 
