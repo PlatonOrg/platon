@@ -25,7 +25,10 @@ export class TopicService {
     })
   }
 
-  async create(user: Partial<TopicEntity>): Promise<TopicEntity> {
+  async create(user: Partial<TopicEntity>, force?: boolean): Promise<TopicEntity> {
+    /*if (force) {
+      return this.repository.save(user)
+    }*/
     return this.repository.save(user)
   }
 

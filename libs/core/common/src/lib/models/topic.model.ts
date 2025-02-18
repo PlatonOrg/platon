@@ -5,8 +5,14 @@ export interface Topic {
   name: string
 }
 
+export interface TopicDouble {
+  topic: Topic
+  doublons: boolean
+}
+
 export interface CreateTopic {
   readonly name: string
+  readonly force?: boolean
 }
 
 export type UpdateTopic = Partial<CreateTopic>
