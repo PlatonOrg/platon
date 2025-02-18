@@ -108,19 +108,25 @@ export class PlayerCorrectionComponent implements OnInit {
 
   protected activityExercisesMap: Map<string, { name: string; map: Map<string, ExerciseGroup> }> = new Map()
   protected userMap: Map<string, User> = new Map()
+  protected listExerciseGroup: ExerciseGroup[] = []
 
   @Input() courseCorrection!: CourseCorrection
 
   async ngOnInit(): Promise<void> {
     this.buildGroups()
     await this.getUsers()
-    const firstGroup = this.activityExercisesMap
-      .get(this.activityExercisesMap.keys().next().value as string)
-      ?.map.values()
-      .next().value
-    console.error('firstGroup', firstGroup)
+    this.getAllExerciseGroup()
+    const firstGroup = this.listExerciseGroup[0]
     if (firstGroup) {
       this.onChooseGroup(firstGroup)
+    }
+  }
+
+  private getAllExerciseGroup(): void {
+    for (const activity of this.activityExercisesMap.values()) {
+      for (const group of activity.map.values()) {
+        this.listExerciseGroup?.push(group)
+      }
     }
   }
 
@@ -148,7 +154,6 @@ export class PlayerCorrectionComponent implements OnInit {
       activityExercisesMap.set(activity.activityId, { name: activity.activityName, map: exercisesMap })
     }
 
-    console.error('Activity Exercises Map:', activityExercisesMap)
     this.activityExercisesMap = activityExercisesMap
     this.changeDetectorRef.markForCheck()
   }
@@ -232,9 +237,64 @@ export class PlayerCorrectionComponent implements OnInit {
     }
   }
 
-  @HostListener('window:keydown.meta.enter')
-  protected async handleKeyDown(): Promise<void> {
-    console.error('coucou Thomas')
+  @HostListener('window:keydown', ['$event'])
+  protected async handleKeyDown(event: KeyboardEvent): Promise<void> {
+    switch (event.key) {
+      case 'ArrowLeft':
+        await this.onChoosePreviousUserExercise()
+        break
+      case 'ArrowRight':
+        await this.onChooseNextUserExercise()
+        break
+      case 'ArrowUp':
+        event.preventDefault()
+        this.onChooseGroup(
+          this.listExerciseGroup[this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) - 1]
+        )
+        break
+      case 'ArrowDown':
+        event.preventDefault()
+        this.onChooseGroup(
+          this.listExerciseGroup[this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) + 1]
+        )
+        break
+    }
+
+    switch (event.code) {
+      case 'IntlBackslash':
+        this.correctedGrade = 0
+        break
+      case 'Digit1':
+        this.correctedGrade = 10
+        break
+      case 'Digit2':
+        this.correctedGrade = 20
+        break
+      case 'Digit3':
+        this.correctedGrade = 30
+        break
+      case 'Digit4':
+        this.correctedGrade = 40
+        break
+      case 'Digit5':
+        this.correctedGrade = 50
+        break
+      case 'Digit6':
+        this.correctedGrade = 60
+        break
+      case 'Digit7':
+        this.correctedGrade = 70
+        break
+      case 'Digit8':
+        this.correctedGrade = 80
+        break
+      case 'Digit9':
+        this.correctedGrade = 90
+        break
+      case 'Digit0':
+        this.correctedGrade = 100
+        break
+    }
   }
 
   // protected onChoosePreviousExercise(): void {
