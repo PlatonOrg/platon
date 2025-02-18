@@ -6,6 +6,11 @@ export interface Topic {
   existing?: boolean
 }
 
+export interface TopicDouble {
+  topic: Topic
+  doublons: boolean
+}
+
 export interface CreateTopic {
   readonly name: string
   force?: boolean | null
