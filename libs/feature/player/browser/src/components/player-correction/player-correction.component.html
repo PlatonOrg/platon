@@ -56,7 +56,7 @@
     </nav>
   </mat-drawer>
   <mat-drawer-content>
-    <mat-toolbar>
+    <mat-toolbar class="toolbar">
       <button mat-icon-button (click)="onChoosePreviousUserExercise()">
         <mat-icon>chevron_left</mat-icon>
       </button>
@@ -79,15 +79,8 @@
     </mat-toolbar>
     <main>
       <nz-row>
-        <nz-col nzSpan="17" class="comment-wrapper">
-          <h3>Commentaire</h3>
-          <!-- TODO : Fix this, it's weird -->
-          <player-comments
-            *ngIf="answers.length > 0"
-            [canComment]="true"
-            [answerId]="answers[answers.length - 1].answerId!"
-            [sessionId]="answers[answers.length - 1].sessionId"
-          />
+        <nz-col nzSpan="17">
+          <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" />
         </nz-col>
         <nz-col nzSpan="6">
           <div class="grade-wrapper">
@@ -96,7 +89,7 @@
               matIcon="check_circle"
               ribbonColor="#8e44ad"
               description="Note attribuées à l'élève"
-              [value]="grade"
+              [value]="correctedGrade ?? 0"
               shouldBePositive
             />
           </div>
@@ -107,7 +100,7 @@
               nz-button
               nzBlock
               *ngFor="let i of [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]"
-              (click)="grade = i"
+              (click)="correctedGrade = i"
             >
               {{ i }}
             </button>
@@ -116,7 +109,8 @@
       </nz-row>
       <nz-row>
         <nz-col nzSpan="17">
-          <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" class="sized" />
+          <h3>Commentaire</h3>
+          <player-comments *ngIf="answers.length > 0" [canComment]="true" [answers]="answers" />
         </nz-col>
         <nz-col nzSpan="7">
           <div class="label-container">
