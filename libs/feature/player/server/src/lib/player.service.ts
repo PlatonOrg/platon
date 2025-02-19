@@ -518,6 +518,11 @@ export class PlayerService extends PlayerManager {
   private async buildNext(activitySession: ActivitySessionEntity): Promise<SessionEntity> {
     const sources = activitySession.source
     const sessions = await this.sessionService.findAllWithParent(activitySession.id)
+
+    sources.variables = activitySession.variables
+
+    sources.variables.savedVariables = sources.variables.savedVariables || {}
+
     sources.variables.exercisesMeta = {}
     for (const exercise of activitySession.variables.navigation.exercises) {
       const meta = sessions.find((s) => s.id === exercise.sessionId)?.variables['.meta']
@@ -542,6 +547,7 @@ export class PlayerService extends PlayerManager {
       nextExerciseId: variables.nextExerciseId,
       navigation: variables.navigation,
       activityGrade: variables.activityGrade,
+      savedVariables: variables.savedVariables,
     }
 
     await this.sessionService.update(activitySession.id, {
@@ -549,6 +555,16 @@ export class PlayerService extends PlayerManager {
       variables: activitySession.variables,
       grade: variables.activityGrade,
     })
+
+    console.error('\n------------------------------------------------------------')
+    console.error('          PLATON LOG')
+    console.error('------------------------------------------------------------\n')
+    if (variables.platon_logs) {
+      for (const log of variables.platon_logs) {
+        console.error(log)
+        console.error('\n')
+      }
+    }
 
     return activitySession
   }
