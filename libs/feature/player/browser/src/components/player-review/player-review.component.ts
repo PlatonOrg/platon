@@ -3,6 +3,7 @@
 
 import { CommonModule } from '@angular/common'
 import {
+  CUSTOM_ELEMENTS_SCHEMA,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -37,7 +38,7 @@ import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature
 
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
-import { ExerciseTheory } from '@platon/feature/compiler'
+import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
 import { AnswerStatePipesModule } from '@platon/feature/result/browser'
 import { AnswerStates } from '@platon/feature/result/common'
 import { WebComponentService } from '@platon/feature/webcomponent'
@@ -117,6 +118,7 @@ type FullscreenElement = HTMLElement & {
     FilePreviewSupportedPipe,
     AnswerStatePipesModule,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
   private readonly subscriptions: Subscription[] = []
@@ -512,5 +514,9 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
       this.runningAction = undefined
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  protected isFeedbackContentAnObject(feedback: ExerciseFeedback): boolean {
+    return typeof feedback.content !== 'string'
   }
 }
