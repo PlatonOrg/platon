@@ -14,6 +14,7 @@ import {
   AnswerStates,
   Correction,
   CourseLeaderboardEntry,
+  CreateLabel,
   CreateSessionComment,
   DashboardOutput,
   EXERCISE_ANSWER_RATE,
@@ -26,6 +27,7 @@ import {
   ExerciseResults,
   FindActivityLeaderboard,
   FindCourseLeaderboard,
+  Label,
   SESSION_AVERAGE_DURATION,
   SESSION_AVERAGE_SCORE,
   SESSION_AVERAGE_SCORE_BY_MONTH,
@@ -45,12 +47,15 @@ import { Observable, map } from 'rxjs'
 import { ResourceDashboardModel, UserDashboardModel } from '../models/dashboard.model'
 import { ResultProvider } from '../models/result-provider'
 import { SessionCommentProvider } from '../models/session-comment-provider'
+import { LabelProvider } from '../models/label.provider'
+import { List } from 'echarts'
 
 @Injectable({ providedIn: 'root' })
 export class ResultService {
   constructor(
     private readonly resultProvider: ResultProvider,
-    private readonly commentProvider: SessionCommentProvider
+    private readonly commentProvider: SessionCommentProvider,
+    private readonly labelProvider: LabelProvider
   ) {}
 
   userDashboard() {
@@ -170,6 +175,18 @@ export class ResultService {
         return response
       })
     )
+  }
+
+  getLabels(): Observable<Label[]> {
+    return this.labelProvider.listLabels()
+  }
+
+  createLabel(id: string, input: CreateLabel): Observable<Label[]> {
+    return this.labelProvider.createLabel(id, input)
+  }
+
+  labelize(sessionId: string, answerId: string, labelId: string): Observable<Label[]> {
+    return this.labelProvider.labelize(sessionId, answerId, labelId)
   }
 
   upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction> {

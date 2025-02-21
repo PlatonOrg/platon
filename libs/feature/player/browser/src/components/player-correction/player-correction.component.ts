@@ -20,10 +20,10 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { ExercisePlayer } from '@platon/feature/player/common'
 import { ResultService } from '@platon/feature/result/browser'
 
-import { FormsModule } from '@angular/forms'
+import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { DialogModule, DialogService, UserService } from '@platon/core/browser'
-import { CourseCorrection, ExerciseCorrection } from '@platon/feature/result/common'
+import { CourseCorrection, ExerciseCorrection, Label } from '@platon/feature/result/common'
 import { UiModalTemplateComponent, UiStatisticCardComponent } from '@platon/shared/ui'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { PlayerService } from '../../api/player.service'
@@ -38,6 +38,7 @@ import { NzCollapseModule } from 'ng-zorro-antd/collapse'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
 import { User } from '@platon/core/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzFormModule } from 'ng-zorro-antd/form'
 
 interface ExerciseGroup {
   exerciseId: string
@@ -55,6 +56,7 @@ interface ExerciseGroup {
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterModule,
 
     MatIconModule,
@@ -72,6 +74,7 @@ interface ExerciseGroup {
     NzCollapseModule,
     NzSelectModule,
     NzButtonModule,
+    NzFormModule,
 
     DialogModule,
 
@@ -87,6 +90,7 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly playerService = inject(PlayerService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly userService = inject(UserService)
+  private readonly fb = inject(NonNullableFormBuilder)
 
   protected answers: ExercisePlayer[] = []
 
@@ -110,11 +114,21 @@ export class PlayerCorrectionComponent implements OnInit {
   protected userMap: Map<string, User> = new Map()
   protected listExerciseGroup: ExerciseGroup[] = []
 
+  protected labels: Label[] = []
+  protected isCreateLabelModalVisible = false
+
+  createLabelForm = this.fb.group({
+    labelName: this.fb.control('', [Validators.required]),
+    labelDescription: this.fb.control(''),
+    labelColor: this.fb.control('#000000'),
+  })
+
   @Input() courseCorrection!: CourseCorrection
 
   async ngOnInit(): Promise<void> {
     this.buildGroups()
     await this.getUsers()
+    await this.getLabels()
     this.getAllExerciseGroup()
     const firstGroup = this.listExerciseGroup[0]
     if (firstGroup) {
@@ -221,6 +235,22 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  private async getLabels() {
+    this.labels = await firstValueFrom(this.resultService.getLabels())
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected async labelize(labelId: string) {
+    console.error('labelId', labelId)
+    await firstValueFrom(
+      this.resultService.labelize(
+        this.currentExercise?.exerciseSessionId ?? '',
+        this.answers[this.answers.length - 1].answerId ?? '',
+        labelId
+      )
+    )
+  }
+
   get userOptions() {
     return (
       this.currentGroup?.users?.map((user) => ({
@@ -235,6 +265,25 @@ export class PlayerCorrectionComponent implements OnInit {
     if (exercise) {
       this.onChooseExercise(this.exercises.indexOf(exercise)).catch(console.error)
     }
+  }
+
+  protected showCreateLabelModal() {
+    this.isCreateLabelModalVisible = true
+  }
+
+  protected async handleOk() {
+    const newLabel = {
+      name: this.createLabelForm.get('labelName')?.value ?? 'Unnamed',
+      description: this.createLabelForm.get('labelDescription')?.value,
+      color: this.createLabelForm.get('labelColor')?.value ?? '#000000',
+    }
+    this.isCreateLabelModalVisible = false
+    this.labels = await firstValueFrom(this.resultService.createLabel('id', newLabel))
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected handleCancel() {
+    this.isCreateLabelModalVisible = false
   }
 
   @HostListener('window:keydown', ['$event'])

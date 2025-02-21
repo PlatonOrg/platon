@@ -93,6 +93,53 @@
               shouldBePositive
             />
           </div>
+          <div class="label-container">
+            <div class="etiquette-wrapper">
+              <h3>Étiquettes</h3>
+              <ng-container *ngFor="let label of labels">
+                <button nz-button nzType="default" nzSize="small" class="label-button" (click)="labelize(label.id)">
+                  {{ label.name }}
+                </button>
+              </ng-container>
+              <button nz-button nzType="primary" nzSize="small" (click)="showCreateLabelModal()">
+                Créer une étiquette
+              </button>
+              <nz-modal
+                [(nzVisible)]="isCreateLabelModalVisible"
+                nzTitle="Créer une étiquette"
+                (nzOnCancel)="handleCancel()"
+                (nzOnOk)="handleOk()"
+                [nzFooter]="footerButtons"
+              >
+                <ng-container *nzModalContent>
+                  <form nz-form [formGroup]="createLabelForm">
+                    <nz-form-item>
+                      <nz-form-label [nzSpan]="7" nzFor="labelName">Nom de l'étiquette</nz-form-label>
+                      <nz-form-control [nzSpan]="15">
+                        <input nz-input formControlName="labelName" id="labelName" />
+                      </nz-form-control>
+                    </nz-form-item>
+                    <nz-form-item>
+                      <nz-form-label [nzSpan]="7" nzFor="labelDescription">Description</nz-form-label>
+                      <nz-form-control [nzSpan]="15">
+                        <textarea nz-input formControlName="labelDescription" id="labelDescription" rows="4"></textarea>
+                      </nz-form-control>
+                    </nz-form-item>
+                    <nz-form-item>
+                      <nz-form-label [nzSpan]="7" nzFor="labelColor">Couleur</nz-form-label>
+                      <nz-form-control [nzSpan]="15">
+                        <input nz-input formControlName="labelColor" id="labelColor" type="color" />
+                      </nz-form-control>
+                    </nz-form-item>
+                  </form>
+                </ng-container>
+                <ng-template #footerButtons>
+                  <button nz-button nzType="default" (click)="handleCancel()">Annuler</button>
+                  <button nz-button nzType="primary" (click)="handleOk()">Créer</button>
+                </ng-template>
+              </nz-modal>
+            </div>
+          </div>
         </nz-col>
         <nz-col nzSpan="1">
           <nz-button-group nzSize="small" class="button-wrapper">
@@ -112,18 +159,7 @@
           <h3>Commentaire</h3>
           <player-comments *ngIf="answers.length > 0" [canComment]="true" [answers]="answers" />
         </nz-col>
-        <nz-col nzSpan="7">
-          <div class="label-container">
-            <div class="etiquette-wrapper">
-              <h3>Étiquette</h3>
-              <!-- <ng-container *ngFor="let etiquette of etiquettes">
-              <nz-tag [nzColor]="etiquette.color" nzMode="checkable" [nzChecked]="etiquette.checked" (nzChange)="handleChange($event, etiquette)">
-                {{ etiquette.label }}
-              </nz-tag>
-            </ng-container> -->
-            </div>
-          </div>
-        </nz-col>
+        <nz-col nzSpan="7"> </nz-col>
       </nz-row>
     </main>
     <!--

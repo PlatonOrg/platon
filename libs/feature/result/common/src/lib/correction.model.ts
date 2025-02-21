@@ -93,3 +93,22 @@ export interface ExerciseCorrection {
 export interface UpsertCorrection {
   grade: number
 }
+
+export interface CorrectionLabel {
+  sessionId: string
+  answerId: string
+  labelId: string
+}
+
+export interface Label {
+  id: string
+  name: string
+  description?: string
+  color?: string
+}
+
+export interface CreateLabel {
+  name: string
+  description?: string
+  color?: string
+}
