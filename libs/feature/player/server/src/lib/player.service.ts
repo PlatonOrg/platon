@@ -541,6 +541,37 @@ export class PlayerService extends PlayerManager {
     sources.variables.navigation = activitySession.variables.navigation
     const { envid, variables } = await this.sandboxService.buildNext(sources)
 
+    if (variables.platon_logs) {
+      variables.nextParams = variables.nextParams || {}
+      variables.platon_logs = ['\n#####   LOGS DU NEXT   #####\n', ...variables.platon_logs]
+      variables.nextParams.platon_logs = variables.platon_logs
+    }
+
+    if (variables.nextParams) {
+      const nextExerciseSessionId = variables.navigation.exercises.find(
+        (ex: PlayerExercise) => ex.id === variables.nextExerciseId
+      )?.sessionId
+
+      const nextExerciseSession = sessions.find((s) => s.id === nextExerciseSessionId)
+
+      if (nextExerciseSession) {
+        nextExerciseSession.variables = {
+          ...nextExerciseSession.variables,
+          ...variables.nextParams,
+        }
+
+        nextExerciseSession.source.variables = {
+          ...nextExerciseSession.source.variables,
+          ...variables.nextParams,
+        }
+
+        await this.sessionService.update(nextExerciseSession.id, {
+          source: nextExerciseSession.source,
+          variables: nextExerciseSession.variables,
+        })
+      }
+    }
+
     activitySession.envid = envid
     activitySession.variables = {
       ...activitySession.variables,
