@@ -3,16 +3,12 @@ export interface Topic {
   readonly createdAt: Date
   readonly updatedAt: Date
   name: string
-}
-
-export interface TopicDouble {
-  topic: Topic
-  doublons: boolean
+  existing?: boolean
 }
 
 export interface CreateTopic {
   readonly name: string
-  readonly force?: boolean
+  force?: boolean | null
 }
 
 export type UpdateTopic = Partial<CreateTopic>
