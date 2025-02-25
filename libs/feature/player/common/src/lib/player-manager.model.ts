@@ -70,6 +70,24 @@ export abstract class PlayerManager {
     return this.actionHandlers[input.action](session, user)
   }
 
+  async saveTempAnswer(sessionId: string, answers: Record<string, unknown>, user?: User): Promise<ExercisePlayer> {
+    const session = withSessionAccessGuard(await this.findExerciseSessionById(sessionId), user)
+    if (this.isExpired(session)) {
+      throw new ForbiddenResponse(`This session is expired.`)
+    }
+
+    session.variables.answers = {
+      ...session.variables.answers,
+      ...answers,
+    }
+
+    await this.updateSession(session.id, {
+      variables: session.variables,
+    })
+
+    return withExercisePlayer(session)
+  }
+
   async reroll(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
     const envid = exerciseSession.envid
     const { source } = exerciseSession
