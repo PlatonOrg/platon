@@ -22,4 +22,5 @@ export abstract class PlayerProvider {
   abstract next(input: PlayExerciseInput): Observable<NextOutput>
   abstract evaluate(input: EvalExerciseInput): Observable<EvalExerciseOutput>
   abstract terminate(sessionId: string): Observable<PlayActivityOuput>
+  abstract saveTemporaryAnswer(input: EvalExerciseInput): Observable<void>
 }
