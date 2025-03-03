@@ -554,7 +554,7 @@ export class PlayerService extends PlayerManager {
     if (variables.platon_logs) {
       variables.nextParams = variables.nextParams || {}
       variables.platon_logs = ['\n#####   LOGS DU NEXT   #####\n', ...variables.platon_logs]
-      variables.nextParams.platon_logs = variables.platon_logs
+      variables.nextParams.platon_next_logs = variables.platon_logs
     }
 
     if (variables.nextParams) {
