@@ -518,6 +518,21 @@ export class PlayerService extends PlayerManager {
   private async buildNext(activitySession: ActivitySessionEntity): Promise<SessionEntity> {
     const sources = activitySession.source
     const sessions = await this.sessionService.findAllWithParent(activitySession.id)
+
+    sources.variables = activitySession.variables
+
+    sources.variables.savedVariables = sources.variables.savedVariables || {}
+
+    sources.variables.exercisesVariables = {}
+    if (sources.variables.settings?.nextSettings?.hasExercisesVariables) {
+      for (const exercise of activitySession.variables.navigation.exercises) {
+        const vars = sessions.find((s) => s.id === exercise.sessionId)?.variables
+        if (vars) {
+          sources.variables.exercisesVariables[exercise.id] = vars
+        }
+      }
+    }
+
     sources.variables.exercisesMeta = {}
     for (const exercise of activitySession.variables.navigation.exercises) {
       const meta = sessions.find((s) => s.id === exercise.sessionId)?.variables['.meta']
@@ -536,12 +551,44 @@ export class PlayerService extends PlayerManager {
     sources.variables.navigation = activitySession.variables.navigation
     const { envid, variables } = await this.sandboxService.buildNext(sources)
 
+    if (variables.platon_logs) {
+      variables.nextParams = variables.nextParams || {}
+      variables.platon_logs = ['\n#####   LOGS DU NEXT   #####\n', ...variables.platon_logs]
+      variables.nextParams.platon_logs = variables.platon_logs
+    }
+
+    if (variables.nextParams) {
+      const nextExerciseSessionId = variables.navigation.exercises.find(
+        (ex: PlayerExercise) => ex.id === variables.nextExerciseId
+      )?.sessionId
+
+      const nextExerciseSession = sessions.find((s) => s.id === nextExerciseSessionId)
+
+      if (nextExerciseSession) {
+        nextExerciseSession.variables = {
+          ...nextExerciseSession.variables,
+          ...variables.nextParams,
+        }
+
+        nextExerciseSession.source.variables = {
+          ...nextExerciseSession.source.variables,
+          ...variables.nextParams,
+        }
+
+        await this.sessionService.update(nextExerciseSession.id, {
+          source: nextExerciseSession.source,
+          variables: nextExerciseSession.variables,
+        })
+      }
+    }
+
     activitySession.envid = envid
     activitySession.variables = {
       ...activitySession.variables,
       nextExerciseId: variables.nextExerciseId,
       navigation: variables.navigation,
       activityGrade: variables.activityGrade,
+      savedVariables: variables.savedVariables,
     }
 
     await this.sessionService.update(activitySession.id, {
@@ -549,6 +596,16 @@ export class PlayerService extends PlayerManager {
       variables: activitySession.variables,
       grade: variables.activityGrade,
     })
+
+    console.error('\n------------------------------------------------------------')
+    console.error('          PLATON LOG')
+    console.error('------------------------------------------------------------\n')
+    if (variables.platon_logs) {
+      for (const log of variables.platon_logs) {
+        console.error(log)
+        console.error('\n')
+      }
+    }
 
     return activitySession
   }

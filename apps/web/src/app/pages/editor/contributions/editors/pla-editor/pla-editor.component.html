@@ -440,6 +440,18 @@
               ></nz-input-number>
             </nz-form-control>
           </nz-form-item>
+          <nz-form-item>
+            <nz-form-label
+              nzLabelAlign="left"
+              for="hasExercisesVariables"
+              nzTooltipTitle="Permet d'avoir accès en lecture seule aux variables de tous les exercices dans le next."
+            >
+              Variables d'exercices
+            </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox formControlName="hasExercisesVariables" id="hasExercisesVariables"></label>
+            </nz-form-control>
+          </nz-form-item>
         </nz-collapse-panel>
       </nz-collapse>
       <!-- <div *ngIf="false" class="next">
