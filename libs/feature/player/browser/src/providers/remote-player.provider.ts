@@ -52,4 +52,8 @@ export class RemotePlayerService extends PlayerProvider {
   terminate(sessionId: string): Observable<PlayActivityOuput> {
     return this.http.post<PlayActivityOuput>('/api/v1/player/terminate/' + sessionId, {})
   }
+
+  saveTemporaryAnswer(input: EvalExerciseInput): Observable<void> {
+    return this.http.post<void>('/api/v1/player/saveTemporaryAnswer', input)
+  }
 }
