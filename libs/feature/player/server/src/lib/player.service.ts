@@ -523,6 +523,16 @@ export class PlayerService extends PlayerManager {
 
     sources.variables.savedVariables = sources.variables.savedVariables || {}
 
+    sources.variables.exercisesVariables = {}
+    if (sources.variables.settings?.nextSettings?.hasExercisesVariables) {
+      for (const exercise of activitySession.variables.navigation.exercises) {
+        const vars = sessions.find((s) => s.id === exercise.sessionId)?.variables
+        if (vars) {
+          sources.variables.exercisesVariables[exercise.id] = vars
+        }
+      }
+    }
+
     sources.variables.exercisesMeta = {}
     for (const exercise of activitySession.variables.navigation.exercises) {
       const meta = sessions.find((s) => s.id === exercise.sessionId)?.variables['.meta']
