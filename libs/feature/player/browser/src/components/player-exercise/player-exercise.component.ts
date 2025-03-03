@@ -203,6 +203,20 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         visible: this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW),
         run: () => this.downloadEnvironment(),
       },
+      {
+        icon: 'save',
+        label: 'Sauvegarder',
+        tooltip: 'Sauvegarder',
+        color: 'primary',
+        visible: !this.reviewMode,
+        disabled: !!this.runningAction,
+        playerAction: PlayerActions.SAVE_ANSWER,
+        run: async () => {
+          await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
+          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
+          this.dialogService.success('Votre réponse a bien été sauvegardée.')
+        },
+      },
     ]
   }
 
@@ -507,6 +521,39 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       if (!this.player.feedbacks?.length && action === PlayerActions.CHECK_ANSWER) {
         this.dialogService.info('Votre réponse a bien été prise en compte.')
       }
+    } catch (error) {
+      let message = 'Une erreur est survenue lors de cette action.'
+      if (error instanceof HttpErrorResponse) {
+        message = error.error?.message || error.message || message
+      }
+
+      this.clearNotification = this.dialogService.notification(this.errorTemplate, {
+        duration: 0,
+        data: { message },
+      })
+    } finally {
+      this.runningAction = undefined
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
+  private async saveTemporaryAnswer(action: PlayerActions): Promise<void> {
+    if (!this.player) return
+    try {
+      this.runningAction = action
+      this.changeDetectorRef.markForCheck()
+
+      this.clearNotification?.()
+      this.clearNotification = undefined
+
+      const answers = this.answers()
+      await firstValueFrom(
+        this.playerService.saveTemporaryAnswer({
+          answers,
+          action,
+          sessionId: this.player.sessionId,
+        })
+      )
     } catch (error) {
       let message = 'Une erreur est survenue lors de cette action.'
       if (error instanceof HttpErrorResponse) {

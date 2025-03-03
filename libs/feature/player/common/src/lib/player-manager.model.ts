@@ -29,6 +29,7 @@ export abstract class PlayerManager {
     CHECK_ANSWER: this.checkAnswer.bind(this),
     SHOW_SOLUTION: this.showSolution.bind(this),
     REROLL_EXERCISE: this.reroll.bind(this),
+    SAVE_ANSWER: this.saveTempAnswer.bind(this),
   }
 
   constructor(private readonly sandboxManager: SandboxManager) {}
@@ -70,21 +71,32 @@ export abstract class PlayerManager {
     return this.actionHandlers[input.action](session, user)
   }
 
-  async saveTempAnswer(sessionId: string, answers: Record<string, unknown>, user?: User): Promise<ExercisePlayer> {
-    const session = withSessionAccessGuard(await this.findExerciseSessionById(sessionId), user)
+  async saveTemporaryAnswer(
+    input: EvalExerciseInput,
+    user?: User
+  ): Promise<ExercisePlayer | [ExercisePlayer, PlayerNavigation]> {
+    const session = withSessionAccessGuard(await this.findExerciseSessionById(input.sessionId), user)
     if (this.isExpired(session)) {
       throw new ForbiddenResponse(`This session is expired.`)
     }
+
+    const answers = input.answers || {}
 
     session.variables.answers = {
       ...session.variables.answers,
       ...answers,
     }
 
+    withAnswersInSession(session.variables, answers)
+
     await this.updateSession(session.id, {
       variables: session.variables,
     })
 
+    return this.actionHandlers[input.action](session, user)
+  }
+
+  private async saveTempAnswer(session: ExerciseSession): Promise<ExercisePlayer> {
     return withExercisePlayer(session)
   }
 

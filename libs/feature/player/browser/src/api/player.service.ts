@@ -50,4 +50,8 @@ export class PlayerService {
   terminate(sessionId: string): Observable<PlayActivityOuput> {
     return this.provider.terminate(sessionId)
   }
+
+  saveTemporaryAnswer(input: EvalExerciseInput): Observable<void> {
+    return this.provider.saveTemporaryAnswer(input)
+  }
 }

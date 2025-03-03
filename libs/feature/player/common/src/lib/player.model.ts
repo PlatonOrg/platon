@@ -9,6 +9,7 @@ export enum PlayerActions {
   CHECK_ANSWER = 'CHECK_ANSWER',
   SHOW_SOLUTION = 'SHOW_SOLUTION',
   REROLL_EXERCISE = 'REROLL_EXERCISE',
+  SAVE_ANSWER = 'SAVE_ANSWER',
 }
 
 export interface PlayerExercise {

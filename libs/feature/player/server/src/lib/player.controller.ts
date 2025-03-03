@@ -77,4 +77,10 @@ export class PlayerController {
       navigation: Array.isArray(response) ? response[1] : undefined,
     }
   }
+
+  @Public()
+  @Post('/saveTemporaryAnswer')
+  async saveTemporaryAnswer(@Req() req: IRequest, @Body() input: EvalExerciseInput): Promise<void> {
+    await this.playerService.saveTemporaryAnswer(input, req.user)
+  }
 }
