@@ -450,7 +450,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       this.player.settings?.navigation?.mode === 'next' &&
       this.player.settings?.nextSettings?.autoNext &&
       !this.loadingNext &&
-      navigation.current?.grade &&
+      navigation.current?.grade != undefined &&
       navigation.current?.grade >= this.player.settings?.nextSettings?.autoNextGrade
     ) {
       this.loadingNext = true
