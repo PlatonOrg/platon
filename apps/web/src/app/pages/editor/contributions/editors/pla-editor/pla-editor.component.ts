@@ -132,7 +132,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       nextSettings: {
         sandbox: 'python',
         autoNext: false,
-        autoNextGrade: 100,
+        autoNextGrade: 0,
+        hasExercisesVariables: false,
       },
     },
     activityGrade: 0,
@@ -176,7 +177,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     nextSettings: this.fb.group({
       sandbox: [this.activity.settings?.nextSettings?.sandbox || 'python'],
       autoNext: [this.activity.settings?.nextSettings?.autoNext || false],
-      autoNextGrade: [this.activity.settings?.nextSettings?.autoNextGrade || 100],
+      autoNextGrade: [this.activity.settings?.nextSettings?.autoNextGrade || 0],
+      hasExercisesVariables: [this.activity.settings?.nextSettings?.hasExercisesVariables || false],
     }),
   })
 
@@ -598,7 +600,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         nextSettings: {
           sandbox: value.nextSettings?.sandbox || 'python',
           autoNext: value.nextSettings?.autoNext || false,
-          autoNextGrade: value.nextSettings?.autoNextGrade || 100,
+          autoNextGrade: value.nextSettings?.autoNextGrade || 0,
+          hasExercisesVariables: value.nextSettings?.hasExercisesVariables || false,
         },
       },
       exerciseGroups: this.exerciseGroups.reduce((acc, group, index) => {
@@ -665,6 +668,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         sandbox: this.activity.settings?.nextSettings?.sandbox,
         autoNext: this.activity.settings?.nextSettings?.autoNext,
         autoNextGrade: this.activity.settings?.nextSettings?.autoNextGrade,
+        hasExercisesVariables: this.activity.settings?.nextSettings?.hasExercisesVariables,
       },
     })
 

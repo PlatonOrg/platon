@@ -26,6 +26,7 @@ export interface NextSettings {
   sandbox: 'python' | 'node'
   autoNext: boolean
   autoNextGrade: number
+  hasExercisesVariables: boolean
 }
 
 /** Settings specific to action buttons. */
@@ -110,5 +111,6 @@ export const defaultActivitySettings = (): ActivitySettings => ({
     sandbox: 'python',
     autoNext: false,
     autoNextGrade: 0,
+    hasExercisesVariables: false,
   },
 })

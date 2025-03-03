@@ -162,6 +162,7 @@ export interface ActivityVariables {
   exercisesMeta?: Record<string, ExerciseMeta>
   currentExerciseId?: string
   savedVariables?: object
+  exercisesVariables?: Record<string, ExerciseVariables>
 
   [k: string]: any
 }
