@@ -137,7 +137,6 @@ export interface ExercisePlayer {
       }[]
     | null
   reviewMode?: boolean | null
-  platon_logs?: string[] | null
 }
 
 export interface ActivityPlayer {
