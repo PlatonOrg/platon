@@ -7,7 +7,7 @@ import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 
-import { saveAs } from 'file-saver'
+// import { saveAs } from 'file-saver'
 
 import { PropositionsComponent } from '../propositions/propositions.component'
 import { RestrictionComponent } from '../restriction/restriction.component'
@@ -79,7 +79,7 @@ export class RestrictionManagerComponent implements OnInit {
     // data.restrictions = traverseRestrictions(this.restrictions)
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const fileName = 'restrictions.json'
-    saveAs(blob, fileName)
+    //saveAs(blob, fileName)
     return data.restrictions
   }
 
