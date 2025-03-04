@@ -58,7 +58,6 @@ import { SandboxService } from './sandboxes/sandbox.service'
 import { randomInt } from 'crypto'
 import { PeerService } from '@platon/feature/peer/server'
 import { MatchStatus, PeerContest } from '@platon/feature/peer/common'
-import { ActivityRestrictionCheckerService } from './activity-restriction-checker.service'
 
 type CreateSessionArgs = {
   user?: User | null
@@ -81,8 +80,7 @@ export class PlayerService extends PlayerManager {
     private readonly sessionService: SessionService,
     private readonly activityService: ActivityService,
     private readonly resourceFileService: ResourceFileService,
-    private readonly peerService: PeerService,
-    private readonly restrictionChecker: ActivityRestrictionCheckerService
+    private readonly peerService: PeerService
   ) {
     super(sandboxService)
   }
@@ -164,21 +162,12 @@ export class PlayerService extends PlayerManager {
     if (!activitySession) {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
     }
-    // Les modifs commencent ici : restrictions
-    /*if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
+    if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
       throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
     }
     if (activitySession.activity?.closeAt && activitySession.activity.closeAt < new Date()) {
       throw new ForbiddenResponse("L'activité est fermée.")
-    }*/
-    if (activitySession.activity && user) {
-      const access = await this.restrictionChecker.validateActivityAccess(activitySession.activity, user)
-      if (!access.isAllowed) {
-        throw new ForbiddenResponse(access.message || 'Access denied')
-      }
     }
-    this.logger.log('\n\n\n -----------User has access to the activity------------------\n\n\n')
-    // Fin des modifs
 
     // CREATE PLAYERS
     const exercisePlayers = await Promise.all(
