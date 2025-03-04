@@ -8,6 +8,8 @@ import { Callout } from 'nextra/components'
 
 La librairie NextLib est une librairie python qui simplifie la création d'activités avec une navigation intelligente.
 
+<Callout type="info">Cette librairie est uniquement utilisable avec une sandbox Python.</Callout>
+
 ## Sommaire
 
 ### Classes
@@ -17,6 +19,7 @@ La librairie NextLib est une librairie python qui simplifie la création d'activ
 - [Gestion de l'activité](#gestion-de-lactivité)
 - [Gestion des notes](#gestion-des-notes)
 - [Gestion de la mémoire](#gestion-de-la-mémoire)
+- [Accès aux variables des exercices](#accès-aux-variables-des-exercices)
 
 ## Classes
 
@@ -27,6 +30,9 @@ Exception levée lorsqu'un numéro de groupe invalide est demandé.
 
 #### `InvalidExerciseError`
 Exception levée lorsqu'un numéro d'exercice invalide est demandé.
+
+#### `ExerciseVariablesNotEnabledError`
+Exception levée lorsqu'un accès aux variables des exercices est tenté sans que cette option soit activée.
 
 ## Fonctions
 
@@ -355,3 +361,42 @@ Charge toutes les variables stockées en mémoire.
 
 **Retourne** :
 - (*dict*): Un dictionnaire contenant toutes les variables stockées.
+
+### Accès aux variables des exercices
+
+<Callout type="warning">L'accès aux variables des exercices doit être activé dans l'onglet `Next` de l'activité pour pouvoir utiliser ces fonctions.</Callout>
+
+#### `CheckExerciseVariables() -> None`
+Vérifie si l'accès aux variables des exercices est activé.
+
+**Exceptions** :
+- `ExerciseVariablesNotEnabledError`: Si l'accès aux variables des exercices n'est pas activé.
+
+---
+
+#### `getExerciseVariable(exerciseId: str, variableName: str) -> Optional[Any]`
+Récupère la valeur d'une variable spécifique pour un exercice donné.
+
+**Arguments** :
+- `exerciseId` (*str*): L'ID de l'exercice.
+- `variableName` (*str*): Le nom de la variable à récupérer.
+
+**Retourne** :
+- (*Optional[Any]*): La valeur de la variable, ou `None` si la variable n'existe pas.
+
+**Exceptions** :
+- `ExerciseVariablesNotEnabledError`: Si l'accès aux variables des exercices n'est pas activé.
+
+---
+
+#### `getExerciseAllVariables(exerciseId: str) -> dict`
+Récupère toutes les variables pour un exercice donné.
+
+**Arguments** :
+- `exerciseId` (*str*): L'ID de l'exercice.
+
+**Retourne** :
+- (*dict*): Un dictionnaire contenant toutes les variables de l'exercice.
+
+**Exceptions** :
+- `ExerciseVariablesNotEnabledError`: Si l'accès aux variables des exercices n'est pas activé.
