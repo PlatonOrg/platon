@@ -146,6 +146,7 @@ export class PythonSandbox implements Sandbox {
     ).catch((_error: AxiosError) => {
       throw new NotFoundResponse(`Environment ${envid} not found `)
     })
+    //      .then((response) => {if (response.status == 404) throw new NotFoundException(`Environment ${envid} not found `) } )
     if (response.status == 404) throw new NotFoundResponse(`Environment ${envid} not found `)
 
     return { envid: envid, content: response.data }
