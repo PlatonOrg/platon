@@ -36,7 +36,8 @@ export class CourseGroupSelectComponent implements ControlValueAccessor {
     this.nodes = value.map((group) => {
       const title = group.name
       return {
-        key: group.id,
+        //key: group.id,
+        key: group.groupId,
         value: group,
         title,
         isLeaf: true,
