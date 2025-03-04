@@ -127,6 +127,7 @@ export interface ExercisePlayer {
   solution?: string | null
   settings?: ActivitySettings | null
   feedbacks?: ExerciseFeedback[] | null
+  platon_logs: string[] | null
   theories?:
     | {
         url: string
