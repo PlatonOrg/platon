@@ -8,19 +8,31 @@ import { Callout } from 'nextra/components'
 
 La librairie NextLib est une librairie python qui simplifie la création d'activités avec une navigation intelligente.
 
+## Sommaire
+
+### Classes
+- [Exceptions](#exceptions)
+
+### Fonctions
+- [Gestion de l'activité](#gestion-de-lactivité)
+- [Gestion des notes](#gestion-des-notes)
+- [Gestion de la mémoire](#gestion-de-la-mémoire)
+
 ## Classes
 
-### `InvalidGroupError`
+### Exceptions
+
+#### `InvalidGroupError`
 Exception levée lorsqu'un numéro de groupe invalide est demandé.
 
-### `InvalidExerciseError`
+#### `InvalidExerciseError`
 Exception levée lorsqu'un numéro d'exercice invalide est demandé.
-
----
 
 ## Fonctions
 
-### `playExercise(exerciseId: str) -> None`
+### Gestion de l'activité
+
+#### `playExercise(exerciseId: str) -> None`
 Démarre l'exécution d'un exercice en fonction de son ID.
 
 **Arguments** :
@@ -31,7 +43,7 @@ Démarre l'exécution d'un exercice en fonction de son ID.
 
 ---
 
-### `stopActivity() -> None`
+#### `stopActivity() -> None`
 Termine l'activité en cours.
 
 **Exceptions** :
@@ -39,7 +51,7 @@ Termine l'activité en cours.
 
 ---
 
-### `getExerciseId(groupNb: int = 0, exerciseNb: int = 0) -> str`
+#### `getExerciseId(groupNb: int = 0, exerciseNb: int = 0) -> str`
 Récupère l'ID de l'exercice à partir d'un groupe et d'un numéro d'exercice spécifiés.
 
 **Arguments** :
@@ -55,7 +67,7 @@ Récupère l'ID de l'exercice à partir d'un groupe et d'un numéro d'exercice s
 
 ---
 
-### `getExerciseAttempts(exerciseId: str) -> int`
+#### `getExerciseAttempts(exerciseId: str) -> int`
 Renvoie le nombre de tentatives effectuées pour un exercice donné par son ID.
 
 **Arguments** :
@@ -66,7 +78,7 @@ Renvoie le nombre de tentatives effectuées pour un exercice donné par son ID.
 
 ---
 
-### `getGroupsCount() -> int`
+#### `getGroupsCount() -> int`
 Récupère le nombre total de groupes d'exercices disponibles.
 
 **Retourne** :
@@ -74,7 +86,7 @@ Récupère le nombre total de groupes d'exercices disponibles.
 
 ---
 
-### `getGroupExercisesCount(groupNb: int) -> int`
+#### `getGroupExercisesCount(groupNb: int) -> int`
 Récupère le nombre d'exercices dans un groupe spécifique.
 
 **Arguments** :
@@ -88,7 +100,7 @@ Récupère le nombre d'exercices dans un groupe spécifique.
 
 ---
 
-### `getLastPlayedExerciseId() -> Optional[str]`
+#### `getLastPlayedExerciseId() -> Optional[str]`
 Récupère l'ID du dernier exercice joué.
 
 **Retourne** :
@@ -96,7 +108,7 @@ Récupère l'ID du dernier exercice joué.
 
 ---
 
-### `isAllExercisesPlayed() -> bool`
+#### `isAllExercisesPlayed() -> bool`
 Vérifie si tous les exercices ont été joués au moins une fois.
 
 **Retourne** :
@@ -104,7 +116,7 @@ Vérifie si tous les exercices ont été joués au moins une fois.
 
 ---
 
-### `getRandomGroupNb() -> int`
+#### `getRandomGroupNb() -> int`
 Sélectionne un numéro de groupe aléatoire.
 
 **Retourne** :
@@ -112,7 +124,7 @@ Sélectionne un numéro de groupe aléatoire.
 
 ---
 
-### `getRandomGroupExerciseNb(groupNb: int) -> int`
+#### `getRandomGroupExerciseNb(groupNb: int) -> int`
 Sélectionne un numéro d'exercice aléatoire au sein d'un groupe spécifié.
 
 **Arguments** :
@@ -126,7 +138,7 @@ Sélectionne un numéro d'exercice aléatoire au sein d'un groupe spécifié.
 
 ---
 
-### `getRandomExercise() -> str`
+#### `getRandomExercise() -> str`
 Sélectionne un exercice aléatoire dans un groupe choisi aléatoirement.
 
 **Retourne** :
@@ -134,7 +146,7 @@ Sélectionne un exercice aléatoire dans un groupe choisi aléatoirement.
 
 ---
 
-### `getRandomExerciseFromGroup(groupNb: int) -> str`
+#### `getRandomExerciseFromGroup(groupNb: int) -> str`
 Sélectionne un exercice aléatoire dans un groupe spécifié.
 
 **Arguments** :
@@ -148,7 +160,7 @@ Sélectionne un exercice aléatoire dans un groupe spécifié.
 
 ---
 
-### `getRandomUnplayedExerciseId() -> Optional[str]`
+#### `getRandomUnplayedExerciseId() -> Optional[str]`
 Sélectionne un exercice aléatoire qui n'a pas encore été joué.
 
 **Retourne** :
@@ -156,14 +168,14 @@ Sélectionne un exercice aléatoire qui n'a pas encore été joué.
 
 ---
 
-### `playCurrentIfUnplayed() -> None`
+#### `playCurrentIfUnplayed() -> None`
 Joue l'exercice actuel s'il n'a pas encore été tenté.
 
 Si l'exercice actuel a déjà été tenté, aucune action n'est effectuée.
 
 ---
 
-### `getExerciseGrades(exerciseId: str) -> Iterable[int]`
+#### `getExerciseGrades(exerciseId: str) -> Iterable[int]`
 Récupère toutes les notes attribuées à un exercice spécifique.
 
 **Arguments** :
@@ -174,7 +186,7 @@ Récupère toutes les notes attribuées à un exercice spécifique.
 
 ---
 
-### `getExerciseLastGrade(exerciseId: str) -> Optional[int]`
+#### `getExerciseLastGrade(exerciseId: str) -> Optional[int]`
 Récupère la dernière note attribuée à un exercice spécifique.
 
 **Arguments** :
@@ -185,7 +197,7 @@ Récupère la dernière note attribuée à un exercice spécifique.
 
 ---
 
-### `getExerciseBestGrade(exerciseId: str) -> Optional[int]`
+#### `getExerciseBestGrade(exerciseId: str) -> Optional[int]`
 Récupère la meilleure note attribuée à un exercice spécifique.
 
 **Arguments** :
@@ -196,7 +208,7 @@ Récupère la meilleure note attribuée à un exercice spécifique.
 
 ---
 
-### `getCurrentGrade() -> Optional[int]`
+#### `getCurrentGrade() -> Optional[int]`
 Récupère la note actuelle de l'exercice en cours dans la navigation.
 
 **Retourne** :
@@ -204,7 +216,7 @@ Récupère la note actuelle de l'exercice en cours dans la navigation.
 
 ---
 
-### `isPlayed(exerciseId: str) -> bool`
+#### `isPlayed(exerciseId: str) -> bool`
 Vérifie si un exercice a déjà été joué au moins une fois.
 
 **Arguments** :
@@ -215,7 +227,7 @@ Vérifie si un exercice a déjà été joué au moins une fois.
 
 ---
 
-### `playAnyFromGroup(groupNb: int) -> Optional[None]`
+#### `playAnyFromGroup(groupNb: int) -> Optional[None]`
 Vérifie si au moins un exercice dans le groupe spécifié a déjà été effectué.
 Si aucun exercice n'a été joué, lance un exercice aléatoire de ce groupe.
 
@@ -230,7 +242,7 @@ Si aucun exercice n'a été joué, lance un exercice aléatoire de ce groupe.
 
 ---
 
-### `playAllFromGroup(groupNb: int, randomOrder: bool = False) -> Optional[None]`
+#### `playAllFromGroup(groupNb: int, randomOrder: bool = False) -> Optional[None]`
 Lance un exercice non joué du groupe spécifié.
 Si `randomOrder` est défini à `True`, sélectionne un exercice non joué aléatoirement.
 Si tous les exercices ont été joués, aucune action n'est effectuée.
@@ -247,7 +259,7 @@ Si tous les exercices ont été joués, aucune action n'est effectuée.
 
 ---
 
-### `playFirstUnplayedExercise() -> None`
+#### `playFirstUnplayedExercise() -> None`
 Sélectionne et joue le premier exercice non joué, en parcourant les groupes et exercices séquentiellement.
 
 **Retourne** :
@@ -255,7 +267,7 @@ Sélectionne et joue le premier exercice non joué, en parcourant les groupes et
 
 ---
 
-### `playNextUnplayedExercise(loop: bool = False) -> None`
+#### `playNextUnplayedExercise(loop: bool = False) -> None`
 Joue le prochain exercice non joué après l'exercice actuellement en cours.
 Si aucun exercice suivant n'est trouvé, parcourt la liste depuis le début si `loop` est défini à `True`.
 
@@ -267,7 +279,7 @@ Si aucun exercice suivant n'est trouvé, parcourt la liste depuis le début si `
 
 ---
 
-### `getCurrentGroupNumber() -> Optional[int]`
+#### `getCurrentGroupNumber() -> Optional[int]`
 Récupère le numéro du groupe de l'exercice actuellement en cours.
 
 **Retourne** :
@@ -275,7 +287,7 @@ Récupère le numéro du groupe de l'exercice actuellement en cours.
 
 ---
 
-### `isAllExercisesFromGroupPlayed(groupNb: int = getCurrentGroupNumber()) -> bool`
+#### `isAllExercisesFromGroupPlayed(groupNb: int = getCurrentGroupNumber()) -> bool`
 Vérifie si tous les exercices d'un groupe spécifique ont été joués.
 
 **Arguments** :
@@ -287,9 +299,9 @@ Vérifie si tous les exercices d'un groupe spécifique ont été joués.
 **Exceptions** :
 - `InvalidGroupError`: Si le numéro de groupe spécifié n'existe pas.
 
----
+### Gestion des notes
 
-### `setActivityGrade(grade_aggregation_strategy: Callable[[], int]) -> None`
+#### `setActivityGrade(grade_aggregation_strategy: Callable[[], int]) -> None`
 Calcule et stocke la note totale de l'activité en utilisant une stratégie d'agrégation spécifiée.
 
 **Arguments** :
@@ -300,11 +312,9 @@ Calcule et stocke la note totale de l'activité en utilisant une stratégie d'ag
 
 <Callout type="info">La note totale de l'activité est calculée en utilisant la stratégie d'agrégation spécifiée. Voir section suivante.</Callout>
 
----
+### Stratégies d'agrégation de notes
 
-## Stratégies d'agrégation de notes
-
-### `average_grade_strategy() -> int`
+#### `average_grade_strategy() -> int`
 Retourne la moyenne des notes des exercices joués.
 
 **Retourne** :
@@ -312,8 +322,36 @@ Retourne la moyenne des notes des exercices joués.
 
 ---
 
-### `best_grade_strategy() -> int`
+#### `best_grade_strategy() -> int`
 Retourne la meilleure note obtenue parmi les exercices joués.
 
 **Retourne** :
 - (*int*): La meilleure note, ou `0` si aucune note n'est disponible.
+
+### Gestion de la mémoire
+
+#### `load(variableName: str) -> Optional[Any]`
+Charge une variable stockée en mémoire.
+
+**Arguments** :
+- `variableName` (*str*): Le nom de la variable à charger.
+
+**Retourne** :
+- (*Optional[Any]*): La valeur de la variable chargée, ou `None` si la variable n'existe pas.
+
+---
+
+#### `save(variableName: str, value: Any) -> None`
+Stocke une variable en mémoire.
+
+**Arguments** :
+- `variableName` (*str*): Le nom de la variable à stocker.
+- `value` (*Any*): La valeur de la variable à stocker.
+
+---
+
+#### `loadAll() -> dict`
+Charge toutes les variables stockées en mémoire.
+
+**Retourne** :
+- (*dict*): Un dictionnaire contenant toutes les variables stockées.

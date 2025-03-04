@@ -22,8 +22,10 @@ import { ActivityMemberView } from '../activity-member/activity-member.view'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
 import { ActivityEntity } from './activity.entity'
 import {
+  ON_CLOSE_ACTIVITY_EVENT,
   ON_RELOAD_ACTIVITY_EVENT,
   ON_REOPEN_ACTIVITY_EVENT,
+  OnCloseActivityEventPayload,
   OnReloadActivityEventPayload,
   OnReopenActivityEventPayload,
 } from './activity.event'
@@ -72,6 +74,8 @@ export class ActivityService {
     if (filters?.challenge != null) {
       qb.andWhere(`is_challenge = :isChallenge`, { isChallenge: !!filters.challenge })
     }
+
+    qb.orderBy('activity.createdAt')
 
     const [entities, count] = await qb.getManyAndCount()
     await this.addVirtualColumns(...entities)
@@ -140,7 +144,10 @@ export class ActivityService {
   }
 
   async create(activity: Partial<ActivityEntity>): Promise<ActivityEntity> {
-    const result = await this.repository.save(activity)
+    const order =
+      ((await this.repository.maximum('order', { courseId: activity.courseId, sectionId: activity.sectionId })) ?? 0) +
+      1
+    const result = await this.repository.save({ ...activity, order })
     await this.addVirtualColumns(result)
     return result
   }
@@ -238,6 +245,7 @@ export class ActivityService {
     this.notificationService.notifyActivityBeingClosed(activityId).catch((error) => {
       this.logger.error('Failed to send notification', error)
     })
+    this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: new Date() }, guard)
   }
 

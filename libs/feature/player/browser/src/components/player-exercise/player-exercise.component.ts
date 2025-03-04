@@ -2,6 +2,7 @@
 
 import { CommonModule } from '@angular/common'
 import {
+  CUSTOM_ELEMENTS_SCHEMA,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -36,7 +37,7 @@ import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature
 
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
-import { ExerciseTheory } from '@platon/feature/compiler'
+import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
 import { AnswerStatePipesModule } from '@platon/feature/result/browser'
 import { AnswerStates } from '@platon/feature/result/common'
 import { WebComponentService } from '@platon/feature/webcomponent'
@@ -114,6 +115,7 @@ type FullscreenElement = HTMLElement & {
     AnswerStatePipesModule,
     PlayerCommentsComponent,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   private readonly subscriptions: Subscription[] = []
@@ -326,6 +328,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
 
   get canRequestFullscreen(): boolean {
     return !!this.requestFullscreen && this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
+  protected isFeedbackContentAnObject(feedback: ExerciseFeedback): boolean {
+    return typeof feedback.content !== 'string'
   }
 
   // Function called before the user goes to next/previous exercise

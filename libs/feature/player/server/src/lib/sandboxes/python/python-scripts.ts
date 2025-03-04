@@ -161,12 +161,10 @@ if __name__ == "__main__":
     #variables.Object = Object
     variables['component'] = component
     variables['StopExec'] = StopExec
-    variables['platon_log'] = platon_log
 
     exec(with_try_clause(script, StopExec), variables)
     exec("", glob)
 
-    #if 'platon_log' in variables:
     variables['platon_logs'] = list_platon_logs
 
     for key in glob:
