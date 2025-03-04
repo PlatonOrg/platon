@@ -1,12 +1,5 @@
 import { ListResponse } from '@platon/core/common'
-import {
-  Activity,
-  ActivityFilters,
-  Course,
-  CreateActivity,
-  Restriction,
-  UpdateActivity,
-} from '@platon/feature/course/common'
+import { Activity, ActivityFilters, Course, CreateActivity, UpdateActivity } from '@platon/feature/course/common'
 import { Observable } from 'rxjs'
 
 export abstract class ActivityProvider {
@@ -19,5 +12,4 @@ export abstract class ActivityProvider {
   abstract delete(activity: Activity, version?: string): Observable<void>
   abstract close(activity: Activity): Observable<Activity>
   abstract reopen(activity: Activity): Observable<Activity>
-  abstract updateRestrictions(activity: Activity, restrictions: Restriction[]): Observable<Activity>
 }
