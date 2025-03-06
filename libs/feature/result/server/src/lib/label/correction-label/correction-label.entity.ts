@@ -1,7 +1,7 @@
 import { CorrectionLabel } from '@platon/feature/result/common'
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '@platon/core/server'
-import { LabelEntity } from '../../label/label.entity'
+import { LabelEntity } from '../label.entity'
 import { SessionEntity } from '../../sessions/session.entity'
 import { AnswerEntity } from '../../answers/answer.entity'
 

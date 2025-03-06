@@ -37,6 +37,7 @@ export interface ActivityCorrection {
 }
 
 export interface CourseCorrection {
+  courseId: string
   ActivityCorrections: ActivityCorrection[]
 }
 

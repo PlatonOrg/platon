@@ -1,0 +1,94 @@
+:host ::ng-deep {
+  div.button-wrapper.ng-star-inserted button.ant-btn.label-button.ant-btn-default.ant-btn-sm span.ng-star-inserted {
+    display: inline-block;
+    max-width: -webkit-fill-available;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+
+
+.label-wrapper {
+
+  display: flex;
+  flex-direction: column;
+  grid-gap: 0.5rem;
+  justify-items: center;
+  .button-wrapper {
+    position:relative;
+
+    .label-button {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+      padding: 5px 10px;
+
+      &:active {
+        transition: none !important;  /* Supprime les transitions */
+        background-color: inherit !important;
+      }
+    }
+
+    .favorite-label, .unfavorite-label {
+      display: flex;
+      user-select: none;
+      font-family: "Material Icons";
+      font-size: 10px;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 17px;
+      height: 17px;
+      padding-bottom: 1px;
+      background-color: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+
+
+      transition: transform 0.2s ease-out, opacity 0.2s ease-in, color 0.3s ease-in-out;
+    }
+
+    .favorite-label {
+      color: #FFA500;
+      transform: scale(1.2);
+    }
+
+    .unfavorite-label {
+      color: #afaaa0;
+      transform: scale(1);
+    }
+
+    .favorite-label:active, .unfavorite-label:active {
+      transform: scale(1.4);
+    }
+
+
+    #createbutton {
+      grid-column-start: 1;
+      grid-column-end: 3;
+    }
+  }
+}
+
+
+mat-card button#settingButton {
+  display: flex;
+  position:absolute;
+  right: 10px;
+  top: 10px;
+  background-color: transparent;
+  border: none;
+  color: #ffd000;
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  align-items: center;
+}

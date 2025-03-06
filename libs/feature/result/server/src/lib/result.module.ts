@@ -26,8 +26,10 @@ import { SessionSubscriber } from './sessions/session.subscriber'
 import { LabelService } from './label/label.service'
 import { LabelController } from './label/label.controller'
 import { LabelEntity } from './label/label.entity'
-import { CorrectionLabelEntity } from './correction/correction-label/correction-label.entity'
-import { CorrectionLabelService } from './correction/correction-label/correction-label.service'
+import { CorrectionLabelEntity } from './label/correction-label/correction-label.entity'
+import { CorrectionLabelService } from './label/correction-label/correction-label.service'
+import { CourseLabelEntity } from './label/course-label/course-label.entity'
+import { UserFavoriteLabel } from './label/user-favorite-label/user-favorite-label.entity'
 @Module({
   imports: [
     FeatureCourseServerModule,
@@ -42,6 +44,8 @@ import { CorrectionLabelService } from './correction/correction-label/correction
       SessionSubscriber,
       LabelEntity,
       CorrectionLabelEntity,
+      CourseLabelEntity,
+      UserFavoriteLabel,
     ]),
   ],
   controllers: [

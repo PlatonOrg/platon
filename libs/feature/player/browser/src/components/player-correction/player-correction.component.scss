@@ -11,7 +11,7 @@
     background-color: inherit;
     color: white;
     font-size: medium;
-  }
+  };
 }
 
 
@@ -133,6 +133,8 @@ nz-segmented {
   text-overflow: ellipsis;
   width: 15vw;
   text-align: center;
+
+  animation: slideInFromLeft 0.5s ease;
 }
 
 mat-toolbar {
@@ -165,8 +167,9 @@ mat-toolbar {
 .grade-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
+  margin-bottom: 0.5rem;
 }
 
 // .comment-wrapper {
@@ -181,4 +184,14 @@ mat-toolbar {
   display: flex;
   flex-direction: column-reverse ;
   align-items: baseline;
+}
+
+.mid-col-wrapper {
+  padding: 0 0.5rem 0.5rem 0.5rem;
+}
+
+.swipe-container {
+  display: inline-block;
+  min-width: 100px;
+  text-align: center;
 }

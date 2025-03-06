@@ -39,6 +39,7 @@ export class PlayerCorrectionPage implements OnInit {
       const courseId = this.getCourseId()
       const activities = await this.getActivities(courseId)
       this.correction = {
+        courseId: courseId.id,
         ActivityCorrections: (await this.getCorrections(activities)).filter(
           (correction): correction is ActivityCorrection => correction !== undefined
         ),

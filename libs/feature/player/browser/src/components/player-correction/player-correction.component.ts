@@ -18,9 +18,9 @@ import { MatToolbarModule } from '@angular/material/toolbar'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 
 import { ExercisePlayer } from '@platon/feature/player/common'
-import { ResultService } from '@platon/feature/result/browser'
+import { LabelComponent, ResultService } from '@platon/feature/result/browser'
 
-import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { DialogModule, DialogService, UserService } from '@platon/core/browser'
 import { CourseCorrection, ExerciseCorrection, Label } from '@platon/feature/result/common'
@@ -38,7 +38,8 @@ import { NzCollapseModule } from 'ng-zorro-antd/collapse'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
 import { User } from '@platon/core/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzFormModule } from 'ng-zorro-antd/form'
+import { MatCardModule } from '@angular/material/card'
+import { animate, style, transition, trigger } from '@angular/animations'
 
 interface ExerciseGroup {
   exerciseId: string
@@ -52,6 +53,18 @@ interface ExerciseGroup {
   selector: 'player-correction',
   templateUrl: './player-correction.component.html',
   styleUrls: ['./player-correction.component.scss'],
+  animations: [
+    trigger('swipeAnimation', [
+      transition('* => left', [
+        style({ transform: 'translateX(-100%)', opacity: 0 }),
+        animate('400ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
+      ]),
+      transition('* => right', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('400ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
+      ]),
+    ]),
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
@@ -64,6 +77,7 @@ interface ExerciseGroup {
     MatToolbarModule,
     MatSidenavModule,
     MatDividerModule,
+    MatCardModule,
 
     NzIconModule,
     NzBadgeModule,
@@ -74,7 +88,6 @@ interface ExerciseGroup {
     NzCollapseModule,
     NzSelectModule,
     NzButtonModule,
-    NzFormModule,
 
     DialogModule,
 
@@ -82,6 +95,7 @@ interface ExerciseGroup {
     PlayerCommentsComponent,
     UiModalTemplateComponent,
     UiStatisticCardComponent,
+    LabelComponent,
   ],
 })
 export class PlayerCorrectionComponent implements OnInit {
@@ -90,7 +104,6 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly playerService = inject(PlayerService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly userService = inject(UserService)
-  private readonly fb = inject(NonNullableFormBuilder)
 
   protected answers: ExercisePlayer[] = []
 
@@ -115,20 +128,15 @@ export class PlayerCorrectionComponent implements OnInit {
   protected listExerciseGroup: ExerciseGroup[] = []
 
   protected labels: Label[] = []
-  protected isCreateLabelModalVisible = false
+  protected currentLabels: Label[] = []
 
-  createLabelForm = this.fb.group({
-    labelName: this.fb.control('', [Validators.required]),
-    labelDescription: this.fb.control(''),
-    labelColor: this.fb.control('#000000'),
-  })
+  protected animationState = ''
 
   @Input() courseCorrection!: CourseCorrection
 
   async ngOnInit(): Promise<void> {
     this.buildGroups()
     await this.getUsers()
-    await this.getLabels()
     this.getAllExerciseGroup()
     const firstGroup = this.listExerciseGroup[0]
     if (firstGroup) {
@@ -235,22 +243,6 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  private async getLabels() {
-    this.labels = await firstValueFrom(this.resultService.getLabels())
-    this.changeDetectorRef.markForCheck()
-  }
-
-  protected async labelize(labelId: string) {
-    console.error('labelId', labelId)
-    await firstValueFrom(
-      this.resultService.labelize(
-        this.currentExercise?.exerciseSessionId ?? '',
-        this.answers[this.answers.length - 1].answerId ?? '',
-        labelId
-      )
-    )
-  }
-
   get userOptions() {
     return (
       this.currentGroup?.users?.map((user) => ({
@@ -267,23 +259,8 @@ export class PlayerCorrectionComponent implements OnInit {
     }
   }
 
-  protected showCreateLabelModal() {
-    this.isCreateLabelModalVisible = true
-  }
-
-  protected async handleOk() {
-    const newLabel = {
-      name: this.createLabelForm.get('labelName')?.value ?? 'Unnamed',
-      description: this.createLabelForm.get('labelDescription')?.value,
-      color: this.createLabelForm.get('labelColor')?.value ?? '#000000',
-    }
-    this.isCreateLabelModalVisible = false
-    this.labels = await firstValueFrom(this.resultService.createLabel('id', newLabel))
-    this.changeDetectorRef.markForCheck()
-  }
-
-  protected handleCancel() {
-    this.isCreateLabelModalVisible = false
+  protected changeGrade() {
+    console.error('changeGrade', this.correctedGrade)
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -291,9 +268,17 @@ export class PlayerCorrectionComponent implements OnInit {
     switch (event.key) {
       case 'ArrowLeft':
         await this.onChoosePreviousUserExercise()
+        this.animationState = 'left'
+        setTimeout(() => {
+          this.animationState = ''
+        }, 400)
         break
       case 'ArrowRight':
         await this.onChooseNextUserExercise()
+        this.animationState = 'right'
+        setTimeout(() => {
+          this.animationState = ''
+        }, 400)
         break
       case 'ArrowUp':
         event.preventDefault()

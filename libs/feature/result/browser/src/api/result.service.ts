@@ -48,7 +48,6 @@ import { ResourceDashboardModel, UserDashboardModel } from '../models/dashboard.
 import { ResultProvider } from '../models/result-provider'
 import { SessionCommentProvider } from '../models/session-comment-provider'
 import { LabelProvider } from '../models/label.provider'
-import { List } from 'echarts'
 
 @Injectable({ providedIn: 'root' })
 export class ResultService {
@@ -177,16 +176,32 @@ export class ResultService {
     )
   }
 
-  getLabels(): Observable<Label[]> {
-    return this.labelProvider.listLabels()
+  getLabels(courseId: string): Observable<Label[]> {
+    return this.labelProvider.listLabels(courseId)
   }
 
-  createLabel(id: string, input: CreateLabel): Observable<Label[]> {
-    return this.labelProvider.createLabel(id, input)
+  createLabel(courseId: string, input: CreateLabel): Observable<Label[]> {
+    return this.labelProvider.createLabel(courseId, input)
   }
 
   labelize(sessionId: string, answerId: string, labelId: string): Observable<Label[]> {
     return this.labelProvider.labelize(sessionId, answerId, labelId)
+  }
+
+  listCorrectionLabels(sessionId: string, answerId: string): Observable<Label[]> {
+    return this.labelProvider.listCorrectionLabels(sessionId, answerId)
+  }
+
+  getFavLabels(): Observable<Label[]> {
+    return this.labelProvider.listFavLabels()
+  }
+
+  favLabel(labelId: string): Observable<Label[]> {
+    return this.labelProvider.favLabel(labelId)
+  }
+
+  unfavLabel(labelId: string): Observable<Label[]> {
+    return this.labelProvider.unfavLabel(labelId)
   }
 
   upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction> {

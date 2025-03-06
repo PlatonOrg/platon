@@ -65,6 +65,7 @@
         [ngModel]="currentUser?.id"
         (ngModelChange)="loadUserExercise($event)"
         [nzOptions]="userOptions"
+        [@swipeAnimation]="animationState"
       >
       </nz-select>
       <button mat-icon-button (click)="onChooseNextUserExercise()">
@@ -82,64 +83,23 @@
         <nz-col nzSpan="17">
           <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" />
         </nz-col>
-        <nz-col nzSpan="6">
+        <nz-col nzSpan="6" class="mid-col-wrapper">
           <div class="grade-wrapper">
-            <h3>Note</h3>
             <ui-statistic-card
               matIcon="check_circle"
               ribbonColor="#8e44ad"
               description="Note attribuées à l'élève"
               [value]="correctedGrade ?? 0"
               shouldBePositive
+              [edit]="true"
             />
           </div>
-          <div class="label-container">
-            <div class="etiquette-wrapper">
-              <h3>Étiquettes</h3>
-              <ng-container *ngFor="let label of labels">
-                <button nz-button nzType="default" nzSize="small" class="label-button" (click)="labelize(label.id)">
-                  {{ label.name }}
-                </button>
-              </ng-container>
-              <button nz-button nzType="primary" nzSize="small" (click)="showCreateLabelModal()">
-                Créer une étiquette
-              </button>
-              <nz-modal
-                [(nzVisible)]="isCreateLabelModalVisible"
-                nzTitle="Créer une étiquette"
-                (nzOnCancel)="handleCancel()"
-                (nzOnOk)="handleOk()"
-                [nzFooter]="footerButtons"
-              >
-                <ng-container *nzModalContent>
-                  <form nz-form [formGroup]="createLabelForm">
-                    <nz-form-item>
-                      <nz-form-label [nzSpan]="7" nzFor="labelName">Nom de l'étiquette</nz-form-label>
-                      <nz-form-control [nzSpan]="15">
-                        <input nz-input formControlName="labelName" id="labelName" />
-                      </nz-form-control>
-                    </nz-form-item>
-                    <nz-form-item>
-                      <nz-form-label [nzSpan]="7" nzFor="labelDescription">Description</nz-form-label>
-                      <nz-form-control [nzSpan]="15">
-                        <textarea nz-input formControlName="labelDescription" id="labelDescription" rows="4"></textarea>
-                      </nz-form-control>
-                    </nz-form-item>
-                    <nz-form-item>
-                      <nz-form-label [nzSpan]="7" nzFor="labelColor">Couleur</nz-form-label>
-                      <nz-form-control [nzSpan]="15">
-                        <input nz-input formControlName="labelColor" id="labelColor" type="color" />
-                      </nz-form-control>
-                    </nz-form-item>
-                  </form>
-                </ng-container>
-                <ng-template #footerButtons>
-                  <button nz-button nzType="default" (click)="handleCancel()">Annuler</button>
-                  <button nz-button nzType="primary" (click)="handleOk()">Créer</button>
-                </ng-template>
-              </nz-modal>
-            </div>
-          </div>
+
+          <correction-label
+            [answers]="answers"
+            [currentExercise]="currentExercise"
+            [courseId]="courseCorrection.courseId"
+          />
         </nz-col>
         <nz-col nzSpan="1">
           <nz-button-group nzSize="small" class="button-wrapper">

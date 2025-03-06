@@ -42,3 +42,16 @@
     height: 20px;
   }
 }
+
+.editable {
+  cursor: pointer;
+  ::hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
