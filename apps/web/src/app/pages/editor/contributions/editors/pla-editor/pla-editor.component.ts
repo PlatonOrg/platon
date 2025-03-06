@@ -133,6 +133,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         sandbox: 'python',
         autoNext: false,
         autoNextGrade: 0,
+        allowFreeNavigation: true,
         hasExercisesVariables: false,
       },
     },
@@ -178,6 +179,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       sandbox: [this.activity.settings?.nextSettings?.sandbox || 'python'],
       autoNext: [this.activity.settings?.nextSettings?.autoNext || false],
       autoNextGrade: [this.activity.settings?.nextSettings?.autoNextGrade || 0],
+      allowFreeNavigation: [!!this.activity.settings?.nextSettings?.allowFreeNavigation],
       hasExercisesVariables: [this.activity.settings?.nextSettings?.hasExercisesVariables || false],
     }),
   })
@@ -601,6 +603,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
           sandbox: value.nextSettings?.sandbox || 'python',
           autoNext: value.nextSettings?.autoNext || false,
           autoNextGrade: value.nextSettings?.autoNextGrade || 0,
+          allowFreeNavigation: value.nextSettings?.allowFreeNavigation || false,
           hasExercisesVariables: value.nextSettings?.hasExercisesVariables || false,
         },
       },
@@ -668,6 +671,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         sandbox: this.activity.settings?.nextSettings?.sandbox,
         autoNext: this.activity.settings?.nextSettings?.autoNext,
         autoNextGrade: this.activity.settings?.nextSettings?.autoNextGrade,
+        allowFreeNavigation: this.activity.settings?.nextSettings?.allowFreeNavigation,
         hasExercisesVariables: this.activity.settings?.nextSettings?.hasExercisesVariables,
       },
     })

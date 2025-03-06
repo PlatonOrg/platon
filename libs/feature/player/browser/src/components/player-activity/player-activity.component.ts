@@ -560,7 +560,8 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     } else if (current && this.player.settings?.navigation?.mode === 'next') {
       const index = navigation.exercises.findIndex((item) => item.sessionId === current.sessionId)
       this.hasNext = true
-      this.hasPrev = navigation.nextExercisesHistoryPosition > 0
+      this.hasPrev =
+        this.player.settings.nextSettings?.allowFreeNavigation && navigation.nextExercisesHistoryPosition > 0
       this.position = index
     }
   }
