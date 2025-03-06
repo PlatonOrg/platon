@@ -521,11 +521,10 @@ export class PlayerService extends PlayerManager {
     let sessions = await this.sessionService.findAllWithParent(activitySession.id)
 
     sources.variables = activitySession.variables
-
     sources.variables.savedVariables = sources.variables.savedVariables || {}
-
     sources.variables.generatedExercises = sources.variables.generatedExercises || {}
 
+    // If hasExercisesVariables settings is true, store the variables of each exercise
     sources.variables.exercisesVariables = {}
     if (sources.variables.settings?.nextSettings?.hasExercisesVariables) {
       for (const exercise of activitySession.variables.navigation.exercises) {
@@ -536,6 +535,7 @@ export class PlayerService extends PlayerManager {
       }
     }
 
+    // Store the meta of each exercise
     sources.variables.exercisesMeta = {}
     for (const exercise of activitySession.variables.navigation.exercises) {
       const meta = sessions.find((s) => s.id === exercise.sessionId)?.variables['.meta']
@@ -551,11 +551,16 @@ export class PlayerService extends PlayerManager {
         }
       }
     }
+
+    // Store the navigation of the activity
     sources.variables.navigation = activitySession.variables.navigation
+
+    // Launch the next
     const { envid, variables } = await this.sandboxService.buildNext(sources)
 
     variables.exerciseGroups = sources.variables.exerciseGroups
 
+    // If the activity has generated an exercise, create it and add it to the navigation
     if (variables.generatedExerciseHash) {
       variables.exerciseGroups['-1'] = {
         name: 'Exercices générés',
@@ -572,18 +577,19 @@ export class PlayerService extends PlayerManager {
       await this.createNavigation(variables as PlayerActivityVariables, activitySession)
 
       variables.generatedExercises[variables.generatedExerciseHash] = generatedExercise.id
-
       variables.nextExerciseId = generatedExercise.id
 
       sessions = await this.sessionService.findAllWithParent(activitySession.id)
     }
 
+    // If the next as logs, add them to nextParams to be passed to the next exercise
     if (variables.platon_logs && variables.platon_logs.length > 0) {
       variables.nextParams = variables.nextParams || {}
       variables.platon_logs = ['\n#####   LOGS DU NEXT   #####\n', ...variables.platon_logs]
       variables.nextParams.platon_next_logs = variables.platon_logs
     }
 
+    // If the next exercise has parameters, update the exercise session variables
     if (variables.nextParams) {
       const nextExerciseSessionId = variables.navigation.exercises.find(
         (ex: PlayerExercise) => ex.id === variables.nextExerciseId
@@ -609,6 +615,7 @@ export class PlayerService extends PlayerManager {
       }
     }
 
+    // Update the navigation history
     if (
       variables.navigation.nextExercisesHistory[variables.navigation.nextExercisesHistory.length - 1] !==
       variables.nextExerciseId
@@ -617,6 +624,7 @@ export class PlayerService extends PlayerManager {
       variables.navigation.nextExercisesHistoryPosition = variables.navigation.nextExercisesHistory.length - 1
     }
 
+    // Update the activity session
     activitySession.envid = envid
     activitySession.variables = {
       ...activitySession.variables,
