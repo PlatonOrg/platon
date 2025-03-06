@@ -98,7 +98,7 @@ export interface PlayActivityOuput {
 
 export interface NextOutput {
   nextExerciseId: string
-  terminated: boolean
+  navigation: PlayerNavigation
 }
 
 export interface EvalExerciseOutput {

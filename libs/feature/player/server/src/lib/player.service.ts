@@ -58,6 +58,7 @@ import { SandboxService } from './sandboxes/sandbox.service'
 import { randomInt } from 'crypto'
 import { PeerService } from '@platon/feature/peer/server'
 import { MatchStatus, PeerContest } from '@platon/feature/peer/common'
+import { v4 as uuidv4 } from 'uuid'
 
 type CreateSessionArgs = {
   user?: User | null
@@ -223,7 +224,7 @@ export class PlayerService extends PlayerManager {
 
     const session = await this.buildNext(activitySession)
 
-    return { nextExerciseId: session.variables.nextExerciseId, terminated: session.variables.navigation.terminated }
+    return { nextExerciseId: session.variables.nextExerciseId, navigation: session.variables.navigation }
   }
 
   async compareTrainOrWait(
@@ -517,11 +518,13 @@ export class PlayerService extends PlayerManager {
 
   private async buildNext(activitySession: ActivitySessionEntity): Promise<SessionEntity> {
     const sources = activitySession.source
-    const sessions = await this.sessionService.findAllWithParent(activitySession.id)
+    let sessions = await this.sessionService.findAllWithParent(activitySession.id)
 
     sources.variables = activitySession.variables
 
     sources.variables.savedVariables = sources.variables.savedVariables || {}
+
+    sources.variables.generatedExercises = sources.variables.generatedExercises || {}
 
     sources.variables.exercisesVariables = {}
     if (sources.variables.settings?.nextSettings?.hasExercisesVariables) {
@@ -550,6 +553,30 @@ export class PlayerService extends PlayerManager {
     }
     sources.variables.navigation = activitySession.variables.navigation
     const { envid, variables } = await this.sandboxService.buildNext(sources)
+
+    variables.exerciseGroups = sources.variables.exerciseGroups
+
+    if (variables.generatedExerciseHash) {
+      variables.exerciseGroups['-1'] = {
+        name: 'Exercices générés',
+        exercises: variables.exerciseGroups['-1']?.exercises || [],
+      }
+      const exercises = extractExercisesFromActivityVariables(variables as PlayerActivityVariables)
+      const nextExercise = exercises.find((e) => e.id === variables.nextExerciseId)
+      if (!nextExercise) {
+        throw new Error(`Next exercise not found: ${variables.nextExerciseId}`)
+      }
+      const generatedExercise = { ...nextExercise, id: uuidv4() }
+      variables.exerciseGroups['-1'].exercises.push(generatedExercise)
+
+      await this.createNavigation(variables as PlayerActivityVariables, activitySession)
+
+      variables.generatedExercises[variables.generatedExerciseHash] = generatedExercise.id
+
+      variables.nextExerciseId = generatedExercise.id
+
+      sessions = await this.sessionService.findAllWithParent(activitySession.id)
+    }
 
     if (variables.platon_logs) {
       variables.nextParams = variables.nextParams || {}
@@ -589,6 +616,7 @@ export class PlayerService extends PlayerManager {
       navigation: variables.navigation,
       activityGrade: variables.activityGrade,
       savedVariables: variables.savedVariables,
+      generatedExercises: variables.generatedExercises,
     }
 
     await this.sessionService.update(activitySession.id, {
@@ -596,16 +624,6 @@ export class PlayerService extends PlayerManager {
       variables: activitySession.variables,
       grade: variables.activityGrade,
     })
-
-    console.error('\n------------------------------------------------------------')
-    console.error('          PLATON LOG')
-    console.error('------------------------------------------------------------\n')
-    if (variables.platon_logs) {
-      for (const log of variables.platon_logs) {
-        console.error(log)
-        console.error('\n')
-      }
-    }
 
     return activitySession
   }
@@ -668,8 +686,14 @@ export class PlayerService extends PlayerManager {
 
     const exercises = (navigation.exercises || []) as (PlayerExercise | ActivityExercise)[]
 
-    if (!exercises.length) {
-      exercises.push(...extractExercisesFromActivityVariables(variables))
+    const newExercises = extractExercisesFromActivityVariables(variables)
+
+    if (exercises.length !== newExercises.length) {
+      for (const exercise of newExercises) {
+        if (!exercises.find((e) => e.id === exercise.id)) {
+          exercises.push(exercise)
+        }
+      }
     }
     navigation.exercises = await Promise.all(
       exercises.map(async (item) => {
