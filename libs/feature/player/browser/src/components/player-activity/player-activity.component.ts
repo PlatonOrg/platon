@@ -355,8 +355,8 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
           })
         )
         const nextExerciseId = nextExercise.nextExerciseId
-        const terminated = nextExercise.terminated
-        if (terminated) {
+        this.navigation.exercises = nextExercise.navigation.exercises
+        if (nextExercise.navigation.terminated) {
           this.terminate().catch(console.error)
           return
         }
