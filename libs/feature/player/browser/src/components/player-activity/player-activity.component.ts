@@ -333,7 +333,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     })
   }
 
-  protected async play(exercise: PlayerExercise) {
+  protected async play(exercise: PlayerExercise, isPrevArrow = false) {
     if (this.composed) {
       this.jumpToExercise(exercise)
       return
@@ -343,35 +343,46 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       this.saveAnswersToSessionStorage()
     }
 
+    let modifiedNextExercisesHistoryPosition = undefined
     if (this.nextNavigation) {
       if (this.loadingNext) {
         return
       }
-      try {
-        const nextExercise = await firstValueFrom(
-          this.playerService.next({
-            activitySessionId: this.player.sessionId,
-            exerciseSessionIds: [],
-          })
-        )
-        const nextExerciseId = nextExercise.nextExerciseId
-        this.navigation.exercises = nextExercise.navigation.exercises
-        if (nextExercise.navigation.terminated) {
-          this.terminate().catch(console.error)
-          return
-        }
+      if (isPrevArrow) {
+        modifiedNextExercisesHistoryPosition = this.navigation.nextExercisesHistoryPosition - 1
+        const prevExerciseId = this.navigation.nextExercisesHistory[modifiedNextExercisesHistoryPosition]
+        exercise = this.navigation.exercises.find((item) => item.id === prevExerciseId) as PlayerExercise
+      } else if (this.navigation.nextExercisesHistoryPosition != this.navigation.nextExercisesHistory?.length - 1) {
+        modifiedNextExercisesHistoryPosition = this.navigation.nextExercisesHistoryPosition + 1
+        const nextExerciseId = this.navigation.nextExercisesHistory[modifiedNextExercisesHistoryPosition]
         exercise = this.navigation.exercises.find((item) => item.id === nextExerciseId) as PlayerExercise
-        if (!exercise) {
-          this.dialogService.error("L'exercice suivant n'a pas été trouvé.")
+      } else {
+        try {
+          const nextExercise = await firstValueFrom(
+            this.playerService.next({
+              activitySessionId: this.player.sessionId,
+              exerciseSessionIds: [],
+            })
+          )
+          const nextExerciseId = nextExercise.nextExerciseId
+          this.navigation.exercises = nextExercise.navigation.exercises
+          if (nextExercise.navigation.terminated) {
+            this.terminate().catch(console.error)
+            return
+          }
+          exercise = this.navigation.exercises.find((item) => item.id === nextExerciseId) as PlayerExercise
+          if (!exercise) {
+            this.dialogService.error("L'exercice suivant n'a pas été trouvé.")
+            return
+          }
+        } catch (error) {
+          let message = 'Une erreur est survenue lors de cette action.'
+          if (error instanceof HttpErrorResponse) {
+            message = error.error?.message || error.message || message
+          }
+          this.dialogService.notification(this.errorTemplate, { duration: 0, data: { message } })
           return
         }
-      } catch (error) {
-        let message = 'Une erreur est survenue lors de cette action.'
-        if (error instanceof HttpErrorResponse) {
-          message = error.error?.message || error.message || message
-        }
-        this.dialogService.notification(this.errorTemplate, { duration: 0, data: { message } })
-        return
       }
     }
 
@@ -386,6 +397,9 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       )
 
       if (output.navigation) {
+        if (modifiedNextExercisesHistoryPosition != undefined) {
+          output.navigation.nextExercisesHistoryPosition = modifiedNextExercisesHistoryPosition
+        }
         this.player.navigation = output.navigation
       }
 
@@ -546,7 +560,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     } else if (current && this.player.settings?.navigation?.mode === 'next') {
       const index = navigation.exercises.findIndex((item) => item.sessionId === current.sessionId)
       this.hasNext = true
-      this.hasPrev = false
+      this.hasPrev = navigation.nextExercisesHistoryPosition > 0
       this.position = index
     }
   }

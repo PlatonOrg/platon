@@ -26,6 +26,9 @@ export interface PlayerNavigation {
   terminated: boolean
   current?: PlayerExercise
   exercises: PlayerExercise[]
+
+  nextExercisesHistory: string[]
+  nextExercisesHistoryPosition: number
 }
 
 /**

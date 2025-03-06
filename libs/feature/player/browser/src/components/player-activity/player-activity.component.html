@@ -70,7 +70,7 @@
             (evaluated)="onChangeNavigation($event)"
             [hasPrev]="hasPrev"
             [hasNext]="hasNext"
-            (goToPrevPlayer)="play(player.navigation.exercises[position - 1])"
+            (goToPrevPlayer)="play(player.navigation.exercises[position - 1], true)"
             (goToNextPlayer)="play(player.navigation.exercises[position + 1])"
           />
         </nz-ribbon>

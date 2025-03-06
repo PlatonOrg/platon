@@ -578,7 +578,7 @@ export class PlayerService extends PlayerManager {
       sessions = await this.sessionService.findAllWithParent(activitySession.id)
     }
 
-    if (variables.platon_logs) {
+    if (variables.platon_logs && variables.platon_logs.length > 0) {
       variables.nextParams = variables.nextParams || {}
       variables.platon_logs = ['\n#####   LOGS DU NEXT   #####\n', ...variables.platon_logs]
       variables.nextParams.platon_next_logs = variables.platon_logs
@@ -609,6 +609,14 @@ export class PlayerService extends PlayerManager {
       }
     }
 
+    if (
+      variables.navigation.nextExercisesHistory[variables.navigation.nextExercisesHistory.length - 1] !==
+      variables.nextExerciseId
+    ) {
+      variables.navigation.nextExercisesHistory.push(variables.nextExerciseId)
+      variables.navigation.nextExercisesHistoryPosition = variables.navigation.nextExercisesHistory.length - 1
+    }
+
     activitySession.envid = envid
     activitySession.variables = {
       ...activitySession.variables,
@@ -617,6 +625,7 @@ export class PlayerService extends PlayerManager {
       activityGrade: variables.activityGrade,
       savedVariables: variables.savedVariables,
       generatedExercises: variables.generatedExercises,
+      exercisesHistory: variables.exercisesHistory,
     }
 
     await this.sessionService.update(activitySession.id, {
@@ -683,6 +692,9 @@ export class PlayerService extends PlayerManager {
     const navigation = variables.navigation || {}
     navigation.started = navigation.started ?? false
     navigation.terminated = navigation.terminated ?? false
+
+    navigation.nextExercisesHistory = navigation.nextExercisesHistory || []
+    navigation.nextExercisesHistoryPosition = navigation.nextExercisesHistoryPosition || -1
 
     const exercises = (navigation.exercises || []) as (PlayerExercise | ActivityExercise)[]
 
