@@ -330,6 +330,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     return !!this.requestFullscreen && this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
   }
 
+  get editorPreview(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
   protected isFeedbackContentAnObject(feedback: ExerciseFeedback): boolean {
     return typeof feedback.content !== 'string'
   }

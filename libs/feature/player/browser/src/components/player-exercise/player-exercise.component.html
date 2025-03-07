@@ -71,7 +71,7 @@
       </section>
       <!-- L'AJOUT DU TERMINAL LOGS -->
       <section>
-        <ng-container *ngIf="player?.platon_logs?.length">
+        <ng-container *ngIf="player?.platon_logs?.length && editorPreview">
           <div class="terminal-container">
             <div class="terminal-header">
               <span>Terminal PlaTon</span>
