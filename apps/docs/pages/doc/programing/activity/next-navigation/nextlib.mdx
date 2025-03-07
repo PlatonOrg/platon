@@ -16,10 +16,12 @@ La librairie NextLib est une librairie python qui simplifie la création d'activ
 - [Exceptions](#exceptions)
 
 ### Fonctions
+- [Vérifications](#vérifications)
 - [Gestion de l'activité](#gestion-de-lactivité)
 - [Gestion des notes](#gestion-des-notes)
 - [Gestion de la mémoire](#gestion-de-la-mémoire)
 - [Accès aux variables des exercices](#accès-aux-variables-des-exercices)
+- [Génération d'exercices](#génération-dexercices)
 
 ## Classes
 
@@ -36,16 +38,47 @@ Exception levée lorsqu'un accès aux variables des exercices est tenté sans qu
 
 ## Fonctions
 
+### Vérifications
+
+#### `checkGroupNb(groupNb: int) -> None`
+Vérifie si le numéro de groupe spécifié est valide.
+
+**Arguments** :
+- `groupNb` (*int*): Le numéro de groupe à vérifier.
+
+**Exceptions** :
+- `InvalidGroupError`: Si le numéro de groupe spécifié n'est pas valide.
+
+---
+
+#### `checkExerciseNb(groupNb: int, exerciseNb: int) -> None`
+Vérifie si le numéro d'exercice spécifié est valide.
+
+**Arguments** :
+- `groupNb` (*int*): Le numéro de groupe (index) de l'exercice.
+- `exerciseNb` (*int*): Le numéro d'exercice (index) à vérifier.
+
+**Exceptions** :
+- `InvalidGroupError`: Si le numéro de groupe spécifié n'est pas valide.
+- `InvalidExerciseError`: Si le numéro d'exercice spécifié n'est pas valide.
+
+#### `CheckExerciseVariables() -> None`
+Vérifie si l'accès aux variables des exercices est activé.
+
+**Exceptions** :
+- `ExerciseVariablesNotEnabledError`: Si l'accès aux variables des exercices n'est pas activé.
+
 ### Gestion de l'activité
 
-#### `playExercise(exerciseId: str) -> None`
+#### `playExercise(exerciseId: str, params: Optional[dict] = None) -> None`
 Démarre l'exécution d'un exercice en fonction de son ID.
 
 **Arguments** :
 - `exerciseId` (*str*): L'ID de l'exercice à jouer.
+- `params` (*Optional[dict]*): Paramètres supplémentaires pour l'exercice. Par défaut : `None`.
 
 **Exceptions** :
-- `StopExec`: Levée pour arrêter la prochaine computation.
+- `StopExec`: Exception levée pour arrêter la prochaine computation.
 
 ---
 
@@ -88,7 +121,7 @@ Renvoie le nombre de tentatives effectuées pour un exercice donné par son ID.
 Récupère le nombre total de groupes d'exercices disponibles.
 
 **Retourne** :
-- (*int*): Le nombre de groupes.
+- (*int*): Le nombre de groupes. Si le groupe "Exercices générés" est présent, il est exclu du compte.
 
 ---
 
@@ -171,6 +204,13 @@ Sélectionne un exercice aléatoire qui n'a pas encore été joué.
 
 **Retourne** :
 - (*Optional[str]*): L'ID de l'exercice choisi aléatoirement qui n'a pas été joué.
+
+---
+
+#### `playCurrent() -> None`
+Joue l'exercice actuel, s'il existe.
+
+Si aucun exercice n'est en cours, aucune action n'est effectuée.
 
 ---
 
@@ -305,6 +345,37 @@ Vérifie si tous les exercices d'un groupe spécifique ont été joués.
 **Exceptions** :
 - `InvalidGroupError`: Si le numéro de groupe spécifié n'existe pas.
 
+---
+
+#### `playIfUnplayed(exerciseId: str, params: Optional[dict] = None) -> None`
+Joue l'exercice spécifié s'il n'a pas encore été tenté.
+
+**Arguments** :
+- `exerciseId` (*str*): L'ID de l'exercice à jouer.
+- `params` (*Optional[dict]*): Paramètres supplémentaires pour l'exercice. Par défaut : `None`.
+
+---
+
+#### `isOneExercisePlayed() -> bool`
+Vérifie si au moins un exercice a déjà été joué.
+
+**Retourne** :
+- (*bool*): `True` si au moins un exercice a été joué, `False` sinon.
+
+---
+
+#### `isOneExerciseFromGroupPlayed(groupNb: int) -> bool`
+Vérifie si au moins un exercice du groupe spécifié a déjà été joué.
+
+**Arguments** :
+- `groupNb` (*int*): Le numéro du groupe (index) à vérifier.
+
+**Retourne** :
+- (*bool*): `True` si au moins un exercice du groupe a été joué, `False` sinon.
+
+**Exceptions** :
+- `InvalidGroupError`: Si le numéro de groupe spécifié n'existe pas.
+
 ### Gestion des notes
 
 #### `setActivityGrade(grade_aggregation_strategy: Callable[[], int]) -> None`
@@ -336,11 +407,12 @@ Retourne la meilleure note obtenue parmi les exercices joués.
 
 ### Gestion de la mémoire
 
-#### `load(variableName: str) -> Optional[Any]`
+#### `load(variableName: str, default: Any = None) -> Optional[Any]`
 Charge une variable stockée en mémoire.
 
 **Arguments** :
 - `variableName` (*str*): Le nom de la variable à charger.
+- `default` (*Any*): La valeur par défaut à retourner si la variable n'existe pas. Par défaut : `None`.
 
 **Retourne** :
 - (*Optional[Any]*): La valeur de la variable chargée, ou `None` si la variable n'existe pas.
@@ -365,14 +437,6 @@ Charge toutes les variables stockées en mémoire.
 ### Accès aux variables des exercices
 
 <Callout type="warning">L'accès aux variables des exercices doit être activé dans l'onglet `Next` de l'activité pour pouvoir utiliser ces fonctions.</Callout>
-
-#### `CheckExerciseVariables() -> None`
-Vérifie si l'accès aux variables des exercices est activé.
-
-**Exceptions** :
-- `ExerciseVariablesNotEnabledError`: Si l'accès aux variables des exercices n'est pas activé.
-
----
 
 #### `getExerciseVariable(exerciseId: str, variableName: str) -> Optional[Any]`
 Récupère la valeur d'une variable spécifique pour un exercice donné.
@@ -400,3 +464,27 @@ Récupère toutes les variables pour un exercice donné.
 
 **Exceptions** :
 - `ExerciseVariablesNotEnabledError`: Si l'accès aux variables des exercices n'est pas activé.
+
+### Génération d'exercices
+
+#### `hashParams(params: dict, exerciseId: str) -> str`
+Génère un hash SHA256 pour les paramètres donnés, incluant un ID d'exercice.
+
+**Arguments** :
+- `params` (*dict*): Un dictionnaire contenant les paramètres à hasher.
+- `exerciseId` (*str*): L'ID de l'exercice à inclure dans les paramètres.
+
+**Retourne** :
+- (*str*): Le hash SHA256 des paramètres sérialisés en JSON, incluant l'ID de l'exercice.
+
+---
+
+#### `generateAndPlayExercise(exerciseId: str, params: dict = {}) -> Optional[str]`
+Génère un exercice avec des paramètres donnés et le lance si cet exercice n'a pas déjà été généré.
+
+**Arguments** :
+- `exerciseId` (*str*): L'ID de l'exercice à générer et à jouer.
+- `params` (*dict*, optionnel): Paramètres supplémentaires pour l'exercice. Par défaut, un dictionnaire vide.
+
+**Retourne** :
+- (*Optional[str]*): L'ID de l'exercice généré et joué si l'exercice vient d'être généré, `None` sinon.
