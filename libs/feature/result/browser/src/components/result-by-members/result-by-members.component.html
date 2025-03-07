@@ -7,7 +7,19 @@
   [nzShowPagination]="false"
   nzBordered
 >
-  <thead></thead>
+  <thead>
+    <tr>
+      <th nzAlign="center" class="limited-width">Membre</th>
+      <th
+        nzAlign="center"
+        *ngFor="let item of nzTable.data[0].exercises | keyvalue"
+        class="limited-width"
+        [nz-tooltip]="item.value.title"
+      >
+        {{ item.value.title }}
+      </th>
+    </tr>
+  </thead>
   <tbody>
     <ng-container *ngFor="let item of nzTable.data">
       <tr>
