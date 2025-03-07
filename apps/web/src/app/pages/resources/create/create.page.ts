@@ -231,6 +231,12 @@ export class ResourceCreatePage implements OnInit {
       })
     )
 
+    response.resources = response.resources
+      .map((r) => ({
+        ...r,
+        exerciseLength: r.statistic?.exercise?.references?.total ?? 0,
+      }))
+      .sort((a, b) => b.exerciseLength - a.exerciseLength)
     this.templateSources = ancestors
       .map((circle) => {
         const templates = response.resources.filter((t) => t.parentId === circle.id)
