@@ -1,0 +1,87 @@
+<div class="restriction-container">
+  <ng-container [ngSwitch]="restriction.type">
+    <!-- Date Range Section -->
+    <ng-container *ngSwitchCase="'DateRange'">
+      <div class="restriction-row">
+        <div class="restriction-header">
+          <i nz-icon nzType="calendar" nzTheme="outline"></i>
+          <span>Période d'accès :</span>
+        </div>
+        <div class="date-picker-compact" *ngIf="isDateRangeConfig(restriction.config)">
+          <nz-date-picker
+            [nzShowTime]="true"
+            [nzDisabledDate]="disabledDateStart"
+            [(ngModel)]="restriction.config.start"
+            nzPlaceHolder="Date d'ouverture"
+            nzFormat="dd/MM/yyyy HH:mm"
+            [nzBorderless]="true"
+          />
+          <span class="separator">→</span>
+          <nz-date-picker
+            [nzShowTime]="true"
+            [nzDisabledDate]="disabledDateEnd"
+            [(ngModel)]="restriction.config.end"
+            nzPlaceHolder="Date de fermeture"
+            nzFormat="dd/MM/yyyy HH:mm"
+            [nzBorderless]="true"
+          />
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Group Section -->
+    <ng-container *ngSwitchCase="'Group'">
+      <div *ngIf="isGroupsConfig(restriction.config)" class="restriction-row">
+        <div class="restriction-header">
+          <i nz-icon nzType="team" nzTheme="outline"></i>
+          <span>Groupes autorisés :</span>
+        </div>
+        <div class="select-container">
+          <course-group-select
+            [groups]="courseGroups"
+            [(ngModel)]="restriction.config.groups"
+            placeholder="Tous les groupes"
+          />
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Correctors Section -->
+    <ng-container *ngSwitchCase="'Correctors'">
+      <div *ngIf="isCorrectorsConfig(restriction.config)" class="restriction-row">
+        <div class="restriction-header">
+          <i nz-icon nzType="audit" nzTheme="outline"></i>
+          <span>Correcteurs :</span>
+        </div>
+        <div class="select-container">
+          <course-member-select
+            [members]="courseMembers"
+            [(ngModel)]="restriction.config.correctors"
+            placeholder="Auto-corrigée"
+          />
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Members Section -->
+    <ng-container *ngSwitchCase="'Members'">
+      <div *ngIf="isMembersConfig(restriction.config)" class="restriction-row">
+        <div class="restriction-header">
+          <i nz-icon nzType="user" nzTheme="outline"></i>
+          <span>Utilisateurs autorisés :</span>
+        </div>
+        <div class="select-container">
+          <course-member-select
+            [members]="courseMembers"
+            [(ngModel)]="restriction.config.members"
+            placeholder="Tous les utilisateurs"
+          />
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <button *ngIf="isSubRestriction" nz-button nzType="text" nzDanger (click)="removeRestriction()" class="delete-button">
+    <i nz-icon nzType="delete"></i>
+  </button>
+</div>

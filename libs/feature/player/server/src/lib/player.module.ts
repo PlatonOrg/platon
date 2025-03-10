@@ -10,6 +10,7 @@ import { PlayerService } from './player.service'
 import { NodeSandbox } from './sandboxes'
 import { PythonSandbox } from './sandboxes/python/python-sandbox'
 import { SandboxService } from './sandboxes/sandbox.service'
+import { ActivityRestrictionCheckerService } from './activity-restriction-checker.service'
 
 @Module({
   controllers: [PlayerController],
@@ -21,7 +22,7 @@ import { SandboxService } from './sandboxes/sandbox.service'
     FeatureResourceServerModule,
     FeaturePeerServerModule,
   ],
-  providers: [PlayerService, NodeSandbox, PythonSandbox, SandboxService],
+  providers: [PlayerService, NodeSandbox, PythonSandbox, SandboxService, ActivityRestrictionCheckerService],
   exports: [PlayerService, SandboxService],
 })
 export class FeaturePlayerServerModule {}
