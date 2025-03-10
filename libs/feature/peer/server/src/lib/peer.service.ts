@@ -46,6 +46,9 @@ export class PeerService {
     if (!match) {
       throw new Error('Match not found')
     }
+    if (match.winnerId) {
+      return
+    }
     const winnerId = winner === 1 ? match.player1Id : match.player2Id
     game.winnerId = winnerId
     game.winner = winnerId === match.player1Id ? match.player1 : match.player2
@@ -54,7 +57,6 @@ export class PeerService {
         match.games.filter((game) => game.winnerId === match.player1Id).length + (winnerId === match.player1Id ? 1 : 0)
       const player2Wins =
         match.games.filter((game) => game.winnerId === match.player2Id).length + (winnerId === match.player2Id ? 1 : 0)
-
       if (player1Wins > match.level) {
         match.winnerId = match.player1Id
         match.winnerSessionId = match.player1SessionId
@@ -269,8 +271,9 @@ export class PeerService {
       },
       relations: ['games'],
     })
-    if (pendingMatches.length === 0) {
-      pendingMatches = await this.createMatchs(activityId)
+    if (pendingMatches.length === 0 || pendingMatches.every((match) => match.games.length >= match.level)) {
+      const createdMatches = await this.createMatchs(activityId)
+      pendingMatches.concat(createdMatches)
     }
 
     pendingMatches = pendingMatches.filter((match) => {
@@ -279,6 +282,12 @@ export class PeerService {
         match.player1Id !== correctorId &&
         match.player2Id !== correctorId
       )
+    })
+    pendingMatches = pendingMatches.sort((a, b) => {
+      if (a.games.length !== b.games.length || a.games.length === 0) {
+        return a.games.length - b.games.length
+      }
+      return a.games[a.games.length - 1].createdAt.getTime() - b.games[b.games.length - 1].createdAt.getTime()
     })
 
     if (pendingMatches.length === 0) {
