@@ -177,8 +177,25 @@ export class PlayerService extends PlayerManager {
           user
         )
 
-        if (!exerciseSession.isBuilt || activitySession?.variables.settings?.navigation?.mode === 'peer') {
+        if (!exerciseSession.isBuilt) {
           exerciseSession = await this.buildExercise(exerciseSession)
+        } else {
+          if (activitySession?.variables.settings?.navigation?.mode === 'peer') {
+            // If the activity is in peer mode, we need to always rebuild the compare exercise
+            console.log('ExercisesGroups', JSON.stringify(activitySession.variables.exerciseGroups, null, 2))
+            const exercice = Object.entries(activitySession.variables.exerciseGroups).reduce((acc, [_, value]) => {
+              if (value.name === 'comparaison') {
+                acc = value.exercises.at(0)!.id
+              }
+              return acc
+            }, '')
+            const exerciceSessionId = activitySession.variables.navigation.exercises
+              .filter((e) => e.id === exercice)
+              .pop()?.sessionId
+            if (exerciceSessionId === exerciseSession.id) {
+              exerciseSession = await this.buildExercise(exerciseSession)
+            }
+          }
         }
 
         exerciseSession.parent = activitySession
