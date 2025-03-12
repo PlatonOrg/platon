@@ -7,6 +7,11 @@
   pointer-events: visibleFill;
 }
 
+.code::after {
+  content: "\A";
+  white-space: pre;
+}
+
 .args {
   background-color: black;
   color: white;
