@@ -208,7 +208,7 @@ export class ActivityExerciseResults implements SessionDataAggregator<ExerciseRe
 
       const exerciseResults = this.exerciseResults.get(exercise.id) ?? emptyExerciseResults()
       exerciseResults.id = exerciseResults.id || exercise.id
-      exerciseResults.title = exerciseResults.title || exercise.title
+      exerciseResults.title = session.resourceName
 
       exerciseResults.states[state]++
 
