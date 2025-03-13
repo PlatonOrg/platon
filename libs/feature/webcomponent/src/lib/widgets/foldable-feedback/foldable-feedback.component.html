@@ -40,11 +40,19 @@
       </div>
       <div *ngIf="item.expected">
         <h3>Attendu :</h3>
-        <pre class="code" (mousedown)="$event.stopPropagation()">{{ item.expected }}</pre>
+        <pre
+          class="code"
+          (mousedown)="$event.stopPropagation()"
+          [innerHTML]="item.showHiddenCharacters ? formatTextHtml(item.expected) : item.expected"
+        ></pre>
       </div>
       <div *ngIf="item.obtained">
         <h3>Obtenu :</h3>
-        <pre class="code" (mousedown)="$event.stopPropagation()">{{ item.obtained }}</pre>
+        <pre
+          class="code"
+          (mousedown)="$event.stopPropagation()"
+          [innerHTML]="item.showHiddenCharacters ? formatTextHtml(item.obtained) : item.obtained"
+        ></pre>
       </div>
       }
     </div>
