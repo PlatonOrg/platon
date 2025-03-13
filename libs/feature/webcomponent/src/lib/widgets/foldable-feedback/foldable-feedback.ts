@@ -36,6 +36,7 @@ export const FoldableFeedbackComponentDefinition = defineWebComponent({
           properties: {
             name: { type: 'string', description: 'Nom du test effectué', default: '' },
             description: { type: 'string', description: 'Description du test effectué', default: '' },
+            showHiddenCharacters: { type: 'boolean', description: 'Afficher les caractères cachés', default: false },
             expected: { type: 'string', description: 'Valeur attendue par le professeur', default: '' },
             obtained: { type: 'string', description: "Valeur obtenue par l'étudiant", default: '' },
             arguments: { type: 'string', description: "Arguments passés à l'execution", default: '' },
