@@ -18,10 +18,9 @@ export interface InputBoxState extends IWebComponent {
 export const InputBoxComponentDefinition = defineWebComponent({
   type: WebComponentTypes.form,
   name: 'InputBox',
-  icon: 'assets/images/components/forms/input-box/input-box.svg',
   selector: 'wc-input-box',
-  description: 'Permets de saisir du texte dans un champ de saisi.',
-  fullDescriptionUrl: 'assets/docs/components/forms/input-box/input-box.md',
+  description:
+    "Champ de saisie polyvalent supportant texte, nombres et zones de texte avec fonctionnalités avancées comme l'autocomplétion et les caractères spéciaux. Utilisable pour de nombreux types d'exercices comme les réponses courtes, calculs numériques, entrée de mots ou phrases, saisie de code, réponses à format spécifique (dates, formules simples).",
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
@@ -133,5 +132,8 @@ export const InputBoxComponentDefinition = defineWebComponent({
         ['~', '`', "'", '"', '§', '°', '²', '³', '£', '¤'],
       ],
     ],
+  },
+  playgrounds: {
+    Addition: 'sum.ple',
   },
 })

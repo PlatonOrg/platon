@@ -1,0 +1,45 @@
+---
+title: <%- name %>
+description: <%- description %>
+---
+
+import { Tabs, Tab } from 'nextra/components'
+import { ComponentProperties, Playground } from '../../../components'
+import { useAbsoluteUrl } from '../../../hooks'
+
+# <%- name %>
+
+`<%- selector %>`
+
+<%- description %>
+
+## Documentation
+
+<%- documentation %>
+
+## Exemple interactif
+
+<Playground
+  width='100%'
+  height='700px'
+  items={[
+    {
+      name: 'Visualisation',
+      url: 'playground/components/<%- selector %>',
+    },
+    ...<%- playgrounds %>
+  ]}
+/>
+
+## API
+
+<Tabs items={['Graphique', 'JSON']}>
+  <Tab>
+    <ComponentProperties schema={<%- JSON.stringify(schema, null, 2) %>} />
+  </Tab>
+  <Tab>
+    ```json
+    <%- JSON.stringify(schema, null, 2) %>
+    ```
+  </Tab>
+</Tabs>
