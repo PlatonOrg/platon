@@ -200,10 +200,11 @@ export class PlayerCorrectionComponent implements OnInit {
     this.answers = []
     this.selectedTabIndex = index
     this.currentExercise = null
-    this.exercises =
-      this.currentGroup?.users?.filter((exercise) => {
-        return index === 0 ? exercise.correctedGrade == null : exercise.correctedGrade != null
-      }) || []
+    // this.exercises =
+    //   this.currentGroup?.users?.filter((exercise) => {
+    //     return index === 0 ? exercise.correctedGrade == null : exercise.correctedGrade != null
+    //   }) || []
+    this.exercises = this.currentGroup?.users || []
     this.onChooseExercise(0).catch(console.error)
   }
 
@@ -294,68 +295,50 @@ export class PlayerCorrectionComponent implements OnInit {
         break
     }
 
-    switch (event.code) {
-      case 'IntlBackslash':
-        this.correctedGrade = 0
-        break
-      case 'Digit1':
-        this.correctedGrade = 10
-        break
-      case 'Digit2':
-        this.correctedGrade = 20
-        break
-      case 'Digit3':
-        this.correctedGrade = 30
-        break
-      case 'Digit4':
-        this.correctedGrade = 40
-        break
-      case 'Digit5':
-        this.correctedGrade = 50
-        break
-      case 'Digit6':
-        this.correctedGrade = 60
-        break
-      case 'Digit7':
-        this.correctedGrade = 70
-        break
-      case 'Digit8':
-        this.correctedGrade = 80
-        break
-      case 'Digit9':
-        this.correctedGrade = 90
-        break
-      case 'Digit0':
-        this.correctedGrade = 100
-        break
+    const gradeMap: { [key: string]: number } = {
+      IntlBackslash: 0,
+      Digit1: 10,
+      Digit2: 20,
+      Digit3: 30,
+      Digit4: 40,
+      Digit5: 50,
+      Digit6: 60,
+      Digit7: 70,
+      Digit8: 80,
+      Digit9: 90,
+      Digit0: 100,
+    }
+
+    if (event.code in gradeMap) {
+      this.correctedGrade = gradeMap[event.code]
+      await this.onSaveGrade()
     }
   }
 
-  // protected onChoosePreviousExercise(): void {
-  //   this.onChooseExercise(this.selectedExerciseIndex - 1).catch(console.error)
-  // }
+  protected async onSetGrade(grade: number) {
+    this.correctedGrade = grade
+    await this.onSaveGrade()
+  }
 
-  // protected onChooseNextExercise(): void {
-  //   this.onChooseExercise(this.selectedExerciseIndex + 1).catch(console.error)
-  // }
-
-  // protected async onSaveGrade(): Promise<void> {
-  //   if (this.currentExercise && this.currentExercise != null) {
-  //     try {
-  //       await firstValueFrom(
-  //         this.resultService.upsertCorrection(this.currentExercise.exerciseSessionId, {
-  //           grade: this.correctedGrade as number,
-  //         })
-  //       )
-  //       this.currentExercise.correctedGrade = this.correctedGrade
-  //       this.buildGroups()
-  //       this.onChooseTab(this.selectedTabIndex)
-  //       this.dialogService.success('La note a été sauvegardée avec succès.')
-  //     } catch {
-  //       this.dialogService.error('Une erreur est survenue lors de la sauvegarde de la note.')
-  //     }
-  //   }
-  // }
+  protected async onSaveGrade() {
+    console.error('triggered')
+    if (this.currentExercise && this.currentExercise != null) {
+      try {
+        await firstValueFrom(
+          this.resultService.upsertCorrection(this.currentExercise.exerciseSessionId, {
+            grade: this.correctedGrade as number,
+          })
+        )
+        this.currentExercise.correctedGrade = this.correctedGrade
+        // this.buildGroups()
+        // this.onChooseTab(this.selectedTabIndex)
+        await this.onChooseNextUserExercise()
+        this.dialogService.success('La note a été sauvegardée avec succès.')
+      } catch {
+        this.dialogService.error('Une erreur est survenue lors de la sauvegarde de la note.')
+      }
+    }
+  }
 
   // private buildGroups(): void {
   //   const groupedExercises: ExerciseGroup[] = []

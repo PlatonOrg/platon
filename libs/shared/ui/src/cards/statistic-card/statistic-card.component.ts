@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, Input, OnChanges, TemplateRef, booleanAttribute } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  TemplateRef,
+  booleanAttribute,
+} from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -66,6 +75,9 @@ export class UiStatisticCardComponent implements OnChanges {
   @Input()
   edit = false
 
+  @Output()
+  valueChanged = new EventEmitter<number>()
+
   ngOnChanges() {
     if (this.shouldBePositive) {
       this.valueColor = positiveGreenColor(Number(this.value))
@@ -82,27 +94,26 @@ export class UiStatisticCardComponent implements OnChanges {
       setTimeout(() => {
         const input = document.getElementById('input-edit-value')
         if (input) {
-          console.error('focus')
           input.focus()
         }
       }, 0)
     }
-    console.error(this.value)
+  }
+
+  onFocusOut() {
+    this.isEditing = false
+    this.valueChanged.emit(Number(this.value))
   }
 
   onKeydown(event: KeyboardEvent) {
     event.stopPropagation()
     event.stopImmediatePropagation()
     if (event.key === 'Enter') {
-      this.onValueChange()
+      this.isEditing = false
+      this.valueChanged.emit(Number(this.value))
     } else if (event.key === 'Escape') {
       this.isEditing = false
     }
     this.ngOnChanges()
-  }
-
-  protected onValueChange() {
-    console.log('onValueChange')
-    this.isEditing = false
   }
 }

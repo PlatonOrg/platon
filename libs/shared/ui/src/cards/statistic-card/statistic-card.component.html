@@ -1,4 +1,4 @@
-<div class="statistic-card" (mouseup)="onCardClick()" [ngClass]="{ editable: edit }">
+<div class="statistic-card" (click)="onCardClick()" [ngClass]="{ editable: edit }">
   <div [style.background-color]="ribbonColor" class="ribbon" *ngIf="icon || matIcon || nzIcon">
     <span>
       <ng-container *ngIf="icon">
@@ -17,8 +17,7 @@
         [(ngModel)]="value"
         nzMin="0"
         nzMax="100"
-        (keydown.enter)="onValueChange()"
-        (focusout)="isEditing = false; onValueChange()"
+        (focusout)="onFocusOut()"
       />
     </ng-container>
   </div>

@@ -92,6 +92,7 @@
               [value]="correctedGrade ?? 0"
               shouldBePositive
               [edit]="true"
+              (valueChanged)="onSaveGrade()"
             />
           </div>
 
@@ -107,7 +108,7 @@
               nz-button
               nzBlock
               *ngFor="let i of [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]"
-              (click)="correctedGrade = i"
+              (click)="onSetGrade(i)"
             >
               {{ i }}
             </button>
