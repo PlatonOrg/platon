@@ -21,6 +21,7 @@ import { InputCodeProvider } from './input-code'
 import { InputFileProvider } from './input-file'
 import { InputJsonProvider } from './input-json'
 import { InputListProvider } from './input-list'
+import { InputListOfListProvider } from './input-list-of-list'
 import { InputMathExprProvider } from './input-math-expr'
 import { InputNumberProvider } from './input-number'
 import { InputSelectProvider } from './input-select'
@@ -55,7 +56,7 @@ import { NgeMarkdownHighlighterProvider } from '@cisstech/nge/markdown'
     InputCodeProvider, // string is always handled by code editor
     InputTextProvider,
     NgeMarkdownHighlighterProvider,
-
+    InputListOfListProvider,
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => PleInputComponent),
