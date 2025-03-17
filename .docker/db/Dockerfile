@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Clone pgvector repository
 RUN git clone --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector
+RUN localedef -i en_US -f UTF-8 en_US.UTF-8
 
 # Build and install pgvector extension
 WORKDIR /tmp/pgvector
