@@ -1,0 +1,178 @@
+<!-- <nz-form-item nzRequired>
+  <nz-form-control>
+    <nz-form-label [nzSpan]="24" nzLabelAlign="left">Commandes</nz-form-label>
+    <nz-form-control>
+      Liste des tags/commandes
+      <div class="command-list">
+        <div *ngFor="let item of items; let i = index" class="command-item">
+          <div class="command-tag" [class.selected]="selectedIndex === i" (click)="selectItem(i)">
+            <ng-container *ngIf="editingIndex !== i; else editField">
+              <span class="tag-text">{{ item.name_test }}</span>
+              <div class="tag-actions">
+                <button nz-button nzType="text" nzSize="small" (click)="startEditing(i)">
+                  <i nz-icon nzType="edit" nzTheme="outline"></i>
+                </button>
+                <button nz-button nzType="text" nzSize="small" (click)="removeItem(i); $event.stopPropagation()">
+                  <i nz-icon nzType="close" nzTheme="outline"></i>
+                </button>
+              </div>
+            </ng-container>
+            <ng-template #editField>
+              <input
+                nz-input
+                [ngModel]="item.name_test"
+                (ngModelChange)="editName(i, $event)"
+                (keydown.enter)="finishEditing()"
+                (blur)="finishEditing()"
+                #editInput
+              />
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      Ajouter une nouvelle commande
+      <div class="add-command-container">
+        <input
+          nz-input
+          [(ngModel)]="newCommandName"
+          [disabled]="disabled"
+          placeholder="Nom de la commande"
+          (keydown.enter)="addItem(newCommandName); newCommandName = ''"
+        />
+        <button
+          nz-button
+          nzType="primary"
+          [disabled]="!newCommandName || disabled"
+          (click)="addItem(newCommandName); newCommandName = ''"
+        >
+          Ajouter
+        </button>
+      </div>
+
+      Détails de la commande sélectionnée
+      <div *ngIf="selectedIndex !== null && getSelectedItem()" class="mt-3 p-3 border rounded">
+        <h4>Paramètres pour "{{ getSelectedItem()?.name_test }}"</h4>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">Arguments (séparés par des virgules)</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <textarea
+              nz-input
+              [(ngModel)]="currentArgv"
+              [disabled]="disabled"
+              (blur)="updateArgv()"
+              placeholder="Saisir les arguments"
+              [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Ligne de commande</nz-form-label>
+          <nz-form-control>
+            <input
+              nz-input
+              [(ngModel)]="getSelectedItem()!.line_cmd"
+              [disabled]="disabled"
+              (blur)="updateLineCmd(getSelectedItem()!.line_cmd)"
+              placeholder="Ligne de commande"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </nz-form-control>
+  </nz-form-control>
+</nz-form-item> -->
+
+<nz-form-item nzRequired>
+  <nz-form-control>
+    <nz-form-label [nzSpan]="24" nzLabelAlign="left" class="command-section-title">Commandes</nz-form-label>
+    <nz-form-control>
+      <!-- Liste des tags/commandes -->
+      <div class="command-list">
+        <div *ngFor="let item of items; let i = index" class="command-item">
+          <div class="command-tag" [class.selected]="selectedIndex === i" (click)="selectItem(i)">
+            <ng-container *ngIf="editingIndex !== i; else editField">
+              <span class="tag-text">{{ item.name_test }}</span>
+              <div class="tag-actions">
+                <button
+                  nz-button
+                  nzType="text"
+                  nzShape="circle"
+                  class="edit-button"
+                  (click)="startEditing(i); $event.stopPropagation()"
+                >
+                  <i nz-icon nzType="edit" nzTheme="outline"></i>
+                </button>
+                <button
+                  nz-button
+                  nzType="text"
+                  nzShape="circle"
+                  class="delete-button"
+                  (click)="removeItem(i); $event.stopPropagation()"
+                >
+                  <i nz-icon nzType="close" nzTheme="outline"></i>
+                </button>
+              </div>
+            </ng-container>
+            <ng-template #editField>
+              <input
+                nz-input
+                [ngModel]="item.name_test"
+                (ngModelChange)="editName(i, $event)"
+                (keydown.enter)="finishEditing()"
+                (blur)="finishEditing()"
+                class="edit-input"
+                #editInput
+              />
+            </ng-template>
+          </div>
+        </div>
+        <!-- Bouton + pour ajouter une nouvelle commande -->
+        <button
+          nz-button
+          nzType="default"
+          nzShape="circle"
+          class="add-command-button"
+          (click)="addItem()"
+          [disabled]="disabled"
+        >
+          <i nz-icon nzType="plus"></i>
+        </button>
+      </div>
+
+      <!-- Détails de la commande sélectionnée -->
+      <div *ngIf="selectedIndex !== null && getSelectedItem()" class="command-details">
+        <h4 class="details-title">Paramètres pour "{{ getSelectedItem()?.name_test }}"</h4>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">Arguments (séparés par des virgules)</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <textarea
+              nz-input
+              [(ngModel)]="currentArgv"
+              [disabled]="disabled"
+              (blur)="updateArgv()"
+              placeholder="Saisir les arguments"
+              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+              class="arguments-input"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Ligne de commande</nz-form-label>
+          <nz-form-control>
+            <input
+              nz-input
+              [(ngModel)]="getSelectedItem()!.line_cmd"
+              [disabled]="disabled"
+              (blur)="updateLineCmd(getSelectedItem()!.line_cmd)"
+              placeholder="Ligne de commande"
+              class="cmd-input"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </nz-form-control>
+  </nz-form-control>
+</nz-form-item>
