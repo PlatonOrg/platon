@@ -196,6 +196,12 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       }
       const { navigation } = this.player
       if (navigation.started && !navigation.terminated) {
+        if (this.player.settings?.security?.terminateOnLeavePage) {
+          // happens when the user opens the activity twice or closed the tab and comes back
+          this.terminatedAfterLeavePage = true
+          this.terminate().catch(console.error)
+          return
+        }
         this.start().catch(console.error)
       }
     } else if (this.state === 'planned') {
