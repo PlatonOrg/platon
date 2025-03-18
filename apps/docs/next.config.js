@@ -1,6 +1,28 @@
+const { BUNDLED_LANGUAGES, getHighlighter } = require('shiki');
+
 const withNextra = require('nextra')({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
+  // Add custom languages to syntax highlighting
+  mdxOptions: {
+    rehypePrettyCodeOptions: {
+      getHighlighter: options =>
+        getHighlighter({
+          ...options,
+          langs: [
+            ...BUNDLED_LANGUAGES,
+            {
+              id: 'ple',
+              scopeName: 'source.ple',
+              path: require.resolve('./ple.tmLanguage.json'),
+              aliases: ['pl-js', 'pl-py'],
+
+            },
+          ]
+        })
+    }
+  }
+
 })
 
 /**
@@ -9,19 +31,19 @@ const withNextra = require('nextra')({
 const nextConfig = process.env.GITHUB_PAGES
   ? {
       output: 'export',
-      basePath: '/platon/docs/main',
-      assetPrefix: '/platon/docs/main/',
+      basePath: '/platon/docs',
+      assetPrefix: '/platon/docs/',
       poweredByHeader: true,
       images: {
         unoptimized: true,
       },
-      distDir: '../../dist/apps/home/docs/main',
+      distDir: '../../dist/apps/home/docs',
     }
   : process.env.NODE_ENV === 'production'
   ? {
       output: 'export',
-      basePath: '/docs/main',
-      assetPrefix: '/docs/main/',
+      basePath: '/docs',
+      assetPrefix: '/docs/',
       poweredByHeader: true,
       images: {
         unoptimized: true,
@@ -29,8 +51,8 @@ const nextConfig = process.env.GITHUB_PAGES
       distDir: '../../dist/apps/docs',
     }
   : {
-      basePath: '/docs/main',
-      assetPrefix: '/docs/main/',
+      basePath: '/docs',
+      assetPrefix: '/docs/',
       poweredByHeader: true,
       images: {
         unoptimized: true,

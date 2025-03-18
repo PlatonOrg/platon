@@ -20,10 +20,8 @@ export interface MatchListState extends IWebComponent {
 export const MatchListComponentDefinition = defineWebComponent({
   type: WebComponentTypes.form,
   name: 'MatchList',
-  icon: 'assets/images/components/forms/match-list/match-list.svg',
   selector: 'wc-match-list',
-  description: `Permets de relier une liste de questions à une liste de réponses.`,
-  fullDescriptionUrl: 'assets/docs/components/forms/match-list/match-list.md',
+  description: `Composant interactif permettant d'associer des éléments entre deux colonnes en traçant des lignes. Parfait pour les exercices d'appariement comme associer des termes à leurs définitions, des mots à leurs traductions, des formules à leurs applications, ou encore des images à leurs descriptions.`,
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
@@ -124,5 +122,9 @@ export const MatchListComponentDefinition = defineWebComponent({
       { id: 'Node9', type: 'target', content: 'aucun malloc' },
       { id: 'Node10', type: 'target', content: 'un malloc' },
     ],
+  },
+
+  playgrounds: {
+    'Biologie animal': 'biology.ple',
   },
 })

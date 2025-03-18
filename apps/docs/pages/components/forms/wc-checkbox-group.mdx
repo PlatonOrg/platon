@@ -1,0 +1,223 @@
+---
+title: CheckboxGroup
+description: Ensemble de cases à cocher permettant la sélection multiple d'options parmi une liste. Idéal pour les QCM à réponses multiples, les exercices de type "cochez toutes les bonnes réponses", les listes de vérification, l'identification de caractéristiques ou propriétés multiples d'un concept.
+---
+
+import { Tabs, Tab } from 'nextra/components'
+import { ComponentProperties, Playground } from '../../../components'
+import { useAbsoluteUrl } from '../../../hooks'
+
+# CheckboxGroup
+
+`wc-checkbox-group`
+
+Ensemble de cases à cocher permettant la sélection multiple d'options parmi une liste. Idéal pour les QCM à réponses multiples, les exercices de type "cochez toutes les bonnes réponses", les listes de vérification, l'identification de caractéristiques ou propriétés multiples d'un concept.
+
+## Documentation
+
+Le composant CheckboxGroup permet de créer des sélections à choix multiples où l'apprenant peut cocher plusieurs réponses simultanément. Ce composant est particulièrement adapté aux questionnaires à choix multiples, listes de vérification, ou tout exercice où plusieurs éléments peuvent être sélectionnés en même temps.
+
+### Propriétés principales
+
+- **items**: Tableau définissant les options disponibles
+- **horizontal**: Booléen déterminant si les options s'affichent horizontalement (`true`) ou verticalement (`false`, par défaut)
+- **disabled**: Booléen permettant de désactiver l'interaction avec les cases à cocher (`true` = désactivé)
+
+### Configuration des options
+
+Les éléments du tableau `items` peuvent être définis de deux manières:
+
+#### 1. Format simplifié
+
+Une simple chaîne de caractères représentant le contenu de l'option:
+
+```typescript
+items: ['Mercure', 'Vénus', 'Terre', 'Mars']
+```
+
+#### 2. Format détaillé
+
+Un objet permettant une personnalisation plus fine:
+
+```typescript
+{
+    "content": string,  // Texte de l'option (supporte le format Markdown)
+    "checked": boolean, // État initial (coché ou non) - Défaut: false
+    "css": string       // Classes CSS pour personnaliser l'apparence
+}
+```
+
+### Exemples d'utilisation
+
+#### Configuration basique
+
+```typescript
+{
+  items: ['Pomme', 'Banane', 'Orange', 'Fraise']
+}
+```
+
+#### Options présélectionnées et personnalisées
+
+```typescript
+{
+  horizontal: true,
+  items: [
+    { content: "**Important!** Option 1", checked: true },
+    { content: "Option avec *italique*" },
+    { content: "Option colorée", css: "color-accent" },
+    "Option simple"
+  ]
+}
+```
+
+### Récupération des réponses
+
+Le composant met à jour automatiquement la propriété `checked` de chaque élément lorsque l'utilisateur interagit avec les cases à cocher. Pour récupérer les sélections:
+
+```typescript
+// Les éléments cochés auront leur propriété "checked" à true
+const selectedItems = items.filter((item) => typeof item === 'object' && item.checked)
+```
+
+### Applications pédagogiques
+
+Ce composant est idéal pour:
+
+- Les QCM à réponses multiples ("cochez toutes les réponses correctes")
+- Les listes de vérification (checklists)
+- Les exercices de classification ("cochez tous les éléments appartenant à une catégorie")
+- Les sondages et questionnaires permettant plusieurs choix
+
+La prise en charge du format Markdown dans le contenu des options permet d'inclure facilement des formules mathématiques, du code formaté, des liens ou des images pour enrichir vos questions.
+
+## Exemple interactif
+
+<Playground
+  width="100%"
+  height="700px"
+  items={[
+    {
+      name: 'Visualisation',
+      url: 'playground/components/wc-checkbox-group',
+    },
+    ...[
+      {
+        name: 'Exemple: Système solaire',
+        url: '/playground/exercises/checkbox-group/solar-system.ple',
+        code: '# Définition de la sandbox\nsandbox = "node"\n\n# Initialisation du composant CheckboxGroup\ncheckboxGroup = :wc-checkbox-group\ncheckboxGroup.items = [\n  "La Terre",\n  "Mars",\n  "Pluton",\n  "Jupiter",\n  "Venus"\n]\n\n# Titre de l\'exercice\ntitle ==\nQCM : Quelles sont les planètes du système solaire ?\n==\n\n# Énoncé de l\'exercice\nstatement ==\nVeuillez sélectionner toutes les planètes qui font partie de notre système solaire.\n==\n\n# Formulaire de l\'exercice\nform ==\n{{ checkboxGroup }}\n==\n\nhint = ["Un des choix n\'est plus une planète depuis 2006"]\n\n# Builder\nbuilder == #!lang=js\n// Mélangement aléatoire des choix\ncheckboxGroup.items = checkboxGroup.items.sort(() => Math.random() - 0.5);\n==\n\n\n# Grader\ngrader == #!lang=js\n\ngrade = 0;\nfeedback.type = "error";\nfeedback.content = "Incorrect. Veuillez réessayer.";\n\n// Réponses correctes\nconst correctAnswers = ["La Terre", "Mars", "Jupiter", "Venus"];\n\n// Récupérer les réponses sélectionnées\nconst selectedAnswers = checkboxGroup.items\n    .filter(item => item.checked)\n    .map(item => item.content);\n\n// Vérifier si toutes les réponses correctes ont été sélectionnées et aucune réponse incorrecte n\'a été sélectionnée\nif (selectedAnswers.length === correctAnswers.length && selectedAnswers.every(answer => correctAnswers.includes(answer))) {\n  grade = 100;\n  feedback.type = "success";\n  feedback.content = "Félicitations ! Vous avez correctement identifié toutes les planètes du système solaire.";\n}\n\n==\n',
+      },
+    ],
+  ]}
+/>
+
+## API
+
+<Tabs items={['Graphique', 'JSON']}>
+  <Tab>
+    <ComponentProperties schema={{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "CheckboxGroup",
+  "properties": {
+    "items": {
+      "type": "array",
+      "default": [],
+      "description": "La liste des propositions.",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ],
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "css": {
+            "type": "string",
+            "description": "Voir API CSS"
+          },
+          "checked": {
+            "type": "boolean",
+            "description": "La proposition est sélectionnée?",
+            "default": false
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenu en markdown."
+          }
+        }
+      }
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver la possibilité de sélectionner les propositions?"
+    },
+    "horizontal": {
+      "type": "boolean",
+      "default": false,
+      "description": "Afficher horizontalement les propositions?"
+    }
+  },
+  "required": [
+    "items"
+  ]
+}} />
+  </Tab>
+  <Tab>
+    ```json
+    {
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "CheckboxGroup",
+  "properties": {
+    "items": {
+      "type": "array",
+      "default": [],
+      "description": "La liste des propositions.",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ],
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "css": {
+            "type": "string",
+            "description": "Voir API CSS"
+          },
+          "checked": {
+            "type": "boolean",
+            "description": "La proposition est sélectionnée?",
+            "default": false
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenu en markdown."
+          }
+        }
+      }
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver la possibilité de sélectionner les propositions?"
+    },
+    "horizontal": {
+      "type": "boolean",
+      "default": false,
+      "description": "Afficher horizontalement les propositions?"
+    }
+  },
+  "required": [
+    "items"
+  ]
+}
+    ```
+  </Tab>
+</Tabs>
