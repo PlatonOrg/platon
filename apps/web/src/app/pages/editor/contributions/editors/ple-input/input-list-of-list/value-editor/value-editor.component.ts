@@ -9,17 +9,13 @@ import { InputListOfList } from '../input-list-of-list'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValueEditorComponent extends BaseValueEditor<InputListOfList[]> {
-  @ViewChild('editInput') editInput?: ElementRef
-
-  // Liste des fonctions Python à reconnaître
-  private pythonFunctions = ['choice', 'random', 'randint', 'range']
+  @ViewChild('editInput', { static: false })
+  editInput?: ElementRef<HTMLInputElement | HTMLTextAreaElement>
 
   selectedIndex: number | null = null
   editingIndex: number | null = null
   currentArgv = ''
-  newCommandName = ''
 
-  // Getter public pour accéder à value dans le template
   get items(): InputListOfList[] {
     return this.value || []
   }
