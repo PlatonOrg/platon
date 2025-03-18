@@ -1,23 +1,22 @@
 
 
-// Variables de couleurs - Thème bleu foncé
-$primary-color: #1a2172;           // Bleu foncé principal
-$primary-light: #303F9F;           // Bleu foncé plus clair
-$primary-dark: #0D1B69;            // Bleu foncé plus sombre
-$primary-border: #3949AB;          // Bordure bleu clair
-$hover-color: #3F51B5;             // Couleur au survol
-$bg-color: #f5f5f5;                // Fond gris clair inchangé
-$tag-bg: #fafafa;                  // Fond des tags inchangé
-$tag-border: #d9d9d9;              // Bordure des tags inchangée
-$selected-bg: #E8EAF6;             // Fond sélectionné (teinte bleue légère)
-$selected-border: #1A237E;         // Bordure sélectionnée (bleu foncé)
-$text-color: #262626;              // Couleur de texte principale inchangée
-$secondary-text: #595959;          // Couleur de texte secondaire inchangée
-$details-bg: #f9f9f9;              // Fond des détails inchangé
-$details-border: #e8e8e8;          // Bordure des détails inchangée
-$delete-color: #c01515;            // Couleur de suppression (bleu)
-$delete-hover: #1976D2;            // Couleur de suppression au survol
-$delete-bg: #E3F2FD;               // Fond de suppression au survol
+$primary-color: #171C8F;
+$primary-light: #171C8F;
+$primary-dark: #171C8F;
+$primary-border: #171C8F;
+$hover-color: #171C8F;
+$bg-color: #f5f5f5;
+$tag-bg: #fafafa;
+$tag-border: #d9d9d9;
+$selected-bg: #E8EAF6;
+$selected-border: #171C8F;
+$text-color: #262626;
+$secondary-text: #595959;
+$details-bg: #f9f9f9;
+$details-border: #e8e8e8;
+$delete-color: #c01515;
+$delete-hover: #f30505;
+$delete-bg: #E3F2FD;
 
 // Styles communs
 .command-section-title {
