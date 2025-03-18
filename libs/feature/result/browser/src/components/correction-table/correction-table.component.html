@@ -1,41 +1,49 @@
-<nz-table
-  #nzTable
-  [nzData]="dataSource"
-  [nzPageSize]="10"
-  nzTableLayout="auto"
-  [nzNoResult]="empty"
-  nzBordered
-  nzShowPagination="false"
->
-  <thead>
-    <tr>
-      <th>Cours</th>
-      <th>Activité</th>
-      <th>Exercices corrigés</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <ng-container *ngFor="let item of nzTable.data">
-      <tr>
-        <td>
-          <a nz-button nzType="link" [routerLink]="['/courses', item.courseId]">{{ item.courseName }}</a>
-        </td>
-        <td>
-          <a nz-button nzType="link" [routerLink]="['/player/correction', item.activityId]">{{ item.activityName }}</a>
-        </td>
-        <td>
-          <nz-tag [nzColor]="item.correctionStatusColor">{{ item.correctedCount }} / {{ item.exerciseCount }}</nz-tag>
-        </td>
-        <th nzAlign="center">
-          <button nz-tooltip="Corriger" nz-button nzType="link" [routerLink]="['/player/correction', item.courseId]">
-            <i nz-icon nzType="edit"></i>
-          </button>
-        </th>
-      </tr>
-    </ng-container>
-  </tbody>
-</nz-table>
+<nz-collapse>
+  <nz-collapse-panel *ngFor="let course of groupedCourses" [nzHeader]="course.courseName">
+    <nz-table #nzActivityTable [nzData]="course.activities" [nzBordered]="false" [nzShowPagination]="false">
+      <thead>
+        <tr>
+          <th nzWidth="50%">Activité</th>
+          <th nzWidth="25%">Exercices corrigés</th>
+          <th nzWidth="25%" nzAlign="center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let activity of course.activities"
+          class="pointer"
+          [routerLink]="['/player/correction', activity.courseId]"
+          [queryParams]="{ activityId: activity.activityId }"
+        >
+          <td>
+            <a nz-button nzType="link" class="aligned" [routerLink]="['/courses', activity.courseId]">
+              <mat-icon>widgets</mat-icon>{{ activity.activityName }}
+            </a>
+          </td>
+          <td>
+            <nz-tag [nzColor]="activity.correctionStatusColor">
+              {{ activity.correctedCount }} / {{ activity.exerciseCount }}
+            </nz-tag>
+          </td>
+          <td nzAlign="center">
+            <button
+              mat-icon-button
+              color="primary"
+              [routerLink]="['/player/correction', activity.courseId]"
+              nz-tooltip="Corriger"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-collapse-panel>
+</nz-collapse>
+
 <ng-template #empty>
-  <ng-content></ng-content>
+  <div class="empty-state">
+    <mat-icon>info</mat-icon>
+    <span>Aucune donnée disponible</span>
+  </div>
 </ng-template>

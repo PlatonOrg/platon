@@ -31,7 +31,7 @@
         @for (entry of activityExercisesMap.entries(); track entry[0]) {
         <nz-collapse-panel
           [nzHeader]="entry[1].name"
-          [nzActive]="entry[0] === activityExercisesMap.keys().next().value"
+          [nzActive]="activityId ? entry[0] === activityId : entry[0] === activityExercisesMap.keys().next().value"
         >
           <ng-container *ngFor="let ex of entry[1].map.entries()">
             <button

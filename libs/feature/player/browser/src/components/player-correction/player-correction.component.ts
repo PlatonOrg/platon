@@ -21,7 +21,7 @@ import { ExercisePlayer } from '@platon/feature/player/common'
 import { LabelComponent, ResultService } from '@platon/feature/result/browser'
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { RouterModule } from '@angular/router'
+import { ActivatedRoute, RouterModule } from '@angular/router'
 import { DialogModule, DialogService, UserService } from '@platon/core/browser'
 import { CourseCorrection, ExerciseCorrection, Label } from '@platon/feature/result/common'
 import { UiModalTemplateComponent, UiStatisticCardComponent } from '@platon/shared/ui'
@@ -104,6 +104,10 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly playerService = inject(PlayerService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly userService = inject(UserService)
+  private readonly route = inject(ActivatedRoute)
+
+  protected activityId?: string
+  protected userId?: string
 
   protected answers: ExercisePlayer[] = []
 
@@ -117,6 +121,7 @@ export class PlayerCorrectionComponent implements OnInit {
 
   protected correctedGrade?: number
 
+  private startIndex = 0
   protected selectedTabIndex = 0
   protected selectedExerciseIndex = 0
 
@@ -135,19 +140,26 @@ export class PlayerCorrectionComponent implements OnInit {
   @Input() courseCorrection!: CourseCorrection
 
   async ngOnInit(): Promise<void> {
+    this.route.queryParams.subscribe((params) => {
+      this.activityId = params.activityId
+      this.userId = params.userId
+    })
     this.buildGroups()
     await this.getUsers()
     this.getAllExerciseGroup()
-    const firstGroup = this.listExerciseGroup[0]
+    const firstGroup = this.listExerciseGroup[this.startIndex]
     if (firstGroup) {
       this.onChooseGroup(firstGroup)
     }
   }
 
   private getAllExerciseGroup(): void {
-    for (const activity of this.activityExercisesMap.values()) {
-      for (const group of activity.map.values()) {
-        this.listExerciseGroup?.push(group)
+    let counter = 0
+    for (const [k, v] of this.activityExercisesMap.entries()) {
+      this.startIndex = this.activityId === k ? counter : 0
+      for (const group of v.map.values()) {
+        this.listExerciseGroup.push(group)
+        counter++
       }
     }
   }
@@ -200,10 +212,6 @@ export class PlayerCorrectionComponent implements OnInit {
     this.answers = []
     this.selectedTabIndex = index
     this.currentExercise = null
-    // this.exercises =
-    //   this.currentGroup?.users?.filter((exercise) => {
-    //     return index === 0 ? exercise.correctedGrade == null : exercise.correctedGrade != null
-    //   }) || []
     this.exercises = this.currentGroup?.users || []
     this.onChooseExercise(0).catch(console.error)
   }
@@ -339,42 +347,6 @@ export class PlayerCorrectionComponent implements OnInit {
       }
     }
   }
-
-  // private buildGroups(): void {
-  //   const groupedExercises: ExerciseGroup[] = []
-  //   const groupedExerciseIds: Set<string> = new Set()
-  //   const activityExercisesMap = new Map<string, ExerciseGroup[]>()
-  //   if (!this.correction) {
-  //     console.error('No correction')
-  //     return
-  //   }
-
-  //   console.error('this.correction.ActivityCorrections', this.correction.ActivityCorrections)
-  //   for (const activity of this.correction.ActivityCorrections) {
-  //     for (const exercise of activity.exercises) {
-  //       if (!groupedExerciseIds.has(exercise.exerciseId)) {
-  //         groupedExerciseIds.add(exercise.exerciseId)
-  //         const newGroup: ExerciseGroup = {
-  //           exerciseId: exercise.exerciseId,
-  //           exerciseName: exercise.exerciseName,
-  //           users: [exercise],
-  //           graded: exercise.correctedGrade != null,
-  //         }
-  //         groupedExercises.push(newGroup)
-  //       } else {
-  //         const group = groupedExercises.find((g) => g.exerciseId === exercise.exerciseId)
-  //         if (group) {
-  //           group.users.push(exercise)
-  //           group.graded = exercise.correctedGrade != null && group.graded
-  //         }
-  //       }
-  //       activityExercisesMap.set(activity.activityName, groupedExercises)
-  //     }
-  //   }
-  //   console.error('groupedExercisesIds', groupedExerciseIds)
-  //   this.exerciseGroups = activityExercisesMap
-  //   console.error(this.exerciseGroups)
-  // }
 
   protected trackByExerciseId(_: number, group: ExerciseGroup): string {
     return group.exerciseId
