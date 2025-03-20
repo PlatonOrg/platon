@@ -469,14 +469,14 @@ Récupère toutes les variables pour un exercice donné.
 ### Génération d'exercices
 
 #### `hashParams(params: dict, exerciseId: str) -> str`
-Génère un hash SHA256 pour les paramètres donnés, incluant un ID d'exercice.
+Génère un hash MD5 pour les paramètres donnés, incluant un ID d'exercice.
 
 **Arguments** :
 - `params` (*dict*): Un dictionnaire contenant les paramètres à hasher.
 - `exerciseId` (*str*): L'ID de l'exercice à inclure dans les paramètres.
 
 **Retourne** :
-- (*str*): Le hash SHA256 des paramètres sérialisés en JSON, incluant l'ID de l'exercice.
+- (*str*): Le hash MD5 des paramètres sérialisés en JSON, incluant l'ID de l'exercice.
 
 ---
 
