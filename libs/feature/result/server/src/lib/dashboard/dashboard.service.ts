@@ -43,6 +43,7 @@ import {
   SessionTotalDurationByMonth,
 } from './aggregators/session.aggregator'
 import { UserExerciseCount } from './aggregators/user.aggregator'
+import { extractExercisesFromActivityVariables } from '@platon/feature/compiler'
 
 @Injectable()
 export class DashboardService {
@@ -219,9 +220,20 @@ export class DashboardService {
 
   async ofActivity(activityId: string): Promise<DashboardOutput> {
     const output: DashboardOutput = {}
+    const resourceMap = new Map<string, string>()
     const activity = await this.activityRepository.findOne({
       where: { id: activityId },
     })
+
+    if (activity) {
+      const resourceIds = extractExercisesFromActivityVariables(activity.source.variables).map((e) => e.resource)
+      await Promise.all(
+        resourceIds.map(async (resourceId) => {
+          const resource = await this.resourceService.findByIdOrCode(resourceId)
+          resourceMap.set(resourceId, resource.map((r) => r.name).orElse('unknown'))
+        })
+      )
+    }
 
     if (!activity) {
       throw new NotFoundResponse(`Activity: ${activityId}`)
@@ -257,6 +269,7 @@ export class DashboardService {
         activity,
         activityMembers,
         exerciseSessions,
+        resourceMap,
       }),
 
       new ActivityExerciseResults({
