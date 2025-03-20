@@ -59,7 +59,6 @@ import { randomInt } from 'crypto'
 import { PeerService } from '@platon/feature/peer/server'
 import { MatchStatus, PeerContest } from '@platon/feature/peer/common'
 import { v4 as uuidv4 } from 'uuid'
-import { ActivityRestrictionCheckerService } from './activity-restriction-checker.service'
 
 type CreateSessionArgs = {
   user?: User | null

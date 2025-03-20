@@ -156,7 +156,9 @@ export class PlayerCorrectionComponent implements OnInit {
   private getAllExerciseGroup(): void {
     let counter = 0
     for (const [k, v] of this.activityExercisesMap.entries()) {
-      this.startIndex = this.activityId === k ? counter : 0
+      if (this.activityId === k) {
+        this.startIndex = counter
+      }
       for (const group of v.map.values()) {
         this.listExerciseGroup.push(group)
         counter++

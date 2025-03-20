@@ -1,5 +1,5 @@
 <nz-collapse>
-  <nz-collapse-panel *ngFor="let course of groupedCourses" [nzHeader]="course.courseName">
+  <nz-collapse-panel *ngFor="let course of groupedCourses" [nzHeader]="course.courseName" [nzActive]="true">
     <nz-table #nzActivityTable [nzData]="course.activities" [nzBordered]="false" [nzShowPagination]="false">
       <thead>
         <tr>
@@ -16,23 +16,20 @@
           [queryParams]="{ activityId: activity.activityId }"
         >
           <td>
-            <a nz-button nzType="link" class="aligned" [routerLink]="['/courses', activity.courseId]">
-              <mat-icon>widgets</mat-icon>{{ activity.activityName }}
-            </a>
+            <a nz-button nzType="link" class="aligned"> <mat-icon>widgets</mat-icon>{{ activity.activityName }} </a>
           </td>
           <td>
             <nz-tag [nzColor]="activity.correctionStatusColor">
               {{ activity.correctedCount }} / {{ activity.exerciseCount }}
             </nz-tag>
           </td>
-          <td nzAlign="center">
+          <td nzAlign="center" style="cursor: default">
             <button
-              mat-icon-button
-              color="primary"
-              [routerLink]="['/player/correction', activity.courseId]"
-              nz-tooltip="Corriger"
+              style="background: inherit; border: none; cursor: pointer"
+              [routerLink]="['/courses', activity.courseId]"
+              nz-tooltip="Se rendre sur la page du cours"
             >
-              <mat-icon>edit</mat-icon>
+              <mat-icon style="margin-right: 0">open_in_new</mat-icon>
             </button>
           </td>
         </tr>
