@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -202,6 +203,13 @@ export class KCileComponent implements AfterViewInit {
         trigger: 'axis',
         axisPointer: {
           type: 'shadow',
+        },
+        formatter: (params: any) => {
+          return params
+            .map((item: any) => {
+              return `${item.marker} ${item.seriesName}: ${item.value.toFixed(2)}`
+            })
+            .join('<br/>')
         },
       } as TooltipComponentOption,
       xAxis: {
