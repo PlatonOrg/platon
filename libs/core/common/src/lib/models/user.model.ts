@@ -37,6 +37,13 @@ export interface User {
   readonly discordId?: string
 }
 
+export interface UserCharter {
+  readonly id: string // idUser
+  readonly createdAt: Date
+  readonly updatedAt: Date
+  readonly acceptedUserCharter?: boolean
+}
+
 export interface UpdateUser {
   readonly role?: UserRoles | keyof typeof UserRoles
   readonly firstName?: string
