@@ -11,11 +11,16 @@ import { UserEntity } from './user.entity'
 import { UserResolver } from './user.resolver'
 import { UserService } from './user.service'
 import { UserSchedulerService } from './user-scheduler.service'
+import { UserCharterController, UserCharterEntity, UserCharterService } from './charter'
 
 @Module({
-  imports: [LevelModule, TopicModule, TypeOrmModule.forFeature([UserEntity, UserPrefsEntity, UserGroupEntity])],
-  controllers: [UserController, UserGroupController, UserPrefsController],
-  providers: [UserService, UserPrefsService, UserGroupService, UserResolver, UserSchedulerService],
+  imports: [
+    LevelModule,
+    TopicModule,
+    TypeOrmModule.forFeature([UserEntity, UserPrefsEntity, UserGroupEntity, UserCharterEntity]),
+  ],
+  controllers: [UserController, UserGroupController, UserPrefsController, UserCharterController],
+  providers: [UserService, UserPrefsService, UserGroupService, UserResolver, UserSchedulerService, UserCharterService],
   exports: [UserService, UserPrefsService, UserGroupService],
 })
 export class UserModule {}
