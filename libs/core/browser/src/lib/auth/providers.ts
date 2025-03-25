@@ -12,6 +12,8 @@ import { RemoteUserGroupProvider } from './providers/remote-user-group.provider'
 import { RemoteUserPrefsProvider } from './providers/remote-user-prefs.provider'
 import { RemoteUserProvider } from './providers/remote-user.provider'
 import { DateConversionInterceptor } from './interceptors/date.interceptor'
+import { UserCharterProvider } from './models/user-charter-provider'
+import { RemoteUserCharterProvider } from './providers/remote-user-charter.provider'
 
 export const AuthProviders: Provider[] = [
   { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
@@ -20,5 +22,6 @@ export const AuthProviders: Provider[] = [
   { provide: UserProvider, useClass: RemoteUserProvider },
   { provide: UserGroupProvider, useClass: RemoteUserGroupProvider },
   { provide: UserPrefsProvider, useClass: RemoteUserPrefsProvider },
+  { provide: UserCharterProvider, useClass: RemoteUserCharterProvider },
   { provide: TokenProvider, useClass: RemoteTokenProvider },
 ]
