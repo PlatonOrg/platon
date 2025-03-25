@@ -12,14 +12,16 @@ import {
   ViewChild,
   inject,
 } from '@angular/core'
+import { MatMenuTrigger } from '@angular/material/menu'
 import { Router, RouterModule } from '@angular/router'
 
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatMenuModule } from '@angular/material/menu'
 
-import { AuthService, ThemeService, UserAvatarComponent } from '@platon/core/browser'
-import { User, UserRoles } from '@platon/core/common'
+import { AuthService, ThemeService, UserAvatarComponent, UserService } from '@platon/core/browser'
+import { UserCharterComponent } from './user-charter/user-charter.component'
+import { User, UserCharter, UserRoles } from '@platon/core/common'
 import { NotificationDrawerComponent } from '@platon/feature/notification/browser'
 import { DiscordInvitationComponent, DiscordButtonComponent } from '@platon/feature/discord/browser'
 import { ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
@@ -27,6 +29,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
+import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
 
@@ -56,6 +59,11 @@ import { UiModalTemplateComponent } from '@platon/shared/ui'
     DiscordButtonComponent,
 
     UiModalTemplateComponent,
+
+    NzPopoverModule,
+    NzModalModule,
+
+    UserCharterComponent,
   ],
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
@@ -72,6 +80,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []
 
   protected user?: User | undefined
+  protected userCharter?: UserCharter
   protected personalCircleId?: string | undefined
 
   protected canCreateCourse = false
@@ -80,8 +89,13 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   protected canCreateActivity = false
   protected loggedToDiscord = false
 
+  protected userCharterModalVisible = false
+
   @ViewChild(UiModalTemplateComponent, { static: true })
   protected modal!: UiModalTemplateComponent
+
+  @ViewChild(UserCharterComponent) userCharterComponent?: UserCharterComponent
+  @ViewChild('menuTrigger', { read: MatMenuTrigger }) menuTrigger!: MatMenuTrigger
 
   protected get canCreate(): boolean {
     return this.canCreateCourse || this.canCreateCircle || this.canCreateExercise || this.canCreateActivity
@@ -108,6 +122,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
   }
 
+  constructor(private readonly userService: UserService) {}
+
   async ngOnInit(): Promise<void> {
     this.drawerOpened = !this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
     this.drawerOpenedChange.emit(this.drawerOpened)
@@ -122,6 +138,12 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.canCreateCircle = this.resourceService.canUserCreateResource(this.user, 'CIRCLE')
     this.canCreateExercise = this.resourceService.canUserCreateResource(this.user, 'EXERCISE')
     this.canCreateActivity = this.resourceService.canUserCreateResource(this.user, 'ACTIVITY')
+
+    if (this.user.role === UserRoles.teacher || this.user.role === UserRoles.admin) {
+      this.userCharter = await firstValueFrom(this.userService.findUserCharterById(this.user.id))
+    } else {
+      console.log('User is not a teacher')
+    }
 
     this.subscriptions.push(
       this.breakpointObserver
@@ -194,5 +216,28 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   openDiscordModal(): void {
     this.modal.open()
+  }
+
+  async acceptUserCharter(): Promise<void> {
+    if (!this.userCharter?.acceptedUserCharter && this.userCharterComponent) {
+      void this.userCharterComponent.showUserCharterModal()
+    }
+  }
+
+  openMenu(): void {
+    console.log('opening menu', this.menuTrigger)
+    if (this.menuTrigger) {
+      console.log('menuTrigger is defined')
+      this.menuTrigger.openMenu()
+    } else {
+      console.log('menuTrigger is not defined')
+    }
+  }
+
+  onUserCharterAccepted(updateCharter: UserCharter): void {
+    this.userCharter = updateCharter
+    console.log('User charter accepted', this.menuTrigger)
+    this.openMenu()
+    this.changeDetectorRef.markForCheck()
   }
 }

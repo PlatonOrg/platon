@@ -13,9 +13,12 @@
   <div class="spacer"></div>
 
   <ng-container *ngIf="canCreate">
-    <button nz-button nzType="primary" nzShape="round" nzSize="small" [matMenuTriggerFor]="actionMenu">
-      <span nz-icon nzType="plus" nzTheme="outline"></span>
-    </button>
+    <div class="menu-trigger-container">
+      <button nz-button nzType="primary" nzShape="round" nzSize="small" (click)="acceptUserCharter()">
+        <span nz-icon nzType="plus"></span>
+      </button>
+      <span #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionMenu"></span>
+    </div>
   </ng-container>
 
   <!-- *ngIf="!loggedToDiscord" -->
@@ -41,7 +44,7 @@
   />
 </header>
 
-<mat-menu #actionMenu="matMenu">
+<mat-menu #actionMenu="matMenu" overlapTrigger="false">
   <button mat-menu-item [routerLink]="['/courses/create']">
     <mat-icon>local_library</mat-icon>
     <span>Créer un cours</span>
@@ -128,3 +131,9 @@
 </div>
 
 <notif-drawer #notifDrawer />
+
+<app-user-charter
+  [user]="user"
+  [userCharter]="userCharter"
+  (userCharterAccepted)="onUserCharterAccepted($event)"
+></app-user-charter>
