@@ -1,4 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
+
 import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
@@ -11,8 +12,9 @@ import {
   Output,
   ViewChild,
   inject,
+  ElementRef,
+  AfterViewInit,
 } from '@angular/core'
-import { MatMenuTrigger } from '@angular/material/menu'
 import { Router, RouterModule } from '@angular/router'
 
 import { MatButtonModule } from '@angular/material/button'
@@ -76,6 +78,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly resourceService = inject(ResourceService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly breakpointObserver = inject(BreakpointObserver)
+  private readonly elementRef = inject(ElementRef)
 
   private readonly subscriptions: Subscription[] = []
 
@@ -90,12 +93,10 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   protected loggedToDiscord = false
 
   protected userCharterModalVisible = false
+  protected userCharterAccepted = false
 
   @ViewChild(UiModalTemplateComponent, { static: true })
   protected modal!: UiModalTemplateComponent
-
-  @ViewChild(UserCharterComponent) userCharterComponent?: UserCharterComponent
-  @ViewChild('menuTrigger', { read: MatMenuTrigger }) menuTrigger!: MatMenuTrigger
 
   protected get canCreate(): boolean {
     return this.canCreateCourse || this.canCreateCircle || this.canCreateExercise || this.canCreateActivity
@@ -122,7 +123,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
   }
 
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   async ngOnInit(): Promise<void> {
     this.drawerOpened = !this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
@@ -141,8 +142,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
     if (this.user.role === UserRoles.teacher || this.user.role === UserRoles.admin) {
       this.userCharter = await firstValueFrom(this.userService.findUserCharterById(this.user.id))
-    } else {
-      console.log('User is not a teacher')
+      this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
     }
 
     this.subscriptions.push(
@@ -219,25 +219,23 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   async acceptUserCharter(): Promise<void> {
-    if (!this.userCharter?.acceptedUserCharter && this.userCharterComponent) {
-      void this.userCharterComponent.showUserCharterModal()
-    }
-  }
-
-  openMenu(): void {
-    console.log('opening menu', this.menuTrigger)
-    if (this.menuTrigger) {
-      console.log('menuTrigger is defined')
-      this.menuTrigger.openMenu()
-    } else {
-      console.log('menuTrigger is not defined')
+    if (!this.userCharterAccepted) {
+      this.userCharterModalVisible = true
+      this.changeDetectorRef.markForCheck()
     }
   }
 
   onUserCharterAccepted(updateCharter: UserCharter): void {
-    this.userCharter = updateCharter
-    console.log('User charter accepted', this.menuTrigger)
-    this.openMenu()
-    this.changeDetectorRef.markForCheck()
+    this.userCharter = { ...updateCharter }
+    this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
+
+    this.changeDetectorRef.detectChanges()
+
+    setTimeout(() => {
+      const buttonElement = this.elementRef.nativeElement.querySelector('button[nzType="primary"]')
+      if (buttonElement) {
+        buttonElement.click()
+      }
+    })
   }
 }

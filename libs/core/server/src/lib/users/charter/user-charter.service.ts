@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
 export class UserCharterService {
-  constructor(@InjectRepository(UserCharterEntity) private readonly repository: Repository<UserCharterEntity>) {}
+  constructor(@InjectRepository(UserCharterEntity) private readonly repository: Repository<UserCharterEntity>) { }
 
   async acceptUserCharter(userId: string): Promise<UserCharterEntity> {
     await this.repository.update(userId, { acceptedUserCharter: true })
