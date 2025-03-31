@@ -2,19 +2,16 @@
   <button nz-button nzType="text" (click)="drawerOpenedChange.emit(!drawerOpened)">
     <mat-icon class="icon-color">menu</mat-icon>
   </button>
-  <img
-    *ngIf="!drawerOpened"
-    class="logo"
-    src="assets/images/logo/platon.svg"
-    alt="Logo PLaTon"
-    [routerLink]="'/dashboard'"
-  />
+  <img *ngIf="!drawerOpened" class="logo" src="assets/images/logo/platon.svg" alt="Logo PLaTon"
+    [routerLink]="'/dashboard'" />
   <span class="icon-color" *ngIf="!mobile">PLaTon</span>
   <div class="spacer"></div>
 
   <ng-container *ngIf="canCreate">
     <div class="menu-trigger-container">
-      <button nz-button nzType="primary" nzShape="round" nzSize="small" (click)="acceptUserCharter()">
+      <button nz-button nzType="primary" nzShape="round" nzSize="small"
+        (click)="userCharterAccepted ? null : acceptUserCharter()"
+        [matMenuTriggerFor]="userCharterAccepted ? actionMenu : null">
         <span nz-icon nzType="plus"></span>
       </button>
       <span #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionMenu"></span>
@@ -34,45 +31,27 @@
       <mat-icon class="icon-color"> notifications </mat-icon>
     </nz-badge>
   </button>
-  <user-avatar
-    *ngIf="user"
-    [user]="user"
-    [size]="32"
-    [showUsername]="mobile ? 'none' : 'stacked'"
-    [attr.aria-label]="user.firstName"
-    [matMenuTriggerFor]="avatarMenu"
-  />
+  <user-avatar *ngIf="user" [user]="user" [size]="32" [showUsername]="mobile ? 'none' : 'stacked'"
+    [attr.aria-label]="user.firstName" [matMenuTriggerFor]="avatarMenu" />
 </header>
 
-<mat-menu #actionMenu="matMenu" overlapTrigger="false">
+<mat-menu #actionMenu="matMenu">
   <button mat-menu-item [routerLink]="['/courses/create']">
     <mat-icon>local_library</mat-icon>
     <span>Créer un cours</span>
   </button>
-  <button
-    *ngIf="canCreateCircle"
-    mat-menu-item
-    [routerLink]="['/resources/create']"
-    [queryParams]="{ type: 'CIRCLE', parent: createResourceParentParam }"
-  >
+  <button *ngIf="canCreateCircle" mat-menu-item [routerLink]="['/resources/create']"
+    [queryParams]="{ type: 'CIRCLE', parent: createResourceParentParam }">
     <mat-icon>{{ 'CIRCLE' | resourceIcon }}</mat-icon>
     <span>Créer un cercle</span>
   </button>
-  <button
-    *ngIf="canCreateActivity"
-    mat-menu-item
-    [routerLink]="['/resources/create']"
-    [queryParams]="{ type: 'ACTIVITY', parent: createResourceParentParam }"
-  >
+  <button *ngIf="canCreateActivity" mat-menu-item [routerLink]="['/resources/create']"
+    [queryParams]="{ type: 'ACTIVITY', parent: createResourceParentParam }">
     <mat-icon>{{ 'ACTIVITY' | resourceIcon }}</mat-icon>
     <span>Créer une activité</span>
   </button>
-  <button
-    *ngIf="canCreateExercise"
-    mat-menu-item
-    [routerLink]="['/resources/create']"
-    [queryParams]="{ type: 'EXERCISE', parent: createResourceParentParam }"
-  >
+  <button *ngIf="canCreateExercise" mat-menu-item [routerLink]="['/resources/create']"
+    [queryParams]="{ type: 'EXERCISE', parent: createResourceParentParam }">
     <mat-icon>{{ 'EXERCISE' | resourceIcon }}</mat-icon>
     <span>Créer un exercice</span>
   </button>
@@ -132,8 +111,6 @@
 
 <notif-drawer #notifDrawer />
 
-<app-user-charter
-  [user]="user"
-  [userCharter]="userCharter"
-  (userCharterAccepted)="onUserCharterAccepted($event)"
-></app-user-charter>
+<app-user-charter [user]="user" [userCharter]="userCharter" [userCharterModalVisible]="userCharterModalVisible"
+  (userCharterModalVisibleChange)="userCharterModalVisible = $event"
+  (userCharterAccepted)="onUserCharterAccepted($event)"></app-user-charter>

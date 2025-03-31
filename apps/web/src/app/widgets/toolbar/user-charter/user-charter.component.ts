@@ -20,14 +20,14 @@ import { inject } from '@angular/core'
 export class UserCharterComponent {
   @Input() user?: User
   @Input() userCharter?: UserCharter
+  @Input() userCharterModalVisible = false
+  @Output() userCharterModalVisibleChange = new EventEmitter<boolean>()
   @Output() userCharterAccepted = new EventEmitter<UserCharter>()
-
-  userCharterModalVisible = false
 
   private readonly router = inject(Router)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
 
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   async showUserCharterModal(): Promise<void> {
     if (!this.userCharter?.acceptedUserCharter) {
@@ -38,6 +38,7 @@ export class UserCharterComponent {
 
   cancelUserCharter(): void {
     this.userCharterModalVisible = false
+    this.userCharterModalVisibleChange.emit(false)
     void this.router.navigate(['/dashboard'])
   }
 
@@ -48,14 +49,11 @@ export class UserCharterComponent {
         if (updatedUserCharter.id) {
           this.userCharter = { ...updatedUserCharter }
           this.userCharterAccepted.emit(this.userCharter)
-        } else {
-          console.error('Updated user charter is missing a valid id')
         }
         this.userCharterModalVisible = false
+        this.userCharterModalVisibleChange.emit(false)
         this.changeDetectorRef.markForCheck()
-      } catch (error) {
-        console.error('An error occurred while updating the user charter acceptance:', error)
-      }
+      } catch (error) { }
     }
   }
 }
