@@ -13,7 +13,6 @@ import {
   ViewChild,
   inject,
   ElementRef,
-  AfterViewInit,
 } from '@angular/core'
 import { Router, RouterModule } from '@angular/router'
 
