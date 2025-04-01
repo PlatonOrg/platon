@@ -1,5 +1,10 @@
-<nz-modal [(nzVisible)]="userCharterModalVisible" [nzTitle]="'Droits d\'accès aux ressources'"
-  [nzFooter]="userCharterFooter" (nzOnCancel)="cancelUserCharter()" [nzMaskClosable]="false">
+<nz-modal
+  [(nzVisible)]="userCharterModalVisible"
+  [nzTitle]="'Droits d\'accès aux ressources'"
+  [nzFooter]="userCharterFooter"
+  (nzOnCancel)="cancelUserCharter()"
+  [nzMaskClosable]="false"
+>
   <ng-container *nzModalContent>
     <div class="user-charter-content">
       <main>

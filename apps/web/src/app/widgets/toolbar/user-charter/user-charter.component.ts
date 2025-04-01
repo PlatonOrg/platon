@@ -27,7 +27,7 @@ export class UserCharterComponent {
   private readonly router = inject(Router)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
 
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   async showUserCharterModal(): Promise<void> {
     if (!this.userCharter?.acceptedUserCharter) {
@@ -53,7 +53,9 @@ export class UserCharterComponent {
         this.userCharterModalVisible = false
         this.userCharterModalVisibleChange.emit(false)
         this.changeDetectorRef.markForCheck()
-      } catch (error) { }
+      } catch (error) {
+        /* empty */
+      }
     }
   }
 }
