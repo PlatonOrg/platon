@@ -24,7 +24,7 @@
             <mat-icon>{{ context.resource.type | resourceIcon }}</mat-icon>
             <span
               nz-typography
-              [nzEditable]="!context.resource.personal && context.resource.permissions?.write"
+              [nzEditable]="context.resource.permissions?.write"
               [nzContent]="context.resource.name"
               (nzContentChange)="updateName($event)"
             ></span>
@@ -35,7 +35,7 @@
     <p
       nz-typography
       *ngIf="!isOtherPersonal"
-      [nzEditable]="!context.resource.personal && context.resource.permissions?.write"
+      [nzEditable]="context.resource.permissions?.write"
       [nzContent]="context.resource.desc"
       (nzContentChange)="updateDesc($event)"
     ></p>
