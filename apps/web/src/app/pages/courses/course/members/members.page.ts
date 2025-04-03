@@ -58,7 +58,7 @@ export class CourseMembersPage implements OnInit, OnDestroy {
   protected searchModalTitle = 'Ajouter un membre'
   protected loading = true
   protected filters: CourseMemberFilters = {}
-  @Input() roles: (keyof typeof CourseMemberRoles)[] = []
+  @Input() roles: (keyof typeof CourseMemberRoles)[] | undefined = []
   protected role: CourseMemberRoles = CourseMemberRoles.student
 
   protected get canEdit(): boolean {
@@ -68,7 +68,7 @@ export class CourseMembersPage implements OnInit, OnDestroy {
   }
 
   protected get allowGroup(): boolean {
-    return this.roles.includes(CourseMemberRoles.student)
+    return !!this.roles?.includes(CourseMemberRoles.student)
   }
 
   ngOnInit(): void {
@@ -79,22 +79,20 @@ export class CourseMembersPage implements OnInit, OnDestroy {
       })
     )
 
+    this.roles = this.roles?.length ? this.roles : [CourseMemberRoles.student, CourseMemberRoles.teacher]
+
     this.filters = {
       roles: this.roles as CourseMemberRoles[],
       limit: 5,
     }
-
-    this.roles = this.roles.length ? this.roles : [CourseMemberRoles.student, CourseMemberRoles.teacher]
 
     if (this.roles.length > 1) {
       this.searchModalTitle = 'Ajouter des membres'
     } else {
       if (this.roles.includes(CourseMemberRoles.student)) {
         this.searchModalTitle = 'Ajouter des élèves'
-      } else {
-        if (this.roles.includes(CourseMemberRoles.teacher)) {
-          this.searchModalTitle = 'Ajouter des enseignants'
-        }
+      } else if (this.roles.includes(CourseMemberRoles.teacher)) {
+        this.searchModalTitle = 'Ajouter des enseignants'
       }
     }
   }
