@@ -13,7 +13,6 @@ import {
   ViewChild,
   inject,
   ElementRef,
-  AfterViewInit,
 } from '@angular/core'
 import { Router, RouterModule } from '@angular/router'
 
@@ -123,7 +122,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
   }
 
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   async ngOnInit(): Promise<void> {
     this.drawerOpened = !this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
