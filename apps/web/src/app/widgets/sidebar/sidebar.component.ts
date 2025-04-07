@@ -43,11 +43,11 @@ export class SidebarComponent implements OnInit {
         icon: 'dashboard',
         title: 'Tableau de bord',
       },
-      {
-        url: '/agenda',
-        icon: 'calendar_month',
-        title: 'Agenda',
-      },
+      // {
+      //   url: '/agenda',
+      //   icon: 'calendar_month',
+      //   title: 'Agenda',
+      // },
       {
         url: '/courses',
         icon: 'local_library',
