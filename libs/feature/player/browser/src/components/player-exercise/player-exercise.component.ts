@@ -166,6 +166,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   protected selectedTheory?: ExerciseTheory
   protected runningAction?: PlayerActions
 
+  get previewMode(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
   protected get primaryActions(): Action[] {
     if (!this.player) return []
     return [
@@ -199,7 +203,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         icon: 'download',
         label: "Télécharger l'environnement",
         tooltip: "Télécharger l'environnement",
-        visible: this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW),
+        visible: this.previewMode,
         run: () => this.downloadEnvironment(),
       },
       {
@@ -586,5 +590,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     } catch (err) {
       this.dialogService.error('Impossible de copier le contenu')
     }
+  }
+
+  protected saveAsTest() {
+    this.dialogService.success('saved as test')
   }
 }
