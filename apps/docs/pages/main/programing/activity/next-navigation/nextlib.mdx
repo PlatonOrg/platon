@@ -72,22 +72,22 @@ Vérifie si l'accès aux variables des exercices est activé.
 ### Gestion de l'activité
 
 #### `playExercise(exerciseId: str, params: Optional[dict] = None) -> None`
-Démarre l'exécution d'un exercice en fonction de son ID.
+Démarre l'exécution d'un exercice en fonction de son ID et stoppe l'exécution du next.
 
 **Arguments** :
 - `exerciseId` (*str*): L'ID de l'exercice à jouer.
 - `params` (*Optional[dict]*): Paramètres supplémentaires pour l'exercice. Par défaut : `None`.
 
 **Exceptions** :
-- `StopExec`: Exception levée pour arrêter la prochaine computation.
+- `StopExec`: Exception levée pour arrêter l'exécution du next.
 
 ---
 
 #### `stopActivity() -> None`
-Termine l'activité en cours.
+Termine l'activité en cours et stoppe l'exécution du next.
 
 **Exceptions** :
-- `StopExec`: Levée pour arrêter la prochaine computation.
+- `StopExec`: Exception levée pour arrêter l'exécution du next.
 
 ---
 
@@ -140,7 +140,7 @@ Récupère le nombre d'exercices dans un groupe spécifique.
 
 ---
 
-#### `getLastPlayedExerciseId() -> Optional[str]`
+#### `getPreviousExerciseId() -> Optional[str]`
 Récupère l'ID du dernier exercice joué.
 
 **Retourne** :
@@ -208,17 +208,17 @@ Sélectionne un exercice aléatoire qui n'a pas encore été joué.
 
 ---
 
-#### `playCurrent() -> None`
-Joue l'exercice actuel, s'il existe.
+#### `playPrevious() -> None`
+Joue le dernier exercice lancé, s'il existe.
 
-Si aucun exercice n'est en cours, aucune action n'est effectuée.
+Si aucun exercice n'a été lancé, aucune action n'est effectuée.
 
 ---
 
-#### `playCurrentIfUnplayed() -> None`
-Joue l'exercice actuel s'il n'a pas encore été tenté.
+#### `playPreviousIfUnplayed() -> None`
+Joue l'exercice précédent s'il n'a pas encore été tenté.
 
-Si l'exercice actuel a déjà été tenté, aucune action n'est effectuée.
+Si l'exercice précédent a déjà été tenté, aucune action n'est effectuée.
 
 ---
 
@@ -255,11 +255,11 @@ Récupère la meilleure note attribuée à un exercice spécifique.
 
 ---
 
-#### `getCurrentGrade() -> Optional[int]`
-Récupère la note actuelle de l'exercice en cours dans la navigation.
+#### `getPreviousGrade() -> Optional[int]`
+Récupère la note du dernier exercice lancé.
 
 **Retourne** :
-- (*Optional[int]*): La note de l'exercice actuellement joué, ou `None` s'il n'y a pas de note.
+- (*Optional[int]*): La note du dernier exercice joué, ou `None` s'il n'y a pas de note.
 
 ---
 
@@ -326,19 +326,19 @@ Si aucun exercice suivant n'est trouvé, parcourt la liste depuis le début si `
 
 ---
 
-#### `getCurrentGroupNumber() -> Optional[int]`
-Récupère le numéro du groupe de l'exercice actuellement en cours.
+#### `getPreviousGroupNumber() -> Optional[int]`
+Récupère le numéro du groupe du dernier exercice lancé, s'il existe.
 
 **Retourne** :
-- (*Optional[int]*): Le numéro du groupe de l'exercice en cours, ou `None` si aucun exercice n'est en cours.
+- (*Optional[int]*): Le numéro du groupe du dernier exercice lancé, ou `None` si aucun exercice n'est en cours.
 
 ---
 
-#### `isAllExercisesFromGroupPlayed(groupNb: int = getCurrentGroupNumber()) -> bool`
+#### `isAllExercisesFromGroupPlayed(groupNb: int = getPreviousGroupNumber()) -> bool`
 Vérifie si tous les exercices d'un groupe spécifique ont été joués.
 
 **Arguments** :
-- `groupNb` (*int*): Le numéro du groupe à vérifier (par défaut : le groupe actuel).
+- `groupNb` (*int*): Le numéro du groupe à vérifier (par défaut : le groupe du dernier exercice lancé).
 
 **Retourne** :
 - (*bool*): `True` si tous les exercices du groupe ont été joués, `False` sinon.
