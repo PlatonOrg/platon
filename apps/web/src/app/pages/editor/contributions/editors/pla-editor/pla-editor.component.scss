@@ -113,6 +113,7 @@ resource-list {
 }
 
 .button-group {
+  display: inline-flex;
   margin-bottom: 1.7rem;
   button {
     height: 2.5rem;
