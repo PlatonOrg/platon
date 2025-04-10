@@ -22,7 +22,7 @@ import {
   NotFoundResponse,
   User,
 } from '@platon/core/common'
-import { IRequest, Mapper, Public, UserService, UUIDParam } from '@platon/core/server'
+import { IRequest, Mapper, Public, UserDTO, UserService, UUIDParam } from '@platon/core/server'
 import { ACTIVITY_MAIN_FILE, EXERCISE_MAIN_FILE } from '@platon/feature/compiler'
 import { ResourceMovedByAdminNotification } from '@platon/feature/course/common'
 import { NotificationService } from '@platon/feature/notification/server'
@@ -110,7 +110,7 @@ export class ResourceController {
   @Get('/owners')
   async listOwners(): Promise<ListResponse<User>> {
     const owners = await this.resourceService.getAllOwners()
-    return new ListResponse({ resources: owners, total: owners.length })
+    return new ListResponse({ resources: Mapper.mapAll(owners, UserDTO), total: owners.length })
   }
 
   @Get('/:id')
