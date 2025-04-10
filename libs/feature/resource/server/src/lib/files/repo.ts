@@ -271,7 +271,7 @@ export class Repo {
       ...this.repo,
       trees: [git.TREE({ ref })],
       map: async (filepath, [entry]) => {
-        if (match && match.type === 'file') return
+        if (match && match.type === FileTypes.file) return
 
         if (filepath !== ROOT && (!filepath.startsWith(prefix) || Path.basename(filepath).startsWith('.'))) return
 
@@ -312,7 +312,6 @@ export class Repo {
     if (!match) {
       throw new FileNotFoundError(path)
     }
-
     return [match, download]
   }
 

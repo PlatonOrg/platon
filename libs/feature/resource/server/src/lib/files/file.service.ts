@@ -10,7 +10,7 @@ import {
   TEMPLATE_OVERRIDE_FILE,
   Variables,
 } from '@platon/feature/compiler'
-import { LATEST, ResourcePermissions } from '@platon/feature/resource/common'
+import { FileTypes, LATEST, ResourceFile, ResourcePermissions } from '@platon/feature/resource/common'
 import path from 'path'
 import { ResourcePermissionService } from '../permissions/permissions.service'
 import { ResourceEntity } from '../resource.entity'
@@ -147,9 +147,34 @@ export class ResourceFileService {
         const [file] = await repo.read(path, version || LATEST)
         return file.downloadUrl
       },
+      isDir: async (resource, version, path) => {
+        const repo = await getRepo(resource, version)
+        const [node] = await repo.read(path, version || LATEST)
+        return node.type === FileTypes.folder
+      },
+      listDir: async (resource, version, path) => {
+        const repo = await getRepo(resource, version)
+        const [node] = await repo.read(path, version || LATEST)
+        if (node.type !== FileTypes.folder) {
+          throw new NotFoundResponse(`Compiler: cannot list dir for ${path} in ${resource}`)
+        }
+        const files: ResourceFile[] = []
+        function addFilesRecursive(node: ResourceFile): void {
+          if (node.type === FileTypes.folder) {
+            node.children?.forEach((child) => addFilesRecursive(child))
+          } else {
+            files.push(node)
+          }
+        }
+        addFilesRecursive(node)
+        return files.map((file) => file.path)
+      },
       resolveContent: async (resource, version, path) => {
         const repo = await getRepo(resource, version)
-        const [, content] = await repo.read(path, version || LATEST)
+        const [node, content] = await repo.read(path, version || LATEST)
+        if (node.type !== FileTypes.file) {
+          throw new NotFoundResponse(`Compiler: cannot resolve content for ${path} in ${resource}`)
+        }
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return Buffer.from((await content!).buffer).toString()
       },

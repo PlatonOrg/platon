@@ -6,6 +6,7 @@ import {
   UpdateUserGroup,
   UpdateUserPrefs,
   User,
+  UserCharter,
   UserFilters,
   UserGroup,
   UserGroupFilters,
@@ -16,6 +17,7 @@ import { map, shareReplay, tap } from 'rxjs/operators'
 import { UserGroupProvider } from '../models/user-group-provider'
 import { UserPrefsProvider } from '../models/user-prefs-provider'
 import { UserProvider } from '../models/user-provider'
+import { UserCharterProvider } from '../models/user-charter-provider'
 
 /**
  * Facade class that will provide access to the user api of the platform.
@@ -28,7 +30,8 @@ export class UserService {
   constructor(
     private readonly userProvider: UserProvider,
     private readonly userGroupProvider: UserGroupProvider,
-    private readonly userPrefsProvider: UserPrefsProvider
+    private readonly userPrefsProvider: UserPrefsProvider,
+    private readonly userCharterProvider: UserCharterProvider
   ) {}
 
   update(user: string | User, input: UpdateUser): Observable<User> {
@@ -128,5 +131,13 @@ export class UserService {
 
   updateUserPrefs(username: string, input: UpdateUserPrefs): Observable<UserPrefs> {
     return this.userPrefsProvider.update(username, input)
+  }
+
+  acceptUserCharter(userId: string): Observable<UserCharter> {
+    return this.userCharterProvider.acceptUserCharter(userId)
+  }
+
+  findUserCharterById(userId: string): Observable<UserCharter> {
+    return this.userCharterProvider.findUserCharterById(userId)
   }
 }

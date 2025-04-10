@@ -1,4 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
+
 import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
@@ -11,6 +12,7 @@ import {
   Output,
   ViewChild,
   inject,
+  ElementRef,
 } from '@angular/core'
 import { Router, RouterModule } from '@angular/router'
 
@@ -18,8 +20,9 @@ import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatMenuModule } from '@angular/material/menu'
 
-import { AuthService, ThemeService, UserAvatarComponent } from '@platon/core/browser'
-import { User, UserRoles } from '@platon/core/common'
+import { AuthService, ThemeService, UserAvatarComponent, UserService } from '@platon/core/browser'
+import { UserCharterComponent } from './user-charter/user-charter.component'
+import { User, UserCharter, UserRoles } from '@platon/core/common'
 import { NotificationDrawerComponent } from '@platon/feature/notification/browser'
 import { DiscordInvitationComponent, DiscordButtonComponent } from '@platon/feature/discord/browser'
 import { ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
@@ -27,6 +30,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
+import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
 
@@ -56,6 +60,11 @@ import { UiModalTemplateComponent } from '@platon/shared/ui'
     DiscordButtonComponent,
 
     UiModalTemplateComponent,
+
+    NzPopoverModule,
+    NzModalModule,
+
+    UserCharterComponent,
   ],
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
@@ -68,10 +77,12 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly resourceService = inject(ResourceService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly breakpointObserver = inject(BreakpointObserver)
+  private readonly elementRef = inject(ElementRef)
 
   private readonly subscriptions: Subscription[] = []
 
   protected user?: User | undefined
+  protected userCharter?: UserCharter
   protected personalCircleId?: string | undefined
 
   protected canCreateCourse = false
@@ -79,6 +90,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   protected canCreateExercise = false
   protected canCreateActivity = false
   protected loggedToDiscord = false
+
+  protected userCharterModalVisible = false
+  protected userCharterAccepted = false
 
   @ViewChild(UiModalTemplateComponent, { static: true })
   protected modal!: UiModalTemplateComponent
@@ -108,6 +122,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
   }
 
+  constructor(private readonly userService: UserService) {}
+
   async ngOnInit(): Promise<void> {
     this.drawerOpened = !this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
     this.drawerOpenedChange.emit(this.drawerOpened)
@@ -122,6 +138,11 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.canCreateCircle = this.resourceService.canUserCreateResource(this.user, 'CIRCLE')
     this.canCreateExercise = this.resourceService.canUserCreateResource(this.user, 'EXERCISE')
     this.canCreateActivity = this.resourceService.canUserCreateResource(this.user, 'ACTIVITY')
+
+    if (this.user.role === UserRoles.teacher || this.user.role === UserRoles.admin) {
+      this.userCharter = await firstValueFrom(this.userService.findUserCharterById(this.user.id))
+      this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
+    }
 
     this.subscriptions.push(
       this.breakpointObserver
@@ -194,5 +215,26 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   openDiscordModal(): void {
     this.modal.open()
+  }
+
+  async acceptUserCharter(): Promise<void> {
+    if (!this.userCharterAccepted) {
+      this.userCharterModalVisible = true
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
+  onUserCharterAccepted(updateCharter: UserCharter): void {
+    this.userCharter = { ...updateCharter }
+    this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
+
+    this.changeDetectorRef.detectChanges()
+
+    setTimeout(() => {
+      const buttonElement = this.elementRef.nativeElement.querySelector('button[nzType="primary"]')
+      if (buttonElement) {
+        buttonElement.click()
+      }
+    })
   }
 }
