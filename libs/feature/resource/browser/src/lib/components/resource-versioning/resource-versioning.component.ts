@@ -103,6 +103,9 @@ export class ResourceVersioningComponent implements OnInit {
   protected tagValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const name = control.value
+      if (name == 'latest') {
+        return { name: true }
+      }
       if (name != null && name.length > 0) {
         return !/[;\-~^:?[* \r\n]|(\.\.)|(@{)/g.test(name) ? null : { name: true }
       }
