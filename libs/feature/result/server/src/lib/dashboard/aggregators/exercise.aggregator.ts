@@ -128,19 +128,29 @@ export class ExerciseAverageAttempts implements SessionDataAggregator<number> {
 export class ExerciceAverageTimeToAttempt implements SessionDataAggregator<number> {
   readonly id = EXERCISE_AVERAGTE_TIME_TO_ATTEMPT
 
-  private totalAttempts = 0
-  private totalFirstAttemptTimes = 0
+  private totalFirstAttemptTimes: number[] = []
+
+  private getPercentile(arr: number[], percentile: number): number {
+    const index = Math.floor(percentile * arr.length)
+    return arr[index]
+  }
 
   next(input: SessionDataEntity): void {
     if (!input.parentId) return
-    if (input.startedAt && input.answers?.length) {
-      this.totalAttempts++
-      this.totalFirstAttemptTimes += differenceInSeconds(new Date(input.answers[0].createdAt), input.startedAt)
+    if (input.startedAt && input.answers) {
+      this.totalFirstAttemptTimes.push(differenceInSeconds(new Date(input.answers[0].createdAt), input.startedAt))
     }
   }
 
   complete(): number {
-    return this.totalAttempts > 0 ? Math.round(this.totalFirstAttemptTimes / this.totalAttempts) : 0
+    this.totalFirstAttemptTimes.sort((a, b) => a - b)
+    const q1 = this.getPercentile(this.totalFirstAttemptTimes, 0.25)
+    const q3 = this.getPercentile(this.totalFirstAttemptTimes, 0.75)
+    const iqr = q3 - q1
+    const lowerBound = q1 - 1.5 * iqr
+    const upperBound = q3 + 1.5 * iqr
+    const filtered = this.totalFirstAttemptTimes.filter((x) => x >= lowerBound && x <= upperBound)
+    return filtered.reduce((a, b) => a + b, 0) / filtered.length
   }
 }
 

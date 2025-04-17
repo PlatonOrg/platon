@@ -33,6 +33,7 @@ import {
   CircleTreeComponent,
   ExerciseConfigurableFilterIndicator,
   LevelFilterIndicator,
+  OwnerFilterIndicator,
   ResourceDependOnFilterIndicator,
   ResourceFiltersComponent,
   ResourceItemComponent,
@@ -222,6 +223,7 @@ export default class ResourcesPage implements OnInit, OnDestroy {
       ...topics.map(TopicFilterIndicator),
       ...topics.map(AntiTopicFilterIndicator),
       ...levels.map(LevelFilterIndicator),
+      ...owners.map(OwnerFilterIndicator),
       ...this.filterIndicators,
     ]
 
