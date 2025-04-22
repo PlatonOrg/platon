@@ -2,7 +2,7 @@ import { map, Observable } from 'rxjs'
 
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { PLSourceFile } from '@platon/feature/compiler'
+import { ActivityExerciseGroup, PLSourceFile } from '@platon/feature/compiler'
 import {
   ExerciseTransformInput,
   FileCreate,
@@ -56,6 +56,16 @@ export class RemoteResourceFileProvider extends ResourceFileProvider {
     return this.http.get<FileVersions>(`/api/v1/files/${id}/`, {
       params: new HttpParams().set('versions', 'true'),
     })
+  }
+
+  exerciseTree(resource: string | Resource, version?: string): Observable<ActivityExerciseGroup[]> {
+    let params = new HttpParams()
+    if (version) {
+      params = params.set('version', version)
+    }
+    params = params.set('exerciseTree', 'true')
+    const id = typeof resource === 'string' ? resource : resource.id
+    return this.http.get<ActivityExerciseGroup[]>(`/api/v1/files/${id}/`, { params }).pipe(map((res) => res))
   }
 
   tree(resource: string | Resource, version?: string): Observable<ResourceFile> {

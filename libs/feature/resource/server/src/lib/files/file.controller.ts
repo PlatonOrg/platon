@@ -236,6 +236,35 @@ export class ResourceFileController {
       })
     }
 
+    if (query?.exerciseTree) {
+      if (resource.type !== ResourceTypes.ACTIVITY) {
+        throw new BadRequestResponse('Exercise tree is only available for activities')
+      }
+      const [_, main_pla_promise] = await repo.read('main.pla', version)
+      const main_pla = await main_pla_promise
+      if (!main_pla) {
+        throw new BadRequestResponse('Main file not found')
+      }
+      const exerciseGroups = JSON.parse(Buffer.from(main_pla?.buffer).toString()).exerciseGroups
+      const exerciseTree = (
+        Object.entries(exerciseGroups) as [
+          string,
+          { name: string; exercises: { id: string; version: string; resource: string }[] }
+        ][]
+      ).map(([key, group]) => {
+        return {
+          id: key,
+          name: group.name,
+          exercises: group.exercises.map((exercise) => ({
+            id: exercise.id,
+            version: exercise.version,
+            resource: exercise.resource,
+          })),
+        }
+      })
+      return exerciseTree
+    }
+
     const [node, content] = await repo.read(path, version)
     const injectExtraFields = (node: ResourceFile) => {
       node.resourceCode = resource.code

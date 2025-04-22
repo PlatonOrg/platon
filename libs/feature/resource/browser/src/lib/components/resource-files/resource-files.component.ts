@@ -21,7 +21,7 @@ import { GitLogResult, ResourceFile } from '@platon/feature/resource/common'
 import { NzContextMenuService, NzDropDownModule, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
-import { NzTreeModule, NzTreeNode } from 'ng-zorro-antd/tree'
+import { NzTreeModule, NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { firstValueFrom } from 'rxjs'
 import { ResourceFileService } from '../../api/file.service'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -66,7 +66,7 @@ export class ResourceFilesComponent implements OnInit {
   protected loading = true
   protected code?: string
   protected version?: string
-  protected nodes: Node[] = []
+  protected nodes: NzTreeNodeOptions[] = []
   protected readme?: ResourceFile
   protected root?: ResourceFile
 
@@ -98,11 +98,22 @@ export class ResourceFilesComponent implements OnInit {
     this.changeDetectionRef.markForCheck()
   }
 
+  @Input()
+  exerciseTree?: NzTreeNodeOptions[] = []
+
   @Output() selected = new EventEmitter<ResourceFile>()
   @Output() afterUpload = new EventEmitter<void>()
 
   ngOnInit(): void {
     this.refreshGitLog()
+  }
+
+  openUrl(url: string): void {
+    if (!url) {
+      console.warn('URL is empty')
+      return
+    }
+    window.open(url, '_blank')
   }
 
   download(target?: ResourceFile): void {
@@ -158,7 +169,7 @@ export class ResourceFilesComponent implements OnInit {
     }
   }
 
-  private compareNodes(a: Node, b: Node): number {
+  private compareNodes(a: NzTreeNodeOptions, b: NzTreeNodeOptions): number {
     if ((a.isLeaf && b.isLeaf) || (!a.isLeaf && !b.isLeaf)) {
       return a.title.localeCompare(b.title)
     }
@@ -225,13 +236,6 @@ export class ResourceFilesComponent implements OnInit {
     this.commits = commits
     this.changeDetectionRef.markForCheck()
   }
-}
-
-interface Node {
-  key: string
-  title: string
-  isLeaf?: boolean
-  children?: Node[]
 }
 
 interface CommitInfos {
