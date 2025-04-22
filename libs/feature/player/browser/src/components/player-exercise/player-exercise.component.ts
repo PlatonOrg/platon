@@ -591,8 +591,4 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       this.dialogService.error('Impossible de copier le contenu')
     }
   }
-
-  protected saveAsTest() {
-    this.dialogService.success('saved as test')
-  }
 }
