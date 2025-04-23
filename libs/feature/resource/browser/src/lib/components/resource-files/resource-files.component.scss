@@ -41,6 +41,14 @@ nz-spin {
   flex: 1;
 }
 
+.has-exercises {
+  display: flex;
+  flex-direction: column;
+  nz-tree {
+    min-height: min-content;
+  }
+}
+
 .files {
   display: flex;
   flex-wrap: wrap;
@@ -48,18 +56,24 @@ nz-spin {
   flex-direction: row;
   height: 70vh;
   margin: 1rem 0;
-  mat-card {
+
+  .row {
+    height: 100%;
+    display: flex;
     flex: 1;
-    height: 95%;
     overflow-y: auto;
     overflow-x: hidden;
     margin-bottom: 1rem;
+    mat-card {
+      flex: 1;
+      overflow: scroll;
+    }
   }
-  mat-card:first-child {
+  .row:first-child {
     margin-right: 1rem;
   }
-  mat-card:last-child {
-    margin-left: 1rem;
+  .has-exercises {
+    overflow-y: hidden;
   }
 }
 
@@ -67,11 +81,8 @@ nz-spin {
   .files {
     display: block;
     height: auto;
-    mat-card:first-child {
+    .row:first-child {
       margin-right: 0;
-    }
-    mat-card:last-child {
-      margin-left: 0;
     }
   }
 }
