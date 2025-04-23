@@ -70,6 +70,7 @@ nz-segmented {
 
 .nav-link {
   height:max-content;
+  width: 100%;
   color: white !important;
   &.active {
     position: relative;
@@ -96,6 +97,10 @@ nz-segmented {
     display: block;
     margin: 0 0.5rem;
   }
+
+  ::ng-deep .mdc-button__label {
+    width: 100%;
+  }
 }
 
 .nav-link-content {
@@ -112,6 +117,7 @@ nz-segmented {
 }
 
 .exercise-name {
+  width: 100%;
   flex: 1;
 }
 
