@@ -221,12 +221,12 @@ export class PlayerCorrectionComponent implements OnInit {
       const bName = this.userMap.get(b.userId)?.username
       return aName?.localeCompare(bName ?? '') ?? 0
     })
-    // Set the selected exercise to the same index as the current group if it is from the same user
-    if (this.exercises.at(this.selectedExerciseIndex)?.userId === currentUserId) {
-      this.onChooseExercise(this.selectedExerciseIndex).catch(console.error)
-      return
+    // Take the current user's exercise if it exists
+    let exerciseIndex = this.exercises.findIndex((exercise) => exercise.userId === currentUserId)
+    if (exerciseIndex == -1) {
+      exerciseIndex = 0
     }
-    this.onChooseExercise(0).catch(console.error)
+    this.onChooseExercise(exerciseIndex).catch(console.error)
   }
 
   protected onChooseGroup(group: ExerciseGroup): void {
