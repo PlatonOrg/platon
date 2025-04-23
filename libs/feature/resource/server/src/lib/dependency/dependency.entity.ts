@@ -1,9 +1,10 @@
 import { BaseEntity } from '@platon/core/server'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { ResourceEntity } from '../resource.entity'
+import { ResourceDependency } from '@platon/feature/resource/common'
 
 @Entity('ResourceDependencies')
-export class ResourceDependencyEntity extends BaseEntity {
+export class ResourceDependencyEntity extends BaseEntity implements ResourceDependency {
   @Column({ name: 'resource_version' })
   resourceVersion!: string
 
@@ -25,4 +26,7 @@ export class ResourceDependencyEntity extends BaseEntity {
   @ManyToOne(() => ResourceEntity, { onDelete: 'CASCADE', nullable: true })
   @JoinColumn({ name: 'depend_on_id' })
   dependOn!: ResourceEntity
+
+  @Column({ name: 'is_template', default: false, nullable: false })
+  isTemplate!: boolean
 }

@@ -105,4 +105,19 @@ export class RemoteResourceProvider extends ResourceProvider {
   listOwners(): Observable<User[]> {
     return this.http.get<ListResponse<User>>(`/api/v1/resources/owners`).pipe(map((response) => response.resources))
   }
+
+  isConfigurableExercise(resourceId: string): Observable<boolean> {
+    return this.http
+      .get<ItemResponse<boolean>>(`/api/v1/resources/${resourceId}/configurable-exercise`)
+      .pipe(map((response) => response.resource))
+  }
+
+  updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource> {
+    return this.http
+      .patch<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/template`, {
+        templateId,
+        templateVersion,
+      })
+      .pipe(map((response) => response.resource))
+  }
 }

@@ -17,6 +17,7 @@ import { ResourceEntity } from '../resource.entity'
 import { ResourceService } from '../resource.service'
 import { Repo } from './repo'
 import { README_PLE } from './snippets'
+import { ResourceDependencyService } from '../dependency'
 
 interface CompileInput {
   resourceId: string
@@ -42,7 +43,8 @@ interface RepoInfo {
 export class ResourceFileService {
   constructor(
     private readonly resourceService: ResourceService,
-    private readonly permissionService: ResourcePermissionService
+    private readonly permissionService: ResourcePermissionService,
+    private readonly dependencyService: ResourceDependencyService
   ) {}
 
   /**
@@ -71,8 +73,8 @@ export class ResourceFileService {
       EXERCISE: 'exercises',
     }[resource.type]
 
-    const extendsExpr = (resourceId: string, resourceVersion: string) =>
-      `@extends /${resourceId}:${resourceVersion}/${EXERCISE_MAIN_FILE}`
+    // const extendsExpr = (resourceId: string, resourceVersion: string) =>
+    //   `@extends /${resourceId}:${resourceVersion}/${EXERCISE_MAIN_FILE}`
 
     return {
       repo: await Repo.get(path.join(directory, resource.id), {
@@ -86,7 +88,7 @@ export class ResourceFileService {
           : undefined,
         defaultFiles: resource.templateId
           ? {
-              [EXERCISE_MAIN_FILE]: extendsExpr(resource.templateId, resource.templateVersion || LATEST),
+              [EXERCISE_MAIN_FILE]: '', // extendsExpr(resource.templateId, resource.templateVersion || LATEST),
               [TEMPLATE_OVERRIDE_FILE]: '{}',
               'readme.md': README_PLE,
             }
@@ -123,6 +125,15 @@ export class ResourceFileService {
     const [file, buffer] = await repo.read(main, version)
     if (!buffer) {
       throw new NotFoundException(`Compiler: missing main file in resource: ${resource.id}`)
+    }
+
+    let bufferContent = Buffer.from((await buffer).buffer).toString()
+    if (resource.templateId) {
+      const dependency = await this.dependencyService.getTemplateDependency(resource.id, version || LATEST)
+      const extendsLine = `@extends /${dependency?.dependOnId}:${
+        dependency?.dependOnVersion || LATEST
+      }/${EXERCISE_MAIN_FILE}`
+      bufferContent = extendsLine + '\n\n' + bufferContent
     }
 
     const getRepo = async (resourceId: string, version?: string) => {
@@ -188,7 +199,7 @@ export class ResourceFileService {
       withAst: input.withAst,
     })
 
-    await compiler.compile(Buffer.from((await buffer).buffer).toString())
+    await compiler.compile(bufferContent)
 
     const source = await compiler.output(overrides)
 

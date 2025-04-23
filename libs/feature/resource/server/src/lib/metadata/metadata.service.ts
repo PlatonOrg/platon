@@ -197,6 +197,7 @@ export class ResourceMetadataService {
         resourceVersion: LATEST,
         dependOnId: resource.templateId,
         dependOnVersion: resource.templateVersion || LATEST,
+        isTemplate: true,
       })
     }
 
@@ -250,6 +251,7 @@ export class ResourceMetadataService {
           resourceVersion: LATEST,
           dependOnId: resource.templateId,
           dependOnVersion: resource.templateVersion || LATEST,
+          isTemplate: true,
         })
       }
     } catch (error) {

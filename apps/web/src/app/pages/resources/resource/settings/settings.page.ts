@@ -6,6 +6,7 @@ import { ResourceInformationsPage } from './informations/informations.page'
 import { ResourceMembersPage } from './members/members.page'
 import { ResourcePresenter } from '../resource.presenter'
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
+import { ResourceTemplatePage } from './template/template.page'
 
 @Component({
   standalone: true,
@@ -13,7 +14,14 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, NzTabsModule, ResourceInformationsPage, ResourceMembersPage],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NzTabsModule,
+    ResourceInformationsPage,
+    ResourceMembersPage,
+    ResourceTemplatePage,
+  ],
 })
 export class ResourceSettingsPage {
   private readonly breakpointObserver = inject(BreakpointObserver)

@@ -96,6 +96,14 @@ export class ResourceService {
   delete(resource: Resource): Observable<void> {
     return this.resourceProvider.delete(resource)
   }
+
+  isConfigurableExercise(resourceId: string): Observable<boolean> {
+    return this.resourceProvider.isConfigurableExercise(resourceId)
+  }
+
+  updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource> {
+    return this.resourceProvider.updateTemplate(resourceId, templateId, templateVersion)
+  }
   //#endregion
 
   //#region Members

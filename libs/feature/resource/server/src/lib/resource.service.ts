@@ -13,6 +13,7 @@ import {
 } from '@platon/core/server'
 import {
   CircleTree,
+  ExerciseResourceMeta,
   RESOURCE_ORDERING_DIRECTIONS,
   ResourceCompletion,
   ResourceFilters,
@@ -263,6 +264,12 @@ export class ResourceService {
         'dependency.depend_on_id = resource.id AND dependency.resource_id IN (:...ids)',
         { ids: filters.usedBy }
       )
+    }
+
+    if (filters.useTemplate) {
+      query.andWhere('resource.template_id IS NOT NULL')
+    } else if (filters.useTemplate === false) {
+      query.andWhere('resource.template_id IS NULL')
     }
 
     if (filters.parents?.length) {
@@ -519,6 +526,15 @@ export class ResourceService {
       .select('u')
       .getMany()
     return owners
+  }
+
+  async isConfigurableExercise(resourceId: string): Promise<boolean> {
+    const resource = await this.repository.findOne({ where: { id: resourceId } })
+    if (!resource || resource.type !== ResourceTypes.EXERCISE) {
+      return false
+    }
+    const metadata = await this.metadataRepo.findOne({ where: { resourceId } })
+    return (metadata?.meta as ExerciseResourceMeta).configurable
   }
 
   @OnEvent('deleteOrphanCircles')

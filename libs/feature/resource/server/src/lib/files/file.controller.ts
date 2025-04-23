@@ -35,6 +35,7 @@ import {
 } from './file.event'
 import { ResourceFileService } from './file.service'
 import { RESOURCES_DIR } from './repo'
+import { ResourceDependencyService } from '../dependency'
 
 const CACHEABLE_EXTENSIONS = [
   // IMAGES
@@ -93,7 +94,8 @@ export class ResourceFileController {
   constructor(
     private readonly fileService: ResourceFileService,
     private readonly eventService: EventService,
-    private readonly configService: ConfigService<Configuration>
+    private readonly configService: ConfigService<Configuration>,
+    private readonly dependencyService: ResourceDependencyService
   ) {}
 
   @Get('/log/:resourceId')
@@ -113,6 +115,8 @@ export class ResourceFileController {
     }
 
     await repo.release(input.name, input.message)
+
+    await this.dependencyService.createDependencyForNewVersion(resourceId, input.name)
 
     this.eventService.emit<OnReleaseRepoEventPayload>(ON_RELEASE_REPO_EVENT, {
       repo,

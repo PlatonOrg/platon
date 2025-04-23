@@ -317,7 +317,7 @@ export class ResourceFileSystemProvider extends FileSystemProvider {
   private adaptEntry(uri: monaco.Uri, entry: ResourceFile, files: IFile[]) {
     const fileUri = monaco.Uri.parse(`${uri.scheme}://${uri.authority}/${removeLeadingSlash(entry.path)}`)
     if (entry.path === EXERCISE_MAIN_FILE && entry.resourceId === this.resource?.id) {
-      entry.readOnly = entry.readOnly || this.isTemplate()
+      entry.isInherited = entry.isInherited || this.isTemplate()
     }
     const file = new ResourceFileImpl(fileUri, entry)
     files.push(file)

@@ -557,4 +557,28 @@ export class Repo {
     commits[0].tags.push('latest')
     return commits
   }
+
+  async getCurrentBranch() {
+    return (await simpleGit(this.root).branch()).current
+  }
+
+  async checkout(branch: string) {
+    await simpleGit(this.root).checkout(branch)
+  }
+
+  async checkoutTag(tag: string) {
+    await simpleGit(this.root).checkout('tags/' + tag, ['-f'])
+  }
+
+  async moveTag(tag: string) {
+    await simpleGit(this.root).raw('tag', '-f', tag, 'HEAD')
+  }
+
+  async checkoutLocalBranch(branch: string) {
+    await simpleGit(this.root).checkoutLocalBranch(branch)
+  }
+
+  async deleteLocalBranch(branch: string) {
+    await simpleGit(this.root).deleteLocalBranch(branch, true)
+  }
 }

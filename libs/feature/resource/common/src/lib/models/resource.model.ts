@@ -425,6 +425,11 @@ export interface ResourceFilters extends ExpandableModel<ResourceExpandableField
    * Ordering direction.
    */
   readonly direction?: OrderingDirections
+
+  /**
+   * Search for resources that use a template.
+   */
+  readonly useTemplate?: boolean
 }
 
 /**

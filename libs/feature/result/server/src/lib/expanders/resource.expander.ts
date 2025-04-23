@@ -62,9 +62,13 @@ export class ResourceExpander {
     let refCount = 0
     let activityRefCount = 0
     let templateRefCount = 0
+    const uniqueResourceIds = new Set<string>()
     references.forEach((ref) => {
-      activityRefCount += ref.resource.type === ResourceTypes.ACTIVITY ? 1 : 0
-      templateRefCount += ref.resource.type === ResourceTypes.EXERCISE ? 1 : 0
+      if (!uniqueResourceIds.has(ref.resourceId)) {
+        uniqueResourceIds.add(ref.resourceId)
+        activityRefCount += ref.resource.type === ResourceTypes.ACTIVITY ? 1 : 0
+        templateRefCount += ref.resource.type === ResourceTypes.EXERCISE ? 1 : 0
+      }
     })
 
     refCount = activityRefCount + templateRefCount
