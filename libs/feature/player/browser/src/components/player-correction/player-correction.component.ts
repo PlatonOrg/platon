@@ -325,13 +325,14 @@ export class PlayerCorrectionComponent implements OnInit {
     }
   }
 
-  protected async onSetGrade(grade: number) {
+  protected async setGradeOnClick(event: Event, grade: number) {
+    // eslint-disable-next-line prettier/prettier
+    (event.target as HTMLInputElement).blur()
     this.correctedGrade = grade
     await this.onSaveGrade()
   }
 
   protected async onSaveGrade() {
-    console.error('triggered')
     if (this.currentExercise && this.currentExercise != null) {
       try {
         await firstValueFrom(
