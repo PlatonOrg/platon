@@ -59,6 +59,7 @@ export class LabelComponent implements OnChanges {
 
   async ngOnChanges(): Promise<void> {
     if (this.answers.length === 0 || !this.currentExercise || this.courseId === '') {
+      this.selectedLabels = []
       return
     }
     await this.getLabels()
