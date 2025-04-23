@@ -430,6 +430,7 @@ export class ResourceService {
     const parent = await this.repository.findOneOrFail({ where: { id: parentId } })
 
     resource.parentId = parent.id
+    resource.personal = parent.personal
     return this.repository.save(resource)
   }
 
