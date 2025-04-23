@@ -211,10 +211,21 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected onChooseTab(index: number): void {
+    const currentUserId = this.currentExercise?.userId
     this.answers = []
     this.selectedTabIndex = index
     this.currentExercise = null
     this.exercises = this.currentGroup?.users || []
+    this.exercises.sort((a, b) => {
+      const aName = this.userMap.get(a.userId)?.username
+      const bName = this.userMap.get(b.userId)?.username
+      return aName?.localeCompare(bName ?? '') ?? 0
+    })
+    // Set the selected exercise to the same index as the current group if it is from the same user
+    if (this.exercises.at(this.selectedExerciseIndex)?.userId === currentUserId) {
+      this.onChooseExercise(this.selectedExerciseIndex).catch(console.error)
+      return
+    }
     this.onChooseExercise(0).catch(console.error)
   }
 
