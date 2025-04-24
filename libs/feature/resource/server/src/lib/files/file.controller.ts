@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { BadRequestResponse, SuccessResponse, UnauthorizedResponse } from '@platon/core/common'
 import { Configuration, EventService, IRequest, Public } from '@platon/core/server'
 import { PLSourceFile } from '@platon/feature/compiler'
@@ -86,6 +86,7 @@ const CACHEABLE_EXTENSIONS = [
   'odp',
 ]
 
+@ApiBearerAuth()
 @Controller('files')
 @ApiTags('Resources')
 export class ResourceFileController {

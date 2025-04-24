@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Patch, Post, Query, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ForbiddenResponse, ItemResponse, ListResponse, NoContentResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import {
@@ -10,6 +10,7 @@ import {
 } from './course-member.dto'
 import { CourseMemberService } from './course-member.service'
 
+@ApiBearerAuth()
 @Controller('courses/:courseId/members')
 @ApiTags('Courses')
 export class CourseMemberController {

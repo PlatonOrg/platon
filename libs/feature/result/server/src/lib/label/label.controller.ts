@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ListResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles } from '@platon/core/server'
 import { CorrectionLabel, CreateLabel } from '@platon/feature/result/common'
@@ -7,6 +7,7 @@ import { LabelService } from './label.service'
 import { LabelDTO } from './label.dto'
 import { CorrectionLabelService } from './correction-label/correction-label.service'
 
+@ApiBearerAuth()
 @Controller('results/labels')
 @ApiTags('Results')
 export class LabelController {

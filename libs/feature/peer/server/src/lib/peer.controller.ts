@@ -1,11 +1,12 @@
 import { Controller, Get } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 
 import { PeerService } from './peer.service'
 import { ItemResponse } from '@platon/core/common'
 import { PeerComparisonTreeOutput } from '@platon/feature/peer/common'
 import { UUIDParam } from '@platon/core/server'
 
+@ApiBearerAuth()
 @Controller('peerMatch')
 @ApiTags('PeerMatchComparisons')
 export class PeerController {

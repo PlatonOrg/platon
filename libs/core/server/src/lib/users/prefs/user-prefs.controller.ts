@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Param, Patch, Req, UnauthorizedException } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse } from '@platon/core/common'
 import { IRequest } from '../../auth'
 import { Mapper } from '../../utils'
 import { UpdateUserPrefsDTO, UserPrefsDTO } from './user-prefs.dto'
 import { UserPrefsService } from './user-prefs.service'
 
+@ApiBearerAuth()
 @Controller('users/:username/prefs')
 @ApiTags('Users')
 export class UserPrefsController {

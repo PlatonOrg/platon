@@ -1,10 +1,11 @@
 import { Body, Controller, Delete, Get, Patch, Post, Query } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse, NotFoundResponse } from '@platon/core/common'
 import { Mapper, UUIDParam } from '@platon/core/server'
 import { CreateLmsDTO, LmsDTO, LmsFiltersDTO, UpdateLmsDTO } from './lti.dto'
 import { LTIService } from './lti.service'
 
+@ApiBearerAuth()
 @Controller('lti')
 @ApiTags('LTI')
 export class LTIController {

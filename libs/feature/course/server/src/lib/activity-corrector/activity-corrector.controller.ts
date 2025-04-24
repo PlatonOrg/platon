@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
   ForbiddenResponse,
   ItemResponse,
@@ -14,6 +14,7 @@ import { ActivityCorrectorService } from './activity-corrector.service'
 import { ActivityService } from '../activity/activity.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 
+@ApiBearerAuth()
 @Controller('activities/:activityId/correctors')
 @ApiTags('Courses')
 export class ActivityCorrectorController {

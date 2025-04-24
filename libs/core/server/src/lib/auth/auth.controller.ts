@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CreatedResponse, ItemResponse } from '@platon/core/common'
 import { AuthTokenDTO, ResetPasswordInputDTO, SignInInputDTO, SignUpInputDTO } from './auth.dto'
 import { AuthService } from './auth.service'
@@ -35,6 +35,7 @@ export class AuthController {
     })
   }
 
+  @ApiBearerAuth()
   @Post('refresh')
   async refresh(@Req() req: IRequest): Promise<ItemResponse<AuthTokenDTO>> {
     return new ItemResponse({

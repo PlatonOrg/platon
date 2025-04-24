@@ -1,11 +1,12 @@
 import { Controller, Get, Query, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ForbiddenResponse, ListResponse, isTeacherRole } from '@platon/core/common'
 import { IRequest, Mapper, toNumber, UUIDParam } from '@platon/core/server'
 import { ActivityMemberService, CourseMemberService, ActivityGroupService } from '@platon/feature/course/server'
 import { ActivityLeaderboardEntryDTO, CourseLeaderboardEntryDTO } from './leaderboard.dto'
 import { LeaderboardService } from './leaderboard.service'
 
+@ApiBearerAuth()
 @Controller('results/leaderboard')
 @ApiTags('Results')
 export class LeaderboardController {
