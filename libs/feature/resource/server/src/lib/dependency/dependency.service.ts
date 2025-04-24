@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ActivityExerciseGroups } from '@platon/feature/compiler'
-import { CreateResourceDependency } from '@platon/feature/resource/common'
+import { CreateResourceDependency, LATEST } from '@platon/feature/resource/common'
 import { EntityManager, Repository } from 'typeorm'
 import { ResourceDependencyEntity } from './dependency.entity'
 
@@ -67,6 +67,70 @@ export class ResourceDependencyService {
   }
 
   /**
+   * Updates a template dependency.
+   * If the dependency does not exist, it creates a new one.
+   *
+   * @param input - The input data for the resource dependency.
+   * @param entityManager - Optional. The entity manager to use for the database operation.
+   * @returns A promise that resolves to the updated or created resource dependency.
+   */
+  async updateTemplateDependency(
+    input: CreateResourceDependency,
+    entityManager?: EntityManager
+  ): Promise<ResourceDependencyEntity> {
+    const { resourceId, resourceVersion } = input
+    let dependency = entityManager
+      ? await entityManager.findOne(ResourceDependencyEntity, {
+          where: { resourceId, resourceVersion, isTemplate: true },
+        })
+      : await this.repository.findOne({ where: { resourceId, resourceVersion, isTemplate: true } })
+
+    if (!dependency) {
+      dependency = this.repository.create(input)
+    }
+
+    dependency.resourceId = resourceId
+    dependency.dependOnId = input.dependOnId
+    dependency.resourceVersion = resourceVersion
+    dependency.dependOnVersion = input.dependOnVersion
+    dependency.isTemplate = true
+
+    return entityManager ? await entityManager.save(dependency) : await this.repository.save(dependency)
+  }
+
+  /**
+   * Creates a dependency for a new version of a resource.
+   * The dependency is set with the same dependOnId and dependOnVersion as the latest version of the resource.
+   *
+   * @param resourceId - The ID of the resource.
+   * @param resourceVersion - The version of the resource.
+   * @returns A promise that resolves to the created ResourceDependencyEntity.
+   */
+  async createDependencyForNewVersion(resourceId: string, resourceVersion: string): Promise<ResourceDependencyEntity> {
+    const latestDependency = await this.repository.findOne({
+      where: { resourceId, resourceVersion: LATEST, isTemplate: true },
+    })
+
+    if (!latestDependency) {
+      throw new Error(`No latest dependency found for resourceId: ${resourceId}`)
+    }
+
+    if (resourceVersion === LATEST) {
+      return latestDependency
+    }
+
+    const newDependency = this.repository.create({
+      resourceId,
+      resourceVersion,
+      dependOnId: latestDependency.dependOnId,
+      dependOnVersion: latestDependency.dependOnVersion,
+      isTemplate: true,
+    })
+
+    return await this.repository.save(newDependency)
+  }
+
+  /**
    * Deletes a resource dependency.
    *
    * @param resourceId - The ID of the resource.
@@ -102,6 +166,7 @@ export class ResourceDependencyService {
         resourceVersion: args.version,
         dependOnId: exercise.resource,
         dependOnVersion: exercise.version,
+        isTemplate: false,
       }))
     )
 
@@ -160,6 +225,21 @@ export class ResourceDependencyService {
   listDependents(dependOnId: string): Promise<ResourceDependencyEntity[]> {
     return this.repository.find({
       where: { dependOnId },
+      relations: { resource: true, dependOn: true },
+    })
+  }
+
+  /**
+   * Get a template dependency by its resourceId and resourceVersion.
+   * (Retrieves only one dependency)
+   *
+   * @param resourceId - The ID of the resource.
+   * @param resourceVersion - The version of the resource.
+   * @return A promise that resolves to the ResourceDependencyEntity object if found, or null if not found.
+   */
+  async getTemplateDependency(resourceId: string, resourceVersion: string): Promise<ResourceDependencyEntity | null> {
+    return await this.repository.findOne({
+      where: { resourceId, resourceVersion, isTemplate: true },
       relations: { resource: true, dependOn: true },
     })
   }

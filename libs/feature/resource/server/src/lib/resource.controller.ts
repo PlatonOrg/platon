@@ -22,11 +22,11 @@ import {
   NotFoundResponse,
   User,
 } from '@platon/core/common'
-import { IRequest, Mapper, Public, UserService, UUIDParam } from '@platon/core/server'
+import { IRequest, Mapper, Public, UserDTO, UserService, UUIDParam } from '@platon/core/server'
 import { ACTIVITY_MAIN_FILE, EXERCISE_MAIN_FILE } from '@platon/feature/compiler'
 import { ResourceMovedByAdminNotification } from '@platon/feature/course/common'
 import { NotificationService } from '@platon/feature/notification/server'
-import { ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
+import { LATEST, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 import { ResourceCompletionDTO } from './completion'
 import { ResourceFileService } from './files'
 import { ResourcePermissionService } from './permissions/permissions.service'
@@ -40,6 +40,7 @@ import {
 } from './resource.dto'
 import { ResourceService } from './resource.service'
 import { ResourceViewService } from './views/view.service'
+import { ResourceDependencyService } from './dependency'
 
 @Controller('resources')
 @ApiTags('Resources')
@@ -52,7 +53,8 @@ export class ResourceController {
     private readonly resourceViewService: ResourceViewService,
     private readonly userService: UserService,
     private readonly notificationService: NotificationService,
-    private readonly fileService: ResourceFileService
+    private readonly fileService: ResourceFileService,
+    private readonly dependencyService: ResourceDependencyService
   ) {}
 
   @Get()
@@ -110,7 +112,7 @@ export class ResourceController {
   @Get('/owners')
   async listOwners(): Promise<ListResponse<User>> {
     const owners = await this.resourceService.getAllOwners()
-    return new ListResponse({ resources: owners, total: owners.length })
+    return new ListResponse({ resources: Mapper.mapAll(owners, UserDTO), total: owners.length })
   }
 
   @Get('/:id')
@@ -370,5 +372,56 @@ export class ResourceController {
     await this.fileService.repo(existing.get().id).then((repo) => repo.repo.removeRepo())
 
     await this.resourceService.delete(existing.get())
+  }
+
+  @Get('/:id/configurable-exercise')
+  async isConfigurableExercise(@Req() req: IRequest, @UUIDParam('id') id: string): Promise<ItemResponse<boolean>> {
+    const resource = await this.resourceService.findByIdOrCode(id)
+    if (!resource.isPresent()) {
+      throw new NotFoundResponse(`Resource not found: ${id}`)
+    }
+
+    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: resource.get() })
+    if (!permissions.write) {
+      throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
+    }
+
+    return new ItemResponse({ resource: await this.resourceService.isConfigurableExercise(id) })
+  }
+
+  @Patch('/:id/template')
+  async updateTemplate(
+    @Req() req: IRequest,
+    @UUIDParam('id') id: string,
+    @Body('templateId') templateId: string,
+    @Body('templateVersion') templateVersion: string
+  ): Promise<ItemResponse<ResourceDTO>> {
+    const existing = await this.resourceService.findByIdOrCode(id)
+    if (!existing.isPresent()) {
+      throw new NotFoundResponse(`Resource not found: ${id}`)
+    }
+
+    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: existing.get() })
+    if (!permissions.write) {
+      throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
+    }
+
+    const resource = Mapper.map(
+      await this.resourceService.update(existing.get(), {
+        templateId,
+        templateVersion,
+      }),
+      ResourceDTO
+    )
+
+    await this.dependencyService.updateTemplateDependency({
+      resourceId: id,
+      resourceVersion: LATEST,
+      dependOnId: templateId,
+      dependOnVersion: templateVersion,
+      isTemplate: true,
+    })
+
+    return new ItemResponse({ resource })
   }
 }

@@ -30,4 +30,6 @@ export abstract class ResourceProvider {
   abstract moveToOwnerCircle(resource: Resource): Observable<Resource>
   abstract delete(resource: Resource): Observable<void>
   abstract listOwners(): Observable<User[]>
+  abstract isConfigurableExercise(resourceId: string): Observable<boolean>
+  abstract updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource>
 }

@@ -63,19 +63,13 @@ export class PloEditorComponent implements OnInit, OnDestroy {
     const file = this.request.file!
     this.readOnly = file?.readOnly
 
-    const { currentResource, currentVersion } = this.presenter
-    const main = await this.fileService.readFile(
-      this.presenter.buildUri(currentResource!.id, currentVersion, EXERCISE_MAIN_FILE)
-    )
+    const template = this.presenter.currentResource.templateId
+    const version = this.presenter.currentResource.templateVersion
 
-    const tokens = main
-      .replace('@extends', '')
-      .trim()
-      .split('/')
-      .map((s) => s.trim())
-      .filter(Boolean)
+    if (!template || !version) {
+      throw new Error('Template ID or version is missing')
+    }
 
-    const [template, version] = tokens[0].split(':')
     try {
       const [content, configContent] = await Promise.all([
         this.fileService.open(this.request.uri),

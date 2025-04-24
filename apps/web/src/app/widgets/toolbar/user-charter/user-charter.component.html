@@ -1,0 +1,45 @@
+<nz-modal
+  [(nzVisible)]="userCharterModalVisible"
+  [nzTitle]="'Droits d\'accès aux ressources'"
+  [nzFooter]="userCharterFooter"
+  (nzOnCancel)="cancelUserCharter()"
+  [nzMaskClosable]="false"
+>
+  <ng-container *nzModalContent>
+    <div class="user-charter-content">
+      <main>
+        <p>
+          Platon est une plateforme d'apprentissage collaborative qui encourage le partage et l'échange de
+          connaissances.
+        </p>
+        <p>
+          Toutes les ressources créées ici sont mises à disposition sous la licence
+          <strong>Creative Commons ShareAlike 2.0</strong>.
+        </p>
+        <p>Cela signifie que vous êtes libre de :</p>
+        <ul>
+          <li>Partager — copier, distribuer et communiquer les ressources</li>
+          <li>Adapter — remixer, transformer et créer à partir des ressources</li>
+        </ul>
+        <p>
+          A condition de donner crédit de manière appropriée et de partager les œuvres dérivées sous les mêmes
+          conditions.
+        </p>
+        <p>
+          Pour en savoir plus sur cette licence, visitez le site officiel de
+          <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank">Creative Commons ShareAlike 2.0</a>.
+        </p>
+      </main>
+
+      <footer>
+        <p>&copy; 2025 Platon - Plateforme éducative. Tous droits réservés.</p>
+      </footer>
+    </div>
+  </ng-container>
+  <ng-template #userCharterFooter>
+    <div class="modal-footer">
+      <button nz-button nzType="default" (click)="cancelUserCharter()">Refuser</button>
+      <button nz-button nzType="primary" (click)="confirmUserCharter()">Accepter</button>
+    </div>
+  </ng-template>
+</nz-modal>

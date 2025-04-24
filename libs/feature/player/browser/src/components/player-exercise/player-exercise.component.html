@@ -18,8 +18,14 @@
           <nz-countdown *ngIf="countdownValue" [nzValue]="countdownValue" [nzValueStyle]="{ color: countdownColor }" />
         </mat-card-subtitle>
       </div>
-      <div>
-        <button *ngIf="canRequestFullscreen" nz-tooltip="Plein écran" (click)="toggleFullscreen()" mat-icon-button>
+      <div class="flex">
+        <button
+          class="flex"
+          *ngIf="canRequestFullscreen"
+          nz-tooltip="Plein écran"
+          (click)="toggleFullscreen()"
+          mat-icon-button
+        >
           <mat-icon>{{ fullscreen ? 'fullscreen' : 'fullscreen_exit' }}</mat-icon>
         </button>
       </div>

@@ -1,48 +1,88 @@
 <ng-container *ngIf="!loading; else spinner">
   <div class="files">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>
-          Fichiers
-          <span>
-            <ng-container *ngIf="code"> &#64;{{ code }}:{{ version }} </ng-container>
-          </span>
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <nz-tree *ngIf="nodes.length; else noFiles" nzBlockNode [nzData]="nodes" [nzTreeTemplate]="nzTreeTemplate">
-        </nz-tree>
-      </mat-card-content>
-    </mat-card>
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Historique des fichiers</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div *ngFor="let commit of commits">
-          @if (commit.isMore) {
-          <div class="more">
-            {{ commit.message }}
-            <button nz-button nzType="link" nzSize="small" (click)="refreshGitLog(false)">(Voir plus)</button>
-          </div>
-          } @else {
-          <div class="timeline-item">
-            @if (commit.displayAuthor) {
-            <user-avatar showUsername="inline" [userIdOrName]="commit.author" />
-            <span> - {{ commit.date | date : 'dd/MM/yyyy à HH:mm' }}</span>
-            }
-            <div class="commit-message">
-              <span class="hidden-date">{{ commit.date | date : 'HH:mm' }}</span>
-              <span class="message">
-                <div class="message-content">{{ commit.message }}</div>
-                <div *ngFor="let tag of commit.tags" class="tag">{{ tag }}</div>
-              </span>
+    <div class="row" [ngClass]="{ 'has-exercises': exerciseTree?.length }">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            Fichiers
+            <span>
+              <ng-container *ngIf="code"> &#64;{{ code }}:{{ version }} </ng-container>
+            </span>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <nz-tree *ngIf="nodes.length; else noFiles" nzBlockNode [nzData]="nodes" [nzTreeTemplate]="nzTreeTemplate">
+          </nz-tree>
+        </mat-card-content>
+      </mat-card>
+      <mat-card *ngIf="exerciseTree?.length">
+        <mat-card-header>
+          <mat-card-title>
+            Exercices
+            <span>
+              <ng-container *ngIf="code"> &#64;{{ code }}:{{ version }} </ng-container>
+            </span>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <nz-tree
+            nzBlockNode
+            [nzData]="exerciseTree ?? []"
+            nzExpandAll="true"
+            [nzTreeTemplate]="nzTreeExercisesTemplate"
+          >
+            <ng-template #nzTreeExercisesTemplate let-node let-origin="origin">
+              <ng-container>
+                @if (!node.isLeaf) {
+                <div class="node">
+                  <ui-icon
+                    [icon]="node.title | iconFile : { alt: node.title, expanded: node.isExpanded, isDirectory: true }"
+                  />
+                  <div class="folder-name">{{ node.title }}</div>
+                </div>
+                } @else {
+                <div class="node" (dblclick)="openUrl(origin.url)">
+                  <ui-icon [icon]="'exercise.ple' | iconFile : { alt: 'exercise.ple' }" />
+                  <div class="file-name">{{ node.title }}</div>
+                </div>
+                }
+              </ng-container>
+            </ng-template>
+          </nz-tree>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="row">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Historique des fichiers</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngFor="let commit of commits">
+            @if (commit.isMore) {
+            <div class="more">
+              {{ commit.message }}
+              <button nz-button nzType="link" nzSize="small" (click)="refreshGitLog(false)">(Voir plus)</button>
             </div>
+            } @else {
+            <div class="timeline-item">
+              @if (commit.displayAuthor) {
+              <user-avatar showUsername="inline" [userIdOrName]="commit.author" />
+              <span> - {{ commit.date | date : 'dd/MM/yyyy à HH:mm' }}</span>
+              }
+              <div class="commit-message">
+                <span class="hidden-date">{{ commit.date | date : 'HH:mm' }}</span>
+                <span class="message">
+                  <div class="message-content">{{ commit.message }}</div>
+                  <div *ngFor="let tag of commit.tags" class="tag">{{ tag }}</div>
+                </span>
+              </div>
+            </div>
+            }
           </div>
-          }
-        </div>
-      </mat-card-content>
-    </mat-card>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
   <mat-card>
     <mat-card-header>

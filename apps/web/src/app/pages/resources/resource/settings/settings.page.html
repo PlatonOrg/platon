@@ -12,6 +12,12 @@
       </a>
       <app-resource-informations />
     </nz-tab>
+    <nz-tab *ngIf="context.resource?.templateId">
+      <a *nzTabLink nz-tab-link [routerLink]="['.']" [queryParams]="{ tab: 'template' }" queryParamsHandling="merge">
+        Template
+      </a>
+      <app-resource-template />
+    </nz-tab>
     <nz-tab *ngIf="context.resource?.type === 'CIRCLE'">
       <a *nzTabLink nz-tab-link [routerLink]="['.']" [queryParams]="{ tab: 'members' }" queryParamsHandling="merge">
         Collaborateurs

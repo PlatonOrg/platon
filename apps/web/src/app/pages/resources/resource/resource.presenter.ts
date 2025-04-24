@@ -3,6 +3,7 @@ import { Injectable, OnDestroy, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { AuthService, DialogService, TagService } from '@platon/core/browser'
 import { Level, ListResponse, Topic, User } from '@platon/core/common'
+import { ActivityExerciseGroup } from '@platon/feature/compiler'
 import { ResourceFileService, ResourceService } from '@platon/feature/resource/browser'
 import {
   CircleTree,
@@ -21,6 +22,7 @@ import {
 } from '@platon/feature/resource/common'
 import { ResourceDashboardModel, ResultService } from '@platon/feature/result/browser'
 import { LayoutState, layoutStateFromError } from '@platon/shared/ui'
+import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { BehaviorSubject, Observable, Subscription, firstValueFrom } from 'rxjs'
 
 @Injectable()
@@ -101,6 +103,39 @@ export class ResourcePresenter implements OnDestroy {
       return [tree, versions]
     }
     throw new ReferenceError('missing resource')
+  }
+
+  async exerciseTree(version?: string): Promise<NzTreeNodeOptions[]> {
+    const { resource } = this.context.value
+    if (!resource) throw new ReferenceError('missing resource')
+    if (resource.type != 'ACTIVITY') {
+      return []
+    }
+    const exerciseTree: ActivityExerciseGroup[] = await firstValueFrom(this.fileService.exerciseTree(resource, version))
+    const resourcesNames = await firstValueFrom(this.resourceService.search({ usedBy: [resource.id] }))
+    const resourcesNamesMap = new Map<string, string>()
+    resourcesNames.resources.forEach((r) => {
+      resourcesNamesMap.set(r.id, r.name)
+    })
+    const res = exerciseTree.map((e) => {
+      const children = e.exercises.map((e) => {
+        return {
+          key: e.id,
+          title: resourcesNamesMap.get(e.resource) || e.resource,
+          isLeaf: true,
+          url: '/resources/' + e.resource,
+          children: [],
+        }
+      })
+      return {
+        key: e.name,
+        title: e.name,
+        isLeaf: false,
+        children: children,
+      }
+    })
+
+    return res
   }
 
   async createTag(tag: string, message: string): Promise<boolean> {

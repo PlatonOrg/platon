@@ -86,7 +86,7 @@ export const OwnerFilterIndicator = (owner: User): FilterIndicator<ResourceFilte
       ...filters,
       owners: filters.owners?.filter((e) => e !== owner.id),
     }),
-    describe: () => `Propriétaire : ${owner.username}`,
+    describe: () => `Propriétaire : ${owner.firstName} ${owner.lastName}`,
   }
 }
 

@@ -1,10 +1,9 @@
 export interface ResourceDependency {
   resourceId: string
-  resourceName: string
   resourceVersion: string
   dependOnId: string
-  dependOnName: string
   dependOnVersion: string
+  isTemplate: boolean
 }
 
 export interface CreateResourceDependency {
@@ -12,4 +11,5 @@ export interface CreateResourceDependency {
   dependOnId: string
   resourceVersion: string
   dependOnVersion: string
+  isTemplate: boolean
 }

@@ -1,6 +1,6 @@
 ### STAGE 1: Build ###
 
-FROM node:22-alpine as build
+FROM node:22-alpine AS build
 
 # Install python3, make, g++, Git, and NodeGit dependencies
 RUN apk add --no-cache --update \
@@ -18,6 +18,7 @@ WORKDIR /src
 
 # Copy dependencies
 COPY --chown=node:node package.json yarn.lock ./
+COPY --chown=node:node shared ./shared
 
 # Install dependencies
 RUN yarn install --frozen-lockfile --non-interactive
@@ -29,30 +30,30 @@ RUN cd apps/docs && yarn install --frozen-lockfile --non-interactive
 COPY --chown=node:node .graphql ./.graphql
 COPY --chown=node:node apps ./apps
 COPY --chown=node:node libs ./libs
-COPY --chown=node:node shared ./shared
 COPY --chown=node:node types ./types
 COPY --chown=node:node nx.json  ./nx.json
+COPY --chown=node:node tools ./tools
 COPY --chown=node:node codegen.ts ./codegen.ts
 COPY --chown=node:node schema.gql ./schema.gql
 COPY --chown=node:node tsconfig.base.json  ./tsconfig.base.json
-
+COPY --chown=node:node bin/cli/wc-docs.sh ./bin/cli/wc-docs.sh
 # Generate GraphQL types
 RUN yarn graphql:generate
 
 # Build NestJS API, Angular web app and docs
-RUN yarn build:api
 RUN yarn build:web
+RUN yarn build:api
 RUN yarn build:docs
 
 # Rebuild node_modules with only production dependencies
-ENV NODE_ENV production
+ENV NODE_ENV=production
 RUN yarn install --frozen-lockfile --non-interactive --production
 
 USER node
 
 ### STAGE 2: Production ###
 
-FROM node:22-alpine as production
+FROM node:22-alpine AS production
 RUN apk add --no-cache --update \
   bash \
   openssh \

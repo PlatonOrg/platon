@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs'
 
 import { Injectable } from '@angular/core'
-import { PLSourceFile } from '@platon/feature/compiler'
+import { ActivityExerciseGroup, PLSourceFile } from '@platon/feature/compiler'
 import {
   ExerciseTransformInput,
   FileCreate,
@@ -39,6 +39,10 @@ export class ResourceFileService {
 
   tree(resource: string | Resource, version?: string): Observable<ResourceFile> {
     return this.provider.tree(resource, version)
+  }
+
+  exerciseTree(resource: string | Resource, version?: string): Observable<ActivityExerciseGroup[]> {
+    return this.provider.exerciseTree(resource, version)
   }
 
   read(resource: string | Resource, path: string, version?: string): Observable<ResourceFile> {

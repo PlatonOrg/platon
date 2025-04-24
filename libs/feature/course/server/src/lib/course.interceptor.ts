@@ -32,49 +32,57 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
   }
 
   async intercept(args: LTILaunchInterceptorArgs): Promise<void> {
+    const { payload, lms, lmsUser } = args
+    const { user } = lmsUser
+    const role = this.getRoleFromPayload(payload)
+
     const courseMatch = args.nextUrl.match(/\/courses\/(?<courseId>[^\\/]+)/)
     let courseId = courseMatch?.groups?.['courseId']
-    const { user } = args.lmsUser
-    if (courseId) {
-      const courseMemberOptional = await this.courseMemberService.getByUserIdAndCourseId(user.id, courseId)
-      courseMemberOptional.ifPresentOrElse(
-        (member) =>
-          member.role === this.getRoleFromPayload(args.payload)
-            ? member
-            : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              this.courseMemberService.updateRole(courseId!, member.id, this.getRoleFromPayload(args.payload)),
-        () => {
-          this.logger.log(`LTI: Adding ${user.username} to course ${courseId}`)
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          return this.courseMemberService.addUser(courseId!, user.id, this.getRoleFromPayload(args.payload))
-        }
-      )
-    } else {
-      const lmsCourse = await this.lmsCourseService.findLmsCourseFromLTI(args.payload['context_id'], args.lms.id)
-      // Create course if course not found and user is teacher
-      if (this.getRoleFromPayload(args.payload) === CourseMemberRoles.teacher && !lmsCourse.isPresent()) {
+
+    if (!courseId) {
+      const lmsCourse = await this.lmsCourseService.findLmsCourseFromLTI(payload['context_id'], lms.id)
+
+      const lmsCoursePresent = lmsCourse.isPresent()
+
+      if (!lmsCoursePresent && role === CourseMemberRoles.teacher) {
         const course = await this.CourseService.create({
-          name: args.payload['context_title'],
-          desc: `Cours PLaTOn rattaché à : ${args.payload['context_title']}`,
+          name: payload['context_title'],
+          desc: `Cours PLaTOn rattaché à : ${payload['context_title']}`,
           ownerId: user.id,
         })
+
         courseId = course.id
+
         await this.lmsCourseService.create({
-          lmsId: args.lms.id,
-          lmsCourseId: args.payload['context_id'],
+          lmsId: lms.id,
+          lmsCourseId: payload['context_id'],
           courseId,
         })
-        args.nextUrl = `/courses/${course.id}`
-      } else if (!lmsCourse.isPresent() && this.getRoleFromPayload(args.payload) !== CourseMemberRoles.teacher) {
+
+        args.nextUrl = `/courses/${courseId}`
+      } else if (!lmsCoursePresent && role !== CourseMemberRoles.teacher) {
         args.nextUrl = '/courses/not-found'
+        return
       } else {
         courseId = lmsCourse.get().courseId
-        args.nextUrl = `/courses/${lmsCourse.get().courseId}`
+        args.nextUrl = `/courses/${courseId}`
       }
     }
 
-    if (courseId && args.payload['custom_groups'] && args.payload['custom_groups'].length > 0) {
-      for (const group of args.payload['custom_groups'].split(',')) {
+    const courseMember = await this.courseMemberService.getByUserIdAndCourseId(user.id, courseId)
+
+    courseMember.ifPresentOrElse(
+      (member) => (member.role === role ? member : this.courseMemberService.updateRole(courseId, member.id, role)),
+      () => {
+        this.logger.log(`LTI: Adding ${user.username} to course ${courseId}`)
+        return this.courseMemberService.addUser(courseId, user.id, role)
+      }
+    )
+
+    const customGroups = payload['custom_groups']
+    if (courseId && customGroups && customGroups.length > 0) {
+      const groups = customGroups.split(',')
+      for (const group of groups) {
         await this.courseGroupService.addCourseGroup(courseId, group)
         await this.courseGroupMemberService.addCourseGroupMember(group, user.id)
       }
