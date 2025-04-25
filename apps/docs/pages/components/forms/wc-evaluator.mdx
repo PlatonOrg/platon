@@ -1,0 +1,250 @@
+---
+title: Evaluator
+description: Carte permettant de donner une note à un élément avec des étoiles ou autres icônes personnalisées.
+---
+
+import { Tabs, Tab } from 'nextra/components'
+import { ComponentProperties, Playground } from '../../../components'
+import { useAbsoluteUrl } from '../../../hooks'
+
+# Evaluator
+
+`wc-evaluator`
+
+Carte permettant de donner une note à un élément avec des étoiles ou autres icônes personnalisées.
+
+## Documentation
+
+Le composant Evaluator permet de donner un note à un élément avec des étoiles ou d'autres icônes personnalisées.
+
+### Propriétés principales
+
+- **title**: Titre de l'élément à noter
+- **count**: Nombre d'étoiles maximal
+- **allowHalf**: Booléen permettant d'activer la possibilité de donner des demi-points
+- **value**: Valeur de la note donnée par l'utilisateur
+
+### Configuration des icônes
+
+Le composant possède une propriété **icons** qui permet d'ajouter des icônes personnalisées.
+Les noms d'icônes utilisables sont situés sur la page suivante :
+[Liste des icônes disponibles](https://ng.ant.design/version/18.2.x/components/icon/en)
+
+Vous pouvez les configurer de deux façons :
+
+#### 1. Une seule icône
+
+Vous pouvez faire en sorte que toutes les icônes soient les mêmes en donnant le nom de l'icône :
+
+```typescript
+icons = 'star'
+count = 5
+```
+
+☆☆☆☆☆
+
+#### 2. Plusieurs icônes
+
+Vous pouvez ajouter plusieurs icônes différentes. Pour cela, il faut donner une liste des noms d'icônes :
+
+```typescript
+icons = ['frown', 'meh', 'smile']
+count = 3
+```
+
+🙁😐🙂
+
+#### Icones pleines
+
+Vous pouvez déninir la propriété `filledIcons = true` pour avoir des icônes pleines. Cela n'est compatible qu'avec les icônes possèdant le thème **Filled** parmi la liste fournie ci-dessus.
+
+★★★★★
+
+## Exemple interactif
+
+<Playground
+  width="100%"
+  height="700px"
+  items={[
+    {
+      name: 'Visualisation',
+      url: 'playground/components/wc-evaluator',
+    },
+    ...[],
+  ]}
+/>
+
+## API
+
+<Tabs items={['Graphique', 'JSON']}>
+  <Tab>
+    <ComponentProperties schema={{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "Evaluator",
+  "properties": {
+    "title": {
+      "type": "string",
+      "default": "",
+      "description": "Titre."
+    },
+    "value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valeur sélectionnée."
+    },
+    "count": {
+      "type": "number",
+      "default": 5,
+      "description": "Nombre d'éléments à afficher."
+    },
+    "width": {
+      "type": [
+        "string",
+        "number"
+      ],
+      "default": "",
+      "description": "Largeur."
+    },
+    "height": {
+      "type": [
+        "string",
+        "number"
+      ],
+      "default": "",
+      "description": "Hauteur."
+    },
+    "allowHalf": {
+      "type": "boolean",
+      "default": false,
+      "description": "Autoriser la sélection de demi-éléments?"
+    },
+    "icons": {
+      "type": [
+        "string",
+        "array"
+      ],
+      "default": "star",
+      "description": "Icône à afficher. Peut être une chaîne ou un tableau de chaînes.",
+      "items": {
+        "type": "string",
+        "description": "Icône à afficher."
+      }
+    },
+    "filledIcons": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher les icônes remplies? (Disponible uniquement pour les icônes compatibles)"
+    },
+    "tooltips": {
+      "type": [
+        "string",
+        "array"
+      ],
+      "default": "",
+      "description": "Texte d'info-bulle à afficher. Peut être une chaîne ou un tableau de chaînes.",
+      "items": {
+        "type": "string",
+        "description": "Texte d'info-bulle à afficher."
+      }
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver la possibilité de choisir une valeur?"
+    },
+    "autoValidation": {
+      "type": "boolean",
+      "default": false,
+      "description": "Activer la validation automatique?"
+    }
+  }
+}} />
+  </Tab>
+  <Tab>
+    ```json
+    {
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "Evaluator",
+  "properties": {
+    "title": {
+      "type": "string",
+      "default": "",
+      "description": "Titre."
+    },
+    "value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valeur sélectionnée."
+    },
+    "count": {
+      "type": "number",
+      "default": 5,
+      "description": "Nombre d'éléments à afficher."
+    },
+    "width": {
+      "type": [
+        "string",
+        "number"
+      ],
+      "default": "",
+      "description": "Largeur."
+    },
+    "height": {
+      "type": [
+        "string",
+        "number"
+      ],
+      "default": "",
+      "description": "Hauteur."
+    },
+    "allowHalf": {
+      "type": "boolean",
+      "default": false,
+      "description": "Autoriser la sélection de demi-éléments?"
+    },
+    "icons": {
+      "type": [
+        "string",
+        "array"
+      ],
+      "default": "star",
+      "description": "Icône à afficher. Peut être une chaîne ou un tableau de chaînes.",
+      "items": {
+        "type": "string",
+        "description": "Icône à afficher."
+      }
+    },
+    "filledIcons": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher les icônes remplies? (Disponible uniquement pour les icônes compatibles)"
+    },
+    "tooltips": {
+      "type": [
+        "string",
+        "array"
+      ],
+      "default": "",
+      "description": "Texte d'info-bulle à afficher. Peut être une chaîne ou un tableau de chaînes.",
+      "items": {
+        "type": "string",
+        "description": "Texte d'info-bulle à afficher."
+      }
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver la possibilité de choisir une valeur?"
+    },
+    "autoValidation": {
+      "type": "boolean",
+      "default": false,
+      "description": "Activer la validation automatique?"
+    }
+  }
+}
+    ```
+  </Tab>
+</Tabs>
