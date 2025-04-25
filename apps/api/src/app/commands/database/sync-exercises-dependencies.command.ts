@@ -171,13 +171,18 @@ export class SyncExercisesDependencies extends CommandRunner {
     )
 
     // Update the template dependency in the database
-    await this.dependencyService.updateTemplateDependency({
-      resourceId: resource.id,
-      resourceVersion: tag,
-      dependOnId: templateId,
-      dependOnVersion: templateVersion,
-      isTemplate: true,
-    })
+    try {
+      await this.dependencyService.updateTemplateDependency({
+        resourceId: resource.id,
+        resourceVersion: tag,
+        dependOnId: templateId,
+        dependOnVersion: templateVersion,
+        isTemplate: true,
+      })
+    } catch (e) {
+      this.logger.error(`Error while updating template dependency`, e)
+      return null
+    }
 
     // Edit the file to comment the line with "@extends" and add a link to the documentation
     const lines = bufferContent.split('\n')

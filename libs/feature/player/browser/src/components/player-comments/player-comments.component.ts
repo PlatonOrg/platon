@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { firstValueFrom } from 'rxjs'
 
@@ -14,6 +14,8 @@ import { AuthService, DialogModule, DialogService, UserAvatarComponent } from '@
 import { User } from '@platon/core/common'
 import { SessionComment } from '@platon/feature/result/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzEmptyModule } from 'ng-zorro-antd/empty'
+import { ExercisePlayer } from '@platon/feature/player/common'
 
 @Component({
   standalone: true,
@@ -30,20 +32,22 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
     NzInputModule,
     NzButtonModule,
     NzCommentModule,
+    NzEmptyModule,
 
     DialogModule,
     UserAvatarComponent,
   ],
 })
-export class PlayerCommentsComponent implements OnInit {
-  @Input() answerId!: string
-  @Input() sessionId!: string
+export class PlayerCommentsComponent implements OnInit, OnChanges {
+  @Input() answers: ExercisePlayer[] = []
   @Input() canComment = false
 
   protected comments: SessionComment[] = []
   protected input = ''
   protected user!: User
   protected submitting = false
+  private sessionId = ''
+  private answerId = ''
 
   constructor(
     private readonly authService: AuthService,
@@ -54,6 +58,16 @@ export class PlayerCommentsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User
+    this.sessionId = this.answers[this.answers.length - 1].sessionId
+    this.answerId = this.answers[this.answers.length - 1].answerId as string
+    const response = await firstValueFrom(this.resultService.listComments(this.sessionId, this.answerId))
+    this.comments = response.resources
+    this.changeDetectorRef.markForCheck()
+  }
+
+  async ngOnChanges(): Promise<void> {
+    this.sessionId = this.answers[this.answers.length - 1].sessionId
+    this.answerId = this.answers[this.answers.length - 1].answerId as string
     const response = await firstValueFrom(this.resultService.listComments(this.sessionId, this.answerId))
     this.comments = response.resources
     this.changeDetectorRef.markForCheck()
@@ -73,5 +87,14 @@ export class PlayerCommentsComponent implements OnInit {
       this.submitting = false
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  protected async blockEvents(event: KeyboardEvent): Promise<void> {
+    if (event.metaKey && event.key === 'Enter') {
+      await this.onSubmitComment()
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    event.stopPropagation()
   }
 }

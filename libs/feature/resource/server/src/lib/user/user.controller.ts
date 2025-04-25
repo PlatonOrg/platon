@@ -1,6 +1,6 @@
 import { Expandable } from '@cisstech/nestjs-expand'
 import { Controller, Get, Param, Req, UnauthorizedException } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { IRequest, Mapper } from '@platon/core/server'
 import { ResourceInvitationDTO, ResourceInvitationService } from '../invitations'
@@ -8,6 +8,7 @@ import { MemberPermissions } from '../permissions'
 import { ResourceDTO } from '../resource.dto'
 import { ResourceService } from '../resource.service'
 
+@ApiBearerAuth()
 @Controller('users/:username')
 @ApiTags('Users')
 export class UserResourceController {

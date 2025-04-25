@@ -19,6 +19,15 @@
       >
         <i nz-icon nzType="play-circle" nzTheme="outline"></i>
       </ui-list-item-article-action>
+      <ui-list-item-article-action
+        *ngIf="configurable && !shorten"
+        class="action"
+        [routerLink]="['/resources/create']"
+        [queryParams]="{ type: item.type, template: item.id }"
+        actionTitle="Créer à partir"
+      >
+        <i nz-icon nzType="node-expand" nzTheme="outline"></i>
+      </ui-list-item-article-action>
     </ng-container>
     <div class="spacer"></div>
 

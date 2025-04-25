@@ -23,6 +23,13 @@ import { SessionEntity } from './sessions/session.entity'
 import { SessionService } from './sessions/session.service'
 import { SessionDataEntity } from './sessions/session-data.entity'
 import { SessionSubscriber } from './sessions/session.subscriber'
+import { LabelService } from './label/label.service'
+import { LabelController } from './label/label.controller'
+import { LabelEntity } from './label/label.entity'
+import { CorrectionLabelEntity } from './label/correction-label/correction-label.entity'
+import { CorrectionLabelService } from './label/correction-label/correction-label.service'
+import { CourseLabelEntity } from './label/course-label/course-label.entity'
+import { UserFavoriteLabel } from './label/user-favorite-label/user-favorite-label.entity'
 @Module({
   imports: [
     FeatureCourseServerModule,
@@ -35,6 +42,10 @@ import { SessionSubscriber } from './sessions/session.subscriber'
       SessionCommentEntity,
       SessionDataEntity,
       SessionSubscriber,
+      LabelEntity,
+      CorrectionLabelEntity,
+      CourseLabelEntity,
+      UserFavoriteLabel,
     ]),
   ],
   controllers: [
@@ -43,6 +54,7 @@ import { SessionSubscriber } from './sessions/session.subscriber'
     CorrectionController,
     LeaderboardController,
     SessionCommentController,
+    LabelController,
   ],
   providers: [
     AnswerService,
@@ -56,6 +68,8 @@ import { SessionSubscriber } from './sessions/session.subscriber'
     CourseExpander,
     ResourceExpander,
     ActivityService,
+    LabelService,
+    CorrectionLabelService,
   ],
   exports: [
     TypeOrmModule,
@@ -66,6 +80,8 @@ import { SessionSubscriber } from './sessions/session.subscriber'
     SessionCommentService,
     LeaderboardService,
     ActivityService,
+    LabelService,
+    CorrectionLabelService,
   ],
 })
 export class FeatureResultServerModule {}

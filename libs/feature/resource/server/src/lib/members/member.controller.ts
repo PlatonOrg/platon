@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Patch, Post, Query, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
   ErrorResponse,
   ForbiddenResponse,
@@ -12,6 +12,7 @@ import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import { ResourceMemberDTO, ResourceMemberFiltersDTO, UpdateResourceMemberDTO } from './member.dto'
 import { ResourceMemberService } from './member.service'
 
+@ApiBearerAuth()
 @Controller('resources/:resourceId/members')
 @ApiTags('Resources')
 export class ResourceMemberController {

@@ -21,6 +21,7 @@ import {
   CourseDemoGetResponseDTO,
 } from './course-demo.dto'
 import { CourseMemberRoles } from '@platon/feature/course/common'
+import { ApiBearerAuth } from '@nestjs/swagger'
 
 @Controller('courses/demo')
 export class CourseDemoController {
@@ -53,6 +54,7 @@ export class CourseDemoController {
     return new ItemResponse({ resource })
   }
 
+  @ApiBearerAuth()
   @Get(':courseId')
   async getDemo(
     @Req() req: IRequest,
@@ -78,6 +80,7 @@ export class CourseDemoController {
     return new ItemResponse({ resource })
   }
 
+  @ApiBearerAuth()
   @Roles(UserRoles.teacher, UserRoles.admin)
   @Post()
   async createDemo(@Req() req: IRequest, @Body() body: CourseDemoCreateDTO): Promise<CreatedResponse<CourseDemoDTO>> {
@@ -98,6 +101,7 @@ export class CourseDemoController {
     return new CreatedResponse({ resource })
   }
 
+  @ApiBearerAuth()
   @Roles(UserRoles.teacher, UserRoles.admin)
   @Delete(':courseId')
   async deleteDemo(@Req() req: IRequest, @Param() params: CourseDemoDeleteDTO): Promise<NoContentResponse> {

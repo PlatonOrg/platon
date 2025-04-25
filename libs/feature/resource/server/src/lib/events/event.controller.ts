@@ -1,10 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ListResponse } from '@platon/core/common'
 import { Mapper, UUIDParam } from '@platon/core/server'
 import { ResourceEventDTO, ResourceEventFiltersDTO } from './event.dto'
 import { ResourceEventService } from './event.service'
 
+@ApiBearerAuth()
 @Controller('resources/:resourceId/events')
 @ApiTags('Resources')
 export class ResourceEventController {

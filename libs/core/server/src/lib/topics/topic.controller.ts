@@ -1,10 +1,11 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse } from '@platon/core/common'
 import { Mapper, UUIDParam } from '../utils'
 import { CreateTopicDTO, TopicDTO, UpdateTopicDTO } from './topic.dto'
 import { TopicService } from './topic.service'
 
+@ApiBearerAuth()
 @Controller('topics')
 @ApiTags('Settings')
 export class TopicController {

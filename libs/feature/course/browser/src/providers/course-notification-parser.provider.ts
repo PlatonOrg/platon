@@ -95,9 +95,9 @@ export const CorrectionPendingNotificationParser: NotificationParser<CorrectionP
     const router = injector.get(Router)
     return {
       icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Vous avez de nouvelles corrections en attente sur “${notification.data.activityName}”`,
+      content: `Vous avez de nouvelles corrections en attente pour le cours “${notification.data.courseName}”`,
       onClick: ({ onClose }) => {
-        router.navigate([`/player/correction/${notification.data.activityId}`]).catch(console.error)
+        router.navigate([`/player/correction/${notification.data.courseId}`]).catch(console.error)
         onClose()
       },
     }

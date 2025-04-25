@@ -83,7 +83,7 @@
         </section>
       </ng-template>
       <ng-template
-        *ngIf="type === 'EXERCISE'"
+        *ngIf="type === 'EXERCISE' && this.template === undefined"
         uiStepperStep
         stepTitle="Mode d'édition"
         stepIcon="edit"
@@ -161,7 +161,7 @@
                 @for (item of source.templates; track item.id) {
                 <div>
                   <div class="template-item" (click)="template = item; infos.markAllAsTouched(); stepper.nextStep()">
-                    <resource-item [item]="item" editable="false" clickable="false" simple />
+                    <resource-item [item]="item" editable="false" clickable="false" [shorten]="true" />
                   </div>
                   <button
                     [nzType]="item.id === template?.id ? 'primary' : 'default'"
@@ -177,7 +177,7 @@
             }
           </nz-collapse>
           }
-          <div>
+          <div *ngIf="!this.template">
             <span> Vous ne trouvez pas un template ? </span>
             <span> Pensez à <b>suivre</b> les cercles qui vous intéresse ! </span>
           </div>

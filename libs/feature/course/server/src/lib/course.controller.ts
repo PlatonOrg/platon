@@ -1,6 +1,6 @@
 import { Expandable } from '@cisstech/nestjs-expand'
 import { Body, Controller, Delete, Get, Patch, Post, Query, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
   CreatedResponse,
   ForbiddenResponse,
@@ -15,6 +15,7 @@ import { CourseService } from './services/course.service'
 import { CoursePermissionsService } from './permissions/permissions.service'
 import { CourseMemberService } from './course-member/course-member.service'
 
+@ApiBearerAuth()
 @Controller('courses')
 @ApiTags('Courses')
 export class CourseController {

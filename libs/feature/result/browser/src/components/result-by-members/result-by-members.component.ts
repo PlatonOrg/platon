@@ -38,5 +38,17 @@ import { AnswerStatePipesModule } from '../../pipes'
 })
 export class ResultByMembersComponent {
   @Input({ required: true }) results: UserResults[] = []
+  @Input() columnOrder?: string[] = []
+
   protected answerStates = Object.values(AnswerStates)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  trackByColumnOrder = (a: any, b: any): number => {
+    const indexA = this.columnOrder?.indexOf(a.value.title)
+    const indexB = this.columnOrder?.indexOf(b.value.title)
+    if (indexA === undefined || indexB === undefined) {
+      return 0
+    }
+    return indexA - indexB
+  }
 }

@@ -138,6 +138,11 @@ export class ResourceCreatePage implements OnInit {
   async ngOnInit(): Promise<void> {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes
     this.parentId = this.activatedRoute.snapshot.queryParamMap.get('parent') || undefined
+    const templateId = this.activatedRoute.snapshot.queryParamMap.get('template') || undefined
+    if (templateId) {
+      this.template = await firstValueFrom(this.resourceService.find({ id: templateId }))
+      this.editionMode = 'template'
+    }
 
     const user = (await this.authService.ready()) as User
     const [tree, topics, levels] = await Promise.all([
@@ -212,10 +217,9 @@ export class ResourceCreatePage implements OnInit {
   }
 
   protected async preloadTemplates(): Promise<void> {
-    if (this.loadingTemplates) return
+    if (this.loadingTemplates || this.template) return
 
     this.loadingTemplates = true
-    this.template = undefined
     this.templateSources = []
     this.selectedTemplateSources.clear()
 

@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, Post, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse, ListResponse, NoContentResponse } from '@platon/core/common'
 import { IRequest, Mapper, UUIDParam } from '@platon/core/server'
 import { CreateSessionComment } from '@platon/feature/result/common'
 import { SessionCommentDTO } from './comment.dto'
 import { SessionCommentService } from './comment.service'
 
+@ApiBearerAuth()
 @Controller('results/session/:sessionId/comments')
 @ApiTags('Results')
 export class SessionCommentController {

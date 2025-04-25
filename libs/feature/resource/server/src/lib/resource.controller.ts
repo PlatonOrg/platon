@@ -11,7 +11,7 @@ import {
   Query,
   Req,
 } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
   BadRequestResponse,
   CreatedResponse,
@@ -42,6 +42,7 @@ import { ResourceService } from './resource.service'
 import { ResourceViewService } from './views/view.service'
 import { ResourceDependencyService } from './dependency'
 
+@ApiBearerAuth()
 @Controller('resources')
 @ApiTags('Resources')
 export class ResourceController {

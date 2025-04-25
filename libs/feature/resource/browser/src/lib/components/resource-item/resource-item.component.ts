@@ -83,6 +83,7 @@ export class ResourceItemComponent implements OnChanges {
   @Input({ transform: booleanAttribute }) editable = true
   @Input({ transform: booleanAttribute }) clickable = true
   @Input() previewOverrides?: Variables
+  @Input() shorten = false
   @Output() levelClicked = new EventEmitter<string>()
   @Output() topicClicked = new EventEmitter<string>()
 

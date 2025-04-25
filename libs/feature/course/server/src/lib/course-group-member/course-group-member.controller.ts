@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Post, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CourseGroupMemberService } from './course-group-member.service'
 import { ForbiddenResponse, ListResponse, NoContentResponse, UserRoles } from '@platon/core/common'
 import { CourseMemberDTO } from '../course-member/course-member.dto'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { IRequest, Roles, UUIDParam } from '@platon/core/server'
 
+@ApiBearerAuth()
 @Controller('courseGroupMembers/:courseId/')
 @ApiTags('CourseGroupMembers')
 export class CourseGroupMemberController {

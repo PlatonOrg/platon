@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { IRequest, Mapper, UUIDParam } from '@platon/core/server'
 import { ActivityCorrection, UpsertCorrection } from '@platon/feature/result/common'
 import { ActivityCorrectionDTO, CorrectionDTO } from './correction.dto'
 import { CorrectionService } from './correction.service'
 
+@ApiBearerAuth()
 @Controller('results/corrections')
 @ApiTags('Results')
 export class CorrectionController {

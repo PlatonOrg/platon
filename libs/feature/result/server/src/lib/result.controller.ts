@@ -1,5 +1,5 @@
 import { Controller, Get, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ForbiddenResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Roles, UUIDParam } from '@platon/core/server'
 import {
@@ -15,6 +15,7 @@ import {
 } from '@platon/feature/result/common'
 import { DashboardService } from './dashboard/dashboard.service'
 
+@ApiBearerAuth()
 @Controller('results')
 @ApiTags('Results')
 export class ResultController {
