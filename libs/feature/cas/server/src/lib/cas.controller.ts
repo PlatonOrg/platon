@@ -12,7 +12,7 @@ import {
   HttpRedirectResponse,
 } from '@nestjs/common'
 import { CreateCasDTO, UpdateCasDTO } from './cas.dto'
-import { AuthService, Mapper, Public, UserService, UUIDParam } from '@platon/core/server'
+import { AuthService, Mapper, Public, Roles, UserService, UUIDParam } from '@platon/core/server'
 import { CasService } from './cas.service'
 import { CasDTO, CasFiltersDTO } from './cas.dto'
 import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse, NotFoundResponse } from '@platon/core/common'
@@ -129,16 +129,18 @@ export class CasController {
     }
   }
 
-  @Get()
   @ApiBearerAuth()
+  @Get()
+  @Roles('admin')
   async searchCas(@Query() filters: CasFiltersDTO): Promise<ListResponse<CasDTO>> {
     const [items, total] = await this.service.searchCas(filters)
     const resources = Mapper.mapAll(items, CasDTO)
     return new ListResponse({ total, resources })
   }
 
-  @Get('/:id')
   @ApiBearerAuth()
+  @Get('/:id')
+  @Roles('admin')
   async findCas(@UUIDParam('id') id: string): Promise<ItemResponse<CasDTO>> {
     const optional = await this.service.findCasById(id)
     const resource = Mapper.map(
@@ -148,24 +150,27 @@ export class CasController {
     return new ItemResponse({ resource })
   }
 
-  @Post('/')
   @ApiBearerAuth()
+  @Post('/')
+  @Roles('admin')
   async createCas(@Body() input: CreateCasDTO): Promise<CreatedResponse<CasDTO>> {
     const res = await this.service.createCas({ ...(await this.service.fromInput(input)) })
     const resource = Mapper.map(res, CasDTO)
     return new CreatedResponse({ resource })
   }
 
-  @Patch('/:id')
   @ApiBearerAuth()
+  @Patch('/:id')
+  @Roles('admin')
   async updateCas(@UUIDParam('id') id: string, @Body() input: UpdateCasDTO): Promise<ItemResponse<CasDTO>> {
     const res = await this.service.updateCas(id, { ...(await this.service.fromInput(input)) })
     const resource = Mapper.map(res, CasDTO)
     return new ItemResponse({ resource })
   }
 
-  @Delete('/:id')
   @ApiBearerAuth()
+  @Delete('/:id')
+  @Roles('admin')
   async deleteCas(@UUIDParam('id') id: string): Promise<NoContentResponse> {
     await this.service.deleteCas(id)
     return new NoContentResponse()
