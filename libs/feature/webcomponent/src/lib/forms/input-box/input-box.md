@@ -26,6 +26,11 @@ Spécialisé pour la saisie de valeurs numériques. Dans ce mode:
 
 Idéal pour les réponses plus longues ou structurées sur plusieurs lignes. Ce mode se comporte comme le mode texte mais permet les retours à la ligne.
 
+#### Mode mot de passe (`type: "password"`)
+
+Conçu pour la saisie de mots de passe ou d'informations sensibles. Ce mode masque les caractères saisis pour protéger la confidentialité de l'utilisateur.
+Dans ce mode, la valeur est transmise au grader sous forme de chaîne de caractères, elle est masquée à l'écran pour éviter toute divulgation accidentelle.
+
 ### Fonctionnalités avancées
 
 #### Icônes interactives
