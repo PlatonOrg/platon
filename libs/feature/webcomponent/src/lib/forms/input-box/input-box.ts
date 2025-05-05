@@ -1,7 +1,7 @@
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component'
 
 export interface InputBoxState extends IWebComponent {
-  type: 'number' | 'text' | 'textarea'
+  type: 'number' | 'text' | 'textarea' | 'password'
   hint: string
   value: string | number
   width: string
