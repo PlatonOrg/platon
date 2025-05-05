@@ -277,6 +277,7 @@
     "reflect-metadata": "^0.1.13",
     "reveal.js": "^5.1.0",
     "rxjs": "^7.8.0",
+    "shepherd.js": "^14.5.0",
     "simple-git": "^3.16.0",
     "storybook": "^8.2.8",
     "tar": "^6.1.13",

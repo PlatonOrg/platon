@@ -1,9 +1,10 @@
 <header>
-  <button nz-button nzType="text" (click)="drawerOpenedChange.emit(!drawerOpened)">
+  <button id="tuto-toolbar-menu-button" nz-button nzType="text" (click)="drawerOpenedChange.emit(!drawerOpened)">
     <mat-icon class="icon-color">menu</mat-icon>
   </button>
   <img
     *ngIf="!drawerOpened"
+    id="tuto-toolbar-logo"
     class="logo"
     src="assets/images/logo/platon.svg"
     alt="Logo PLaTon"
@@ -15,6 +16,7 @@
   <ng-container *ngIf="canCreate">
     <div class="menu-trigger-container">
       <button
+        id="tuto-toolbar-create-button"
         nz-button
         nzType="primary"
         nzShape="round"
@@ -33,10 +35,10 @@
     <discord-button class="discord-button" />
   </button>
 
-  <button nz-button nzType="text" nzSize="small" [matMenuTriggerFor]="themeMenu">
+  <button id="tuto-toolbar-theme-button" nz-button nzType="text" nzSize="small" [matMenuTriggerFor]="themeMenu">
     <mat-icon class="icon-color"> {{ themeIcon }} </mat-icon>
   </button>
-  <button nz-button nzType="text" nzSize="small" (click)="notifDrawer.open()">
+  <button id="tuto-toolbar-notifications-button" nz-button nzType="text" nzSize="small" (click)="notifDrawer.open()">
     <nz-badge [nzCount]="(notifDrawer.count | async) || 0" [nzOffset]="[0, -4]">
       <mat-icon class="icon-color"> notifications </mat-icon>
     </nz-badge>
