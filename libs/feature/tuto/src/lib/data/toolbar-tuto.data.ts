@@ -1,29 +1,30 @@
 import { type StepOptions } from 'shepherd.js';
 
 
+// Remplacer votre code builtInButtons actuel
 export const builtInButtons = {
   cancel: {
-    classes: 'cancel-button',
+    classes: 'ant-btn ant-btn-default',
     secondary: true,
-    text: 'Exit',
+    text: 'Quitter',
     type: 'cancel'
   },
   next: {
-    classes: 'next-button',
-    text: 'Next',
+    classes: 'ant-btn ant-btn-primary',
+    text: 'Suivant',
     type: 'next'
   },
   back: {
-    classes: 'back-button',
+    classes: 'ant-btn ant-btn-default',
     secondary: true,
-    text: 'Back',
+    text: 'Précédent',
     type: 'back'
   }
 };
 
 // Default step options
 export const defaultStepOptions: StepOptions = {
-  classes: 'custom-class-name-1 custom-class-name-2',
+  classes: 'ant-typography',
   scrollTo: { behavior: 'smooth', block: 'center' },
   cancelIcon: {
     enabled: true
@@ -37,6 +38,22 @@ export const defaultStepOptions: StepOptions = {
   }
 };
 
+// Fonction utilitaire pour générer du contenu NG-Zorro compatible
+function createNzContent(title: string, content: string, icon?: string): string {
+  const iconHtml = icon ? `<span nz-icon nzType="${icon}" nzTheme="outline" class="mr-2"></span>` : '';
+
+  return `
+    <div class="ant-typography">
+      <div class="ant-typography-title level-5">
+        ${iconHtml}${title}
+      </div>
+      <div class="ant-typography-paragraph">
+        ${content}
+      </div>
+    </div>
+  `;
+}
+
 // Define the toolbar tour steps
 export const toolbarSteps: StepOptions[] = [
   {
@@ -45,11 +62,11 @@ export const toolbarSteps: StepOptions[] = [
       on: 'bottom',
     },
     buttons: [builtInButtons.cancel, builtInButtons.next],
-    classes: 'custom-class-name-1 custom-class-name-2',
     id: 'menu',
     title: 'Menu Principal',
     text: `
       <p>
+        <span nz-icon nzType="menu" nzTheme="outline"></span>
         Ce bouton ouvre le menu principal de l'application. Vous pouvez y accéder pour naviguer entre les différentes sections.
       </p>
     `,

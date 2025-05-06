@@ -1,6 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { elementIsHidden} from './utils/dom';
 import { makeButton } from './utils/buttons';
+import { DOCUMENT } from '@angular/common';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzNotificationService } from 'ng-zorro-antd/notification'
+
 
 import Shepherd, {
   type Tour,
@@ -36,7 +40,13 @@ export class TutoService {
   private currentPage: string = '';
 
 
-  constructor() {}
+  constructor(
+    /*@Inject(DOCUMENT) private document: Document,
+    private modalService: NzModalService,
+    private notification: NzNotificationService*/
+  ) {}
+
+
 
     /**
    * Sets the current page to track tour context
@@ -235,6 +245,41 @@ export class TutoService {
     return true;
   }
 
+
+  /*showTutorialNotification(message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info'): void {
+    this.notification.create(
+      type,
+      'Tutoriel',
+      message,
+      { nzDuration: 3000 }
+    );
+  }
+
+  onTourFinished(completeOrCancel: 'complete' | 'cancel'): void {
+    this.isActive = false;
+    this.tourObject = null;
+
+    if (completeOrCancel === 'complete') {
+      this.showTutorialNotification('Tutoriel terminé avec succès !', 'success');
+    } else {
+      this.showTutorialNotification('Tutoriel annulé', 'info');
+    }
+  }
+
+  // Ajouter une méthode pour utiliser les modals NG-Zorro au lieu des modals par défaut
+  showConfirmCancel(): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.modalService.confirm({
+        nzTitle: 'Quitter le tutoriel ?',
+        nzContent: 'Êtes-vous sûr de vouloir quitter le tutoriel ?',
+        nzOkText: 'Oui',
+        nzCancelText: 'Non',
+        nzOnOk: () => resolve(true),
+        nzOnCancel: () => resolve(false)
+      });
+    });
+  }*/
+
   /**
   * Initializes the tour, creates a new Shepherd.Tour. sets options, and binds events
   */
@@ -257,6 +302,43 @@ export class TutoService {
     tourObject.on('cancel', this.onTourFinished.bind(this, 'cancel'));
     this.tourObject = tourObject as unknown as Tour;
   }
+  /*private _initTour(): void {
+    if (this.tourObject) {
+      return;
+    }
+
+    const tourObject = new Shepherd.Tour({
+      confirmCancel: this.confirmCancel,
+      confirmCancelMessage: this.confirmCancelMessage,
+      defaultStepOptions: {
+        ...this.defaultStepOptions,
+        classes: 'shepherd-theme-ng-zorro ' + (this.defaultStepOptions.classes || '')
+      },
+      keyboardNavigation: this.keyboardNavigation,
+      tourName: this.tourName,
+      useModalOverlay: this.modal,
+      exitOnEsc: this.exitOnEsc,
+    });
+
+    // Si nous avons notre propre méthode de confirmation
+    if (this.confirmCancel) {
+      tourObject.on('cancel', async (event) => {
+        if (event.type === 'cancel' && this.confirmCancel) {
+          const shouldCancel = await this.showConfirmCancel();
+          if (!shouldCancel) {
+            return event.preventDefault();
+          }
+        }
+        this.onTourFinished('cancel');
+      });
+    } else {
+      tourObject.on('cancel', this.onTourFinished.bind(this, 'cancel'));
+    }
+
+    tourObject.on('complete', this.onTourFinished.bind(this, 'complete'));
+    this.tourObject = tourObject as unknown as Tour;
+  }*/
+
 
   /**
  * Clear the tour completely - useful when navigating away
