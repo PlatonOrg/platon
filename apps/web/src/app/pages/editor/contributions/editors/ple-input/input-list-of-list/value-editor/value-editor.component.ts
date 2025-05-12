@@ -12,6 +12,13 @@ export class ValueEditorComponent extends BaseValueEditor<InputListOfList[]> {
   @ViewChild('editInput', { static: false })
   editInput?: ElementRef<HTMLInputElement | HTMLTextAreaElement>
 
+  @ViewChild('argInput') argInput?: ElementRef<HTMLInputElement | HTMLTextAreaElement>
+
+  isAddingArgument = false
+  newArgument = ''
+  editingArgumentIndex: number | null = null
+  editingArgumentValue = ''
+
   selectedIndex: number | null = null
   editingIndex: number | null = null
   currentArgv = ''
@@ -65,13 +72,18 @@ export class ValueEditorComponent extends BaseValueEditor<InputListOfList[]> {
   }
 
   addItem(): void {
-    const defaultName = `test${this.items.length + 1}`
+    let defaultName = `test${this.items.length + 1}`
+    for (const item of this.items) {
+      if (item.name_test === defaultName) {
+        defaultName = `test${this.items.indexOf(item) + 1}`
+      }
+    }
 
     const values = this.items
-    values.push({ name_test: defaultName, argv: [''], line_cmd: '' })
+    values.push({ name_test: defaultName, argv: [], line_cmd: '' })
     this.notifyValueChange?.(values)
     this.selectedIndex = values.length - 1
-    this.currentArgv = ''
+    //this.currentArgv = ''
     this.changeDetectorRef.markForCheck()
   }
 
@@ -83,17 +95,63 @@ export class ValueEditorComponent extends BaseValueEditor<InputListOfList[]> {
 
     this.selectedIndex = index
     const item = this.items[index]
-
-    if (item) {
+    if (item.argv) {
       this.currentArgv = item.argv.join('; ')
+    } else {
+      this.currentArgv = ''
     }
     this.changeDetectorRef.markForCheck()
   }
 
-  updateArgv(): void {
+  showAddArgumentInput(): void {
+    this.isAddingArgument = true
+    setTimeout(() => {
+      this.argInput?.nativeElement?.focus()
+    })
+  }
+
+  addArgument(): void {
+    if (this.newArgument?.trim()) {
+      if (this.selectedIndex !== null) {
+        const values = [...this.items]
+        values[this.selectedIndex].argv = [...values[this.selectedIndex].argv, this.newArgument.trim()]
+        this.notifyValueChange?.(values)
+      }
+    }
+    this.newArgument = ''
+    this.isAddingArgument = false
+  }
+
+  startEditingArgument(index: number): void {
+    if (this.selectedIndex === null) return
+
+    this.editingArgumentIndex = index
+    this.editingArgumentValue = this.items[this.selectedIndex].argv[index]
+
+    setTimeout(() => {
+      this.editInput?.nativeElement?.focus()
+    })
+  }
+
+  finishEditingArgument(): void {
+    if (this.selectedIndex === null || this.editingArgumentIndex === null) return
+
+    // Mettre à jour l'argument s'il a changé
+    if (this.editingArgumentValue.trim()) {
+      const values = [...this.items]
+      values[this.selectedIndex].argv[this.editingArgumentIndex] = this.editingArgumentValue.trim()
+      this.notifyValueChange?.(values)
+    }
+
+    this.editingArgumentIndex = null
+    this.editingArgumentValue = ''
+  }
+
+  // Méthode pour la suppression
+  removeArgument(index: number): void {
     if (this.selectedIndex !== null) {
-      const values = this.items
-      values[this.selectedIndex].argv = this.currentArgv.split(';').map((arg) => arg.trim())
+      const values = [...this.items]
+      values[this.selectedIndex].argv = values[this.selectedIndex].argv.filter((_, i) => i !== index)
       this.notifyValueChange?.(values)
     }
   }
