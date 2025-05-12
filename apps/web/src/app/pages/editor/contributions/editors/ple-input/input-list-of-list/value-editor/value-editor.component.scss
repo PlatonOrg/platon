@@ -1,5 +1,3 @@
-
-
 $primary-color: #171C8F;
 $primary-light: #171C8F;
 $primary-dark: #171C8F;
@@ -18,7 +16,6 @@ $delete-color: #c01515;
 $delete-hover: #f30505;
 $delete-bg: #E3F2FD;
 
-// Styles communs
 .command-section-title {
   font-size: 18px;
   font-weight: 500;
@@ -26,7 +23,6 @@ $delete-bg: #E3F2FD;
   margin-bottom: 16px;
 }
 
-// Liste des commandes
 .command-list {
   display: flex;
   flex-wrap: wrap;
@@ -83,21 +79,25 @@ $delete-bg: #E3F2FD;
   opacity: 1;
 }
 
-.edit-button, .delete-button {
-  width: 24px;
-  height: 24px;
-  display: flex;
+.action-button {
+  cursor: pointer;
+  margin: 0;
+  padding: 0 5px;
+  height: 22px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 4px;
   transition: all 0.2s;
 
   i {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
 .edit-button {
+  background-color: transparent;
+  border-color: transparent;
   color: $primary-color;
 
   &:hover {
@@ -107,6 +107,8 @@ $delete-bg: #E3F2FD;
 }
 
 .delete-button {
+  background-color: transparent;
+  border-color: transparent;
   color: $delete-color;
 
   &:hover {
@@ -146,7 +148,6 @@ $delete-bg: #E3F2FD;
   }
 }
 
-// Détails de la commande
 .command-details {
   background-color: $details-bg;
   border: 1px solid $details-border;
@@ -189,6 +190,68 @@ $delete-bg: #E3F2FD;
   }
 }
 
+.arguments-container {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.arguments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.arg-item {
+  position: relative;
+  width: 100%;
+}
+
+.argument-tag {
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 0;
+  width: 100%;
+
+  &:hover .arg-actions {
+    opacity: 1;
+  }
+}
+
+.arg-actions {
+  margin-left: 8px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+  display: inline-flex;
+  gap: 6px;
+}
+
+.edit-icon, .delete-icon {
+  cursor: pointer;
+  font-size: 12px;
+
+  &:hover {
+    color: #1890ff;
+  }
+}
+
+.delete-icon:hover {
+  color: #ff4d4f;
+}
+
+.add-argument-button {
+  height: 32px;
+  min-width: 88px;
+  margin-top: 8px;
+}
+
+.new-arg-input, .edit-arg-input {
+  width: 100%;
+  height: 32px;
+}
+
 // Surcharge ng-zorro
 ::ng-deep {
   .ant-form-item-label > label {
@@ -225,5 +288,10 @@ $delete-bg: #E3F2FD;
 
   .ant-switch-checked {
     background-color: $primary-color;
+  }
+
+  .arguments-list .ant-tag {
+    display: flex;
+    width: 100%;
   }
 }

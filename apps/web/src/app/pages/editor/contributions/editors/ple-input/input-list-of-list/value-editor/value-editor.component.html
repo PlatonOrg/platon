@@ -8,24 +8,12 @@
             <ng-container *ngIf="editingIndex !== i; else editField">
               <span class="tag-text">{{ item.name_test }}</span>
               <div class="tag-actions">
-                <button
-                  nz-button
-                  nzType="text"
-                  nzShape="circle"
-                  class="edit-button"
-                  (click)="startEditing(i); $event.stopPropagation()"
-                >
+                <nz-tag class="action-button edit-button" (click)="startEditing(i); $event.stopPropagation()">
                   <i nz-icon nzType="edit" nzTheme="outline"></i>
-                </button>
-                <button
-                  nz-button
-                  nzType="text"
-                  nzShape="circle"
-                  class="delete-button"
-                  (click)="removeItem(i); $event.stopPropagation()"
-                >
+                </nz-tag>
+                <nz-tag class="action-button delete-button" (click)="removeItem(i); $event.stopPropagation()">
                   <i nz-icon nzType="close" nzTheme="outline"></i>
-                </button>
+                </nz-tag>
               </div>
             </ng-container>
             <ng-template #editField>
@@ -56,17 +44,65 @@
       <div *ngIf="selectedIndex !== null && getSelectedItem()" class="command-details">
         <h4 class="details-title">Paramètres pour "{{ getSelectedItem()?.name_test }}"</h4>
         <nz-form-item>
-          <nz-form-label [nzSpan]="24">Arguments (séparés par des point-virgules)</nz-form-label>
+          <nz-form-label [nzSpan]="24">Arguments</nz-form-label>
           <nz-form-control [nzSpan]="24">
-            <textarea
-              nz-input
-              [(ngModel)]="currentArgv"
-              [disabled]="disabled"
-              (blur)="updateArgv()"
-              placeholder="agr1; arg2; arg3"
-              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
-              class="arguments-input"
-            ></textarea>
+            <div class="arguments-container">
+              <div class="arguments-list">
+                <ng-container *ngFor="let arg of getSelectedItem()!.argv; let i = index">
+                  <div *ngIf="editingArgumentIndex !== i; else editArgField" class="arg-item">
+                    <nz-tag class="argument-tag">
+                      {{ arg }}
+                      <div class="arg-actions">
+                        <i
+                          nz-icon
+                          nzType="edit"
+                          nzTheme="outline"
+                          class="edit-icon"
+                          (click)="startEditingArgument(i)"
+                        ></i>
+                        <i nz-icon nzType="close" nzTheme="outline" class="delete-icon" (click)="removeArgument(i)"></i>
+                      </div>
+                    </nz-tag>
+                  </div>
+                  <ng-template #editArgField>
+                    <input
+                      nz-input
+                      [(ngModel)]="editingArgumentValue"
+                      (blur)="finishEditingArgument()"
+                      (keydown.enter)="finishEditingArgument()"
+                      class="edit-arg-input"
+                      #editArgInput
+                    />
+                  </ng-template>
+                </ng-container>
+
+                <ng-container *ngIf="!isAddingArgument; else addArgumentInput">
+                  <button
+                    nz-button
+                    nzSize="small"
+                    nzType="dashed"
+                    (click)="showAddArgumentInput()"
+                    [disabled]="disabled"
+                    class="add-argument-button"
+                  >
+                    <i nz-icon nzType="plus"></i> Ajouter
+                  </button>
+                </ng-container>
+
+                <ng-template #addArgumentInput>
+                  <input
+                    nz-input
+                    #argInput
+                    [(ngModel)]="newArgument"
+                    [disabled]="disabled"
+                    (blur)="addArgument()"
+                    (keydown.enter)="addArgument(); $event.preventDefault()"
+                    placeholder="Nouvel argument"
+                    class="new-arg-input"
+                  />
+                </ng-template>
+              </div>
+            </div>
           </nz-form-control>
         </nz-form-item>
         <nz-form-item>
