@@ -29,6 +29,7 @@ import { ChartViewerRadarComponentDefinition } from './widgets/chart-viewer-rada
 import { FoldableFeedbackComponentDefinition } from './widgets/foldable-feedback/foldable-feedback'
 import { WordSelectorComponentDefinition } from './forms/word-selector/word-selector'
 import { EvaluatorComponentDefinition } from './forms/evaluator/evaluator'
+import { TimerComponentDefinition } from './widgets/timer/timer'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
@@ -194,6 +195,10 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
         /* webpackChunkName: "wc-foldable-feedback" */ './widgets/foldable-feedback/foldable-feedback.module'
       ).then((m) => m.FoldableFeedbackModule),
   },
+  {
+    selector: 'wc-timer',
+    module: () => import(/* webpackChunkName: "wc-timer" */ './widgets/timer/timer.module').then((m) => m.TimerModule),
+  },
 
   // INTERNALS
   {
@@ -335,5 +340,10 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: FoldableFeedbackComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: TimerComponentDefinition,
   },
 ]

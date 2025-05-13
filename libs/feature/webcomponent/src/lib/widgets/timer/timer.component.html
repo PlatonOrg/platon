@@ -1,0 +1,13 @@
+<!-- This is a simple web component that displays a chronometer or a countdown. -->
+@if (errorFlag) {
+<div class="error">
+  <nge-markdown>{{ errorMessage }}</nge-markdown>
+</div>
+} @else {
+<div class="wc-timer">
+  <div class="timer-display">
+    <span>{{ formattedTime }}</span>
+  </div>
+</div>
+}
+<wc-base [(state)]="state"></wc-base>
