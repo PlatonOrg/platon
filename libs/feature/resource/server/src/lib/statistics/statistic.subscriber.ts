@@ -26,7 +26,10 @@ export class ResourceStatsSubscriber implements EntitySubscriberInterface {
 
   private async onEvent(event: InsertEvent<unknown> | UpdateEvent<unknown> | RemoveEvent<unknown>): Promise<void> {
     if (TABLES.includes(event.metadata.tableName)) {
+      const dep = Date.now()
       await event.manager.query(`REFRESH MATERIALIZED VIEW "ResourceStats"`)
+      const duration = Date.now() - dep
+      this.logger.log(`Refreshed ResourceStats in ${duration}ms`)
     }
   }
 
