@@ -21,7 +21,6 @@ import { useAbsoluteUrl } from '../../../hooks'
 
 <Playground
   width='100%'
-  height='700px'
   items={[
     {
       name: 'Visualisation',

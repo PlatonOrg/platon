@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core'
+import { Component, ElementRef, Input, OnInit, ViewChild, inject, AfterViewInit, OnDestroy } from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 import { JsonEditorComponent, JsonEditorOptions, JsonEditorTreeNode } from 'ang-jsoneditor'
 import { firstValueFrom } from 'rxjs'
@@ -10,9 +10,11 @@ import { WebComponentDefinition } from '../../web-component'
   templateUrl: './showcase.component.html',
   styleUrls: ['./showcase.component.scss'],
 })
-export class ShowcaseComponent implements OnInit {
+export class ShowcaseComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly elementRef = inject(ElementRef) as ElementRef<HTMLElement>
   private readonly resourceLoader = inject(ResourceLoaderService)
+  private resizeObserver?: ResizeObserver
+
   protected readonly options = new JsonEditorOptions()
 
   protected component?: any
@@ -26,7 +28,6 @@ export class ShowcaseComponent implements OnInit {
 
   async ngOnInit() {
     await firstValueFrom(this.resourceLoader.loadAllAsync([['style', 'assets/vendors/jsoneditor/jsoneditor.min.css']]))
-
     const host = this.elementRef.nativeElement.firstElementChild
     this.component = document.createElement(this.definition.selector)
 
@@ -81,5 +82,22 @@ export class ShowcaseComponent implements OnInit {
 
   componentToEditor() {
     this.editor?.set(this.component.state)
+  }
+
+  ngAfterViewInit() {
+    const sendHeight = () => {
+      const height = this.elementRef.nativeElement.clientHeight + 20
+      window.parent.postMessage({ type: 'resize', height }, '*')
+    }
+
+    this.resizeObserver = new ResizeObserver(() => {
+      sendHeight()
+    })
+
+    this.resizeObserver.observe(this.elementRef.nativeElement)
+  }
+
+  ngOnDestroy() {
+    this.resizeObserver?.disconnect()
   }
 }

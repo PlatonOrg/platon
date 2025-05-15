@@ -1,5 +1,5 @@
 import { Tab, Tabs } from 'nextra/components'
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef, useEffect } from 'react'
 import { useBaseUrl } from '../../hooks/useBaseUrl'
 import { buildAbsoluteUrl } from '../../hooks'
 
@@ -16,6 +16,7 @@ interface PlaygroundProps {
 
 export const Playground: React.FC<PlaygroundProps> = ({ items, height = '700px', width = '100%' }) => {
   const baseUrl = useBaseUrl()
+  const iframeRefs = useRef<(HTMLIFrameElement | null)[]>([])
 
   // Filter out .ple URLs when the base URL is not '/' (e.g. GitHub Pages)
   const filteredItems = useMemo(() => {
@@ -32,6 +33,25 @@ export const Playground: React.FC<PlaygroundProps> = ({ items, height = '700px',
       }))
   }, [items, baseUrl])
 
+useEffect(() => {
+  const handler = (event: MessageEvent) => {
+    if (event.data?.type === 'resize') {
+      console.log('resizing iframe', event.data.height)
+      iframeRefs.current.forEach((iframe) => {
+        if (iframe?.contentWindow === event.source) {
+          iframe.style.height = `${event.data.height}px`
+        }
+      })
+    }
+  }
+
+  window.addEventListener('message', handler)
+  return () => window.removeEventListener('message', handler)
+}, [])
+
+
+
+
   if (filteredItems.length === 0) {
     return <div>No playground items available</div>
   }
@@ -40,7 +60,12 @@ export const Playground: React.FC<PlaygroundProps> = ({ items, height = '700px',
     <Tabs items={filteredItems.map((item) => item.name)}>
       {filteredItems.map((item, index) => (
         <Tab key={index}>
-          <iframe src={item.url} style={{ width, height, border: 'none' }}></iframe>
+          <iframe
+            ref={(el) => (iframeRefs.current[index] = el)}
+            src={item.url}
+            style={{ width, height, border: 'none' }}
+            title={item.name}
+          />
         </Tab>
       ))}
     </Tabs>
