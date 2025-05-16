@@ -9,11 +9,13 @@ import { CourseGroupSelectComponent } from '../../course-group-select/course-gro
 // Module
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
 import differenceInCalendarDays from 'date-fns/differenceInCalendarDays'
+import differenceInMilliseconds from 'date-fns/differenceInMilliseconds'
 import { FormsModule } from '@angular/forms'
 import { NzButtonModule, NzButtonSize } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzSpaceModule } from 'ng-zorro-antd/space'
+import { DialogService } from '@platon/core/browser'
 
 @Component({
   selector: 'course-restriction',
@@ -40,13 +42,33 @@ export class RestrictionComponent {
   @Input() courseGroups: CourseGroup[] = []
   @Input() isSubRestriction = false
 
+  constructor(private dialogService: DialogService) {}
+
   size: NzButtonSize = 'large'
 
   protected disabledDateStart = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
 
   protected disabledDateEnd = (current: Date): boolean => {
     const start = (this.restriction.config as RestrictionConfig['DateRange']).start
-    return start ? differenceInCalendarDays(current, start) < 0 : differenceInCalendarDays(current, new Date()) < 0
+    if (start) {
+      return differenceInCalendarDays(current, new Date(start)) < 0
+    }
+    return differenceInCalendarDays(current, new Date()) < 0
+  }
+
+  protected checkEndDateIsSuperiorStartDate(): boolean {
+    const start = (this.restriction.config as RestrictionConfig['DateRange']).start
+    const end = (this.restriction.config as RestrictionConfig['DateRange']).end
+    if (start && end) {
+      if (differenceInMilliseconds(end, start) >= 0) {
+        return true
+      }
+      // eslint-disable-next-line prettier/prettier
+      (this.restriction.config as RestrictionConfig['DateRange']).end = undefined
+      this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
+      return false
+    }
+    return true
   }
 
   removeRestriction() {
@@ -54,7 +76,7 @@ export class RestrictionComponent {
   }
 
   isDateRangeConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['DateRange'] {
-    return 'start' in config || 'end' in config
+    return config !== undefined || 'start' in config || 'end' in config
   }
 
   isMembersConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Members'] {

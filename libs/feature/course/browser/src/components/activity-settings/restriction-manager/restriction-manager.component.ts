@@ -84,7 +84,7 @@ export class RestrictionManagerComponent implements OnInit {
   }
 
   emitRestrictions() {
-    const res = this.saveDataToFile()
+    //const res = this.saveDataToFile()
     this.sendRestrictions.emit(this.restrictions)
   }
 
@@ -147,7 +147,12 @@ export class RestrictionManagerComponent implements OnInit {
         newRestriction = {
           type: 'Jeu',
           config: {},
-          restrictions: [],
+          restrictions: [
+            {
+              type: 'DateRange',
+              config: { start: undefined, end: undefined },
+            },
+          ],
           condition: this.condition,
           allConditions: this.allConditions,
         }
@@ -208,13 +213,19 @@ export class RestrictionManagerComponent implements OnInit {
             config: {},
             condition: parentRestriction.condition,
             allConditions: parentRestriction.allConditions,
-            restrictions: [],
+            restrictions: [
+              {
+                type: 'DateRange',
+                config: { start: undefined, end: undefined },
+              },
+            ],
           }
           break
         default:
           return
       }
       parentRestriction.restrictions.push(newSubRestriction)
+      this.changeDetectorRef.markForCheck()
     }
     this.selectedType = ''
     this.restrictionAdded.emit()
@@ -231,7 +242,7 @@ export class RestrictionManagerComponent implements OnInit {
         parentRestriction.restrictions = []
         console.log('Toutes les sous-restrictions ont été supprimées.')
       }
-
+      //this.emitRestrictions()
       this.restrictionAdded.emit()
     }
   }

@@ -21,6 +21,7 @@
             [nzShowTime]="true"
             [nzDisabledDate]="disabledDateEnd"
             [(ngModel)]="restriction.config.end"
+            (ngModelChange)="checkEndDateIsSuperiorStartDate()"
             nzPlaceHolder="Date de fermeture"
             nzFormat="dd/MM/yyyy HH:mm"
             [nzBorderless]="true"
@@ -81,7 +82,14 @@
     </ng-container>
   </ng-container>
 
-  <button *ngIf="isSubRestriction" nz-button nzType="text" nzDanger (click)="removeRestriction()" class="delete-button">
+  <button
+    *ngIf="isSubRestriction && restriction.type !== 'DateRange'"
+    nz-button
+    nzType="text"
+    nzDanger
+    (click)="removeRestriction()"
+    class="delete-button"
+  >
     <i nz-icon nzType="delete"></i>
   </button>
 </div>
