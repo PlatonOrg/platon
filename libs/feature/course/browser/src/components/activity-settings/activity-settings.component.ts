@@ -107,52 +107,97 @@ export class CourseActivitySettingsComponent implements OnInit {
       groups: activityGroups.resources.map((g) => g.groupId),
     })
 
-    console.log('Members 1 : \n', this.form.get('members')?.value)
-    console.log('Correctors 1 : \n', this.form.get('correctors')?.value)
-    console.log('Groups 1 : \n', this.form.get('groups')?.value)
     if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
-      //console.log('Restrictions from activité : \n\n', this.activity.restrictions)
-      this.restrictions = this.activity.restrictions
-      this.addRest = true
-    } else {
-      if (this.form.get('openAt')?.value && this.form.get('closeAt')?.value) {
-        const startAt = this.form.get('openAt')?.value
-        const closeAt = this.form.get('closeAt')?.value
-        this.restrictions.push({
-          type: 'DateRange',
-          config: {
-            start: startAt instanceof Date ? startAt : undefined,
-            end: closeAt instanceof Date ? closeAt : undefined,
-          },
-        })
-      }
-      if (this.form.get('members')?.value) {
-        this.restrictions.push({
-          type: 'Members',
-          config: {
-            members: this.form.get('members')?.value || undefined,
-          },
-        })
-      }
-      if (this.form.get('correctors')?.value) {
-        this.restrictions.push({
-          type: 'Correctors',
-          config: {
-            correctors: this.form.get('correctors')?.value || undefined,
-          },
-        })
-      }
-      if (this.form.get('groups')?.value) {
-        this.restrictions.push({
-          type: 'Group',
-          config: {
-            groups: this.form.get('groups')?.value || undefined,
-          },
-        })
-      }
-      console.log('Restrictions testings \n\n :', this.restrictions)
-      this.addRest = true
+      console.log('Restrictions from activité : \n\n', this.activity.restrictions)
+      this.restrictions = [...this.activity.restrictions]
     }
+
+    const startAt = this.form.get('openAt')?.value
+    const closeAt = this.form.get('closeAt')?.value
+    // Vérifier si une restriction de type 'DateRange' existe déjà
+    const dateRangeIndex = this.restrictions.findIndex((restriction) => restriction.type === 'DateRange')
+
+    if (dateRangeIndex === -1) {
+      this.restrictions.unshift({
+        type: 'DateRange',
+        config: {
+          start: startAt instanceof Date ? startAt : undefined,
+          end: closeAt instanceof Date ? closeAt : undefined,
+        },
+      })
+      // Mettre à jour la configuration existante
+      /*const dateRange = this.restrictions[dateRangeIndex]
+      const config = dateRange.config as RestrictionConfig['DateRange']
+      if (config.start && config.end) {
+        this.restrictions[dateRangeIndex] = {
+          ...dateRange,
+        }
+      } else {
+        this.restrictions[dateRangeIndex] = {
+          ...dateRange,
+          config: {
+            start: undefined,
+            end: undefined,
+          },
+        }
+      }*/
+      // Mettre à jour uniquement si les dates sont définies
+      /*this.restrictions[dateRangeIndex] = {
+        ...dateRange,
+        config: {
+          // start: startAt instanceof Date ? startAt : config.start,
+          // end: closeAt instanceof Date ? closeAt : config.end,
+          start: startAt instanceof Date ? startAt : undefined,
+          end: closeAt instanceof Date ? closeAt : undefined,
+        },
+      }*/
+    } else {
+      // Créer une nouvelle restriction DateRange
+      // this.restrictions.unshift({
+      //   type: 'DateRange',
+      //   config: {
+      //     start: startAt instanceof Date ? startAt : undefined,
+      //     end: closeAt instanceof Date ? closeAt : undefined,
+      //   },
+      // })
+      // this.restrictions.unshift({
+      //   type: 'DateRange',
+      //   config: {
+      //     start: undefined,
+      //     end: undefined,
+      //   },
+      // })
+    }
+
+    if (!this.restrictions.some((restriction) => restriction.type === 'Members')) {
+      this.restrictions.push({
+        type: 'Members',
+        config: {
+          members: this.form.get('members')?.value || undefined,
+        },
+      })
+    }
+
+    if (!this.restrictions.some((restriction) => restriction.type === 'Group')) {
+      this.restrictions.push({
+        type: 'Group',
+        config: {
+          groups: this.form.get('groups')?.value || undefined,
+        },
+      })
+    }
+
+    if (!this.restrictions.some((restriction) => restriction.type === 'Correctors')) {
+      this.restrictions.push({
+        type: 'Correctors',
+        config: {
+          correctors: this.form.get('correctors')?.value || undefined,
+        },
+      })
+    }
+
+    console.log('Restrictions testings \n\n :', this.restrictions)
+    this.addRest = true
 
     this.loading = false
     this.changeDetectorRef.markForCheck()
@@ -197,11 +242,12 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.selectedType = ''
   }
 
-  receiveRestrictions($event: any) {
-    this.restrictions = $event
+  receiveRestrictions(updatedRestrictions: Restriction[]) {
+    this.restrictions = [...updatedRestrictions]
     this.changeDetectorRef.markForCheck()
     void this.update()
     this.changeRestriction = false
+    this.changeDetectorRef.markForCheck()
   }
 
   askRestriction() {
@@ -217,7 +263,6 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   protected async update(): Promise<void> {
     this.updating = true
-    this.changeDetectorRef.markForCheck()
 
     try {
       const { value } = this.form
@@ -233,7 +278,8 @@ export class CourseActivitySettingsComponent implements OnInit {
           ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.restrictions))]
           : []),
       ])
-
+      console.log('La Suite ', res)
+      this.activity = res[0]
       this.activityChange.emit(
         (this.activity = {
           ...this.activity,

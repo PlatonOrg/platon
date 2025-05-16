@@ -12,6 +12,7 @@ import {
   UpdateActivity,
   calculateActivityOpenState,
 } from '@platon/feature/course/common'
+// import { ActivityRestrictionCheckerService } from '@platon/feature/player/server'
 import { ResourceEntity, ResourceFileService } from '@platon/feature/resource/server'
 import { CLS_REQ } from 'nestjs-cls'
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm'
@@ -35,6 +36,11 @@ import { ActivityGroupEntity } from '../activity-group/activity-group.entity'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 
+// -------------------------------------------------------------------------------
+import { Activity, RestrictionConfig } from '@platon/feature/course/common'
+import { CourseGroupService } from '../course-group/course-group.service'
+import { UserRoles } from '@platon/core/common'
+
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
 @Injectable()
@@ -51,6 +57,7 @@ export class ActivityService {
     private readonly activityMemberService: ActivityMemberService,
     private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
+    private readonly courseGroup: CourseGroupService,
 
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -61,7 +68,7 @@ export class ActivityService {
     @InjectRepository(CourseGroupMemberEntity)
     private readonly courseGroupMemberRepository: Repository<CourseGroupMemberEntity>,
 
-    private readonly activityGroupService: ActivityGroupService
+    private readonly activityGroupService: ActivityGroupService //private readonly activityCheckerService: ActivityRestrictionCheckerService
   ) {}
 
   async search(courseId: string, filters?: ActivityFilters): Promise<[ActivityEntity[], number]> {
@@ -78,7 +85,23 @@ export class ActivityService {
     qb.orderBy('activity.createdAt')
 
     const [entities, count] = await qb.getManyAndCount()
+    this.logger.debug(
+      'Avant la modification de la date : ',
+      entities[2].title,
+      entities[2].openAt,
+      ' -> ',
+      entities[2].closeAt
+    )
+    await this.updateActivitiesDates(entities)
     await this.addVirtualColumns(...entities)
+
+    this.logger.debug(
+      'Après la modification de la date : ',
+      entities[2].title,
+      entities[2].openAt,
+      ' -> ',
+      entities[2].closeAt
+    )
 
     return [entities, count]
   }
@@ -102,7 +125,7 @@ export class ActivityService {
     if (!isCreator && !isPrivateMember && !isInGroup && !isMember) {
       throw new ForbiddenResponse(`You are not a member of this activity`)
     }
-
+    await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
     return activity
@@ -114,6 +137,7 @@ export class ActivityService {
 
     const activity = await qb.getOne()
     if (activity) {
+      await this.updateActivitiesDates([activity])
       await this.addVirtualColumns(activity)
     }
     return Optional.ofNullable(activity)
@@ -132,14 +156,19 @@ export class ActivityService {
     return Optional.of(activities)
   }
 
+  //------------------------------------------------------
+
   async findByCourseId(courseId: string, activityId: string): Promise<Optional<ActivityEntity>> {
     const qb = this.createQueryBuilder(courseId)
     qb.andWhere(`activity.id = :id`, { id: activityId })
 
     const activity = await qb.getOne()
     if (activity) {
+      await this.updateActivitiesDates([activity])
+
       await this.addVirtualColumns(activity)
     }
+
     return Optional.ofNullable(activity)
   }
 
@@ -236,8 +265,16 @@ export class ActivityService {
 
     this.eventService.emit<OnReloadActivityEventPayload>(ON_RELOAD_ACTIVITY_EVENT, { activity })
 
+    await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
+    this.logger.log(
+      'Dans reload : Avant la modification de la date : ',
+      activity.title,
+      activity.openAt,
+      ' -> ',
+      activity.closeAt
+    )
     return activity
   }
 
@@ -245,6 +282,8 @@ export class ActivityService {
     this.notificationService.notifyActivityBeingClosed(activityId).catch((error) => {
       this.logger.error('Failed to send notification', error)
     })
+
+    // Des changements ici
     this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: new Date() }, guard)
   }
@@ -257,6 +296,8 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
+    // Des changements ici
+
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: null })
   }
@@ -398,5 +439,133 @@ export class ActivityService {
       .leftJoin(ActivityGroupEntity, 'activityGroup', 'group.id = activityGroup.group_id')
       .where('activityGroup.id IS NOT NULL')
       .andWhere('activityGroup.activity_id = activity.id')
+  }
+
+  /**
+   * Met à jour les dates d'ouverture et de fermeture des activités en fonction des restrictions
+   * @param activities Liste des activités à mettre à jour
+   */
+  async updateActivitiesDates(activities: ActivityEntity[]): Promise<void> {
+    for (const activity of activities) {
+      if (activity?.restrictions && activity.restrictions.length > 0) {
+        const dateRange = await this.findUserAccess(activity, activity.restrictions, this.request.user)
+        console.log(dateRange)
+        if (dateRange && activity) {
+          //if (dateRange.start !== undefined || dateRange.end !== undefined) {
+          activity.openAt = dateRange.start
+          activity.closeAt = dateRange.end
+          //}
+        } /*else {
+          activity.openAt = undefined
+          activity.closeAt = undefined
+        }*/
+      }
+    }
+  }
+
+  private async checkMembers(
+    activity: Activity,
+    config: RestrictionConfig['Members'] | RestrictionConfig['Correctors'],
+    user: User
+  ): Promise<boolean> {
+    if (!activity) {
+      return false
+    }
+
+    // Si la liste est vide et que c'est un étudiant, on autorise l'accès
+    /*if ('members' in config && (!config.members || config.members.length === 0) && user.role === UserRoles.student) {
+      return true
+    }*/
+
+    const member = await this.courseMemberService.getByUserIdAndCourseId(user.id, activity.courseId)
+    if (!member.isPresent()) {
+      return false
+    }
+
+    if ('members' in config) {
+      return config.members?.some((memberId) => member.get().id === memberId) ?? false
+    }
+
+    if ('correctors' in config) {
+      return config.correctors?.some((correctorId) => member.get().id === correctorId) ?? false
+    }
+
+    return false
+  }
+
+  // Check if the user is in the group
+  private async checkGroups(activity: Activity, config: RestrictionConfig['Groups'], user: User): Promise<boolean> {
+    // Si la liste des groupes est vide et que c'est un étudiant, on autorise l'accès
+    /*if ((!config.groups || config.groups.length === 0) && user.role === UserRoles.student) {
+      return true
+    }*/
+
+    if (!activity) {
+      return false
+    }
+
+    for (const group of config.groups || []) {
+      const isMember = await this.courseGroup.isMember(group, user.id)
+      if (isMember) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private async findUserAccess(
+    activity: Activity,
+    restrictions: Restriction[],
+    user: User
+  ): Promise<RestrictionConfig['DateRange'] | null> {
+    // Vérifier s'il existe des restrictions de type Members ou Group
+    const hasMembersRestriction = restrictions.some((r) => r.type === 'Members')
+    const hasGroupRestriction = restrictions.some((r) => r.type === 'Group')
+
+    // Si les deux restrictions sont absentes et que c'est un étudiant, on autorise l'accès
+    if (!hasMembersRestriction && !hasGroupRestriction) {
+      // Vérifier s'il y a une restriction de type DateRange
+      const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
+      if (dateRangeRestriction) {
+        return dateRangeRestriction.config as RestrictionConfig['DateRange']
+      }
+      return { start: undefined, end: undefined }
+    }
+
+    // Traitement normal pour chaque restriction
+    for (const restriction of restrictions) {
+      let hasAccess = false
+
+      switch (restriction.type) {
+        case 'Members':
+          hasAccess = await this.checkMembers(activity, restriction.config as RestrictionConfig['Members'], user)
+          break
+        case 'Group':
+          hasAccess = await this.checkGroups(activity, restriction.config as RestrictionConfig['Groups'], user)
+          break
+        case 'Correctors':
+          hasAccess = await this.checkMembers(activity, restriction.config as RestrictionConfig['Correctors'], user)
+          break
+        case 'Jeu':
+          if (restriction.restrictions) {
+            const dateRange = await this.findUserAccess(activity, restriction.restrictions, user)
+            if (dateRange) {
+              return dateRange
+            }
+          }
+          continue
+      }
+
+      if (hasAccess) {
+        // Vérifier si la restriction contient une DateRange
+        const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
+        if (dateRangeRestriction) {
+          return dateRangeRestriction.config as RestrictionConfig['DateRange']
+        }
+        return { start: undefined, end: undefined }
+      }
+    }
+    return null
   }
 }
