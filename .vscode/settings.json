@@ -35,5 +35,6 @@
     "resource",
     "docs",
     "webcomponents"
-  ]
+  ],
+  "nxConsole.generateAiAgentRules": true
 }
