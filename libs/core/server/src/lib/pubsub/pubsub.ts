@@ -36,6 +36,6 @@ export class PubSub extends RedisPubSub {
   }
 
   public asyncIteratorWithInitialValue<T>(triggers: string | string[], initialValue: T): AsyncIterator<T> {
-    return this.withInitialValue(this.asyncIterator<T>(triggers), initialValue)
+    return this.withInitialValue(this.asyncIterator(triggers) as AsyncIterator<T>, initialValue)
   }
 }
