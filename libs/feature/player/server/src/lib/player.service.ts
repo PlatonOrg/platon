@@ -50,7 +50,7 @@ import {
   ExerciseSessionEntity,
   SessionEntity,
   SessionService,
-} from '@platon/feature/result/server'
+} from '@platon/feature/result/server' // from '@platon/feature/player/server
 import { PartialDeep } from 'type-fest'
 import { DataSource, EntityManager, In } from 'typeorm'
 import { PreviewOuputDTO } from './player.dto'
@@ -166,18 +166,25 @@ export class PlayerService extends PlayerManager {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
     }
     // Les modifs commencent ici : restrictions
-    /*if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
+    const dateRange = { openAt: activitySession.activity?.openAt, closeAt: activitySession.activity?.closeAt }
+    console.log("Date Avant l'appel à updateActivitiesDates :", dateRange)
+    if (activitySession.activity?.restrictions) {
+      await this.activityService.updateActivitiesDates([activitySession.activity])
+      const dateRange = { openAt: activitySession.activity?.openAt, closeAt: activitySession.activity?.closeAt }
+      console.log("Date Après l'appel à updateActivitiesDates :", dateRange)
+    }
+    if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
       throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
     }
     if (activitySession.activity?.closeAt && activitySession.activity.closeAt < new Date()) {
       throw new ForbiddenResponse("L'activité est fermée.")
-    }*/
-    if (activitySession.activity && user) {
+    }
+    /*if (activitySession.activity && user) {
       const access = await this.restrictionChecker.validateActivityAccess(activitySession.activity, user)
       if (!access.isAllowed) {
         throw new ForbiddenResponse(access.message || 'Access denied')
       }
-    }
+    }*/
     this.logger.log('\n\n\n -----------User has access to the activity------------------\n\n\n')
     // Fin des modifs
 
