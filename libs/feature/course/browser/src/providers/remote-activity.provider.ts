@@ -7,7 +7,7 @@ import {
   ActivityFilters,
   Course,
   CreateActivity,
-  Restriction,
+  RestrictionList,
   UpdateActivity,
 } from '@platon/feature/course/common'
 import { Observable } from 'rxjs'
@@ -78,7 +78,7 @@ export class RemoteActivityProvider extends ActivityProvider {
       .pipe(map((response) => response.resource))
   }
 
-  updateRestrictions(activity: Activity, restrictions: Restriction[]): Observable<Activity> {
+  updateRestrictions(activity: Activity, restrictions: RestrictionList[]): Observable<Activity> {
     return this.http
       .patch<ItemResponse<Activity>>(
         `/api/v1/courses/${activity.courseId}/activities/${activity.id}/restrictions`,

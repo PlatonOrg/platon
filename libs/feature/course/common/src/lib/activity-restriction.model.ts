@@ -1,4 +1,4 @@
-export type RestrictionType = 'DateRange' | 'Correctors' | 'Group' | 'Members' | 'Jeu'
+export type RestrictionType = 'DateRange' | 'Correctors' | 'Groups' | 'Members'
 
 export interface RestrictionConfig {
   DateRange: {
@@ -19,7 +19,11 @@ export interface RestrictionConfig {
 export interface Restriction {
   type: RestrictionType
   config: RestrictionConfig[keyof RestrictionConfig]
-  restrictions?: Restriction[]
-  condition?: 'must' | 'mustNot'
-  allConditions?: 'all' | 'any'
+  //restrictions?: Restriction[]
+  //condition?: 'must' | 'mustNot'
+  //allConditions?: 'all' | 'any'
+}
+
+export interface RestrictionList {
+  restriction: Restriction[]
 }

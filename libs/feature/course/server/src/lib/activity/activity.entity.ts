@@ -1,6 +1,6 @@
 import { BaseEntity, UserEntity } from '@platon/core/server'
 import { ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
-import { Activity, ActivityOpenStates, ActivityPermissions, Restriction } from '@platon/feature/course/common'
+import { Activity, ActivityOpenStates, ActivityPermissions, RestrictionList } from '@platon/feature/course/common'
 import { Column, Entity, Index, JoinColumn, ManyToOne, VirtualColumn } from 'typeorm'
 import { CourseEntity } from '../entites/course.entity'
 import { CourseSectionEntity } from '../section/section.entity'
@@ -36,7 +36,7 @@ export class ActivityEntity extends BaseEntity implements Activity {
   source!: PLSourceFile<ActivityVariables>
 
   @Column({ type: 'jsonb', default: {} })
-  restrictions?: Restriction[] | null
+  restrictions?: RestrictionList[] | null
 
   @Index('Activities_open_at_idx')
   @Column({ name: 'open_at', nullable: true, type: 'timestamp with time zone' })

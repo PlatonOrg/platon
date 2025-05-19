@@ -7,20 +7,19 @@ import { Restriction } from '@platon/feature/course/common'
 export enum RestrictionType {
   DateRange = 'DateRange',
   Correctors = 'Correctors',
-  Group = 'Group',
+  Groups = 'Groups',
   Members = 'Members',
-  Jeu = 'Jeu',
 }
 
-export enum ConditionType {
-  Must = 'must',
-  MustNot = 'mustNot',
-}
+// export enum ConditionType {
+//   Must = 'must',
+//   MustNot = 'mustNot',
+// }
 
-export enum AllConditionsType {
-  All = 'all',
-  Any = 'any',
-}
+// export enum AllConditionsType {
+//   All = 'all',
+//   Any = 'any',
+// }
 
 export class DateRangeConfigDTO {
   @Transform(({ value }) => toDate(value))
@@ -78,7 +77,7 @@ export class RestrictionDTO implements Restriction {
         return MembersConfigDTO
       case RestrictionType.Correctors:
         return CorrectorsConfigDTO
-      case RestrictionType.Group:
+      case RestrictionType.Groups:
         return GroupsConfigDTO
       default:
         return Object
@@ -91,7 +90,7 @@ export class RestrictionDTO implements Restriction {
     | { correctors?: string[] }
     | { groups?: string[] }
 
-  @IsOptional()
+  /*@IsOptional()
   @ValidateNested({ each: true })
   @Type(() => RestrictionDTO)
   @ApiProperty({ type: () => [RestrictionDTO] })
@@ -105,5 +104,12 @@ export class RestrictionDTO implements Restriction {
   @IsOptional()
   @IsEnum(AllConditionsType)
   @ApiProperty({ enum: AllConditionsType })
-  readonly allConditions?: AllConditionsType
+  readonly allConditions?: AllConditionsType*/
+}
+
+export class RestrictionListDTO {
+  @ValidateNested({ each: true })
+  @Type(() => RestrictionDTO)
+  @ApiProperty({ type: () => [RestrictionDTO] })
+  readonly restriction!: Restriction[]
 }

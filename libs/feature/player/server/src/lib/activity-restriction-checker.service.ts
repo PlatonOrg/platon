@@ -9,123 +9,115 @@ export class ActivityRestrictionCheckerService {
 
   constructor(private readonly courseMember: CourseMemberService, private readonly courseGroup: CourseGroupService) {}
 
-  private async checkMembers(
-    config: RestrictionConfig['Members'] | RestrictionConfig['Correctors'],
-    user: User
-  ): Promise<boolean> {
-    if (!this.activity) {
-      return false
-    }
+  // private async checkMembers(
+  //   config: RestrictionConfig['Members'] | RestrictionConfig['Correctors'],
+  //   user: User
+  // ): Promise<boolean> {
+  //   if (!this.activity) {
+  //     return false
+  //   }
 
-    // Si la liste est vide et que c'est un étudiant, on autorise l'accès
-    /*if ('members' in config && (!config.members || config.members.length === 0) && user.role === UserRoles.student) {
-      return true
-    }*/
+  //   // Si la liste est vide et que c'est un étudiant, on autorise l'accès
 
-    const member = await this.courseMember.getByUserIdAndCourseId(user.id, this.activity.courseId)
-    if (!member.isPresent()) {
-      return false
-    }
+  //   const member = await this.courseMember.getByUserIdAndCourseId(user.id, this.activity.courseId)
+  //   if (!member.isPresent()) {
+  //     return false
+  //   }
 
-    if ('members' in config) {
-      return config.members?.some((memberId) => member.get().id === memberId) ?? false
-    }
+  //   if ('members' in config) {
+  //     return config.members?.some((memberId) => member.get().id === memberId) ?? false
+  //   }
 
-    if ('correctors' in config) {
-      return config.correctors?.some((correctorId) => member.get().id === correctorId) ?? false
-    }
+  //   if ('correctors' in config) {
+  //     return config.correctors?.some((correctorId) => member.get().id === correctorId) ?? false
+  //   }
 
-    return false
-  }
+  //   return false
+  // }
 
-  // Check if the user is in the group
-  private async checkGroups(config: RestrictionConfig['Groups'], user: User): Promise<boolean> {
-    // Si la liste des groupes est vide et que c'est un étudiant, on autorise l'accès
-    /*if ((!config.groups || config.groups.length === 0) && user.role === UserRoles.student) {
-      return true
-    }*/
+  // // Check if the user is in the group
+  // private async checkGroups(config: RestrictionConfig['Groups'], user: User): Promise<boolean> {
+  //   if (!this.activity) {
+  //     return false
+  //   }
 
-    if (!this.activity) {
-      return false
-    }
+  //   for (const group of config.groups || []) {
+  //     const isMember = await this.courseGroup.isMember(group, user.id)
+  //     if (isMember) {
+  //       return true
+  //     }
+  //   }
 
-    for (const group of config.groups || []) {
-      const isMember = await this.courseGroup.isMember(group, user.id)
-      if (isMember) {
-        return true
-      }
-    }
+  //   return false
+  // }
 
-    return false
-  }
+  // private async findUserAccess(
+  //   restrictions: Restriction[],
+  //   user: User
+  // ): Promise<RestrictionConfig['DateRange'] | null> {
+  //   // Vérifier s'il existe des restrictions de type Members ou Group
+  //   const hasMembersRestriction = restrictions.some((r) => r.type === 'Members')
+  //   const hasGroupRestriction = restrictions.some((r) => r.type === 'Groups')
 
-  private async findUserAccess(
-    restrictions: Restriction[],
-    user: User
-  ): Promise<RestrictionConfig['DateRange'] | null> {
-    // Vérifier s'il existe des restrictions de type Members ou Group
-    const hasMembersRestriction = restrictions.some((r) => r.type === 'Members')
-    const hasGroupRestriction = restrictions.some((r) => r.type === 'Group')
+  //   // Si les deux restrictions sont absentes et que c'est un étudiant, on autorise l'accès
+  //   if (!hasMembersRestriction && !hasGroupRestriction && user.role === UserRoles.student) {
+  //     // Vérifier s'il y a une restriction de type DateRange
+  //     const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
+  //     if (dateRangeRestriction) {
+  //       return dateRangeRestriction.config as RestrictionConfig['DateRange']
+  //     }
+  //     return { start: undefined, end: undefined }
+  //   }
 
-    // Si les deux restrictions sont absentes et que c'est un étudiant, on autorise l'accès
-    if (!hasMembersRestriction && !hasGroupRestriction && user.role === UserRoles.student) {
-      // Vérifier s'il y a une restriction de type DateRange
-      const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
-      if (dateRangeRestriction) {
-        return dateRangeRestriction.config as RestrictionConfig['DateRange']
-      }
-      return { start: undefined, end: undefined }
-    }
+  //   // Traitement normal pour chaque restriction
+  //   for (const restriction of restrictions) {
+  //     let hasAccess = false
 
-    // Traitement normal pour chaque restriction
-    for (const restriction of restrictions) {
-      let hasAccess = false
+  //     switch (restriction.type) {
+  //       case 'Members':
+  //         hasAccess = await this.checkMembers(restriction.config as RestrictionConfig['Members'], user)
+  //         break
+  //       case 'Groups':
+  //         hasAccess = await this.checkGroups(restriction.config as RestrictionConfig['Groups'], user)
+  //         break
+  //       case 'Correctors':
+  //         hasAccess = await this.checkMembers(restriction.config as RestrictionConfig['Correctors'], user)
+  //         break
+  //       case 'Jeu':
+  //         if (restriction.restrictions) {
+  //           const dateRange = await this.findUserAccess(restriction.restrictions, user)
+  //           if (dateRange) {
+  //             return dateRange
+  //           }
+  //         }
+  //         continue
+  //     }
 
-      switch (restriction.type) {
-        case 'Members':
-          hasAccess = await this.checkMembers(restriction.config as RestrictionConfig['Members'], user)
-          break
-        case 'Group':
-          hasAccess = await this.checkGroups(restriction.config as RestrictionConfig['Groups'], user)
-          break
-        case 'Correctors':
-          hasAccess = await this.checkMembers(restriction.config as RestrictionConfig['Correctors'], user)
-          break
-        case 'Jeu':
-          if (restriction.restrictions) {
-            const dateRange = await this.findUserAccess(restriction.restrictions, user)
-            if (dateRange) {
-              return dateRange
-            }
-          }
-          continue
-      }
+  //     if (hasAccess) {
+  //       // Vérifier si la restriction contient une DateRange
+  //       const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
+  //       if (dateRangeRestriction) {
+  //         return dateRangeRestriction.config as RestrictionConfig['DateRange']
+  //       }
+  //       return { start: undefined, end: undefined }
+  //     }
+  //   }
+  //   return null
+  // }
 
-      if (hasAccess) {
-        // Vérifier si la restriction contient une DateRange
-        const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
-        if (dateRangeRestriction) {
-          return dateRangeRestriction.config as RestrictionConfig['DateRange']
-        }
-        return { start: undefined, end: undefined }
-      }
-    }
-    return null
-  }
+  // private isWithinDateRange(config: RestrictionConfig['DateRange'], now: Date = new Date()): boolean {
+  //   const { start, end } = config
 
-  private isWithinDateRange(config: RestrictionConfig['DateRange'], now: Date = new Date()): boolean {
-    const { start, end } = config
+  //   const startDate = start ? new Date(start) : null
+  //   const endDate = end ? new Date(end) : null
 
-    const startDate = start ? new Date(start) : null
-    const endDate = end ? new Date(end) : null
+  //   if (startDate && now < startDate) return false
+  //   if (endDate && now > endDate) return false
 
-    if (startDate && now < startDate) return false
-    if (endDate && now > endDate) return false
+  //   return true
+  // }
 
-    return true
-  }
-
-  async validateActivityAccess(activity: Activity, user: User): Promise<{ isAllowed: boolean; message?: string }> {
+  /*async validateActivityAccess(activity: Activity, user: User): Promise<{ isAllowed: boolean; message?: string }> {
     try {
       this.activity = activity
 
@@ -153,5 +145,5 @@ export class ActivityRestrictionCheckerService {
       console.error('Error validating activity access:', error)
       return { isAllowed: false, message: "Une erreur est survenue lors de la vérification des droits d'accès." }
     }
-  }
+  }*/
 }

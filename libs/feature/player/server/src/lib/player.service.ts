@@ -82,8 +82,7 @@ export class PlayerService extends PlayerManager {
     private readonly sessionService: SessionService,
     private readonly activityService: ActivityService,
     private readonly resourceFileService: ResourceFileService,
-    private readonly peerService: PeerService,
-    private readonly restrictionChecker: ActivityRestrictionCheckerService
+    private readonly peerService: PeerService //private readonly restrictionChecker: ActivityRestrictionCheckerService
   ) {
     super(sandboxService)
   }
@@ -166,17 +165,36 @@ export class PlayerService extends PlayerManager {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
     }
     // Les modifs commencent ici : restrictions
-    const dateRange = { openAt: activitySession.activity?.openAt, closeAt: activitySession.activity?.closeAt }
-    console.log("Date Avant l'appel à updateActivitiesDates :", dateRange)
-    if (activitySession.activity?.restrictions) {
-      await this.activityService.updateActivitiesDates([activitySession.activity])
-      const dateRange = { openAt: activitySession.activity?.openAt, closeAt: activitySession.activity?.closeAt }
-      console.log("Date Après l'appel à updateActivitiesDates :", dateRange)
+
+    if (!activitySession.activity) {
+      throw new NotFoundResponse(`Activity not found: ${activitySessionId}`)
     }
-    if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
+    //const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
+    // if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
+    //   throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
+    // }
+    // if (activitySession.activity?.closeAt && activitySession.activity.closeAt < new Date()) {
+    //   throw new ForbiddenResponse("L'activité est fermée.")
+    // }
+    /*if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
       throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
     }
     if (activitySession.activity?.closeAt && activitySession.activity.closeAt < new Date()) {
+      throw new ForbiddenResponse("L'activité est fermée.")
+    }*/
+    const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
+
+    // Ajouter un log pour voir ce que retourne réellement updateActivitiesDates
+    console.log('Dates récupérées:', dateRange)
+
+    // Ne vérifier que si les dates existent réellement
+    if (dateRange && dateRange.start instanceof Date && dateRange.start > new Date()) {
+      console.log("L'activité n'est pas encore ouverte. Date de début:", dateRange.start)
+      throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
+    }
+
+    if (dateRange && dateRange.end instanceof Date && dateRange.end < new Date()) {
+      console.log("L'activité est fermée. Date de fin:", dateRange.end)
       throw new ForbiddenResponse("L'activité est fermée.")
     }
     /*if (activitySession.activity && user) {
