@@ -25,7 +25,7 @@ import {
   CourseGroup,
   ActivityGroup,
   CourseMemberRoles,
-  Restriction,
+  RestrictionList,
 } from '@platon/feature/course/common'
 import { Observable, Subject, tap } from 'rxjs'
 import { ActivityCorrectorProvider } from '../models/activity-corrector.provider'
@@ -183,7 +183,7 @@ export class CourseService {
 
   //#region Activity Restrictions
 
-  updateActivityRestrictions(activity: Activity, restrictions: Restriction[]): Observable<Activity> {
+  updateActivityRestrictions(activity: Activity, restrictions: RestrictionList[]): Observable<Activity> {
     return this.activityProvider.updateRestrictions(activity, restrictions)
   }
 

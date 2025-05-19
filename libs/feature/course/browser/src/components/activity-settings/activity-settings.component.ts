@@ -22,7 +22,14 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzCardModule } from 'ng-zorro-antd/card'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
-import { Activity, CourseGroup, CourseMember, Restriction, RestrictionConfig } from '@platon/feature/course/common'
+import {
+  Activity,
+  CourseGroup,
+  CourseMember,
+  Restriction,
+  RestrictionConfig,
+  RestrictionList,
+} from '@platon/feature/course/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
@@ -55,7 +62,7 @@ import { RestrictionManagerComponent } from './restriction-manager/restriction-m
 export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
   @Output() activityChange = new EventEmitter<Activity>()
-  @Input() restrictions: Restriction[] = [] as Restriction[]
+  restrictions: RestrictionList[] = [] as RestrictionList[]
   @Output() changeRestriction = false
 
   protected form = new FormGroup({
@@ -110,12 +117,23 @@ export class CourseActivitySettingsComponent implements OnInit {
     if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
       console.log('Restrictions from activité : \n\n', this.activity.restrictions)
       this.restrictions = [...this.activity.restrictions]
+    } else {
+      const startAt = this.form.get('openAt')?.value
+      const closeAt = this.form.get('closeAt')?.value
+      this.newRestriction()
+      const isDateRange = (
+        config: RestrictionConfig[keyof RestrictionConfig]
+      ): config is RestrictionConfig['DateRange'] => {
+        return config !== undefined || 'start' in config || 'end' in config
+      }
+      if (isDateRange(this.restrictions[0].restriction[0].config)) {
+        this.restrictions[0].restriction[0].config.start = startAt instanceof Date ? startAt : undefined
+        this.restrictions[0].restriction[0].config.end = closeAt instanceof Date ? closeAt : undefined
+      }
     }
 
-    const startAt = this.form.get('openAt')?.value
-    const closeAt = this.form.get('closeAt')?.value
     // Vérifier si une restriction de type 'DateRange' existe déjà
-    const dateRangeIndex = this.restrictions.findIndex((restriction) => restriction.type === 'DateRange')
+    /*const dateRangeIndex = this.restrictions.findIndex((restriction) => restriction.type === 'DateRange')
 
     if (dateRangeIndex === -1) {
       this.restrictions.unshift({
@@ -125,50 +143,7 @@ export class CourseActivitySettingsComponent implements OnInit {
           end: closeAt instanceof Date ? closeAt : undefined,
         },
       })
-      // Mettre à jour la configuration existante
-      /*const dateRange = this.restrictions[dateRangeIndex]
-      const config = dateRange.config as RestrictionConfig['DateRange']
-      if (config.start && config.end) {
-        this.restrictions[dateRangeIndex] = {
-          ...dateRange,
-        }
-      } else {
-        this.restrictions[dateRangeIndex] = {
-          ...dateRange,
-          config: {
-            start: undefined,
-            end: undefined,
-          },
-        }
-      }*/
-      // Mettre à jour uniquement si les dates sont définies
-      /*this.restrictions[dateRangeIndex] = {
-        ...dateRange,
-        config: {
-          // start: startAt instanceof Date ? startAt : config.start,
-          // end: closeAt instanceof Date ? closeAt : config.end,
-          start: startAt instanceof Date ? startAt : undefined,
-          end: closeAt instanceof Date ? closeAt : undefined,
-        },
-      }*/
-    } else {
-      // Créer une nouvelle restriction DateRange
-      // this.restrictions.unshift({
-      //   type: 'DateRange',
-      //   config: {
-      //     start: startAt instanceof Date ? startAt : undefined,
-      //     end: closeAt instanceof Date ? closeAt : undefined,
-      //   },
-      // })
-      // this.restrictions.unshift({
-      //   type: 'DateRange',
-      //   config: {
-      //     start: undefined,
-      //     end: undefined,
-      //   },
-      // })
     }
-
     if (!this.restrictions.some((restriction) => restriction.type === 'Members')) {
       this.restrictions.push({
         type: 'Members',
@@ -178,9 +153,9 @@ export class CourseActivitySettingsComponent implements OnInit {
       })
     }
 
-    if (!this.restrictions.some((restriction) => restriction.type === 'Group')) {
+    if (!this.restrictions.some((restriction) => restriction.type === 'Groups')) {
       this.restrictions.push({
-        type: 'Group',
+        type: 'Groups',
         config: {
           groups: this.form.get('groups')?.value || undefined,
         },
@@ -194,7 +169,7 @@ export class CourseActivitySettingsComponent implements OnInit {
           correctors: this.form.get('correctors')?.value || undefined,
         },
       })
-    }
+    }*/
 
     console.log('Restrictions testings \n\n :', this.restrictions)
     this.addRest = true
@@ -216,57 +191,73 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
-  openBottomSheet() {
+  newRestriction() {
     this.isOpenProposition = true
+    this.restrictions.push({
+      restriction: [
+        {
+          type: 'DateRange',
+          config: {
+            start: undefined,
+            end: undefined,
+          },
+        },
+      ],
+    })
+    this.changeDetectorRef.markForCheck()
   }
 
-  closeBottomSheet() {
-    this.isOpenProposition = false
-  }
-
-  selectOption(type: string) {
-    if (type === 'Jeu de restriction') {
-      this.jeuDeRestriction = true
-      console.log('jeu de restriction')
+  removeRestriction(index: number) {
+    this.restrictions.splice(index, 1)
+    if (this.restrictions.length === 0) {
+      this.addRest = false
     }
-    this.selectedType = type
-    this.addRest = true
-    this.isOpenProposition = false
+    this.changeDetectorRef.markForCheck()
   }
 
-  closeRestriction() {
-    this.addRest = false
-  }
+  // selectOption(type: string) {
+  //   if (type === 'Jeu de restriction') {
+  //     this.jeuDeRestriction = true
+  //     console.log('jeu de restriction')
+  //   }
+  //   this.selectedType = type
+  //   this.addRest = true
+  //   this.isOpenProposition = false
+  // }
 
-  resetSelectedType() {
-    this.selectedType = ''
-  }
+  // closeRestriction() {
+  //   this.addRest = false
+  // }
 
-  receiveRestrictions(updatedRestrictions: Restriction[]) {
-    this.restrictions = [...updatedRestrictions]
+  // resetSelectedType() {
+  //   this.selectedType = ''
+  // }
+
+  updateRestriction(index: number, updatedRestrictions: Restriction[]) {
+    this.restrictions[index] = { restriction: updatedRestrictions }
     this.changeDetectorRef.markForCheck()
     void this.update()
     this.changeRestriction = false
     this.changeDetectorRef.markForCheck()
   }
 
-  askRestriction() {
-    this.changeRestriction = true
-    this.changeDetectorRef.markForCheck()
-    console.log('Restrictions 0 :', this.restrictions)
-  }
+  // askRestriction() {
+  //   this.changeRestriction = true
+  //   this.changeDetectorRef.markForCheck()
+  //   console.log('Restrictions 0 :', this.restrictions)
+  // }
 
-  private getDate(): RestrictionConfig['DateRange'] | null {
-    const dateRange = this.restrictions.find((restriction) => restriction.type === 'DateRange')
+  private getMainDate(): RestrictionConfig['DateRange'] | null {
+    const dateRange = this.restrictions[0].restriction.find((r) => r.type === 'DateRange')
     return dateRange ? (dateRange.config as RestrictionConfig['DateRange']) : null
   }
 
   protected async update(): Promise<void> {
     this.updating = true
-
+    console.log('Updating ...')
+    console.log('Restrictions : ', this.restrictions)
     try {
-      const { value } = this.form
-      const dateRange = this.getDate()
+      const dateRange = this.getMainDate()
       const res = await Promise.all([
         /*firstValueFrom(
           this.courseService.updateActivity(this.activity, {

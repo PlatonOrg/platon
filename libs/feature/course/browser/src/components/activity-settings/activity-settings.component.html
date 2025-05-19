@@ -4,27 +4,24 @@
       <section>
         <div class="example-button-row">
           <div *ngIf="addRest" class="data-form">
+            @for(restriction of restrictions; track restriction; let i = $index) {
             <course-restriction-manager
               [type]="selectedType"
               [activity]="activity"
               [courseGroups]="courseGroups"
               [courseMembers]="courseMembers"
-              [restrictions]="restrictions"
-              (notRestriction)="closeRestriction()"
-              (restrictionAdded)="resetSelectedType()"
+              [restrictions]="restriction.restriction"
+              [isMainRestriction]="i === 0 ? true : false"
+              [index]="i"
               [sendRestrictionToParent]="changeRestriction"
-              (sendRestrictions)="receiveRestrictions($event)"
+              (sendRestrictions)="updateRestriction(i, $event)"
             >
             </course-restriction-manager>
+            }
           </div>
-          <course-propositions
-            *ngIf="isOpenProposition"
-            (closeEvent)="closeBottomSheet()"
-            (sendEvent)="selectOption($event)"
-          >
-          </course-propositions>
+
           <nz-button-group>
-            <button nz-button [nzType]="'primary'" (click)="openBottomSheet()">
+            <button nz-button [nzType]="'primary'" (click)="newRestriction()">
               <span nz-icon nzType="plus"></span>
               Ajouter une restriction
             </button>
@@ -35,7 +32,7 @@
 
     <nz-spin *ngIf="updating" nzTip="Modification de l'activité..."></nz-spin>
     <div class="actions">
-      <button nz-button [disabled]="!form.valid" nzType="primary" (click)="askRestriction()">
+      <button nz-button [disabled]="!form.valid" nzType="primary" (click)="update()">
         Appliquer les modifications
       </button>
       <div class="spacer"></div>
@@ -112,3 +109,6 @@
     </div>
   </ng-template>
 </div>
+
+<!-- (notRestriction)="closeRestriction()"
+              (restrictionAdded)="resetSelectedType()"  -->
