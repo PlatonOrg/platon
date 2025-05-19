@@ -24,10 +24,6 @@ export class PropositionsComponent {
       description: 'N’autoriser que les étudiants membres d’un groupe spécifié ou de tous les groupes.',
     },
     { title: 'Membres', description: 'Contrôle l’accès sur la base des champs du profil de l’étudiant' },
-    {
-      title: 'Jeu de restriction',
-      description: 'Ajouter un jeu de restrictions imbriquées pour obtenir une logique complexe.',
-    },
   ]
 
   close() {
@@ -43,18 +39,15 @@ export class PropositionsComponent {
         this.sendEvent.emit('Correctors')
         break
       case 'Groupe':
-        this.sendEvent.emit('Group')
+        this.sendEvent.emit('Groups')
         break
       case 'Membres':
         this.sendEvent.emit('Members')
         break
-      case 'Jeu de restriction':
-        this.sendEvent.emit('Jeu')
-        break
       default:
         break
     }
-    //this.sendEvent.emit(type)
+    //this.sendEvent.emit(value)
     this.close()
   }
 }
