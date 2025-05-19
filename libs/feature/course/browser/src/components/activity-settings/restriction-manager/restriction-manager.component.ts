@@ -12,6 +12,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid'
 import { PropositionsComponent } from '../propositions/propositions.component'
 import { RestrictionComponent } from '../restriction/restriction.component'
 import { Activity, CourseGroup, CourseMember, Restriction } from '@platon/feature/course/common'
+import index from 'isomorphic-git'
 
 @Component({
   selector: 'course-restriction-manager',
@@ -34,12 +35,11 @@ export class RestrictionManagerComponent implements OnInit {
   @Output() notRestriction = new EventEmitter<void>() // Si l'utilisateur supprime la dernière restriction, on envoie un événement pour mettre à jour l'affichage
   @Output() restrictionAdded = new EventEmitter<void>()
   @Input() restrictions: Restriction[] = [] as Restriction[]
-  @Input() condition?: 'must' | 'mustNot' = 'must'
-  @Input() allConditions?: 'all' | 'any' = 'all'
-  @Input() isSubRestriction = false
   @Input() isStart = false
   @Output() sendRestrictions = new EventEmitter<Restriction[]>()
   @Input() activity!: Activity
+  @Input() isMainRestriction = false
+  @Input() index = 0
 
   isOpenProposition = false
   selectedType = ''
@@ -52,36 +52,34 @@ export class RestrictionManagerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  saveDataToFile(): Restriction[] {
-    const data = {
-      condition: this.condition,
-      allConditions: this.allConditions,
-      restrictions: this.restrictions,
-    }
-
-    // const traverseRestrictions = (restrictions: Restriction[]): any[] => {
-    //   return restrictions.map((restriction) => {
-    //     if (restriction.type === 'Jeu') {
-    //       return {
-    //         condition: restriction.condition,
-    //         allConditions: restriction.allConditions,
-    //         restrictions: traverseRestrictions(restriction.restrictions || []),
-    //       }
-    //     } else {
-    //       return {
-    //         type: restriction.type,
-    //         config: restriction.config,
-    //       }
-    //     }
-    //   })
-    // }
-
-    // data.restrictions = traverseRestrictions(this.restrictions)
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const fileName = 'restrictions.json'
-    //saveAs(blob, fileName)
-    return data.restrictions
-  }
+  //saveDataToFile(): Restriction[] {
+  // const data = {
+  //   condition: this.condition,
+  //   allConditions: this.allConditions,
+  //   restrictions: this.restrictions,
+  // }
+  // const traverseRestrictions = (restrictions: Restriction[]): any[] => {
+  //   return restrictions.map((restriction) => {
+  //     if (restriction.type === 'Jeu') {
+  //       return {
+  //         condition: restriction.condition,
+  //         allConditions: restriction.allConditions,
+  //         restrictions: traverseRestrictions(restriction.restrictions || []),
+  //       }
+  //     } else {
+  //       return {
+  //         type: restriction.type,
+  //         config: restriction.config,
+  //       }
+  //     }
+  //   })
+  // }
+  // data.restrictions = traverseRestrictions(this.restrictions)
+  //const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  //const fileName = 'restrictions.json'
+  //saveAs(blob, fileName)
+  //return data.restrictions
+  //}
 
   emitRestrictions() {
     //const res = this.saveDataToFile()
@@ -108,13 +106,13 @@ export class RestrictionManagerComponent implements OnInit {
     }
   }
 
-  CantAddRestriction(restrictions: Restriction[], type: string): boolean {
-    return restrictions.some((restriction) => restriction.type === type)
+  CantAddRestriction(type: string): boolean {
+    return this.restrictions.some((restriction) => restriction.type === type)
   }
 
   addRestriction(type: string): void {
     let newRestriction: Restriction
-    if (type !== 'Jeu' && this.CantAddRestriction(this.restrictions, type)) {
+    if (this.CantAddRestriction(type)) {
       console.log('Cette restriction existe déjà.')
       return
     }
@@ -131,9 +129,9 @@ export class RestrictionManagerComponent implements OnInit {
           config: { correctors: [] },
         }
         break
-      case 'Group':
+      case 'Groups':
         newRestriction = {
-          type: 'Group',
+          type: 'Groups',
           config: { groups: [] },
         }
         break
@@ -143,22 +141,10 @@ export class RestrictionManagerComponent implements OnInit {
           config: { members: [] },
         }
         break
-      case 'Jeu':
-        newRestriction = {
-          type: 'Jeu',
-          config: {},
-          restrictions: [
-            {
-              type: 'DateRange',
-              config: { start: undefined, end: undefined },
-            },
-          ],
-          condition: this.condition,
-          allConditions: this.allConditions,
-        }
-        break
       default:
-        throw new Error(`Type de restriction non supporté: ${type}`)
+        //throw new Error(`Type de restriction non supporté: ${type}`)
+        console.error(`Type de restriction non supporté: ${type}`)
+        return
     }
 
     this.restrictions.push(newRestriction)
@@ -174,79 +160,6 @@ export class RestrictionManagerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  onSubRestrictionAdded(parentIndex: number) {
-    const parentRestriction = this.restrictions[parentIndex]
-
-    if (parentRestriction.type === 'Jeu') {
-      parentRestriction.restrictions = parentRestriction.restrictions || []
-
-      if (this.selectedType !== 'Jeu' && this.CantAddRestriction(parentRestriction.restrictions, this.selectedType)) {
-        console.log('Cette restriction existe déjà.')
-        return
-      }
-      let newSubRestriction: Restriction
-      switch (this.selectedType) {
-        case 'DateRange':
-          newSubRestriction = {
-            type: 'DateRange',
-            config: { start: undefined, end: undefined },
-          }
-          break
-        case 'Correctors':
-          newSubRestriction = {
-            type: 'Correctors',
-            config: { correctors: [] },
-          }
-          break
-        case 'Group':
-          newSubRestriction = { type: 'Group', config: { groups: [] } }
-          break
-        case 'Members':
-          newSubRestriction = {
-            type: 'Members',
-            config: { members: [] },
-          }
-          break
-        case 'Jeu':
-          newSubRestriction = {
-            type: 'Jeu',
-            config: {},
-            condition: parentRestriction.condition,
-            allConditions: parentRestriction.allConditions,
-            restrictions: [
-              {
-                type: 'DateRange',
-                config: { start: undefined, end: undefined },
-              },
-            ],
-          }
-          break
-        default:
-          return
-      }
-      parentRestriction.restrictions.push(newSubRestriction)
-      this.changeDetectorRef.markForCheck()
-    }
-    this.selectedType = ''
-    this.restrictionAdded.emit()
-    this.changeDetectorRef.detectChanges()
-  }
-
-  onSubRestrictionRemoved(parentIndex: number, subIndex: number) {
-    const parentRestriction = this.restrictions[parentIndex]
-
-    if (parentRestriction.type === 'Jeu' && parentRestriction.restrictions) {
-      parentRestriction.restrictions.splice(subIndex, 1)
-
-      if (parentRestriction.restrictions.length === 0) {
-        parentRestriction.restrictions = []
-        console.log('Toutes les sous-restrictions ont été supprimées.')
-      }
-      //this.emitRestrictions()
-      this.restrictionAdded.emit()
-    }
-  }
-
   openBottomSheet() {
     this.isOpenProposition = true
     this.changeDetectorRef.markForCheck()
@@ -257,12 +170,13 @@ export class RestrictionManagerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  selectOption(parentIndex: number, type: string) {
+  selectOption(type: string) {
     this.selectedType = type
     this.isOpenProposition = false
 
     if (this.selectedType) {
-      this.onSubRestrictionAdded(parentIndex)
+      this.addRestriction(this.selectedType)
+      this.selectedType = ''
     }
     this.changeDetectorRef.markForCheck()
   }
