@@ -31,7 +31,7 @@
     </ng-container>
 
     <!-- Group Section -->
-    <ng-container *ngSwitchCase="'Group'">
+    <ng-container *ngSwitchCase="'Groups'">
       <div *ngIf="isGroupsConfig(restriction.config)" class="restriction-row">
         <div class="restriction-header">
           <i nz-icon nzType="team" nzTheme="outline"></i>
@@ -83,7 +83,7 @@
   </ng-container>
 
   <button
-    *ngIf="isSubRestriction && restriction.type !== 'DateRange'"
+    *ngIf="!isMainRestriction && restriction.type !== 'DateRange'"
     nz-button
     nzType="text"
     nzDanger

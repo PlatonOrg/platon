@@ -40,7 +40,7 @@ export class RestrictionComponent {
   @Output() update = new EventEmitter<Restriction>()
   @Input() courseMembers: CourseMember[] = []
   @Input() courseGroups: CourseGroup[] = []
-  @Input() isSubRestriction = false
+  @Input() isMainRestriction = false
 
   constructor(private dialogService: DialogService) {}
 
