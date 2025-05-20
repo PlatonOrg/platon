@@ -14,9 +14,8 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 export class PropositionsComponent {
   @Output() closeEvent = new EventEmitter<void>()
   @Output() sendEvent = new EventEmitter<string>()
-  showDateForm = false
 
-  menuItems = [
+  protected menuItems = [
     { title: 'Date', description: 'Empêcher l’accès jusqu’à (ou à partir) d’une date et heure donnée.' },
     { title: 'Correcteurs', description: 'Requiert l’atteinte d’une note minimale par les étudiants' },
     {
@@ -26,7 +25,7 @@ export class PropositionsComponent {
     { title: 'Membres', description: 'Contrôle l’accès sur la base des champs du profil de l’étudiant' },
   ]
 
-  close() {
+  protected close() {
     this.closeEvent.emit()
   }
 
@@ -47,7 +46,6 @@ export class PropositionsComponent {
       default:
         break
     }
-    //this.sendEvent.emit(value)
     this.close()
   }
 }

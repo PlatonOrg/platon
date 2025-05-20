@@ -6,17 +6,7 @@
   margin-bottom: 8px;
 }
 
-.sub-restriction-card {
-  //background: #fafafa;
-  border-radius: 4px;
-}
 
-.sub-restriction-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  //padding: 8px 0;
-}
 
 .add-restriction-button {
   margin-top: 16px;
@@ -24,7 +14,6 @@
 
 :host ::ng-deep {
   .ant-card-head {
-    //padding: 8px 24px;
     min-height: auto;
     border-bottom: 1px solid #f0f0f0;
   }

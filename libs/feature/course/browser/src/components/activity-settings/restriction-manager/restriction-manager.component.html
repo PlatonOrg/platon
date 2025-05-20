@@ -1,47 +1,26 @@
 <nz-row [nzGutter]="16" class="restrictions-container">
   <div nz-col [nzSpan]="24">
-    <!-- La restriction principale -->
     <nz-card *ngIf="restrictions.length > 0" [nzBordered]="false" [nzTitle]="titleTemplate">
       <ng-template #titleTemplate>
-        <h4 nz-typography>Restriction n°{{ index + 1 }}</h4>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%">
+          <h4 nz-typography>Restriction n°{{ index + 1 }}</h4>
+          @if(index !== 0){
+          <button nz-button nzType="primary" nzDanger nzShape="circle" (click)="removeAllRestrictions()">
+            <i nz-icon nzType="delete"></i>
+          </button>
+          }
+        </div>
       </ng-template>
 
-      <!-- <div *ngFor="let restriction of restrictions; let i = index" class="restriction-item"> -->
       @for(restriction of restrictions; track restriction ;let i = $index){
       <course-restriction
         [restriction]="restriction"
         [courseGroups]="courseGroups"
         [courseMembers]="courseMembers"
-        [isMainRestriction]="isMainRestriction"
+        [isMainRestriction]="index === 0 ? true : false"
         (remove)="removeRestriction(i)"
       >
       </course-restriction>
-
-      <!-- <nz-card class="sub-restriction-card" [nzTitle]="subRestrictionTitle" [nzBordered]="false">
-        <ng-template #subRestrictionTitle>
-          <div class="sub-restriction-header">
-            <span nz-typography>Sous restriction</span>
-            <button nz-button nzType="primary" nzDanger nzShape="circle" (click)="removeRestriction(i)">
-              <i nz-icon nzType="delete"></i>
-            </button>
-          </div>
-        </ng-template>
-
-        <course-propositions
-          *ngIf="isOpenProposition"
-          (closeEvent)="closeBottomSheet()"
-          (sendEvent)="selectOption($event)"
-        >
-        </course-propositions>
-
-        <div class="add-restriction-button">
-          <button nz-button nzType="dashed" nzBlock (click)="openBottomSheet()">
-            <i nz-icon nzType="plus"></i>
-            Ajouter une sous-restriction
-          </button>
-        </div>
-      </nz-card> -->
-      <!-- </div> -->
       }
 
       <course-propositions
@@ -58,63 +37,5 @@
         </button>
       </div>
     </nz-card>
-
-    <!-- Les sous-restrictions -->
-    <!-- <nz-card *ngIf="isSubRestriction" [nzBordered]="false">
-      <div *ngFor="let restriction of restrictions; let i = index" class="restriction-item">
-        <course-restriction
-          *ngIf="restriction.type !== 'Jeu'"
-          [restriction]="restriction"
-          [courseGroups]="courseGroups"
-          [courseMembers]="courseMembers"
-          [isSubRestriction]="isSubRestriction"
-          (remove)="removeRestriction(i)"
-        >
-        </course-restriction>
-
-        <nz-card
-          *ngIf="restriction.type === 'Jeu'"
-          class="sub-restriction-card"
-          [nzTitle]="subRestrictionTitle"
-          [nzBordered]="false"
-        >
-          <ng-template #subRestrictionTitle>
-            <div class="sub-restriction-header">
-              <span nz-typography>Sous restriction</span>
-              <button nz-button nzType="primary" nzDanger nzShape="circle" (click)="removeRestriction(i)">
-                <i nz-icon nzType="delete"></i>
-              </button>
-            </div>
-          </ng-template>
-
-          <div *ngIf="restriction.restrictions && restriction.restrictions.length > 0">
-            <course-restriction-manager
-              [restrictions]="restriction.restrictions"
-              [courseGroups]="courseGroups"
-              [courseMembers]="courseMembers"
-              [condition]="restriction.condition"
-              [allConditions]="restriction.allConditions"
-              [isSubRestriction]="true"
-              (restrictionAdded)="onSubRestrictionAdded(i)"
-            >
-            </course-restriction-manager>
-          </div>
-
-          <course-propositions
-            *ngIf="isOpenProposition"
-            (closeEvent)="closeBottomSheet()"
-            (sendEvent)="selectOption(i, $event)"
-          >
-          </course-propositions>
-
-          <div class="add-restriction-button">
-            <button nz-button nzType="dashed" nzBlock (click)="openBottomSheet()">
-              <i nz-icon nzType="plus"></i>
-              Ajouter une sous-restriction
-            </button>
-          </div>
-        </nz-card>
-      </div>
-    </nz-card> -->
   </div>
 </nz-row>

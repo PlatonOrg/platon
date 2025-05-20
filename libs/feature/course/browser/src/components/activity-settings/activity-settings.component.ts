@@ -10,8 +10,6 @@ import {
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
-import differenceInCalendarDays from 'date-fns/differenceInCalendarDays'
-//import { saveAs } from 'file-saver'
 
 import { MatIconModule } from '@angular/material/icon'
 
@@ -33,7 +31,6 @@ import {
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
-import { PropositionsComponent } from './propositions/propositions.component'
 import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
 
 @Component({
@@ -55,7 +52,6 @@ import { RestrictionManagerComponent } from './restriction-manager/restriction-m
     NzPopconfirmModule,
     DialogModule,
     NzCardModule,
-    PropositionsComponent,
     RestrictionManagerComponent,
   ],
 })
@@ -63,7 +59,6 @@ export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
   @Output() activityChange = new EventEmitter<Activity>()
   restrictions: RestrictionList[] = [] as RestrictionList[]
-  @Output() changeRestriction = false
 
   protected form = new FormGroup({
     openAt: new FormControl<Date | undefined>(undefined),
@@ -77,8 +72,6 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected updating = false
   protected courseMembers: CourseMember[] = []
   protected courseGroups: CourseGroup[] = []
-
-  protected disabledDate = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
 
   constructor(
     private readonly courseService: CourseService,
@@ -115,7 +108,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     })
 
     if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
-      console.log('Restrictions from activité : \n\n', this.activity.restrictions)
       this.restrictions = [...this.activity.restrictions]
     } else {
       const startAt = this.form.get('openAt')?.value
@@ -132,67 +124,11 @@ export class CourseActivitySettingsComponent implements OnInit {
       }
     }
 
-    // Vérifier si une restriction de type 'DateRange' existe déjà
-    /*const dateRangeIndex = this.restrictions.findIndex((restriction) => restriction.type === 'DateRange')
-
-    if (dateRangeIndex === -1) {
-      this.restrictions.unshift({
-        type: 'DateRange',
-        config: {
-          start: startAt instanceof Date ? startAt : undefined,
-          end: closeAt instanceof Date ? closeAt : undefined,
-        },
-      })
-    }
-    if (!this.restrictions.some((restriction) => restriction.type === 'Members')) {
-      this.restrictions.push({
-        type: 'Members',
-        config: {
-          members: this.form.get('members')?.value || undefined,
-        },
-      })
-    }
-
-    if (!this.restrictions.some((restriction) => restriction.type === 'Groups')) {
-      this.restrictions.push({
-        type: 'Groups',
-        config: {
-          groups: this.form.get('groups')?.value || undefined,
-        },
-      })
-    }
-
-    if (!this.restrictions.some((restriction) => restriction.type === 'Correctors')) {
-      this.restrictions.push({
-        type: 'Correctors',
-        config: {
-          correctors: this.form.get('correctors')?.value || undefined,
-        },
-      })
-    }*/
-
-    console.log('Restrictions testings \n\n :', this.restrictions)
-    this.addRest = true
-
     this.loading = false
     this.changeDetectorRef.markForCheck()
   }
 
-  isOpen = true
-  addRest = false
-  isOpenProposition = false
-  selectedType = ''
-  jeuDeRestriction = false
-
-  accordDeroule() {
-    this.isOpen = !this.isOpen
-    if (!this.isOpen) {
-      this.addRest = false
-    }
-  }
-
-  newRestriction() {
-    this.isOpenProposition = true
+  protected newRestriction() {
     this.restrictions.push({
       restriction: [
         {
@@ -207,45 +143,14 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  removeRestriction(index: number) {
-    this.restrictions.splice(index, 1)
-    if (this.restrictions.length === 0) {
-      this.addRest = false
+  protected updateRestriction(index: number, updatedRestrictions: Restriction[]) {
+    if (updatedRestrictions.length === 0) {
+      this.restrictions.splice(index, 1)
+    } else {
+      this.restrictions[index] = { restriction: updatedRestrictions }
     }
     this.changeDetectorRef.markForCheck()
   }
-
-  // selectOption(type: string) {
-  //   if (type === 'Jeu de restriction') {
-  //     this.jeuDeRestriction = true
-  //     console.log('jeu de restriction')
-  //   }
-  //   this.selectedType = type
-  //   this.addRest = true
-  //   this.isOpenProposition = false
-  // }
-
-  // closeRestriction() {
-  //   this.addRest = false
-  // }
-
-  // resetSelectedType() {
-  //   this.selectedType = ''
-  // }
-
-  updateRestriction(index: number, updatedRestrictions: Restriction[]) {
-    this.restrictions[index] = { restriction: updatedRestrictions }
-    this.changeDetectorRef.markForCheck()
-    void this.update()
-    this.changeRestriction = false
-    this.changeDetectorRef.markForCheck()
-  }
-
-  // askRestriction() {
-  //   this.changeRestriction = true
-  //   this.changeDetectorRef.markForCheck()
-  //   console.log('Restrictions 0 :', this.restrictions)
-  // }
 
   private getMainDate(): RestrictionConfig['DateRange'] | null {
     const dateRange = this.restrictions[0].restriction.find((r) => r.type === 'DateRange')
@@ -259,17 +164,11 @@ export class CourseActivitySettingsComponent implements OnInit {
     try {
       const dateRange = this.getMainDate()
       const res = await Promise.all([
-        /*firstValueFrom(
-          this.courseService.updateActivity(this.activity, {
-            openAt: dateRange?.start || undefined,
-            closeAt: dateRange?.end || undefined,
-          })
-        ),*/
         ...(!this.activity.isChallenge
           ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.restrictions))]
           : []),
       ])
-      console.log('La Suite ', res)
+      console.log('Après la fonction update : ', res)
       this.activity = res[0]
       this.activityChange.emit(
         (this.activity = {
@@ -287,7 +186,6 @@ export class CourseActivitySettingsComponent implements OnInit {
       )
     } finally {
       this.updating = false
-      this.changeRestriction = false
       this.changeDetectorRef.markForCheck()
     }
   }

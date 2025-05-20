@@ -1,19 +1,16 @@
 <div class="page-container">
   <div>
-    <div *ngIf="isOpen">
+    <div>
       <section>
         <div class="example-button-row">
-          <div *ngIf="addRest" class="data-form">
+          <div class="data-form">
             @for(restriction of restrictions; track restriction; let i = $index) {
             <course-restriction-manager
-              [type]="selectedType"
               [activity]="activity"
               [courseGroups]="courseGroups"
               [courseMembers]="courseMembers"
               [restrictions]="restriction.restriction"
-              [isMainRestriction]="i === 0 ? true : false"
               [index]="i"
-              [sendRestrictionToParent]="changeRestriction"
               (sendRestrictions)="updateRestriction(i, $event)"
             >
             </course-restriction-manager>
@@ -109,6 +106,3 @@
     </div>
   </ng-template>
 </div>
-
-<!-- (notRestriction)="closeRestriction()"
-              (restrictionAdded)="resetSelectedType()"  -->

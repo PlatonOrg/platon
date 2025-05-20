@@ -7,12 +7,9 @@ import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 
-// import { saveAs } from 'file-saver'
-
 import { PropositionsComponent } from '../propositions/propositions.component'
 import { RestrictionComponent } from '../restriction/restriction.component'
 import { Activity, CourseGroup, CourseMember, Restriction } from '@platon/feature/course/common'
-import index from 'isomorphic-git'
 
 @Component({
   selector: 'course-restriction-manager',
@@ -32,17 +29,12 @@ import index from 'isomorphic-git'
   styleUrl: './restriction-manager.component.scss',
 })
 export class RestrictionManagerComponent implements OnInit {
-  @Output() notRestriction = new EventEmitter<void>() // Si l'utilisateur supprime la dernière restriction, on envoie un événement pour mettre à jour l'affichage
-  @Output() restrictionAdded = new EventEmitter<void>()
   @Input() restrictions: Restriction[] = [] as Restriction[]
-  @Input() isStart = false
   @Output() sendRestrictions = new EventEmitter<Restriction[]>()
   @Input() activity!: Activity
-  @Input() isMainRestriction = false
   @Input() index = 0
 
   isOpenProposition = false
-  selectedType = ''
 
   @Input() courseMembers: CourseMember[] = []
   @Input() courseGroups: CourseGroup[] = []
@@ -52,58 +44,8 @@ export class RestrictionManagerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  //saveDataToFile(): Restriction[] {
-  // const data = {
-  //   condition: this.condition,
-  //   allConditions: this.allConditions,
-  //   restrictions: this.restrictions,
-  // }
-  // const traverseRestrictions = (restrictions: Restriction[]): any[] => {
-  //   return restrictions.map((restriction) => {
-  //     if (restriction.type === 'Jeu') {
-  //       return {
-  //         condition: restriction.condition,
-  //         allConditions: restriction.allConditions,
-  //         restrictions: traverseRestrictions(restriction.restrictions || []),
-  //       }
-  //     } else {
-  //       return {
-  //         type: restriction.type,
-  //         config: restriction.config,
-  //       }
-  //     }
-  //   })
-  // }
-  // data.restrictions = traverseRestrictions(this.restrictions)
-  //const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  //const fileName = 'restrictions.json'
-  //saveAs(blob, fileName)
-  //return data.restrictions
-  //}
-
   emitRestrictions() {
-    //const res = this.saveDataToFile()
     this.sendRestrictions.emit(this.restrictions)
-  }
-
-  @Input() set type(value: string) {
-    if (value) {
-      this.addRestriction(value)
-    }
-  }
-
-  @Input() set start(value: boolean) {
-    if (value) {
-      this.isStart = value
-    }
-  }
-
-  @Input() set sendRestrictionToParent(value: boolean) {
-    if (value) {
-      this.emitRestrictions()
-      console.log('Restrictions envoyées au parent')
-      this.changeDetectorRef.markForCheck()
-    }
   }
 
   CantAddRestriction(type: string): boolean {
@@ -113,7 +55,6 @@ export class RestrictionManagerComponent implements OnInit {
   addRestriction(type: string): void {
     let newRestriction: Restriction
     if (this.CantAddRestriction(type)) {
-      console.log('Cette restriction existe déjà.')
       return
     }
     switch (type) {
@@ -142,24 +83,24 @@ export class RestrictionManagerComponent implements OnInit {
         }
         break
       default:
-        //throw new Error(`Type de restriction non supporté: ${type}`)
         console.error(`Type de restriction non supporté: ${type}`)
         return
     }
 
     this.restrictions.push(newRestriction)
-    this.restrictionAdded.emit()
     this.changeDetectorRef.markForCheck()
   }
 
   removeRestriction(index: number) {
     this.restrictions.splice(index, 1)
-    if (this.restrictions.length === 0) {
-      this.notRestriction.emit()
-    }
     this.changeDetectorRef.markForCheck()
   }
 
+  removeAllRestrictions() {
+    this.restrictions = []
+    this.emitRestrictions()
+    this.changeDetectorRef.markForCheck()
+  }
   openBottomSheet() {
     this.isOpenProposition = true
     this.changeDetectorRef.markForCheck()
@@ -171,12 +112,9 @@ export class RestrictionManagerComponent implements OnInit {
   }
 
   selectOption(type: string) {
-    this.selectedType = type
     this.isOpenProposition = false
-
-    if (this.selectedType) {
-      this.addRestriction(this.selectedType)
-      this.selectedType = ''
+    if (type) {
+      this.addRestriction(type)
     }
     this.changeDetectorRef.markForCheck()
   }

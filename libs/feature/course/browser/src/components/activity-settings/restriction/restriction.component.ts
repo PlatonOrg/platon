@@ -44,8 +44,6 @@ export class RestrictionComponent {
 
   constructor(private dialogService: DialogService) {}
 
-  size: NzButtonSize = 'large'
-
   protected disabledDateStart = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
 
   protected disabledDateEnd = (current: Date): boolean => {
@@ -75,19 +73,25 @@ export class RestrictionComponent {
     this.remove.emit()
   }
 
-  isDateRangeConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['DateRange'] {
+  protected isDateRangeConfig(
+    config: RestrictionConfig[keyof RestrictionConfig]
+  ): config is RestrictionConfig['DateRange'] {
     return config !== undefined || 'start' in config || 'end' in config
   }
 
-  isMembersConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Members'] {
+  protected isMembersConfig(
+    config: RestrictionConfig[keyof RestrictionConfig]
+  ): config is RestrictionConfig['Members'] {
     return 'members' in config
   }
 
-  isCorrectorsConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Correctors'] {
+  protected isCorrectorsConfig(
+    config: RestrictionConfig[keyof RestrictionConfig]
+  ): config is RestrictionConfig['Correctors'] {
     return 'correctors' in config
   }
 
-  isGroupsConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Groups'] {
+  protected isGroupsConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Groups'] {
     return 'groups' in config
   }
 }
