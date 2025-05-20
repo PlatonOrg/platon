@@ -4,9 +4,9 @@ export class RefactoResourceStats1747231230119 implements MigrationInterface {
     name = 'RefactoResourceStats1747231230119'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP MATERIALIZED VIEW "ResourceStats"`);
-        await queryRunner.query(`DELETE FROM "typeorm_metadata" WHERE "type" = $1 AND "name" = $2 AND "schema" = $3`, ["MATERIALIZED_VIEW","ResourceStats","public"]);
         await queryRunner.query(`DROP INDEX "public"."IDX_90423e56a0b8338517b720074c"`);
+        await queryRunner.query(`DELETE FROM "typeorm_metadata" WHERE "type" = $1 AND "name" = $2 AND "schema" = $3`, ["MATERIALIZED_VIEW","ResourceStats","public"]);
+        await queryRunner.query(`DROP MATERIALIZED VIEW "ResourceStats"`);
         await queryRunner.query(`CREATE MATERIALIZED VIEW "ResourceStats" AS SELECT resource.id AS "id", resource.name AS "name", resource.members AS "members", resource.watchers AS "watchers", resource.events AS "events", resource.uses AS "uses", COALESCE(SUM(CASE WHEN resource.id = "child"."parent_id" THEN 1 ELSE 0 END), 0) AS "children", COALESCE(SUM(CASE WHEN "child"."type" = 'CIRCLE' THEN 1 ELSE 0 END), 0) AS "circles", COALESCE(SUM(CASE WHEN "child"."type" = 'ACTIVITY' THEN 1 ELSE 0 END), 0) AS "activities", COALESCE(SUM(CASE WHEN "child"."type" = 'EXERCISE' THEN 1 ELSE 0 END), 0) AS "exercises", COALESCE(SUM(CASE WHEN "child"."status" = 'READY' THEN 1 ELSE 0 END), 0) + CASE WHEN resource.status = 'READY' THEN 1 ELSE 0 END AS "ready", COALESCE(SUM(CASE WHEN "child"."status" = 'DEPRECATED' THEN 1 ELSE 0 END), 0) + CASE WHEN resource.status = 'DEPRECATED' THEN 1 ELSE 0 END AS "deprecated", COALESCE(SUM(CASE WHEN "child"."status" = 'BUGGED' THEN 1 ELSE 0 END), 0) + CASE WHEN resource.status = 'BUGGED' THEN 1 ELSE 0 END AS "bugged", COALESCE(SUM(CASE WHEN "child"."status" = 'NOT_TESTED' THEN 1 ELSE 0 END), 0) + CASE WHEN resource.status = 'NOT_TESTED' THEN 1 ELSE 0 END AS "not_tested", COALESCE(SUM(CASE WHEN "child"."status" = 'DRAFT' THEN 1 ELSE 0 END), 0) + CASE WHEN resource.status = 'DRAFT' THEN 1 ELSE 0 END AS "draft",
         (
           (
