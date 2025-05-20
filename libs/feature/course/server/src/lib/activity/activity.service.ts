@@ -8,12 +8,10 @@ import {
   ActivityFilters,
   CreateActivity,
   ReloadActivity,
-  Restriction,
   RestrictionList,
   UpdateActivity,
   calculateActivityOpenState,
 } from '@platon/feature/course/common'
-// import { ActivityRestrictionCheckerService } from '@platon/feature/player/server'
 import { ResourceEntity, ResourceFileService } from '@platon/feature/resource/server'
 import { CLS_REQ } from 'nestjs-cls'
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm'
@@ -36,6 +34,7 @@ import { CourseGroupEntity } from '../course-group/course-group.entity'
 import { ActivityGroupEntity } from '../activity-group/activity-group.entity'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
+import { ActivityDatesService } from './activity-dates.service'
 
 // -------------------------------------------------------------------------------
 import { Activity, RestrictionConfig } from '@platon/feature/course/common'
@@ -59,6 +58,7 @@ export class ActivityService {
     private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
     private readonly courseGroup: CourseGroupService,
+    private readonly activityDatesService: ActivityDatesService, // Nouveau service injecté
 
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -69,7 +69,7 @@ export class ActivityService {
     @InjectRepository(CourseGroupMemberEntity)
     private readonly courseGroupMemberRepository: Repository<CourseGroupMemberEntity>,
 
-    private readonly activityGroupService: ActivityGroupService //private readonly activityCheckerService: ActivityRestrictionCheckerService
+    private readonly activityGroupService: ActivityGroupService
   ) {}
 
   async search(courseId: string, filters?: ActivityFilters): Promise<[ActivityEntity[], number]> {
@@ -86,7 +86,7 @@ export class ActivityService {
     qb.orderBy('activity.createdAt')
 
     const [entities, count] = await qb.getManyAndCount()
-    this.logger.debug(
+    console.log(
       'Avant la modification de la date : ',
       entities[2].title,
       entities[2].openAt,
@@ -96,7 +96,7 @@ export class ActivityService {
     await this.updateActivitiesDates(entities)
     await this.addVirtualColumns(...entities)
 
-    this.logger.debug(
+    console.log(
       'Après la modification de la date : ',
       entities[2].title,
       entities[2].openAt,
@@ -292,7 +292,7 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
-    await this.reopenOrCloseAllRestrictions(activity, false)
+    await this.activityDatesService.reopenOrCloseAllRestrictions(activity, false)
     // Fin de changement
     this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: new Date(), restrictions: activity.restrictions }, guard)
@@ -307,7 +307,7 @@ export class ActivityService {
       await guard(activity)
     }
     // Des changements ici
-    await this.reopenOrCloseAllRestrictions(activity, true)
+    await this.activityDatesService.reopenOrCloseAllRestrictions(activity, true)
     // Fin de changement
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: null, restrictions: activity.restrictions })
@@ -458,187 +458,7 @@ export class ActivityService {
    */
   async updateActivitiesDates(
     activities: ActivityEntity[]
-  ): Promise<void | { start: Date | undefined; end: Date | undefined }> {
-    const dateRangeGlobale: { start: Date | undefined; end: Date | undefined } = {
-      start: undefined,
-      end: undefined,
-    }
-    console.log('Le nom de la fonction est : updateActivitiesDates', this.request.user)
-    for (const activity of activities) {
-      if (activity?.restrictions && activity.restrictions.length > 0) {
-        let isExist = false
-        for (const restriction of activity.restrictions) {
-          const dateRange = await this.findUserAccess(activity, restriction.restriction, this.request.user)
-          if (dateRange && activity) {
-            activity.openAt = dateRange.start
-            activity.closeAt = dateRange.end
-            dateRangeGlobale.start = dateRange.start
-            dateRangeGlobale.end = dateRange.end
-            isExist = true
-            console.log('ON A TROUVÉ LA DATE', dateRange.start, dateRange.end)
-            break // Sortir de la boucle une fois une date trouvée
-          }
-        }
-        if (!isExist) {
-          for (const restriction of activity.restrictions) {
-            let condition = 0
-            for (const rest of restriction.restriction) {
-              if (rest.type === 'Members') {
-                const isMember = (
-                  config: RestrictionConfig[keyof RestrictionConfig]
-                ): config is RestrictionConfig['Members'] => {
-                  return 'members' in config
-                }
-                if (isMember(rest.config) && (!rest.config.members || rest.config.members.length === 0)) {
-                  condition++
-                }
-              }
-              if (rest.type === 'Groups') {
-                const isMember = (
-                  config: RestrictionConfig[keyof RestrictionConfig]
-                ): config is RestrictionConfig['Groups'] => {
-                  return 'groups' in config
-                }
-                if (isMember(rest.config) && (!rest.config.groups || rest.config.groups.length === 0)) {
-                  condition++
-                }
-              }
-              if (condition === 2) {
-                const dateRangeRestriction = restriction.restriction.find((r) => r.type === 'DateRange')
-                if (dateRangeRestriction) {
-                  const dateRange = dateRangeRestriction.config as RestrictionConfig['DateRange']
-                  activity.openAt = dateRange.start
-                  activity.closeAt = dateRange.end
-                  dateRangeGlobale.start = dateRange.start
-                  dateRangeGlobale.end = dateRange.end
-                  isExist = true
-                }
-              }
-            }
-          }
-        }
-        if (!isExist) {
-          const yesterday = new Date()
-          yesterday.setDate(yesterday.getDate() - 1)
-
-          activity.openAt = yesterday
-          activity.closeAt = yesterday
-          dateRangeGlobale.start = yesterday
-          dateRangeGlobale.end = yesterday
-
-          console.log('Aucune restriction trouvée, dates par défaut :', yesterday)
-        }
-      }
-    }
-    return dateRangeGlobale
-  }
-
-  private async checkMembers(
-    activity: Activity,
-    config: RestrictionConfig['Members'] | RestrictionConfig['Correctors'],
-    user: User
-  ): Promise<boolean> {
-    if (!activity) {
-      return false
-    }
-
-    const member = await this.courseMemberService.getByUserIdAndCourseId(user.id, activity.courseId)
-    if (!member.isPresent()) {
-      return false
-    }
-
-    if ('members' in config) {
-      return config.members?.some((memberId) => member.get().id === memberId) ?? false
-    }
-
-    if ('correctors' in config) {
-      return config.correctors?.some((correctorId) => member.get().id === correctorId) ?? false
-    }
-
-    return false
-  }
-
-  // Check if the user is in the group
-  private async checkGroups(activity: Activity, config: RestrictionConfig['Groups'], user: User): Promise<boolean> {
-    if (!activity) {
-      return false
-    }
-
-    for (const group of config.groups || []) {
-      const isMember = await this.courseGroup.isMember(group, user.id)
-      if (isMember) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  private async findUserAccess(
-    activity: Activity,
-    restrictions: Restriction[],
-    user: User
-  ): Promise<RestrictionConfig['DateRange'] | null> {
-    // Vérifier s'il existe des restrictions de type Members ou Groups
-    const hasMembersRestriction = restrictions.some((r) => r.type === 'Members')
-    const hasGroupRestriction = restrictions.some((r) => r.type === 'Groups')
-
-    // Si les deux restrictions sont absentes et que c'est un étudiant, on autorise l'accès
-    if (!hasMembersRestriction && !hasGroupRestriction) {
-      // Vérifier s'il y a une restriction de type DateRange
-      const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
-      if (dateRangeRestriction) {
-        return dateRangeRestriction.config as RestrictionConfig['DateRange']
-      }
-      return { start: undefined, end: undefined }
-    }
-
-    // Traitement normal pour chaque restriction
-    for (const restriction of restrictions) {
-      let hasAccess = false
-
-      switch (restriction.type) {
-        case 'Members':
-          hasAccess = await this.checkMembers(activity, restriction.config as RestrictionConfig['Members'], user)
-          break
-        case 'Groups':
-          hasAccess = await this.checkGroups(activity, restriction.config as RestrictionConfig['Groups'], user)
-          break
-        case 'Correctors':
-          hasAccess = await this.checkMembers(activity, restriction.config as RestrictionConfig['Correctors'], user)
-          break
-        default:
-          break
-      }
-
-      if (hasAccess) {
-        // Vérifier si la restriction contient une DateRange
-        const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
-        if (dateRangeRestriction) {
-          return dateRangeRestriction.config as RestrictionConfig['DateRange']
-        }
-        return { start: undefined, end: undefined }
-      }
-    }
-    return null
-  }
-
-  private async reopenOrCloseAllRestrictions(activity: Activity, isOpen: boolean): Promise<void> {
-    if (activity?.restrictions && activity.restrictions.length > 0) {
-      activity.restrictions.forEach((restrictionList) => {
-        restrictionList.restriction.forEach((restric) => {
-          const isDateRange = (
-            config: RestrictionConfig[keyof RestrictionConfig]
-          ): config is RestrictionConfig['DateRange'] => {
-            return config !== undefined || 'start' in config || 'end' in config
-          }
-          if (isDateRange(restric.config) && !isOpen) {
-            restric.config.end = undefined
-          } else if (isDateRange(restric.config) && isOpen) {
-            restric.config.start = undefined
-          }
-        })
-      })
-    }
+  ): Promise<{ start: Date | undefined; end: Date | undefined }> {
+    return this.activityDatesService.updateActivitiesDates(activities)
   }
 }

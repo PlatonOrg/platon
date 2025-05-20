@@ -434,6 +434,10 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
         this.player.navigation = output.navigation
       }
     } catch (error) {
+      if (error instanceof HttpErrorResponse) {
+        this.dialogService.error(error.error?.message || error.message)
+        return
+      }
       this.dialogService.error(
         "Une erreur est survenue lors du chargement de l'exercice. Merci de prévenir votre professeur"
       )

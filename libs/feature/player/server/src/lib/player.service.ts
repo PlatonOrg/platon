@@ -58,7 +58,6 @@ import { SandboxService } from './sandboxes/sandbox.service'
 import { randomInt } from 'crypto'
 import { PeerService } from '@platon/feature/peer/server'
 import { MatchStatus, PeerContest } from '@platon/feature/peer/common'
-import { ActivityRestrictionCheckerService } from './activity-restriction-checker.service'
 import { v4 as uuidv4 } from 'uuid'
 
 type CreateSessionArgs = {
@@ -82,7 +81,7 @@ export class PlayerService extends PlayerManager {
     private readonly sessionService: SessionService,
     private readonly activityService: ActivityService,
     private readonly resourceFileService: ResourceFileService,
-    private readonly peerService: PeerService //private readonly restrictionChecker: ActivityRestrictionCheckerService
+    private readonly peerService: PeerService
   ) {
     super(sandboxService)
   }
@@ -169,41 +168,36 @@ export class PlayerService extends PlayerManager {
     if (!activitySession.activity) {
       throw new NotFoundResponse(`Activity not found: ${activitySessionId}`)
     }
-    //const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
-    // if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
-    //   throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
-    // }
-    // if (activitySession.activity?.closeAt && activitySession.activity.closeAt < new Date()) {
-    //   throw new ForbiddenResponse("L'activité est fermée.")
-    // }
-    /*if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
-      throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
-    }
-    if (activitySession.activity?.closeAt && activitySession.activity.closeAt < new Date()) {
-      throw new ForbiddenResponse("L'activité est fermée.")
-    }*/
+
     const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
 
-    // Ajouter un log pour voir ce que retourne réellement updateActivitiesDates
-    console.log('Dates récupérées:', dateRange)
+    const localDateRange = dateRange
+      ? {
+          start: dateRange.start ? new Date(dateRange.start).toLocaleString() : undefined,
+          end: dateRange.end ? new Date(dateRange.end).toLocaleString() : undefined,
+        }
+      : undefined
+    console.log('Dates récupérées (local time):', localDateRange)
+    console.log('Dates récupérées (UTC):', dateRange)
+    if (dateRange && dateRange.start) {
+      const startTime = new Date(dateRange.start).getTime()
+      const nowTime = new Date().getTime()
 
-    // Ne vérifier que si les dates existent réellement
-    if (dateRange && dateRange.start instanceof Date && dateRange.start > new Date()) {
-      console.log("L'activité n'est pas encore ouverte. Date de début:", dateRange.start)
-      throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
-    }
-
-    if (dateRange && dateRange.end instanceof Date && dateRange.end < new Date()) {
-      console.log("L'activité est fermée. Date de fin:", dateRange.end)
-      throw new ForbiddenResponse("L'activité est fermée.")
-    }
-    /*if (activitySession.activity && user) {
-      const access = await this.restrictionChecker.validateActivityAccess(activitySession.activity, user)
-      if (!access.isAllowed) {
-        throw new ForbiddenResponse(access.message || 'Access denied')
+      if (startTime > nowTime) {
+        console.log("L'activité n'est pas encore ouverte. Date de début (ms):", startTime, 'Maintenant (ms):', nowTime)
+        throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
       }
-    }*/
-    this.logger.log('\n\n\n -----------User has access to the activity------------------\n\n\n')
+    }
+
+    if (dateRange && dateRange.end) {
+      const endTime = new Date(dateRange.end).getTime()
+      const nowTime = new Date().getTime()
+
+      if (endTime < nowTime) {
+        console.log("L'activité est fermée. Date de fin (ms):", endTime, 'Maintenant (ms):', nowTime)
+        throw new ForbiddenResponse("L'activité est fermée.")
+      }
+    }
     // Fin des modifs
 
     // CREATE PLAYERS
