@@ -140,6 +140,26 @@ export class PLCompiler implements PLVisitor {
    */
   async output(overrides?: Variables): Promise<PLSourceFile> {
     const source = deepCopy(this.source)
+    if (await this.resolver.exists(source.resource, source.version, 'includes')) {
+      if (await this.resolver.isDir(source.resource, source.version, 'includes')) {
+        const includes = await this.resolver.listDir(source.resource, source.version, 'includes')
+        const includesPromises = includes.map(async (include) => {
+          const { abspath } = this.resolveReference(include)
+          const content = await this.resolver.resolveContent(source.resource, source.version, include)
+          const hash = crypto.SHA1(content).toString()
+          return {
+            alias: include,
+            lineno: 0,
+            content: '',
+            hash,
+            abspath,
+          }
+        })
+        const dependencies: PLDependency[] = await Promise.all(includesPromises)
+        source.dependencies = source.dependencies.concat(dependencies)
+      }
+    }
+
     if (!this.config) {
       return source
     }
@@ -171,27 +191,6 @@ export class PLCompiler implements PLVisitor {
         configOverrides = deepMerge(configOverrides, overrides, true)
       }
       source.variables = deepMerge(source.variables, await this.resolvePathsInObject(configOverrides), true)
-    }
-
-    // If an `includes` folder is present, we need to resolve the includes.
-    if (await this.resolver.exists(source.resource, source.version, 'includes')) {
-      if (await this.resolver.isDir(source.resource, source.version, 'includes')) {
-        const includes = await this.resolver.listDir(source.resource, source.version, 'includes')
-        const includesPromises = includes.map(async (include) => {
-          const { abspath } = this.resolveReference(include)
-          const content = await this.resolver.resolveContent(source.resource, source.version, include)
-          const hash = crypto.SHA1(content).toString()
-          return {
-            include,
-            abspath,
-            content: '',
-            hash,
-            lineno: 0,
-          }
-        })
-        const dependencies: PLDependency[] = await Promise.all(includesPromises)
-        source.dependencies = source.dependencies.concat(dependencies)
-      }
     }
 
     return source
