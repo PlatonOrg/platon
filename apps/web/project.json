@@ -29,6 +29,11 @@
           },
           {
             "glob": "**/*",
+            "input": "libs/feature/webcomponent/src/lib/docs/playground",
+            "output": "/assets/playground/exercises"
+          },
+          {
+            "glob": "**/*",
             "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
             "output": "/assets/vendors/@ant-design/assets/"
           },
@@ -44,7 +49,7 @@
           },
           {
             "glob": "**/*",
-            "input": "./node_modules/@cisstech/nge/assets/ui/icon/assets/icons/files",
+            "input": "./node_modules/@cisstech/nge/assets/ui/icon/icons/files",
             "output": "./assets/vendors/nge/ui/icon/icons/files/"
           },
           {
@@ -71,16 +76,6 @@
             "glob": "**/*",
             "input": "./node_modules/intro.js/",
             "output": "./assets/vendors/intro.js/"
-          },
-          {
-            "glob": "**/*.md",
-            "input": "libs/feature/webcomponent/src/lib",
-            "output": "./assets/docs/components"
-          },
-          {
-            "glob": "**/*.svg",
-            "input": "libs/feature/webcomponent/src/lib",
-            "output": "./assets/images/components"
           },
           {
             "glob": "**/*.js",

@@ -18,8 +18,14 @@
           <nz-countdown *ngIf="countdownValue" [nzValue]="countdownValue" [nzValueStyle]="{ color: countdownColor }" />
         </mat-card-subtitle>
       </div>
-      <div>
-        <button *ngIf="canRequestFullscreen" nz-tooltip="Plein écran" (click)="toggleFullscreen()" mat-icon-button>
+      <div class="flex">
+        <button
+          class="flex"
+          *ngIf="canRequestFullscreen"
+          nz-tooltip="Plein écran"
+          (click)="toggleFullscreen()"
+          mat-icon-button
+        >
           <mat-icon>{{ fullscreen ? 'fullscreen' : 'fullscreen_exit' }}</mat-icon>
         </button>
       </div>
@@ -71,7 +77,7 @@
       </section>
       <!-- L'AJOUT DU TERMINAL LOGS -->
       <section>
-        <ng-container *ngIf="player?.platon_logs?.length">
+        <ng-container *ngIf="player?.platon_logs?.length && editorPreview">
           <div class="terminal-container">
             <div class="terminal-header">
               <span>Terminal PlaTon</span>

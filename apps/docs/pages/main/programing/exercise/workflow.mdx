@@ -1,0 +1,151 @@
+---
+title: Construction, Affichage et Évaluation
+description: Documentation détaillée du cycle de vie d'un exercice PLaTon, couvrant les phases de construction, affichage, évaluation et solution, ainsi que les différentes sandboxes d'exécution disponibles.
+---
+
+import { Callout } from 'nextra/components'
+
+# Construction, Affichage et Évaluation
+
+Le cycle de vie d'un exercice PLaTon se déroule en quatre phases principales:
+
+- **Construction** - Génération des données et configuration de l'exercice (clé `builder`)
+- **Affichage** - Présentation de l'exercice à l'apprenant (clés `title`, `statement`, `form`)
+- **Évaluation** - Analyse de la réponse soumise et attribution d'une note (clé `grader`)
+- **Solution** - Affichage optionnel de la solution (clé `solution`)
+
+## Environnement d'exécution : Sandbox
+
+Les exercices s'exécutent dans un environnement isolé appelé "sandbox", qui garantit la sécurité et la reproductibilité de leur exécution.
+
+### Sandbox node (par défaut)
+
+- **Syntaxe** : `sandbox = "node"`
+- **Description** : Exécution de code JavaScript via l'API de sandboxing de Node.js
+- **Bibliothèques disponibles** : API standard de JavaScript et [fonctions utilitaires](https://github.com/cisstech/platon/blob/main/libs/feature/player/server/src/lib/sandboxes/node/node-sandbox-api.ts#L22)
+- **Cas d'usage** : Exercices simples à modérément complexes, sans besoin de bibliothèques système
+
+### Sandbox python
+
+- **Syntaxe** : `sandbox = "python"`
+- **Description** : Exécution de code Python dans un conteneur Docker
+- **Bibliothèques disponibles** : Conteneur Linux complet avec de nombreux outils et bibliothèques préinstallés (python, gcc, java, postgresql...)
+- **Détails** : [Liste complète des bibliothèques disponibles](https://github.com/PremierLangage/sandbox/blob/master/docker/Dockerfile)
+
+<Callout type="warning">
+  La sandbox Python nécessite une configuration supplémentaire. Consultez la [documentation](https://github.com/PremierLangage/sandbox) pour son installation.
+</Callout>
+
+## Construction: Builder
+
+La phase de construction permet de générer des données aléatoires et de préparer l'exercice avant son affichage.
+
+```pl-js
+builder == #!lang=js
+// Code exécuté avant l'affichage de l'exercice
+max = 10
+op1 = Math.round(Math.random() * max)
+op2 = Math.round(Math.random() * max)
+expected_result = op1 + op2
+==
+```
+
+Pour l'aléatoire dans une sandbox Python:
+
+```pl-py
+builder == #!lang=py
+# Important: utilisez la graine (seed) fournie automatiquement
+import random
+random.seed(seed)
+op1 = random.randint(1, 10)
+op2 = random.randint(1, 10)
+expected_result = op1 + op2
+==
+```
+
+## Affichage: Title, Statement et Form
+
+### title - Le titre de l'exercice
+
+```pl-js
+title = "Addition aléatoire"
+```
+
+<Callout type="warning">
+  La clé `title` ne peut pas contenir de variables avec la syntaxe `{{ nomvariable }}`.
+</Callout>
+
+### statement - L'énoncé de l'exercice
+
+```pl-js
+statement ==
+Calculez le résultat de **{{ op1 }}** + **{{ op2 }}**.
+==
+```
+
+### form - Le formulaire de réponse
+
+```pl-js
+input = :wc-input-box
+input.type = "number"
+
+form ==
+{{ input }}
+==
+```
+
+Ces clés supportent le HTML, le [Markdown](https://fr.wikipedia.org/wiki/Markdown), et les [templates Nunjucks](https://mozilla.github.io/nunjucks/templating.html) pour l'affichage dynamique de variables avec la syntaxe `{{ variable }}`.
+
+## Évaluation: Grader
+
+Le grader évalue la réponse de l'apprenant et lui attribue une note:
+
+```pl-js
+grader == #!lang=js
+// Important: grade et feedback doivent être déclarés comme variables globales (sans let/const/var)
+grade = 0
+feedback = {
+  type: "error",
+  content: "Mauvaise réponse"
+}
+
+if (parseInt(input.value) === expected_result) {
+  grade = 100
+  feedback.type = "success"
+  feedback.content = "Bonne réponse!"
+}
+==
+```
+
+<Callout type="warning">
+  Déclarez toujours `grade` et `feedback` sans mot-clé (`let`, `const`, `var`) pour qu'ils soient accessibles en dehors du grader.
+</Callout>
+
+Pour afficher plusieurs feedbacks:
+
+```pl-js
+grader == #!lang=js
+// Plusieurs feedbacks avec un tableau
+feedback = [
+  { type: "warning", content: "Premier commentaire" },
+  { type: "success", content: "Deuxième commentaire" }
+]
+==
+```
+
+## Solution: Affichage de la solution
+
+```pl-js
+inputSolution = :wc-input-box
+inputSolution.type = "number"
+inputSolution.disabled = true
+
+builder == #!lang=js
+// ...existing code...
+inputSolution.value = expected_result
+==
+
+solution ==
+{{ inputSolution }}
+==
+```

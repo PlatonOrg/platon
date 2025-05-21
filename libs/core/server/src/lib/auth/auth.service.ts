@@ -78,7 +78,10 @@ export class AuthService {
   async resetPassword(input: ResetPasswordInput): Promise<AuthToken> {
     const user = (await this.userService.findByUsername(input.username)).get()
     if (user.password && !(await bcrypt.compare(input.password || '', user.password))) {
-      throw new ForbiddenResponse('New password is the same as the old one')
+      throw new ForbiddenResponse('Password is incorrect')
+    }
+    if (input.newPassword === input.password) {
+      throw new BadRequestException('New password must be different from the old one')
     }
     const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?([^\w\s]|_)).{12,}$/
     if (!passwordRegex.test(input.newPassword.trim())) {

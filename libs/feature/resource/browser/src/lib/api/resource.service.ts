@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { ListResponse, User, UserRoles } from '@platon/core/common'
 import {
   CircleTree,
+  CreatePreviewResource,
   CreateResource,
   CreateResourceInvitation,
   FindResource,
@@ -80,6 +81,10 @@ export class ResourceService {
     return this.resourceProvider.create(input)
   }
 
+  createPreview(input: CreatePreviewResource): Observable<Resource> {
+    return this.resourceProvider.createPreview(input)
+  }
+
   move(id: string, parentId: string): Observable<Resource> {
     return this.resourceProvider.move(id, parentId)
   }
@@ -90,6 +95,14 @@ export class ResourceService {
 
   delete(resource: Resource): Observable<void> {
     return this.resourceProvider.delete(resource)
+  }
+
+  isConfigurableExercise(resourceId: string): Observable<boolean> {
+    return this.resourceProvider.isConfigurableExercise(resourceId)
+  }
+
+  updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource> {
+    return this.resourceProvider.updateTemplate(resourceId, templateId, templateVersion)
   }
   //#endregion
 

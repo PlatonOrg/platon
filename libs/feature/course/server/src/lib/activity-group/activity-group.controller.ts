@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ActivityGroupService } from './activity-group.service'
 import { ActivityService } from '../activity/activity.service'
 import { CourseGroupService } from '../course-group/course-group.service'
@@ -7,6 +7,7 @@ import { Roles, UUIDParam } from '@platon/core/server'
 import { ListResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
 import { ActivityGroupEntity } from './activity-group.entity'
 
+@ApiBearerAuth()
 @Controller('activities/:activityId/groups')
 @ApiTags('Courses')
 export class ActivityGroupController {

@@ -10,10 +10,11 @@
     </nz-comment>
   </ng-template>
 </nz-list>
+
 <nz-comment *ngIf="canComment">
   <nz-comment-content>
     <nz-form-item>
-      <textarea [(ngModel)]="input" nz-input rows="4"></textarea>
+      <textarea [(ngModel)]="input" nz-input rows="4" (keydown)="blockEvents($event)"></textarea>
     </nz-form-item>
     <nz-form-item>
       <button

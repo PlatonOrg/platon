@@ -53,7 +53,6 @@ import { UiError512Component } from './error-512.component'
         justify-content: center;
       }
 
-      ui-error-512,
       ui-error-500,
       ui-error-403,
       ui-error-404 {

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IRequest, Public, UUIDParam } from '@platon/core/server'
 import { EvalExerciseInput, NextOutput, PlayAnswersInput } from '@platon/feature/player/common'
 import {
@@ -15,6 +15,7 @@ import {
 import { PlayerService } from './player.service'
 import { Response } from 'express'
 
+@ApiBearerAuth()
 @Controller('player')
 @ApiTags('Players')
 export class PlayerController {

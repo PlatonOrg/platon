@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Patch, Post, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
   CreatedResponse,
   ItemResponse,
@@ -13,6 +13,7 @@ import { ResourceMemberDTO } from '../members/member.dto'
 import { CreateResourceInvitationDTO, ResourceInvitationDTO } from './invitation.dto'
 import { ResourceInvitationService } from './invitation.service'
 
+@ApiBearerAuth()
 @Controller('resources/:resourceId/invitations')
 @ApiTags('Resources')
 export class ResourceInvitationController {

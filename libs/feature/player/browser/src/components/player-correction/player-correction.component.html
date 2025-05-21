@@ -2,43 +2,104 @@
   <mat-drawer mode="side" opened #drawer>
     <nav>
       <img class="logo" src="assets/images/logo/platon.svg" alt="Logo PLaTon" [routerLink]="'/dashboard'" />
-      <h2>Exercices</h2>
-      <ng-container *ngFor="let group of exerciseGroups; trackBy: trackByExerciseId">
-        <button
-          (click)="onChooseGroup(group)"
-          mat-button
-          class="nav-link"
-          [class.active]="group.exerciseId === currentGroup?.exerciseId"
+      <h2>Corrections</h2>
+      <nz-collapse class="panel-wrapper" [nzBordered]="false">
+        @for (entry of activityExercisesMap.entries(); track entry[0]) {
+        <nz-collapse-panel
+          [nzHeader]="entry[1].name"
+          [nzActive]="activityId ? entry[0] === activityId : entry[0] === activityExercisesMap.keys().next().value"
         >
-          <mat-icon [style.color]="group.graded ? 'green' : 'white'">
-            {{ group.graded ? 'check_circle' : 'cancel' }}
-          </mat-icon>
-          {{ group.exerciseName }}
-        </button>
-      </ng-container>
+          <ng-container *ngFor="let ex of entry[1].map.entries()">
+            <button
+              (click)="onChooseGroup(ex[1])"
+              mat-button
+              class="nav-link"
+              [class.active]="ex[0] === currentGroup?.exerciseId"
+            >
+              <div class="nav-link-content">
+                <div class="icon-container">
+                  <mat-icon [style.color]="ex[1].graded ? 'green' : 'white'">
+                    {{ ex[1].graded ? 'check_circle' : 'cancel' }}
+                  </mat-icon>
+                </div>
+                <div class="exercise-name">{{ ex[1].exerciseName }}</div>
+              </div>
+            </button>
+          </ng-container>
+        </nz-collapse-panel>
+        }
+      </nz-collapse>
     </nav>
   </mat-drawer>
   <mat-drawer-content>
-    <mat-toolbar>
-      <nz-breadcrumb>
-        <nz-breadcrumb-item>
-          <a [routerLink]="['/corrections']">
-            <span nz-icon nzType="link" nzTheme="outline"></span>
-            <span>Corrections</span>
-          </a>
-        </nz-breadcrumb-item>
-        <nz-breadcrumb-item>
-          <a [routerLink]="['/courses', correction.courseId]">
-            <span nz-icon nzType="link" nzTheme="outline"></span>
-            <span> {{ correction.courseName }}</span>
-          </a>
-        </nz-breadcrumb-item>
-        <nz-breadcrumb-item>{{ correction.activityName }}</nz-breadcrumb-item>
-        <nz-breadcrumb-item *ngIf="currentGroup?.exerciseName">
-          <b>{{ currentGroup!.exerciseName }}</b>
-        </nz-breadcrumb-item>
-      </nz-breadcrumb>
+    <mat-toolbar class="toolbar">
+      <button mat-icon-button (click)="onChoosePreviousUserExercise()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <nz-select
+        class="student-name"
+        [ngModel]="currentUser?.id"
+        (ngModelChange)="loadUserExercise($event)"
+        [nzOptions]="userOptions"
+        [@swipeAnimation]="animationState"
+      >
+      </nz-select>
+      <button mat-icon-button (click)="onChooseNextUserExercise()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      <div class="setting-button">
+        <button mat-icon-button>
+          <mat-icon>settings</mat-icon>
+        </button>
+      </div>
     </mat-toolbar>
+    <main>
+      <nz-row>
+        <nz-col nzSpan="17">
+          <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" />
+        </nz-col>
+        <nz-col nzSpan="6" class="mid-col-wrapper">
+          <div class="grade-wrapper">
+            <ui-statistic-card
+              matIcon="check_circle"
+              ribbonColor="#8e44ad"
+              description="Note attribuées à l'élève"
+              [value]="correctedGrade ?? 0"
+              shouldBePositive
+              [edit]="true"
+              (valueChanged)="onSaveGrade()"
+            />
+          </div>
+
+          <correction-label
+            [answers]="answers"
+            [currentExercise]="currentExercise"
+            [courseId]="courseCorrection.courseId"
+          />
+        </nz-col>
+        <nz-col nzSpan="1">
+          <nz-button-group nzSize="small" class="button-wrapper">
+            <button
+              nz-button
+              nzBlock
+              *ngFor="let i of [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]"
+              (click)="setGradeOnClick($event, i)"
+            >
+              {{ i }}
+            </button>
+          </nz-button-group>
+        </nz-col>
+      </nz-row>
+      <nz-row>
+        <nz-col nzSpan="17">
+          <h3>Commentaire</h3>
+          <player-comments *ngIf="answers.length > 0" [canComment]="true" [answers]="answers" />
+        </nz-col>
+        <nz-col nzSpan="7"> </nz-col>
+      </nz-row>
+    </main>
+    <!--
     <main>
       <nz-segmented
         #segmented
@@ -53,7 +114,9 @@
               Exercice : {{ selectedExerciseIndex + 1 }}/{{ exerciseCount }}&nbsp; Réponse :
               {{ player.currentAttemptIndex + 1 }}/{{ answerCount }}
             </ng-template>
-            <player-exercise #player [players]="answers" [reviewMode]="true" [canComment]="true" />
+            <h1>aaaaa</h1>
+            <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" class="sized" />
+            <h1>aaaaa</h1>
           </nz-ribbon>
           <footer *ngIf="currentExercise">
             <h3>Note grader ({{ currentExercise.grade }})</h3>
@@ -92,7 +155,7 @@
           </nz-ribbon>
         </ng-template>
       </ng-container>
-    </main>
+    </main>-->
   </mat-drawer-content>
 </mat-drawer-container>
 

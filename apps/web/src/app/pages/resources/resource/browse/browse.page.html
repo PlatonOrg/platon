@@ -14,6 +14,7 @@
   <resource-files
     #files
     [tree]="tree!"
+    [exerciseTree]="exerciseTree"
     (selected)="openTab(context.editorUrl + '&files=' + $event.path)"
     (afterUpload)="refreshFiles()"
     [gitLog]="gitLog"

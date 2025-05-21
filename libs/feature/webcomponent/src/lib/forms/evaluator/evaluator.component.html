@@ -1,0 +1,25 @@
+<mat-card [style.width]="state.width || null" [style.height]="state.height || null">
+  <mat-card-content>
+    @if (state.title) {
+    <div>
+      <h3>{{ state.title }}</h3>
+    </div>
+    }
+    <div>
+      <nz-rate
+        [(ngModel)]="state.value"
+        [nzCount]="state.count"
+        [nzCharacter]="characterList"
+        [nzTooltips]="state.tooltips"
+        [nzAllowHalf]="state.allowHalf"
+        [nzDisabled]="state.disabled"
+        (ngModelChange)="autoValidate()"
+      ></nz-rate>
+    </div>
+  </mat-card-content>
+</mat-card>
+<wc-base [(state)]="state"></wc-base>
+
+<ng-template #characterList let-index>
+  <span nz-icon [nzType]="getIcon(index)" [nzTheme]="state.filledIcons ? 'fill' : 'outline'"></span>
+</ng-template>

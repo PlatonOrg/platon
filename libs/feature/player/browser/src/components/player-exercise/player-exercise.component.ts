@@ -30,8 +30,6 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
-import { SafePipe } from '@cisstech/nge/pipes'
-
 import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
 import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
 
@@ -103,7 +101,6 @@ type FullscreenElement = HTMLElement & {
     NzStatisticModule,
     MatExpansionModule,
 
-    SafePipe,
     IsUUIDPipe,
     DialogModule,
     UserAvatarComponent,
@@ -169,6 +166,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   protected selectedTheory?: ExerciseTheory
   protected runningAction?: PlayerActions
 
+  get previewMode(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
   protected get primaryActions(): Action[] {
     if (!this.player) return []
     return [
@@ -202,7 +203,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         icon: 'download',
         label: "Télécharger l'environnement",
         tooltip: "Télécharger l'environnement",
-        visible: this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW),
+        visible: this.previewMode,
         run: () => this.downloadEnvironment(),
       },
       {
@@ -328,6 +329,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
 
   get canRequestFullscreen(): boolean {
     return !!this.requestFullscreen && this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
+  get editorPreview(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
   }
 
   protected isFeedbackContentAnObject(feedback: ExerciseFeedback): boolean {

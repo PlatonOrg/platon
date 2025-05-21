@@ -13,6 +13,7 @@ import { UiModalIFrameComponent } from '@platon/shared/ui'
 
 import { ResourcePresenter } from '../resource.presenter'
 import { ResourceBrowseHeaderComponent } from './header/header.component'
+import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 
 @Component({
   standalone: true,
@@ -42,6 +43,7 @@ export class ResourceBrowsePage implements OnInit, OnDestroy {
 
   protected tree?: ResourceFile
   protected versions?: FileVersions
+  protected exerciseTree?: NzTreeNodeOptions[]
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -58,6 +60,9 @@ export class ResourceBrowsePage implements OnInit, OnDestroy {
   }
 
   protected async refreshFiles() {
+    await this.presenter.exerciseTree(this.context.version).then((tree) => {
+      this.exerciseTree = tree
+    })
     const [tree, versions] = await this.presenter.files(this.context.version)
     this.tree = tree
     this.versions = versions

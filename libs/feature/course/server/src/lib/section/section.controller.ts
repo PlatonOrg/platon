@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse, ListResponse, NoContentResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
 import { Mapper, Roles, UUIDParam } from '@platon/core/server'
 import { CourseSectionDTO, CreateCourseSectionDTO, UpdateCourseSectionDTO } from './section.dto'
 import { CourseSectionEntity } from './section.entity'
 import { CourseSectionService } from './section.service'
 
+@ApiBearerAuth()
 @Controller('courses/:courseId/sections')
 @ApiTags('Courses')
 export class CourseSectionController {

@@ -122,7 +122,7 @@
         formControlName="owners"
         [nzCustomTemplate]="userSelectionTemplate"
       >
-        <nz-option *ngFor="let option of owners" nzCustomContent [nzValue]="option.id">
+        <nz-option *ngFor="let option of owners" nzCustomContent [nzLabel]="option.username" [nzValue]="option.id">
           <user-avatar [user]="option" />
         </nz-option>
       </nz-select>

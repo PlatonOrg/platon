@@ -26,10 +26,9 @@ export interface BindedBubblesState extends IWebComponent {
 export const BindedBubblesComponentDefinition = defineWebComponent({
   type: WebComponentTypes.form,
   name: 'BindedBubbles',
-  icon: 'assets/images/components/forms/binded-bubbles/binded-bubbles.svg', //FIXME
   selector: 'wc-binded-bubbles',
-  description: 'Permets de choisir 2 propositions parmi une liste.',
-  fullDescriptionUrl: 'assets/docs/components/forms/binded-bubbles/binded-bubbles.md',
+  description:
+    "Jeu interactif de correspondance entre paires d'éléments, présentés sous forme de bulles à sélectionner. Parfait pour les exercices ludiques d'apprentissage de vocabulaire, de correspondances entre termes et définitions, de relations entre concepts, ou pour des activités de mémorisation comme les jeux de cartes mémoire.",
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
@@ -175,5 +174,8 @@ export const BindedBubblesComponentDefinition = defineWebComponent({
       },
     ],
     numberPairToShow: 3,
+  },
+  playgrounds: {
+    Traductions: 'translation.ple',
   },
 })

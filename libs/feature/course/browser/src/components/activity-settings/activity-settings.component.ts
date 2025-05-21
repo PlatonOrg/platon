@@ -159,8 +159,6 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   protected async update(): Promise<void> {
     this.updating = true
-    console.log('Updating ...')
-    console.log('Restrictions : ', this.restrictions)
     try {
       const dateRange = this.getMainDate()
       const res = await Promise.all([

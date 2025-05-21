@@ -146,6 +146,63 @@
 </mat-form-field>
 } }
 
+<!-- PASSWORD -->
+@case ('password') { @if (state.appearance === 'inline') {
+<input
+  class="ghost-input"
+  type="password"
+  [formControl]="form"
+  (keydown.enter)="autoValidate()"
+  [ngClass]="state.css | css : 'class'"
+  [ngStyle]="state.css | css : 'style'"
+  [ngStyle]="{ 'justify-items': state.width === 'auto' ? 'center' : 'start' }"
+/>
+} @else {
+<mat-form-field
+  [ngStyle]="containerStyles"
+  [appearance]="state.appearance"
+  [ngClass]="state.css | css : 'class'"
+  [ngStyle]="state.css | css : 'style'"
+>
+  <mat-label>{{ state.placeholder }}</mat-label>
+  <mat-hint>{{ state.hint }}</mat-hint>
+  <input
+    matInput
+    type="password"
+    [formControl]="form"
+    [matAutocomplete]="auto"
+    (keydown.enter)="autoValidate()"
+    [ngStyle]="{ 'justify-items': state.width === 'auto' ? 'center' : 'start' }"
+  />
+  <mat-autocomplete #auto="matAutocomplete">
+    <mat-option *ngFor="let option of $autocomplete | async" [value]="option">
+      {{ option }}
+    </mat-option>
+  </mat-autocomplete>
+  <div class="prefix" [class.no-prefix]="!state.prefix" matIconPrefix>
+    <img
+      *ngIf="state.prefix"
+      [src]="state.prefix || 'fontawesome address-book color=FF0000' | icongr"
+      alt="prefix icon"
+    />
+  </div>
+  <div class="suffix" [class.no-suffix]="!hasSpecialCharacters()" matIconSuffix>
+    <button
+      class="special-characters-button"
+      mat-icon-button
+      nz-button
+      nz-popover
+      [nzPopoverContent]="specialCharacters"
+      nzPopoverTrigger="click"
+      nzPopoverPlacement="bottomRight"
+      (click)="$event.stopPropagation()"
+    >
+      <mat-icon>keyboard</mat-icon>
+    </button>
+  </div>
+</mat-form-field>
+} }
+
 <!-- FALLBACK -->
 @default {
 <mat-error>"{{ state.type }}" is not a valid input type</mat-error>

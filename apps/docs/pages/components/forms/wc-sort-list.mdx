@@ -1,0 +1,191 @@
+---
+title: SortList
+description: Liste interactive d'éléments réorganisables par glisser-déposer. Parfait pour les exercices de séquençage, de tri logique, d'ordonnancement d'instructions ou d'événements, de classement chronologique, d'algorithmes de tri, ou toute activité pédagogique où l'ordre des éléments est significatif.
+---
+
+import { Tabs, Tab } from 'nextra/components'
+import { ComponentProperties, Playground } from '../../../components'
+import { useAbsoluteUrl } from '../../../hooks'
+
+# SortList
+
+`wc-sort-list`
+
+Liste interactive d'éléments réorganisables par glisser-déposer. Parfait pour les exercices de séquençage, de tri logique, d'ordonnancement d'instructions ou d'événements, de classement chronologique, d'algorithmes de tri, ou toute activité pédagogique où l'ordre des éléments est significatif.
+
+## Documentation
+
+Le composant SortList vous permet de créer des listes d'éléments que les apprenants peuvent réorganiser par glisser-déposer. C'est un outil idéal pour tester la capacité des étudiants à établir un ordre logique, chronologique ou hiérarchique.
+
+### Définition des éléments de la liste
+
+Vous pouvez définir les éléments de votre liste de deux façons :
+
+1. **Format simplifié** : pour les éléments simples, utilisez directement des chaînes de caractères
+
+   ```js
+   items: ['Première étape', 'Deuxième étape', 'Troisième étape']
+   ```
+
+2. **Format détaillé** : pour personnaliser davantage chaque élément
+   ```js
+   items: [
+     {
+       content: 'Étape avec *mise en forme* markdown',
+       css: 'highlight important-item',
+     },
+     {
+       content: 'Étape avec une formule $E=mc^2$',
+     },
+   ]
+   ```
+
+Le contenu de chaque élément peut inclure du texte formaté en markdown, des formules mathématiques et même des images.
+
+### Personnalisation de l'affichage
+
+Par défaut, les éléments sont centrés dans la liste, mais vous pouvez les aligner à gauche en définissant `alignment: "left"`. Cette option est particulièrement utile pour les listes comportant des éléments de longueurs variables ou du texte structuré.
+
+### Comportement interactif
+
+Les étudiants peuvent facilement réorganiser les éléments en les faisant glisser dans un nouvel ordre. Une animation fluide accompagne le déplacement, rendant l'interaction intuitive. Si vous avez besoin d'afficher une liste statique (par exemple pour montrer la solution), utilisez l'option `disabled: true`.
+
+### Applications pédagogiques
+
+Le composant SortList est particulièrement efficace pour :
+
+- Reconstruire une séquence d'événements historiques
+- Ordonner les étapes d'un processus ou d'un algorithme
+- Classer des éléments par ordre de priorité ou d'importance
+- Reconstituer des phrases ou paragraphes dans le bon ordre
+- Visualiser les étapes d'une démonstration mathématique
+
+L'ordre final des éléments est automatiquement enregistré, ce qui facilite l'évaluation de la réponse dans votre script d'évaluation (grader).
+
+## Exemple interactif
+
+<Playground
+  width="100%"
+  items={[
+    {
+      name: 'Visualisation',
+      url: 'playground/components/wc-sort-list',
+    },
+    ...[
+      {
+        name: 'Exemple: Histoire',
+        url: '/playground/exercises/sort-list/history.ple',
+        code: 'sandbox = "node"\n\n// Initialisation du composant SortList\nmaListe = :wc-sort-list\nmaListe.items = [\n  // (1776)\n  "Déclaration d\'indépendance des États-Unis",\n  // (1789)\n  "Prise de la Bastille",\n  // (1918)\n  "Fin de la Première Guerre mondiale",\n  // (1989)\n  "Chute du mur de Berlin"\n]\n\n\n// Mélange des éléments au début de l\'exercice\nbuilder == #!lang=js\n\nfunction shuffleArray(array) {\n  for (let i = array.length - 1; i > 0; i--) {\n    const j = Math.floor(Math.random() * (i + 1));\n    [array[i], array[j]] = [array[j], array[i]];\n  }\n}\n\nshuffleArray(maListe.items)\n\n==\n\n// Évaluation de la réponse (exemple simplifié)\ngrader == #!lang=js\ngrade = 0\nfeedback.type = "error"\nfeedback.content = "Mauvaise réponse"\nconst correctOrder = [\n  "Déclaration d\'indépendance des États-Unis",\n  "Prise de la Bastille",\n  "Fin de la Première Guerre mondiale",\n  "Chute du mur de Berlin"\n]\n\n// Vérifier l\'ordre de la liste\nif (JSON.stringify(correctOrder) == JSON.stringify(maListe.items.map(e => e.content))) {\n    grade = 100\n    feedback.type = "success"\n    feedback.content = "Bonne réponse"\n}\n\n==\n\n// Énoncé de l\'exercice\ntitle==\nRemettre les événements historiques dans l\'ordre\n==\n\nstatement ==\nRéorganisez les événements suivants dans l\'ordre chronologique :\n==\n\nform==\n{{ maListe }}\n==\n\nsolution==\nVoici l\'ordre chronologique correct :\nDéclaration d\'indépendance des États-Unis (1776)\nPrise de la Bastille (1789)\nFin de la Première Guerre mondiale (1918)\nChute du mur de Berlin (1989)\n==\n',
+      },
+    ],
+  ]}
+/>
+
+## API
+
+<Tabs items={['Graphique', 'JSON']}>
+  <Tab>
+    <ComponentProperties schema={{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "SortList",
+  "required": [
+    "items"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "default": [],
+      "description": "La liste des éléments à ordonner.",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ],
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "css": {
+            "type": "string",
+            "description": "Voir API CSS"
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenu en markdown."
+          }
+        }
+      }
+    },
+    "alignment": {
+      "type": "string",
+      "default": "center",
+      "description": "Alignement des items du SortList",
+      "enum": [
+        "center",
+        "left"
+      ]
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le composant?"
+    }
+  }
+}} />
+  </Tab>
+  <Tab>
+    ```json
+    {
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "SortList",
+  "required": [
+    "items"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "default": [],
+      "description": "La liste des éléments à ordonner.",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ],
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "css": {
+            "type": "string",
+            "description": "Voir API CSS"
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenu en markdown."
+          }
+        }
+      }
+    },
+    "alignment": {
+      "type": "string",
+      "default": "center",
+      "description": "Alignement des items du SortList",
+      "enum": [
+        "center",
+        "left"
+      ]
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le composant?"
+    }
+  }
+}
+    ```
+  </Tab>
+</Tabs>

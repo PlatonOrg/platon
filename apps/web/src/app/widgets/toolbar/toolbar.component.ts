@@ -1,4 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
+
 import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
@@ -94,8 +95,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   protected userCharterModalVisible = false
   protected userCharterAccepted = false
 
-  constructor(private readonly userService: UserService) {}
-
   @ViewChild(UiModalTemplateComponent, { static: true })
   protected modal!: UiModalTemplateComponent
 
@@ -123,6 +122,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   get tabletOrBelow(): boolean {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
   }
+
+  constructor(private readonly userService: UserService) {}
 
   async ngOnInit(): Promise<void> {
     this.drawerOpened = !this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])

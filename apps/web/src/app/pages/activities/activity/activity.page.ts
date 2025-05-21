@@ -77,6 +77,7 @@ export class CourseActivityPage implements OnInit, OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly resultService = inject(ResultService)
   private readonly subscriptions: Subscription[] = []
+  private readonly today = new Date()
 
   protected userDistribution: UserActivityResultsDistribution[] = []
   protected context = this.presenter.defaultContext()
@@ -92,14 +93,15 @@ export class CourseActivityPage implements OnInit, OnDestroy {
   }
   protected dates: Date[] = []
   protected cursorValue = 100
-  private today = new Date()
   protected lastDate: Date = this.today
   protected splitDate: Date = this.today
+  protected columnOrder?: string[]
 
   ngOnInit(): void {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
+        this.columnOrder = this.context.results?.exercises.map((e) => e.title)
         this.onDateChange([
           this.context.activity?.createdAt ?? this.today,
           this.context.activity?.closeAt ?? this.today,

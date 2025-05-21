@@ -9,6 +9,7 @@ import {
   ExtendsNode,
   IncludeNode,
   PLAst,
+  PLDependency,
   PLDict,
   PLFileContent,
   PLFileURL,
@@ -43,6 +44,23 @@ export interface PLReferenceResolver {
    * @param path Path to check.
    */
   exists(resource: string, version: string, path: string): Promise<boolean>
+
+  /**
+   * Tells if the file at `path` is a directory in the given `version` of `resource`.
+   * @param resource Resource id of code.
+   * @param version Version of the resource.
+   * @param path Path to resolves.
+   * @returns Whether the file at `path` is a directory or not.
+   */
+  isDir(resource: string, version: string, path: string): Promise<boolean>
+
+  /**
+   * Lists the files in the directory at `path` from the given `version` of `resource`.
+   * @param resource Resource id of code.
+   * @param version Version of the resource.
+   * @param path Path of the directory to list.
+   */
+  listDir(resource: string, version: string, path: string): Promise<string[]>
 
   /**
    * Gets the download url of the file at `path` from the given `version` of `resource`.
@@ -122,6 +140,26 @@ export class PLCompiler implements PLVisitor {
    */
   async output(overrides?: Variables): Promise<PLSourceFile> {
     const source = deepCopy(this.source)
+    if (await this.resolver.exists(source.resource, source.version, 'includes')) {
+      if (await this.resolver.isDir(source.resource, source.version, 'includes')) {
+        const includes = await this.resolver.listDir(source.resource, source.version, 'includes')
+        const includesPromises = includes.map(async (include) => {
+          const { abspath } = this.resolveReference(include)
+          const content = await this.resolver.resolveContent(source.resource, source.version, include)
+          const hash = crypto.SHA1(content).toString()
+          return {
+            alias: include,
+            lineno: 0,
+            content: '',
+            hash,
+            abspath,
+          }
+        })
+        const dependencies: PLDependency[] = await Promise.all(includesPromises)
+        source.dependencies = source.dependencies.concat(dependencies)
+      }
+    }
+
     if (!this.config) {
       return source
     }

@@ -44,6 +44,7 @@ export class CorrectionService {
       correctedAt?: Date
       correctedGrade?: number
       grade?: number
+      exerciseName: string
     }
 
     // Construct SQL query and parameters
@@ -51,6 +52,7 @@ export class CorrectionService {
     SELECT
       activity.id as "activityId",
       activity.source->'variables'->>'title' as "activityName",
+      resources."name" as "exerciseName",
       (activity_session.variables->>'navigation')::jsonb as "activityNavigation",
       activity_session.id as "activitySessionId",
       exercise_session.user_id as "userId",
@@ -62,6 +64,7 @@ export class CorrectionService {
       correction.grade as "correctedGrade",
       exercise_session.grade as "grade"
     FROM "Sessions" exercise_session
+    INNER JOIN "Resources" resources on resources.id = (exercise_session.source->>'resource')::uuid
     INNER JOIN "Sessions" activity_session ON activity_session.id=exercise_session.parent_id
     INNER JOIN "Activities" activity ON activity.id=exercise_session.activity_id
     INNER JOIN "Courses" course ON course.id=activity.course_id
@@ -95,7 +98,7 @@ export class CorrectionService {
         correctedGrade: projection.correctedGrade,
         grade: projection.grade,
         exerciseId: navItem.id,
-        exerciseName: navItem.title,
+        exerciseName: projection.exerciseName,
       }
 
       if (!activityMap.has(projection.activityId)) {

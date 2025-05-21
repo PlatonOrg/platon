@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs'
 import { ExplorerReplaceFolder } from './commands/explorer-replace-folder.command'
 import { ExplorerCommandUnzip } from './commands/explorer-unzip.command'
 import { ExplorerUpdateFolders } from './commands/explorer-update-folders.command'
+import { ExplorerCommandUnzipAndDelete } from './commands/explorer-unzip-and-delete.command'
 
 @Injectable()
 export class PLExplorerContribution implements IContribution {
@@ -27,9 +28,14 @@ export class PLExplorerContribution implements IContribution {
     const toolbarService = injector.get(ToolbarService)
     const explorerService = injector.get(ExplorerService)
 
-    commandService.register(ExplorerCommandUnzip, ExplorerUpdateFolders, ExplorerReplaceFolder)
+    commandService.register(
+      ExplorerCommandUnzip,
+      ExplorerUpdateFolders,
+      ExplorerReplaceFolder,
+      ExplorerCommandUnzipAndDelete
+    )
 
-    explorerService.registerCommands(ExplorerCommandUnzip, ExplorerReplaceFolder)
+    explorerService.registerCommands(ExplorerCommandUnzip, ExplorerCommandUnzipAndDelete, ExplorerReplaceFolder)
 
     explorerService.unregisterCommands(EXPLORER_COMMAND_COPY_PATH)
 
@@ -52,6 +58,15 @@ export class PLExplorerContribution implements IContribution {
       }),
       new ToolbarSeparator(ToolbarGroups.FILE, 1)
     )
+
+    toolbarService.register(
+      new ToolbarButton({
+        group: ToolbarGroups.FILE,
+        command: commandService.find(ExplorerCommandUnzipAndDelete),
+        priority: 2,
+      }),
+      new ToolbarSeparator(ToolbarGroups.FILE, 1)
+    )
   }
 
   deactivate() {
@@ -62,6 +77,7 @@ export class PLExplorerContribution implements IContribution {
 @NgModule({
   providers: [
     ExplorerCommandUnzip,
+    ExplorerCommandUnzipAndDelete,
     ExplorerUpdateFolders,
     ExplorerReplaceFolder,
     ExplorerService,

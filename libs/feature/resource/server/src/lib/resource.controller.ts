@@ -1,24 +1,48 @@
 import { Expandable, Selectable } from '@cisstech/nestjs-expand'
-import { Body, Controller, Delete, Get, Logger, Patch, Post, Query, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
 import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  InternalServerErrorException,
+  Logger,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import {
+  BadRequestResponse,
   CreatedResponse,
+  DEFAULT_USER_ID,
   ForbiddenResponse,
   ItemResponse,
   ListResponse,
   NotFoundResponse,
   User,
 } from '@platon/core/common'
-import { IRequest, Mapper, UserService, UUIDParam } from '@platon/core/server'
+import { IRequest, Mapper, Public, UserDTO, UserService, UUIDParam } from '@platon/core/server'
+import { ACTIVITY_MAIN_FILE, EXERCISE_MAIN_FILE } from '@platon/feature/compiler'
+import { ResourceMovedByAdminNotification } from '@platon/feature/course/common'
+import { NotificationService } from '@platon/feature/notification/server'
+import { LATEST, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 import { ResourceCompletionDTO } from './completion'
+import { ResourceFileService } from './files'
 import { ResourcePermissionService } from './permissions/permissions.service'
-import { CircleTreeDTO, CreateResourceDTO, ResourceDTO, ResourceFiltersDTO, UpdateResourceDTO } from './resource.dto'
+import {
+  CircleTreeDTO,
+  CreatePreviewResourceDTO,
+  CreateResourceDTO,
+  ResourceDTO,
+  ResourceFiltersDTO,
+  UpdateResourceDTO,
+} from './resource.dto'
 import { ResourceService } from './resource.service'
 import { ResourceViewService } from './views/view.service'
-import { NotificationService } from '@platon/feature/notification/server'
-import { ResourceMovedByAdminNotification } from '@platon/feature/course/common'
-import { ResourceFileService } from './files'
+import { ResourceDependencyService } from './dependency'
 
+@ApiBearerAuth()
 @Controller('resources')
 @ApiTags('Resources')
 export class ResourceController {
@@ -30,7 +54,8 @@ export class ResourceController {
     private readonly resourceViewService: ResourceViewService,
     private readonly userService: UserService,
     private readonly notificationService: NotificationService,
-    private readonly fileService: ResourceFileService
+    private readonly fileService: ResourceFileService,
+    private readonly dependencyService: ResourceDependencyService
   ) {}
 
   @Get()
@@ -88,7 +113,7 @@ export class ResourceController {
   @Get('/owners')
   async listOwners(): Promise<ListResponse<User>> {
     const owners = await this.resourceService.getAllOwners()
-    return new ListResponse({ resources: owners, total: owners.length })
+    return new ListResponse({ resources: Mapper.mapAll(owners, UserDTO), total: owners.length })
   }
 
   @Get('/:id')
@@ -134,15 +159,84 @@ export class ResourceController {
       throw new ForbiddenResponse(`Operation not allowed on resource: ${input.parentId}`)
     }
 
+    const { files, ...props } = input
+    if (files?.length) {
+      switch (props.type) {
+        case ResourceTypes.EXERCISE:
+          if (!files.some((f) => f.path === EXERCISE_MAIN_FILE)) {
+            throw new BadRequestResponse(`No ${EXERCISE_MAIN_FILE} file found`)
+          }
+          break
+        case ResourceTypes.ACTIVITY:
+          if (!files.some((f) => f.path === ACTIVITY_MAIN_FILE)) {
+            throw new BadRequestResponse(`No ${ACTIVITY_MAIN_FILE} file found`)
+          }
+          break
+      }
+    }
+
     const resource = Mapper.map(
       await this.resourceService.create({
-        ...(await this.resourceService.fromInput(input)),
+        ...(await this.resourceService.fromInput(props)),
         ownerId: req.user.id,
       }),
       ResourceDTO
     )
 
     Object.assign(resource, { permissions })
+
+    if (files?.length) {
+      await this.fileService.repo(
+        resource.id,
+        req,
+        files.reduce((acc, f) => ({ ...acc, [f.path]: f.content }), {})
+      )
+    }
+
+    return new CreatedResponse({ resource })
+  }
+
+  @Public()
+  @Post('/preview')
+  @Expandable(ResourceDTO, { rootField: 'resource' })
+  @Selectable({ rootField: 'resource' })
+  async createPreview(
+    @Req() req: IRequest,
+    @Body() input: CreatePreviewResourceDTO
+  ): Promise<CreatedResponse<ResourceDTO>> {
+    if (!input.files.some((f) => f.path === EXERCISE_MAIN_FILE)) {
+      throw new BadRequestResponse(`No ${EXERCISE_MAIN_FILE} file found`)
+    }
+
+    const user = (await this.userService.findById(DEFAULT_USER_ID)).orElseThrow(
+      () => new InternalServerErrorException(`Default user not found: ${DEFAULT_USER_ID}: should never happen`)
+    )
+    const circle = await this.resourceService.getPersonal(user)
+
+    const resource = input.resourceId
+      ? Mapper.map(await this.resourceService.getById(input.resourceId), ResourceDTO)
+      : Mapper.map(
+          await this.resourceService.create({
+            ownerId: DEFAULT_USER_ID,
+            name: `Preview: ${new Date().toISOString()}`,
+            publicPreview: true,
+            status: ResourceStatus.DRAFT,
+            type: ResourceTypes.EXERCISE,
+            personal: true,
+            parentId: circle.id,
+          }),
+          ResourceDTO
+        )
+
+    const { repo } = await this.fileService.repo(
+      resource.id,
+      req,
+      input.files.reduce((acc, f) => ({ ...acc, [f.path]: f.content }), {})
+    )
+
+    if (input.resourceId) {
+      await Promise.all(input.files.map((f) => repo.write(f.path, f.content || '')))
+    }
 
     return new CreatedResponse({ resource })
   }
@@ -279,5 +373,56 @@ export class ResourceController {
     await this.fileService.repo(existing.get().id).then((repo) => repo.repo.removeRepo())
 
     await this.resourceService.delete(existing.get())
+  }
+
+  @Get('/:id/configurable-exercise')
+  async isConfigurableExercise(@Req() req: IRequest, @UUIDParam('id') id: string): Promise<ItemResponse<boolean>> {
+    const resource = await this.resourceService.findByIdOrCode(id)
+    if (!resource.isPresent()) {
+      throw new NotFoundResponse(`Resource not found: ${id}`)
+    }
+
+    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: resource.get() })
+    if (!permissions.write) {
+      throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
+    }
+
+    return new ItemResponse({ resource: await this.resourceService.isConfigurableExercise(id) })
+  }
+
+  @Patch('/:id/template')
+  async updateTemplate(
+    @Req() req: IRequest,
+    @UUIDParam('id') id: string,
+    @Body('templateId') templateId: string,
+    @Body('templateVersion') templateVersion: string
+  ): Promise<ItemResponse<ResourceDTO>> {
+    const existing = await this.resourceService.findByIdOrCode(id)
+    if (!existing.isPresent()) {
+      throw new NotFoundResponse(`Resource not found: ${id}`)
+    }
+
+    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: existing.get() })
+    if (!permissions.write) {
+      throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
+    }
+
+    const resource = Mapper.map(
+      await this.resourceService.update(existing.get(), {
+        templateId,
+        templateVersion,
+      }),
+      ResourceDTO
+    )
+
+    await this.dependencyService.updateTemplateDependency({
+      resourceId: id,
+      resourceVersion: LATEST,
+      dependOnId: templateId,
+      dependOnVersion: templateVersion,
+      isTemplate: true,
+    })
+
+    return new ItemResponse({ resource })
   }
 }

@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, Injector, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, OnInit } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
+import { WebComponentService } from '../../web-component.service'
 import { WordSelectorComponentDefinition, WordSelectorState } from './word-selector'
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop'
 

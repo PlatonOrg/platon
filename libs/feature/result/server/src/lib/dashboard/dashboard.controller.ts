@@ -1,10 +1,11 @@
 import { Controller, Get, Param, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ForbiddenResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Roles, UUIDParam } from '@platon/core/server'
 import { DashboardOutput, UserActivityResultsDistribution } from '@platon/feature/result/common'
 import { DashboardService } from './dashboard.service'
 
+@ApiBearerAuth()
 @Controller('results/dashboard')
 @ApiTags('Results')
 export class DashboardController {

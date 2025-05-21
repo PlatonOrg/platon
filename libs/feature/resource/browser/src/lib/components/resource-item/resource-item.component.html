@@ -5,7 +5,6 @@
     [articleTags]="tags"
     [articleIconTemplate]="imageTemplate"
     [articleDescription]="descriptionTemplate"
-    [articleUrl]="clickable ? ['/resources/', item.id] : undefined"
     (didClickTagItem)="handleTagClick($event)"
   >
     <ui-list-item-article-action *ngIf="editable" (click)="openTab(editorUrl)" class="action" actionTitle="Éditer">
@@ -19,6 +18,15 @@
         actionTitle="Prévisualiser"
       >
         <i nz-icon nzType="play-circle" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+      <ui-list-item-article-action
+        *ngIf="configurable && !shorten"
+        class="action"
+        [routerLink]="['/resources/create']"
+        [queryParams]="{ type: item.type, template: item.id }"
+        actionTitle="Créer à partir"
+      >
+        <i nz-icon nzType="node-expand" nzTheme="outline"></i>
       </ui-list-item-article-action>
     </ng-container>
     <div class="spacer"></div>
@@ -93,7 +101,11 @@
     [nzPopoverTrigger]="configurable ? 'hover' : null"
     (mouseenter)="configurable ? getReadmeContent() : null"
   >
+    @if( clickable) {
+    <a [routerLink]="detailsUrl" class="resource-item-title">{{ name }}</a>
+    } @else {
     <span class="resource-item-title">{{ name }}</span>
+    }
     <i
       class="icon-configurable"
       *ngIf="configurable"

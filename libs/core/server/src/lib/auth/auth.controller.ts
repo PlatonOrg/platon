@@ -1,17 +1,18 @@
 import { Body, Controller, Post, Req } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CreatedResponse, ItemResponse } from '@platon/core/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { CreatedResponse, ItemResponse, UserRoles } from '@platon/core/common'
 import { AuthTokenDTO, ResetPasswordInputDTO, SignInInputDTO, SignUpInputDTO } from './auth.dto'
 import { AuthService } from './auth.service'
 import { IRequest } from './auth.types'
 import { Public } from './decorators/public.decorator'
+import { Roles } from './decorators/roles.decorator'
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Public()
+  @Roles(UserRoles.admin)
   @Post('signup')
   async signUp(@Body() input: SignUpInputDTO): Promise<CreatedResponse<AuthTokenDTO>> {
     return new CreatedResponse({
@@ -35,6 +36,7 @@ export class AuthController {
     })
   }
 
+  @ApiBearerAuth()
   @Post('refresh')
   async refresh(@Req() req: IRequest): Promise<ItemResponse<AuthTokenDTO>> {
     return new ItemResponse({

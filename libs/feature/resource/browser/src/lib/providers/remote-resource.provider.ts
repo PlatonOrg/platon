@@ -4,6 +4,7 @@ import { buildExpandableHttpParams, buildHttpParams } from '@platon/core/browser
 import { ItemResponse, ListResponse, User } from '@platon/core/common'
 import {
   CircleTree,
+  CreatePreviewResource,
   CreateResource,
   FindResource,
   Resource,
@@ -74,6 +75,16 @@ export class RemoteResourceProvider extends ResourceProvider {
       .pipe(map((response) => response.resource))
   }
 
+  createPreview(input: CreatePreviewResource): Observable<Resource> {
+    const params = buildExpandableHttpParams(input)
+
+    return this.http
+      .post<ItemResponse<Resource>>('/api/v1/resources/preview', input, {
+        params,
+      })
+      .pipe(map((response) => response.resource))
+  }
+
   move(id: string, parentId: string): Observable<Resource> {
     return this.http
       .patch<ItemResponse<Resource>>(`/api/v1/resources/${id}/move`, { parentId })
@@ -93,5 +104,20 @@ export class RemoteResourceProvider extends ResourceProvider {
 
   listOwners(): Observable<User[]> {
     return this.http.get<ListResponse<User>>(`/api/v1/resources/owners`).pipe(map((response) => response.resources))
+  }
+
+  isConfigurableExercise(resourceId: string): Observable<boolean> {
+    return this.http
+      .get<ItemResponse<boolean>>(`/api/v1/resources/${resourceId}/configurable-exercise`)
+      .pipe(map((response) => response.resource))
+  }
+
+  updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource> {
+    return this.http
+      .patch<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/template`, {
+        templateId,
+        templateVersion,
+      })
+      .pipe(map((response) => response.resource))
   }
 }

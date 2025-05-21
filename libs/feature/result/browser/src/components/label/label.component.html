@@ -1,0 +1,86 @@
+<mat-card>
+  <button mat-mini-fab id="settingButton">
+    <mat-icon>star</mat-icon>
+  </button>
+  <!-- <nz-modal
+    [(nzVisible)]="isFavLabelModalVisible"
+    nzTitle="Mettez des étiquettes en favories"
+    (nzOnCancel)="handleFavCancel()"
+    (nzOnOk)="handleFavOk()"
+  >
+    <ng-container *nzModalContent>
+      <div class="label-wrapper">
+        <ng-container *ngFor="let label of labels">
+          <button nz-button nzType="default" nzSize="small" class="label-button" [ngStyle]="getLabelStyles(label)">
+            {{ label.name }}
+          </button>
+        </ng-container>
+      </div>
+    </ng-container>
+  </nz-modal> -->
+  <mat-card-header>
+    <mat-card-title class="title">Étiquettes</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="label-wrapper">
+      <ng-container *ngFor="let label of labels">
+        <div class="button-wrapper">
+          <button
+            nz-button
+            nzType="default"
+            nzSize="small"
+            class="label-button"
+            [ngStyle]="getLabelStyles(label)"
+            (click)="labelize(label)"
+          >
+            {{ label.name }}
+          </button>
+          <span
+            [ngClass]="isLabelFav(label) ? 'favorite-label' : 'unfavorite-label'"
+            (click)="addOrRemoveToFav(label, $event)"
+          >
+            ★
+          </span>
+        </div>
+      </ng-container>
+
+      <button id="createbutton" nz-button nzType="primary" nzSize="small" (click)="showCreateLabelModal()">
+        Créer une étiquette
+      </button>
+      <nz-modal
+        [(nzVisible)]="isCreateLabelModalVisible"
+        nzTitle="Créer une étiquette"
+        (nzOnCancel)="handleCancel()"
+        (nzOnOk)="handleOk()"
+        [nzFooter]="footerButtons"
+      >
+        <ng-container *nzModalContent>
+          <form nz-form [formGroup]="createLabelForm">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="7" nzFor="labelName">Nom de l'étiquette</nz-form-label>
+              <nz-form-control [nzSpan]="15">
+                <input nz-input formControlName="labelName" id="labelName" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="7" nzFor="labelDescription">Description</nz-form-label>
+              <nz-form-control [nzSpan]="15">
+                <textarea nz-input formControlName="labelDescription" id="labelDescription" rows="4"></textarea>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="7" nzFor="labelColor">Couleur</nz-form-label>
+              <nz-form-control [nzSpan]="15">
+                <input nz-input formControlName="labelColor" id="labelColor" type="color" />
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </ng-container>
+        <ng-template #footerButtons>
+          <button nz-button nzType="default" (click)="handleCancel()">Annuler</button>
+          <button nz-button nzType="primary" (click)="handleOk()">Créer</button>
+        </ng-template>
+      </nz-modal>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -15,7 +15,6 @@ import { constants } from 'fs'
 import { RegisterSandbox } from '../sandbox'
 import { createNodeSandboxAPI } from './node-sandbox-api'
 import { NotFoundResponse } from '@platon/core/common'
-
 /**
  * Directory where environment files are stored.
  */

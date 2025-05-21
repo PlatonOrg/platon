@@ -28,18 +28,10 @@ import { ChartViewerBarsComponentDefinition } from './widgets/chart-viewer-bars/
 import { ChartViewerRadarComponentDefinition } from './widgets/chart-viewer-radar/chart-viewer-radar'
 import { FoldableFeedbackComponentDefinition } from './widgets/foldable-feedback/foldable-feedback'
 import { WordSelectorComponentDefinition } from './forms/word-selector/word-selector'
+import { EvaluatorComponentDefinition } from './forms/evaluator/evaluator'
+import { TimerComponentDefinition } from './widgets/timer/timer'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
-  // INTERNALS
-  {
-    selector: 'wc-editorjs-viewer',
-    module: () =>
-      import(/* webpackChunkName: "wc-editorjs-viewer" */ './internals/editorjs-viewer/editorjs-viewer.module').then(
-        (m) => m.EditorjsViewerModule
-      ),
-  },
-
-  // PUBLICS
   {
     selector: 'wc-automaton-editor',
     module: () =>
@@ -80,6 +72,13 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     module: () =>
       import(/* webpackChunkName: "wc-graph-viewer" */ './widgets/graph-viewer/graph-viewer.module').then(
         (m) => m.GraphViewerModule
+      ),
+  },
+  {
+    selector: 'wc-evaluator',
+    module: () =>
+      import(/* webpackChunkName: "wc-evaluator" */ './forms/evaluator/evaluator.module').then(
+        (m) => m.EvaluatorModule
       ),
   },
   {
@@ -196,6 +195,19 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
         /* webpackChunkName: "wc-foldable-feedback" */ './widgets/foldable-feedback/foldable-feedback.module'
       ).then((m) => m.FoldableFeedbackModule),
   },
+  {
+    selector: 'wc-timer',
+    module: () => import(/* webpackChunkName: "wc-timer" */ './widgets/timer/timer.module').then((m) => m.TimerModule),
+  },
+
+  // INTERNALS
+  {
+    selector: 'wc-editorjs-viewer',
+    module: () =>
+      import(/* webpackChunkName: "wc-editorjs-viewer" */ './internals/editorjs-viewer/editorjs-viewer.module').then(
+        (m) => m.EditorjsViewerModule
+      ),
+  },
 ]
 
 export const WEB_COMPONENTS_REGISTRY: Provider[] = [
@@ -228,6 +240,11 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: GraphViewerComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: EvaluatorComponentDefinition,
   },
   {
     provide: WEB_COMPONENT_DEFINITIONS,
@@ -323,5 +340,10 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: FoldableFeedbackComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: TimerComponentDefinition,
   },
 ]

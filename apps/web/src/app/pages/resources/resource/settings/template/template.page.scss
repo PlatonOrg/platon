@@ -1,0 +1,53 @@
+.ple-extends-editor {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+mat-card {
+  min-width: 600px;
+  padding: 0 32px;
+  text-align: left;
+}
+
+mat-card-header {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+mat-card-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  div {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+mat-card-title {
+  text-align: center;
+  font-weight: bold;
+}
+
+nz-input-group {
+  width: 100%;
+}
+
+nz-select {
+  width: 30%;
+}
+
+.save-button {
+  margin-top: 16px;
+  width: 128px;
+}
+
+resource-version {
+  width: 100%;
+  margin-top: 16px;
+}

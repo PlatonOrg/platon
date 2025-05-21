@@ -271,7 +271,7 @@ export class Repo {
       ...this.repo,
       trees: [git.TREE({ ref })],
       map: async (filepath, [entry]) => {
-        if (match && match.type === 'file') return
+        if (match && match.type === FileTypes.file) return
 
         if (filepath !== ROOT && (!filepath.startsWith(prefix) || Path.basename(filepath).startsWith('.'))) return
 
@@ -312,7 +312,6 @@ export class Repo {
     if (!match) {
       throw new FileNotFoundError(path)
     }
-
     return [match, download]
   }
 
@@ -557,5 +556,29 @@ export class Repo {
     })
     commits[0].tags.push('latest')
     return commits
+  }
+
+  async getCurrentBranch() {
+    return (await simpleGit(this.root).branch()).current
+  }
+
+  async checkout(branch: string) {
+    await simpleGit(this.root).checkout(branch)
+  }
+
+  async checkoutTag(tag: string) {
+    await simpleGit(this.root).checkout('tags/' + tag, ['-f'])
+  }
+
+  async moveTag(tag: string) {
+    await simpleGit(this.root).raw('tag', '-f', tag, 'HEAD')
+  }
+
+  async checkoutLocalBranch(branch: string) {
+    await simpleGit(this.root).checkoutLocalBranch(branch)
+  }
+
+  async deleteLocalBranch(branch: string) {
+    await simpleGit(this.root).deleteLocalBranch(branch, true)
   }
 }

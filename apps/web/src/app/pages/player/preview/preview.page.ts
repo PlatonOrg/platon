@@ -8,7 +8,7 @@ import { Player } from '@platon/feature/player/common'
 import { UiErrorComponent } from '@platon/shared/ui'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
-import { StorageService } from '@platon/core/browser'
+import { AuthService, StorageService } from '@platon/core/browser'
 import { Variables } from '@platon/feature/compiler'
 import { getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
 
@@ -29,6 +29,7 @@ export class PlayerPreviewPage implements OnInit {
     private readonly playerService: PlayerService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly storageService: StorageService,
+    private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {}
 
@@ -40,6 +41,12 @@ export class PlayerPreviewPage implements OnInit {
       const id = params.get('id')
       const version = queryParams.get('version')
       const sessionId = queryParams.get('sessionId')
+      const accessToken = queryParams.get('accessToken')
+      const refreshToken = queryParams.get('refreshToken')
+      if (accessToken && refreshToken) {
+        // used for preview in vscode
+        await this.authService.signInWithToken({ accessToken, refreshToken })
+      }
 
       let overrides: Variables | undefined
       if (sessionId) {

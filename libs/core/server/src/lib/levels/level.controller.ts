@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse } from '@platon/core/common'
 import { Mapper, UUIDParam } from '../utils'
 import { CreateLevelDTO, LevelDTO, UpdateLevelDTO } from './level.dto'
 import { LevelService } from './level.service'
 import { Roles } from '../auth/decorators/roles.decorator'
 
+@ApiBearerAuth()
 @Controller('levels')
 @ApiTags('Settings')
 export class LevelController {

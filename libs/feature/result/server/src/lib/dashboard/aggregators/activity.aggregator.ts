@@ -25,6 +25,7 @@ type ActivityUserResultsResultsArgs = {
   activity?: ActivityEntity | null
   activityMembers?: ActivityMemberView[] | null
   exerciseSessions: SessionDataEntity[]
+  resourceMap?: Map<string, string>
 }
 
 type ActivityExerciseResultsArgs = {
@@ -42,7 +43,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
   private readonly exerciseSessions = new Map<string, SessionDataEntity>()
 
   constructor(args: ActivityUserResultsResultsArgs) {
-    const { activity, activityMembers, exerciseSessions } = args
+    const { activity, activityMembers, exerciseSessions, resourceMap } = args
 
     activityMembers
       ?.sort((a, b) => a.username.localeCompare(b.username))
@@ -80,7 +81,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
         Array.from(this.userResults.values()).forEach((userResult) => {
           userResult.exercises[exercise.id] = {
             id: exercise.id,
-            title: exercise.overrides?.title ?? variables.title,
+            title: resourceMap?.get(exercise.resource) ?? variables.title,
             grade: -1,
             attempts: 0,
             duration: 0,
@@ -208,7 +209,7 @@ export class ActivityExerciseResults implements SessionDataAggregator<ExerciseRe
 
       const exerciseResults = this.exerciseResults.get(exercise.id) ?? emptyExerciseResults()
       exerciseResults.id = exerciseResults.id || exercise.id
-      exerciseResults.title = exerciseResults.title || exercise.title
+      exerciseResults.title = session.resourceName
 
       exerciseResults.states[state]++
 

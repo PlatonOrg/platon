@@ -7,14 +7,26 @@
   [nzShowPagination]="false"
   nzBordered
 >
-  <thead></thead>
+  <thead>
+    <tr>
+      <th nzAlign="center" class="limited-width">Membre</th>
+      <th
+        nzAlign="center"
+        *ngFor="let item of nzTable.data[0].exercises | keyvalue : trackByColumnOrder"
+        class="limited-width"
+        [nz-tooltip]="item.value.title"
+      >
+        {{ item.value.title }}
+      </th>
+    </tr>
+  </thead>
   <tbody>
     <ng-container *ngFor="let item of nzTable.data">
       <tr>
         <td>
           <user-avatar [userIdOrName]="item.id" />
         </td>
-        <ng-container *ngFor="let pair of item.exercises | keyvalue">
+        <ng-container *ngFor="let pair of item.exercises | keyvalue : trackByColumnOrder">
           <td nzAlign="center">
             <mat-icon
               [nz-popover]="popover"

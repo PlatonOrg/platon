@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { BadRequestResponse, SuccessResponse, UnauthorizedResponse } from '@platon/core/common'
 import { Configuration, EventService, IRequest, Public } from '@platon/core/server'
 import { PLSourceFile } from '@platon/feature/compiler'
@@ -35,6 +35,7 @@ import {
 } from './file.event'
 import { ResourceFileService } from './file.service'
 import { RESOURCES_DIR } from './repo'
+import { ResourceDependencyService } from '../dependency'
 
 const CACHEABLE_EXTENSIONS = [
   // IMAGES
@@ -85,6 +86,7 @@ const CACHEABLE_EXTENSIONS = [
   'odp',
 ]
 
+@ApiBearerAuth()
 @Controller('files')
 @ApiTags('Resources')
 export class ResourceFileController {
@@ -93,7 +95,8 @@ export class ResourceFileController {
   constructor(
     private readonly fileService: ResourceFileService,
     private readonly eventService: EventService,
-    private readonly configService: ConfigService<Configuration>
+    private readonly configService: ConfigService<Configuration>,
+    private readonly dependencyService: ResourceDependencyService
   ) {}
 
   @Get('/log/:resourceId')
@@ -113,6 +116,8 @@ export class ResourceFileController {
     }
 
     await repo.release(input.name, input.message)
+
+    await this.dependencyService.createDependencyForNewVersion(resourceId, input.name)
 
     this.eventService.emit<OnReleaseRepoEventPayload>(ON_RELEASE_REPO_EVENT, {
       repo,
@@ -234,6 +239,35 @@ export class ResourceFileController {
         matchWord: query.match_word,
         useRegex: query.use_regex,
       })
+    }
+
+    if (query?.exerciseTree) {
+      if (resource.type !== ResourceTypes.ACTIVITY) {
+        throw new BadRequestResponse('Exercise tree is only available for activities')
+      }
+      const [_, main_pla_promise] = await repo.read('main.pla', version)
+      const main_pla = await main_pla_promise
+      if (!main_pla) {
+        throw new BadRequestResponse('Main file not found')
+      }
+      const exerciseGroups = JSON.parse(Buffer.from(main_pla?.buffer).toString()).exerciseGroups
+      const exerciseTree = (
+        Object.entries(exerciseGroups) as [
+          string,
+          { name: string; exercises: { id: string; version: string; resource: string }[] }
+        ][]
+      ).map(([key, group]) => {
+        return {
+          id: key,
+          name: group.name,
+          exercises: group.exercises.map((exercise) => ({
+            id: exercise.id,
+            version: exercise.version,
+            resource: exercise.resource,
+          })),
+        }
+      })
+      return exerciseTree
     }
 
     const [node, content] = await repo.read(path, version)

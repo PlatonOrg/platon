@@ -18,10 +18,9 @@ export interface FoldableFeedbackState extends IWebComponent {
 export const FoldableFeedbackComponentDefinition = defineWebComponent({
   type: WebComponentTypes.widget,
   name: 'FoldableFeedback',
-  icon: 'assets/images/components/widgets/foldable-feedback/foldable-feedback.svg',
   selector: 'wc-foldable-feedback',
-  description: "Permets d'afficher un feedback pliable.",
-  fullDescriptionUrl: 'assets/docs/components/widgets/foldable-feedback/foldable-feedback.md',
+  description:
+    "Système avancé d'affichage de retours détaillés et hiérarchisés avec des sections pliables/dépliables. Particulièrement adapté aux exercices de programmation pour montrer les résultats de tests unitaires, aux analyses multicritères, ou toute évaluation nécessitant plusieurs niveaux de détail avec comparaison entre valeurs attendues et obtenues.",
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
@@ -36,6 +35,7 @@ export const FoldableFeedbackComponentDefinition = defineWebComponent({
           properties: {
             name: { type: 'string', description: 'Nom du test effectué', default: '' },
             description: { type: 'string', description: 'Description du test effectué', default: '' },
+            showHiddenCharacters: { type: 'boolean', description: 'Afficher les caractères cachés', default: false },
             expected: { type: 'string', description: 'Valeur attendue par le professeur', default: '' },
             obtained: { type: 'string', description: "Valeur obtenue par l'étudiant", default: '' },
             arguments: { type: 'string', description: "Arguments passés à l'execution", default: '' },
