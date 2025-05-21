@@ -45,6 +45,8 @@ import { LmsCourseEntity } from './entites/lms-course.entity'
 import { LmsCourseService } from './services/lms-course.service'
 import { ActivityListeners } from './activity/activity.listeners'
 
+import { ActivityDatesService } from './activity/activity-dates.service'
+
 @Module({
   imports: [
     UserModule,
@@ -99,6 +101,7 @@ import { ActivityListeners } from './activity/activity.listeners'
     CourseGroupService,
     CourseGroupMemberService,
     ActivityGroupService,
+    ActivityDatesService,
   ],
   exports: [
     TypeOrmModule,
@@ -113,6 +116,8 @@ import { ActivityListeners } from './activity/activity.listeners'
     ActivityCorrectorService,
     CourseNotificationService,
     ActivityGroupService,
+    CourseGroupService,
+    ActivityDatesService,
   ],
 })
 export class FeatureCourseServerModule {}

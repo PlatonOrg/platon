@@ -68,3 +68,6 @@ dumps/*
 .nx/cache
 .nx/workspace-data
 !shared/external_libs/**/dist
+
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md

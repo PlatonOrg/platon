@@ -26,6 +26,7 @@ import { User, UserCharter, UserRoles } from '@platon/core/common'
 import { NotificationDrawerComponent } from '@platon/feature/notification/browser'
 import { DiscordInvitationComponent, DiscordButtonComponent } from '@platon/feature/discord/browser'
 import { ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
+
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'

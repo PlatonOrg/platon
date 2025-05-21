@@ -11,6 +11,8 @@ import {
 import { Exclude, Transform, Type } from 'class-transformer'
 import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator'
 import { ActivityPermissionsDTO } from '../permissions/permissions.dto'
+import { Res } from '@nestjs/common'
+import { RestrictionListDTO } from './activity-restriction.dto'
 
 export class ActivityDTO extends BaseDTO implements Activity {
   @IsUUID()
@@ -64,6 +66,10 @@ export class ActivityDTO extends BaseDTO implements Activity {
 
   @Exclude()
   readonly source?: unknown
+
+  @Type(() => RestrictionListDTO)
+  @IsOptional()
+  readonly restrictions?: RestrictionListDTO[] | null
 }
 
 export class ActivityFiltersDTO implements ActivityFilters {

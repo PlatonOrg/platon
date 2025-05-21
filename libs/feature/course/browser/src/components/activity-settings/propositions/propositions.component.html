@@ -1,0 +1,18 @@
+<nz-modal
+  [nzVisible]="true"
+  [nzFooter]="null"
+  [nzClosable]="false"
+  [nzWidth]="400"
+  [nzStyle]="{ position: 'absolute', right: '20%', top: '20%' }"
+  (nzOnCancel)="close()"
+>
+  <ng-container *nzModalContent>
+    @for(item of menuItems; track item.title){
+    <div class="menu-item" (click)="sendAndClose(item.title)">
+      <h3 nz-typography>{{ item.title }}</h3>
+      <p nz-typography nzType="secondary">{{ item.description }}</p>
+    </div>
+    }
+    <button nz-button nzType="primary" (click)="close()" class="cancel-btn">Annuler</button>
+  </ng-container>
+</nz-modal>

@@ -1,0 +1,41 @@
+<nz-row [nzGutter]="16" class="restrictions-container">
+  <div nz-col [nzSpan]="24">
+    <nz-card *ngIf="restrictions.length > 0" [nzBordered]="false" [nzTitle]="titleTemplate">
+      <ng-template #titleTemplate>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%">
+          <h4 nz-typography>Restriction n°{{ index + 1 }}</h4>
+          @if(index !== 0){
+          <button nz-button nzType="primary" nzDanger nzShape="circle" (click)="removeAllRestrictions()">
+            <i nz-icon nzType="delete"></i>
+          </button>
+          }
+        </div>
+      </ng-template>
+
+      @for(restriction of restrictions; track restriction ;let i = $index){
+      <course-restriction
+        [restriction]="restriction"
+        [courseGroups]="courseGroups"
+        [courseMembers]="courseMembers"
+        [isMainRestriction]="index === 0 ? true : false"
+        (remove)="removeRestriction(i)"
+      >
+      </course-restriction>
+      }
+
+      <course-propositions
+        *ngIf="isOpenProposition"
+        (closeEvent)="closeBottomSheet()"
+        (sendEvent)="selectOption($event)"
+      >
+      </course-propositions>
+
+      <div class="add-restriction-button">
+        <button nz-button nzType="dashed" nzBlock (click)="openBottomSheet()">
+          <i nz-icon nzType="plus"></i>
+          Ajouter une sous-restriction
+        </button>
+      </div>
+    </nz-card>
+  </div>
+</nz-row>

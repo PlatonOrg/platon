@@ -1,3 +1,4 @@
+import { RestrictionList } from './activity-restriction.model'
 import { ActivityPermissions } from './permissions.model'
 
 export interface Activity {
@@ -21,6 +22,7 @@ export interface Activity {
   readonly timeSpent: number
   readonly progression: number
   readonly permissions: ActivityPermissions
+  readonly restrictions?: RestrictionList[] | null
 }
 
 export interface ActivityFilters {

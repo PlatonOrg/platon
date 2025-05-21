@@ -1,3 +1,75 @@
+@import 'shepherd.js/dist/css/shepherd.css';
+
+/*.shepherd-element {
+  z-index: 9999 !important;
+}*/
+
+// Dans votre fichier de styles global (styles.scss)
+.shepherd-element {
+  z-index: 9999 !important;
+
+  // Appliquer les styles des cartes NG-Zorro
+  @extend .ant-card !optional;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  .shepherd-header {
+    // Style d'en-tête similaire à NG-Zorro
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+
+    .shepherd-title {
+      @extend .ant-typography !optional;
+      @extend .ant-typography-title !optional;
+      margin: 0;
+    }
+
+    .shepherd-cancel-icon {
+      @extend .ant-btn !optional;
+      @extend .ant-btn-text !optional;
+      @extend .ant-btn-sm !optional;
+      padding: 0;
+      line-height: 1;
+    }
+  }
+
+  .shepherd-text {
+    padding: 16px 24px;
+
+    p {
+      @extend .ant-typography !optional;
+      margin-bottom: 8px;
+    }
+  }
+
+  .shepherd-footer {
+    padding: 10px 16px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+
+    .shepherd-button {
+      @extend .ant-btn !optional;
+      margin-left: 8px;
+
+      &.primary {
+        @extend .ant-btn-primary !optional;
+      }
+
+      &.secondary {
+        @extend .ant-btn-default !optional;
+      }
+    }
+  }
+}
+
+// Dans votre fichier de styles global
+.shepherd-modal-overlay-container {
+  opacity: 0.5;
+  background-color: rgba(0, 0, 0, 0.45); // Même couleur que les modals NG-Zorro
+  pointer-events: auto;
+}
+
 mat-drawer-container {
   width: 100vw;
   height: 100vh;

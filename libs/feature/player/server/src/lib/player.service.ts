@@ -50,7 +50,7 @@ import {
   ExerciseSessionEntity,
   SessionEntity,
   SessionService,
-} from '@platon/feature/result/server'
+} from '@platon/feature/result/server' // from '@platon/feature/player/server
 import { PartialDeep } from 'type-fest'
 import { DataSource, EntityManager, In } from 'typeorm'
 import { PreviewOuputDTO } from './player.dto'
@@ -163,12 +163,32 @@ export class PlayerService extends PlayerManager {
     if (!activitySession) {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
     }
-    if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
-      throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
+    // Les modifs commencent ici : restrictions
+
+    if (!activitySession.activity) {
+      throw new NotFoundResponse(`Activity not found: ${activitySessionId}`)
     }
-    if (activitySession.activity?.closeAt && activitySession.activity.closeAt < new Date()) {
-      throw new ForbiddenResponse("L'activité est fermée.")
+
+    const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
+
+    if (dateRange && dateRange.start) {
+      const startTime = new Date(dateRange.start).getTime()
+      const nowTime = new Date().getTime()
+
+      if (startTime > nowTime) {
+        throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
+      }
     }
+
+    if (dateRange && dateRange.end) {
+      const endTime = new Date(dateRange.end).getTime()
+      const nowTime = new Date().getTime()
+
+      if (endTime < nowTime) {
+        throw new ForbiddenResponse("L'activité est fermée.")
+      }
+    }
+    // Fin des modifs
 
     // CREATE PLAYERS
     const exercisePlayers = await Promise.all(

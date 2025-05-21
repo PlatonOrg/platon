@@ -54,7 +54,7 @@ export class UserCharterComponent {
         this.userCharterModalVisibleChange.emit(false)
         this.changeDetectorRef.markForCheck()
       } catch (error) {
-        /* empty */
+        /* empty block */
       }
     }
   }

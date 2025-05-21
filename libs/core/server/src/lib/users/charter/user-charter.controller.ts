@@ -1,12 +1,11 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { ApiTags } from '@nestjs/swagger'
 import { ItemResponse } from '@platon/core/common'
 
 import { UserCharterService } from './user-charter.service'
 import { userCharterDTO } from './user-charter.dto'
 import { Mapper } from '../../utils'
 
-@ApiBearerAuth()
 @Controller('user-charter')
 @ApiTags('Users')
 export class UserCharterController {

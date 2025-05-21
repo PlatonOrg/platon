@@ -8,6 +8,7 @@ import {
   ActivityFilters,
   CreateActivity,
   ReloadActivity,
+  RestrictionList,
   UpdateActivity,
   calculateActivityOpenState,
 } from '@platon/feature/course/common'
@@ -33,6 +34,12 @@ import { CourseGroupEntity } from '../course-group/course-group.entity'
 import { ActivityGroupEntity } from '../activity-group/activity-group.entity'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
+import { ActivityDatesService } from './activity-dates.service'
+
+// -------------------------------------------------------------------------------
+import { Activity, RestrictionConfig } from '@platon/feature/course/common'
+import { CourseGroupService } from '../course-group/course-group.service'
+import { UserRoles } from '@platon/core/common'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
@@ -50,6 +57,8 @@ export class ActivityService {
     private readonly activityMemberService: ActivityMemberService,
     private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
+    private readonly courseGroup: CourseGroupService,
+    private readonly activityDatesService: ActivityDatesService, // Nouveau service injecté
 
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -77,6 +86,8 @@ export class ActivityService {
     qb.orderBy('activity.createdAt')
 
     const [entities, count] = await qb.getManyAndCount()
+
+    await this.updateActivitiesDates(entities)
     await this.addVirtualColumns(...entities)
 
     return [entities, count]
@@ -101,7 +112,7 @@ export class ActivityService {
     if (!isCreator && !isPrivateMember && !isInGroup && !isMember) {
       throw new ForbiddenResponse(`You are not a member of this activity`)
     }
-
+    await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
     return activity
@@ -113,6 +124,7 @@ export class ActivityService {
 
     const activity = await qb.getOne()
     if (activity) {
+      await this.updateActivitiesDates([activity])
       await this.addVirtualColumns(activity)
     }
     return Optional.ofNullable(activity)
@@ -131,14 +143,19 @@ export class ActivityService {
     return Optional.of(activities)
   }
 
+  //------------------------------------------------------
+
   async findByCourseId(courseId: string, activityId: string): Promise<Optional<ActivityEntity>> {
     const qb = this.createQueryBuilder(courseId)
     qb.andWhere(`activity.id = :id`, { id: activityId })
 
     const activity = await qb.getOne()
     if (activity) {
+      await this.updateActivitiesDates([activity])
+
       await this.addVirtualColumns(activity)
     }
+
     return Optional.ofNullable(activity)
   }
 
@@ -195,6 +212,15 @@ export class ActivityService {
     return result
   }
 
+  async updateRestrictions(
+    courseId: string,
+    activityId: string,
+    restrictions: RestrictionList[],
+    guard?: ActivityGuard
+  ): Promise<ActivityEntity> {
+    return this.update(courseId, activityId, { restrictions }, guard)
+  }
+
   async reload(
     courseId: string,
     activityId: string,
@@ -226,6 +252,7 @@ export class ActivityService {
 
     this.eventService.emit<OnReloadActivityEventPayload>(ON_RELOAD_ACTIVITY_EVENT, { activity })
 
+    await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
     return activity
@@ -235,8 +262,19 @@ export class ActivityService {
     this.notificationService.notifyActivityBeingClosed(activityId).catch((error) => {
       this.logger.error('Failed to send notification', error)
     })
+
+    // Des changements ici
+    const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
+    if (!activity) {
+      throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
+    }
+    if (guard) {
+      await guard(activity)
+    }
+    await this.activityDatesService.reopenOrCloseAllRestrictions(activity, false)
+    // Fin de changement
     this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
-    return this.update(courseId, activityId, { closeAt: new Date() }, guard)
+    return this.update(courseId, activityId, { closeAt: new Date(), restrictions: activity.restrictions }, guard)
   }
 
   async reopen(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityEntity> {
@@ -247,8 +285,11 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
+    // Des changements ici
+    await this.activityDatesService.reopenOrCloseAllRestrictions(activity, true)
+    // Fin de changement
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
-    return this.update(courseId, activityId, { closeAt: null })
+    return this.update(courseId, activityId, { closeAt: null, restrictions: activity.restrictions })
   }
 
   async delete(courseId: string, activityId: string, guard?: ActivityGuard) {
@@ -388,5 +429,15 @@ export class ActivityService {
       .leftJoin(ActivityGroupEntity, 'activityGroup', 'group.id = activityGroup.group_id')
       .where('activityGroup.id IS NOT NULL')
       .andWhere('activityGroup.activity_id = activity.id')
+  }
+
+  /**
+   * Met à jour les dates d'ouverture et de fermeture des activités en fonction des restrictions
+   * @param activities Liste des activités à mettre à jour
+   */
+  async updateActivitiesDates(
+    activities: ActivityEntity[]
+  ): Promise<{ start: Date | undefined; end: Date | undefined }> {
+    return this.activityDatesService.updateActivitiesDates(activities)
   }
 }

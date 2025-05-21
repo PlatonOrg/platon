@@ -10,7 +10,6 @@ import {
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
-import differenceInCalendarDays from 'date-fns/differenceInCalendarDays'
 
 import { MatIconModule } from '@angular/material/icon'
 
@@ -18,14 +17,21 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzCardModule } from 'ng-zorro-antd/card'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
-import { Activity, CourseGroup, CourseMember } from '@platon/feature/course/common'
+import {
+  Activity,
+  CourseGroup,
+  CourseMember,
+  Restriction,
+  RestrictionConfig,
+  RestrictionList,
+} from '@platon/feature/course/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
-import { CourseMemberSelectComponent } from '../course-member-select/course-member-select.component'
-import { CourseGroupSelectComponent } from '../course-group-select/course-group-select.component'
+import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
 
 @Component({
   standalone: true,
@@ -38,24 +44,21 @@ import { CourseGroupSelectComponent } from '../course-group-select/course-group-
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatIconModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSkeletonModule,
     NzDatePickerModule,
     NzPopconfirmModule,
-
     DialogModule,
-
-    CourseMemberSelectComponent,
-    CourseGroupSelectComponent,
+    NzCardModule,
+    RestrictionManagerComponent,
   ],
 })
 export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
   @Output() activityChange = new EventEmitter<Activity>()
+  restrictions: RestrictionList[] = [] as RestrictionList[]
 
   protected form = new FormGroup({
     openAt: new FormControl<Date | undefined>(undefined),
@@ -69,8 +72,6 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected updating = false
   protected courseMembers: CourseMember[] = []
   protected courseGroups: CourseGroup[] = []
-
-  protected disabledDate = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
 
   constructor(
     private readonly courseService: CourseService,
@@ -106,59 +107,72 @@ export class CourseActivitySettingsComponent implements OnInit {
       groups: activityGroups.resources.map((g) => g.groupId),
     })
 
+    if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
+      this.restrictions = [...this.activity.restrictions]
+    } else {
+      const startAt = this.form.get('openAt')?.value
+      const closeAt = this.form.get('closeAt')?.value
+      this.newRestriction()
+      const isDateRange = (
+        config: RestrictionConfig[keyof RestrictionConfig]
+      ): config is RestrictionConfig['DateRange'] => {
+        return config !== undefined || 'start' in config || 'end' in config
+      }
+      if (isDateRange(this.restrictions[0].restriction[0].config)) {
+        this.restrictions[0].restriction[0].config.start = startAt instanceof Date ? startAt : undefined
+        this.restrictions[0].restriction[0].config.end = closeAt instanceof Date ? closeAt : undefined
+      }
+    }
+
     this.loading = false
     this.changeDetectorRef.markForCheck()
   }
 
+  protected newRestriction() {
+    this.restrictions.push({
+      restriction: [
+        {
+          type: 'DateRange',
+          config: {
+            start: undefined,
+            end: undefined,
+          },
+        },
+      ],
+    })
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected updateRestriction(index: number, updatedRestrictions: Restriction[]) {
+    if (updatedRestrictions.length === 0) {
+      this.restrictions.splice(index, 1)
+    } else {
+      this.restrictions[index] = { restriction: updatedRestrictions }
+    }
+    this.changeDetectorRef.markForCheck()
+  }
+
+  private getMainDate(): RestrictionConfig['DateRange'] | null {
+    const dateRange = this.restrictions[0].restriction.find((r) => r.type === 'DateRange')
+    return dateRange ? (dateRange.config as RestrictionConfig['DateRange']) : null
+  }
+
   protected async update(): Promise<void> {
     this.updating = true
-    this.changeDetectorRef.markForCheck()
-
     try {
-      const { value } = this.form
+      const dateRange = this.getMainDate()
       const res = await Promise.all([
-        firstValueFrom(
-          this.courseService.updateActivity(this.activity, {
-            openAt: value.openAt,
-            closeAt: value.closeAt,
-          })
-        ),
         ...(!this.activity.isChallenge
-          ? [
-              firstValueFrom(
-                this.courseService.updateActivityMembers(
-                  this.activity,
-                  value.members?.map((m) => {
-                    const [memberId, userId] = m.split(':')
-                    return {
-                      userId,
-                      memberId,
-                    }
-                  }) || []
-                )
-              ),
-              firstValueFrom(
-                this.courseService.updateActivityCorrectors(
-                  this.activity,
-                  value.correctors?.map((m) => {
-                    const [memberId, userId] = m.split(':')
-                    return {
-                      userId,
-                      memberId,
-                    }
-                  }) || []
-                )
-              ),
-              firstValueFrom(this.courseService.updateActivityGroups(this.activity.id, value.groups || [])),
-            ]
+          ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.restrictions))]
           : []),
       ])
-
+      console.log('Après la fonction update : ', res)
+      this.activity = res[0]
       this.activityChange.emit(
         (this.activity = {
           ...this.activity,
-          openAt: value.openAt || undefined,
-          closeAt: value.closeAt || undefined,
+          openAt: dateRange?.start || undefined,
+          closeAt: dateRange?.end || undefined,
           state: res[0].state,
         })
       )
