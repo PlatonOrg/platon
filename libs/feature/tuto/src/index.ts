@@ -1,5 +1,0 @@
-export * from './lib/tuto/tuto.component'
-export * from './lib/tuto/tuto.service'
-export * from './lib/tuto/utils/buttons'
-export * from './lib/tuto/utils/dom'
-export * from './lib/data/toolbar-tuto.data'

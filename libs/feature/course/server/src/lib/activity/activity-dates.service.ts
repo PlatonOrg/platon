@@ -31,8 +31,6 @@ export class ActivityDatesService {
       end: undefined,
     }
 
-    this.logger.debug('Mise à jour des dates des activités', this.request.user)
-
     for (const activity of activities) {
       if (activity?.restrictions && activity.restrictions.length > 0) {
         let isExist = false
@@ -47,11 +45,6 @@ export class ActivityDatesService {
             dateRangeGlobale.start = dateRange.start
             dateRangeGlobale.end = dateRange.end
             isExist = true
-
-            const localStart = dateRange.start ? new Date(dateRange.start).toLocaleString() : 'undefined'
-            const localEnd = dateRange.end ? new Date(dateRange.end).toLocaleString() : 'undefined'
-            this.logger.log('Dates trouvées (local time)', localStart, localEnd)
-            this.logger.log('Dates trouvées (UTC)', dateRange.start, dateRange.end)
 
             break // Sortir de la boucle une fois une date trouvée
           }
@@ -71,8 +64,6 @@ export class ActivityDatesService {
           activity.closeAt = yesterday
           dateRangeGlobale.start = yesterday
           dateRangeGlobale.end = yesterday
-
-          this.logger.log('Aucune restriction trouvée, dates par défaut :', yesterday)
         }
       }
     }
@@ -236,8 +227,6 @@ export class ActivityDatesService {
             activity.closeAt = dateRange.end
             dateRangeGlobale.start = dateRange.start
             dateRangeGlobale.end = dateRange.end
-
-            this.logger.log('Dates trouvées depuis restriction vide', dateRange.start, dateRange.end)
             return true
           }
         }

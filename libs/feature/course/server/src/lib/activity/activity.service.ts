@@ -86,23 +86,9 @@ export class ActivityService {
     qb.orderBy('activity.createdAt')
 
     const [entities, count] = await qb.getManyAndCount()
-    console.log(
-      'Avant la modification de la date : ',
-      entities[2].title,
-      entities[2].openAt,
-      ' -> ',
-      entities[2].closeAt
-    )
+
     await this.updateActivitiesDates(entities)
     await this.addVirtualColumns(...entities)
-
-    console.log(
-      'Après la modification de la date : ',
-      entities[2].title,
-      entities[2].openAt,
-      ' -> ',
-      entities[2].closeAt
-    )
 
     return [entities, count]
   }
@@ -269,13 +255,6 @@ export class ActivityService {
     await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
-    this.logger.log(
-      'Dans reload : Avant la modification de la date : ',
-      activity.title,
-      activity.openAt,
-      ' -> ',
-      activity.closeAt
-    )
     return activity
   }
 

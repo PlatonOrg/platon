@@ -1,5 +1,4 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
-import * as echarts from 'echarts/core'
 import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
@@ -13,9 +12,8 @@ import {
   ViewChild,
   inject,
   ElementRef,
-  AfterViewInit,
 } from '@angular/core'
-import { NavigationStart, Router, RouterModule } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
@@ -27,7 +25,6 @@ import { User, UserCharter, UserRoles } from '@platon/core/common'
 import { NotificationDrawerComponent } from '@platon/feature/notification/browser'
 import { DiscordInvitationComponent, DiscordButtonComponent } from '@platon/feature/discord/browser'
 import { ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
-import { TutoService, toolbarSteps, defaultStepOptions } from '@platon/feature/tuto'
 
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -70,7 +67,7 @@ import { UiModalTemplateComponent } from '@platon/shared/ui'
     UserCharterComponent,
   ],
 })
-export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ToolbarComponent implements OnInit, OnDestroy {
   @Input() drawerOpened = false
   @Output() drawerOpenedChange = new EventEmitter<boolean>()
 
@@ -81,7 +78,6 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly breakpointObserver = inject(BreakpointObserver)
   private readonly elementRef = inject(ElementRef)
-  private readonly tutoService = inject(TutoService)
 
   private readonly subscriptions: Subscription[] = []
 
@@ -97,66 +93,8 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   protected userCharterModalVisible = false
   protected userCharterAccepted = false
-  // Track if tutorial has been initialized
-  private tutoInitialized = false
 
   constructor(private readonly userService: UserService) {}
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.initTutorial()
-    }, 500)
-  }
-
-  /**
-   * Initialize the tutorial with proper context
-   */
-  private initTutorial(): void {
-    const echartElements = document.querySelectorAll('[_echarts_instance_]')
-    for (let i = 0; i < echartElements.length; i++) {
-      const element = echartElements[i] as HTMLElement
-      const instance = echarts.getInstanceByDom(element)
-      if (instance) {
-        echarts.dispose(element)
-      }
-    }
-
-    this.tutoService.setCurrentPage('toolbar')
-
-    // Configure the tutorial
-    this.tutoService.defaultStepOptions = defaultStepOptions
-    this.tutoService.modal = false
-    this.tutoService.confirmCancel = false
-
-    // Add required elements for validation
-    this.tutoService.requiredElements = [
-      {
-        selector: '#tuto-toolbar-menu-button',
-        title: 'Menu Button Missing',
-        message: 'The tutorial cannot start because the menu button is not visible.',
-      },
-      {
-        selector: '#tuto-toolbar-theme-button',
-        title: 'Theme Button Missing',
-        message: 'The tutorial cannot start because the theme button is not visible.',
-      },
-      {
-        selector: '#tuto-toolbar-notifications-button',
-        title: 'Notifications Button Missing',
-        message: 'The tutorial cannot start because the notifications button is not visible.',
-      },
-    ]
-
-    // Add the steps
-    this.tutoService.addSteps(toolbarSteps)
-
-    // Only start the tutorial if not already active
-    if (!this.tutoService.isActive && !this.tutoInitialized) {
-      this.tutoInitialized = true
-      console.log('Starting toolbar tutorial')
-      void this.tutoService.start()
-    }
-  }
 
   @ViewChild(UiModalTemplateComponent, { static: true })
   protected modal!: UiModalTemplateComponent
@@ -207,15 +145,6 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.subscriptions.push(
-      this.router.events.subscribe((event) => {
-        // Cancel tutorial on navigation
-        if (event instanceof NavigationStart && this.tutoService.isActive) {
-          this.tutoService.clearTour()
-        }
-      })
-    )
-
-    this.subscriptions.push(
       this.breakpointObserver
         .observe([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
         .subscribe((state) => {
@@ -237,16 +166,10 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    // Clean up tutorials when component is destroyed
-    if (this.tutoService.isActive) {
-      this.tutoService.clearTour()
-    }
     this.subscriptions.forEach((s) => s.unsubscribe())
   }
 
   signOut(): void {
-    // Cancel any running tutorials before signing out
-    this.tutoService.clearTour()
     this.authService.signOut().catch(console.error)
   }
 

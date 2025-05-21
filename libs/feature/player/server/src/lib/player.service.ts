@@ -171,20 +171,11 @@ export class PlayerService extends PlayerManager {
 
     const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
 
-    const localDateRange = dateRange
-      ? {
-          start: dateRange.start ? new Date(dateRange.start).toLocaleString() : undefined,
-          end: dateRange.end ? new Date(dateRange.end).toLocaleString() : undefined,
-        }
-      : undefined
-    console.log('Dates récupérées (local time):', localDateRange)
-    console.log('Dates récupérées (UTC):', dateRange)
     if (dateRange && dateRange.start) {
       const startTime = new Date(dateRange.start).getTime()
       const nowTime = new Date().getTime()
 
       if (startTime > nowTime) {
-        console.log("L'activité n'est pas encore ouverte. Date de début (ms):", startTime, 'Maintenant (ms):', nowTime)
         throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
       }
     }
@@ -194,7 +185,6 @@ export class PlayerService extends PlayerManager {
       const nowTime = new Date().getTime()
 
       if (endTime < nowTime) {
-        console.log("L'activité est fermée. Date de fin (ms):", endTime, 'Maintenant (ms):', nowTime)
         throw new ForbiddenResponse("L'activité est fermée.")
       }
     }
