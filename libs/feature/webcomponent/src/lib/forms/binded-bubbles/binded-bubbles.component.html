@@ -1,4 +1,4 @@
-<div class="bubbles-items" *ngIf="this.state.mode === 'shuffle'">
+<!-- <div class="bubbles-items" *ngIf="this.state.mode === 'shuffle'">
   <ng-container *ngFor="let item of shuffledList">
     <div class="bubbles-item">
       <button
@@ -15,18 +15,18 @@
       </button>
     </div>
   </ng-container>
-</div>
+</div> -->
 
 <!-- template.html -->
 <div class="bubbles-items" *ngIf="state.mode === 'ordered'">
   <div class="bubbles-container">
     <div class="column">
-      <ng-container *ngFor="let item of list1">
+      <ng-container *ngFor="let item of list1; trackBy: trackById">
         <div class="bubbles-item">
           <button
             mat-fab
             extended
-            (click)="updateClickedList(item)"
+            (click)="updateClickedList(item, 'list1')"
             [class.checked]="item.state === 'checked'"
             [class.unchecked]="item.state === 'unchecked'"
             [class.error]="item.state === 'error'"
@@ -42,12 +42,12 @@
       </ng-container>
     </div>
     <div class="column">
-      <ng-container *ngFor="let item of list2">
+      <ng-container *ngFor="let item of list2; trackBy: trackById">
         <div class="bubbles-item">
           <button
             mat-fab
             extended
-            (click)="updateClickedList(item)"
+            (click)="updateClickedList(item, 'list2')"
             [class.checked]="item.state === 'checked'"
             [class.unchecked]="item.state === 'unchecked'"
             [class.error]="item.state === 'error'"
