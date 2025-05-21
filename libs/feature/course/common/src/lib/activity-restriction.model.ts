@@ -19,9 +19,6 @@ export interface RestrictionConfig {
 export interface Restriction {
   type: RestrictionType
   config: RestrictionConfig[keyof RestrictionConfig]
-  //restrictions?: Restriction[]
-  //condition?: 'must' | 'mustNot'
-  //allConditions?: 'all' | 'any'
 }
 
 export interface RestrictionList {

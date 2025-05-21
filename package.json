@@ -260,6 +260,7 @@
     "graphql-type-json": "^0.3.2",
     "graphql-ws": "^5.12.1",
     "gray-matter": "^4.0.3",
+    "has-proto": "^1.2.0",
     "intro.js": "^6.0.0",
     "isomorphic-git": "^1.21.0",
     "jison": "^0.4.18",

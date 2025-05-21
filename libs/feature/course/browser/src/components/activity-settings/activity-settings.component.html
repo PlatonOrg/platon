@@ -26,26 +26,7 @@
         </div>
       </section>
     </div>
-    <ng-container *ngIf="!activity.isChallenge">
-      <h4 id="members">Souhaitez-vous limiter l'accès de cette activité à des utilisateurs en particulier?</h4>
-      <course-member-select
-        [members]="courseMembers"
-        formControlName="members"
-        placeholder="Laissez la sélection vide pour permettre l'accès à tous, y compris aux nouveaux membres."
-      />
-      <h4 id="members">Souhaitez-vous limiter l'accès de cette activité à des groupes en particulier?</h4>
-      <course-group-select
-        [groups]="courseGroups"
-        formControlName="groups"
-        placeholder="Laissez la sélection vide pour permettre l'accès à tous, y compris aux nouveaux membres."
-      />
-      <h4 id="correctors">Souhaitez-vous ajouter des correcteurs à cette activité?</h4>
-      <course-member-select
-        [members]="courseMembers"
-        formControlName="correctors"
-        placeholder="Laissez la sélection vide si cette activité est auto-corrigée."
-      />
-    </ng-container>
+
     <nz-spin *ngIf="updating" nzTip="Modification de l'activité..."></nz-spin>
     <div class="actions">
       <button nz-button [disabled]="!form.valid" nzType="primary" (click)="update()">
@@ -96,32 +77,32 @@
     >
       Rouvrir l'activité pour tous
     </button>
-  </form>
-</nz-skeleton>
-
-<ng-template #confirmReload>
-  <p>Êtes-vous sûr de vouloir recharger cette activité ?</p>
-  <ul>
-    <li>L'activité sera remplacée par sa dernière version publiée.</li>
-    <li>Après avoir supprimé l'activité, toutes ses réponses seront effacées.</li>
-  </ul>
-</ng-template>
-
-<ng-template #confirmDelete>
-  <p>Êtes-vous sûr de vouloir supprimer cette activité ?</p>
-  <p>Après avoir supprimé l'activité, toutes ses réponses seront effacées.</p>
-</ng-template>
-
-<ng-template #confirmClose>
-  <p>Êtes-vous sûr de vouloir fermer cette activité ?</p>
-</ng-template>
-
-<ng-template #confirmReopen>
-  <div>
-    <p>Êtes-vous sûr de vouloir rouvrir cette activité pour tous?</p>
-    <p>
-      La date de fin de l'activité sera automatiquement supprimée, si vous souhaiter la remettre en place, vous devrez
-      le faire manuellement.
-    </p>
   </div>
-</ng-template>
+
+  <ng-template #confirmReload>
+    <p>Êtes-vous sûr de vouloir recharger cette activité ?</p>
+    <ul>
+      <li>L'activité sera remplacée par sa dernière version publiée.</li>
+      <li>Après avoir supprimé l'activité, toutes ses réponses seront effacées.</li>
+    </ul>
+  </ng-template>
+
+  <ng-template #confirmDelete>
+    <p>Êtes-vous sûr de vouloir supprimer cette activité ?</p>
+    <p>Après avoir supprimé l'activité, toutes ses réponses seront effacées.</p>
+  </ng-template>
+
+  <ng-template #confirmClose>
+    <p>Êtes-vous sûr de vouloir fermer cette activité ?</p>
+  </ng-template>
+
+  <ng-template #confirmReopen>
+    <div>
+      <p>Êtes-vous sûr de vouloir rouvrir cette activité pour tous?</p>
+      <p>
+        La date de fin de l'activité sera automatiquement supprimée, si vous souhaiter la remettre en place, vous devrez
+        le faire manuellement.
+      </p>
+    </div>
+  </ng-template>
+</div>
