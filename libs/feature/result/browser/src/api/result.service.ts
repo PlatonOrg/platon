@@ -176,12 +176,12 @@ export class ResultService {
     )
   }
 
-  getLabels(courseId: string): Observable<Label[]> {
-    return this.labelProvider.listLabels(courseId)
+  getLabels(activityId: string): Observable<Label[]> {
+    return this.labelProvider.listLabels(activityId)
   }
 
-  createLabel(courseId: string, input: CreateLabel): Observable<Label[]> {
-    return this.labelProvider.createLabel(courseId, input)
+  createLabel(activityId: string, input: CreateLabel): Observable<Label[]> {
+    return this.labelProvider.createLabel(activityId, input)
   }
 
   labelize(sessionId: string, answerId: string, labelId: string): Observable<Label[]> {
@@ -202,6 +202,10 @@ export class ResultService {
 
   unfavLabel(labelId: string): Observable<Label[]> {
     return this.labelProvider.unfavLabel(labelId)
+  }
+
+  updateLabel(label: Partial<Label>): Observable<Label> {
+    return this.labelProvider.updateLabel(label)
   }
 
   upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction> {
