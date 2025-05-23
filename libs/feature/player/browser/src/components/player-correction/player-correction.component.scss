@@ -146,6 +146,7 @@ mat-toolbar {
   background-color: #3c2864 !important;
   color: white;
   position: sticky;
+  height: 3vh;
   top: 0;
   z-index: 2;
   .setting-button {
@@ -191,8 +192,23 @@ mat-toolbar {
   align-items: baseline;
 }
 
+.left-col-wrapper {
+  overflow-y: auto;
+  height: 100%;
+}
+
 .mid-col-wrapper {
+  display:flex;
+  flex-direction: column;
+  gap: 0.5rem;
   padding: 0 0.5rem 0.5rem 0.5rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.divider {
+  margin: 0;
+  margin-top: 6px;
 }
 
 .swipe-container {

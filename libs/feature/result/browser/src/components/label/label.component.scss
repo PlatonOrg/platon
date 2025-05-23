@@ -22,16 +22,24 @@
     .label-button {
       position: relative;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      flex-direction: column;
       width: 100%;
-      padding: 5px 10px;
 
       &:active {
         transition: none !important;  /* Supprime les transitions */
         background-color: inherit !important;
       }
+
+      .label-description {
+        font-size: 12px;
+        color: #808080;
+        margin-top: 5px;
+      }
+    }
+
+    .error-message {
+      color: red;
+      font-size: 10px;
     }
 
     .favorite-label, .unfavorite-label {
@@ -71,13 +79,14 @@
     }
 
 
-    #createbutton {
-      grid-column-start: 1;
-      grid-column-end: 3;
-    }
+
   }
 }
 
+#createbutton {
+  width: 100%;
+  margin-top: 0.5rem;
+}
 
 mat-card button#settingButton {
   display: flex;

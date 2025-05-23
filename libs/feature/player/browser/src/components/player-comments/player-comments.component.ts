@@ -16,6 +16,11 @@ import { SessionComment } from '@platon/feature/result/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { ExercisePlayer } from '@platon/feature/player/common'
+import { MatCardModule } from '@angular/material/card'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { MatMenuModule } from '@angular/material/menu'
+import { MatIconModule } from '@angular/material/icon'
+import { MatButtonModule } from '@angular/material/button'
 
 @Component({
   standalone: true,
@@ -26,6 +31,10 @@ import { ExercisePlayer } from '@platon/feature/player/common'
   imports: [
     CommonModule,
     FormsModule,
+    MatCardModule,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule,
 
     NzFormModule,
     NzListModule,
@@ -33,6 +42,7 @@ import { ExercisePlayer } from '@platon/feature/player/common'
     NzButtonModule,
     NzCommentModule,
     NzEmptyModule,
+    NzSpinModule,
 
     DialogModule,
     UserAvatarComponent,
@@ -48,6 +58,9 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
   protected submitting = false
   private sessionId = ''
   private answerId = ''
+  protected isLoading = true
+  protected previousComments: SessionComment[] = []
+  protected showSuggestions = false
 
   constructor(
     private readonly authService: AuthService,
@@ -61,6 +74,7 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
     this.sessionId = this.answers[this.answers.length - 1].sessionId
     this.answerId = this.answers[this.answers.length - 1].answerId as string
     const response = await firstValueFrom(this.resultService.listComments(this.sessionId, this.answerId))
+    this.isLoading = false
     this.comments = response.resources
     this.changeDetectorRef.markForCheck()
   }
@@ -69,6 +83,7 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
     this.sessionId = this.answers[this.answers.length - 1].sessionId
     this.answerId = this.answers[this.answers.length - 1].answerId as string
     const response = await firstValueFrom(this.resultService.listComments(this.sessionId, this.answerId))
+    this.isLoading = false
     this.comments = response.resources
     this.changeDetectorRef.markForCheck()
   }
@@ -81,6 +96,7 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
       )
       this.input = ''
       this.comments = [...this.comments, comment]
+      this.previousComments = [...this.previousComments, comment]
     } catch {
       this.dialogService.error(`Le commentaire n'a pas pu être envoyé. Veuillez réessayer plus tard.`)
     } finally {

@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   HostListener,
   Input,
   OnInit,
+  ViewChild,
   inject,
 } from '@angular/core'
 import { firstValueFrom } from 'rxjs'
@@ -32,6 +34,7 @@ import { PlayerReviewComponent } from '../player-review/player-review.component'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { MatDividerModule } from '@angular/material/divider'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
@@ -40,6 +43,7 @@ import { User } from '@platon/core/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { MatCardModule } from '@angular/material/card'
 import { animate, style, transition, trigger } from '@angular/animations'
+import { NzProgressModule } from 'ng-zorro-antd/progress'
 
 interface ExerciseGroup {
   exerciseId: string
@@ -88,6 +92,8 @@ interface ExerciseGroup {
     NzCollapseModule,
     NzSelectModule,
     NzButtonModule,
+    NzProgressModule,
+    NzDividerModule,
 
     DialogModule,
 
@@ -106,8 +112,10 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly userService = inject(UserService)
   private readonly route = inject(ActivatedRoute)
 
-  protected activityId?: string
-  protected userId?: string
+  @ViewChild('GradeCard', { read: ElementRef }) cardRef!: ElementRef<HTMLElement>
+
+  protected activityId = ''
+  protected sessionId?: string
 
   protected answers: ExercisePlayer[] = []
 
@@ -124,6 +132,7 @@ export class PlayerCorrectionComponent implements OnInit {
   private startIndex = 0
   protected selectedTabIndex = 0
   protected selectedExerciseIndex = 0
+  protected exerciseCorrected: Set<string> = new Set()
 
   protected correction?: CourseCorrection
   protected grade = 0
@@ -136,21 +145,44 @@ export class PlayerCorrectionComponent implements OnInit {
   protected currentLabels: Label[] = []
 
   protected animationState = ''
+  protected totalGradeChange?: string
+  protected calculatedSteps = 0
 
   @Input() courseCorrection!: CourseCorrection
 
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe((params) => {
       this.activityId = params.activityId
-      this.userId = params.userId
+      this.sessionId = params.sessionId
     })
+    console.error('courseCorrection', this.courseCorrection)
+    console.error('sessionId', this.sessionId)
+    console.error('activityId', this.activityId)
     this.buildGroups()
     await this.getUsers()
+    console.error('userMap', this.userMap)
     this.getAllExerciseGroup()
-    const firstGroup = this.listExerciseGroup[this.startIndex]
+    console.error('listExerciseGroup', this.listExerciseGroup)
+    const firstGroup = this.getSessionId() ?? this.listExerciseGroup[this.startIndex]
+    console.error(firstGroup)
     if (firstGroup) {
       this.onChooseGroup(firstGroup)
     }
+  }
+
+  private getSessionId(): ExerciseGroup | undefined {
+    if (!this.sessionId) {
+      return undefined
+    }
+    for (const group of this.listExerciseGroup) {
+      const userIndex = group.users.findIndex((user) => user.exerciseSessionId === this.sessionId)
+      if (userIndex > -1) {
+        const [user] = group.users.splice(userIndex, 1)
+        group.users.unshift(user)
+        return group
+      }
+    }
+    return undefined
   }
 
   private getAllExerciseGroup(): void {
@@ -212,6 +244,7 @@ export class PlayerCorrectionComponent implements OnInit {
 
   protected onChooseTab(index: number): void {
     const currentUserId = this.currentExercise?.userId
+    console.error('currentActivity', this.currentActivityId)
     this.answers = []
     this.selectedTabIndex = index
     this.currentExercise = null
@@ -230,7 +263,16 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected onChooseGroup(group: ExerciseGroup): void {
+    if (this.currentGroup === group) {
+      return
+    }
     this.currentGroup = group
+    this.exerciseCorrected.clear()
+    for (const exercise of this.currentGroup.users) {
+      if (exercise.correctedGrade != null) {
+        this.exerciseCorrected.add(exercise.exerciseSessionId)
+      }
+    }
     this.onChooseTab(this.selectedTabIndex)
   }
 
@@ -285,10 +327,48 @@ export class PlayerCorrectionComponent implements OnInit {
     console.error('changeGrade', this.correctedGrade)
   }
 
+  protected onTotalGradeChange(totalGradeChange: string) {
+    if (!this.currentExercise) {
+      return
+    }
+    console.error('je suis là', totalGradeChange)
+
+    let value = 0
+    let coef = 0
+
+    if (totalGradeChange.startsWith('+') || totalGradeChange.startsWith('-')) {
+      coef = totalGradeChange.startsWith('+') ? 1 : -1
+      value = parseInt(totalGradeChange.slice(1), 10)
+      if (isNaN(value) || value === 0) {
+        this.correctedGrade = this.currentExercise.grade ?? 0
+      } else {
+        const base = this.currentExercise.grade ?? 0
+        this.correctedGrade = base + coef * value
+      }
+    } else {
+      value = parseInt(totalGradeChange, 10)
+      if (!isNaN(value)) {
+        this.correctedGrade = value
+      }
+    }
+
+    this.changeDetectorRef.markForCheck()
+  }
+
   @HostListener('window:keydown', ['$event'])
   protected async handleKeyDown(event: KeyboardEvent): Promise<void> {
+    const active = document.activeElement
+    // On ignore si le focus est sur un input, textarea ou contenteditable
+    if (
+      active &&
+      (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || (active as HTMLElement).isContentEditable)
+    ) {
+      return
+    }
+
     switch (event.key) {
       case 'ArrowLeft':
+        await this.onSaveGrade()
         await this.onChoosePreviousUserExercise()
         this.animationState = 'left'
         setTimeout(() => {
@@ -296,6 +376,7 @@ export class PlayerCorrectionComponent implements OnInit {
         }, 400)
         break
       case 'ArrowRight':
+        await this.onSaveGrade()
         await this.onChooseNextUserExercise()
         this.animationState = 'right'
         setTimeout(() => {
@@ -305,34 +386,20 @@ export class PlayerCorrectionComponent implements OnInit {
       case 'ArrowUp':
         event.preventDefault()
         this.onChooseGroup(
-          this.listExerciseGroup[this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) - 1]
+          this.listExerciseGroup[Math.max(0, this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) - 1)]
         )
         break
       case 'ArrowDown':
         event.preventDefault()
         this.onChooseGroup(
-          this.listExerciseGroup[this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) + 1]
+          this.listExerciseGroup[
+            Math.min(
+              this.listExerciseGroup.length,
+              this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) + 1
+            )
+          ]
         )
         break
-    }
-
-    const gradeMap: { [key: string]: number } = {
-      IntlBackslash: 0,
-      Digit1: 10,
-      Digit2: 20,
-      Digit3: 30,
-      Digit4: 40,
-      Digit5: 50,
-      Digit6: 60,
-      Digit7: 70,
-      Digit8: 80,
-      Digit9: 90,
-      Digit0: 100,
-    }
-
-    if (event.code in gradeMap) {
-      this.correctedGrade = gradeMap[event.code]
-      await this.onSaveGrade()
     }
   }
 
@@ -352,10 +419,14 @@ export class PlayerCorrectionComponent implements OnInit {
           })
         )
         this.currentExercise.correctedGrade = this.correctedGrade
+        console.error('currentExercise', this.currentExercise)
+        this.exerciseCorrected.add(this.currentExercise.exerciseSessionId)
+
         // this.buildGroups()
         // this.onChooseTab(this.selectedTabIndex)
-        await this.onChooseNextUserExercise()
-        this.dialogService.success('La note a été sauvegardée avec succès.')
+
+        // await this.onChooseNextUserExercise()
+        // this.dialogService.success('La note a été sauvegardée avec succès.')
       } catch {
         this.dialogService.error('Une erreur est survenue lors de la sauvegarde de la note.')
       }
@@ -364,5 +435,14 @@ export class PlayerCorrectionComponent implements OnInit {
 
   protected trackByExerciseId(_: number, group: ExerciseGroup): string {
     return group.exerciseId
+  }
+
+  protected get currentActivityId(): string | undefined {
+    for (const [activityId, { map }] of this.activityExercisesMap.entries()) {
+      if (map.has(this.currentGroup?.exerciseId ?? '')) {
+        return activityId
+      }
+    }
+    return undefined
   }
 }

@@ -1,0 +1,11 @@
+.previous-comments-button {
+  display: flex;
+  justify-content: center;
+
+  .previous-comments-trigger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}

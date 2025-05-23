@@ -11,4 +11,7 @@ export class LabelEntity extends BaseEntity {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   color?: string
+
+  @Column({ type: 'varchar', length: 4, default: '-0' })
+  gradeChange!: string
 }
