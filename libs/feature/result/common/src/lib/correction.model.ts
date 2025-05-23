@@ -106,6 +106,7 @@ export interface Label {
   name: string
   description?: string
   color?: string
+  gradeChange?: string
 }
 
 export interface CreateLabel {

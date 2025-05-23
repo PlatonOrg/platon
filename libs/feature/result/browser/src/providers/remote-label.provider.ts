@@ -10,16 +10,16 @@ export class RemoteLabelProvider extends LabelProvider {
   constructor(private readonly http: HttpClient) {
     super()
   }
-  listLabels(courseId: string): Observable<Label[]> {
-    return this.http.get<ListResponse<Label>>(`/api/v1/results/labels/list/${courseId}`).pipe(
+  listLabels(activityId: string): Observable<Label[]> {
+    return this.http.get<ListResponse<Label>>(`/api/v1/results/labels/list/${activityId}`).pipe(
       map((response: ListResponse<Label>) => {
         return response.resources
       })
     )
   }
 
-  createLabel(courseId: string, input: CreateLabel): Observable<Label[]> {
-    return this.http.post<ListResponse<Label>>(`/api/v1/results/labels/create/${courseId}`, input).pipe(
+  createLabel(activityId: string, input: CreateLabel): Observable<Label[]> {
+    return this.http.post<ListResponse<Label>>(`/api/v1/results/labels/create/${activityId}`, input).pipe(
       map((response: ListResponse<Label>) => {
         return response.resources
       })
@@ -67,6 +67,18 @@ export class RemoteLabelProvider extends LabelProvider {
     return this.http.post<ListResponse<Label>>(`/api/v1/results/labels/unfav/${labelId}`, {}).pipe(
       map((response: ListResponse<Label>) => {
         return response.resources
+      })
+    )
+  }
+
+  deleteLabel(labelId: string): Observable<Label[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  updateLabel(label: Partial<Label>): Observable<Label> {
+    return this.http.patch<void>(`/api/v1/results/labels/update`, label).pipe(
+      map(() => {
+        return label as Label
       })
     )
   }

@@ -54,13 +54,35 @@
         </button>
       </div>
     </mat-toolbar>
-    <main>
-      <nz-row>
-        <nz-col nzSpan="17">
+    <main style="padding: 0.5rem">
+      <nz-row style="height: 95vh">
+        <nz-col nzSpan="17" class="left-col-wrapper">
           <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" />
         </nz-col>
-        <nz-col nzSpan="6" class="mid-col-wrapper">
-          <div class="grade-wrapper">
+        <nz-col nzSpan="7" class="mid-col-wrapper">
+          <mat-card #GradeCard>
+            <mat-card-content style="display: flex; flex-direction: column; align-items: center">
+              <nz-progress
+                [nzPercent]="(exerciseCorrected.size / exercises.length) * 100"
+                [nzShowInfo]="exerciseCorrected.size === exercises.length"
+                [nzStrokeColor]="{ '0%': '#ff008c', '100%': '#ff6f00' }"
+                nzStatus="active"
+                style="width: 100%"
+              ></nz-progress>
+              <span style="font-size: 0.7rem"
+                >{{ exerciseCorrected.size }} évalué{{ exerciseCorrected.size > 1 ? 's' : '' }} sur
+                {{ exercises.length }}</span
+              >
+
+              <nz-divider nzPlain nzText="Note attribuée" class="divider"></nz-divider>
+
+              <div>
+                <h1 style="margin: 0">{{ correctedGrade }} / 100</h1>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- <div class="grade-wrapper">
             <ui-statistic-card
               matIcon="check_circle"
               ribbonColor="#8e44ad"
@@ -71,14 +93,18 @@
               (valueChanged)="onSaveGrade()"
             />
           </div>
+          -->
 
           <correction-label
             [answers]="answers"
             [currentExercise]="currentExercise"
-            [courseId]="courseCorrection.courseId"
+            [activityId]="currentActivityId"
+            (totalGradeChange)="onTotalGradeChange($event)"
           />
+
+          <player-comments *ngIf="answers.length > 0" [canComment]="true" [answers]="answers" />
         </nz-col>
-        <nz-col nzSpan="1">
+        <!-- <nz-col nzSpan="1">
           <nz-button-group nzSize="small" class="button-wrapper">
             <button
               nz-button
@@ -89,14 +115,7 @@
               {{ i }}
             </button>
           </nz-button-group>
-        </nz-col>
-      </nz-row>
-      <nz-row>
-        <nz-col nzSpan="17">
-          <h3>Commentaire</h3>
-          <player-comments *ngIf="answers.length > 0" [canComment]="true" [answers]="answers" />
-        </nz-col>
-        <nz-col nzSpan="7"> </nz-col>
+        </nz-col> -->
       </nz-row>
     </main>
     <!--

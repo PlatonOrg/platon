@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core'
+import { ActivatedRoute } from '@angular/router'
 
 import { MatIconModule } from '@angular/material/icon'
 
@@ -36,11 +37,22 @@ import { AnswerStatePipesModule } from '../../pipes'
     UiStatisticCardComponent,
   ],
 })
-export class ResultByMembersComponent {
+export class ResultByMembersComponent implements OnInit {
   @Input({ required: true }) results: UserResults[] = []
   @Input() columnOrder?: string[] = []
 
   protected answerStates = Object.values(AnswerStates)
+  private activityId: string | null = null
+  private courseId: string | null = null
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      this.courseId = params.get('courseId')
+      this.activityId = params.get('activityId')
+    })
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trackByColumnOrder = (a: any, b: any): number => {
@@ -50,5 +62,11 @@ export class ResultByMembersComponent {
       return 0
     }
     return indexA - indexB
+  }
+
+  protected openSession(sessionId: string | undefined): void {
+    if (sessionId) {
+      window.open(`/player/correction/${this.courseId}?activityId=${this.activityId}&sessionId=${sessionId}`)
+    }
   }
 }

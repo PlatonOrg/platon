@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Req } from '@nestjs/common'
+import { Controller, Get, Patch, Post, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ListResponse, UserRoles } from '@platon/core/common'
+import { ErrorResponse, ListResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles } from '@platon/core/server'
 import { CorrectionLabel, CreateLabel } from '@platon/feature/result/common'
 import { LabelService } from './label.service'
@@ -61,25 +61,24 @@ export class LabelController {
   }
 
   @Roles(UserRoles.admin, UserRoles.teacher)
-  @Get('list/:courseId')
+  @Get('list/:activityId')
   async list(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const courseId = req.params.courseId
-    const labels = Mapper.mapAll(await this.labelService.list(courseId, req.user.id), LabelDTO)
+    const activityId = req.params.activityId
+    const labels = Mapper.mapAll(await this.labelService.list(activityId, req.user.id), LabelDTO)
     return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
   }
 
   @Roles(UserRoles.admin, UserRoles.teacher)
-  @Post('create/:courseId')
+  @Post('create/:activityId')
   async create(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
+    const userId = req.user.id
+    const activityId = req.params.activityId
     const createdLabel = {
       name: req.body.name,
       color: req.body.color,
       description: req.body.description,
     } as CreateLabel
-    const labels = Mapper.mapAll(
-      await this.labelService.saveAndList(createdLabel, req.params.courseId, req.user.id),
-      LabelDTO
-    )
+    const labels = Mapper.mapAll(await this.labelService.saveAndList(createdLabel, activityId, userId), LabelDTO)
     return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
   }
 
@@ -96,5 +95,33 @@ export class LabelController {
       })
     )
     return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
+  }
+
+  @Roles(UserRoles.admin, UserRoles.teacher)
+  @Patch('update')
+  async updateLabel(@Req() req: IRequest): Promise<LabelDTO> {
+    const optionalLabel = await this.labelService.findById(req.body.id)
+
+    if (!optionalLabel.isPresent()) {
+      throw new ErrorResponse({
+        message: 'Label not found',
+        status: 404,
+      })
+    }
+
+    const label = optionalLabel.get()
+    label.name = req.body.name
+    label.description = req.body.description
+    label.color = req.body.color
+    label.gradeChange = req.body.gradeChange
+
+    try {
+      return await this.labelService.update(label.id, label)
+    } catch (error) {
+      throw new ErrorResponse({
+        message: 'Error while updating label',
+        status: 500,
+      })
+    }
   }
 }
