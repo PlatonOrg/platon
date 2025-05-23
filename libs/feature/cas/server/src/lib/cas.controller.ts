@@ -24,6 +24,7 @@ import { Optional } from 'typescript-optional'
 import { LTIService } from '@platon/feature/lti/server'
 import { AxiosService } from './axios.service'
 import { ApiBearerAuth } from '@nestjs/swagger'
+import { URL } from 'url'
 
 @Controller('cas')
 export class CasController {
@@ -85,7 +86,10 @@ export class CasController {
     @Query() query: { ticket: string; next?: string },
     @Req() request: Request
   ): Promise<HttpRedirectResponse> {
-    const service = `https://${request.get('Host')}${request.originalUrl.split('?')[0]}`
+    const service = new URL(`https://${request.get('host')}${request.baseUrl}${request.path}`)
+    if (query.next) {
+      service.searchParams.set('next', query.next)
+    }
 
     if (!query.ticket) {
       return {
@@ -100,7 +104,7 @@ export class CasController {
         () => new NotFoundResponse(`Cas not found: ${casname}`)
       )
 
-      const username = await this.checkCasTicket(casEntity.serviceValidateURL, query.ticket, service)
+      const username = await this.checkCasTicket(casEntity.serviceValidateURL, query.ticket, service.toString())
       if (username.isEmpty()) {
         return {
           url: `/login/no-account`,
