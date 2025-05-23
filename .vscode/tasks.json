@@ -1,0 +1,63 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run the whole Project",
+      "dependsOn": [
+        "Run Docker",
+        "Run Backend",
+        "Run Frontend"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "revealProblems": "never",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Run Docker",
+      "type": "shell",
+      "command": "./up.sh",
+      "options": {
+        "cwd": "./bin/docker"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Run Backend",
+      "type": "shell",
+      "hide": false,
+      "command": "bash",
+      "args": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use && yarn serve:api"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Run Frontend",
+      "type": "shell",
+      "hide": false,
+      "command": "bash",
+      "args": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use && yarn serve:web"
+      ],
+      "options": {
+        "env": {
+          "NODE_OPTIONS": "--max_old_space_size=8096"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}
