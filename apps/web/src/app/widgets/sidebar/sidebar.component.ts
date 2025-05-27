@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
-import { RouterModule } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { User, UserRoles, isTeacherRole } from '@platon/core/common'
+import { SidebarTutorialService } from 'tuto'
 
 type NavLink = {
   url?: string | null
@@ -29,7 +30,12 @@ export class SidebarComponent implements OnInit {
 
   protected user?: User
 
-  constructor(private readonly authService: AuthService, private readonly changeDetectorRef: ChangeDetectorRef) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly sidebarTutorialService: SidebarTutorialService,
+    private readonly router: Router
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.user = await this.authService.ready()
@@ -96,7 +102,7 @@ export class SidebarComponent implements OnInit {
           ]
         : [])
     )
-
+    this.checkFirstVisit()
     this.changeDetectorRef.markForCheck()
   }
 
@@ -108,6 +114,46 @@ export class SidebarComponent implements OnInit {
       this.expandedLinks.delete(link.title)
     } else {
       this.expandedLinks.add(link.title)
+    }
+  }
+
+  // Pour le tutoriel
+  protected isFirstVisit = true
+
+  /**
+   * Vérifie si c'est la première visite de l'utilisateur
+   */
+  private checkFirstVisit(): void {
+    // Si c'est la première visite, démarrer le tutoriel automatiquement après un délai
+    if (this.isFirstVisit && this.user) {
+      setTimeout(() => {
+        this.startSidebarTutorial()
+      }, 1500) // Délai de 1.5 secondes pour permettre à la page de se charger
+    }
+  }
+
+  /**
+   * Démarre le tutoriel complet de la sidebar
+   */
+  startSidebarTutorial(): void {
+    if (!this.user) return
+
+    this.sidebarTutorialService.startSidebarTutorial(this.user, this.topLinks, this.bottomLinks, (route: string) =>
+      this.router.navigate([route])
+    )
+
+    // Marquer le tutoriel comme vu
+    localStorage.setItem(`platon-sidebar-tutorial-${this.user.id}`, 'true')
+  }
+
+  /**
+   * Réinitialise le tutoriel (pour les tests ou si l'utilisateur veut le revoir)
+   */
+  resetTutorial(): void {
+    if (this.user) {
+      localStorage.removeItem(`platon-sidebar-tutorial-${this.user.id}`)
+      this.isFirstVisit = true
+      this.startSidebarTutorial()
     }
   }
 }

@@ -1,7 +1,14 @@
 <header>
-  <button id="tuto-toolbar-menu-button" nz-button nzType="text" (click)="drawerOpenedChange.emit(!drawerOpened)">
+  <button
+    id="tuto-toolbar-menu-button"
+    nz-button
+    nzType="text"
+    (click)="drawerOpenedChange.emit(!drawerOpened)"
+    title="Ouvrir/Fermer le menu de navigation"
+  >
     <mat-icon class="icon-color">menu</mat-icon>
   </button>
+
   <img
     *ngIf="!drawerOpened"
     id="tuto-toolbar-logo"
@@ -9,19 +16,38 @@
     src="assets/images/logo/platon.svg"
     alt="Logo PLaTon"
     [routerLink]="'/dashboard'"
+    title="Retour au tableau de bord"
   />
+
   <span class="icon-color" *ngIf="!mobile">PLaTon</span>
   <div class="spacer"></div>
 
+  <!-- Bouton d'aide pour relancer le tutoriel -->
+  <button
+    id="tuto-help-button"
+    nz-button
+    nzType="text"
+    nzSize="large"
+    (click)="startToolbarTutorial()"
+    title="Relancer le tutoriel"
+  >
+    <mat-icon class="icon-color">help_outline</mat-icon>
+    <!-- <nz-icon nzType="question-circle" nzTheme="outline" /> -->
+    <!-- <span nz-icon nzType="question-circle" nzTheme="outline" nzSize="35px" style="color: #3c2864"></span> -->
+  </button>
+
+  <!-- Menu de création -->
   <ng-container *ngIf="canCreate">
-    <div class="menu-trigger-container">
+    <div class="menu-trigger-container" id="tuto-create-menu-container">
       <button
+        id="tuto-create-button"
         nz-button
         nzType="primary"
         nzShape="round"
         nzSize="small"
         (click)="userCharterAccepted ? null : acceptUserCharter()"
         [matMenuTriggerFor]="userCharterAccepted ? actionMenu : null"
+        title="Créer une nouvelle ressource"
       >
         <span nz-icon nzType="plus"></span>
       </button>
@@ -29,31 +55,65 @@
     </div>
   </ng-container>
 
-  <!-- *ngIf="!loggedToDiscord" -->
-  <button *ngIf="false" nz-button nzType="text" nzSize="small" (click)="openDiscordModal()" class="discord-button">
+  <!-- Bouton Discord (désactivé) -->
+  <button
+    *ngIf="false"
+    id="tuto-discord-button"
+    nz-button
+    nzType="text"
+    nzSize="small"
+    (click)="openDiscordModal()"
+    class="discord-button"
+  >
     <discord-button class="discord-button" />
   </button>
 
-  <button id="tuto-toolbar-theme-button" nz-button nzType="text" nzSize="small" [matMenuTriggerFor]="themeMenu">
-    <mat-icon class="icon-color"> {{ themeIcon }} </mat-icon>
+  <!-- Sélecteur de thème -->
+  <button
+    id="tuto-toolbar-theme-button"
+    nz-button
+    nzType="text"
+    nzSize="small"
+    [matMenuTriggerFor]="themeMenu"
+    title="Changer le thème"
+    (mouseenter)="setDataTourActive($event, 'data-tour-active', 'theme')"
+  >
+    <mat-icon class="icon-color">{{ themeIcon }}</mat-icon>
   </button>
-  <button id="tuto-toolbar-notifications-button" nz-button nzType="text" nzSize="small" (click)="notifDrawer.open()">
+
+  <!-- Notifications -->
+  <button
+    id="tuto-toolbar-notifications-button"
+    nz-button
+    nzType="text"
+    nzSize="small"
+    (click)="notifDrawer.open()"
+    title="Voir les notifications"
+    (mouseenter)="setDataTourActive($event, 'data-tour-active', 'notifications')"
+  >
     <nz-badge [nzCount]="(notifDrawer.count | async) || 0" [nzOffset]="[0, -4]">
-      <mat-icon class="icon-color"> notifications </mat-icon>
+      <mat-icon class="icon-color">notifications</mat-icon>
     </nz-badge>
   </button>
+
+  <!-- Avatar utilisateur -->
   <user-avatar
     *ngIf="user"
+    id="tuto-user-avatar"
     [user]="user"
     [size]="32"
     [showUsername]="mobile ? 'none' : 'stacked'"
     [attr.aria-label]="user.firstName"
     [matMenuTriggerFor]="avatarMenu"
+    title="Menu utilisateur"
+    style="cursor: pointer"
+    (mouseenter)="setDataTourActive($event, 'data-tour-active', 'profile')"
   />
 </header>
 
-<mat-menu #actionMenu="matMenu">
-  <button mat-menu-item [routerLink]="['/courses/create']">
+<!-- Menu de création de ressources -->
+<mat-menu #actionMenu="matMenu" id="tuto-action-menu">
+  <button mat-menu-item [routerLink]="['/courses/create']" id="tuto-create-course" *ngIf="canCreateCourse">
     <mat-icon>local_library</mat-icon>
     <span>Créer un cours</span>
   </button>
@@ -62,6 +122,7 @@
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'CIRCLE', parent: createResourceParentParam }"
+    id="tuto-create-circle"
   >
     <mat-icon>{{ 'CIRCLE' | resourceIcon }}</mat-icon>
     <span>Créer un cercle</span>
@@ -71,6 +132,7 @@
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'ACTIVITY', parent: createResourceParentParam }"
+    id="tuto-create-activity"
   >
     <mat-icon>{{ 'ACTIVITY' | resourceIcon }}</mat-icon>
     <span>Créer une activité</span>
@@ -80,28 +142,48 @@
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'EXERCISE', parent: createResourceParentParam }"
+    id="tuto-create-exercise"
   >
     <mat-icon>{{ 'EXERCISE' | resourceIcon }}</mat-icon>
     <span>Créer un exercice</span>
   </button>
+
+  <!-- Séparateur et option tutoriel -->
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="startResourceTutorial()" id="tuto-help-resources">
+    <mat-icon>school</mat-icon>
+    <span>Aide - Comment créer une ressource ?</span>
+  </button>
 </mat-menu>
 
-<mat-menu class="icon-color" #avatarMenu="matMenu">
-  <button mat-menu-item [routerLink]="'/account'">
+<!-- Menu utilisateur -->
+<mat-menu class="icon-color" #avatarMenu="matMenu" id="tuto-avatar-menu">
+  <button mat-menu-item [routerLink]="'/account'" id="tuto-account">
     <mat-icon>account_circle</mat-icon>
     <span>Mon compte</span>
   </button>
-  <button *ngIf="canCreate" mat-menu-item [routerLink]="'/resources/' + personalCircleId">
+  <button *ngIf="canCreate" mat-menu-item [routerLink]="'/resources/' + personalCircleId" id="tuto-personal-circle">
     <mat-icon>group_work</mat-icon>
     <span>Mon cercle</span>
   </button>
-  <button mat-menu-item (click)="signOut()">
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="startQuickTour('profile')" id="tuto-help-profile">
+    <mat-icon>help</mat-icon>
+    <span>Aide - Mon profil</span>
+  </button>
+  <button mat-menu-item (click)="resetTutorial(); startToolbarTutorial()" id="tuto-restart">
+    <mat-icon>refresh</mat-icon>
+    <span>Refaire le tutoriel</span>
+  </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="signOut()" id="tuto-logout">
     <mat-icon>logout</mat-icon>
     <span>Déconnexion</span>
   </button>
 </mat-menu>
 
-<mat-menu #notifMenu="matMenu">
+<!-- Menu des notifications (pour référence future) -->
+<mat-menu #notifMenu="matMenu" id="tuto-notif-menu">
   <button mat-menu-item>
     <mat-icon>account_circle</mat-icon>
     <span>Compte</span>
@@ -112,21 +194,28 @@
   </button>
 </mat-menu>
 
-<mat-menu #themeMenu="matMenu">
-  <button mat-menu-item (click)="lightTheme()">
+<!-- Menu des thèmes -->
+<mat-menu #themeMenu="matMenu" id="tuto-theme-menu">
+  <button mat-menu-item (click)="lightTheme()" id="tuto-light-theme">
     <mat-icon>light_mode</mat-icon>
     <span>Thème clair</span>
   </button>
-  <button mat-menu-item (click)="darkTheme()">
+  <button mat-menu-item (click)="darkTheme()" id="tuto-dark-theme">
     <mat-icon>dark_mode</mat-icon>
     <span>Thème sombre</span>
   </button>
-  <button mat-menu-item (click)="systemTheme()">
+  <button mat-menu-item (click)="systemTheme()" id="tuto-system-theme">
     <mat-icon>auto_awesome</mat-icon>
     <span>Thème système</span>
   </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="startQuickTour('theme')" id="tuto-help-theme">
+    <mat-icon>help</mat-icon>
+    <span>Aide - Thèmes</span>
+  </button>
 </mat-menu>
 
+<!-- Modal Discord -->
 <div #discordModal>
   <ui-modal-template [title]="'Discord'" #modal>
     <ng-template>
@@ -138,12 +227,89 @@
   </ui-modal-template>
 </div>
 
-<notif-drawer #notifDrawer />
+<!-- Drawer des notifications -->
+<notif-drawer #notifDrawer id="tuto-notif-drawer" />
 
+<!-- Composant de charte utilisateur -->
 <app-user-charter
   [user]="user"
   [userCharter]="userCharter"
   [userCharterModalVisible]="userCharterModalVisible"
   (userCharterModalVisibleChange)="userCharterModalVisible = $event"
   (userCharterAccepted)="onUserCharterAccepted($event)"
-></app-user-charter>
+  id="tuto-user-charter"
+>
+</app-user-charter>
+
+<style>
+  @keyframes welcomeBounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-5px);
+    }
+    60% {
+      transform: translateY(-3px);
+    }
+  }
+
+  /* Styles pour les éléments en surbrillance pendant le tutoriel */
+  [data-tour-active] {
+    transition: all 0.3s ease;
+  }
+
+  [data-tour-active]:hover {
+    background-color: rgba(24, 144, 255, 0.1) !important;
+    border-radius: 4px;
+  }
+
+  /* Style pour le bouton d'aide */
+  #tuto-help-button {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+
+  #tuto-help-button:hover {
+    opacity: 1;
+  }
+
+  /* Amélioration visuelle pour les menus */
+  .mat-menu-panel {
+    max-width: 280px !important;
+  }
+
+  .mat-menu-item {
+    line-height: 48px !important;
+    height: 48px !important;
+  }
+
+  .mat-menu-item .mat-icon {
+    margin-right: 16px;
+    color: var(--brand-text-secondary, #666);
+  }
+
+  .mat-divider {
+    margin: 8px 0 !important;
+  }
+
+  /* Style spécial pour les options d'aide */
+  #tuto-help-resources,
+  #tuto-help-profile,
+  #tuto-help-theme,
+  #tuto-restart {
+    color: var(--brand-primary, #1890ff) !important;
+    font-weight: 500;
+  }
+
+  #tuto-help-resources .mat-icon,
+  #tuto-help-profile .mat-icon,
+  #tuto-help-theme .mat-icon,
+  #tuto-restart .mat-icon {
+    color: var(--brand-primary, #1890ff) !important;
+  }
+</style>

@@ -1,74 +1,516 @@
 @import 'shepherd.js/dist/css/shepherd.css';
 
-/*.shepherd-element {
-  z-index: 9999 !important;
-}*/
 
-// Dans votre fichier de styles global (styles.scss)
-.shepherd-element {
-  z-index: 9999 !important;
 
-  // Appliquer les styles des cartes NG-Zorro
-  @extend .ant-card !optional;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+/* Styles spécifiques au tutoriel du toolbar */
 
-  .shepherd-header {
-    // Style d'en-tête similaire à NG-Zorro
-    padding: 16px 24px;
-    border-bottom: 1px solid #f0f0f0;
+/* Indicateur de bienvenue pour nouveaux utilisateurs */
+#tuto-welcome-indicator {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: linear-gradient(45deg, #1890ff, #52c41a);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  animation: welcomeBounce 2s ease-in-out infinite;
+  cursor: pointer;
+  user-select: none;
+}
 
-    .shepherd-title {
-      @extend .ant-typography !optional;
-      @extend .ant-typography-title !optional;
-      margin: 0;
-    }
-
-    .shepherd-cancel-icon {
-      @extend .ant-btn !optional;
-      @extend .ant-btn-text !optional;
-      @extend .ant-btn-sm !optional;
-      padding: 0;
-      line-height: 1;
-    }
+@keyframes welcomeBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
   }
-
-  .shepherd-text {
-    padding: 16px 24px;
-
-    p {
-      @extend .ant-typography !optional;
-      margin-bottom: 8px;
-    }
+  40% {
+    transform: translateY(-5px);
   }
+  60% {
+    transform: translateY(-3px);
+  }
+}
 
-  .shepherd-footer {
+/* Bouton d'aide dans la toolbar */
+#tuto-help-button {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+#tuto-help-button:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Styles pour les éléments en surbrillance pendant le tutoriel */
+[data-tour-active] {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+[data-tour-active]:hover {
+  background-color: rgba(24, 144, 255, 0.1) !important;
+  border-radius: 4px;
+}
+
+/* Amélioration des menus */
+.mat-menu-panel {
+  max-width: 300px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mat-menu-item {
+  line-height: 48px !important;
+  height: 48px !important;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.mat-menu-item:hover {
+  background-color: rgba(24, 144, 255, 0.06) !important;
+}
+
+.mat-menu-item .mat-icon {
+  margin-right: 16px;
+  color: var(--brand-text-secondary, #666);
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.mat-divider {
+  margin: 8px 0 !important;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Styles spéciaux pour les options d'aide */
+#tuto-help-resources,
+#tuto-help-profile,
+#tuto-help-theme,
+#tuto-restart {
+  color: var(--brand-primary, #1890ff) !important;
+  font-weight: 500;
+}
+
+#tuto-help-resources .mat-icon,
+#tuto-help-profile .mat-icon,
+#tuto-help-theme .mat-icon,
+#tuto-restart .mat-icon {
+  color: var(--brand-primary, #1890ff) !important;
+}
+
+/* Animation pour le bouton de création */
+#tuto-create-button {
+  transition: all 0.3s ease;
+}
+
+#tuto-create-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+/* Style pour le container de sélection de ressources dans Shepherd */
+.resource-selection-container {
+  margin: 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.resource-option {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin: 8px 0;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.resource-option:hover {
+  border-color: #1890ff !important;
+  background-color: #f6fdff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+
+.resource-option.selected {
+  border-color: #1890ff !important;
+  background-color: #e6f7ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.resource-option .resource-icon {
+  width: 40px;
+  height: 40px;
+  background: #f0f2f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 18px;
+  transition: background-color 0.2s ease;
+}
+
+.resource-option:hover .resource-icon,
+.resource-option.selected .resource-icon {
+  background: rgba(24, 144, 255, 0.1);
+}
+
+.resource-option .resource-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.resource-option .resource-description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Améliorations pour les notifications */
+#tuto-toolbar-notifications-button .ant-badge {
+  transition: transform 0.2s ease;
+}
+
+#tuto-toolbar-notifications-button:hover .ant-badge {
+  transform: scale(1.05);
+}
+
+/* Style pour l'avatar utilisateur */
+#tuto-user-avatar {
+  transition: transform 0.2s ease;
+}
+
+#tuto-user-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive design pour le tutoriel */
+@media (max-width: 768px) {
+  #tuto-welcome-indicator {
+    right: 10px;
+    top: 70px;
+    font-size: 12px;
     padding: 10px 16px;
-    border-top: 1px solid #f0f0f0;
+  }
+
+  .resource-selection-container {
+    margin: 15px 0;
+  }
+
+  .resource-option {
+    padding: 10px;
+    margin: 6px 0;
+  }
+
+  .resource-option .resource-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    margin-right: 10px;
+  }
+
+  .resource-option .resource-name {
+    font-size: 14px;
+  }
+
+  .resource-option .resource-description {
+    font-size: 12px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .resource-option {
+    border-color: #374151;
+    background-color: #1f2937;
+  }
+
+  .resource-option:hover {
+    background-color: #374151 !important;
+    border-color: #60a5fa !important;
+  }
+
+  .resource-option.selected {
+    background-color: #1e3a8a !important;
+    border-color: #60a5fa !important;
+  }
+
+  .resource-option .resource-name {
+    color: #f9fafb;
+  }
+
+  .resource-option .resource-description {
+    color: #d1d5db;
+  }
+
+  .resource-option .resource-icon {
+    background: #374151;
+  }
+
+  .resource-option:hover .resource-icon,
+  .resource-option.selected .resource-icon {
+    background: rgba(96, 165, 250, 0.2);
+  }
+}
+
+/* Animation pour la première visite */
+.first-visit-highlight {
+  animation: firstVisitPulse 3s ease-in-out;
+}
+
+@keyframes firstVisitPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(24, 144, 255, 0);
+  }
+}
+
+:host {
+  display: block;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.doc {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  margin: 1rem 0 4rem 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.cisstech {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+nav {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: center;
+}
+
+a {
+  height: 32px;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.nav-link {
+  height: 64px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  &.active {
+    border-right: 4px solid white;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  &.nav-link--child {
+    padding-left: 1rem;
+  }
+
+  &.nav-link--powered-by {
+    justify-content: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .nav-link-icon {
+    display: block;
+    margin: 0 1rem;
+  }
+
+  .nav-link-toggle {
+    margin: 0 1rem;
+    transition: transform 0.2s ease;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+// Styles spécifiques au tutoriel
+#tuto-sidebar-help-button {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .nav-link-icon {
+    color: #1890ff;
+  }
+}
+
+// Animation pour les éléments en surbrillance pendant le tutoriel
+[id^="tuto-sidebar-"] {
+  transition: all 0.3s ease;
+
+  &[data-tour-active] {
+    background-color: rgba(24, 144, 255, 0.15) !important;
+    box-shadow: inset 0 0 0 2px rgba(24, 144, 255, 0.3);
+  }
+}
+
+// Style pour la première visite
+.first-visit-indicator {
+  position: absolute;
+  top: 20px;
+  right: -10px;
+  width: 8px;
+  height: 8px;
+  background: #ff4d4f;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 77, 79, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
+  }
+}
+
+// Styles pour le conteneur de sélection de navigation
+.navigation-selection-container {
+  margin: 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.navigation-option {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin: 8px 0;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  background: white;
+
+  &:hover {
+    border-color: #1890ff !important;
+    background-color: #f6fdff !important;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+  }
+
+  &.selected {
+    border-color: #1890ff !important;
+    background-color: #e6f7ff !important;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+
+  .navigation-icon {
+    width: 40px;
+    height: 40px;
+    background: #f0f2f5;
+    border-radius: 50%;
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    transition: background-color 0.2s ease;
+  }
 
-    .shepherd-button {
-      @extend .ant-btn !optional;
-      margin-left: 8px;
+  &:hover .navigation-icon,
+  &.selected .navigation-icon {
+    background: rgba(24, 144, 255, 0.1);
+  }
+}
 
-      &.primary {
-        @extend .ant-btn-primary !optional;
-      }
+// Responsive design
+@media (max-width: 768px) {
+  .logo {
+    width: 48px;
+    height: 48px;
+    margin: 0.5rem 0 2rem 0;
+  }
 
-      &.secondary {
-        @extend .ant-btn-default !optional;
-      }
+  .nav-link {
+    height: 56px;
+    font-size: 14px;
+  }
+
+  .navigation-option {
+    padding: 10px;
+    margin: 6px 0;
+    font-size: 14px;
+  }
+}
+
+// Dark mode support (si nécessaire)
+@media (prefers-color-scheme: dark) {
+  .navigation-option {
+    border-color: #374151;
+    background-color: #1f2937;
+    color: white;
+
+    &:hover {
+      background-color: #374151 !important;
+      border-color: #60a5fa !important;
+    }
+
+    &.selected {
+      background-color: #1e3a8a !important;
+      border-color: #60a5fa !important;
     }
   }
 }
 
-// Dans votre fichier de styles global
-.shepherd-modal-overlay-container {
-  opacity: 0.5;
-  background-color: rgba(0, 0, 0, 0.45); // Même couleur que les modals NG-Zorro
-  pointer-events: auto;
-}
+
+
+/// Fin des nouvelles modifications
 
 mat-drawer-container {
   width: 100vw;

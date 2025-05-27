@@ -34,6 +34,9 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
+// Import du service de tutoriel
+import { ToolbarTutorialService } from 'tuto' // à avec avec @platon/feature/tuto/browser
+import { MatDividerModule } from '@angular/material/divider'
 
 @Component({
   standalone: true,
@@ -47,6 +50,7 @@ import { UiModalTemplateComponent } from '@platon/shared/ui'
 
     MatIconModule,
     MatMenuModule,
+    MatDividerModule,
     MatButtonModule,
 
     NzIconModule,
@@ -79,6 +83,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly breakpointObserver = inject(BreakpointObserver)
   private readonly elementRef = inject(ElementRef)
+  private readonly toolbarTutorialService = inject(ToolbarTutorialService)
 
   private readonly subscriptions: Subscription[] = []
 
@@ -144,6 +149,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.userCharter = await firstValueFrom(this.userService.findUserCharterById(this.user.id))
       this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
     }
+
+    // Vérifier si c'est la première visite pour déclencher le tutoriel
+    this.checkFirstVisit()
 
     this.subscriptions.push(
       this.breakpointObserver
@@ -237,5 +245,65 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         buttonElement.click()
       }
     })
+  }
+
+  // Debut tuto
+  protected isFirstVisit = true
+  /**
+   * Vérifie si c'est la première visite de l'utilisateur
+   */
+  private checkFirstVisit(): void {
+    //const hasSeenTutorial = localStorage.getItem(`platon-toolbar-tutorial-${this.user?.id}`)
+    //this.isFirstVisit = !hasSeenTutorial
+
+    // Si c'est la première visite, démarrer le tutoriel automatiquement après un délai
+    if (this.isFirstVisit && this.user) {
+      setTimeout(() => {
+        this.startToolbarTutorial()
+      }, 1000) // Délai de 1 seconde pour permettre à la page de se charger
+    }
+  }
+
+  /**
+   * Démarre le tutoriel complet du toolbar
+   */
+  startToolbarTutorial(): void {
+    if (!this.user) return
+
+    this.toolbarTutorialService.startToolbarTutorial(this.user, this.personalCircleId, this.createResourceParentParam)
+
+    // Marquer le tutoriel comme vu
+    //localStorage.setItem(`platon-toolbar-tutorial-${this.user.id}`, 'true')
+  }
+
+  /**
+   * Démarre le tutoriel de création de ressource
+   */
+  startResourceTutorial(): void {
+    if (!this.user) return
+
+    this.toolbarTutorialService.startResourceCreationTutorial(this.user, this.createResourceParentParam)
+  }
+
+  /**
+   * Démarre un tutoriel rapide pour une fonctionnalité spécifique
+   */
+  startQuickTour(feature: 'notifications' | 'theme' | 'menu' | 'profile'): void {
+    this.toolbarTutorialService.startQuickTour(feature)
+  }
+
+  /**
+   * Réinitialise le tutoriel (pour les tests ou si l'utilisateur veut le revoir)
+   */
+  resetTutorial(): void {
+    if (this.user) {
+      //localStorage.removeItem(`platon-toolbar-tutorial-${this.user.id}`)
+      this.isFirstVisit = true
+    }
+  }
+
+  setDataTourActive(event: MouseEvent, qualifiedName: string, value: string): void {
+    const target = event.target as HTMLElement
+    target.setAttribute(qualifiedName, value)
   }
 }

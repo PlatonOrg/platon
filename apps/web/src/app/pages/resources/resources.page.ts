@@ -56,6 +56,9 @@ import {
   ResourceTypes,
 } from '@platon/feature/resource/common'
 
+import { ShepherdService } from 'tuto'
+import { ResourcesTutorialService } from 'tuto'
+
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
 
@@ -117,6 +120,8 @@ export default class ResourcesPage implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly resourceService = inject(ResourceService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly shepherdService = inject(ShepherdService)
+  private readonly resourcesTutorialService = inject(ResourcesTutorialService)
 
   protected readonly searchbar: SearchBar<string> = {
     placeholder: 'Essayez un nom, un topic, un niveau...',
@@ -175,6 +180,10 @@ export default class ResourcesPage implements OnInit, OnDestroy {
 
   protected isSmallScreen = false
   protected drawerVisible = false
+
+  // Pour le tutoriel
+  protected isFirstVisit = true
+  protected hasSearched = false
 
   protected toggleSidebar(): void {
     this.sidebarCollapsed = !this.sidebarCollapsed
@@ -283,12 +292,20 @@ export default class ResourcesPage implements OnInit, OnDestroy {
         this.totalMatches = response.total
         this.searching = false
 
+        // Marquer qu'une recherche a été effectuée
+        if (e.q && e.q.length > 0) {
+          this.hasSearched = true
+        }
+
         this.changeDetectorRef.markForCheck()
       })
     )
 
     this.checkScreenSize()
     window.addEventListener('resize', this.handleResize)
+
+    // Si c'est la première visite, on lance le tutoriel
+    this.checkFirstVisit()
   }
 
   ngOnDestroy(): void {
@@ -369,5 +386,52 @@ export default class ResourcesPage implements OnInit, OnDestroy {
   protected toggleDrawer(): void {
     this.drawerVisible = !this.drawerVisible
     this.changeDetectorRef.markForCheck()
+  }
+
+  /**
+   * Vérifie si c'est la première visite de l'utilisateur
+   */
+  private checkFirstVisit(): void {
+    const hasSeenTutorial = localStorage.getItem(`platon-resources-tutorial-${this.user?.id}`)
+    this.isFirstVisit = !hasSeenTutorial
+
+    // Si c'est la première visite, démarrer le tutoriel automatiquement après un délai
+    if (this.isFirstVisit && this.user) {
+      setTimeout(() => {
+        this.startResourcesTutorial()
+      }, 1000) // Délai de 1 seconde pour permettre à la page de se charger
+    }
+  }
+
+  /**
+   * Démarre le tutoriel complet de l'espace de travail
+   */
+  startResourcesTutorial(): void {
+    if (!this.user) return
+
+    this.resourcesTutorialService.startResourcesTutorial(
+      this.user,
+      this.items,
+      () => this.hasSearched,
+      (query: string) => {
+        this.searchbar.value = query
+        this.search(this.filters, query)
+      }
+    )
+
+    // Marquer le tutoriel comme vu
+    //localStorage.setItem(`platon-resources-tutorial-${this.user.id}`, 'true')
+  }
+
+  /**
+   * Réinitialise le tutoriel
+   */
+  resetTutorial(): void {
+    if (this.user) {
+      //localStorage.removeItem(`platon-resources-tutorial-${this.user.id}`)
+      this.isFirstVisit = true
+      this.hasSearched = false
+      this.startResourcesTutorial()
+    }
   }
 }
