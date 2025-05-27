@@ -1,0 +1,5 @@
+export * from './lib/tuto'
+export * from './lib/shepherd/shepherd.service'
+export * from './lib/toolbar-tutorial.service'
+export * from './lib/sidebar-tutorial.service'
+export * from './lib/resources-tutorial.service'
