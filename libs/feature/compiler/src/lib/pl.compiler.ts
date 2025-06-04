@@ -364,7 +364,10 @@ export class PLCompiler implements PLVisitor {
   private async compileExercise(content: string): Promise<void> {
     const { resource, version } = this.source
     if (this.dependencyResolver) {
-      content = ((await this.dependencyResolver(resource, version)) || '') + content
+      const dependency = await this.dependencyResolver(resource, version)
+      if (dependency) {
+        content = dependency + '\n\n' + content
+      }
     }
 
     const [configurable, isFromTemplate] = await Promise.all([
