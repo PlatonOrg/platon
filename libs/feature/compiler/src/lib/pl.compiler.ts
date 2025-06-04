@@ -83,6 +83,7 @@ interface PLCompilerOptions {
   version: string
   main: string
   resolver: PLReferenceResolver
+  dependencyResolver?: PLDependencyResolver
   withAst?: boolean
 }
 
@@ -90,6 +91,8 @@ interface ToExerciseOptions {
   variableChanges: Variables
   includeChanges?: string[]
 }
+
+type PLDependencyResolver = (id: string, version: string) => Promise<string>
 
 const emptySource = (resource: string, version: string, main: string): PLSourceFile => ({
   resource: resource,
@@ -112,6 +115,7 @@ export class PLCompiler implements PLVisitor {
   private readonly urls = new Map<string, string>()
   private readonly contents = new Map<string, string>()
   private readonly resolver: PLReferenceResolver
+  private readonly dependencyResolver?: PLDependencyResolver
   private parent?: PLCompiler
   private nodes: PLAst = []
   private lineno = 0
@@ -128,6 +132,7 @@ export class PLCompiler implements PLVisitor {
     this.resolver = options.resolver
     this.withAst = options.withAst
     this.source = emptySource(options.resource, options.version, options.main)
+    this.dependencyResolver = options.dependencyResolver
   }
 
   /**
@@ -248,6 +253,7 @@ export class PLCompiler implements PLVisitor {
       version,
       main: relpath,
       resolver: this.resolver,
+      dependencyResolver: undefined, // dependencyResolver is not used in extends
     })
 
     await compiler.compileExercise(content)
@@ -357,6 +363,9 @@ export class PLCompiler implements PLVisitor {
    */
   private async compileExercise(content: string): Promise<void> {
     const { resource, version } = this.source
+    if (this.dependencyResolver) {
+      content = ((await this.dependencyResolver(resource, version)) || '') + content
+    }
 
     const [configurable, isFromTemplate] = await Promise.all([
       this.resolver.exists(resource, version, EXERCISE_CONFIG_FILE),
@@ -434,6 +443,7 @@ export class PLCompiler implements PLVisitor {
             version,
             main: EXERCISE_MAIN_FILE,
             resolver: this.resolver,
+            dependencyResolver: this.dependencyResolver,
           }))
           await compiler.compileExercise(await this.resolver.resolveContent(resource, version, EXERCISE_MAIN_FILE))
         }

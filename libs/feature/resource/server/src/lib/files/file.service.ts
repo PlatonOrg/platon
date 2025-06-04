@@ -127,15 +127,6 @@ export class ResourceFileService {
       throw new NotFoundException(`Compiler: missing main file in resource: ${resource.id}`)
     }
 
-    let bufferContent = Buffer.from((await buffer).buffer).toString()
-    if (resource.templateId) {
-      const dependency = await this.dependencyService.getTemplateDependency(resource.id, version || LATEST)
-      const extendsLine = `@extends /${dependency?.dependOnId}:${
-        dependency?.dependOnVersion || LATEST
-      }/${EXERCISE_MAIN_FILE}`
-      bufferContent = extendsLine + '\n\n' + bufferContent
-    }
-
     const getRepo = async (resourceId: string, version?: string) => {
       version = version || LATEST
       const repo = openedRepos[`${resourceId}-${version}`]
@@ -191,15 +182,30 @@ export class ResourceFileService {
       },
     }
 
+    const dependencyResolver = async (resourceId: string, version: string): Promise<string> => {
+      let extendsLine = ''
+      const resource = (await this.resourceService.findByIdOrCode(resourceId)).orElseThrow(
+        () => new NotFoundResponse(`Resource not found: ${resourceId}`)
+      )
+      if (resource.templateId) {
+        const dependency = await this.dependencyService.getTemplateDependency(resource.id, version || LATEST)
+        if (!dependency) {
+          throw new NotFoundResponse(`Dependency not found for resource: ${resourceId} at version: ${version}`)
+        }
+        extendsLine = `@extends /${dependency.dependOnId}:${dependency.dependOnVersion || LATEST}/${EXERCISE_MAIN_FILE}`
+      }
+      return extendsLine
+    }
+
     const compiler = new PLCompiler({
       resolver,
       resource: resourceId,
       version: file.version,
       main: file.path,
       withAst: input.withAst,
+      dependencyResolver: dependencyResolver,
     })
-
-    await compiler.compile(bufferContent)
+    await compiler.compile(Buffer.from((await buffer).buffer).toString())
 
     const source = await compiler.output(overrides)
 
