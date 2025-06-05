@@ -276,16 +276,16 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     return [
       {
         icon: 'arrow_back',
-        label: 'Exercise précédent',
-        tooltip: 'Exercise précédent',
+        label: 'Exercice précédent',
+        tooltip: 'Exercice précédent',
         visible: this.hasPrev,
         id: 'prev-exercise-button',
         run: () => this.showConfirmModalIfAnswered(this.goToPrevPlayer),
       },
       {
         icon: 'arrow_forward',
-        label: 'Exercise suivant',
-        tooltip: 'Exercise suivant',
+        label: 'Exercice suivant',
+        tooltip: 'Exercice suivant',
         visible: this.hasNext,
         id: 'next-exercise-button',
         run: () => this.showConfirmModalIfAnswered(this.goToNextPlayer),
