@@ -1,13 +1,24 @@
 <nz-form-item nzRequired>
   <nz-form-control>
-    <input
-      nz-input
-      type="number"
-      [disabled]="disabled"
-      [min]="options?.min ?? null"
-      [max]="options?.max ?? null"
+    <nz-input-number
       [(ngModel)]="value"
+      [nzMin]="options?.min ?? minSafeInteger"
+      [nzMax]="options?.max ?? maxSafeInteger"
       (ngModelChange)="notifyValueChange?.($event)"
+      [nzDisabled]="disabled"
     />
+    <div *ngIf="options?.min !== undefined || options?.max !== undefined" class="hint-text" nz-typography>
+      <small nz-text nzType="secondary">
+        <span *ngIf="options?.min !== undefined && options?.max !== undefined">
+          Valeur comprise entre {{ options?.min }} et {{ options?.max }}
+        </span>
+        <span *ngIf="options?.min !== undefined && options?.max === undefined">
+          Valeur minimum : {{ options?.min }}
+        </span>
+        <span *ngIf="options?.min === undefined && options?.max !== undefined">
+          Valeur maximum : {{ options?.max }}
+        </span>
+      </small>
+    </div>
   </nz-form-control>
 </nz-form-item>
