@@ -1,0 +1,104 @@
+$highlight-color: #ff002671;
+
+.table-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 16px;
+
+  .actions-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 14px;
+
+    mat-icon {
+      color: #ff9800;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .actions-buttons {
+    display: flex;
+    gap: 12px;
+
+    button {
+      min-width: 120px;
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.highlighted-grade {
+  background-color: $highlight-color;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  &:hover {
+    background-color: $highlight-color;
+  }
+}
+
+.highlighted-grade {
+  animation: highlight-fade-in 0.3s ease-in-out;
+}
+
+@keyframes highlight-fade-in {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: $highlight-color;
+  }
+}
+
+table {
+  --mat-table-row-item-container-height: 60px; // Increased for input fields
+  --mat-table-header-row-item-container-height: 56px;
+
+  .mat-mdc-cell {
+    padding: 8px;
+
+    input[nz-input] {
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      transition: all 0.2s ease;
+
+      &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        outline: none;
+      }
+
+      &:hover {
+        border-color: #40a9ff;
+      }
+
+      // Style for positive adjustments
+      &[style*="color: green"] {
+        background-color: #f6ffed;
+        border-color: #52c41a;
+      }
+
+      // Style for negative adjustments
+      &[style*="color: red"] {
+        background-color: #fff2f0;
+        border-color: #ff4d4f;
+      }
+    }
+  }
+}

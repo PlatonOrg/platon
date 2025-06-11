@@ -101,3 +101,17 @@ mat-card button#settingButton {
   width: 40px;
   align-items: center;
 }
+
+
+.horizontal-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap:2px;
+}
+
+.horizontal-button button {
+  width: 100%;
+}

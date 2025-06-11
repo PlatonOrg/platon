@@ -8,6 +8,7 @@ import { ActivityCorrection, ExerciseCorrection } from '@platon/feature/result/c
 import { Repository } from 'typeorm'
 import { SessionEntity } from '../sessions/session.entity'
 import { CorrectionEntity } from './correction.entity'
+import { CorrectionLabelEntity } from '../label/correction-label/correction-label.entity'
 
 @Injectable()
 export class CorrectionService {
@@ -17,7 +18,9 @@ export class CorrectionService {
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(CorrectionEntity)
-    private readonly correctionRepository: Repository<CorrectionEntity>
+    private readonly correctionRepository: Repository<CorrectionEntity>,
+    @InjectRepository(CorrectionLabelEntity)
+    private readonly correctionLabelRepository: Repository<CorrectionLabelEntity>
   ) {}
 
   /**
@@ -78,13 +81,21 @@ export class CorrectionService {
         WHERE corrector.activity_id=activity.id AND corrector.id=$1
       )
   `
+
+    const subQuery = `
+      select
+        l.*
+      from "CorrectionLabels" cl
+      left join "Labels" l on cl.label_id = l.id
+      where cl.session_id = $1
+    `
     const queryParams = activityId ? [correctorUserId, activityId] : [correctorUserId]
 
     const projections = (await this.sessionRepository.query(queryText, queryParams)) as Projection[]
 
     const activityMap = new Map<string, ActivityCorrection>()
 
-    projections.forEach((projection) => {
+    projections.forEach(async (projection) => {
       const navItem = projection.activityNavigation.exercises.find(
         (item: any) => item.sessionId === projection.exerciseSessionId
       )
@@ -99,6 +110,19 @@ export class CorrectionService {
         grade: projection.grade,
         exerciseId: navItem.id,
         exerciseName: projection.exerciseName,
+        labels: [],
+      }
+
+      const alreadyCorrected = exercise.correctedBy ?? false
+      if (alreadyCorrected) {
+        const labels = await this.correctionLabelRepository.query(subQuery, [projection.exerciseSessionId])
+        exercise.labels = labels.map((label: any) => ({
+          id: label.id,
+          name: label.name,
+          color: label.color,
+          description: label.description,
+          gradeChange: label.grade_change,
+        }))
       }
 
       if (!activityMap.has(projection.activityId)) {
@@ -157,12 +181,12 @@ export class CorrectionService {
         await this.sessionRepository.save(activitySession)
       }
 
-      if (exerciseSession.activity && exerciseSession.userId) {
-        this.eventService.emit<OnCorrectActivityEventPayload>(ON_CORRECT_ACTIVITY_EVENT, {
-          userId: exerciseSession.userId,
-          activity: exerciseSession.activity,
-        })
-      }
+      // if (exerciseSession.activity && exerciseSession.userId) {
+      //   this.eventService.emit<OnCorrectActivityEventPayload>(ON_CORRECT_ACTIVITY_EVENT, {
+      //     userId: exerciseSession.userId,
+      //     activity: exerciseSession.activity,
+      //   })
+      // }
     }
 
     return correction

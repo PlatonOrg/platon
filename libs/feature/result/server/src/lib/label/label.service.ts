@@ -4,30 +4,63 @@ import { Repository } from 'typeorm'
 import { CreateLabel } from '@platon/feature/result/common'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Optional } from 'typescript-optional'
-import { ActivityLabelEntity } from './activity-label/activity-label.entity'
 import { UserFavoriteLabel } from './user-favorite-label/user-favorite-label.entity'
+import { ActivityEntity } from '@platon/feature/course/server'
+import { ResourceLabelEntity } from './resource-label/resource-label.entity'
 
 @Injectable()
 export class LabelService {
   constructor(
     @InjectRepository(LabelEntity)
     private readonly labelRepository: Repository<LabelEntity>,
-    @InjectRepository(ActivityLabelEntity)
-    private readonly activityLabelRepository: Repository<ActivityLabelEntity>,
+    @InjectRepository(ResourceLabelEntity)
+    private readonly resourceLabelRepository: Repository<ResourceLabelEntity>,
     @InjectRepository(UserFavoriteLabel)
-    private readonly userFavoriteLabelRepository: Repository<UserFavoriteLabel>
+    private readonly userFavoriteLabelRepository: Repository<UserFavoriteLabel>,
+    @InjectRepository(ActivityEntity)
+    private readonly activityRepository: Repository<ActivityEntity>
   ) {}
 
-  async saveAndList(label: CreateLabel, activityId: string, userId: string): Promise<LabelEntity[]> {
+  async saveAndList(
+    label: CreateLabel,
+    activityId: string,
+    navigationExerciseId: string,
+    userId: string
+  ): Promise<LabelEntity[]> {
     const labelEntity = await this.labelRepository.save(label)
-    await this.activityLabelRepository.save({ activityId, labelId: labelEntity.id })
-    return this.list(activityId, userId)
+    const resourceId = await this.getResourceId(activityId, navigationExerciseId)
+    await this.resourceLabelRepository.save({ resourceId, labelId: labelEntity.id, navigationExerciseId })
+    return this.list(navigationExerciseId, userId)
   }
 
-  async list(activityId: string, userId: string): Promise<LabelEntity[]> {
-    const activityLabels = await this.activityLabelRepository.find({ where: { activityId } })
-    const activityLabelIds = activityLabels.map((activityLabel) => activityLabel.labelId)
-    const labels = await this.convertLabelIdsToEntity(activityLabelIds)
+  async getResourceId(activityId: string, navigationExerciseId: string): Promise<string> {
+    const activity = await this.activityRepository.findOne({ where: { id: activityId } })
+    if (!activity) {
+      throw new NotFoundException(`Activity with ID ${activityId} not found`)
+    }
+    const resourceId = activity.source?.resource
+    if (!resourceId) {
+      throw new NotFoundException(`Resource ID not found for activity with ID ${activityId}`)
+    }
+    const exerciseGroups = Array.isArray(activity.source?.variables.exerciseGroups)
+      ? activity.source?.variables.exerciseGroups
+      : Object.values(activity.source?.variables.exerciseGroups || {})
+    for (const group of exerciseGroups) {
+      for (const exercise of group.exercises || []) {
+        if (exercise.id === navigationExerciseId) {
+          return exercise.resource
+        }
+      }
+    }
+    throw new NotFoundException(
+      `Navigation exercise with ID ${navigationExerciseId} not found in activity ${activityId}`
+    )
+  }
+
+  async list(navigationExerciseId: string, userId: string): Promise<LabelEntity[]> {
+    const resourceLabels = await this.resourceLabelRepository.find({ where: { navigationExerciseId } })
+    const resourceLabelIds = resourceLabels.map((resourceLabel) => resourceLabel.labelId)
+    const labels = await this.convertLabelIdsToEntity(resourceLabelIds)
     const userLabels = await this.getUserFav(userId)
     const userLabelIds = new Set(userLabels.map((label) => label.id))
     const uniqueLabels = userLabels.concat(labels.filter((label) => !userLabelIds.has(label.id)))
@@ -69,5 +102,15 @@ export class LabelService {
     return (
       await Promise.all(labelIds.map((labelId) => this.labelRepository.findOne({ where: { id: labelId } })))
     ).filter((label) => label !== undefined) as LabelEntity[]
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const label = await this.labelRepository.findOne({ where: { id } })
+    if (!label) {
+      throw new NotFoundException(`Label with ID ${id} not found`)
+    }
+    await this.resourceLabelRepository.delete({ labelId: id })
+    await this.labelRepository.delete(id)
+    return true
   }
 }
