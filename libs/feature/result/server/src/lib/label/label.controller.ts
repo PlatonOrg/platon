@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Post, Req } from '@nestjs/common'
+import { Controller, Delete, Get, Patch, Post, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ErrorResponse, ListResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles } from '@platon/core/server'
@@ -6,6 +6,9 @@ import { CorrectionLabel, CreateLabel } from '@platon/feature/result/common'
 import { LabelService } from './label.service'
 import { LabelDTO } from './label.dto'
 import { CorrectionLabelService } from './correction-label/correction-label.service'
+import { ResourceLabelService } from './resource-label/resource-label.service'
+import { ResourceLabelEntity } from './resource-label/resource-label.entity'
+import { CorrectionLabelEntity } from './correction-label/correction-label.entity'
 
 @ApiBearerAuth()
 @Controller('results/labels')
@@ -13,27 +16,41 @@ import { CorrectionLabelService } from './correction-label/correction-label.serv
 export class LabelController {
   constructor(
     private readonly labelService: LabelService,
-    private readonly correctionLabelService: CorrectionLabelService
+    private readonly correctionLabelService: CorrectionLabelService,
+    private readonly resourceLabelService: ResourceLabelService
   ) {}
 
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Post('labelize')
   async labelize(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const labelCorrectionEntities = await this.correctionLabelService.labelize(
-      req.body.sessionId,
-      req.body.answerId,
-      req.body.labelId
+    console.error(
+      'The labelize endpoint is deprecated and will be removed in the future. Please use the new correction label endpoints.'
     )
-    // retrieve labels from the database
-    const labels = await Promise.all(
-      labelCorrectionEntities.map(async (label: CorrectionLabel) => {
-        const labelEntity = (await this.labelService.findById(label.labelId)).get()
-        const labelDTO = Mapper.map(labelEntity, LabelDTO)
-        return labelDTO
-      })
-    )
+    // const labelCorrectionEntities = await this.correctionLabelService.labelize(
+    //   req.body.sessionId,
+    //   req.body.answerId,
+    //   req.body.labelId
+    // )
+    // const labels = await Promise.all(
+    //   labelCorrectionEntities.map(async (label: CorrectionLabelEntity) => {
+    //     if (!label.resourceLabelId) {
+    //       const labelEntity = (await this.labelService.findById(label.labelId)).get()
+    //       const labelDTO = Mapper.map(labelEntity, LabelDTO)
+    //       labelDTO.id = label.labelId
+    //       return labelDTO
+    //     }
+    //     const labelEntity = (await this.resourceLabelService.findById(label?.resourceLabelId)).get()
+    //     const labelDTO = Mapper.map(labelEntity, LabelDTO)
+    //     labelDTO.id = label.labelId
+    //     return labelDTO
+    //   })
+    // )
 
-    return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
+    // return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
+    return new ListResponse<LabelDTO>({
+      resources: [],
+      total: 0,
+    })
   }
 
   @Roles(UserRoles.admin, UserRoles.teacher)
@@ -61,29 +78,43 @@ export class LabelController {
   }
 
   @Roles(UserRoles.admin, UserRoles.teacher)
-  @Get('list/:activityId')
+  @Get('list/:navigationExerciseId')
   async list(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const activityId = req.params.activityId
-    const labels = Mapper.mapAll(await this.labelService.list(activityId, req.user.id), LabelDTO)
-    return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
+    const navigationExerciseId = req.params.navigationExerciseId
+    const resourceLabels = await this.resourceLabelService.list(navigationExerciseId)
+    const labels = Mapper.mapAll(await this.labelService.list(navigationExerciseId, req.user.id), LabelDTO)
+
+    const labelsWithGradeChange = labels.map((label) => {
+      const resourceLabel = resourceLabels.find((rl: ResourceLabelEntity) => rl.labelId === label.id)
+      if (resourceLabel && resourceLabel.gradeChange !== undefined) {
+        return { ...label, gradeChange: resourceLabel.gradeChange }
+      }
+      return label
+    })
+
+    return new ListResponse<LabelDTO>({ resources: labelsWithGradeChange, total: labelsWithGradeChange.length })
   }
 
   @Roles(UserRoles.admin, UserRoles.teacher)
-  @Post('create/:activityId')
+  @Post('create/:activityId/:navigationExerciseId')
   async create(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
     const userId = req.user.id
     const activityId = req.params.activityId
+    const navigationExerciseId = req.params.navigationExerciseId
     const createdLabel = {
       name: req.body.name,
       color: req.body.color,
       description: req.body.description,
     } as CreateLabel
-    const labels = Mapper.mapAll(await this.labelService.saveAndList(createdLabel, activityId, userId), LabelDTO)
+    const labels = Mapper.mapAll(
+      await this.labelService.saveAndList(createdLabel, activityId, navigationExerciseId, userId),
+      LabelDTO
+    )
     return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
   }
 
   @Roles(UserRoles.admin, UserRoles.teacher)
-  @Get('list/:sessionId/:answerId')
+  @Get('list-correction/:sessionId/:answerId')
   async listCorrectionLabels(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
     const labels = await Promise.all(
       (
@@ -98,7 +129,31 @@ export class LabelController {
   }
 
   @Roles(UserRoles.admin, UserRoles.teacher)
-  @Patch('update')
+  @Delete('delete/:labelId')
+  async deleteLabel(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
+    const labelId = req.params.labelId
+    const label = await this.labelService.findById(labelId)
+
+    if (!label.isPresent()) {
+      throw new ErrorResponse({
+        message: 'Label not found',
+        status: 404,
+      })
+    }
+
+    try {
+      await this.labelService.delete(label.get().id)
+    } catch (error) {
+      throw new ErrorResponse({
+        message: 'Error while deleting label',
+        status: 500,
+      })
+    }
+    return new ListResponse<LabelDTO>({ resources: [], total: 0 })
+  }
+
+  @Roles(UserRoles.admin, UserRoles.teacher)
+  @Patch('update/:navigationExerciseId')
   async updateLabel(@Req() req: IRequest): Promise<LabelDTO> {
     const optionalLabel = await this.labelService.findById(req.body.id)
 
@@ -113,13 +168,13 @@ export class LabelController {
     label.name = req.body.name
     label.description = req.body.description
     label.color = req.body.color
-    label.gradeChange = req.body.gradeChange
 
     try {
+      await this.resourceLabelService.update(label.id, req.params.navigationExerciseId, req.body.gradeChange)
       return await this.labelService.update(label.id, label)
-    } catch (error) {
+    } catch (error: any) {
       throw new ErrorResponse({
-        message: 'Error while updating label',
+        message: error.message,
         status: 500,
       })
     }
