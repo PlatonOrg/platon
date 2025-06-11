@@ -10,20 +10,22 @@ export class RemoteLabelProvider extends LabelProvider {
   constructor(private readonly http: HttpClient) {
     super()
   }
-  listLabels(activityId: string): Observable<Label[]> {
-    return this.http.get<ListResponse<Label>>(`/api/v1/results/labels/list/${activityId}`).pipe(
+  listLabels(navigationExerciseId: string): Observable<Label[]> {
+    return this.http.get<ListResponse<Label>>(`/api/v1/results/labels/list/${navigationExerciseId}`).pipe(
       map((response: ListResponse<Label>) => {
         return response.resources
       })
     )
   }
 
-  createLabel(activityId: string, input: CreateLabel): Observable<Label[]> {
-    return this.http.post<ListResponse<Label>>(`/api/v1/results/labels/create/${activityId}`, input).pipe(
-      map((response: ListResponse<Label>) => {
-        return response.resources
-      })
-    )
+  createLabel(activityId: string, navigationExerciseId: string, input: CreateLabel): Observable<Label[]> {
+    return this.http
+      .post<ListResponse<Label>>(`/api/v1/results/labels/create/${activityId}/${navigationExerciseId}`, input)
+      .pipe(
+        map((response: ListResponse<Label>) => {
+          return response.resources
+        })
+      )
   }
 
   labelize(sessionId: string, answerId: string, labelId: string): Observable<Label[]> {
@@ -40,7 +42,7 @@ export class RemoteLabelProvider extends LabelProvider {
   }
 
   listCorrectionLabels(sessionId: string, answerId: string): Observable<Label[]> {
-    return this.http.get<ListResponse<Label>>(`/api/v1/results/labels/list/${sessionId}/${answerId}`).pipe(
+    return this.http.get<ListResponse<Label>>(`/api/v1/results/labels/list-correction/${sessionId}/${answerId}`).pipe(
       map((response: ListResponse<Label>) => {
         return response.resources
       })
@@ -72,11 +74,15 @@ export class RemoteLabelProvider extends LabelProvider {
   }
 
   deleteLabel(labelId: string): Observable<Label[]> {
-    throw new Error('Method not implemented.')
+    return this.http.delete<ListResponse<Label>>(`/api/v1/results/labels/delete/${labelId}`).pipe(
+      map((response: ListResponse<Label>) => {
+        return response.resources
+      })
+    )
   }
 
-  updateLabel(label: Partial<Label>): Observable<Label> {
-    return this.http.patch<void>(`/api/v1/results/labels/update`, label).pipe(
+  updateLabel(label: Partial<Label>, navigationExerciseId: string): Observable<Label> {
+    return this.http.patch<void>(`/api/v1/results/labels/update/${navigationExerciseId}`, label).pipe(
       map(() => {
         return label as Label
       })

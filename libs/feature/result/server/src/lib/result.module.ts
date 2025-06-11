@@ -30,6 +30,8 @@ import { CorrectionLabelEntity } from './label/correction-label/correction-label
 import { CorrectionLabelService } from './label/correction-label/correction-label.service'
 import { ActivityLabelEntity } from './label/activity-label/activity-label.entity'
 import { UserFavoriteLabel } from './label/user-favorite-label/user-favorite-label.entity'
+import { ResourceLabelEntity } from './label/resource-label/resource-label.entity'
+import { ResourceLabelService } from './label/resource-label/resource-label.service'
 @Module({
   imports: [
     FeatureCourseServerModule,
@@ -45,6 +47,7 @@ import { UserFavoriteLabel } from './label/user-favorite-label/user-favorite-lab
       LabelEntity,
       CorrectionLabelEntity,
       ActivityLabelEntity,
+      ResourceLabelEntity,
       UserFavoriteLabel,
     ]),
   ],
@@ -70,6 +73,7 @@ import { UserFavoriteLabel } from './label/user-favorite-label/user-favorite-lab
     ActivityService,
     LabelService,
     CorrectionLabelService,
+    ResourceLabelService,
   ],
   exports: [
     TypeOrmModule,

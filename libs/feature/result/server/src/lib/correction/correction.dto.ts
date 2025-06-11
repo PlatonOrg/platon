@@ -1,7 +1,14 @@
 import { BaseDTO } from '@platon/core/server'
-import { Correction, ActivityCorrection, ExerciseCorrection, UpsertCorrection } from '@platon/feature/result/common'
+import {
+  Correction,
+  ActivityCorrection,
+  ExerciseCorrection,
+  UpsertCorrection,
+  Label,
+} from '@platon/feature/result/common'
 import { Type } from 'class-transformer'
 import { IsArray, IsDate, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator'
+import { CorrectionLabelEntity } from '../label/correction-label/correction-label.entity'
 
 export class CorrectionDTO extends BaseDTO implements Correction {
   @IsUUID()
@@ -60,9 +67,15 @@ export class ExerciseCorrectionDTO implements ExerciseCorrection {
   @IsOptional()
   @IsNumber()
   grade?: number
+
+  @IsArray()
+  labels!: Label[]
 }
 
 export class UpsertCorrectionDTO implements UpsertCorrection {
   @IsNumber()
   grade!: number
+
+  @IsArray()
+  labels!: CorrectionLabelEntity[]
 }

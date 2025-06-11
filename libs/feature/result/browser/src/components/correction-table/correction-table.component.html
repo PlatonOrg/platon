@@ -1,5 +1,5 @@
 <nz-collapse>
-  <nz-collapse-panel *ngFor="let course of groupedCourses" [nzHeader]="course.courseName" [nzActive]="true">
+  <nz-collapse-panel *ngFor="let course of groupedCourses" [nzHeader]="course.courseName" [nzActive]="false">
     <nz-table #nzActivityTable [nzData]="course.activities" [nzBordered]="false" [nzShowPagination]="false">
       <thead>
         <tr>
