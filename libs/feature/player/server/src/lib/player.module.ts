@@ -10,6 +10,7 @@ import { PlayerService } from './player.service'
 import { NodeSandbox } from './sandboxes'
 import { PythonSandbox } from './sandboxes/python/python-sandbox'
 import { SandboxService } from './sandboxes/sandbox.service'
+import { FeatureEmailModule } from '@platon/feature/email/server'
 
 @Module({
   controllers: [PlayerController],
@@ -20,6 +21,7 @@ import { SandboxService } from './sandboxes/sandbox.service'
     FeatureResultServerModule,
     FeatureResourceServerModule,
     FeaturePeerServerModule,
+    FeatureEmailModule,
   ],
   providers: [PlayerService, NodeSandbox, PythonSandbox, SandboxService],
   exports: [PlayerService, SandboxService],
