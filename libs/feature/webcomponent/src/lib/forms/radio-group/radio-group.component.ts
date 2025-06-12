@@ -8,7 +8,6 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
-  AfterViewChecked,
   AfterViewInit,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
