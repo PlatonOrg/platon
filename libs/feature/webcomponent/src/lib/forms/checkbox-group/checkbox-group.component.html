@@ -1,9 +1,18 @@
-<div class="checkbox-items" [class.disabled]="state.disabled" [class.horizontal]="state.horizontal">
-  <ng-container *ngFor="let item of state.items; trackBy: trackBy">
+<div
+  #focusZone
+  tabindex="0"
+  class="checkbox-items"
+  [ngClass]="state.css | css : 'class'"
+  [ngStyle]="state.css | css : 'style'"
+  [class.disabled]="state.disabled"
+  [class.horizontal]="state.horizontal"
+>
+  <ng-container *ngFor="let item of state.items; trackBy: trackBy; let i = index">
     <div
       class="checkbox-item"
       [ngClass]="item.css | css : 'class'"
       [ngStyle]="item.css | css : 'style'"
+      [class.selected]="i === state.selectedIndex"
       [class.checked]="item.checked"
       (click)="item.checked = !item.checked; state.isFilled = true; $event.stopPropagation()"
     >
