@@ -1,21 +1,4 @@
-<!-- Action buttons for saving/resetting modifications -->
-<div class="table-actions" *ngIf="hasUnsavedChanges">
-  <div class="actions-info">
-    <mat-icon>edit</mat-icon>
-    <span>{{ getModificationCount() }} modification(s) en attente</span>
-  </div>
-  <div class="actions-buttons">
-    <button mat-stroked-button color="warn" (click)="resetModifications()" title="Annuler toutes les modifications">
-      <mat-icon>undo</mat-icon>
-      Annuler
-    </button>
-    <button mat-flat-button color="primary" (click)="saveModifications()" title="Enregistrer toutes les modifications">
-      <mat-icon>save</mat-icon>
-      Enregistrer les modifications
-    </button>
-  </div>
-</div>
-
+<!-- Table for displaying corrections -->
 <table mat-table [dataSource]="dataSource" matSort>
   <!-- Position Column -->
   <ng-container matColumnDef="userId">
@@ -29,8 +12,8 @@
   <ng-container matColumnDef="grade">
     <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by Grade">Note</th>
     <td mat-cell *matCellDef="let sheet" [ngClass]="getStyle(sheet.correctedGrade ?? sheet.grade)">
-      <span [title]="gradeAdjustments.has(sheet.userId) ? 'Note ajustée: ' + getFinalGrade(sheet) : ''">
-        {{ getGradeDisplayText(sheet) }}
+      <span [title]="sheet.correctedGrade !== sheet.grade ? 'Note ajustée: ' + getGradeDisplay(sheet) : ''">
+        {{ getGradeDisplay(sheet) }}
       </span>
     </td>
   </ng-container>
