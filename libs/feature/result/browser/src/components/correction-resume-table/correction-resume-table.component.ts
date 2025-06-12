@@ -49,6 +49,9 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
   @Input()
   highlightedGrade?: number | string
 
+  @Input()
+  gradeAdjustments: Map<string, number> = new Map<string, number>()
+
   @Output()
   gradeAdjustmentChange = new EventEmitter<{ userId: string; adjustment: number }>()
 
@@ -59,10 +62,7 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
 
   // Form for grade adjustments
   gradeForm: FormGroup
-  gradeAdjustments = new Map<string, number>()
   protected dataSource: MatTableDataSource<ExerciseCorrection> = new MatTableDataSource<ExerciseCorrection>([])
-
-  hasUnsavedChanges = false
 
   constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder) {
     this.gradeForm = this.fb.group({})
@@ -78,8 +78,8 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
           return user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
         }
         case 'grade': {
-          // Sort by final grade (including adjustments)
-          return this.getFinalGrade(item)
+          // Sort by corrected grade (final grade)
+          return item.correctedGrade ?? item.grade ?? 0
         }
         default:
           return ''
@@ -95,14 +95,9 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
       this.cdr.markForCheck()
     }
     if (changes['data'] || changes['userMap']) {
-      // Use the data directly instead of creating a copy
       this.dataSource = new MatTableDataSource(this.data)
       this.setupCustomSorting()
       this.dataSource.sort = this.sort
-
-      // Reset adjustments and unsaved changes flag when new data arrives
-      this.gradeAdjustments.clear()
-      this.hasUnsavedChanges = false
 
       this.cdr.markForCheck()
     }
@@ -138,9 +133,8 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
 
     // Clear adjustment if empty or default placeholder
     if (value === '' || value === '+/-0') {
-      const _previousValue = (this.gradeAdjustments.get(correction.userId) ?? 0) * -1
       this.gradeAdjustments.delete(correction.userId)
-      this.hasUnsavedChanges = true
+      this.gradeAdjustmentChange.emit({ userId: correction.userId, adjustment: 0 })
       this.cdr.markForCheck()
       return
     }
@@ -168,7 +162,6 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
 
       if (this.gradeAdjustments.get(correction.userId) === adjustment) return
       this.gradeAdjustments.set(correction.userId, adjustment)
-      this.hasUnsavedChanges = true
       this.gradeAdjustmentChange.emit({ userId: correction.userId, adjustment })
 
       // Update input display with proper formatting
@@ -195,74 +188,16 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
     }
   }
 
-  getAdjustmentValue(correction: ExerciseCorrection): string {
+  protected getAdjustmentValue(correction: ExerciseCorrection): string {
     const adjustment = this.gradeAdjustments.get(correction.userId)
     if (adjustment === undefined || adjustment === 0) {
       return ''
     }
-    return adjustment > 0 ? `+${adjustment}` : `${adjustment}`
+    return adjustment > 0 ? `+${adjustment}` : `-${adjustment}`
   }
 
-  /**
-   * Calculate the final grade including any adjustments
-   */
-  getFinalGrade(correction: ExerciseCorrection): number {
-    const originalGrade = correction.correctedGrade ?? correction.grade ?? 0
-    const adjustment = this.gradeAdjustments.get(correction.userId) ?? 0
-    return Math.max(0, Math.min(100, originalGrade + adjustment))
-  }
-
-  /**
-   * Get display text for the grade column showing both original and adjusted grade
-   */
-  getGradeDisplayText(correction: ExerciseCorrection): string {
-    const originalGrade = correction.correctedGrade ?? correction.grade ?? 0
-    const adjustment = this.gradeAdjustments.get(correction.userId)
-
-    if (!adjustment || adjustment === 0) {
-      return originalGrade.toString()
-    }
-
-    const finalGrade = this.getFinalGrade(correction)
-    return `${originalGrade} → ${finalGrade}`
-  }
-
-  /**
-   * Save all modifications and emit the updated corrections to parent
-   */
-  saveModifications(): void {
-    const updatedCorrections = this.data.map((correction) => {
-      const adjustment = this.gradeAdjustments.get(correction.userId)
-      if (adjustment !== undefined && adjustment !== 0) {
-        const finalGrade = this.getFinalGrade(correction)
-        return {
-          ...correction,
-          correctedGrade: finalGrade,
-        }
-      }
-      return correction
-    })
-
-    this.correctionsUpdated.emit(updatedCorrections)
-    this.hasUnsavedChanges = false
-    this.cdr.markForCheck()
-  }
-
-  /**
-   * Reset all modifications and go back to original data
-   */
-  resetModifications(): void {
-    this.gradeAdjustments.clear()
-    this.hasUnsavedChanges = false
-    this.dataSource.data = this.data
-    this.refreshSorting()
-    this.cdr.markForCheck()
-  }
-
-  /**
-   * Check if there are any modifications that differ from original data
-   */
-  getModificationCount(): number {
-    return this.gradeAdjustments.size
+  protected getGradeDisplay(correction: ExerciseCorrection): string {
+    const correctedGrade = correction.correctedGrade ?? correction.grade ?? 0
+    return `${correctedGrade}`
   }
 }
