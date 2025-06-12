@@ -11,6 +11,8 @@ export interface RadioGroupState extends IWebComponent {
   selection: string
   horizontal: boolean
   autoValidation: boolean
+  css?: string
+  selectedIndex: number
 }
 
 export const RadioGroupComponentDefinition = defineWebComponent({
@@ -64,6 +66,16 @@ export const RadioGroupComponentDefinition = defineWebComponent({
         type: 'boolean',
         default: false,
         description: 'Activer la validation automatique?',
+      },
+      selectedIndex: {
+        type: 'number',
+        default: -1,
+        description: 'Index de la proposition sélectionnée.',
+      },
+      css: {
+        type: 'string',
+        description: 'CSS personnalisée pour le style du groupe de boutons radio.',
+        default: '',
       },
     },
   },
