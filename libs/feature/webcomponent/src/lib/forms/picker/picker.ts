@@ -3,8 +3,11 @@ import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-
 export interface PickerState extends IWebComponent {
   hint: string
   items: string[]
+  width: string
   prefix: string
   suffix: string
+  appearance: 'fill' | 'outline' | 'inline'
+  type : 'default' | 'select'
   selection: string
   placeholder: string
   disabled: boolean
@@ -27,6 +30,11 @@ export const PickerComponentDefinition = defineWebComponent({
         description: 'La liste des choix.',
         items: { type: 'string' },
       },
+      width: {
+        type: ['string', 'number'],
+        default: '',
+        description: 'Le largeur du champ de saisi en valeur CSS (%, px, em, etc.).',
+      },
       prefix: {
         type: 'string',
         default: '',
@@ -36,6 +44,12 @@ export const PickerComponentDefinition = defineWebComponent({
         type: 'string',
         default: '',
         description: 'Une icône à afficher à droite du picker.',
+      },
+      appearance: {
+        type: 'string',
+        default: 'outline',
+        description: "L'apparence du champ de saisi.",
+        enum: ['fill', 'outline', 'inline'],
       },
       hint: {
         type: 'string',
@@ -56,6 +70,11 @@ export const PickerComponentDefinition = defineWebComponent({
         type: 'boolean',
         default: false,
         description: 'Désactiver la sélection?',
+      },
+      type: {
+        type: 'string',
+        default: 'default',
+        description:" change l'apparence du picker lorsque le format est en 'inline'",
       },
     },
   },

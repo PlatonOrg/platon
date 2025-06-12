@@ -1,6 +1,15 @@
+@if (state.appearance === 'inline' && state.type === 'select') {
+<select [(ngModel)]="state.selection" [ngStyle]="{ 'justify-items': state.width === 'auto' ? 'center' : 'start' }"
+  style="width : 100%">
+  @for(item of state.items; track $index) {
+  <option value="{{item}}">{{item}}</option>
+  }
+</select>
+} @else {
 <mat-form-field appearance="fill">
   <mat-label>{{ state.placeholder }}</mat-label>
-  <mat-select [(ngModel)]="state.selection" (ngModelChange)="state.isFilled = true" [disabled]="state.disabled">
+  <mat-select [(ngModel)]="state.selection" (ngModelChange)="state.isFilled = true" [disabled]="state.disabled"
+    style="width : 100%">
     <mat-option *ngFor="let item of state.items" [value]="item">
       {{ item }}
     </mat-option>
@@ -14,3 +23,4 @@
   </div>
 </mat-form-field>
 <wc-base [(state)]="state"></wc-base>
+}
