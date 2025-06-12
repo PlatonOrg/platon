@@ -1,16 +1,21 @@
 <mat-radio-group
+  #focusZone
+  tabindex="0"
   [disabled]="state.disabled"
   [class.disabled]="state.disabled"
   [class.horizontal]="state.horizontal"
   [(ngModel)]="state.selection"
+  [ngClass]="state.css | css : 'class'"
+  [ngStyle]="state.css | css : 'style'"
 >
   <ng-container *ngFor="let item of state.items; let i = index; trackBy: trackBy">
     <div
       class="radio-item"
       [ngClass]="item.css | css : 'class'"
       [ngStyle]="item.css | css : 'style'"
-      (click)="state.selection = item.content; $event.stopPropagation(); autoValidate(); state.isFilled = true"
-      [class.selected]="state.selection === item.content"
+      (click)="onClick($event, item, i)"
+      [class.selected]="i === state.selectedIndex"
+      [class.checked]="state.selection === item.content"
     >
       <mat-radio-button color="primary" [name]="item.content" [value]="item.content">
         <nge-markdown [data]="item.content"></nge-markdown>
