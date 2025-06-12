@@ -227,7 +227,7 @@
             id="summarizeButton"
             extended
             *ngIf="exerciseCorrected.size === exercises.length"
-            (click)="resumeMode = !resumeMode"
+            (click)="resumeMode = !resumeMode; currentExercise ? loadAnswers(currentExercise) : null"
           >
             <mat-icon>summarize</mat-icon>
             Résumé
@@ -244,6 +244,7 @@
               [data]="correctionResumeList"
               [userMap]="userMap"
               [highlightedGrade]="highlightedGrade"
+              [gradeAdjustments]="gradeAdjustments"
               (gradeAdjustmentChange)="onGradeAdjustmentChange($event)"
               (correctionsUpdated)="onCorrectionsResumeDone($event)"
             ></correction-resume-table>

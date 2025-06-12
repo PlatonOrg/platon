@@ -50,7 +50,7 @@ import { MatCardModule } from '@angular/material/card'
 import { animate, style, transition, trigger } from '@angular/animations'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { NzModalModule } from 'ng-zorro-antd/modal'
-
+import { GRADE_BOUNDS, GRADE_OPTIONS, PlayerCorrectionService } from './player-correction.service'
 interface ExerciseGroup {
   exerciseId: string
   exerciseName: string
@@ -114,6 +114,7 @@ interface ExerciseGroup {
   ],
 })
 export class PlayerCorrectionComponent implements OnInit {
+  // === SERVICES ===
   private readonly dialogService = inject(DialogService)
   private readonly resultService = inject(ResultService)
   private readonly playerService = inject(PlayerService)
@@ -121,7 +122,10 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly userService = inject(UserService)
   private readonly route = inject(ActivatedRoute)
 
+  // === VIEW REFERENCES ===
   @ViewChild('GradeCard', { read: ElementRef }) cardRef!: ElementRef<HTMLElement>
+
+  // === COMPONENT STATE ===
   protected isSettingsModalOpen = false
   protected selectedGradeOption = 'platon'
   protected resumeMode = false
@@ -160,15 +164,18 @@ export class PlayerCorrectionComponent implements OnInit {
   protected calculatedSteps = 0
   protected correctionResumeList: ExerciseCorrection[] = []
   protected highlightedGrade?: number
+  protected gradeAdjustments = new Map<string, number>()
 
+  // === CONFIGURATION ===
   protected gradeOptionMap: Map<string, number | undefined> = new Map([
-    ['platon', undefined],
-    ['max', 100],
-    ['min', 0],
+    [GRADE_OPTIONS.PLATON, undefined],
+    [GRADE_OPTIONS.MAX, GRADE_BOUNDS.MAX],
+    [GRADE_OPTIONS.MIN, GRADE_BOUNDS.MIN],
   ])
 
   @Input() courseCorrection!: CourseCorrection
 
+  // === LIFECYCLE ===
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe((params) => {
       this.activityId = params.activityId
@@ -183,6 +190,7 @@ export class PlayerCorrectionComponent implements OnInit {
     }
   }
 
+  // === SESSION MANAGEMENT ===
   private getSessionId(): ExerciseGroup | undefined {
     if (!this.sessionId) {
       return undefined
@@ -211,6 +219,7 @@ export class PlayerCorrectionComponent implements OnInit {
     }
   }
 
+  // === GROUP BUILDING ===
   private buildGroups(): void {
     const activityExercisesMap = new Map<string, { name: string; map: Map<string, ExerciseGroup> }>()
 
@@ -239,10 +248,11 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  // === EXERCISE LOADING ===
   protected async loadAnswers(exercise: ExerciseCorrection): Promise<void> {
     this.currentExercise = exercise
     const initialGrade = exercise.correctedGrade ?? this.gradeOptionMap.get(this.selectedGradeOption) ?? exercise.grade
-    this.correctedGrade = Math.max(0, Math.min(100, initialGrade ?? 0))
+    this.correctedGrade = PlayerCorrectionService.validateGrade(initialGrade ?? 0)
     if (exercise.exerciseSessionId) {
       this.answers = (
         await firstValueFrom(
@@ -256,6 +266,7 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  // === NAVIGATION METHODS ===
   protected onChooseTab(index: number): void {
     const currentUserId = this.currentExercise?.userId
     this.answers = []
@@ -308,6 +319,7 @@ export class PlayerCorrectionComponent implements OnInit {
     await this.onChooseExercise(this.selectedExerciseIndex - 1)
   }
 
+  // === UTILITY METHODS ===
   private async getUsers() {
     const userIds = new Set<string>()
     for (const activity of this.courseCorrection.ActivityCorrections) {
@@ -322,46 +334,22 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  get userOptions() {
+  // === GETTERS ===
+  get userOptions(): Array<{ label: string; value: string }> {
     return (
       this.currentGroup?.users?.map((user) => ({
-        label: this.userMap.get(user.userId)?.firstName + ' ' + this.userMap.get(user.userId)?.lastName,
+        label: `${this.userMap.get(user.userId)?.firstName} ${this.userMap.get(user.userId)?.lastName}`,
         value: user.userId,
       })) ?? []
     )
   }
 
-  protected loadUserExercise(userId: string) {
+  // === USER EXERCISE MANAGEMENT ===
+  protected loadUserExercise(userId: string): void {
     const exercise = this.currentGroup?.users.find((exercise) => exercise.userId === userId)
     if (exercise) {
       this.onChooseExercise(this.exercises.indexOf(exercise)).catch(console.error)
     }
-  }
-
-  private parseGradeChange(totalGradeChange: string, baseGrade: number): number {
-    if (!totalGradeChange) {
-      return baseGrade
-    }
-
-    let value = 0
-    let coef = 0
-
-    if (totalGradeChange.startsWith('+') || totalGradeChange.startsWith('-')) {
-      coef = totalGradeChange.startsWith('+') ? 1 : -1
-      value = parseInt(totalGradeChange.slice(1), 10)
-      if (isNaN(value) || value === 0) {
-        return baseGrade
-      } else {
-        return Math.max(0, Math.min(100, baseGrade + coef * value))
-      }
-    } else {
-      value = parseInt(totalGradeChange, 10)
-      if (!isNaN(value)) {
-        return Math.max(0, Math.min(100, value))
-      }
-    }
-
-    return baseGrade
   }
 
   protected onTotalGradeChange(totalGradeChange: string) {
@@ -370,10 +358,11 @@ export class PlayerCorrectionComponent implements OnInit {
     }
 
     const baseGrade = this.currentExercise.grade ?? 0
-    this.correctedGrade = this.parseGradeChange(totalGradeChange, baseGrade)
+    this.correctedGrade = PlayerCorrectionService.parseGradeChange(totalGradeChange, baseGrade)
     this.changeDetectorRef.markForCheck()
   }
 
+  // === EVENT HANDLERS ===
   @HostListener('window:keydown', ['$event'])
   protected async handleKeyDown(event: KeyboardEvent): Promise<void> {
     const active = document.activeElement
@@ -420,14 +409,6 @@ export class PlayerCorrectionComponent implements OnInit {
         )
         break
     }
-  }
-
-  protected async setGradeOnClick(event: Event, grade: number) {
-    // eslint-disable-next-line prettier/prettier
-    (event.target as HTMLInputElement).blur()
-    // Appliquer les limites 0-100 avant d'assigner
-    this.correctedGrade = Math.max(0, Math.min(100, grade))
-    await this.onSaveGrade()
   }
 
   protected async onSaveGrade() {
@@ -505,9 +486,9 @@ export class PlayerCorrectionComponent implements OnInit {
     if (!this.currentExercise) {
       return
     }
+    this.gradeAdjustments.set(event.userId, event.adjustment)
     const exercise = this.currentGroup?.users.find((ex) => ex.userId === event.userId)
     if (exercise && exercise.correctedGrade) {
-      // Appliquer les limites 0-100 lors de l'ajustement
       exercise.correctedGrade = Math.max(0, Math.min(100, exercise.correctedGrade + event.adjustment))
       if (this.exerciseCorrected.has(exercise.exerciseSessionId)) {
         const index = this.correctionResumeList.findIndex((ex) => ex.exerciseSessionId === exercise.exerciseSessionId)
@@ -548,50 +529,27 @@ export class PlayerCorrectionComponent implements OnInit {
 
       // Use the original grade as base for calculation
       const originalGrade = exercise.grade ?? 0
-      updatedExercise.correctedGrade = this.computeGradeChange(updatedExercise.labels, originalGrade)
+      updatedExercise.correctedGrade = PlayerCorrectionService.computeGradeChange(
+        updatedExercise.labels,
+        originalGrade,
+        this.gradeAdjustments.get(updatedExercise.userId)
+      )
 
       return updatedExercise
     })
-
-    this.changeDetectorRef.markForCheck()
-  }
-
-  private computeGradeChange(labelList: Label[], originalGrade?: number): number | undefined {
-    if (originalGrade === undefined) return undefined
-
-    let totalGradeChange = 0
-    let hasAbsoluteGrade = false
-    let absoluteGrade = 0
-
-    // Process all labels to calculate the final grade change
-    labelList.forEach((label) => {
-      const gradeChange = label.gradeChange
-      if (gradeChange) {
-        if (gradeChange.startsWith('+') || gradeChange.startsWith('-')) {
-          // Relative grade change
-          const sign = gradeChange.startsWith('+') ? 1 : -1
-          const value = parseInt(gradeChange.slice(1))
-          if (!isNaN(value)) {
-            totalGradeChange += sign * value
-          }
-        } else {
-          // Absolute grade change - use the last absolute grade found
-          const value = parseInt(gradeChange)
-          if (!isNaN(value)) {
-            hasAbsoluteGrade = true
-            absoluteGrade = value
-          }
-        }
+    // Update the current exercise if it matches
+    if (this.currentGroup) {
+      const exercise = this.currentGroup.users.find(
+        (ex) => ex.exerciseSessionId === this.currentExercise?.exerciseSessionId
+      )
+      if (exercise) {
+        exercise.correctedGrade = PlayerCorrectionService.computeGradeChange(
+          exercise.labels,
+          exercise.grade,
+          this.gradeAdjustments.get(exercise.userId)
+        )
       }
-    })
-    let finalGrade: number
-    if (hasAbsoluteGrade) {
-      finalGrade = absoluteGrade
-    } else {
-      finalGrade = originalGrade + totalGradeChange
     }
-
-    // Ensure grade is within valid bounds (0-100)
-    return Math.max(0, Math.min(100, finalGrade))
+    this.changeDetectorRef.markForCheck()
   }
 }
