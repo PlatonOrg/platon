@@ -49,12 +49,19 @@
 <input
   class="ghost-input"
   type="text"
+  list="suggestions"
   [formControl]="form"
   (keydown.enter)="autoValidate()"
   [ngClass]="state.css | css : 'class'"
   [ngStyle]="state.css | css : 'style'"
   [ngStyle]="{ 'justify-items': state.width === 'auto' ? 'center' : 'start' }"
 />
+<datalist id="suggestions">
+  @for(option of state.completion; track $index) {
+  <option value="{{option}}">
+    }
+</datalist>
+
 } @else {
 
 <div>
