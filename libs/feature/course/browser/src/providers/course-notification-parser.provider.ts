@@ -1,6 +1,6 @@
 import { Injector } from '@angular/core'
 import { Router } from '@angular/router'
-import { ImgIcon } from '@cisstech/nge/ui/icon'
+import { ThemeAwareIconService } from '@platon/core/browser'
 import {
   ACTIVITY_MEMBER_CREATION_NOTIFICATION,
   ActivityClosedNotification,
@@ -25,9 +25,10 @@ export const CourseMemberCreationNotificationParser: NotificationParser<CourseMe
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Vous êtes désormais membre du cours “${notification.data.courseName}”`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Vous êtes désormais membre du cours "${notification.data.courseName}"`,
       onClick: ({ onClose }) => {
         router.navigate([`/courses/${notification.data.courseId}`]).catch(console.error)
         onClose()
@@ -42,9 +43,10 @@ export const ActivityMemberCreationNotificationParser: NotificationParser<Activi
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Vous êtes désormais membre de l'activité “${notification.data.activityName}”`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Vous êtes désormais membre de l'activité "${notification.data.activityName}"`,
       onClick: ({ onClose }) => {
         router.navigate([`/courses/${notification.data.courseId}`]).catch(console.error)
         onClose()
@@ -59,9 +61,10 @@ export const CorrectorCreatedNotificationParser: NotificationParser<CorrectorCre
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Vous êtes désormais correcteur de l'activité “${notification.data.activityName}”`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Vous êtes désormais correcteur de l'activité "${notification.data.activityName}"`,
       onClick: ({ onClose }) => {
         router.navigate([`/courses/${notification.data.courseId}`]).catch(console.error)
         onClose()
@@ -76,9 +79,10 @@ export const CorrectorRemovedNotificationParser: NotificationParser<CorrectorRem
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Vous n'êtes plus correcteur de l'activité “${notification.data.activityName}”`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Vous n'êtes plus correcteur de l'activité "${notification.data.activityName}"`,
       onClick: ({ onClose }) => {
         router.navigate([`/courses/${notification.data.courseId}`]).catch(console.error)
         onClose()
@@ -93,9 +97,10 @@ export const CorrectionPendingNotificationParser: NotificationParser<CorrectionP
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Vous avez de nouvelles corrections en attente pour le cours “${notification.data.courseName}”`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Vous avez de nouvelles corrections en attente pour le cours "${notification.data.courseName}"`,
       onClick: ({ onClose }) => {
         router.navigate([`/player/correction/${notification.data.courseId}`]).catch(console.error)
         onClose()
@@ -110,9 +115,10 @@ export const CorrectionAvailableNotificationParser: NotificationParser<Correctio
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Vous pouvez désormais accéder à la correction de l'activité “${notification.data.activityName}”`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Vous pouvez désormais accéder à la correction de l'activité "${notification.data.activityName}"`,
       onClick: ({ onClose }) => {
         router.navigate([`/player/activity/${notification.data.activityId}`]).catch(console.error)
         onClose()
@@ -127,9 +133,10 @@ export const ActivityClosedNotificationParser: NotificationParser<ActivityClosed
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `L'activité “${notification.data.activityName}” du cours “${notification.data.courseName}” est désormais fermée`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `L'activité "${notification.data.activityName}" du cours "${notification.data.courseName}" est désormais fermée`,
       onClick: ({ onClose }) => {
         router.navigate([`/courses/${notification.data.courseId}`]).catch(console.error)
         onClose()
@@ -144,9 +151,10 @@ export const ResourceMovedByAdminNotificationParser: NotificationParser<Resource
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     return {
-      icon: new ImgIcon(`/assets/images/courses/course.svg`),
-      content: `Votre ressource “${notification.data.resourceName}” du cercle “${notification.data.circleName}” a été déplacée dans votre cercle personnel par un administrateur`,
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Votre ressource "${notification.data.resourceName}" du cercle "${notification.data.circleName}" a été déplacée dans votre cercle personnel par un administrateur`,
       onClick: ({ onClose }) => {
         router.navigate([`/resources/${notification.data.resourceId}/overview`]).catch(console.error)
         onClose()
@@ -155,7 +163,7 @@ export const ResourceMovedByAdminNotificationParser: NotificationParser<Resource
   },
 }
 
-export const CourseNotificationParsers = [
+export const CourseNotificationParsers: NotificationParser<unknown>[] = [
   CourseMemberCreationNotificationParser,
   ActivityMemberCreationNotificationParser,
   CorrectorCreatedNotificationParser,

@@ -1,5 +1,5 @@
 import { Provider } from '@angular/core'
-import { NOTIFICATION_PARSER } from '@platon/feature/notification/browser'
+import { NOTIFICATION_PARSER, NotificationParser } from '@platon/feature/notification/browser'
 import { ActivityCorrectorProvider } from './models/activity-corrector.provider'
 import { ActivityGroupProvider } from './models/activity-group.provider'
 import { ActivityMemberProvider } from './models/activity-member.provider'
@@ -35,7 +35,7 @@ export const COURSE_PROVIDERS: Provider[] = [
   { provide: CourseGroupProvider, useClass: RemoteCourseGroupProvider },
   { provide: ActivityGroupProvider, useClass: RemoteActivityGroupProvider },
 
-  ...CourseNotificationParsers.map((provider) => ({
+  ...CourseNotificationParsers.map((provider: NotificationParser<unknown>) => ({
     provide: NOTIFICATION_PARSER,
     multi: true,
     useValue: provider,

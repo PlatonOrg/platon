@@ -5,30 +5,33 @@
 @import '../../../node_modules/ng-zorro-antd/ng-zorro-antd.less';
 @import 'base';
 
-@body-background: #071a2b;
-@component-background: #0d2136;
-@popover-background: #0d2136;
+@body-background: rgb(27, 28, 33);
+@component-background: rgb(27, 28, 33);
+@popover-background: rgb(32, 33, 38);
 
-@primary-color: #171c8f;
+@primary-color: #d09000;
 
 @btn-link-hover-bg: transparent;
-@btn-text-hover-bg: #f6f6f60a;
+@btn-text-hover-bg: rgba(246, 246, 246, 0.04);
 
-@text-color: #d3e3fd;
-@text-color-secondary: #d3e3fdb3;
+@text-color: #f2f2f2;
+@text-color-secondary: rgba(242, 242, 242, 0.7);
 
-@link-color: #d3e3fd;
+@link-color: var(--brand-text-primary);
 //@link-hover-color: color(~`colorPalette('@{link-color}', 5) `);
 //@link-active-color: color(~`colorPalette('@{link-color}', 7) `);
+@link-hover-color: var(--brand-highlight-primary);
+@link-active-color: var(--brand-highlight-primary);
 
-@table-header-bg: #0d2136;
-@table-row-hover-bg: #7cacf814;
+@table-header-bg: rgb(32, 33, 38);
+@table-row-hover-bg: rgba(246, 246, 246, 0.04);
 
-@border-color-base: #d3e3fd4d;
-@border-color-split: #d3e3fd4d;
+@border-color-base: rgba(211, 227, 253, 0.3);
+@border-color-split: rgba(211, 227, 253, 0.12);
 
-@tabs-card-active-color: #d3e3fd;
-@tabs-ink-bar-color: #d3e3fd;
-@tabs-highlight-color: #d3e3fd;
-@tabs-hover-color: #d3e3fd;
-@tabs-active-color: #d3e3fd;
+@tabs-card-active-color: #f2f2f2;
+@tabs-ink-bar-color: var(--brand-highlight-primary);
+@tabs-nav-bar-bg: var(--brand-highlight-primary);
+@tabs-highlight-color: var(--brand-highlight-primary);
+@tabs-hover-color: var(--brand-highlight-primary);
+@tabs-active-color: #f2f2f2;

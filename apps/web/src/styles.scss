@@ -73,7 +73,6 @@
 mat-drawer-container {
   width: 100vw;
   height: 100vh;
-  background-color: var(--brand-background-primary) !important;
 }
 
 drawer-container {
@@ -85,8 +84,6 @@ drawer-container {
 mat-drawer {
   padding: 0;
   width: 240px;
-  background-color: #3c2864 !important;
-  color: white !important;
 }
 
 mat-toolbar {
@@ -94,11 +91,5 @@ mat-toolbar {
   app-toolbar {
     display: block;
     width: 100%;
-  }
-}
-
-.dark-theme {
-  mat-drawer {
-    background-color: var(--brand-background-components) !important;
   }
 }
