@@ -6,6 +6,17 @@
     </ng-template>
   </nz-page-header>
 </header>
+@if(!userCharterAccepted){
+<app-user-charter
+  [user]="user"
+  [userCharter]="userCharter"
+  [userCharterModalVisible]="userCharterModalVisible"
+  (userCharterModalVisibleChange)="userCharterModalVisible = $event"
+  (userCharterAccepted)="onUserCharterAccepted($event)"
+  id="tuto-user-charter"
+>
+</app-user-charter>
+}@else {
 <main>
   <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
     <ui-stepper #stepper (finished)="create()" (changed)="$event === 2 && preloadTemplates()">
@@ -215,3 +226,4 @@
     </ng-container>
   </ng-template>
 </footer>
+}
