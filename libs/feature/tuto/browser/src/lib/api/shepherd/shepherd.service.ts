@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import Shepherd from 'shepherd.js';
+import { Subject } from 'rxjs';
+
+// import '../../styles/shepherd-override.css';
 
 export interface TutorialStep {
   id: string;
@@ -39,14 +42,19 @@ export interface TutorialOptions {
   confirmCancelMessage?: string;
   tourName?: string;
   classPrefix?: string;
+  enableEnterNavigation?: boolean; // Nouvelle option
 }
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShepherdService {
   private currentTour: Shepherd.Tour | null = null;
+  private keyboardListener: ((event: KeyboardEvent) => void) | null = null;
+
+  private tourEndedSubject = new Subject<void>();
+  public tourEnded$ = this.tourEndedSubject.asObservable();
+
   private defaultOptions: TutorialOptions = {
     useModalOverlay: true,
     exitOnEsc: true,
@@ -54,9 +62,9 @@ export class ShepherdService {
     confirmCancel: true,
     confirmCancelMessage: 'Êtes-vous sûr de vouloir quitter le tutoriel ?',
     tourName: 'tutorial',
-    classPrefix: 'shepherd'
+    classPrefix: 'shepherd',
+    enableEnterNavigation: true // Activé par défaut
   };
-
 
   constructor() {}
 
@@ -97,22 +105,65 @@ export class ShepherdService {
     this.currentTour.on('start', () => {
       console.log('Tutoriel démarré');
       document.body.classList.add('shepherd-active');
+
+      // Configurer la navigation par Entrée si activée
+      if (mergedOptions.enableEnterNavigation) {
+        this.setupEnterNavigation();
+      }
     });
 
     this.currentTour.on('complete', () => {
-      console.log('Tutoriel terminé');
       document.body.classList.remove('shepherd-active');
+      this.removeEnterNavigation();
+      this.tourEndedSubject.next();
       this.currentTour = null;
     });
 
     this.currentTour.on('cancel', () => {
-      console.log('Tutoriel annulé');
       document.body.classList.remove('shepherd-active');
+      this.removeEnterNavigation();
+      this.tourEndedSubject.next();
       this.currentTour = null;
     });
 
     // Démarrer le tutoriel
     this.currentTour.start();
+  }
+
+  /**
+   * Configure la navigation avec la touche Entrée
+   */
+  private setupEnterNavigation(): void {
+    this.removeEnterNavigation(); // S'assurer qu'il n'y a pas de listener existant
+
+    this.keyboardListener = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && this.currentTour) {
+        // Vérifier si nous sommes sur la dernière étape
+        const currentStep = this.currentTour.getCurrentStep();
+        if (currentStep) {
+          const currentStepIndex = this.currentTour.steps.findIndex(step => step.id === currentStep.id);
+          const isLastStep = currentStepIndex === this.currentTour.steps.length - 1;
+
+          if (isLastStep) {
+            this.complete();
+          } else {
+            this.next();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', this.keyboardListener, true);
+  }
+
+  /**
+   * Supprime le listener de navigation par Entrée
+   */
+  private removeEnterNavigation(): void {
+    if (this.keyboardListener) {
+      document.removeEventListener('keydown', this.keyboardListener, true);
+      this.keyboardListener = null;
+    }
   }
 
   /**
@@ -191,17 +242,15 @@ export class ShepherdService {
       });
     }
 
-    // Bouton Suivant/Terminer
+    // Bouton Suivant/Terminer avec indication de la touche Entrée
     buttons.push({
-      text: isLastStep ? 'Terminer' : 'Suivant',
+      text: isLastStep ? 'Terminer (Entrée)' : 'Suivant (Entrée)',
       classes: 'shepherd-button shepherd-button-primary',
       action: isLastStep ? () => this.complete() : () => this.next()
     });
 
     return buttons;
   }
-
-
 
   /**
   * Passe à l'étape suivante
@@ -236,6 +285,7 @@ export class ShepherdService {
    */
   stopTutorial(): void {
     if (this.currentTour) {
+      this.removeEnterNavigation();
       this.currentTour.cancel();
       this.currentTour = null;
     }
@@ -277,10 +327,10 @@ export class ShepherdService {
       {
         id: 'welcome',
         title: 'Bienvenue !',
-        text: 'Nous allons vous faire découvrir les fonctionnalités principales de cette application.',
+        text: 'Nous allons vous faire découvrir les fonctionnalités principales de cette application.<br><small>💡 Utilisez les flèches ← → ou la touche Entrée pour naviguer</small>',
         buttons: [
           {
-            text: 'Commencer',
+            text: 'Commencer (Entrée)',
             action: () => this.next()
           },
           {
@@ -350,14 +400,14 @@ export class ShepherdService {
       {
         id: 'validated-step',
         title: 'Étape avec validation',
-        text: description,
+        text: description + '<br><small>💡 Appuyez sur Entrée pour vérifier et continuer</small>',
         attachTo: {
           element: targetElement,
           on: 'bottom'
         },
         buttons: [
           {
-            text: 'Vérifier et continuer',
+            text: 'Vérifier et continuer (Entrée)',
             action: checkAndProceed
           }
         ]
@@ -367,5 +417,21 @@ export class ShepherdService {
     this.startTutorial(steps, {
       tourName: 'validated-tutorial'
     });
+  }
+
+  /**
+   * Désactive temporairement la navigation par Entrée
+   */
+  disableEnterNavigation(): void {
+    this.removeEnterNavigation();
+  }
+
+  /**
+   * Réactive la navigation par Entrée
+   */
+  enableEnterNavigation(): void {
+    if (this.currentTour && !this.keyboardListener) {
+      this.setupEnterNavigation();
+    }
   }
 }
