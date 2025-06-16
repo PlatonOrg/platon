@@ -24,30 +24,42 @@
       </mat-card-content>
     </mat-card>
     <mat-card>
-      <mat-card-header>
-        <mat-card-title>Demo</mat-card-title>
-      </mat-card-header>
       <mat-card-content>
         <ng-container *ngIf="saving; else demoInfo">
           <nz-spin></nz-spin>
         </ng-container>
         <ng-template #demoInfo>
-          <ng-container *ngIf="!hasDemo">
+          @if (!hasDemo) {
+          <ng-container>
+            <mat-card-title class="demo-title">Demo</mat-card-title>
             <button nz-button nzType="primary" (click)="createDemo()" [disabled]="!canEdit">Créer accès démo</button>
           </ng-container>
-          <ng-container *ngIf="hasDemo">
-            <mat-form-field appearance="fill">
-              <mat-label>URL</mat-label>
-              <input matInput [ngModel]="demoUri" readonly />
-              <span matTextSuffix
-                ><button nz-button nzType="primary" (click)="copyUri()">
-                  <span nz-icon nzType="copy" nzTheme="outline"></span></button
-              ></span>
-            </mat-form-field>
-            <button nz-button nzType="primary" (click)="deleteDemo()" [disabled]="!canEdit">
-              Supprimer l'accès démo
-            </button>
+          } @else {
+          <ng-container>
+            <div class="demo-content">
+              <div class="demo-left">
+                <mat-card-title class="demo-title">Demo</mat-card-title>
+                <mat-form-field appearance="fill" class="demo-url-field">
+                  <mat-label>URL</mat-label>
+                  <input matInput [ngModel]="demoUri" readonly />
+                  <span matTextSuffix
+                    ><button nz-button nzType="primary" (click)="copyUri()">
+                      <span nz-icon nzType="copy" nzTheme="outline"></span></button
+                  ></span>
+                </mat-form-field>
+                <div class="demo-qr-mobile">
+                  <ui-qrcode [value]="demoUri"></ui-qrcode>
+                </div>
+                <button nz-button nzType="primary" (click)="deleteDemo()" [disabled]="!canEdit" class="demo-delete-btn">
+                  Supprimer l'accès démo
+                </button>
+              </div>
+              <div class="demo-right">
+                <ui-qrcode [value]="demoUri"></ui-qrcode>
+              </div>
+            </div>
           </ng-container>
+          }
         </ng-template>
       </mat-card-content>
     </mat-card>

@@ -1,6 +1,6 @@
-import { CommonModule, DOCUMENT } from '@angular/common'
+import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, inject } from '@angular/core'
-import { UiError403Component } from '@platon/shared/ui'
+import { UiError403Component, UiQRCodeComponent } from '@platon/shared/ui'
 import { Subscription } from 'rxjs'
 import { CoursePresenter } from '../course.presenter'
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
@@ -31,6 +31,7 @@ import { Router } from '@angular/router'
     FormsModule,
     UiError403Component,
     ReactiveFormsModule,
+    UiQRCodeComponent,
 
     MatInputModule,
     MatCheckboxModule,
@@ -82,8 +83,7 @@ export class CourseSettingsPage implements OnInit, OnDestroy {
   constructor(
     private readonly presenter: CoursePresenter,
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly clipboard: Clipboard,
-    @Inject(DOCUMENT) private document: Document
+    private readonly clipboard: Clipboard
   ) {}
 
   ngOnInit(): void {
@@ -100,7 +100,7 @@ export class CourseSettingsPage implements OnInit, OnDestroy {
         }
         if (!!demo && demo.isPresent()) {
           this.hasDemo = true
-          this.demoUri = this.document.location.hostname + '/demo/' + demo.get().uri
+          this.demoUri = `${location.origin}/demo/${demo.get().uri}`
         } else {
           this.hasDemo = false
           this.demoUri = ''

@@ -11,6 +11,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { firstValueFrom } from 'rxjs'
 import { ResourceService } from '../../api/resource.service'
+import { UiQRCodeComponent } from '@platon/shared/ui'
 
 @Component({
   standalone: true,
@@ -22,6 +23,7 @@ import { ResourceService } from '../../api/resource.service'
     CommonModule,
     CommonModule,
     FormsModule,
+    UiQRCodeComponent,
 
     NzIconModule,
     NzDropDownModule,
@@ -43,6 +45,7 @@ export class ResourceSharingComponent implements OnInit {
 
   protected versions: FileVersion[] = []
   protected visibility: 'public' | 'private' = 'public'
+  protected url = ''
 
   async ngOnInit(): Promise<void> {
     const resource = await firstValueFrom(
@@ -54,12 +57,13 @@ export class ResourceSharingComponent implements OnInit {
     )
     this.versions = resource.metadata?.versions ?? []
     this.visibility = resource.publicPreview ? 'public' : 'private'
+    this.url = `${location.origin}${this.resourceService.previewUrl(this.resourceId, this.resourceVersion)}`
     this.changeDetectorRef.markForCheck()
   }
 
   protected share(): void {
     this.clipboardService
-      .copy(`${location.origin}${this.resourceService.previewUrl(this.resourceId, this.resourceVersion)}`)
+      .copy(this.url)
       .then(() => {
         this.dialogService.success('Lien copié dans le presse-papier')
       })
