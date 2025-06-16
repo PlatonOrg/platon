@@ -50,18 +50,18 @@ $mat-light-theme-foreground: (
   slider-off-active: $dark-disabled-text,
 );
 
-// BACKGROUND LIGHT
+// BACKGROUND LIGHT (couleurs fixes pour compilation SCSS)
 
 $light-background: #ffffff;
-$light-bg-darker-1: darken($light-background, 1%);
-$light-bg-darker-2: darken($light-background, 2%);
-$light-bg-darker-5: darken($light-background, 5%);
-$light-bg-darker-10: darken($light-background, 10%);
-$light-bg-darker-20: darken($light-background, 20%);
-$light-bg-darker-30: darken($light-background, 30%);
-$light-bg-lighter-5: lighten($light-background, 5%);
-$dark-bg-alpha-4: rgba(#292d33, 0.04);
-$dark-bg-alpha-12: rgba(#292d33, 0.12);
+$light-bg-darker-1: #fefefe;
+$light-bg-darker-2: #fcfcfc;
+$light-bg-darker-5: #f5f5f5;
+$light-bg-darker-10: #e6e6e6;
+$light-bg-darker-20: #cccccc;
+$light-bg-darker-30: #b3b3b3;
+$light-bg-lighter-5: #fafafa;
+$dark-bg-alpha-4: rgba(41, 45, 51, 0.04);
+$dark-bg-alpha-12: rgba(41, 45, 51, 0.12);
 
 $mat-light-theme-background: (
   background: $light-background,
@@ -112,16 +112,16 @@ $mat-dark-theme-foreground: (
 
 // BACKGROUND DARK
 
-$dark-background: #071a2b;
-$dark-bg-lighter-5: lighten($dark-background, 5%);
-$dark-bg-lighter-10: lighten($dark-background, 10%);
-$dark-bg-lighter-20: lighten($dark-background, 20%);
-$dark-bg-lighter-30: lighten($dark-background, 30%);
-$light-bg-alpha-4: rgba(#f6f6f6, 0.04);
-$light-bg-alpha-12: rgba(#f6f6f6, 0.12);
+$dark-background-components: rgb(27, 28, 33);
+$dark-bg-lighter-5: lighten($dark-background-components, 5%);
+$dark-bg-lighter-10: lighten($dark-background-components, 10%);
+$dark-bg-lighter-20: lighten($dark-background-components, 20%);
+$dark-bg-lighter-30: lighten($dark-background-components, 30%);
+$light-bg-alpha-4: rgba(246, 246, 246, 0.04);
+$light-bg-alpha-12: rgba(246, 246, 246, 0.12);
 
 $mat-dark-theme-background: (
-  background: $dark-background,
+  background: $dark-background-components,
   status-bar: $dark-bg-lighter-20,
   app-bar: $dark-bg-lighter-5,
   hover: $light-bg-alpha-4,
