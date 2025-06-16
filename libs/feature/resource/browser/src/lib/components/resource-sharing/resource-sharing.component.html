@@ -12,6 +12,7 @@
       <nz-option nzLabel="Visible uniquement dans PLaTon" nzValue="private" />
     </nz-select>
   </div>
+  <ui-qrcode [value]="url"></ui-qrcode>
 
   <div class="row">
     <nz-select class="version-select" [(ngModel)]="resourceVersion" [nzCustomTemplate]="versionTpt">
