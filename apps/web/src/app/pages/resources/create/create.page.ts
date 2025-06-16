@@ -23,8 +23,8 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { SelectionModel } from '@angular/cdk/collections'
-import { AuthService, DialogModule, DialogService, TagService } from '@platon/core/browser'
-import { Level, Topic, User } from '@platon/core/common'
+import { AuthService, DialogModule, DialogService, TagService, UserService } from '@platon/core/browser'
+import { Level, Topic, User, UserCharter } from '@platon/core/common'
 import {
   CircleTreeComponent,
   ResourceItemComponent,
@@ -46,6 +46,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { firstValueFrom } from 'rxjs'
+import { UserCharterComponent } from '../../../widgets/toolbar/user-charter/user-charter.component'
 
 type TemplateSource = {
   circle: CircleTree
@@ -86,6 +87,7 @@ type TemplateSource = {
     ResourcePipesModule,
     ResourceItemComponent,
     ResourceSearchBarComponent,
+    UserCharterComponent,
   ],
 })
 export class ResourceCreatePage implements OnInit {
@@ -99,6 +101,12 @@ export class ResourceCreatePage implements OnInit {
   protected editionMode?: 'scratch' | 'template'
   protected loadingTemplates = false
   protected isFinished = false
+  protected user?: User
+
+  // Used to check if the user has accepted the charter
+  protected userCharterAccepted = true
+  protected userCharter?: UserCharter
+  protected userCharterModalVisible = true
 
   protected tree!: CircleTree
   protected topics: Topic[] = []
@@ -132,6 +140,7 @@ export class ResourceCreatePage implements OnInit {
     private readonly dialogService: DialogService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly resourceService: ResourceService,
+    private readonly userService: UserService,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {}
 
@@ -145,10 +154,11 @@ export class ResourceCreatePage implements OnInit {
     }
 
     const user = (await this.authService.ready()) as User
-    const [tree, topics, levels] = await Promise.all([
+    const [tree, topics, levels, userCharter] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.tagService.listTopics()),
       firstValueFrom(this.tagService.listLevels()),
+      firstValueFrom(this.userService.findUserCharterById(user.id)),
     ])
 
     if (!this.resourceService.canUserCreateResource(user, this.type)) {
@@ -174,6 +184,10 @@ export class ResourceCreatePage implements OnInit {
 
     this.topics = topics
     this.levels = levels
+
+    this.user = user
+    this.userCharter = userCharter
+    this.userCharterAccepted = userCharter?.acceptedUserCharter ?? false
 
     this.loading = false
     this.changeDetectorRef.markForCheck()
@@ -287,5 +301,11 @@ export class ResourceCreatePage implements OnInit {
     this.infos.markAllAsTouched()
     stepper.nextStep()
     this.isFinished = true
+  }
+
+  protected onUserCharterAccepted(updateCharter: UserCharter): void {
+    this.userCharter = { ...updateCharter }
+    this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
+    this.changeDetectorRef.detectChanges()
   }
 }
