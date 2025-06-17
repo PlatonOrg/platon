@@ -71,10 +71,17 @@ export class CorrectionService {
     INNER JOIN "Sessions" activity_session ON activity_session.id=exercise_session.parent_id
     INNER JOIN "Activities" activity ON activity.id=exercise_session.activity_id
     INNER JOIN "Courses" course ON course.id=activity.course_id
+    INNER JOIN LATERAL (
+      SELECT * FROM "Answers" a
+      WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
+      ORDER BY a.created_at DESC
+      LIMIT 1
+    ) answer ON true
     LEFT JOIN "Corrections" correction ON correction.id=exercise_session.correction_id
     WHERE
       ${activityId ? 'activity.id=$2 AND' : ''}
       exercise_session.user_id<>$1 AND
+      answer.variables IS NOT NULL AND
       (activity_session.variables->'navigation'->>'terminated')::boolean = TRUE AND
       EXISTS (
         SELECT 1 FROM "ActivityCorrectorView" corrector
