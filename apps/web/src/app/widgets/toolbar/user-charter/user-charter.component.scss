@@ -1,0 +1,37 @@
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  button {
+    background-color: #32399C;
+    color: #fff;
+    border: none;
+  }
+
+  button:hover {
+    background-color: darken(#32399C, 10%);
+  }
+
+  button[nzType="default"] {
+    background-color: #fff;
+    color: #32399C;
+    border: 1px solid #32399C;
+  }
+
+  button[nzType="default"]:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.user-charter-content {
+  main {
+    margin-bottom: 20px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+  }
+}
