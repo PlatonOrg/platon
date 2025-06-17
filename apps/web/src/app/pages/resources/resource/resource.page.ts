@@ -23,6 +23,7 @@ import { UiLayoutTabDirective, UiLayoutTabsComponent, UiModalIFrameComponent } f
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ResourcePresenter } from './resource.presenter'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
+import { ResourcePageTutorialService } from '@platon/feature/tuto/browser'
 
 @Component({
   standalone: true,
@@ -65,6 +66,7 @@ export class ResourcePage implements OnInit, OnDestroy {
   private readonly presenter = inject(ResourcePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly router = inject(Router)
+  private readonly resourcePageTutorialService = inject(ResourcePageTutorialService)
 
   protected context = this.presenter.defaultContext()
 
@@ -83,6 +85,7 @@ export class ResourcePage implements OnInit, OnDestroy {
         this.changeDetectorRef.markForCheck()
       })
     )
+    this.checkFirstVisit()
   }
 
   ngOnDestroy(): void {
@@ -155,5 +158,23 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected referencesNumber(): number {
     return this.context.resource?.statistic?.exercise?.references?.total || 0
+  }
+
+  /**
+   * Vérifie si c'est la première visite de l'utilisateur
+   */
+  private checkFirstVisit(): void {
+    setTimeout(() => {
+      this.startResourcesTutorial()
+    }, 1000)
+  }
+
+  /**
+   * Démarre le tutoriel complet de l'espace de travail
+   */
+  startResourcesTutorial(): void {
+    if (this.context.resource) {
+      this.resourcePageTutorialService.startResourcePageTutorial(this.context.resource, false, false, false)
+    }
   }
 }

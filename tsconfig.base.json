@@ -62,12 +62,11 @@
       "@platon/feature/result/browser": ["libs/feature/result/browser/src/index.ts"],
       "@platon/feature/result/common": ["libs/feature/result/common/src/index.ts"],
       "@platon/feature/result/server": ["libs/feature/result/server/src/index.ts"],
-      "@platon/feature/tuto/browser": ["feature/tuto/src/index.ts"],
+      "@platon/feature/tuto/browser": ["libs/feature/tuto/browser/src/index.ts"],
       "@platon/feature/webcomponent": ["libs/feature/webcomponent/src/index.ts"],
       "@platon/graphql": [".graphql/types.ts"],
       "@platon/shared/server": ["libs/shared/server/src/index.ts"],
-      "@platon/shared/ui": ["libs/shared/ui/src/index.ts"],
-      "tuto": ["libs/feature/tuto/browser/src/index.ts"]
+      "@platon/shared/ui": ["libs/shared/ui/src/index.ts"]
     }
   },
   "include": ["./graphql/*.ts"],

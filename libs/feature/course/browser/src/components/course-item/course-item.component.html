@@ -1,10 +1,17 @@
-<nz-ribbon [nzText]="item.statistic ? ribbon : null" [nzColor]="progressColor">
+<nz-ribbon
+  [nzText]="item.statistic ? ribbon : null"
+  [nzColor]="progressColor"
+  class="tuto-course-item-container"
+  [attr.data-course-id]="item.id"
+  [id]="'tuto-course-item-' + item.id"
+>
   <ui-list-item-article
     [style.--border-color]="'red'"
     [articleTitle]="title"
     [articleDescription]="desc"
     [articleIconTemplate]="image"
     [articleUrl]="['/courses/', item.id]"
+    class="tuto-course-article"
   >
     <ui-list-item-article-action
       *ngIf="item.statistic"

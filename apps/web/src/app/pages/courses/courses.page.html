@@ -5,6 +5,7 @@
   </ui-search-bar>
   <button
     *ngIf="canCreateCourse"
+    id="tuto-courses-create-button"
     nz-button
     nzType="primary"
     nzShape="round"
@@ -41,6 +42,7 @@
     <button
       class="show-all-button"
       *ngIf="displayShowAllButton"
+      id="tuto-courses-show-all-button"
       nz-button
       nzType="default"
       nzShape="round"
@@ -49,7 +51,7 @@
     >
       Afficher tous les cours
     </button>
-    <course-list [items]="items">
+    <course-list [items]="items" id="tuto-courses-course-list">
       <h2>Aucun cours ne correspond à votre recherche</h2>
       <ul>
         <li>Vérifiez les termes de votre recherche</li>

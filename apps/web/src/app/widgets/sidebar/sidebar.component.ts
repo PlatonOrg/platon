@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
 import { Router, RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { User, UserRoles, isTeacherRole } from '@platon/core/common'
-import { SidebarTutorialService } from 'tuto'
+import { SidebarTutorialService } from '@platon/feature/tuto/browser'
+import { NzModalModule } from 'ng-zorro-antd/modal'
 
 type NavLink = {
   url?: string | null
@@ -19,8 +20,7 @@ type NavLink = {
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule, NzModalModule],
 })
 export class SidebarComponent implements OnInit {
   protected readonly topLinks: NavLink[] = []
@@ -102,7 +102,6 @@ export class SidebarComponent implements OnInit {
           ]
         : [])
     )
-    this.checkFirstVisit()
     this.changeDetectorRef.markForCheck()
   }
 
@@ -117,43 +116,7 @@ export class SidebarComponent implements OnInit {
     }
   }
 
-  // Pour le tutoriel
-  protected isFirstVisit = true
-
-  /**
-   * Vérifie si c'est la première visite de l'utilisateur
-   */
-  private checkFirstVisit(): void {
-    // Si c'est la première visite, démarrer le tutoriel automatiquement après un délai
-    if (this.isFirstVisit && this.user) {
-      setTimeout(() => {
-        this.startSidebarTutorial()
-      }, 1500) // Délai de 1.5 secondes pour permettre à la page de se charger
-    }
-  }
-
-  /**
-   * Démarre le tutoriel complet de la sidebar
-   */
-  startSidebarTutorial(): void {
-    if (!this.user) return
-
-    this.sidebarTutorialService.startSidebarTutorial(this.user, this.topLinks, this.bottomLinks, (route: string) =>
-      this.router.navigate([route])
-    )
-
-    // Marquer le tutoriel comme vu
-    localStorage.setItem(`platon-sidebar-tutorial-${this.user.id}`, 'true')
-  }
-
-  /**
-   * Réinitialise le tutoriel (pour les tests ou si l'utilisateur veut le revoir)
-   */
-  resetTutorial(): void {
-    if (this.user) {
-      localStorage.removeItem(`platon-sidebar-tutorial-${this.user.id}`)
-      this.isFirstVisit = true
-      this.startSidebarTutorial()
-    }
+  protected generateId(title: string): string {
+    return 'tuto-sidebar-' + title.toLowerCase().replace(/ /g, '-')
   }
 }

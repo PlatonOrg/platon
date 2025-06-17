@@ -56,8 +56,8 @@ import {
   ResourceTypes,
 } from '@platon/feature/resource/common'
 
-import { ShepherdService } from 'tuto'
-import { ResourcesTutorialService } from 'tuto'
+import { ShepherdService } from '@platon/feature/tuto/browser'
+import { ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
@@ -181,10 +181,6 @@ export default class ResourcesPage implements OnInit, OnDestroy {
   protected isSmallScreen = false
   protected drawerVisible = false
 
-  // Pour le tutoriel
-  protected isFirstVisit = true
-  protected hasSearched = false
-
   protected toggleSidebar(): void {
     this.sidebarCollapsed = !this.sidebarCollapsed
     localStorage.setItem('resources-sidebar-collapsed', this.sidebarCollapsed.toString())
@@ -296,17 +292,16 @@ export default class ResourcesPage implements OnInit, OnDestroy {
         if (e.q && e.q.length > 0) {
           this.hasSearched = true
         }
-
+        this.checkForResourcesTutorial()
         this.changeDetectorRef.markForCheck()
       })
     )
 
     this.checkScreenSize()
     window.addEventListener('resize', this.handleResize)
-
-    // Si c'est la première visite, on lance le tutoriel
-    this.checkFirstVisit()
   }
+
+  hasSearched = false
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())
@@ -388,18 +383,11 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     this.changeDetectorRef.markForCheck()
   }
 
-  /**
-   * Vérifie si c'est la première visite de l'utilisateur
-   */
   private checkFirstVisit(): void {
-    const hasSeenTutorial = localStorage.getItem(`platon-resources-tutorial-${this.user?.id}`)
-    this.isFirstVisit = !hasSeenTutorial
-
-    // Si c'est la première visite, démarrer le tutoriel automatiquement après un délai
-    if (this.isFirstVisit && this.user) {
+    if (this.user) {
       setTimeout(() => {
         this.startResourcesTutorial()
-      }, 1000) // Délai de 1 seconde pour permettre à la page de se charger
+      }, 100) // Délai de 100 ms pour permettre à la page de se charger
     }
   }
 
@@ -418,20 +406,32 @@ export default class ResourcesPage implements OnInit, OnDestroy {
         this.search(this.filters, query)
       }
     )
+  }
 
-    // Marquer le tutoriel comme vu
-    //localStorage.setItem(`platon-resources-tutorial-${this.user.id}`, 'true')
+  private checkForResourcesTutorial(): void {
+    this.subscriptions.push(
+      this.activatedRoute.queryParams.subscribe((params: any) => {
+        if (params['tutorial'] === 'workspace' && this.user) {
+          this.resetTutorialParam()
+
+          setTimeout(() => {
+            this.startResourcesTutorial()
+          }, 500)
+        }
+      })
+    )
   }
 
   /**
-   * Réinitialise le tutoriel
+   * Réinitialise le paramètre tutorial dans l'URL
    */
-  resetTutorial(): void {
-    if (this.user) {
-      //localStorage.removeItem(`platon-resources-tutorial-${this.user.id}`)
-      this.isFirstVisit = true
-      this.hasSearched = false
-      this.startResourcesTutorial()
-    }
+  private resetTutorialParam(): void {
+    this.router
+      .navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { tutorial: null },
+        queryParamsHandling: 'merge',
+      })
+      .catch(console.error)
   }
 }

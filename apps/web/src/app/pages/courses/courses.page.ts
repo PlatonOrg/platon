@@ -31,6 +31,7 @@ import {
 } from '@platon/feature/course/browser'
 import { Course, CourseFilters, CourseOrderings } from '@platon/feature/course/common'
 import { UserRoles } from '@platon/core/common'
+import { CourseManagementTutorialService } from '@platon/feature/tuto/browser'
 
 @Component({
   standalone: true,
@@ -101,6 +102,7 @@ export class CoursesPage implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly courseService: CourseService,
+    private readonly courseManagementTutorialService: CourseManagementTutorialService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {}
@@ -150,6 +152,8 @@ export class CoursesPage implements OnInit, OnDestroy {
         this.totalMatches = response.total
         this.searching = false
 
+        this.checkForCourseTutorial()
+
         this.changeDetectorRef.markForCheck()
       })
     )
@@ -195,6 +199,41 @@ export class CoursesPage implements OnInit, OnDestroy {
         queryParamsHandling: 'merge',
       })
       .catch(console.error)
+  }
+
+  private checkForCourseTutorial(): void {
+    this.subscriptions.push(
+      this.activatedRoute.queryParams.subscribe((params: any) => {
+        if (params['tutorial'] === 'course-management' && this.user) {
+          this.resetTutorialParam()
+
+          setTimeout(() => {
+            this.startCourseManagementTutorial()
+          }, 500)
+        }
+      })
+    )
+  }
+
+  /**
+   * Réinitialise le paramètre tutorial dans l'URL
+   */
+  private resetTutorialParam(): void {
+    this.router
+      .navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { tutorial: null },
+        queryParamsHandling: 'merge',
+      })
+      .catch(console.error)
+  }
+
+  /**
+   * Démarre le tutoriel de gestion de cours
+   */
+  startCourseManagementTutorial(): void {
+    if (!this.user) return
+    this.courseManagementTutorialService.startCourseManagementTutorial(this.user, this.items)
   }
 }
 

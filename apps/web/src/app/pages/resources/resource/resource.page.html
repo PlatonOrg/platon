@@ -4,6 +4,7 @@
       <ng-template #header>
         <nz-breadcrumb nzSeparator="" nzRouteLabel="breadcrumb">
           <button
+            id="tuto-tree-button"
             *ngIf="context.circles"
             class="hide-on-mobile"
             nz-button
@@ -23,6 +24,7 @@
           <nz-breadcrumb-item>
             <mat-icon>{{ context.resource.type | resourceIcon }}</mat-icon>
             <span
+              id="tuto-resource-name"
               nz-typography
               [nzEditable]="context.resource.permissions?.write"
               [nzContent]="context.resource.name"
@@ -33,6 +35,7 @@
       </ng-template>
     </nz-page-header>
     <p
+      id="tuto-resource-description"
       nz-typography
       *ngIf="!isOtherPersonal"
       [nzEditable]="context.resource.permissions?.write"
@@ -42,7 +45,7 @@
     <div class="container-toolbar">
       <nz-button-group>
         <nz-select
-          id="status"
+          id="tuto-status"
           name="status"
           nzShowSearch
           [ngModel]="context.resource.status"
@@ -58,6 +61,7 @@
       </nz-button-group>
       <nz-button-group>
         <button
+          id="tuto-watch-button"
           nz-tooltip="Suivre une ressource vous permet notamment de l'ajouter dans vos cours/activités et de recevoir des notifications lorsqu'elle est mise à jour."
           nz-button
           nzType="default"
@@ -68,6 +72,7 @@
           <span class="hide-on-mobile">{{ context.resource.permissions?.watcher ? 'Ne plus suivre' : 'Suivre' }}</span>
         </button>
         <button
+          id="tuto-join-button"
           *ngIf="
             context.user?.role !== 'admin' &&
             context.resource.type === 'CIRCLE' &&
@@ -82,7 +87,14 @@
           <i nz-icon nzType="user-add" nzTheme="outline"></i>
           <span class="hide-on-mobile">Demander à rejoindre</span>
         </button>
-        <button *ngIf="context.resource.permissions?.waiting" nz-button nzDanger nzType="default" (click)="unjoin()">
+        <button
+          id="tuto-cancel-join-button"
+          *ngIf="context.resource.permissions?.waiting"
+          nz-button
+          nzDanger
+          nzType="default"
+          (click)="unjoin()"
+        >
           <i nz-icon nzType="user-add" nzTheme="outline"></i>
           <span class="hide-on-mobile">Annuler la demande de rejoindre</span>
         </button>
@@ -90,6 +102,7 @@
       <div class="spacer"></div>
       <nz-button-group>
         <button
+          id="tuto-move-to-owner-button"
           *ngIf="isAdmin() && context.resource.type !== 'CIRCLE' && !context.resource.parent?.personal!"
           nz-button
           nzType="primary"
@@ -105,6 +118,7 @@
           <i nz-icon nzType="logout" nzTheme="outline"></i>
         </button>
         <button
+          id="tuto-delete-button"
           *ngIf="context.resource.type !== 'CIRCLE' && context.resource.parent?.personal!"
           nz-button
           nzType="primary"
@@ -120,6 +134,7 @@
           <span class="hide-on-mobile">Supprimer</span>
         </button>
         <button
+          id="tuto-move-button"
           *ngIf="context.resource.type === 'EXERCISE' && canMove()"
           nz-button
           [routerLink]="['/resources/move']"
@@ -128,11 +143,12 @@
           <i nz-icon nzType="copy" nzTheme="outline"></i>
           <span class="hide-on-mobile">Déplacer</span>
         </button>
-        <button nz-button (click)="openTab(context.editorUrl!)">
+        <button id="tuto-editor-button" nz-button (click)="openTab(context.editorUrl!)">
           <i nz-icon nzType="edit" nzTheme="outline"></i>
           <span class="hide-on-mobile">Ouvrir dans l'éditeur</span>
         </button>
         <button
+          id="tuto-share-button"
           *ngIf="context.resource.type !== 'CIRCLE'"
           nz-button
           [nz-popover]
@@ -144,6 +160,7 @@
           <span class="hide-on-mobile">Partager</span>
         </button>
         <button
+          id="tuto-preview-button"
           *ngIf="context.resource.type !== 'CIRCLE'"
           nz-button
           nzType="primary"
@@ -155,25 +172,26 @@
       </nz-button-group>
     </div>
   </ng-container>
-  <ui-layout-tab [link]="['overview']">
+
+  <ui-layout-tab id="tuto-overview-tab" [link]="['overview']">
     <ng-template>
       <span nz-icon nzType="dashboard" nzTheme="outline"></span>
       Vue d'ensemble
     </ng-template>
   </ui-layout-tab>
-  <ui-layout-tab [link]="['browse']">
+  <ui-layout-tab id="tuto-browse-tab" [link]="['browse']">
     <ng-template>
       <span nz-icon nzType="folder" nzTheme="outline"></span>
       Explorer
     </ng-template>
   </ui-layout-tab>
-  <ui-layout-tab [link]="['events']">
+  <ui-layout-tab id="tuto-events-tab" [link]="['events']">
     <ng-template>
       <span nz-icon nzType="history" nzTheme="outline"></span>
       Évènements
     </ng-template>
   </ui-layout-tab>
-  <ui-layout-tab [link]="['settings']" [linkParams]="{ tab: 'informations' }">
+  <ui-layout-tab id="tuto-settings-tab" [link]="['settings']" [linkParams]="{ tab: 'informations' }">
     <ng-template>
       <span nz-icon nzType="setting" nzTheme="outline"></span>
       Paramètres
