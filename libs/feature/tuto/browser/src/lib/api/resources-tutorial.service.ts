@@ -48,7 +48,7 @@ export class ResourcesTutorialService {
         buttons: [
           {
             text: 'Commencer le tutoriel',
-            action: () => this.shepherdService.next()
+            action: () => { this.shepherdService.next(); this.shepherdService.disableEnterNavigation(); }
           },
           {
             text: 'Passer le tutoriel',
@@ -88,10 +88,12 @@ export class ResourcesTutorialService {
             text: 'J\'ai fait ma recherche',
             action: () => {
               if (hasSearched()) {
+                this.shepherdService.enableEnterNavigation();
                 this.shepherdService.next();
               } else {
                 // Faire une recherche automatique d'exemple
-                performSearch('python');
+                this.shepherdService.enableEnterNavigation();
+                performSearch('Demo tutoriel');
                 setTimeout(() => this.shepherdService.next(), 1000);
               }
             }
@@ -202,7 +204,7 @@ export class ResourcesTutorialService {
         title: 'Utilisons les filtres avancés !',
         text: 'Maintenant que vous connaissez l\'interface, apprenons à filtrer précisément les résultats. Cliquez sur le bouton filtre dans la barre de recherche.',
         attachTo: {
-          element: '#tuto_filter_list',//'[data-tutorial-target="filter-button"]',
+          element: '#tuto_filter_list',
           on: 'bottom'
         },
         advanceOn: {
@@ -240,29 +242,38 @@ export class ResourcesTutorialService {
         }
       },
       {
+        id: 'filter-drawer-intro',
+        title: 'Panneau de filtres',
+        text: 'Les filtres avancés vous permettent de préciser votre recherche selon différents critères.',
+        when: {
+          show: async () => {
+            return this.waitForFilterDrawer();
+          }
+        }
+      },
+      {
         id: 'filter-drawer-open',
         title: 'Panneau de recherche avancée',
         text: 'Voici le panneau de recherche avancée. Vous allez maintenant apprendre à filtrer par type de ressource. Cochez uniquement "Cercle" pour voir tous les cercles disponibles.',
-        attachTo: {
-          element: '.ant-drawer-content-wrapper',
-          on: 'left'
-        },
-          when: {
-            show: async () => {
-              // Attendre que le drawer soit visible
-              await this.waitForFilterDrawer();
-              // Puis effacer automatiquement la recherche
-              const searchInput = document.querySelector('ui-search-bar input[type="search"]') as HTMLInputElement;
-              if (searchInput) {
-                searchInput.value = '';
-                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                searchInput.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('Recherche automatiquement effacée');
-                performSearch(''); // Effacer la recherche
-              }
+        when: {
+          show: async () => {
+            // Attendre que le drawer soit complètement visible
+            await this.waitForFilterDrawer();
+
+            // Attendre que l'élément spécifique soit présent dans le DOM
+            await this.waitForElement('#tuto-recherche-avancee');
+
+            // Puis effacer automatiquement la recherche
+            const searchInput = document.querySelector('ui-search-bar input[type="search"]') as HTMLInputElement;
+            if (searchInput) {
+              searchInput.value = '';
+              searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+              searchInput.dispatchEvent(new Event('change', { bubbles: true }));
+              performSearch(''); // Effacer la recherche
             }
           }
-        },
+        }
+      },
       {
         id: 'select-circle-type',
         title: 'Sélectionnez le type "Cercle"',
@@ -279,13 +290,10 @@ export class ResourcesTutorialService {
               setTimeout(() => {
                 // Sélectionner automatiquement Cercle et désélectionner les autres
                 const checkboxes = document.querySelectorAll('#tuto-types-recourses mat-checkbox');
-                console.log('Nombre de checkboxes trouvées:', checkboxes.length);
-
                 checkboxes.forEach(checkbox => {
                   const formControlName = (checkbox as HTMLElement).getAttribute('formcontrolname') ||
                                          (checkbox as HTMLElement).getAttribute('formControlName') ||
                                          (checkbox as HTMLElement).getAttribute('ng-reflect-name');
-                  console.log('FormControlName trouvé:', formControlName);
 
                   if (formControlName === 'CIRCLE') {
                     // Cocher Cercle s'il n'est pas déjà coché
@@ -329,7 +337,6 @@ export class ResourcesTutorialService {
                 }
 
                 const allCheckboxes = typeSection.querySelectorAll('mat-checkbox');
-                console.log('Checkboxes trouvées:', allCheckboxes.length);
 
                 let circleChecked = false;
 
@@ -338,8 +345,6 @@ export class ResourcesTutorialService {
                                          (cb as HTMLElement).getAttribute('formControlName') ||
                                          (cb as HTMLElement).getAttribute('ng-reflect-name');
                   const isChecked = this.isCheckboxChecked(cb as HTMLElement);
-                  console.log('Checkbox:', formControlName, 'Cochée:', isChecked);
-
                   if (formControlName === 'CIRCLE' && isChecked) {
                     circleChecked = true;
                   }
@@ -411,10 +416,6 @@ export class ResourcesTutorialService {
         id: 'circles-list',
         title: 'Liste des cercles',
         text: 'Voici tous les cercles disponibles ! Chaque cercle peut contenir des exercices, activités et autres ressources.',
-        attachTo: {
-          element: '#tuto-resources-list',
-          on: 'top'
-        },
         when: {
           show: () => {
             // Attendre que les résultats soient chargés
@@ -603,9 +604,8 @@ export class ResourcesTutorialService {
 
       // Timeout de sécurité après 5 secondes
       setTimeout(() => {
-        console.warn('Timeout waiting for filter drawer');
         resolve();
-      }, 5000);
+      }, 1000);
     });
   }
 
@@ -684,6 +684,35 @@ export class ResourcesTutorialService {
     this.shepherdService.startTutorial(steps, {
       tourName: `${action}-action-tutorial`,
       useModalOverlay: false
+    });
+  }
+
+    /**
+   * Attend qu'un élément spécifique soit présent dans le DOM
+   */
+  private waitForElement(selector: string): Promise<HTMLElement> {
+    return new Promise<HTMLElement>((resolve) => {
+      const checkElement = () => {
+        const element = document.querySelector(selector) as HTMLElement;
+        if (element) {
+          // L'élément est présent dans le DOM
+          setTimeout(() => {
+            resolve(element);
+          }, 100); // Court délai pour s'assurer que l'élément est complètement rendu
+        } else {
+          // Continuer à vérifier toutes les 100ms
+          setTimeout(checkElement, 100);
+        }
+      };
+
+      // Commencer à vérifier
+      checkElement();
+
+      // Timeout de sécurité après 5 secondes
+      setTimeout(() => {
+        console.warn(`Timeout waiting for element: ${selector}`);
+        resolve(document.querySelector(selector) as HTMLElement);
+      }, 5000);
     });
   }
 

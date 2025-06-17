@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service';
 import { User, UserRoles, isTeacherRole } from '@platon/core/common';
+import { Router, RouterModule } from '@angular/router'
+
 
 export interface NavigationChoice {
   title: string;
   url: string;
   icon: string;
   description: string;
+  queryParams?: { [key: string]: string };
 }
 
 @Injectable({
@@ -14,9 +17,11 @@ export interface NavigationChoice {
 })
 export class SidebarTutorialService {
   private selectedNavigation: string | null = null;
+  private user: User | null = null;
 
   constructor(
-    private shepherdService: ShepherdService
+    private shepherdService: ShepherdService,
+    private router: Router
   ) {}
 
   /**
@@ -24,11 +29,9 @@ export class SidebarTutorialService {
    */
   startSidebarTutorial(
     user: User,
-    topLinks: any[],
-    bottomLinks: any[],
-    navigateCallback: (route: string) => void
   ): void {
-    const steps = this.buildTutorialSteps(user, topLinks, bottomLinks, navigateCallback);
+    this.user = user;
+    const steps = this.buildTutorialSteps(user);
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'sidebar-tutorial',
@@ -40,18 +43,16 @@ export class SidebarTutorialService {
 
   /**
    * Construit les étapes du tutoriel en fonction de l'utilisateur
+   * Texte adapté pour les enseignants et administrateurs
    */
   private buildTutorialSteps(
-    user: User,
-    topLinks: any[],
-    bottomLinks: any[],
-    navigateCallback: (route: string) => void
+    user: User
   ): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
         id: 'welcome',
         title: 'Bienvenue dans la navigation PLaTon !',
-        text: 'Ce tutoriel va vous présenter les différentes sections de l\'application. Découvrons ensemble comment naviguer dans PLaTon.',
+        text: 'Ce tutoriel va vous présenter les différentes sections de l\'interface enseignant. Découvrons ensemble comment naviguer efficacement dans PLaTon pour gérer vos cours et ressources.',
         buttons: [
           {
             text: 'Commencer le tutoriel',
@@ -67,7 +68,7 @@ export class SidebarTutorialService {
       {
         id: 'logo',
         title: 'Logo PLaTon',
-        text: 'Le logo PLaTon vous permet de revenir rapidement au tableau de bord depuis n\'importe quelle page.',
+        text: 'Le logo PLaTon vous permet de revenir rapidement au tableau de bord depuis n\'importe quelle page, vous donnant un accès rapide à toutes les fonctionnalités essentielles.',
         attachTo: {
           element: '#tuto-sidebar-logo',
           on: 'right'
@@ -76,7 +77,7 @@ export class SidebarTutorialService {
       {
         id: 'dashboard',
         title: 'Tableau de bord',
-        text: 'Le tableau de bord est votre page d\'accueil. Vous y retrouvez un résumé de votre activité et vos cours récents.',
+        text: 'Le tableau de bord est votre centre de contrôle. Vous y retrouvez un résumé de l\'activité de vos cours, les statistiques d\'utilisation et les dernières notifications importantes.',
         attachTo: {
           element: '#tuto-sidebar-tableau-de-bord',
           on: 'right'
@@ -85,7 +86,7 @@ export class SidebarTutorialService {
       {
         id: 'courses',
         title: 'Section Cours',
-        text: 'Accédez à tous vos cours, qu\'ils soient en cours, terminés ou à venir. C\'est le cœur de votre apprentissage sur PLaTon.',
+        text: 'Gérez tous vos cours, créez de nouvelles sessions et suivez la progression de vos étudiants. C\'est ici que vous organisez votre enseignement et structurez votre contenu pédagogique.',
         attachTo: {
           element: '#tuto-sidebar-cours',
           on: 'right'
@@ -94,7 +95,7 @@ export class SidebarTutorialService {
       {
         id: 'corrections',
         title: 'Corrections',
-        text: 'Consultez les corrections de vos exercices et suivez votre progression. Les enseignants peuvent y corriger les travaux des étudiants.',
+        text: 'Accédez aux travaux de vos étudiants qui nécessitent une évaluation manuelle. Vous pouvez y fournir des retours détaillés et attribuer des notes pour les exercices non auto-évalués.',
         attachTo: {
           element: '#tuto-sidebar-corrections',
           on: 'right'
@@ -103,11 +104,11 @@ export class SidebarTutorialService {
     ];
 
     // Ajouter l'espace de travail pour les enseignants
-    if (isTeacherRole(user.role)) {
+    if (isTeacherRole(user.role) || user.role === UserRoles.admin) {
       steps.push({
         id: 'workspace',
         title: 'Espace de travail',
-        text: 'Votre espace personnel pour créer et organiser vos ressources pédagogiques : exercices, activités, et cercles de travail.',
+        text: 'Votre atelier de création pédagogique. Créez et organisez vos ressources : exercices interactifs, activités d\'apprentissage, et cercles thématiques. C\'est le cœur créatif de PLaTon pour les enseignants.',
         attachTo: {
           element: '#tuto-sidebar-espace-de-travail',
           on: 'right'
@@ -120,7 +121,7 @@ export class SidebarTutorialService {
       steps.push({
         id: 'admin',
         title: 'Administration',
-        text: 'Accédez au panneau d\'administration pour gérer les utilisateurs, les cours et les paramètres de la plateforme.',
+        text: 'En tant qu\'administrateur, vous avez accès au panneau d\'administration complet. Gérez les utilisateurs, configurez les paramètres globaux, supervisez l\'utilisation de la plateforme et maintenez son bon fonctionnement.',
         attachTo: {
           element: '#tuto-sidebar-administration',
           on: 'right'
@@ -133,7 +134,7 @@ export class SidebarTutorialService {
       {
         id: 'account',
         title: 'Mon compte',
-        text: 'Gérez votre profil, vos préférences et vos informations personnelles.',
+        text: 'Personnalisez votre profil enseignant, gérez vos préférences d\'interface et vos informations de contact. Les paramètres que vous définissez ici affectent votre expérience sur l\'ensemble de la plateforme.',
         attachTo: {
           element: '#tuto-sidebar-mon-compte',
           on: 'right'
@@ -146,7 +147,7 @@ export class SidebarTutorialService {
       steps.push({
         id: 'documentation',
         title: 'Documentation',
-        text: 'Accédez à la documentation complète de PLaTon pour découvrir toutes les fonctionnalités avancées.',
+        text: 'Accédez à la documentation technique complète de PLaTon, incluant des guides pour la création d\'exercices avancés, l\'utilisation des langages spécifiques et les bonnes pratiques pédagogiques recommandées.',
         attachTo: {
           element: '#tuto-sidebar-documentation',
           on: 'right'
@@ -157,12 +158,12 @@ export class SidebarTutorialService {
     // Étape finale avec choix de navigation
     steps.push({
       id: 'navigation-choice',
-      title: 'Où voulez-vous commencer ?',
+      title: 'Où souhaitez-vous commencer votre parcours ?',
       text: this.buildNavigationChoiceHTML(user),
       buttons: [
         {
           text: 'Aller à la section choisie',
-          action: () => this.handleNavigationChoice(navigateCallback)
+          action: () => this.handleNavigationChoice()
         },
         {
           text: 'Terminer le tutoriel',
@@ -243,24 +244,25 @@ export class SidebarTutorialService {
    */
   private getNavigationChoices(user: User): NavigationChoice[] {
     const choices: NavigationChoice[] = [
-      {
-        title: 'Tableau de bord',
-        url: '/dashboard',
-        icon: '📊📈',
-        description: 'Commencer par voir votre vue d\'ensemble'
-      },
+      // {
+      //   title: 'Tableau de bord',
+      //   url: '/dashboard',
+      //   icon: '📊📈',
+      //   description: 'Commencer par voir votre vue d\'ensemble'
+      // },
       {
         title: 'Cours',
         url: '/courses',
         icon: '📚',
-        description: 'Explorer les cours disponibles'
+        description: 'Explorer les cours disponibles',
+        queryParams: { tutorial: 'course-management' }
       },
-      {
-        title: 'Corrections',
-        url: '/corrections',
-        icon: '📝',
-        description: 'Voir vos exercices à corriger'
-      }
+      // {
+      //   title: 'Corrections',
+      //   url: '/corrections',
+      //   icon: '📝',
+      //   description: 'Voir vos exercices à corriger'
+      // }
     ];
 
     if (isTeacherRole(user.role)) {
@@ -268,25 +270,26 @@ export class SidebarTutorialService {
         title: 'Espace de travail',
         url: '/resources',
         icon: '🛠️',
-        description: 'Créer et gérer vos ressources'
+        description: 'Créer et gérer vos ressources',
+        queryParams: { tutorial: 'workspace' }
       });
     }
 
-    if (user.role === UserRoles.admin) {
-      choices.push({
-        title: 'Administration',
-        url: '/admin',
-        icon: '🔧',
-        description: 'Gérer la plateforme'
-      });
-    }
+    // if (user.role === UserRoles.admin) {
+    //   choices.push({
+    //     title: 'Administration',
+    //     url: '/admin',
+    //     icon: '🔧',
+    //     description: 'Gérer la plateforme'
+    //   });
+    // }
 
-    choices.push({
-      title: 'Mon compte',
-      url: '/account/about-me',
-      icon: '👤',
-      description: 'Configurer votre profil'
-    });
+    // choices.push({
+    //   title: 'Mon compte',
+    //   url: '/account/about-me',
+    //   icon: '👤',
+    //   description: 'Configurer votre profil'
+    // });
 
     return choices;
   }
@@ -321,9 +324,9 @@ export class SidebarTutorialService {
   }
 
   /**
-   * Gère la navigation vers la section choisie
-   */
-  private handleNavigationChoice(navigateCallback: (route: string) => void): void {
+ * Gère la navigation vers la section choisie
+ */
+  private handleNavigationChoice(): void {
     if (!this.selectedNavigation) {
       alert('Veuillez sélectionner une section avant de continuer.');
       return;
@@ -332,55 +335,17 @@ export class SidebarTutorialService {
     // Terminer le tutoriel
     this.shepherdService.complete();
 
+    const selectedChoice = this.getNavigationChoices(this.user as User).find(
+      choice => choice.url === this.selectedNavigation
+    );
+
     // Naviguer vers la section choisie
     setTimeout(() => {
-      navigateCallback(this.selectedNavigation!);
+      if (selectedChoice?.queryParams) {
+        this.router.navigate([this.selectedNavigation!], { queryParams: selectedChoice.queryParams });
+      } else {
+        this.router.navigate([this.selectedNavigation!]);
+      }
     }, 500);
-  }
-
-  /**
-   * Démarre un mini-tutoriel pour une section spécifique
-   */
-  startSectionTutorial(section: 'courses' | 'corrections' | 'resources' | 'admin'): void {
-    let steps: TutorialStep[] = [];
-
-    switch (section) {
-      case 'courses':
-        steps = [{
-          id: 'courses-tutorial',
-          title: 'Section Cours',
-          text: 'Ici vous pouvez parcourir tous les cours disponibles, vous inscrire à de nouveaux cours et suivre votre progression.',
-        }];
-        break;
-
-      case 'corrections':
-        steps = [{
-          id: 'corrections-tutorial',
-          title: 'Section Corrections',
-          text: 'Consultez les corrections de vos exercices et les commentaires de vos enseignants.',
-        }];
-        break;
-
-      case 'resources':
-        steps = [{
-          id: 'resources-tutorial',
-          title: 'Espace de travail',
-          text: 'Créez et organisez vos ressources pédagogiques : exercices, activités et cercles de travail.',
-        }];
-        break;
-
-      case 'admin':
-        steps = [{
-          id: 'admin-tutorial',
-          title: 'Administration',
-          text: 'Gérez les utilisateurs, les cours et les paramètres globaux de la plateforme.',
-        }];
-        break;
-    }
-
-    this.shepherdService.startTutorial(steps, {
-      tourName: `${section}-section-tutorial`,
-      useModalOverlay: false
-    });
   }
 }

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 
 
@@ -32,8 +31,8 @@ export class ToolbarTutorialService {
   /**
   * Démarre le tutoriel complet du toolbar
   */
-  startToolbarTutorial(user: User, personalCircleId?: string, createResourceParentParam?: string): void {
-    const steps = this.buildTutorialSteps(user, personalCircleId, createResourceParentParam);
+  startToolbarTutorial(user: User/*createResourceParentParam?: string*/): void{
+    const steps = this.buildTutorialSteps(user/*createResourceParentParam*/);
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'toolbar-tutorial',
@@ -41,12 +40,13 @@ export class ToolbarTutorialService {
       confirmCancel: true,
       confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de la barre d\'outils ?'
     });
+
   }
 
   /**
   * Construit les étapes du tutoriel en fonction de l'utilisateur
   */
-  private buildTutorialSteps(user: User, personalCircleId?: string, createResourceParentParam?: string): TutorialStep[] {
+  private buildTutorialSteps(user: User): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
         id: 'welcome',
@@ -72,26 +72,27 @@ export class ToolbarTutorialService {
           element: '#tuto-toolbar-menu-button',
           on: 'bottom'
         }
-      },
-      {
-        id: 'logo',
-        title: 'Logo PLaTon',
-        text: 'Cliquez sur le logo pour revenir rapidement au tableau de bord principal.',
-        attachTo: {
-          element: '#tuto-toolbar-logo',
-          on: 'bottom'
-        }
       }
     ];
 
     // Ajouter les étapes selon les permissions de l'utilisateur
     if (this.canUserCreate(user)) {
-      steps.push({
+      steps.push(
+        {
+          id: 'menu-tutorial',
+          title: 'Menu pour les tutoriels',
+          text: 'Ce bouton permet de regarder les tutoriels disponibles.',
+          attachTo: {
+            element: '#tuto-help-button',
+            on: 'bottom'
+          }
+        },
+        {
         id: 'create-button',
         title: 'Bouton de création',
         text: 'Ce bouton vous permet de créer de nouvelles ressources : cours, cercles, activités ou exercices.',
         attachTo: {
-          element: '.menu-trigger-container button[nzType="primary"]',
+          element: '#tuto-create-menu-container',
           on: 'bottom'
         }
       });
@@ -155,11 +156,11 @@ export class ToolbarTutorialService {
         {
           id: 'resource-selection',
           title: 'Quelle ressource voulez-vous créer ?',
-          text: this.buildResourceSelectionHTML(user, createResourceParentParam),
+          text: this.buildResourceSelectionHTML(user/*, createResourceParentParam*/),
           buttons: [
             {
               text: 'Créer la ressource sélectionnée',
-              action: () => this.handleResourceCreation(createResourceParentParam)
+              action: () => this.handleResourceCreation(/*createResourceParentParam*/)
             },
             {
               text: 'Terminer le tutoriel',
@@ -168,7 +169,7 @@ export class ToolbarTutorialService {
             }
           ],
           when: {
-            show: () => this.setupResourceSelection(user, createResourceParentParam)
+            show: () => this.setupResourceSelection(user/*, createResourceParentParam*/)
           }
         }
       );
@@ -216,8 +217,8 @@ export class ToolbarTutorialService {
   /**
    * Construit le HTML pour la sélection de ressource
    */
-  private buildResourceSelectionHTML(user: User, createResourceParentParam?: string): string {
-    const resources = this.getAvailableResources(user, createResourceParentParam);
+  private buildResourceSelectionHTML(user: User/*, createResourceParentParam?: string*/): string {
+    const resources = this.getAvailableResources(user/*, createResourceParentParam*/);
 
     let html = '<div class="resource-selection-container" style="margin: 20px 0;">';
     html += '<p style="margin-bottom: 16px; font-weight: 500;">Sélectionnez le type de ressource que vous souhaitez créer :</p>';
@@ -281,7 +282,7 @@ export class ToolbarTutorialService {
   /**
    * Retourne les ressources disponibles selon l'utilisateur
    */
-  private getAvailableResources(user: User, createResourceParentParam?: string): ResourceChoice[] {
+  private getAvailableResources(user: User): ResourceChoice[] {
     const resources: ResourceChoice[] = [];
 
     if (user.role === UserRoles.admin || user.role === UserRoles.teacher) {
@@ -301,7 +302,7 @@ export class ToolbarTutorialService {
         icon: '🔵',
         description: 'Organisez vos ressources en groupes thématiques',
         route: '/resources/create',
-        queryParams: { type: 'CIRCLE', parent: createResourceParentParam }
+        queryParams: { type: 'CIRCLE' }
       },
       {
         type: 'ACTIVITY',
@@ -309,7 +310,7 @@ export class ToolbarTutorialService {
         icon: '🎯',
         description: 'Concevez des exercices interactifs et des projets',
         route: '/resources/create',
-        queryParams: { type: 'ACTIVITY', parent: createResourceParentParam }
+        queryParams: { type: 'ACTIVITY' }
       },
       {
         type: 'EXERCISE',
@@ -317,7 +318,7 @@ export class ToolbarTutorialService {
         icon: '📝',
         description: 'Créez des questions et des problèmes à résoudre',
         route: '/resources/create',
-        queryParams: { type: 'EXERCISE', parent: createResourceParentParam }
+        queryParams: { type: 'EXERCISE' }
       }
     );
 
@@ -347,17 +348,16 @@ export class ToolbarTutorialService {
   /**
    * Gère la création de la ressource sélectionnée
    */
-  private handleResourceCreation(createResourceParentParam?: string): void {
+  private handleResourceCreation(): void {
     if (!this.selectedResourceType) {
       alert('Veuillez sélectionner un type de ressource avant de continuer.');
       return;
     }
 
-    const resources = this.getAvailableResources({ role: UserRoles.teacher } as User, createResourceParentParam);
+    const resources = this.getAvailableResources({ role: UserRoles.teacher } as User);
     const selectedResource = resources.find(r => r.type === this.selectedResourceType);
 
     if (selectedResource) {
-      // Terminer le tutoriel
       this.shepherdService.complete();
 
       // Rediriger vers la création de ressource
@@ -376,7 +376,7 @@ export class ToolbarTutorialService {
   /**
    * Démarre un tutoriel spécifique pour la création de ressource
    */
-  startResourceCreationTutorial(user: User, createResourceParentParam?: string): void {
+  startResourceCreationTutorial(user: User/*, createResourceParentParam?: string*/): void {
     const steps: TutorialStep[] = [
       {
         id: 'resource-creation-intro',
@@ -388,11 +388,11 @@ export class ToolbarTutorialService {
         title: 'Cliquez sur le bouton de création',
         text: 'Pour commencer, cliquez sur le bouton "+" pour ouvrir le menu de création.',
         attachTo: {
-          element: '.menu-trigger-container button[nzType="primary"]',
+          element: '#tuto-create-menu-container',
           on: 'bottom'
         },
         advanceOn: {
-          selector: '.menu-trigger-container button[nzType="primary"]',
+          selector: '#tuto-create-menu-container',
           event: 'click'
         },
         buttons: []
@@ -426,68 +426,6 @@ export class ToolbarTutorialService {
     this.shepherdService.startTutorial(steps, {
       tourName: 'resource-creation-tutorial',
       useModalOverlay: true
-    });
-  }
-
-  /**
-   * Démarre un mini-tutoriel pour une fonctionnalité spécifique
-   */
-  startQuickTour(feature: 'notifications' | 'theme' | 'menu' | 'profile'): void {
-    let steps: TutorialStep[] = [];
-
-    switch (feature) {
-      case 'notifications':
-        steps = [{
-          id: 'notifications-tour',
-          title: 'Centre de notifications',
-          text: 'Ici vous pouvez voir toutes vos notifications : nouveaux messages, activités terminées, rappels, etc.',
-          attachTo: {
-            element: '#tuto-toolbar-notifications-button',
-            on: 'bottom'
-          }
-        }];
-        break;
-
-      case 'theme':
-        steps = [{
-          id: 'theme-tour',
-          title: 'Personnalisation du thème',
-          text: 'Changez l\'apparence de PLaTon selon vos préférences : thème clair pour le jour, sombre pour le soir, ou automatique.',
-          attachTo: {
-            element: '#tuto-toolbar-theme-button',
-            on: 'bottom'
-          }
-        }];
-        break;
-
-      case 'menu':
-        steps = [{
-          id: 'menu-tour',
-          title: 'Navigation principale',
-          text: 'Ce menu vous donne accès à toutes les sections de PLaTon : dashboard, cours, ressources, paramètres.',
-          attachTo: {
-            element: '#tuto-toolbar-menu-button',
-            on: 'bottom'
-          }
-        }];
-        break;
-
-      case 'profile':
-        steps = [{
-          id: 'profile-tour',
-          title: 'Profil utilisateur',
-          text: 'Gérez votre compte, accédez à vos ressources personnelles et paramètres depuis ce menu.',
-          attachTo: {
-            element: 'user-avatar',
-            on: 'bottom'
-          }
-        }];
-        break;
-    }
-
-    this.shepherdService.startTutorial(steps, {
-      tourName: `${feature}-quick-tour`,
-      useModalOverlay: false
     });
   }
 

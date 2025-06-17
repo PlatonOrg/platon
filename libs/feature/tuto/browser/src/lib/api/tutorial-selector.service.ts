@@ -172,7 +172,6 @@ export class TutorialSelectorService {
         // Supprimer le listener
         this.removeTutorialCompletionListener();
 
-        // Passer au tutoriel suivant
         this.currentChainIndex++;
 
         setTimeout(() => {
