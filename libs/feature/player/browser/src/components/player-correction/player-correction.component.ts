@@ -357,7 +357,7 @@ export class PlayerCorrectionComponent implements OnInit {
       return
     }
 
-    const baseGrade = this.currentExercise.grade ?? 0
+    const baseGrade = this.gradeOptionMap.get(this.selectedGradeOption) ?? this.currentExercise.grade ?? 0
     this.correctedGrade = PlayerCorrectionService.parseGradeChange(totalGradeChange, baseGrade)
     this.changeDetectorRef.markForCheck()
   }
@@ -414,7 +414,6 @@ export class PlayerCorrectionComponent implements OnInit {
   protected async onSaveGrade() {
     if (this.currentExercise) {
       try {
-        // S'assurer que la note est dans les limites 0-100 avant de sauvegarder
         const validatedGrade = Math.max(0, Math.min(100, this.correctedGrade as number))
         this.correctedGrade = validatedGrade
 
