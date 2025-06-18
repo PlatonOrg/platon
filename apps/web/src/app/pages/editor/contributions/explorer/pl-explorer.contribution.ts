@@ -15,6 +15,7 @@ import { ExplorerReplaceFolder } from './commands/explorer-replace-folder.comman
 import { ExplorerCommandUnzip } from './commands/explorer-unzip.command'
 import { ExplorerUpdateFolders } from './commands/explorer-update-folders.command'
 import { ExplorerCommandUnzipAndDelete } from './commands/explorer-unzip-and-delete.command'
+import { ExplorerCopyUrlCommand } from './commands/explorer-copy-url.command'
 
 @Injectable()
 export class PLExplorerContribution implements IContribution {
@@ -32,10 +33,16 @@ export class PLExplorerContribution implements IContribution {
       ExplorerCommandUnzip,
       ExplorerUpdateFolders,
       ExplorerReplaceFolder,
-      ExplorerCommandUnzipAndDelete
+      ExplorerCommandUnzipAndDelete,
+      ExplorerCopyUrlCommand
     )
 
-    explorerService.registerCommands(ExplorerCommandUnzip, ExplorerCommandUnzipAndDelete, ExplorerReplaceFolder)
+    explorerService.registerCommands(
+      ExplorerCommandUnzip,
+      ExplorerCommandUnzipAndDelete,
+      ExplorerReplaceFolder,
+      ExplorerCopyUrlCommand
+    )
 
     explorerService.unregisterCommands(EXPLORER_COMMAND_COPY_PATH)
 
@@ -67,6 +74,15 @@ export class PLExplorerContribution implements IContribution {
       }),
       new ToolbarSeparator(ToolbarGroups.FILE, 1)
     )
+
+    toolbarService.register(
+      new ToolbarButton({
+        group: ToolbarGroups.FILE,
+        command: commandService.find(ExplorerReplaceFolder),
+        priority: 2,
+      }),
+      new ToolbarSeparator(ToolbarGroups.FILE, 1)
+    )
   }
 
   deactivate() {
@@ -80,6 +96,7 @@ export class PLExplorerContribution implements IContribution {
     ExplorerCommandUnzipAndDelete,
     ExplorerUpdateFolders,
     ExplorerReplaceFolder,
+    ExplorerCopyUrlCommand,
     ExplorerService,
     { provide: CONTRIBUTION, multi: true, useClass: PLExplorerContribution },
   ],

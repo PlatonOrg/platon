@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, inject } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { UiError403Component, UiQRCodeComponent } from '@platon/shared/ui'
 import { Subscription } from 'rxjs'
 import { CoursePresenter } from '../course.presenter'
