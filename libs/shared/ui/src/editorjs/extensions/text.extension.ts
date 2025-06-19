@@ -1,11 +1,10 @@
 import Header from '@editorjs/header'
-import Marker from '@editorjs/marker'
 import Paragraph from '@editorjs/paragraph'
 import TextVariant from '@editorjs/text-variant-tune'
 import Underline from '@editorjs/underline'
 import { StyleInlineTool } from 'editorjs-style'
 import TextAlignment from 'editorjs-text-alignment-blocktune'
-import TextColor from 'editorjs-text-color-plugin'
+import ColorPlugin from 'editorjs-text-color-plugin'
 import { EditorJsExtension, EDITOR_JS_EXTENSION } from '../editorjs'
 
 const Extension: EditorJsExtension = {
@@ -24,20 +23,24 @@ const Extension: EditorJsExtension = {
     style: {
       class: StyleInlineTool,
     },
-    marker: {
-      class: Marker,
-      inlineToolbar: true,
+    Color: {
+      class: ColorPlugin,
+      config: {
+        defaultColor: '#ff1300',
+        type: 'text',
+        customPicker: true,
+      },
+    },
+    Marker: {
+      class: ColorPlugin,
+      config: {
+        defaultColor: '#ff1300',
+        type: 'marker',
+      },
     },
     underline: {
       class: Underline,
       inlineToolbar: true,
-    },
-
-    textColor: {
-      class: TextColor,
-      config: {
-        customPicker: true,
-      },
     },
     textVariant: {
       class: TextVariant,

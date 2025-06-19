@@ -29,7 +29,7 @@ export class EditorJsService {
       autofocus: true,
       holder: options.holder || 'editorjs',
       inlineToolbar: true,
-      minHeight: options.minHeight || 400,
+      minHeight: options.minHeight || 50,
       logLevel: 'ERROR' as any,
       readOnly: options.readOnly,
       tools: (this.extensions || [])
