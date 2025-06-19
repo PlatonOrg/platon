@@ -1,4 +1,12 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, forwardRef } from '@angular/core'
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnDestroy,
+  ViewEncapsulation,
+  forwardRef,
+} from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { v4 as uuidv4 } from 'uuid'
@@ -16,6 +24,7 @@ import { TextExtension } from './extensions/text.extension'
   templateUrl: './editorjs.component.html',
   styleUrls: ['./editorjs.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     EditorJsService,
     CodeExtension,
@@ -36,15 +45,28 @@ import { TextExtension } from './extensions/text.extension'
 export class EditorJsComponent implements AfterViewInit, OnDestroy, ControlValueAccessor {
   private data?: OutputData
   private editor!: EditorJS
+  private _disabled?: boolean | null
 
   protected readonly id = `editorjs-${uuidv4()}`
 
   @Input() minHeight?: number
-  @Input() disabled?: boolean | null
+
+  @Input()
+  get disabled(): boolean | null | undefined {
+    return this._disabled
+  }
+
+  set disabled(value: boolean | null | undefined) {
+    this._disabled = value
+    this.refreshReadOnly()
+  }
 
   constructor(private readonly editorJsService: EditorJsService) {}
 
   async ngAfterViewInit(): Promise<void> {
+    // Ewww hack to ensure the editor is initialized after the view is ready
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
     let initialChange = true
     const editor = (this.editor = this.editorJsService.newInstance({
       data: this.data,
@@ -105,6 +127,13 @@ export class EditorJsComponent implements AfterViewInit, OnDestroy, ControlValue
     this.disabled = disabled
   }
 
+  private refreshReadOnly(): void {
+    if (this.editor?.readOnly?.isEnabled !== undefined && this.editor?.readOnly?.isEnabled !== this.disabled) {
+      this.editor?.readOnly.toggle().catch((error) => {
+        console.warn('Failed to toggle readOnly state:', error)
+      })
+    }
+  }
   private notifyChange(newData: OutputData): void {
     this.data = newData
     this.onChange(this.data)
