@@ -126,6 +126,7 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
         }
       }
     );
+    this.notificationId = ref.messageId;
   }
 
   get isVisible() {
@@ -151,6 +152,10 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
   }
 
   onClose(): void {
+    if (this.notificationId) {
+      this.notification.remove(this.notificationId);
+      this.notificationId = null;
+    }
     this.featureAnnouncementService.dismissAnnouncement('close');
   }
 

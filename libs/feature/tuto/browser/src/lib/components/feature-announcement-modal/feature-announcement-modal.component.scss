@@ -10,7 +10,6 @@
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     border: 1px solid #e8e8e8;
-    background: linear-gradient(to right, #f0f4ff, #ffffff);
     background-color: var(--brand-background-components, #f0f4ff);
     max-width: 280px;
     margin-right: 16px;
@@ -23,7 +22,7 @@
   }
 
   .ant-notification-notice-close {
-    display: none; // Masquer le bouton de fermeture par défaut
+    display: none;
   }
 }
 
@@ -54,9 +53,9 @@
 
   .announcement-description {
     text-align: left;
-    margin-bottom: 12px; // Réduit
+    margin-bottom: 12px;
     color: var(--brand-text-primary, #64748b);
-    font-size: 13px; // Réduit
+    font-size: 13px;
     line-height: 1.4;
 
     .description-text {
