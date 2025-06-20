@@ -5061,13 +5061,6 @@
   resolved "https://registry.yarnpkg.com/@module-federation/sdk/-/sdk-0.2.8.tgz#f88671b68f80dc4a52fa7ac440e4f6cdabd15772"
   integrity sha512-eGMnJxdRDgt6dtMv8gkAlzEbTPWVHb3AHUNUG0w56wcbIF0RHC6kmvpHpSQyq4DVGWv3U4g/ZiH5BvBlqEelDQ==
 
-"@module-federation/sdk@0.7.6":
-  version "0.7.6"
-  resolved "https://registry.yarnpkg.com/@module-federation/sdk/-/sdk-0.7.6.tgz#5195184c4a92f7407238fa9a7f959dc570415cbe"
-  integrity sha512-MFE+RtsHnutZOCp2eKpa3A/yzZ8tOPmjX7QRdVnB2qqR9JA2SH3ZP5+cYq76tzFQZvU1BCWAQVNMvqGOW2yVZQ==
-  dependencies:
-    isomorphic-rslog "0.0.6"
-
 "@module-federation/third-party-dts-extractor@0.2.8":
   version "0.2.8"
   resolved "https://registry.yarnpkg.com/@module-federation/third-party-dts-extractor/-/third-party-dts-extractor-0.2.8.tgz#d7e386a377f6f58a7bc38b40ce7e16cbcbe93546"
@@ -5621,6 +5614,13 @@
   dependencies:
     "@nx/plugin" "19.6.4"
 
+"@nrwl/storybook@19.6.4":
+  version "19.6.4"
+  resolved "https://registry.yarnpkg.com/@nrwl/storybook/-/storybook-19.6.4.tgz#b2c4d678ab7abd29b665daed22518cd9ff3cad6d"
+  integrity sha512-PhvTvb3XhgN5FIvLxIaYqT2PzrqDGAN0rJGneSRsh1+PA9K0YX0srUlRb7KJVsEWCjroTCkBXgPyQJfoUtKwxw==
+  dependencies:
+    "@nx/storybook" "19.6.4"
+
 "@nrwl/tao@19.6.4":
   version "19.6.4"
   resolved "https://registry.yarnpkg.com/@nrwl/tao/-/tao-19.6.4.tgz#b5cb09642b4efa88a382b2bde04e0d8a477dee82"
@@ -5697,38 +5697,12 @@
     detect-port "^1.5.1"
     tslib "^2.3.0"
 
-"@nx/cypress@20.1.4":
-  version "20.1.4"
-  resolved "https://registry.yarnpkg.com/@nx/cypress/-/cypress-20.1.4.tgz#abdee8ea2d9a67eadd7edc2b7376c2ea3d0acac6"
-  integrity sha512-D+GOPVSoPsylp6EHILk+NGL8rMegExoT+orFIiS7Dyix+r/6112IkxTPNgO0ndvHQrdo9H74cYy1hvgQxXBygg==
-  dependencies:
-    "@nx/devkit" "20.1.4"
-    "@nx/eslint" "20.1.4"
-    "@nx/js" "20.1.4"
-    "@phenomnomnominal/tsquery" "~5.0.1"
-    detect-port "^1.5.1"
-    tslib "^2.3.0"
-
 "@nx/devkit@19.6.4":
   version "19.6.4"
   resolved "https://registry.yarnpkg.com/@nx/devkit/-/devkit-19.6.4.tgz#12299ab34cfa1edabb8d94cecac5bea89cc9a8c7"
   integrity sha512-mBitFwb/gcz8MR7STt7KQG0vf+QcsasDXiSYcf3OWpc6lGE5wn1q5jg6Iabp49Bd/mdHXVLQnP1aV5A+QqFIOQ==
   dependencies:
     "@nrwl/devkit" "19.6.4"
-    ejs "^3.1.7"
-    enquirer "~2.3.6"
-    ignore "^5.0.4"
-    minimatch "9.0.3"
-    semver "^7.5.3"
-    tmp "~0.2.1"
-    tslib "^2.3.0"
-    yargs-parser "21.1.1"
-
-"@nx/devkit@20.1.4":
-  version "20.1.4"
-  resolved "https://registry.yarnpkg.com/@nx/devkit/-/devkit-20.1.4.tgz#877a5df42e4f1fd0a28eee0820129107cdff1a75"
-  integrity sha512-Opz7eRPmpt3e4SGkbwZbE9Bg3MhKeivh1QTNCj4tQVAB4gucz0lW/F3mdtRDFdj6gUbqIc5rRrbO/DGlNaEzYw==
-  dependencies:
     ejs "^3.1.7"
     enquirer "~2.3.6"
     ignore "^5.0.4"
@@ -5762,17 +5736,6 @@
     "@nx/devkit" "19.6.4"
     "@nx/js" "19.6.4"
     "@nx/linter" "19.6.4"
-    semver "^7.5.3"
-    tslib "^2.3.0"
-    typescript "~5.4.2"
-
-"@nx/eslint@20.1.4":
-  version "20.1.4"
-  resolved "https://registry.yarnpkg.com/@nx/eslint/-/eslint-20.1.4.tgz#bccbf1fce3016449153350091c6713ffa48fb6a3"
-  integrity sha512-Qq5Hq4LA+3aYgPvBrPng5JX2T54UnpOCUBHmIbPk6PAXYWPTHM/qfeKNTjY0zYpX/dv5l0ij5OAGg20CmHqXaQ==
-  dependencies:
-    "@nx/devkit" "20.1.4"
-    "@nx/js" "20.1.4"
     semver "^7.5.3"
     tslib "^2.3.0"
     typescript "~5.4.2"
@@ -5822,42 +5785,6 @@
     detect-port "^1.5.1"
     fast-glob "3.2.7"
     fs-extra "^11.1.0"
-    ignore "^5.0.4"
-    js-tokens "^4.0.0"
-    jsonc-parser "3.2.0"
-    minimatch "9.0.3"
-    npm-package-arg "11.0.1"
-    npm-run-path "^4.0.1"
-    ora "5.3.0"
-    semver "^7.5.3"
-    source-map-support "0.5.19"
-    ts-node "10.9.1"
-    tsconfig-paths "^4.1.2"
-    tslib "^2.3.0"
-
-"@nx/js@20.1.4":
-  version "20.1.4"
-  resolved "https://registry.yarnpkg.com/@nx/js/-/js-20.1.4.tgz#bf511e643c275089d15c9ad38b5cc3dc60ab17e9"
-  integrity sha512-o44prlNHyEEzhLOaIsEWdHm0I6SrEYkX5zjGAjlajoHuZ0o9JJBuE4uyIPZGo/EOZIy6idANfvpAbEtd6XAhJA==
-  dependencies:
-    "@babel/core" "^7.23.2"
-    "@babel/plugin-proposal-decorators" "^7.22.7"
-    "@babel/plugin-transform-class-properties" "^7.22.5"
-    "@babel/plugin-transform-runtime" "^7.23.2"
-    "@babel/preset-env" "^7.23.2"
-    "@babel/preset-typescript" "^7.22.5"
-    "@babel/runtime" "^7.22.6"
-    "@nx/devkit" "20.1.4"
-    "@nx/workspace" "20.1.4"
-    "@zkochan/js-yaml" "0.0.7"
-    babel-plugin-const-enum "^1.0.1"
-    babel-plugin-macros "^2.8.0"
-    babel-plugin-transform-typescript-metadata "^0.3.1"
-    chalk "^4.1.0"
-    columnify "^1.6.0"
-    detect-port "^1.5.1"
-    enquirer "~2.3.6"
-    fast-glob "3.2.7"
     ignore "^5.0.4"
     js-tokens "^4.0.0"
     jsonc-parser "3.2.0"
@@ -6102,18 +6029,6 @@
     chalk "^4.1.0"
     enquirer "~2.3.6"
     nx "19.6.4"
-    tslib "^2.3.0"
-    yargs-parser "21.1.1"
-
-"@nx/workspace@20.1.4":
-  version "20.1.4"
-  resolved "https://registry.yarnpkg.com/@nx/workspace/-/workspace-20.1.4.tgz#162a4480ed1410f570bbec54e5b65528eb1d714f"
-  integrity sha512-rEceXQqcNdlD5EvUA2w3MLi7mZPH13OvpvDPPyBNBurBrRcSaylDSvUCL54jWJ2G7bLzJx9bqWy81W8g7KNS5Q==
-  dependencies:
-    "@nx/devkit" "20.1.4"
-    chalk "^4.1.0"
-    enquirer "~2.3.6"
-    nx "20.1.4"
     tslib "^2.3.0"
     yargs-parser "21.1.1"
 
@@ -7933,7 +7848,7 @@
   resolved "https://registry.yarnpkg.com/@types/reveal.js/-/reveal.js-5.0.5.tgz#7edc545a9027ea531410d5b7d0ad811911bc683e"
   integrity sha512-+8OFb1RlB69dZT1laNDq+xDSGrPY/VYARSSTxSC/rMl8s9X+W4dr7gHmoKRR9yu20JU8gvp18g9SVxvouk7SiQ==
 
-"@types/semver@7.5.8", "@types/semver@^7.3.4":
+"@types/semver@^7.3.4":
   version "7.5.8"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.8.tgz#8268a8c57a3e4abd25c165ecd36237db7948a55e"
   integrity sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==
@@ -15280,11 +15195,6 @@ isomorphic-git@^1.21.0:
     readable-stream "^3.4.0"
     sha.js "^2.4.9"
     simple-get "^4.0.1"
-
-isomorphic-rslog@0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/isomorphic-rslog/-/isomorphic-rslog-0.0.6.tgz#abf13c77b545b03e5ab3bc376e6de720e07eb190"
-  integrity sha512-HM0q6XqQ93psDlqvuViNs/Ea3hAyGDkIdVAHlrEocjjAwGrs1fZ+EdQjS9eUPacnYB7Y8SoDdSY3H8p3ce205A==
 
 isomorphic-ws@5.0.0, isomorphic-ws@^5.0.0:
   version "5.0.0"
