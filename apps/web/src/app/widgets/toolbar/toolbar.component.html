@@ -16,14 +16,9 @@
   <div class="spacer"></div>
 
   <ng-container *ngIf="canCreate">
-    <button
-      id="tuto-help-button"
-      nz-button
-      nzSize="large"
-      (click)="openTutorialSelector()"
-      title="Relancer le tutoriel"
-    >
-      <span nz-icon nzType="question-circle"></span>
+    <!-- Selectionner un tutoriel -->
+    <button id="tuto-help-button" nz-button nzType="text" nzSize="small" (click)="openTutorialSelector()">
+      <mat-icon class="icon-color">play_lesson</mat-icon>
     </button>
 
     <button

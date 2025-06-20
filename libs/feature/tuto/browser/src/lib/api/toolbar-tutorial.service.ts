@@ -31,8 +31,8 @@ export class ToolbarTutorialService {
   /**
   * Démarre le tutoriel complet du toolbar
   */
-  startToolbarTutorial(user: User/*createResourceParentParam?: string*/): void{
-    const steps = this.buildTutorialSteps(user/*createResourceParentParam*/);
+  startToolbarTutorial(user: User): void{
+    const steps = this.buildTutorialSteps(user);
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'toolbar-tutorial',

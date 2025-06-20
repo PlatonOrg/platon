@@ -1,122 +1,140 @@
-/* Surcharge des styles Shepherd.js avec vos couleurs de marque */
-
-/* Boutons */
-.shepherd-button {
-  background: #171c8f !important; /* --brand-color-primary */
-  border: 0;
-  border-radius: 4px;
-  color: #ffffff !important; /* --brand-color-primary-contrast */
-  cursor: pointer;
-  margin-right: 8px;
-  padding: 6px 15px;
-  font-size: 14px;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-}
-
-.shepherd-button:not(:disabled):hover {
-  background: #14197e !important; /* --brand-color-primary-shade */
-  color: #ffffff !important;
-}
-
-.shepherd-button.shepherd-button-secondary {
-  background: transparent !important;
-  border: 1px solid #dddddd !important; /* --brand-border-color */
-  color: #24292e !important; /* --brand-text-primary */
-}
-
-.shepherd-button.shepherd-button-secondary:not(:disabled):hover {
-  background: transparent !important;
-  border-color: #171c8f !important; /* --brand-color-primary */
-  color: #171c8f !important; /* --brand-color-primary */
-}
-
-/* Element principal */
+// Style pour les tutoriels Shepherd.js avec les variables globales
 .shepherd-element {
-  background: #fff !important; /* --brand-background-components */
-  border: none;
+  background-color: var(--brand-background-components);
+  color: var(--brand-text-primary);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  font-family: 'Source Sans Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Fira Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
   max-width: 400px;
+  z-index: 10000;
+  font-family: var(--brand-font);
+
+  // En-tête
+  .shepherd-header {
+    padding: 8px 16px !important;
+    min-height: unset !important;
+    background-color: var(--brand-color-primary);
+    align-items: center;
+
+    .shepherd-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2 !important;
+      margin: 0 !important;
+      padding: 0;
+      color: var(--brand-text-primary);
+    }
+
+    .shepherd-cancel-icon {
+      color: var(--brand-text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      // transition: color 0.3s ease;
+      padding: 0 !important;
+      margin: 0 !important;
+      opacity: 0.8;
+      &:hover {
+        color: var(--brand-text-primary);
+        opacity: 1;
+      }
+    }
+  }
+
+  // Contenu
+  .shepherd-text {
+    padding: 16px;
+    color: var(--brand-text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+
+    a {
+      color: var(--brand-color-primary);
+    }
+  }
+
+  // Boutons
+  .shepherd-footer {
+    padding: 0 16px 16px;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .shepherd-button {
+      min-height: 32px;
+      height: auto;
+      padding: 6px 15px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.2;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      cursor: pointer;
+      border: none;
+      white-space: normal;
+      text-align: center;
+      max-width: 100%;
+      word-break: break-word;
+
+      &.shepherd-button-primary {
+        background-color: var(--brand-color-primary);
+        color: var(--brand-color-primary-contrast);
+
+        &:hover, &:focus {
+          background-color: var(--brand-color-primary-tint);
+        }
+      }
+
+      &.shepherd-button-secondary {
+        background-color: transparent;
+        border: 1px solid var(--brand-border-color);
+        color: var(--brand-text-primary);
+
+        &:hover, &:focus {
+          border-color: var(--brand-color-primary);
+          color: var(--brand-color-primary);
+        }
+      }
+    }
+  }
+
+  // Flèche
+  .shepherd-arrow:before {
+    background-color: var(--brand-background-components);
+  }
 }
 
-/* En-tête */
-.shepherd-header {
-  padding: 16px 16px 0 !important;
+// Overlay du tutoriel
+.shepherd-modal-overlay-container .shepherd-modal-overlay {
+  opacity: 0.5;
+  background-color: #000;
 }
 
-.shepherd-has-title .shepherd-content .shepherd-header {
-  background: transparent !important; /* Enlever le fond gris */
-  padding: 16px 16px 0 !important;
+// Animation pour mettre en évidence les éléments
+@keyframes shepherdHighlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--brand-color-primary-rgb), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(var(--brand-color-primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--brand-color-primary-rgb), 0);
+  }
 }
 
-.shepherd-title {
-  color: #24292e !important; /* --brand-text-primary */
-  font-size: 16px;
-  font-weight: 500;
+// Classe pour les éléments mis en évidence
+.shepherd-highlighted {
+  animation: shepherdHighlight 1.5s infinite;
+  z-index: 10001 !important;
 }
 
-/* Bouton de fermeture */
-.shepherd-cancel-icon {
-  color: #24292e !important; /* --brand-text-primary */
-  font-size: 16px;
-  padding: 8px;
-  margin-right: -8px;
-}
+.dark-theme {
+  .shepherd-element {
+    .shepherd-header {
+      color: var(--brand-text-primary);
 
-.shepherd-cancel-icon:hover,
-.shepherd-has-title .shepherd-content .shepherd-cancel-icon:hover {
-  color: #090a39 !important; /* --brand-text-secondary */
-}
-
-/* Contenu texte */
-.shepherd-text {
-  color: #24292e !important; /* --brand-text-primary */
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 16px !important;
-}
-
-/* Footer */
-.shepherd-footer {
-  padding: 0 16px 16px !important;
-  border-radius: 0 0 8px 8px;
-}
-
-.shepherd-footer .shepherd-button:last-child {
-  margin-right: 0;
-}
-
-/* Flèche */
-.shepherd-arrow:before {
-  background: #fff !important; /* --brand-background-components */
-}
-
-.shepherd-element.shepherd-has-title[data-popper-placement^=bottom]>.shepherd-arrow:before {
-  background-color: #fff !important; /* Pas de fond gris pour la flèche */
-}
-
-/* Mode sombre (si nécessaire) */
-body.dark-theme .shepherd-element {
-  background: #0d2136 !important;
-}
-
-body.dark-theme .shepherd-text {
-  color: #d3e3fd !important;
-}
-
-body.dark-theme .shepherd-title {
-  color: #d3e3fd !important;
-}
-
-body.dark-theme .shepherd-cancel-icon {
-  color: #d3e3fd !important;
-}
-
-body.dark-theme .shepherd-arrow:before {
-  background: #0d2136 !important;
-}
-
-body.dark-theme .shepherd-element.shepherd-has-title[data-popper-placement^=bottom]>.shepherd-arrow:before {
-  background-color: #0d2136 !important;
+      .shepherd-title, .shepherd-cancel-icon {
+        color: var(--brand-background-components); // S'assurer que le texte et les icônes sont visibles
+      }
+    }
+  }
 }
