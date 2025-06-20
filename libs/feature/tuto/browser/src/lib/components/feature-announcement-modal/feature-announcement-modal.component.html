@@ -1,0 +1,24 @@
+<ng-template #notificationTpl>
+  <div class="announcement-container">
+    <button nz-button nzType="text" nzSize="small" ngClass="" (click)="onClose()">
+      <i nz-icon nzType="close"></i>
+    </button>
+    <div class="announcement-body">
+      <h4 class="announcement-title">
+        <i nz-icon nzType="bulb" nzTheme="twotone" style="margin-right: 6px"></i>
+        {{ currentTitle }}
+      </h4>
+
+      <div class="announcement-description">
+        <p class="description-text">{{ currentDescription }}</p>
+      </div>
+    </div>
+    <div class="announcement-actions">
+      @if(hasPrimaryAction){
+      <button nz-button nzType="primary" ngClass="primary-action" (click)="onPrimaryAction()">
+        {{ primaryActionText }}
+      </button>
+      }
+    </div>
+  </div>
+</ng-template>
