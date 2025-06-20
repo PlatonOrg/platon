@@ -105,6 +105,62 @@ export class CorrectionLabelComponent implements OnChanges {
     this.changeDetectorRef.markForCheck()
   }
 
+  // Utility to convert hex to RGB
+  private hexToRgb(hex: string): [number, number, number] {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0]
+  }
+
+  // Euclidean distance between two colors
+  private colorDistance(c1: [number, number, number], c2: [number, number, number]): number {
+    return Math.sqrt(Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2) + Math.pow(c1[2] - c2[2], 2))
+  }
+
+  // Pick the most distant color from a palette
+  private pickMostDistantColor(existing: string[]): string {
+    const palette = [
+      '#e6194b',
+      '#3cb44b',
+      '#ffe119',
+      '#4363d8',
+      '#f58231',
+      '#911eb4',
+      '#46f0f0',
+      '#f032e6',
+      '#bcf60c',
+      '#fabebe',
+      '#008080',
+      '#e6beff',
+      '#9a6324',
+      '#fffac8',
+      '#800000',
+      '#aaffc3',
+      '#808000',
+      '#ffd8b1',
+      '#000075',
+      '#808080',
+    ]
+    if (existing.length === 0) return palette[0]
+    const existingRgb = existing.map(this.hexToRgb)
+    let maxDist = -1
+    let bestColor = palette[0]
+    for (const color of palette) {
+      const rgb = this.hexToRgb(color)
+      const minDist = Math.min(...existingRgb.map((c) => this.colorDistance(c, rgb)))
+      if (minDist > maxDist) {
+        maxDist = minDist
+        bestColor = color
+      }
+    }
+    return bestColor
+  }
+
+  private updateCreateLabelDefaultColor() {
+    const usedColors = this.labels.map((l) => l.color).filter(Boolean) as string[]
+    const distantColor = this.pickMostDistantColor(usedColors)
+    this.createLabelForm.get('labelColor')?.setValue(distantColor)
+  }
+
   private async getLabels() {
     if (
       !this.activityId ||
@@ -139,6 +195,7 @@ export class CorrectionLabelComponent implements OnChanges {
         ]),
       })
     })
+    this.updateCreateLabelDefaultColor()
     this.changeDetectorRef.markForCheck()
   }
 
@@ -222,7 +279,7 @@ export class CorrectionLabelComponent implements OnChanges {
     }
 
     const gradeMap: { [key: string]: number } = {
-      Digit0: 0,
+      Digit0: 10,
       Digit1: 1,
       Digit2: 2,
       Digit3: 3,
@@ -240,8 +297,8 @@ export class CorrectionLabelComponent implements OnChanges {
       return
     }
 
-    if (index >= 0 && index < this.labels.length) {
-      this.labelize(this.labels[index])
+    if (index >= 1 && index < this.labels.length + 1) {
+      this.labelize(this.labels[index - 1])
     }
   }
 
@@ -262,6 +319,12 @@ export class CorrectionLabelComponent implements OnChanges {
     }
     this.isCreateLabelModalVisible = false
     await firstValueFrom(this.resultService.createLabel(this.activityId, this.navigationExerciseId, newLabel))
+    // reset the form
+    this.createLabelForm.reset({
+      labelName: '',
+      labelDescription: '',
+      labelColor: '#000000',
+    })
     await this.getLabels()
     this.changeDetectorRef.markForCheck()
   }
@@ -357,4 +420,8 @@ export class CorrectionLabelComponent implements OnChanges {
   }
 
   //#endregion
+
+  protected trackByLabelId(index: number, label: Label): string {
+    return label.id
+  }
 }
