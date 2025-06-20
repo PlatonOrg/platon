@@ -5,7 +5,7 @@ import { ResourcesTutorialService } from './resources-tutorial.service';
 import {SidebarTutorialService} from './sidebar-tutorial.service';
 import {ToolbarTutorialService} from './toolbar-tutorial.service'
 import {ResourceCreationTutorialService} from './resource-creation-tutorial.service';
-import {TutorialSelectorModalComponent} from '../components/tutorial-selector-modal/TutorialSelectorModal.component';
+import {TutorialSelectorModalComponent} from '../components/tutorial-selector-modal/tutorial-selector-modal.component';
 import {User} from '@platon/core/common';
 import { AuthService } from '@platon/core/browser'
 
@@ -107,7 +107,7 @@ export class TutorialSelectorService {
         );
         break;
       default:
-        console.error(`Tutoriel inconnu: ${tutorialId}`);
+        break;
     }
   }
 

@@ -1,1 +1,2 @@
-export * from './tutorial-selector-modal/TutorialSelectorModal.component'
+export * from './tutorial-selector-modal/tutorial-selector-modal.component'
+export * from './feature-announcement-modal/feature-announcement-modal.component'

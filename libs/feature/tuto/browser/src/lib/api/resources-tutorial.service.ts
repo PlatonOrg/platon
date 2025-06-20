@@ -12,9 +12,7 @@ export class ResourcesTutorialService {
     private shepherdService: ShepherdService
   ) {}
 
-  /**
-   * Démarre le tutoriel complet de l'espace de travail
-   */
+
   startResourcesTutorial(
     user: User,
     items: Resource[],
@@ -119,7 +117,6 @@ export class ResourcesTutorialService {
       }
     ];
 
-    // Si des résultats sont disponibles
     if (items.length > 0 || hasSearched()) {
       steps.push(
         {
@@ -151,7 +148,6 @@ export class ResourcesTutorialService {
       );
     }
 
-    // Ajouter les autres fonctionnalités
     steps.push(
       {
         id: 'filters',
@@ -198,7 +194,6 @@ export class ResourcesTutorialService {
           on: 'left'
         }
       },
-      // NOUVELLES ÉTAPES AJOUTÉES ICI
       {
         id: 'filter-button-intro',
         title: 'Utilisons les filtres avancés !',
@@ -577,9 +572,7 @@ export class ResourcesTutorialService {
     `;
   }
 
-  /**
-   * Attend que le drawer de filtres soit ouvert
-   */
+
   /**
  * Attend que le drawer de filtres soit ouvert et visible
  */
@@ -588,8 +581,7 @@ export class ResourcesTutorialService {
       const checkDrawer = () => {
         const drawer = document.querySelector('.ant-drawer-content-wrapper');
         if (drawer && (drawer as HTMLElement).offsetWidth > 0) {
-          // Le drawer est visible
-          // Attendre un peu plus pour l'animation
+
           setTimeout(() => {
             resolve();
           }, 300);
@@ -602,7 +594,6 @@ export class ResourcesTutorialService {
       // Commencer à vérifier
       checkDrawer();
 
-      // Timeout de sécurité après 5 secondes
       setTimeout(() => {
         resolve();
       }, 1000);
@@ -716,43 +707,5 @@ export class ResourcesTutorialService {
     });
   }
 
-  /**
-   * Démarre un tutoriel pour les filtres
-   */
-  startFiltersTutorial(): void {
-    const steps: TutorialStep[] = [
-      {
-        id: 'filters-intro',
-        title: 'Filtres de recherche',
-        text: 'Les filtres vous permettent d\'affiner précisément vos recherches pour trouver exactement ce dont vous avez besoin.',
-      },
-      {
-        id: 'filter-types',
-        title: 'Types de filtres',
-        text: `
-          <div>
-            <p style="margin-bottom: 12px;"><strong>Filtres disponibles :</strong></p>
-            <ul style="padding-left: 20px;">
-              <li>Type de ressource (Exercice, Activité, Cercle, Cours)</li>
-              <li>Statut (Brouillon, Publié, Obsolète)</li>
-              <li>Niveau scolaire</li>
-              <li>Matière/Topic</li>
-              <li>Auteur</li>
-              <li>Période de création</li>
-            </ul>
-          </div>
-        `,
-      },
-      {
-        id: 'filter-combination',
-        title: 'Combiner les filtres',
-        text: 'Vous pouvez combiner plusieurs filtres pour des recherches très précises. Les filtres actifs apparaissent sous la barre de recherche.',
-      }
-    ];
 
-    this.shepherdService.startTutorial(steps, {
-      tourName: 'filters-tutorial',
-      useModalOverlay: true
-    });
-  }
 }

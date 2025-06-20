@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import Shepherd from 'shepherd.js';
 import { Subject } from 'rxjs';
 
-// import '../../styles/shepherd-override.css';
-
 export interface TutorialStep {
   id: string;
   title: string;
@@ -42,7 +40,7 @@ export interface TutorialOptions {
   confirmCancelMessage?: string;
   tourName?: string;
   classPrefix?: string;
-  enableEnterNavigation?: boolean; // Nouvelle option
+  enableEnterNavigation?: boolean;
 }
 
 @Injectable({
@@ -68,9 +66,7 @@ export class ShepherdService {
 
   constructor() {}
 
-  /**
-   * Démarre un nouveau tutoriel
-   */
+
   startTutorial(steps: TutorialStep[], options?: TutorialOptions): void {
     // Arrêter le tutoriel actuel s'il existe
     this.stopTutorial();
@@ -83,7 +79,7 @@ export class ShepherdService {
       classPrefix: mergedOptions.classPrefix,
       exitOnEsc: mergedOptions.exitOnEsc,
       keyboardNavigation: mergedOptions.keyboardNavigation,
-      confirmCancel: false,//mergedOptions.confirmCancel,
+      confirmCancel: false,
       confirmCancelMessage: mergedOptions.confirmCancelMessage,
       defaultStepOptions: {
         cancelIcon: {
@@ -125,8 +121,6 @@ export class ShepherdService {
       this.tourEndedSubject.next();
       this.currentTour = null;
     });
-
-    // Démarrer le tutoriel
     this.currentTour.start();
   }
 
@@ -315,9 +309,7 @@ export class ShepherdService {
     return this.currentTour?.getCurrentStep();
   }
 
-  /**
-   * Méthodes utilitaires pour créer des tutoriels prédéfinis
-   */
+
 
   /**
    * Tutoriel d'introduction simple
