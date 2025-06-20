@@ -1,0 +1,23 @@
+
+ui-editorjs {
+
+    @media (min-width: 651px) {
+      .ce-block__content, .ce-toolbar__content {
+        max-width: calc(100% - 120px) !important;
+        margin: 0 60px !important;
+      }
+    }
+
+    cdx-block {
+      max-width: 100%;
+    }
+
+    .ce-block__content ul.cdx-block {
+      padding-left: 0;
+    }
+    .ace_gutter {
+      z-index: 0;
+
+    }
+
+}

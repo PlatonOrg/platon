@@ -9,6 +9,9 @@ import { InputNumberOptions } from '../input-number'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValueEditorComponent extends BaseValueEditor<number, InputNumberOptions> {
+  readonly minSafeInteger = Number.MIN_SAFE_INTEGER
+  readonly maxSafeInteger = Number.MAX_SAFE_INTEGER
+
   constructor() {
     super()
   }

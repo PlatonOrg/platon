@@ -9,6 +9,8 @@ export interface CheckboxGroupState extends IWebComponent {
   items: CheckboxItem[]
   disabled: boolean
   horizontal: boolean
+  selectedIndex: number
+  css?: string
 }
 
 export const CheckboxGroupComponentDefinition = defineWebComponent({
@@ -50,6 +52,11 @@ export const CheckboxGroupComponentDefinition = defineWebComponent({
         type: 'boolean',
         default: false,
         description: 'Afficher horizontalement les propositions?',
+      },
+      css: {
+        type: 'string',
+        description: 'CSS personnalisée pour le style du groupe de cases à cocher.',
+        default: '',
       },
     },
     required: ['items'],

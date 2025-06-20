@@ -6,6 +6,10 @@ import { PickerComponentDefinition, PickerState } from './picker'
   selector: 'wc-picker',
   templateUrl: 'picker.component.html',
   styleUrls: ['picker.component.scss'],
+  host: {
+    '[style.display]': `state.width === 'auto' || state.appearance === 'inline' ? 'inline-flex' : ''`,
+    '[style.width]': `state.width !== 'auto' ? (state.width ? state.width : '') : ''`,
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(PickerComponentDefinition)

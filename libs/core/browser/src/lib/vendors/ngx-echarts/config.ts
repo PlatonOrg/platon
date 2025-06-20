@@ -66,7 +66,7 @@ echarts.use([
   RadarChart,
 ])
 
-echarts.registerTheme('dark', darkTheme)
+echarts.registerTheme('dark', darkTheme())
 
 // TODO: register local https://xieziyu.github.io/ngx-echarts/api-doc/#custom-locale
 

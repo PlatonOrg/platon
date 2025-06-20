@@ -17,6 +17,7 @@ import { pythonNextScript, pythonRunnerScript } from './python-scripts'
 import { AxiosError } from 'axios'
 import { NotFoundResponse } from '@platon/core/common'
 import { timeout as rxjsTimeout } from 'rxjs'
+import { EmailService } from '@platon/feature/email/server'
 
 interface ExecutionResult {
   status: number
@@ -35,7 +36,11 @@ interface ExecutionResult {
 @Injectable()
 @RegisterSandbox()
 export class PythonSandbox implements Sandbox {
-  constructor(private readonly http: HttpService, private readonly config: ConfigService<Configuration>) {}
+  constructor(
+    private readonly http: HttpService,
+    private readonly config: ConfigService<Configuration>,
+    private readonly emailService: EmailService
+  ) {}
 
   supports(input: SandboxInput): boolean {
     const { sandbox } = input.variables
@@ -114,8 +119,26 @@ export class PythonSandbox implements Sandbox {
         throw error
       }
       if (error instanceof TimeoutError) {
+        this.emailService
+          .sendTechnicalAlert({
+            subject: 'Python Sandbox Timeout',
+            content: ``,
+            error,
+          })
+          .catch((emailError) => {
+            console.error('Failed to send technical alert email:', emailError)
+          })
         throw new HttpException('A timeout occurred while executing the script.', 504)
       }
+      this.emailService
+        .sendTechnicalAlert({
+          subject: 'Python Sandbox Unavailable',
+          content: ``,
+          error,
+        })
+        .catch((emailError) => {
+          console.error('Failed to send technical alert email:', emailError)
+        })
       throw new HttpException(
         `The sandbox is currently unavailable. Please try again later.\n\n${(error as AxiosError)?.message}`,
         512

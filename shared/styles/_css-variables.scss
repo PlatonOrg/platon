@@ -1,0 +1,97 @@
+// Variables CSS centralisées pour tous les systèmes de theming
+// Ces variables seront utilisées par SCSS, Material Design et ng-zorro
+
+.light-theme {
+  // === COLORS PRINCIPALES ===
+  --brand-color-primary: #171c8f;
+  --brand-color-primary-rgb: 23, 28, 143;
+  --brand-color-primary-contrast: #ffffff;
+  --brand-color-primary-shade: #14197e;
+  --brand-color-primary-tint: #2e339a;
+
+  --brand-background-sidebar: #3C2964;
+
+  --brand-color-secondary: #3466fe;
+  --brand-color-secondary-rgb: 52, 102, 254;
+  --brand-color-secondary-contrast: #ffffff;
+  --brand-color-secondary-shade: #2e5ae0;
+  --brand-color-secondary-tint: #4875fe;
+
+  --brand-color-tertiary: #7044ff;
+  --brand-color-tertiary-rgb: 112, 68, 255;
+  --brand-color-tertiary-contrast: #ffffff;
+  --brand-color-tertiary-shade: #633ce0;
+  --brand-color-tertiary-tint: #7e57ff;
+
+  --brand-background-components: #fafafa;
+  --brand-background-primary: #f4f2ed;
+  --brand-background-secondary: #f4f2ed;
+  --brand-background-hover: rgba(41, 45, 51, 0.04);
+  --brand-background-card: #fafafa;
+  --brand-background-dialog: #fafafa;
+
+  // Variables supplémentaires pour Material Design
+  --brand-background-darker-2: #fcfcfc;
+  --brand-background-darker-10: #e6e6e6;
+  --brand-background-darker-20: #cccccc;
+  --brand-background-darker-30: #b3b3b3;
+  --brand-background-lighter-5: #ffffff;
+  --brand-background-alpha-12: rgba(41, 45, 51, 0.12);
+
+  // === TEXTE ===
+  --brand-text-primary: rgba(0, 0, 0, 0.87);
+  --brand-text-secondary: rgba(66, 27, 27, 0.54);
+  --brand-text-disabled: rgba(0, 0, 0, 0.38);
+  --brand-text-error: #de0029;
+
+  // === BORDURES ===
+  --brand-border-color: rgba(0, 0, 0, 0.12);
+  --brand-border-color-light: rgba(0, 0, 0, 0.06);
+
+  // === FONTS ===
+  --brand-font: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+
+  // === HIGHLIGHT ===
+  --brand-highlight-primary: var(--brand-color-primary);
+
+  // === OVERRIDE MATERIAL DESIGN ===
+  --mat-sidenav-content-background-color: var(--brand-background-secondary);
+  --mat-sidenav-container-background-color: var(--brand-background-sidebar);
+
+
+}
+
+.dark-theme {
+  // === COLORS PRINCIPALES ===
+  --brand-color-primary: #d09000;
+
+  --brand-background-components: rgb(38, 40, 48);
+  --brand-background-primary: rgb(17, 17, 22);
+  --brand-background-secondary: rgb(32, 33, 38);
+  --brand-background-hover: rgba(246, 246, 246, 0.04);
+  --brand-background-card: rgb(32, 33, 38);
+  --brand-background-dialog: rgb(32, 33, 38);
+
+  // Variables supplémentaires pour Material Design (thème sombre)
+  --brand-background-darker-2: rgb(29, 30, 35);
+  --brand-background-darker-10: rgb(37, 38, 43);
+  --brand-background-darker-20: rgb(47, 48, 53);
+  --brand-background-darker-30: rgb(57, 58, 63);
+  --brand-background-lighter-5: rgb(32, 33, 38);
+  --brand-background-alpha-12: rgba(246, 246, 246, 0.12);
+
+  --brand-text-primary: #f2f2f2;
+  --brand-text-secondary: rgba(242, 242, 242, 0.7);
+  --brand-text-disabled: rgba(242, 242, 242, 0.5);
+  --brand-text-error: #ff1a44;
+
+  --brand-border-color: rgba(211, 227, 253, 0.3);
+  --brand-border-color-light: rgba(211, 227, 253, 0.12);
+
+  --brand-highlight-primary: #d09000;
+
+  // === OVERRIDE MATERIAL DESIGN ===
+  --mdc-elevated-card-container-color: var(--brand-background-components);
+
+
+}

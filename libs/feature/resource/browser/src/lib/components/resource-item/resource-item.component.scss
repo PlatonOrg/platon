@@ -1,4 +1,14 @@
+:host {
+  container-type: inline-size;
+  container-name: resource-item;
+}
+
 :host::ng-deep {
+  // Appliquons aussi le container type au composant article principal
+  ui-list-item-article {
+    container-type: inline-size;
+    container-name: list-item;
+  }
   .article-title {
     max-width: 75%;
   }
@@ -12,6 +22,12 @@
       width: 18px;
       height: 18px;
       font-size: 18px;
+    }
+  }
+
+  @container list-item (max-width: 500px) {
+    .container-wide {
+      display: none;
     }
   }
 

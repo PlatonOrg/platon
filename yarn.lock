@@ -2685,28 +2685,21 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.6.1.tgz#593da7a17a31a72a874e313677183334a49b01c9"
   integrity sha512-boghen8F0Q8D+0/Q1/1r6DUEieUJ8w2a1gIknExMSHBsJFOr2+0KUfHiVYBvucPwl3+RU5PFBK833FjFCh3BhA==
 
-"@editorjs/attaches@^1.3.0":
+"@editorjs/attaches@1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@editorjs/attaches/-/attaches-1.3.0.tgz#594fac7d399d2342016d29f1bec0ac22736bfd2e"
   integrity sha512-D+dj55EsC5bvXV///Dh/+KN4unuI0j6SU3f5QcMA5zrfda47PNKwbKOuwMBJwn0O+o5qwqrFv67g98lAo2qqVQ==
   dependencies:
     "@codexteam/icons" "^0.0.4"
 
-"@editorjs/checklist@^1.4.0":
+"@editorjs/checklist@1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@editorjs/checklist/-/checklist-1.6.0.tgz#f3e501b0422917ca78fd08cb51578098a26a1823"
   integrity sha512-hRNP36DInr73mSK3noHBQeoQb7DA12ANfqTXufEkTgQzx+k4mRJ0HdeGukTIR4JbwjHJ9ecUBnnQqIEGnxCFEg==
   dependencies:
     "@codexteam/icons" "^0.3.0"
 
-"@editorjs/code@^2.8.0":
-  version "2.9.3"
-  resolved "https://registry.yarnpkg.com/@editorjs/code/-/code-2.9.3.tgz#89f25ce86e1cd551804c5c7fc2b7d3d5108777dd"
-  integrity sha512-nXUrK3CjhpubvShYtcbkpZ9SU15IYwmJOsWZrlWYSzy9unZBRQthii6eABndsCtODzzV0yiSKmTp00RQkFow3Q==
-  dependencies:
-    "@codexteam/icons" "^0.3.2"
-
-"@editorjs/delimiter@^1.3.0":
+"@editorjs/delimiter@1.4.2":
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/@editorjs/delimiter/-/delimiter-1.4.2.tgz#3034ff16470bda5de88087fd5f92f5a2889528db"
   integrity sha512-S8q2LpeYdYkVShLp7K8c4HLthDHBevLw+sT+iO0+SH0oMvFmld9SUon3DFzMQ2gG07EOdZGRZ958+sVxyvFjZw==
@@ -2720,7 +2713,7 @@
   dependencies:
     "@editorjs/helpers" "^0.0.4"
 
-"@editorjs/editorjs@^2.26.5", "@editorjs/editorjs@^2.29.1":
+"@editorjs/editorjs@2.30.8", "@editorjs/editorjs@^2.29.1":
   version "2.30.8"
   resolved "https://registry.yarnpkg.com/@editorjs/editorjs/-/editorjs-2.30.8.tgz#e88773622b656f002d6aac31a4b09a04ddea554b"
   integrity sha512-ClFuxI1qZTfXPJTacQfsJtOUP6bKoIe6BQNdAvGsDTDVwMnZEzoaSOwvUpdZEE56xppVfQueNK/1MElV9SJKHg==
@@ -2738,35 +2731,35 @@
   resolved "https://registry.yarnpkg.com/@editorjs/helpers/-/helpers-0.0.4.tgz#9351373f609e9f8333e0421f7b396c7c7fd41bfa"
   integrity sha512-ieg3dzo2m1/ELze/RMNADiAiC5amXxIlVXoJ5vvXITOu/p/dPsrF+Oi3h5gBYvtGk9vg5LJUSG5YWU0tBUO1tw==
 
-"@editorjs/image@^2.8.1":
+"@editorjs/image@2.10.2":
   version "2.10.2"
   resolved "https://registry.yarnpkg.com/@editorjs/image/-/image-2.10.2.tgz#d2d6f523507d1a8e51216e7522354834dfafac86"
   integrity sha512-SU0nP9NhqwA7+Jlco/E7zjYjtRUrVGSOW8bsrrEnH8my588UW7mPGa1zwAHFs/UMB0x8LXKOb1iq40db+2iC6A==
   dependencies:
     "@codexteam/icons" "^0.3.0"
 
-"@editorjs/marker@^1.3.0":
+"@editorjs/marker@1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@editorjs/marker/-/marker-1.4.0.tgz#c5553c54ced70d28502fb47f2dbc7d50c53fc88e"
   integrity sha512-5ipEXfL44jTTRzgNp/p/YjMO7jT08S5z4V8qA3FFJTfdhKgQyM3mvP1zpdYKw47ZZpVWMCncvk5Nto3BxihEtg==
   dependencies:
     "@codexteam/icons" "^0.0.5"
 
-"@editorjs/nested-list@^1.3.0":
+"@editorjs/nested-list@1.4.3":
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/@editorjs/nested-list/-/nested-list-1.4.3.tgz#4e36658789346b7dcfd0f53cd55921894999dd57"
   integrity sha512-3jTJd6H2Zwe8SeiI9li9AolkCxFVitEnCpJjDI6+la/HslSJC827fHivc9hue6JmC8esA4yri0KCMyp8N4ykww==
   dependencies:
     "@codexteam/icons" "^0.0.2"
 
-"@editorjs/paragraph@^2.9.0":
+"@editorjs/paragraph@2.11.7":
   version "2.11.7"
   resolved "https://registry.yarnpkg.com/@editorjs/paragraph/-/paragraph-2.11.7.tgz#156957112b4932bc4523476c613af874d73c58fc"
   integrity sha512-qD6bbWvRc4VvP0mXDOm+hOhzzhUYR9ZjcAvgCuKWcCbUMpCvhVF1s8NX40zdjekPi6JEnuHTamCncTrSzVsVhw==
   dependencies:
     "@codexteam/icons" "^0.0.4"
 
-"@editorjs/quote@^2.5.0":
+"@editorjs/quote@2.7.6":
   version "2.7.6"
   resolved "https://registry.yarnpkg.com/@editorjs/quote/-/quote-2.7.6.tgz#f399220c109321dce98530010eae36372f4380c2"
   integrity sha512-D01KUMSDj2r+6Z+xjDkQqI+y6URpeHCvj0+P4pah+GtkG040lWjFb2H4pgHFXuol2cbfyAoraYSw85fuPheCvw==
@@ -2774,33 +2767,33 @@
     "@codexteam/icons" "^0.3.2"
     "@editorjs/dom" "^0.0.5"
 
-"@editorjs/raw@^2.4.0":
+"@editorjs/raw@2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@editorjs/raw/-/raw-2.5.1.tgz#c6c0854d172c731022eaf9f0df4ef546a3b9ebcb"
   integrity sha512-h7CjXtfSTe4Bj1CL84ch5NW0q0CdrlWsLzQ/kbaFTgx914CzKz4Ug+xgdvytVO1dd1QzB5/HCW0ic1VxtgkhMQ==
   dependencies:
     "@codexteam/icons" "^0.0.4"
 
-"@editorjs/simple-image@^1.5.1":
+"@editorjs/simple-image@^1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@editorjs/simple-image/-/simple-image-1.6.0.tgz#711c3900e17845331d6667cf0fe91793a5557f84"
   integrity sha512-WvdGfQPlozwZd3PXQrJnRXk6gEYbv1U2vRupYJ6lTd3/UsLInXYUX5jSFcnGB5ZMH3bd0JDZfcb4d4Sv1/1big==
   dependencies:
     "@codexteam/icons" "^0.0.6"
 
-"@editorjs/table@^2.2.0":
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/@editorjs/table/-/table-2.4.4.tgz#724cbebd2c99b929bd41d31a147fdaf690ae2c81"
-  integrity sha512-2wWjxk48C9Z7uaBZIS5dML81c2VsD47Va9J4RDd2UboxcnYV8OZ4oYxKafH5RJIGPj8ykGaROIzyDVR1N4e7Cg==
+"@editorjs/table@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@editorjs/table/-/table-2.4.5.tgz#bb2ce9962935088e3d24a20e799acb9526b90e7b"
+  integrity sha512-pF48R2wc5m0c+N+RjtCLXBGZd23Rl7EjfSFpmcSViwNsu5RwMgYGrEiQ8mzVh98mbvYQwXm/NYBi9DEUUs970A==
   dependencies:
     "@codexteam/icons" "^0.0.6"
 
-"@editorjs/text-variant-tune@^1.0.1":
+"@editorjs/text-variant-tune@1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@editorjs/text-variant-tune/-/text-variant-tune-1.0.3.tgz#d6004c88db75d3af35b4ba12b7a24fed62fc1290"
   integrity sha512-zET/uTEnyY0wPYkFI41M6PhtBNqp5DHiUf/sbig4xpq1uwF9xgoJBZh92VultEJSjvLHFAQtD/dP8x7NJ7rouQ==
 
-"@editorjs/underline@^1.1.0":
+"@editorjs/underline@1.2.1":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@editorjs/underline/-/underline-1.2.1.tgz#72ad63e9821b2ebca17f25536682b53b7a2c90df"
   integrity sha512-LjJ01ia6Pj0Z/elifycp9+T1bQs0eXNnIcEYKOlk0sGHLy88DPcBOh9oz1i+uWarZ4AjGsvSMaptpWe+yQNsjQ==
@@ -7905,6 +7898,13 @@
   dependencies:
     undici-types "~6.19.2"
 
+"@types/nodemailer@^6.4.17":
+  version "6.4.17"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-6.4.17.tgz#5c82a42aee16a3dd6ea31446a1bd6a447f1ac1a4"
+  integrity sha512-I9CCaIp6DTldEg7vyUTZi8+9Vo0hi1/T8gv3C89yk1rSAAzoKQ8H8ki/jBYJSFoH/BisgLP8tkZMlQ91CIquww==
+  dependencies:
+    "@types/node" "*"
+
 "@types/normalize-package-data@^2.4.0":
   version "2.4.4"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.4.tgz#56e2cc26c397c038fab0e3a917a12d5c5909e901"
@@ -8595,6 +8595,13 @@ ace-builds@^1.31.1:
   version "1.41.0"
   resolved "https://registry.yarnpkg.com/ace-builds/-/ace-builds-1.41.0.tgz#682db7c31624bd42d69be4e975075fb60751ca75"
   integrity sha512-tiEUfw7V/FpHuI4tG7KS+muOTMIuPh6zReBAD2Uqhe9t00tLeyVGxjXu0tSqz5OIPWy7/wvuJBVXAsNWx0rYvQ==
+
+ace-code-editorjs@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/ace-code-editorjs/-/ace-code-editorjs-1.0.3.tgz#14c7ecccee394f2659ccde10202e88ae9c040cbe"
+  integrity sha512-FaxcZInqduJK5YfqMB5t8WAAeGTf6/XQF9JpTjxwmoXPV9fmkZGM+FmMw5OAW0OWCwqS/kPClvSHglIRSJPy2g==
+  dependencies:
+    "@codexteam/icons" "^0.3.0"
 
 acorn-globals@^6.0.0:
   version "6.0.0"
@@ -12100,19 +12107,19 @@ echarts@^5.4.3:
     tslib "2.3.0"
     zrender "5.6.1"
 
-editorjs-drag-drop@^1.1.13:
+editorjs-drag-drop@1.1.16:
   version "1.1.16"
   resolved "https://registry.yarnpkg.com/editorjs-drag-drop/-/editorjs-drag-drop-1.1.16.tgz#428f44520272260e3d0e1ec7b7676ddf4a78d3a0"
   integrity sha512-yOyKZqqZepkdbDQbAw1bZr3mQewkT4a9QgufWW3Aoy1qcTka8uHR01T/dGHqrpyYrF56ykyidPyp0LX79LEHHQ==
 
-editorjs-latex@^1.0.0:
+editorjs-latex@1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/editorjs-latex/-/editorjs-latex-1.0.5.tgz#39ff414759a8f071eb54a3e0216feb44286a74e0"
   integrity sha512-qT4aQBnaXK1VA3FGRlTCVpmnf7Mj3OD5RXpfRTsQHSL/wrOsoVcXhPGvNkZm1qTAj6m7rVLXmwXqvBxURF1DBA==
   dependencies:
     katex "^0.16.4"
 
-editorjs-mermaid@^1.0.0:
+editorjs-mermaid@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/editorjs-mermaid/-/editorjs-mermaid-1.0.0.tgz#da8164ec477eef498a80f8a46bef1881b6b8e4da"
   integrity sha512-4uxQ/B+UyjkfMNuZrGwIoEuR5wn3Jhk78x40eij/gPAqVu5ODVxym3kizX8MdVLb3r3wtqKupkWuSFwLNxLkvA==
@@ -12135,19 +12142,18 @@ editorjs-text-alignment-blocktune@^1.0.3:
   resolved "https://registry.yarnpkg.com/editorjs-text-alignment-blocktune/-/editorjs-text-alignment-blocktune-1.0.3.tgz#7942fe2d3fbdbd7fcfd10fbb9b341c97ec3eb84f"
   integrity sha512-DAJ2LJP+WjETvU4lVOJCqZ1kZkKHp0GkujkqZgza9DRv7bO46m1M/s2d5Ba5hPFdmqk1vA/ci++MQXgWD7mWYw==
 
-editorjs-text-color-plugin@^2.0.2:
+"editorjs-text-color-plugin@git+https://github.com/dariox64/editorjs-text-color-plugin.git":
   version "2.0.4"
-  resolved "https://registry.yarnpkg.com/editorjs-text-color-plugin/-/editorjs-text-color-plugin-2.0.4.tgz#6e143c9507abe59da54ca0f8d6f9ffb14447c29d"
-  integrity sha512-QpibTkOxs3ndlKNOLT8ZlC4ktc3/eKIajiLO0Jm/hh9AJug/CrM1/rAvHy+ldfUKavbWeI+YZvgjad0YTyoyGw==
+  resolved "git+https://github.com/dariox64/editorjs-text-color-plugin.git#214395c69ea1779dfb98b2f7744a090353068659"
 
-editorjs-toggle-block@^0.3.8:
+editorjs-toggle-block@0.3.16:
   version "0.3.16"
   resolved "https://registry.yarnpkg.com/editorjs-toggle-block/-/editorjs-toggle-block-0.3.16.tgz#3f881c5d9dd59116dd4e3388afb8a8891460e548"
   integrity sha512-vjLE0bTF2HcQ7gQdgQ4c+Dl0n2o+oA0JICseJSYkQluDIE+LA9oHfTAE8ziJr03oeya7iVQ/b+d21Ez5hKsVsw==
   dependencies:
     uuid "^9.0.0"
 
-editorjs-undo@^2.0.18:
+editorjs-undo@2.0.28:
   version "2.0.28"
   resolved "https://registry.yarnpkg.com/editorjs-undo/-/editorjs-undo-2.0.28.tgz#94ba953b800442fa84cea2b93139e38b8623fb16"
   integrity sha512-7MiLdjIsPOXn8+cHDeAt2HapVklg4vcLWWkd2eMMlGI6UVtwYSjdQquDSv9752B/fOEP1C3NMF2sdiCoZV3tTA==
@@ -17972,6 +17978,11 @@ node-schedule@2.1.1:
     cron-parser "^4.2.0"
     long-timeout "0.1.1"
     sorted-array-functions "^1.3.0"
+
+nodemailer@^7.0.3:
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-7.0.3.tgz#c098ce79ac60c7c111a86949eed2f99bd00cdac3"
+  integrity sha512-Ajq6Sz1x7cIK3pN6KesGTah+1gnwMnx5gKl3piQlQQE/PwyJ4Mbc8is2psWYxK3RJTVeqsDaCv8ZzXLCDHMTZw==
 
 nomnom@1.5.2:
   version "1.5.2"

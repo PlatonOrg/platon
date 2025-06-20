@@ -21,7 +21,7 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   list1: BubbleItem[] = []
   list2: BubbleItem[] = []
   waitingChoice: { index1: number; index2: number; pair: PairBubbleItem }[] = []
-  clickedList: BubbleItem[] = []
+  clickedList: (BubbleItem | undefined)[] = [undefined, undefined]
   achieveList: PairBubbleItem[] = []
   timeoutID: NodeJS.Timeout | undefined
 
@@ -57,13 +57,18 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
     }
   }
 
-  updateClickedList(item: BubbleItem) {
+  updateClickedList(item: BubbleItem, fromList: 'list1' | 'list2') {
     if (item.state === 'unchecked') {
       item.state = 'checked'
-      this.clickedList.push(item)
+      const index = fromList === 'list1' ? 0 : 1
+      if (this.clickedList[index] !== undefined) {
+        this.clickedList[index].state = 'unchecked'
+        this.clickedList[index] = undefined
+      }
+      this.clickedList[index] = item
     } else if (item.state === 'checked') {
-      this.clickedList.find((element) => element.id === item.id)!.state = 'unchecked'
-      this.clickedList = this.clickedList.filter((element) => element.id !== item.id)
+      item.state = 'unchecked'
+      this.clickedList = this.clickedList.filter((element) => element?.id !== item.id)
     }
     if (this.clickedList.length > 2) {
       const item = this.clickedList.shift()
@@ -76,19 +81,18 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
 
   achievePair() {
     if (this.clickedList.length === 2) {
+      if (this.clickedList[0] === undefined || this.clickedList[1] === undefined) {
+        return
+      }
       const pair = this.generatePair(this.clickedList[0], this.clickedList[1])
-      const reversedPair = this.generatePair(this.clickedList[1], this.clickedList[0])
 
       let foundPair: PairBubbleItem | undefined = undefined
       let sameSide = true
       for (const item of this.state.items) {
-        if (item.item1.id === pair.item1.id || reversedPair.item1.id === item.item1.id) {
+        if (item.item1.id === pair.item1.id) {
           sameSide = !sameSide
         }
-        if (
-          (item.item1.id === pair.item1.id && item.item2.id === pair.item2.id) ||
-          (item.item1.id === reversedPair.item1.id && item.item2.id === reversedPair.item2.id)
-        ) {
+        if (item.item1.id === pair.item1.id && item.item2.id === pair.item2.id) {
           foundPair = item
           break
         }
@@ -111,8 +115,8 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
         }
       }
       //mettre à jour les deux list
-      this.list1 = this.list1.slice()
-      this.list2 = this.list2.slice()
+      // this.list1 = this.list1.slice()
+      // this.list2 = this.list2.slice()
     }
   }
 
@@ -240,8 +244,14 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   }
 
   clearClickedList(gotWrong: boolean) {
-    if (gotWrong) this.clickedList.forEach((element) => (element.state = 'error'))
-    else this.clickedList.forEach((element) => (element.state = 'achieved'))
+    if (gotWrong)
+      this.clickedList.forEach((element) => {
+        if (element) element.state = 'error'
+      })
+    else
+      this.clickedList.forEach((element) => {
+        if (element) element.state = 'achieved'
+      })
     this.clickedList = []
   }
 
@@ -273,5 +283,9 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
     if (this.achieveList.length === this.state.items.length) {
       this.webComponentService.submit(this)
     }
+  }
+
+  protected trackById(index: number, item: BubbleItem): string {
+    return item.id
   }
 }
