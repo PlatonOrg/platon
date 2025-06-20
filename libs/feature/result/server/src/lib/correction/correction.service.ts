@@ -188,12 +188,12 @@ export class CorrectionService {
         await this.sessionRepository.save(activitySession)
       }
 
-      // if (exerciseSession.activity && exerciseSession.userId) {
-      //   this.eventService.emit<OnCorrectActivityEventPayload>(ON_CORRECT_ACTIVITY_EVENT, {
-      //     userId: exerciseSession.userId,
-      //     activity: exerciseSession.activity,
-      //   })
-      // }
+      if (exerciseSession.activity && exerciseSession.userId) {
+        this.eventService.emit<OnCorrectActivityEventPayload>(ON_CORRECT_ACTIVITY_EVENT, {
+          userId: exerciseSession.userId,
+          activity: exerciseSession.activity,
+        })
+      }
     }
 
     return correction

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ItemResponse, ListResponse } from '@platon/core/common'
-import { IRequest, Mapper, UUIDParam } from '@platon/core/server'
+import { ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
+import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import { ActivityCorrection, UpsertCorrection } from '@platon/feature/result/common'
 import { ActivityCorrectionDTO, CorrectionDTO } from './correction.dto'
 import { CorrectionService } from './correction.service'
@@ -33,6 +33,7 @@ export class CorrectionController {
     return new ListResponse({ total: resources.length, resources })
   }
 
+  @Roles(UserRoles.teacher, UserRoles.admin)
   @Post('/:sessionId')
   async upsert(
     @Req() req: IRequest,
