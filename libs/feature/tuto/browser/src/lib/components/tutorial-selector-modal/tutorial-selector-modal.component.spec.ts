@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { TutorialSelectorModalComponent } from './TutorialSelectorModal.component'
+import { TutorialSelectorModalComponent } from './tutorial-selector-modal.component'
 
 describe('TutorialSelectorModalComponent', () => {
   let component: TutorialSelectorModalComponent

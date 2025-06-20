@@ -9,8 +9,8 @@ import {NzGridModule} from 'ng-zorro-antd/grid'
   selector: 'tutorial-selector-modal',
   standalone: true,
   imports: [CommonModule, MatIconModule, NzGridModule],
-  templateUrl: './TutorialSelectorModal.component.html',
-  styleUrl: './TutorialSelectorModal.component.scss',
+  templateUrl: './tutorial-selector-modal.component.html',
+  styleUrl: './tutorial-selector-modal.component.scss',
 })
 export class TutorialSelectorModalComponent {
   @Input() tutorials: TutorialOption[] = [];
