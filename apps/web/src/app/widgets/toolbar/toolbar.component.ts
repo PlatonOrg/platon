@@ -35,8 +35,12 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
 // Import du service de tutoriel
-import { ToolbarTutorialService } from '@platon/feature/tuto/browser'
-import { TutorialSelectorService } from '@platon/feature/tuto/browser'
+import {
+  TutorialSelectorService,
+  ToolbarTutorialService,
+  FeatureAnnouncementService,
+  FeatureAnnouncementModalComponent,
+} from '@platon/feature/tuto/browser'
 
 import { MatDividerModule } from '@angular/material/divider'
 
@@ -49,29 +53,24 @@ import { MatDividerModule } from '@angular/material/divider'
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
     MatButtonModule,
-
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
     NzPopoverModule,
-
     ResourcePipesModule,
     UserAvatarComponent,
     NotificationDrawerComponent,
     DiscordInvitationComponent,
     DiscordButtonComponent,
-
     UiModalTemplateComponent,
-
     NzPopoverModule,
     NzModalModule,
-
     UserCharterComponent,
+    FeatureAnnouncementModalComponent,
   ],
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
@@ -87,6 +86,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly elementRef = inject(ElementRef)
   private readonly toolbarTutorialService = inject(ToolbarTutorialService)
   private readonly tutorialSelectorService = inject(TutorialSelectorService)
+  private readonly featureAnnouncementService = inject(FeatureAnnouncementService) // Nouveau service
 
   private readonly subscriptions: Subscription[] = []
 
@@ -152,6 +152,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.userCharter = await firstValueFrom(this.userService.findUserCharterById(this.user.id))
       this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
     }
+
+    this.checkFeatureAnnouncements()
 
     this.subscriptions.push(
       this.breakpointObserver
@@ -250,6 +252,16 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   protected async openTutorialSelector(): Promise<void> {
     if (this.user) {
       this.tutorialSelectorService.openTutorialSelector()
+    }
+  }
+
+  private checkFeatureAnnouncements(): void {
+    if (this.user) {
+      // Délai pour laisser l'interface se charger complètement
+      this.featureAnnouncementService.resetAnnouncementStats('tutorials-feature-2025')
+      setTimeout(() => {
+        this.featureAnnouncementService.checkForAnnouncements(this.user as User)
+      }, 2000)
     }
   }
 }
