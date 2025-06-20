@@ -2,36 +2,19 @@
   <button mat-mini-fab id="settingButton">
     <mat-icon>star</mat-icon>
   </button>
-  <!-- <nz-modal
-    [(nzVisible)]="isFavLabelModalVisible"
-    nzTitle="Mettez des étiquettes en favories"
-    (nzOnCancel)="handleFavCancel()"
-    (nzOnOk)="handleFavOk()"
-  >
-    <ng-container *nzModalContent>
-      <div class="label-wrapper">
-        <ng-container *ngFor="let label of labels">
-          <button nz-button nzType="default" nzSize="small" class="label-button" [ngStyle]="getLabelStyles(label)">
-            {{ label.name }}
-          </button>
-        </ng-container>
-      </div>
-    </ng-container>
-  </nz-modal> -->
   <mat-card-header>
-    <mat-card-title class="title">Étiquettes</mat-card-title>
+    <mat-card-title class="title">Critères d'évaluations</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <nz-list nzBordered class="label-wrapper" nzItemLayout="horizontal">
-      @for(label of labels; track label.id; let i = $index) {
-      <nz-list-item class="button-wrapper">
+      <nz-list-item class="button-wrapper" *ngFor="let label of labels; let i = index; trackBy: trackByLabelId">
         <div style="width: 50px">
           <button nz-button nzType="default" nzSize="small" [ngStyle]="getLabelStyles(label)" (click)="labelize(label)">
-            {{ i }}
+            {{ i + 1 }}
           </button>
         </div>
         <form [formGroup]="labelForms[label.id]">
-          <div style="width: 80px; align-self: baseline">
+          <div style="width: 64px; align-self: baseline">
             <input
               formControlName="gradeChange"
               nz-input
@@ -104,14 +87,13 @@
           </ng-template>
         </div>
 
-        <span
+        <!-- <span
           [ngClass]="isLabelFav(label) ? 'favorite-label' : 'unfavorite-label'"
           (click)="addOrRemoveToFav(label, $event)"
         >
           ★
-        </span>
+        </span> -->
       </nz-list-item>
-      }
     </nz-list>
 
     <button id="createbutton" nz-button nzType="primary" nzSize="small" (click)="showCreateLabelModal()">
