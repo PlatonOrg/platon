@@ -1,0 +1,47 @@
+---
+title : Importation d'image
+description : Manuel d'instruction pour l'importation d'image dans un exercice sur Platon
+---
+
+# Importation d'image
+
+
+Certains exercices utilisent une image explicative et pertinente afin de faciliter la compréhension de l’énoncé par les étudiants.
+Avec Platon, l’intégration d’images dans un exercice est une opération simple et rapide.
+
+### Utilisation d’images dans un exercice Platon
+ -------------------------------------------
+  ##### Où dois-je placer l’image à importer ?
+   L'image à importer doit être placée dans le **même repertoire** que les fichiers **readme.md** et **main.ple** .
+   Faire un click droite au parent puis **importer**
+
+   ![Résultat de l'exercice](../../../../public/screens/programming/import.png)
+
+  ##### Fichier main.ple
+
+  Faire **Cliquer - Glisser** l'image depuis le repertoire et selectionner **Inserer un @copyurl**
+
+  ![Résultat de l'exercice](../../../../public/screens/programming/insertion_URL.png)
+
+  Avant d’insérer l’image dans l’énoncé, il convient tout d’abord d’ajouter le lien de l’image dans la section des variables de l’exercice et de l’associer à une variable.
+  Cette variable servira ensuite de référence dans le corps de l’énoncé.
+  ![Résultat de l'exercice](../../../../public/screens/programming/stockage_URL_variable.png)
+
+  Comme l'image est utilisée dans l'énnoncé , il convient d'insérer la balise HTML **img** dans la section statement, en précisant l'attribut **src** comme suit : ``` <img src="{{variable_URL_image}}" /> ```
+
+ ![Résultat de l'exercice](../../../../public/screens/programming/image_statement.png)
+
+
+### Voir ce Tuto 
+
+
+
+<video
+  width="560"
+  height="315"
+  controls
+  preload="metadata"
+>
+  <source src="https://zany-yodel-wqw5775v76x2994p-4203.app.github.dev/docs/screens/tuto/tuto_importation_image.mp4" />
+  Votre navigateur ne supporte pas la lecture de vidéos.
+</video>
