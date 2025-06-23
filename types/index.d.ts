@@ -21,6 +21,11 @@ declare module 'editorjs-text-color-plugin'
 declare module 'editorjs-undo'
 declare module 'editorjs-drag-drop'
 declare module '@editorjs/simple-image'
+declare module 'ace-code-editorjs'
+declare module 'ace-builds/src-noconflict/worker-html?url' {
+  const url: string
+  export default url
+}
 
 declare module 'pdfjs-dist/build/pdf.worker.entry'
 declare module 'pdfjs-dist/build/pdf'

@@ -1,0 +1,97 @@
+// Override des composants Material Design et ng-zorro pour utiliser les variables CSS
+// Ce fichier sera chargé APRÈS la compilation des thèmes pour appliquer les couleurs dynamiques
+
+// Material Design overrides
+
+.mat-drawer-container {
+  color: var(--brand-text-primary) !important;
+}
+
+.mat-mdc-dialog-container {
+  background-color: var(--brand-background-dialog) !important;
+}
+
+.mat-mdc-table {
+  background-color: var(--brand-background-components) !important;
+}
+
+.mat-mdc-header-row {
+  background-color: var(--brand-background-secondary) !important;
+}
+
+.mat-mdc-row:hover {
+  background-color: var(--brand-background-hover) !important;
+}
+
+.mat-mdc-button-toggle {
+  background-color: var(--brand-background-components) !important;
+}
+
+.mat-mdc-button-toggle:hover {
+  background-color: var(--brand-background-hover) !important;
+}
+
+// Text colors
+.mat-mdc-card-content,
+.mat-mdc-dialog-content,
+.mat-mdc-table .mat-mdc-cell {
+  color: var(--brand-text-primary) !important;
+}
+
+// ng-zorro overrides
+.ant-card {
+  background-color: var(--brand-background-components) !important;
+  color: var(--brand-text-primary) !important;
+}
+
+.ant-table {
+  background-color: var(--brand-background-components) !important;
+}
+
+.ant-table-thead > tr > th {
+  background-color: var(--brand-background-secondary) !important;
+  color: var(--brand-text-primary) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: var(--brand-background-hover) !important;
+}
+
+.ant-popover-inner {
+  background-color: var(--brand-background-dialog) !important;
+}
+
+.ant-tabs-tab {
+  color: var(--brand-text-primary) !important;
+}
+
+// .ant-tabs-ink-bar {
+//   background-color: var(--brand-color-primary) !important;
+// }
+
+// .ant-btn-primary {
+//     color: #fff;
+//     border-color: var(--brand-color-primary) !important;
+//     background: var(--brand-color-primary) !important;
+//     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+//     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+// }
+
+// .ant-btn-dangerous.ant-btn-primary {
+//     color: #fff;
+//     border-color: #a92029 !important;
+//     background: #a92029 !important;
+//     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+//     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+// }
+
+// .ant-pagination-item-active a {
+//     color: var(--brand-color-primary) !important;;
+// }
+
+// Global text colors
+body,
+.ant-typography,
+.mat-typography {
+  color: var(--brand-text-primary) !important;
+}

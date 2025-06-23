@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import EdjsParser from 'editorjs-parser'
+import { ListParser } from './parsers/list-parser'
+import { ChecklistParser } from './parsers/checklist-parser'
 
 // TODO implements custom editorjs parser https://github.com/miadabdi/editorjs-parser#custom-or-overriding-parser-methods
 
@@ -10,7 +12,10 @@ import EdjsParser from 'editorjs-parser'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorjsViewerComponent implements OnInit {
-  private readonly parser = new EdjsParser()
+  private readonly parser = new EdjsParser(undefined, {
+    list: ListParser,
+    checklist: ChecklistParser,
+  })
   @ViewChild('container', { static: true })
   protected container!: ElementRef<HTMLElement>
 

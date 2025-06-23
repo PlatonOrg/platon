@@ -1,7 +1,6 @@
 import { Injector } from '@angular/core'
 import { Router } from '@angular/router'
-import { ImgIcon } from '@cisstech/nge/ui/icon'
-import { DialogService } from '@platon/core/browser'
+import { DialogService, ThemeAwareIconService } from '@platon/core/browser'
 import { NotificationParser, NotificationRenderer } from '@platon/feature/notification/browser'
 import {
   RESOURCE_EVENT_NOTIFICATION,
@@ -19,12 +18,13 @@ export const ResourceEventNotificationParser: NotificationParser<ResourceEventNo
   },
   renderer(notification, injector: Injector): NotificationRenderer {
     const router = injector.get(Router)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     const event = notification.data.eventInfo
     const resourceId = 'resourceId' in event.data ? event.data.resourceId : event.resourceId
     const resourceType = event.data.resourceType?.toLowerCase()
 
     return {
-      icon: new ImgIcon(`/assets/images/resources/${resourceType}.svg`),
+      icon: themeAwareIconService.createIcon(`/assets/images/resources/${resourceType}.svg`),
       content: ResourceEventItemComponent,
       onClick: async ({ onClose }) => {
         if (event.type === 'MEMBER_REMOVE') return
@@ -55,10 +55,11 @@ export const ResourceInvitationNotificationParser: NotificationParser<ResourceIn
     const router = injector.get(Router)
     const dialogService = injector.get(DialogService)
     const resourceService = injector.get(ResourceService)
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
     const { data } = notification
 
     return {
-      icon: new ImgIcon(`/assets/images/resources/${data.resourceType.toLowerCase()}.svg`),
+      icon: themeAwareIconService.createIcon(`/assets/images/resources/${data.resourceType.toLowerCase()}.svg`),
       content: data.expired
         ? `Vous aviez été invité à collaborer sur "${data.resourceName}" par "${data.inviterName}"`
         : `Vous avez été invité à collaborer sur "${data.resourceName}" par "${data.inviterName}"`,

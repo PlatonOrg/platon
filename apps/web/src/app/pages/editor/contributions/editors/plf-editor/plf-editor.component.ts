@@ -38,6 +38,9 @@ export class PlfEditorComponent implements OnInit, OnDestroy {
   }
 
   protected onChangeData(data: OutputData): void {
+    if (JSON.stringify(data.blocks) === JSON.stringify(this.data?.blocks)) {
+      return
+    }
     this.fileService.update(this.request.uri, JSON.stringify(data, null, 2))
   }
 

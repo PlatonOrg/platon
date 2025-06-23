@@ -3,7 +3,9 @@
 @import 'variables';
 @import 'animations';
 @import 'components';
+@import 'css-variables'; // Import des variables CSS centralisées
 @import './material/base';
+@import './theme-overrides';
 
 body {
   width: 100vw;
@@ -14,37 +16,13 @@ body {
   font-family: var(--brand-font);
 }
 
-.light-theme {
-  --brand-background-components: #{$light-background};
-  --brand-background-primary: #{$light-bg-darker-1};
-  --brand-background-hover: #{$dark-bg-alpha-4};
-
-  --brand-text-primary: #{$dark-text};
-  --brand-text-secondary: #{$dark-accent-text};
-  --brand-text-error: #{$dark-error-text};
-  --brand-border-color: #{$dark-dividers};
-
-  --brand-color-theme: #{$brand-color-primary};
-}
-
-.dark-theme {
-  --brand-background-components: #{$dark-bg-lighter-5};
-  --brand-background-primary: #{$dark-background};
-  --brand-background-hover: #{$light-bg-alpha-4};
-
-  --brand-text-primary: #{$light-text};
-  --brand-text-secondary: #{$light-accent-text};
-  --brand-text-error: #{$light-error-text};
-  --brand-border-color: #{$light-dividers};
-
-  --brand-color-theme: #{$light-text};
-}
-
 // GLOBAL APP COMPONENTS
 
 ui-list-item-article {
   background-color: var(--brand-background-components);
+  border-radius: 0.5rem;
 }
+
 
 nge-markdown {
   background-color: transparent !important;
