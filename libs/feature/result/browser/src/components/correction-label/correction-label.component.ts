@@ -170,19 +170,19 @@ export class CorrectionLabelComponent implements OnChanges {
     ) {
       return
     }
-    const [selectedLabels, favLabels] = await Promise.all([
+    const [selectedLabels] = await Promise.all([
       firstValueFrom(
         this.resultService.listCorrectionLabels(
           this.currentExercise?.exerciseSessionId,
           this.answers[this.answers.length - 1].answerId ?? ''
         )
       ),
-      firstValueFrom(this.resultService.getFavLabels()),
+      //firstValueFrom(this.resultService.getFavLabels()),
     ])
 
     this.selectedLabels = selectedLabels
     this.currentLabelsChange.emit(this.selectedLabels)
-    this.favLabels = favLabels
+    //this.favLabels = favLabels
     this.labels = await firstValueFrom(this.resultService.getLabels(this.navigationExerciseId))
     // Crée un formulaire pour chaque label
     this.labels.forEach((label) => {
