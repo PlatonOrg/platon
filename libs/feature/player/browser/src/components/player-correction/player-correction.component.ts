@@ -393,7 +393,6 @@ export class PlayerCorrectionComponent implements OnInit {
           this.selectedExerciseIndex === this.exercises.length - 1 &&
           this.exerciseCorrected.size === this.exercises.length
         ) {
-          console.error('go')
           this.resumeMode = true
           this.changeDetectorRef.markForCheck()
           return
