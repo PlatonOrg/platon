@@ -15,4 +15,7 @@ export class CorrectionEntity extends BaseEntity implements Correction {
 
   @Column({ type: 'float' })
   grade!: number
+
+  // @Column({ type: 'boolean', default: false })
+  // isFinal!: boolean
 }

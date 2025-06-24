@@ -368,15 +368,19 @@ export class PlayerCorrectionComponent implements OnInit {
     const active = document.activeElement
     // On ignore si le focus est sur un input, textarea ou contenteditable
     if (
-      (active &&
-        (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || (active as HTMLElement).isContentEditable)) ||
-      this.resumeMode
+      active &&
+      (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || (active as HTMLElement).isContentEditable)
     ) {
       return
     }
 
     switch (event.key) {
       case 'ArrowLeft':
+        if (this.resumeMode) {
+          this.resumeMode = false
+          this.changeDetectorRef.markForCheck()
+          return
+        }
         await this.onChoosePreviousUserExercise()
         this.animationState = 'left'
         setTimeout(() => {
@@ -385,6 +389,15 @@ export class PlayerCorrectionComponent implements OnInit {
         break
       case 'ArrowRight':
         await this.onSaveGrade()
+        if (
+          this.selectedExerciseIndex === this.exercises.length - 1 &&
+          this.exerciseCorrected.size === this.exercises.length
+        ) {
+          console.error('go')
+          this.resumeMode = true
+          this.changeDetectorRef.markForCheck()
+          return
+        }
         await this.onChooseNextUserExercise()
         this.animationState = 'right'
         setTimeout(() => {
@@ -392,12 +405,14 @@ export class PlayerCorrectionComponent implements OnInit {
         }, 400)
         break
       case 'ArrowUp':
+        if (this.resumeMode) return
         event.preventDefault()
         this.onChooseGroup(
           this.listExerciseGroup[Math.max(0, this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) - 1)]
         )
         break
       case 'ArrowDown':
+        if (this.resumeMode) return
         event.preventDefault()
         this.onChooseGroup(
           this.listExerciseGroup[

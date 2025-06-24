@@ -61,10 +61,10 @@ export class LabelService {
     const resourceLabels = await this.resourceLabelRepository.find({ where: { navigationExerciseId } })
     const resourceLabelIds = resourceLabels.map((resourceLabel) => resourceLabel.labelId)
     const labels = await this.convertLabelIdsToEntity(resourceLabelIds)
-    const userLabels = await this.getUserFav(userId)
-    const userLabelIds = new Set(userLabels.map((label) => label.id))
-    const uniqueLabels = userLabels.concat(labels.filter((label) => !userLabelIds.has(label.id)))
-    return uniqueLabels
+    // const userLabels = await this.getUserFav(userId)
+    // const userLabelIds = new Set(userLabels.map((label) => label.id))
+    // const uniqueLabels = userLabels.concat(labels.filter((label) => !userLabelIds.has(label.id)))
+    return labels
   }
 
   async findById(id: string): Promise<Optional<LabelEntity>> {
