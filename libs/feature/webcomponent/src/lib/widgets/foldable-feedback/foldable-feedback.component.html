@@ -10,16 +10,13 @@
     (click)="onClick(indexes)"
   >
     <h2>
-      <div
-        *ngIf="item.feedbacks && item.feedbacks.length > 0"
-        [style.background-image]="
-          'url(' + 'https://icongr.am/entypo/chevron-' + (item.display ? 'down' : 'right') + '.svg?size=20&color=0000)'
-        "
-        class="chevron-icon"
-        alt="down arrow icon"
-      ></div>
+      <mat-icon>
+        {{ item.display ? 'expand_less' : 'expand_more' }}
+      </mat-icon>
       {{ item.name }}
-      <div [class]="(item.type ? item.type : 'info') + '-icon'"></div>
+      <mat-icon class="feedback-type-icon" [ngClass]="item.type ? item.type : 'info'">
+        {{ getIconForType(item.type ? item.type : 'info') }}
+      </mat-icon>
     </h2>
     <div [class]="item.display ? 'show' : 'hide'">
       @if (item.feedbacks && item.feedbacks.length > 0){
