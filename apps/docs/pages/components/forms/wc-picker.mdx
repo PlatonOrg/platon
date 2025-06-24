@@ -85,6 +85,14 @@ Le Picker est particulièrement utile pour:
         "type": "string"
       }
     },
+    "width": {
+      "type": [
+        "string",
+        "number"
+      ],
+      "default": "",
+      "description": "Le largeur du champ de saisi en valeur CSS (%, px, em, etc.)."
+    },
     "prefix": {
       "type": "string",
       "default": "",
@@ -94,6 +102,16 @@ Le Picker est particulièrement utile pour:
       "type": "string",
       "default": "",
       "description": "Une icône à afficher à droite du picker."
+    },
+    "appearance": {
+      "type": "string",
+      "default": "outline",
+      "description": "L'apparence du champ de saisi.",
+      "enum": [
+        "fill",
+        "outline",
+        "inline"
+      ]
     },
     "hint": {
       "type": "string",
@@ -114,6 +132,11 @@ Le Picker est particulièrement utile pour:
       "type": "boolean",
       "default": false,
       "description": "Désactiver la sélection?"
+    },
+    "type": {
+      "type": "string",
+      "default": "default",
+      "description": " change l'apparence du picker lorsque le format est en 'inline'"
     }
   }
 }} />
@@ -135,6 +158,14 @@ Le Picker est particulièrement utile pour:
         "type": "string"
       }
     },
+    "width": {
+      "type": [
+        "string",
+        "number"
+      ],
+      "default": "",
+      "description": "Le largeur du champ de saisi en valeur CSS (%, px, em, etc.)."
+    },
     "prefix": {
       "type": "string",
       "default": "",
@@ -144,6 +175,16 @@ Le Picker est particulièrement utile pour:
       "type": "string",
       "default": "",
       "description": "Une icône à afficher à droite du picker."
+    },
+    "appearance": {
+      "type": "string",
+      "default": "outline",
+      "description": "L'apparence du champ de saisi.",
+      "enum": [
+        "fill",
+        "outline",
+        "inline"
+      ]
     },
     "hint": {
       "type": "string",
@@ -164,6 +205,11 @@ Le Picker est particulièrement utile pour:
       "type": "boolean",
       "default": false,
       "description": "Désactiver la sélection?"
+    },
+    "type": {
+      "type": "string",
+      "default": "default",
+      "description": " change l'apparence du picker lorsque le format est en 'inline'"
     }
   }
 }
