@@ -21,16 +21,11 @@ export class LabelService {
     private readonly activityRepository: Repository<ActivityEntity>
   ) {}
 
-  async saveAndList(
-    label: CreateLabel,
-    activityId: string,
-    navigationExerciseId: string,
-    userId: string
-  ): Promise<LabelEntity[]> {
+  async saveAndList(label: CreateLabel, activityId: string, navigationExerciseId: string): Promise<LabelEntity[]> {
     const labelEntity = await this.labelRepository.save(label)
     const resourceId = await this.getResourceId(activityId, navigationExerciseId)
     await this.resourceLabelRepository.save({ resourceId, labelId: labelEntity.id, navigationExerciseId })
-    return this.list(navigationExerciseId, userId)
+    return this.list(navigationExerciseId)
   }
 
   async getResourceId(activityId: string, navigationExerciseId: string): Promise<string> {
@@ -57,8 +52,11 @@ export class LabelService {
     )
   }
 
-  async list(navigationExerciseId: string, userId: string): Promise<LabelEntity[]> {
-    const resourceLabels = await this.resourceLabelRepository.find({ where: { navigationExerciseId } })
+  async list(navigationExerciseId: string): Promise<LabelEntity[]> {
+    const resourceLabels = await this.resourceLabelRepository.find({
+      where: { navigationExerciseId },
+      order: { createdAt: 'ASC' },
+    })
     const resourceLabelIds = resourceLabels.map((resourceLabel) => resourceLabel.labelId)
     const labels = await this.convertLabelIdsToEntity(resourceLabelIds)
     // const userLabels = await this.getUserFav(userId)
