@@ -48,6 +48,14 @@ export default [
               './tags/tags.routes'
             ),
         },
+        {
+          path: 'announcements',
+          loadChildren: () =>
+            import(
+              /* webpackChunkName: "admin-announcements" */
+              './announcements/announcements.routes'
+            ),
+        },
         { path: '**', pathMatch: 'full', redirectTo: 'users' },
       ],
     },
