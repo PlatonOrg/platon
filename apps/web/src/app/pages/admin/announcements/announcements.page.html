@@ -1,0 +1,72 @@
+<div class="page-header">
+  <h1>Gestion des annonces</h1>
+  <button nz-button nzType="primary" nz-tooltip="Créer une nouvelle annonce" (click)="openCreateModal()">
+    <span nz-icon nzType="plus" nzTheme="outline"></span>
+    Créer une annonce
+  </button>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <nz-table #announcementTable [nzData]="announcements" nzSize="small">
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Description</th>
+        <th>État</th>
+        <th>Date de création</th>
+        <th>Rôles ciblés</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for(item of announcementTable.data; track item) {
+      <tr>
+        <td>{{ item.title }}</td>
+        <td>{{ item.description }}</td>
+        <td>
+          <nz-tag [nzColor]="item.active ? 'green' : 'red'">
+            {{ item.active ? 'Actif' : 'Inactif' }}
+          </nz-tag>
+        </td>
+        <td>{{ item.createdAt | date : 'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <ng-container *ngIf="item.targetedRoles?.length; else allRoles">
+            <nz-tag *ngFor="let role of item.targetedRoles">{{ role }}</nz-tag>
+          </ng-container>
+          <ng-template #allRoles>
+            <nz-tag>Tous</nz-tag>
+          </ng-template>
+        </td>
+        <td>
+          <button nz-button nzType="text" nzShape="circle" nz-tooltip="Modifier">
+            <span nz-icon nzType="edit" nzTheme="outline"></span>
+          </button>
+          <button
+            nz-button
+            nzType="text"
+            nzShape="circle"
+            [nzType]="item.active ? 'primary' : 'default'"
+            (click)="toggleActive(item)"
+            [nz-tooltip]="item.active ? 'Désactiver' : 'Activer'"
+          >
+            <span nz-icon [nzType]="item.active ? 'eye-invisible' : 'eye'" nzTheme="outline"></span>
+          </button>
+          <button
+            nz-button
+            nzDanger
+            nzType="text"
+            nzShape="circle"
+            (click)="deleteAnnouncement(item.id)"
+            nz-tooltip="Supprimer"
+          >
+            <span nz-icon nzType="delete" nzTheme="outline"></span>
+          </button>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </nz-table>
+</nz-spin>
+
+<!-- Garde seulement le drawer d'édition si nécessaire -->
+<announcement-edit-drawer #editDrawer (updated)="updateAnnouncement($event)"></announcement-edit-drawer>
