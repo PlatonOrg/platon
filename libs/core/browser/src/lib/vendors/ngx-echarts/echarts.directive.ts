@@ -31,7 +31,6 @@ export class CoreEchartsDirective implements OnInit, OnDestroy {
     this.host.theme = this.themeService.isDark ? 'dark' : 'default'
     this.subscriptions.push(
       this.themeService.themeChange.subscribe((theme) => {
-        console.error('je suis trigger')
         this.host.theme = theme === 'dark' ? 'dark' : 'default'
         this.host.refreshChart().catch(console.error)
       })
