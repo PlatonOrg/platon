@@ -7,6 +7,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { FeatureAnnouncementService, FeatureAnnouncement } from '../../api/feature-announcement.service';
+import { NotificationCloseReason } from '../../models/announcement.model'
 import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
 import { Subscription } from 'rxjs';
 
@@ -144,22 +145,12 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSecondaryAction(): void {
-    const announcement = this.announcement;
-    if (announcement?.actions.secondary) {
-      announcement.actions.secondary.action();
-    }
-  }
 
   onClose(): void {
     if (this.notificationId) {
       this.notification.remove(this.notificationId);
       this.notificationId = null;
     }
-    this.featureAnnouncementService.dismissAnnouncement('close');
-  }
-
-  onCancel(): void {
-    this.featureAnnouncementService.dismissAnnouncement('later');
+    this.featureAnnouncementService.dismissAnnouncement(NotificationCloseReason.CLOSE);
   }
 }
