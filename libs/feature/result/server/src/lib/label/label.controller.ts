@@ -82,7 +82,7 @@ export class LabelController {
   async list(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
     const navigationExerciseId = req.params.navigationExerciseId
     const resourceLabels = await this.resourceLabelService.list(navigationExerciseId)
-    const labels = Mapper.mapAll(await this.labelService.list(navigationExerciseId, req.user.id), LabelDTO)
+    const labels = Mapper.mapAll(await this.labelService.list(navigationExerciseId), LabelDTO)
 
     const labelsWithGradeChange = labels.map((label) => {
       const resourceLabel = resourceLabels.find((rl: ResourceLabelEntity) => rl.labelId === label.id)
@@ -98,7 +98,6 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Post('create/:activityId/:navigationExerciseId')
   async create(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const userId = req.user.id
     const activityId = req.params.activityId
     const navigationExerciseId = req.params.navigationExerciseId
     const createdLabel = {
@@ -107,7 +106,7 @@ export class LabelController {
       description: req.body.description,
     } as CreateLabel
     const labels = Mapper.mapAll(
-      await this.labelService.saveAndList(createdLabel, activityId, navigationExerciseId, userId),
+      await this.labelService.saveAndList(createdLabel, activityId, navigationExerciseId),
       LabelDTO
     )
     return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
