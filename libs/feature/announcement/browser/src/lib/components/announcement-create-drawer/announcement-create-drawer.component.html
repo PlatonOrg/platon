@@ -1,0 +1,101 @@
+<div class="container">
+  <div class="header">
+    <button nz-button class="close-button" nzType="primary" (click)="close()">
+      <span>Fermer</span>
+    </button>
+
+    <div class="save-state">
+      @if (hasUnsavedChanges) {
+      <mat-icon class="turn" matTooltip="Modifications non sauvegardées" matTooltipClass="tooltip">edit</mat-icon>
+      } @else {
+      <mat-icon matTooltip="Aucune modification" matTooltipClass="tooltip">check</mat-icon>
+      }
+    </div>
+  </div>
+
+  <h1>Créer une annonce</h1>
+
+  <form nz-form [formGroup]="form" (ngSubmit)="save()">
+    <nz-spin [nzSpinning]="loading">
+      <!-- Titre -->
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="title">Titre</nz-form-label>
+        <nz-form-control nzErrorTip="Veuillez saisir un titre">
+          <input nz-input formControlName="title" id="title" placeholder="Titre de l'annonce" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Description -->
+      <nz-form-item class="vertical-label">
+        <nz-form-label nzRequired nzFor="description">Description brève</nz-form-label>
+        <nz-form-control nzErrorTip="Veuillez saisir une description">
+          <textarea
+            nz-input
+            [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+            formControlName="description"
+            id="description"
+            placeholder="Description courte de l'annonce"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="spacer"></div>
+      <!-- Actif -->
+      <nz-form-item>
+        <nz-form-label nzFor="active">Actif</nz-form-label>
+        <nz-form-control>
+          <nz-switch formControlName="active"></nz-switch>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Rôles ciblés
+      <nz-form-label nzFor="targetedRoles">Rôles ciblés</nz-form-label>
+      <nz-form-control nzExtra="Laissez vide pour cibler tous les rôles">
+        <nz-select
+          formControlName="targetedRoles"
+          nzMode="multiple"
+          nzAllowClear
+          nzPlaceHolder="Sélectionner les rôles"
+        >
+          @for(role of userRoles; track role) {
+          <nz-option [nzValue]="role" [nzLabel]="role"></nz-option>
+          }
+        </nz-select>
+      </nz-form-control> -->
+
+      <!--  Date d'affichage
+      <nz-form-item>
+        <nz-form-label nzFor="displayUntil">Afficher jusqu'au</nz-form-label>
+        <nz-form-control>
+          <nz-date-picker
+            formControlName="displayUntil"
+            [nzFormat]="'dd/MM/yyyy'"
+            nzPlaceHolder="Sélectionner une date"
+            id="displayUntil"
+          >
+          </nz-date-picker>
+        </nz-form-control>
+      </nz-form-item> -->
+
+      <!-- Durée d'affichage -->
+      <!-- <nz-form-item>
+        <nz-form-label nzFor="displayDurationInDays">Durée d'affichage (jours)</nz-form-label>
+        <nz-form-control>
+          <nz-input-number
+            formControlName="displayDurationInDays"
+            [nzMin]="1"
+            id="displayDurationInDays"
+            nzPlaceHolder="Nombre de jours"
+          ></nz-input-number>
+        </nz-form-control>
+      </nz-form-item> -->
+    </nz-spin>
+  </form>
+  <h2>Contenu de l'annonce</h2>
+  <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)"></ui-editorjs>
+
+  <div class="button-container">
+    <button nz-button nzType="primary" type="submit" [disabled]="loading">Créer</button>
+    <button nz-button type="button" (click)="close()">Annuler</button>
+  </div>
+</div>
