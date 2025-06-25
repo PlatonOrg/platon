@@ -35,12 +35,8 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
 // Import du service de tutoriel
-import {
-  TutorialSelectorService,
-  ToolbarTutorialService,
-  FeatureAnnouncementService,
-  FeatureAnnouncementModalComponent,
-} from '@platon/feature/tuto/browser'
+import { TutorialSelectorService, ToolbarTutorialService } from '@platon/feature/tuto/browser'
+import { FeatureAnnouncementService, FeatureAnnouncementModalComponent } from '@platon/feature/announcement/browser'
 
 import { MatDividerModule } from '@angular/material/divider'
 
