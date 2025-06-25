@@ -19,6 +19,7 @@ import {
   ResultLegendComponent,
   ResultService,
   ResultBoxPlotComponent,
+  ResultHistogramComponent,
 } from '@platon/feature/result/browser'
 
 import { DurationPipe, UiLayoutBlockComponent, UiStatisticCardComponent } from '@platon/shared/ui'
@@ -66,6 +67,7 @@ import { PeerTreeComponent } from '@platon/feature/peer/browser'
     KCileComponent,
     ResultBoxPlotComponent,
     PeerTreeComponent,
+    ResultHistogramComponent,
 
     UiStatisticCardComponent,
     UiLayoutBlockComponent,
@@ -96,11 +98,18 @@ export class CourseActivityPage implements OnInit, OnDestroy {
   protected lastDate: Date = this.today
   protected splitDate: Date = this.today
   protected columnOrder?: string[]
+  protected exerciseVariableStatistic: Map<string, number> = new Map<string, number>()
 
   ngOnInit(): void {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
+        this.context.results?.exercises.forEach((exercise) => {
+          if (exercise.stats) {
+            this.exerciseVariableStatistic = new Map<string, number>(Object.entries(exercise.stats))
+            return
+          }
+        })
         this.columnOrder = this.context.results?.exercises.map((e) => e.title)
         this.onDateChange([
           this.context.activity?.createdAt ?? this.today,

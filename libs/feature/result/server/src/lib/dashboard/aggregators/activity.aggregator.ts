@@ -179,7 +179,7 @@ export class ActivityExerciseResults implements SessionDataAggregator<ExerciseRe
   private readonly exerciseResults = new Map<string, ExerciseResults>()
   private readonly exerciseSessions = new Map<string, SessionDataEntity>()
 
-  constructor(args: ActivityExerciseResultsArgs) {
+  constructor(args: ActivityExerciseResultsArgs, private sessionVariablesStats?: Map<string, number>) {
     const { activity, exerciseSessions } = args
     exerciseSessions.forEach((exercise) => {
       this.exerciseSessions.set(exercise.id, exercise)
@@ -268,6 +268,16 @@ export class ActivityExerciseResults implements SessionDataAggregator<ExerciseRe
       calculateAverage(exerciseResult.averageTimeToAttempt)
       calculateAverage(exerciseResult.averageAttemptsToSuccess)
       calculateAverage(exerciseResult.successRateOnFirstAttempt)
+
+      // Include session variables statistics if available
+      if (this.sessionVariablesStats && this.sessionVariablesStats.size > 0) {
+        exerciseResult.stats = {}
+        this.sessionVariablesStats.forEach((value, key) => {
+          if (exerciseResult.stats) {
+            exerciseResult.stats[key] = value
+          }
+        })
+      }
     })
     return results
   }

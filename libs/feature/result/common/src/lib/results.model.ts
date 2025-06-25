@@ -224,6 +224,11 @@ export interface ExerciseResults {
    * All notes for the exercise.
    */
   details: number[]
+
+  /**
+   * Variable statistics aggregated from sessions
+   */
+  stats?: Record<string, number>
 }
 
 /**
@@ -328,6 +333,7 @@ export const emptyExerciseResults = (defaults?: { id: string; title: string }): 
     ERROR: 0,
   },
   details: [],
+  stats: {},
 })
 
 export const emptyUserResults = (defaults?: Partial<UserResults>): UserResults => ({

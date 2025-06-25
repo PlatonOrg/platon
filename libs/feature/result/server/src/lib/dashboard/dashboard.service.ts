@@ -252,6 +252,28 @@ export class DashboardService {
     const activitySessions = sessions.filter((session) => !session.parentId)
     const exerciseSessions = sessions.filter((session) => !!session.parentId)
 
+    // Extract and aggregate session variables statistics from session data
+    const sessionVariablesStats = new Map<string, number>()
+    const query = `select s.variables->'stats' as stats from "SessionData" sd left join "Sessions" s on s.id = sd.id where s.id = $1`
+
+    for (const session of exerciseSessions) {
+      // Process sessions that need stats extraction
+      if (session.resourceName.toLowerCase().includes('sondage')) {
+        const stats = await this.sessionData.query(query, [session.id])
+        stats.forEach((stat: { stats: Record<string, number> | string }) => {
+          // Handle both object and string JSON formats
+          const statsObj = typeof stat.stats === 'string' ? JSON.parse(stat.stats) : stat.stats
+          if (statsObj) {
+            Object.entries(statsObj).forEach(([key, value]) => {
+              if (typeof value === 'number') {
+                sessionVariablesStats.set(key, (sessionVariablesStats.get(key) ?? 0) + value)
+              }
+            })
+          }
+        })
+      }
+    }
+
     const aggregators = [
       new SessionSuccessRate(),
       new SessionAverageScore(),
@@ -272,10 +294,13 @@ export class DashboardService {
         resourceMap,
       }),
 
-      new ActivityExerciseResults({
-        activity,
-        exerciseSessions,
-      }),
+      new ActivityExerciseResults(
+        {
+          activity,
+          exerciseSessions,
+        },
+        sessionVariablesStats
+      ),
     ]
 
     activitySessions.forEach((session) => aggregators.forEach((aggregator) => aggregator.next(session)))
@@ -357,7 +382,7 @@ export class DashboardService {
       new ActivityTotalAttempts(),
       new ActivityTotalCompletions(),
 
-      new ActivityExerciseResults({ exerciseSessions }),
+      new ActivityExerciseResults({ exerciseSessions }, new Map<string, number>()),
     ]
 
     activitySessions.forEach((session) => aggregators.forEach((aggregator) => aggregator.next(session)))

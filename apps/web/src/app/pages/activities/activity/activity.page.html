@@ -140,6 +140,11 @@
       </nz-col>
     </nz-row>
     <section>
+      <mat-card *ngIf="exerciseVariableStatistic.size > 0">
+        <mat-card-content style="height: 25rem; padding-bottom: 0">
+          <result-histogram [data]="exerciseVariableStatistic!"></result-histogram>
+        </mat-card-content>
+      </mat-card>
       <mat-card>
         <mat-card-header>
           <h4>Boîte à moustaches</h4>
