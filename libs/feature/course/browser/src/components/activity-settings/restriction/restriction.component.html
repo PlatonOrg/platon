@@ -6,7 +6,8 @@
       <i nz-icon nzType="calendar" nzTheme="outline"></i>
       <span>Période d'accès :</span>
     </div>
-    <div class="date-picker-compact" *ngIf="isDateRangeConfig(restriction.config)">
+    @if(isDateRangeConfig(restriction.config)) {
+    <div class="date-picker-compact">
       <nz-date-picker
         [nzShowTime]="true"
         [nzDisabledDate]="disabledDateStart"
@@ -26,9 +27,10 @@
         [nzBorderless]="true"
       />
     </div>
+    }
   </div>
-  } @case ('Groups') {
-  <div *ngIf="isGroupsConfig(restriction.config)" class="restriction-row">
+  } @case ('Groups') { @if(isGroupsConfig(restriction.config)) {
+  <div class="restriction-row">
     <!-- Group Section -->
     <div class="restriction-header">
       <i nz-icon nzType="team" nzTheme="outline"></i>
@@ -42,8 +44,8 @@
       />
     </div>
   </div>
-  } @case ('Correctors') {
-  <div *ngIf="isCorrectorsConfig(restriction.config)" class="restriction-row">
+  } } @case ('Correctors') { @if(isCorrectorsConfig(restriction.config)) {
+  <div class="restriction-row">
     <!-- Correctors Section -->
     <div class="restriction-header">
       <i nz-icon nzType="audit" nzTheme="outline"></i>
@@ -57,8 +59,8 @@
       />
     </div>
   </div>
-  } @case ('Members') {
-  <div *ngIf="isMembersConfig(restriction.config)" class="restriction-row">
+  } } @case ('Members') { @if(isMembersConfig(restriction.config)) {
+  <div class="restriction-row">
     <!-- Members Section -->
     <div class="restriction-header">
       <i nz-icon nzType="user" nzTheme="outline"></i>
@@ -72,7 +74,7 @@
       />
     </div>
   </div>
-  } }
+  } } }
   <button
     *ngIf="!isMainRestriction && restriction.type !== 'DateRange'"
     nz-button

@@ -1,8 +1,8 @@
 .restriction-container {
   display: flex;
   align-items: center;
-  background: #fff;
-  border: 1px solid #e8e8e8;
+  background: var(--brand-background-components);
+  border: 1px solid var(--brand-border-color-light);
   border-radius: 4px;
   padding: 8px 12px;
   margin-bottom: 8px;
@@ -21,13 +21,13 @@
   align-items: center;
   gap: 8px;
   min-width: 140px;
-  color: #003366;
+  color: var(--brand-color-primary);
   font-size: 14px;
   white-space: nowrap;
 
   i {
     font-size: 16px;
-    color: #003366;
+    color: var(--brand-color-primary);
   }
 }
 
@@ -38,7 +38,7 @@
   gap: 8px;
 
   .separator {
-    color: #003366;
+    color: var(--brand-color-primary);
     font-weight: 500;
   }
 
@@ -62,7 +62,7 @@
 
 :host ::ng-deep {
   .ant-picker {
-    border: 1px solid #e8e8e8;
+    border: 1px solid var(--brand-border-color-light);
     height: 28px;
 
     input {

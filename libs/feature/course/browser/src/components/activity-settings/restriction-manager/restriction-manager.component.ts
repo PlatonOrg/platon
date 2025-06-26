@@ -44,15 +44,15 @@ export class RestrictionManagerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  emitRestrictions() {
+  protected emitRestrictions() {
     this.sendRestrictions.emit(this.restrictions)
   }
 
-  CantAddRestriction(type: string): boolean {
+  protected CantAddRestriction(type: string): boolean {
     return this.restrictions.some((restriction) => restriction.type === type)
   }
 
-  addRestriction(type: string): void {
+  private addRestriction(type: string): void {
     let newRestriction: Restriction
     if (this.CantAddRestriction(type)) {
       return
@@ -91,27 +91,27 @@ export class RestrictionManagerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  removeRestriction(index: number) {
+  protected removeRestriction(index: number) {
     this.restrictions.splice(index, 1)
     this.changeDetectorRef.markForCheck()
   }
 
-  removeAllRestrictions() {
+  protected removeAllRestrictions() {
     this.restrictions = []
     this.emitRestrictions()
     this.changeDetectorRef.markForCheck()
   }
-  openBottomSheet() {
+  protected openBottomSheet() {
     this.isOpenProposition = true
     this.changeDetectorRef.markForCheck()
   }
 
-  closeBottomSheet() {
+  protected closeBottomSheet() {
     this.isOpenProposition = false
     this.changeDetectorRef.markForCheck()
   }
 
-  selectOption(type: string) {
+  protected selectOption(type: string) {
     this.isOpenProposition = false
     if (type) {
       this.addRestriction(type)
