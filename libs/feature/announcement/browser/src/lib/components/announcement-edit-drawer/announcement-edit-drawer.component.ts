@@ -21,7 +21,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { DialogModule, DialogService } from '@platon/core/browser';
 import { UiModalDrawerComponent } from '@platon/shared/ui'
 
-import { Announcement } from '@platon/feature/announcement/browser';
+import { Announcement } from '@platon/feature/announcement/common';
 //import { AnnouncementService } from '@platon/feature/announcement/browser';
 import { EditorJsComponent } from '@platon/shared/ui';
 import { firstValueFrom } from 'rxjs';
