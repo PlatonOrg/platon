@@ -1,6 +1,7 @@
 {
   "ide": "",
   "vscode": "Utiliser Visual Studio Code comme Éditeur",
+  "createExo" : "Création d'exercice",
   "exercise": "Programmation d'un exercice",
   "activity": "Création d'une activité"
 }
