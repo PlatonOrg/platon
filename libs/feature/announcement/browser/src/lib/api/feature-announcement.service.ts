@@ -1,7 +1,7 @@
 import { Injectable, signal, EventEmitter } from '@angular/core';
 import { User, UserRoles, isTeacherRole } from '@platon/core/common';
 import { TutorialSelectorService } from "@platon/feature/tuto/browser";
-import { AnnouncementDisplayStats, STORAGE_KEY, MAX_DISPLAY_COUNT,  MIN_INTERVAL_DAYS, TOTAL_PERIOD_DAYS, MS_PER_DAY, NotificationCloseReason } from "../models/announcement.model";
+import { AnnouncementDisplayStats, STORAGE_KEY, MAX_DISPLAY_COUNT,  MIN_INTERVAL_DAYS, TOTAL_PERIOD_DAYS, MS_PER_DAY, NotificationCloseReason } from "../models/data-storage.model";
 
 
 export interface FeatureAnnouncement {

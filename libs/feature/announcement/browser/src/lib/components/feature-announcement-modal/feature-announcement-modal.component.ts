@@ -7,7 +7,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { FeatureAnnouncementService, FeatureAnnouncement } from '../../api/feature-announcement.service';
-import { NotificationCloseReason } from '../../models/announcement.model'
+import { NotificationCloseReason } from '../../models/data-storage.model'
 import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
 import { Subscription } from 'rxjs';
 
