@@ -1,25 +1,42 @@
-
 .menu-item {
   padding: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--brand-border-color-light);
   cursor: pointer;
 }
+
 .menu-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--brand-background-hover);
 }
+
 .menu-item:last-child {
   border-bottom: none;
 }
+
 .cancel-btn {
   display: block;
   margin: 20px auto 0;
   width: 100%;
+  border: none;
+  background-color: var(--brand-color-primary);
+  color: var(--brand-color-primary-contrast);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: var(--brand-color-primary-tint);
+    color: var(--brand-color-primary-contrast);
+  }
 }
+
+
+
 h3 {
   margin: 0;
   font-size: 16px;
+  color: var(--brand-text-primary);
 }
+
 p {
   margin: 4px 0 0;
   font-size: 14px;
+  color: var(--brand-text-secondary);
 }

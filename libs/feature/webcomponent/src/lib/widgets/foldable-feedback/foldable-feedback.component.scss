@@ -126,35 +126,57 @@ pre {
   padding: 0;
 }
 
-.chevron-icon {
-  width: 20px;
-  height: 20px;
-  background-size: cover;
-  display: inline-block;
-}
-
-.success-icon,
-.info-icon,
-.warning-icon,
-.error-icon {
-  width: 32px;
-  height: 32px;
-  background-size: cover;
+.feedback-type-icon {
   float: right;
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 32px !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.success-icon {
-  background-image: url('https://icongr.am/material/check-circle-outline.svg?size=32&color=00cc00');
+.feedback-type-icon.success {
+  color: #00cc00;
 }
 
-.info-icon {
-  background-image: url('https://icongr.am/material/information-outline.svg?size=32&color=0000ff');
+.feedback-type-icon.warning {
+  color: #ff8000;
 }
 
-.warning-icon {
-  background-image: url('https://icongr.am/material/alert-circle-outline.svg?size=32&color=ff8000');
+.feedback-type-icon.error {
+  color: #ff0000;
 }
 
-.error-icon {
-  background-image: url('https://icongr.am/material/close-circle-outline.svg?size=32&color=ff0000');
+.feedback-type-icon.info {
+  color: #0000ff;
+}
+
+/* fallback */
+@font-face {
+  font-family: 'Material Icons Outlined';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/shared/styles/icons/gok-H7zzDkdnRel8-DQ6KAXJ69wP1tGnf4ZGhUcel5euIg.woff2') format('woff2');
+}
+
+.material-icons-outlined {
+  font-family: 'Material Icons Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }

@@ -28,11 +28,7 @@
         </td>
         <ng-container *ngFor="let pair of item.exercises | keyvalue : trackByColumnOrder">
           <td nzAlign="center">
-            <mat-icon
-              [nz-popover]="popover"
-              [nz-tooltip]="pair.value.state | answerStateLabel"
-              [style.color]="pair.value.state | answerStateColor"
-            >
+            <mat-icon [nz-popover]="popover" [style.color]="pair.value.state | answerStateColor">
               {{ pair.value.state | answerStateIcon }}
             </mat-icon>
           </td>
@@ -70,6 +66,9 @@
                 shouldBePositive
               />
             </div>
+            <a *ngIf="pair.value?.sessionId" class="spacing" (click)="openSession(pair.value.sessionId)">
+              Voir la copie <br />
+            </a>
           </ng-template>
         </ng-container>
       </tr>

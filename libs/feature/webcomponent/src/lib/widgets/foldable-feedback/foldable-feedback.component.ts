@@ -22,6 +22,20 @@ export class FoldableFeedbackComponent implements WebComponentHooks<FoldableFeed
       .replace(/\n/g, '<span class="invisible newline">↲</span><br>')
   }
 
+  getIconForType(type: string): string {
+    switch (type) {
+      case 'success':
+        return 'check_circle_outline'
+      case 'warning':
+        return 'error_outline'
+      case 'error':
+        return 'cancel_outline'
+      case 'info':
+      default:
+        return 'info_outline'
+    }
+  }
+
   onClick(index: string) {
     const indexArray = index.split('-')
     const content = this.state.content

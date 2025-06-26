@@ -32,35 +32,98 @@
     </nav>
   </mat-drawer>
   <mat-drawer-content>
-    <mat-toolbar class="toolbar">
-      <button mat-icon-button (click)="onChoosePreviousUserExercise()">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <nz-select
-        class="student-name"
-        [ngModel]="currentUser?.id"
-        (ngModelChange)="loadUserExercise($event)"
-        [nzOptions]="userOptions"
-        [@swipeAnimation]="animationState"
-      >
-      </nz-select>
-      <button mat-icon-button (click)="onChooseNextUserExercise()">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-
-      <div class="setting-button">
-        <button mat-icon-button>
-          <mat-icon>settings</mat-icon>
+    <div *ngIf="!resumeMode">
+      <mat-toolbar class="toolbar">
+        <button mat-icon-button (click)="onChoosePreviousUserExercise()">
+          <mat-icon>chevron_left</mat-icon>
         </button>
-      </div>
-    </mat-toolbar>
-    <main>
-      <nz-row>
-        <nz-col nzSpan="17">
-          <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" />
-        </nz-col>
-        <nz-col nzSpan="6" class="mid-col-wrapper">
-          <div class="grade-wrapper">
+        <nz-select
+          class="student-name"
+          [ngModel]="currentUser?.id"
+          (ngModelChange)="loadUserExercise($event)"
+          [nzOptions]="userOptions"
+          [@swipeAnimation]="animationState"
+        >
+        </nz-select>
+        <button mat-icon-button (click)="onChooseNextUserExercise()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+        <div class="setting-button">
+          <button
+            mat-fab
+            id="summarizeButton"
+            extended
+            *ngIf="exerciseCorrected.size === exercises.length"
+            (click)="resumeMode = !resumeMode"
+          >
+            <mat-icon>summarize</mat-icon>
+            Résumé
+          </button>
+          <button mat-icon-button (click)="isSettingsModalOpen = true">
+            <mat-icon>settings</mat-icon>
+          </button>
+          <nz-modal
+            [(nzVisible)]="isSettingsModalOpen"
+            nzTitle="Paramètres"
+            (nzOnCancel)="isSettingsModalOpen = false"
+            (nzOnOk)="isSettingsModalOpen = false"
+          >
+            <ng-container *nzModalContent>
+              <div style="padding: 1rem; text-align: center">
+                <nz-select
+                  [nzOptions]="[
+                    { label: 'Partir de la note donnée par PLaTon', value: 'platon' },
+                    { label: 'Partir de la note maximale', value: 'max' },
+                    { label: 'Partir de la note minimale', value: 'min' }
+                  ]"
+                  [(ngModel)]="selectedGradeOption"
+                  (ngModelChange)="loadAnswers(this.currentExercise!)"
+                >
+                </nz-select>
+              </div>
+            </ng-container>
+          </nz-modal>
+        </div>
+      </mat-toolbar>
+      <main style="padding: 0.5rem">
+        <nz-row style="height: 95vh">
+          <nz-col nzSpan="17" class="left-col-wrapper">
+            <player-review #player [players]="answers" [reviewMode]="true" [canComment]="true" />
+          </nz-col>
+          <nz-col nzSpan="7" class="mid-col-wrapper">
+            <mat-card #GradeCard>
+              <mat-card-content style="display: flex; flex-direction: column; align-items: center">
+                <nz-progress
+                  [nzPercent]="(exerciseCorrected.size / exercises.length) * 100"
+                  [nzShowInfo]="exerciseCorrected.size === exercises.length"
+                  [nzStrokeColor]="{ '0%': '#ff008c', '100%': '#ff6f00' }"
+                  nzStatus="active"
+                  style="width: 100%"
+                ></nz-progress>
+                <span style="font-size: 0.7rem"
+                  >{{ exerciseCorrected.size }} évalué{{ exerciseCorrected.size > 1 ? 's' : '' }} sur
+                  {{ exercises.length }}</span
+                >
+
+                <nz-divider nzPlain nzText="Note attribuée" class="divider"></nz-divider>
+
+                <div>
+                  <h1 style="margin: 0">
+                    {{ correctedGrade }} / 100
+                    <mat-icon
+                      [style.color]="
+                        exerciseCorrected.has(this.currentExercise?.exerciseSessionId || '') ? 'green' : 'white'
+                      "
+                    >
+                      {{ exerciseCorrected.has(currentExercise?.exerciseSessionId || '') ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </h1>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- <div class="grade-wrapper">
             <ui-statistic-card
               matIcon="check_circle"
               ribbonColor="#8e44ad"
@@ -71,14 +134,20 @@
               (valueChanged)="onSaveGrade()"
             />
           </div>
+          -->
 
-          <correction-label
-            [answers]="answers"
-            [currentExercise]="currentExercise"
-            [courseId]="courseCorrection.courseId"
-          />
-        </nz-col>
-        <nz-col nzSpan="1">
+            <correction-label
+              [answers]="answers"
+              [activityId]="currentActivityId"
+              [currentExercise]="currentExercise"
+              [navigationExerciseId]="currentGroup?.exerciseId"
+              (currentLabelsChange)="onCurrentLabelsChange($event)"
+              (totalGradeChange)="onTotalGradeChange($event)"
+            />
+
+            <player-comments *ngIf="answers.length > 0" [canComment]="true" [answers]="answers" />
+          </nz-col>
+          <!-- <nz-col nzSpan="1">
           <nz-button-group nzSize="small" class="button-wrapper">
             <button
               nz-button
@@ -89,17 +158,10 @@
               {{ i }}
             </button>
           </nz-button-group>
-        </nz-col>
-      </nz-row>
-      <nz-row>
-        <nz-col nzSpan="17">
-          <h3>Commentaire</h3>
-          <player-comments *ngIf="answers.length > 0" [canComment]="true" [answers]="answers" />
-        </nz-col>
-        <nz-col nzSpan="7"> </nz-col>
-      </nz-row>
-    </main>
-    <!--
+        </nz-col> -->
+        </nz-row>
+      </main>
+      <!--
     <main>
       <nz-segmented
         #segmented
@@ -156,6 +218,73 @@
         </ng-template>
       </ng-container>
     </main>-->
+    </div>
+    <div *ngIf="resumeMode">
+      <mat-toolbar class="toolbar">
+        <div class="setting-button">
+          <button
+            mat-fab
+            id="summarizeButton"
+            extended
+            *ngIf="exerciseCorrected.size === exercises.length"
+            (click)="resumeMode = !resumeMode; currentExercise ? loadAnswers(currentExercise) : null"
+          >
+            <mat-icon>summarize</mat-icon>
+            Résumé
+          </button>
+          <button mat-icon-button>
+            <mat-icon>settings</mat-icon>
+          </button>
+        </div>
+      </mat-toolbar>
+      <main style="padding: 0.5rem">
+        <nz-row style="height: 95vh">
+          <nz-col nzSpan="17" class="left-col-wrapper">
+            <correction-resume-table
+              [data]="correctionResumeList"
+              [userMap]="userMap"
+              [highlightedGrade]="highlightedGrade"
+              [gradeAdjustments]="gradeAdjustments"
+              (gradeAdjustmentChange)="onGradeAdjustmentChange($event)"
+              (correctionsUpdated)="onCorrectionsResumeDone($event)"
+            ></correction-resume-table>
+          </nz-col>
+          <nz-col nzSpan="7" class="mid-col-wrapper">
+            <mat-card #GradeCard>
+              <mat-card-content style="height: 25rem; padding: 0.5rem">
+                <result-histogram [data]="correctionGrades" (highlightedValueChange)="highlightedGrade = $event" />
+              </mat-card-content>
+            </mat-card>
+            <div class="statistic-wrapper">
+              <ui-statistic-card
+                matIcon="check_circle"
+                ribbonColor="#8e44ad"
+                description="Moyenne sur l'exercice"
+                [value]="correctionGradesMean.toFixed(2)"
+                shouldBePositive
+              />
+              <ui-statistic-card
+                matIcon="check_circle"
+                ribbonColor="#8e44ad"
+                description="Écart-type sur l'exercice"
+                [value]="standardDeviation.toFixed(2)"
+                shouldBeZero
+              />
+            </div>
+
+            <correction-label
+              [answers]="answers"
+              [activityId]="currentActivityId"
+              [resumeMode]="true"
+              [currentExercise]="currentExercise"
+              [navigationExerciseId]="currentGroup?.exerciseId"
+              (totalGradeChange)="onTotalGradeChange($event)"
+              (labelGradeChange)="onLabelGradeChange($event)"
+            />
+          </nz-col>
+        </nz-row>
+      </main>
+    </div>
   </mat-drawer-content>
 </mat-drawer-container>
 

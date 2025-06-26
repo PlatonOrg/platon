@@ -17,19 +17,19 @@ export class PropositionsComponent {
 
   protected menuItems = [
     { title: 'Date', description: 'Empêcher l’accès jusqu’à (ou à partir) d’une date et heure donnée.' },
-    { title: 'Correcteurs', description: 'Requiert l’atteinte d’une note minimale par les étudiants' },
+    { title: 'Correcteurs', description: 'Ajouter des correcteurs spécifiques à l’activité.' },
     {
       title: 'Groupe',
-      description: 'N’autoriser que les étudiants membres d’un groupe spécifié ou de tous les groupes.',
+      description: 'Ajouter un groupe spécifique pour l’activité.',
     },
-    { title: 'Membres', description: 'Contrôle l’accès sur la base des champs du profil de l’étudiant' },
+    { title: 'Membres', description: 'Ajouter des membres spécifiques à l’activité.' },
   ]
 
   protected close() {
     this.closeEvent.emit()
   }
 
-  sendAndClose(type: string) {
+  protected sendAndClose(type: string) {
     switch (type) {
       case 'Date':
         this.sendEvent.emit('DateRange')

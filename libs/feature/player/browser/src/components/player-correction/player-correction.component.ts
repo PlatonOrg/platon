@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   HostListener,
   Input,
   OnInit,
+  ViewChild,
   inject,
 } from '@angular/core'
 import { firstValueFrom } from 'rxjs'
@@ -18,7 +20,12 @@ import { MatToolbarModule } from '@angular/material/toolbar'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 
 import { ExercisePlayer } from '@platon/feature/player/common'
-import { LabelComponent, ResultService } from '@platon/feature/result/browser'
+import {
+  CorrectionLabelComponent,
+  CorrectionResumeTableComponent,
+  ResultHistogramComponent,
+  ResultService,
+} from '@platon/feature/result/browser'
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, RouterModule } from '@angular/router'
@@ -32,6 +39,7 @@ import { PlayerReviewComponent } from '../player-review/player-review.component'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { MatDividerModule } from '@angular/material/divider'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
@@ -40,7 +48,9 @@ import { User } from '@platon/core/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { MatCardModule } from '@angular/material/card'
 import { animate, style, transition, trigger } from '@angular/animations'
-
+import { NzProgressModule } from 'ng-zorro-antd/progress'
+import { NzModalModule } from 'ng-zorro-antd/modal'
+import { GRADE_BOUNDS, GRADE_OPTIONS, PlayerCorrectionService } from './player-correction.service'
 interface ExerciseGroup {
   exerciseId: string
   exerciseName: string
@@ -88,6 +98,9 @@ interface ExerciseGroup {
     NzCollapseModule,
     NzSelectModule,
     NzButtonModule,
+    NzProgressModule,
+    NzDividerModule,
+    NzModalModule,
 
     DialogModule,
 
@@ -95,10 +108,13 @@ interface ExerciseGroup {
     PlayerCommentsComponent,
     UiModalTemplateComponent,
     UiStatisticCardComponent,
-    LabelComponent,
+    CorrectionLabelComponent,
+    CorrectionResumeTableComponent,
+    ResultHistogramComponent,
   ],
 })
 export class PlayerCorrectionComponent implements OnInit {
+  // === SERVICES ===
   private readonly dialogService = inject(DialogService)
   private readonly resultService = inject(ResultService)
   private readonly playerService = inject(PlayerService)
@@ -106,13 +122,21 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly userService = inject(UserService)
   private readonly route = inject(ActivatedRoute)
 
-  protected activityId?: string
-  protected userId?: string
+  // === VIEW REFERENCES ===
+  @ViewChild('GradeCard', { read: ElementRef }) cardRef!: ElementRef<HTMLElement>
+
+  // === COMPONENT STATE ===
+  protected isSettingsModalOpen = false
+  protected selectedGradeOption = 'platon'
+  protected resumeMode = false
+
+  protected activityId = ''
+  protected sessionId?: string
 
   protected answers: ExercisePlayer[] = []
 
   protected currentGroup?: ExerciseGroup | null = null
-  protected currentExercise?: ExerciseCorrection | null = null
+  protected currentExercise?: ExerciseCorrection
   protected currentUser?: User | null = null
 
   protected exerciseGroups: Map<string, ExerciseGroup[]> = new Map()
@@ -124,6 +148,7 @@ export class PlayerCorrectionComponent implements OnInit {
   private startIndex = 0
   protected selectedTabIndex = 0
   protected selectedExerciseIndex = 0
+  protected exerciseCorrected: Set<string> = new Set()
 
   protected correction?: CourseCorrection
   protected grade = 0
@@ -132,25 +157,53 @@ export class PlayerCorrectionComponent implements OnInit {
   protected userMap: Map<string, User> = new Map()
   protected listExerciseGroup: ExerciseGroup[] = []
 
-  protected labels: Label[] = []
   protected currentLabels: Label[] = []
 
   protected animationState = ''
+  protected totalGradeChange?: string
+  protected calculatedSteps = 0
+  protected correctionResumeList: ExerciseCorrection[] = []
+  protected highlightedGrade?: number
+  protected gradeAdjustments = new Map<string, number>()
+
+  // === CONFIGURATION ===
+  protected gradeOptionMap: Map<string, number | undefined> = new Map([
+    [GRADE_OPTIONS.PLATON, undefined],
+    [GRADE_OPTIONS.MAX, GRADE_BOUNDS.MAX],
+    [GRADE_OPTIONS.MIN, GRADE_BOUNDS.MIN],
+  ])
 
   @Input() courseCorrection!: CourseCorrection
 
+  // === LIFECYCLE ===
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe((params) => {
       this.activityId = params.activityId
-      this.userId = params.userId
+      this.sessionId = params.sessionId
     })
     this.buildGroups()
     await this.getUsers()
     this.getAllExerciseGroup()
-    const firstGroup = this.listExerciseGroup[this.startIndex]
+    const firstGroup = this.getSessionId() ?? this.listExerciseGroup[this.startIndex]
     if (firstGroup) {
       this.onChooseGroup(firstGroup)
     }
+  }
+
+  // === SESSION MANAGEMENT ===
+  private getSessionId(): ExerciseGroup | undefined {
+    if (!this.sessionId) {
+      return undefined
+    }
+    for (const group of this.listExerciseGroup) {
+      const userIndex = group.users.findIndex((user) => user.exerciseSessionId === this.sessionId)
+      if (userIndex > -1) {
+        const [user] = group.users.splice(userIndex, 1)
+        group.users.unshift(user)
+        return group
+      }
+    }
+    return undefined
   }
 
   private getAllExerciseGroup(): void {
@@ -166,6 +219,7 @@ export class PlayerCorrectionComponent implements OnInit {
     }
   }
 
+  // === GROUP BUILDING ===
   private buildGroups(): void {
     const activityExercisesMap = new Map<string, { name: string; map: Map<string, ExerciseGroup> }>()
 
@@ -194,9 +248,11 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  // === EXERCISE LOADING ===
   protected async loadAnswers(exercise: ExerciseCorrection): Promise<void> {
     this.currentExercise = exercise
-    this.correctedGrade = exercise.correctedGrade ?? exercise.grade
+    const initialGrade = exercise.correctedGrade ?? this.gradeOptionMap.get(this.selectedGradeOption) ?? exercise.grade
+    this.correctedGrade = PlayerCorrectionService.validateGrade(initialGrade ?? 0)
     if (exercise.exerciseSessionId) {
       this.answers = (
         await firstValueFrom(
@@ -210,11 +266,12 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  // === NAVIGATION METHODS ===
   protected onChooseTab(index: number): void {
     const currentUserId = this.currentExercise?.userId
     this.answers = []
     this.selectedTabIndex = index
-    this.currentExercise = null
+    this.currentExercise = undefined
     this.exercises = this.currentGroup?.users || []
     this.exercises.sort((a, b) => {
       const aName = this.userMap.get(a.userId)?.username
@@ -230,7 +287,18 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected onChooseGroup(group: ExerciseGroup): void {
+    if (this.currentGroup === group) {
+      return
+    }
+    this.correctionResumeList = []
     this.currentGroup = group
+    this.exerciseCorrected.clear()
+    for (const exercise of this.currentGroup.users) {
+      if (exercise.correctedGrade != null) {
+        this.exerciseCorrected.add(exercise.exerciseSessionId)
+        this.correctionResumeList.push(exercise)
+      }
+    }
     this.onChooseTab(this.selectedTabIndex)
   }
 
@@ -251,6 +319,7 @@ export class PlayerCorrectionComponent implements OnInit {
     await this.onChooseExercise(this.selectedExerciseIndex - 1)
   }
 
+  // === UTILITY METHODS ===
   private async getUsers() {
     const userIds = new Set<string>()
     for (const activity of this.courseCorrection.ActivityCorrections) {
@@ -265,30 +334,53 @@ export class PlayerCorrectionComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  get userOptions() {
+  // === GETTERS ===
+  get userOptions(): Array<{ label: string; value: string }> {
     return (
       this.currentGroup?.users?.map((user) => ({
-        label: this.userMap.get(user.userId)?.firstName + ' ' + this.userMap.get(user.userId)?.lastName,
+        label: `${this.userMap.get(user.userId)?.firstName} ${this.userMap.get(user.userId)?.lastName}`,
         value: user.userId,
       })) ?? []
     )
   }
 
-  protected loadUserExercise(userId: string) {
+  // === USER EXERCISE MANAGEMENT ===
+  protected loadUserExercise(userId: string): void {
     const exercise = this.currentGroup?.users.find((exercise) => exercise.userId === userId)
     if (exercise) {
       this.onChooseExercise(this.exercises.indexOf(exercise)).catch(console.error)
     }
   }
 
-  protected changeGrade() {
-    console.error('changeGrade', this.correctedGrade)
+  protected onTotalGradeChange(totalGradeChange: string) {
+    if (!this.currentExercise) {
+      return
+    }
+
+    const baseGrade = this.gradeOptionMap.get(this.selectedGradeOption) ?? this.currentExercise.grade ?? 0
+    this.correctedGrade = PlayerCorrectionService.parseGradeChange(totalGradeChange, baseGrade)
+    this.changeDetectorRef.markForCheck()
   }
 
+  // === EVENT HANDLERS ===
   @HostListener('window:keydown', ['$event'])
   protected async handleKeyDown(event: KeyboardEvent): Promise<void> {
+    const active = document.activeElement
+    // On ignore si le focus est sur un input, textarea ou contenteditable
+    if (
+      active &&
+      (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || (active as HTMLElement).isContentEditable)
+    ) {
+      return
+    }
+
     switch (event.key) {
       case 'ArrowLeft':
+        if (this.resumeMode) {
+          this.resumeMode = false
+          this.changeDetectorRef.markForCheck()
+          return
+        }
         await this.onChoosePreviousUserExercise()
         this.animationState = 'left'
         setTimeout(() => {
@@ -296,6 +388,15 @@ export class PlayerCorrectionComponent implements OnInit {
         }, 400)
         break
       case 'ArrowRight':
+        await this.onSaveGrade()
+        if (
+          this.selectedExerciseIndex === this.exercises.length - 1 &&
+          this.exerciseCorrected.size === this.exercises.length
+        ) {
+          this.resumeMode = true
+          this.changeDetectorRef.markForCheck()
+          return
+        }
         await this.onChooseNextUserExercise()
         this.animationState = 'right'
         setTimeout(() => {
@@ -303,59 +404,57 @@ export class PlayerCorrectionComponent implements OnInit {
         }, 400)
         break
       case 'ArrowUp':
+        if (this.resumeMode) return
         event.preventDefault()
         this.onChooseGroup(
-          this.listExerciseGroup[this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) - 1]
+          this.listExerciseGroup[Math.max(0, this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) - 1)]
         )
         break
       case 'ArrowDown':
+        if (this.resumeMode) return
         event.preventDefault()
         this.onChooseGroup(
-          this.listExerciseGroup[this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) + 1]
+          this.listExerciseGroup[
+            Math.min(
+              this.listExerciseGroup.length,
+              this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) + 1
+            )
+          ]
         )
         break
     }
-
-    const gradeMap: { [key: string]: number } = {
-      IntlBackslash: 0,
-      Digit1: 10,
-      Digit2: 20,
-      Digit3: 30,
-      Digit4: 40,
-      Digit5: 50,
-      Digit6: 60,
-      Digit7: 70,
-      Digit8: 80,
-      Digit9: 90,
-      Digit0: 100,
-    }
-
-    if (event.code in gradeMap) {
-      this.correctedGrade = gradeMap[event.code]
-      await this.onSaveGrade()
-    }
-  }
-
-  protected async setGradeOnClick(event: Event, grade: number) {
-    // eslint-disable-next-line prettier/prettier
-    (event.target as HTMLInputElement).blur()
-    this.correctedGrade = grade
-    await this.onSaveGrade()
   }
 
   protected async onSaveGrade() {
-    if (this.currentExercise && this.currentExercise != null) {
+    if (this.currentExercise) {
       try {
+        const validatedGrade = Math.max(0, Math.min(100, this.correctedGrade as number))
+        this.correctedGrade = validatedGrade
+
         await firstValueFrom(
           this.resultService.upsertCorrection(this.currentExercise.exerciseSessionId, {
-            grade: this.correctedGrade as number,
+            grade: validatedGrade,
+            labels: this.currentLabels.map((label) => {
+              return {
+                labelId: label.id,
+                sessionId: this.currentExercise?.exerciseSessionId ?? '',
+                answerId: this.answers[this.answers.length - 1].answerId ?? '',
+              }
+            }),
           })
         )
-        this.currentExercise.correctedGrade = this.correctedGrade
-        // this.buildGroups()
-        // this.onChooseTab(this.selectedTabIndex)
-        await this.onChooseNextUserExercise()
-        this.dialogService.success('La note a été sauvegardée avec succès.')
+        this.currentExercise.correctedGrade = validatedGrade
+        if (this.exerciseCorrected.has(this.currentExercise.exerciseSessionId)) {
+          const index = this.correctionResumeList.findIndex(
+            (exercise) => exercise.exerciseSessionId === this.currentExercise?.exerciseSessionId
+          )
+          if (index !== -1) {
+            this.correctionResumeList[index] = this.currentExercise
+          }
+        } else {
+          this.correctionResumeList.push(this.currentExercise)
+        }
+        this.exerciseCorrected.add(this.currentExercise.exerciseSessionId)
       } catch {
         this.dialogService.error('Une erreur est survenue lors de la sauvegarde de la note.')
       }
@@ -364,5 +463,106 @@ export class PlayerCorrectionComponent implements OnInit {
 
   protected trackByExerciseId(_: number, group: ExerciseGroup): string {
     return group.exerciseId
+  }
+
+  protected get currentActivityId(): string | undefined {
+    for (const [activityId, { map }] of this.activityExercisesMap.entries()) {
+      if (map.has(this.currentGroup?.exerciseId ?? '')) {
+        return activityId
+      }
+    }
+    return undefined
+  }
+  get correctionGrades(): number[] {
+    return this.correctionResumeList.map((exercise) => exercise.correctedGrade ?? exercise.grade ?? 0)
+  }
+  get correctionGradesMean(): number {
+    const grades = this.correctionGrades
+    if (grades.length === 0) {
+      return 0
+    }
+    const sum = grades.reduce((acc, grade) => acc + grade, 0)
+    return sum / grades.length
+  }
+
+  get standardDeviation(): number {
+    const grades = this.correctionGrades
+    if (grades.length === 0) {
+      return 0
+    }
+    const mean = this.correctionGradesMean
+    const variance = grades.reduce((acc, grade) => acc + Math.pow(grade - mean, 2), 0) / grades.length
+    return Math.sqrt(variance)
+  }
+
+  protected onGradeAdjustmentChange(event: { userId: string; adjustment: number }): void {
+    if (!this.currentExercise) {
+      return
+    }
+    this.gradeAdjustments.set(event.userId, event.adjustment)
+    const exercise = this.currentGroup?.users.find((ex) => ex.userId === event.userId)
+    if (exercise && exercise.correctedGrade) {
+      exercise.correctedGrade = Math.max(0, Math.min(100, exercise.correctedGrade + event.adjustment))
+      if (this.exerciseCorrected.has(exercise.exerciseSessionId)) {
+        const index = this.correctionResumeList.findIndex((ex) => ex.exerciseSessionId === exercise.exerciseSessionId)
+        if (index !== -1) {
+          this.correctionResumeList[index] = exercise
+        }
+      } else {
+        this.correctionResumeList.push(exercise)
+      }
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
+  protected onCorrectionsResumeDone(corrections: ExerciseCorrection[]): void {
+    this.correctionResumeList = corrections
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected onCurrentLabelsChange(labels: Label[]): void {
+    this.currentLabels = labels
+    if (this.currentExercise) {
+      this.currentExercise.labels = labels
+    }
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected onLabelGradeChange(labelGrade: Map<string, string>): void {
+    // Create a new array to trigger change detection
+    this.correctionResumeList = this.correctionResumeList.map((exercise) => {
+      const updatedExercise = { ...exercise, labels: [...exercise.labels] }
+
+      // Update label grade changes
+      updatedExercise.labels.forEach((label) => {
+        if (labelGrade.has(label.id)) {
+          label.gradeChange = labelGrade.get(label.id)
+        }
+      })
+
+      // Use the original grade as base for calculation
+      const originalGrade = exercise.grade ?? 0
+      updatedExercise.correctedGrade = PlayerCorrectionService.computeGradeChange(
+        updatedExercise.labels,
+        originalGrade,
+        this.gradeAdjustments.get(updatedExercise.userId)
+      )
+
+      return updatedExercise
+    })
+    // Update the current exercise if it matches
+    if (this.currentGroup) {
+      const exercise = this.currentGroup.users.find(
+        (ex) => ex.exerciseSessionId === this.currentExercise?.exerciseSessionId
+      )
+      if (exercise) {
+        exercise.correctedGrade = PlayerCorrectionService.computeGradeChange(
+          exercise.labels,
+          exercise.grade,
+          this.gradeAdjustments.get(exercise.userId)
+        )
+      }
+    }
+    this.changeDetectorRef.markForCheck()
   }
 }

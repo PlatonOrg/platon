@@ -8,13 +8,6 @@
   transition: all 0.2s;
 }
 
-.showcase-demo {
-  padding: 1.3rem;
-  color: rgba(0, 0, 0, 0.85);
-  border-bottom: 1px solid #f0f0f0;
-  position:relative;
-}
-
 .showcase-meta {
   position: relative;
   width: 100%;
@@ -36,5 +29,12 @@
   .showcase-action {
     cursor: pointer;
     margin: 0 4px;
+    font-weight: 600;
+    &.toggle-editor-icon {
+      width: 34px !important;
+      height: 34px !important;
+      font-size: 34px !important;
+      font-weight: 500;
+    }
   }
 }

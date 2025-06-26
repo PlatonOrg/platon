@@ -7,10 +7,11 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { BaseModule } from '../../shared/components/base/base.module'
 import { FoldableFeedbackComponent } from './foldable-feedback.component'
+import { MatIconModule } from '@angular/material/icon'
 
 @NgModule({
   declarations: [FoldableFeedbackComponent],
-  imports: [BaseModule, NzAlertModule, NzIconModule, NgeMarkdownModule],
+  imports: [BaseModule, NzAlertModule, NzIconModule, NgeMarkdownModule, MatIconModule],
   exports: [FoldableFeedbackComponent],
 })
 export class FoldableFeedbackModule implements IDynamicModule {
