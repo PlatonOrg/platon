@@ -10,13 +10,14 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzCardModule } from 'ng-zorro-antd/card'
 
 import { MatDialog, MatDialogModule } from '@angular/material/dialog'
 
 import { UserRoles } from '@platon/core/common'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
-import { Announcement } from '@platon/feature/announcement/browser'
+import { Announcement } from '@platon/feature/announcement/common'
 import {
   //AnnouncementService,
   AnnouncementCreateDrawerComponent,
@@ -46,6 +47,7 @@ import { firstValueFrom } from 'rxjs'
     NzTagModule,
     NzToolTipModule,
     NzModalModule,
+    NzCardModule,
 
     MatDialogModule,
 
@@ -70,19 +72,34 @@ export class AdminAnnouncementsPage implements OnInit {
     void this.loadAnnouncements()
   }
 
-  @ViewChild('editDrawer') editDrawerRef!: AnnouncementEditDrawerComponent
-
-  // Your other properties and methods
-  protected openCreateModal(): void {
+  protected openCreateDialog(): void {
     const dialogRef = this.dialog.open(AnnouncementCreateDrawerComponent, {
       width: '80%',
       height: '80%',
-      data: {},
+      disableClose: true,
     })
 
-    dialogRef.afterClosed().subscribe((result: Announcement) => {
+    dialogRef.afterClosed().subscribe((result: Announcement | undefined) => {
       if (result) {
-        this.addAnnouncement(result)
+        this.announcements = [result, ...this.announcements]
+        this.changeDetectorRef.markForCheck()
+      }
+    })
+  }
+
+  protected openEditDialog(announcement: Announcement): void {
+    const dialogRef = this.dialog.open(AnnouncementCreateDrawerComponent, {
+      width: '80%',
+      height: '80%',
+      disableClose: true,
+      data: { announcement },
+    })
+
+    dialogRef.afterClosed().subscribe((result: Announcement | undefined) => {
+      if (result) {
+        // Mettre à jour l'annonce dans le tableau
+        this.announcements = this.announcements.map((item) => (item.id === result.id ? result : item))
+        this.changeDetectorRef.markForCheck()
       }
     })
   }
@@ -180,6 +197,35 @@ export class AdminAnnouncementsPage implements OnInit {
   protected updateAnnouncement(announcement: Announcement): void {
     // this.announcements = this.announcements.map((item) => (item.id === announcement.id ? announcement : item))
     this.changeDetectorRef.markForCheck()
+  }
+
+  // Dans votre composant announcements.page.ts
+  protected getRoleColor(role: string): string {
+    const colorMap: Record<string, string> = {
+      admin: 'red',
+      teacher: 'blue',
+      student: 'green',
+      // Ajoutez d'autres rôles selon votre système
+    }
+
+    return colorMap[role] || 'default'
+  }
+
+  protected formatRoleName(role: string): string {
+    const nameMap: Record<string, string> = {
+      admin: 'Administrateur',
+      teacher: 'Enseignant',
+      student: 'Étudiant',
+      // Ajoutez d'autres rôles selon votre système
+    }
+
+    return nameMap[role] || role
+  }
+
+  protected formatRolesList(roles: UserRoles[]): string {
+    if (!roles?.length) return ''
+
+    return roles.map((role) => this.formatRoleName(role)).join(', ')
   }
 
   protected async deleteAnnouncement(id: string): Promise<void> {
