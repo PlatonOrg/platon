@@ -1,31 +1,60 @@
-<nz-list [nzDataSource]="comments" [nzRenderItem]="item" [nzItemLayout]="'horizontal'">
-  <ng-template #item let-item>
-    <nz-comment [nzAuthor]="author" [nzDatetime]="(item.createdAt | date : 'dd/MM/yyy HH:mm')!">
-      <ng-template #author>
-        <user-avatar [userIdOrName]="item.authorId" />
-      </ng-template>
-      <nz-comment-content>
-        <p>{{ item.comment }}</p>
-      </nz-comment-content>
-    </nz-comment>
-  </ng-template>
-</nz-list>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Commentaires</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <ng-container *ngIf="!isLoading; else loading">
+      <nz-list [nzDataSource]="comments" [nzRenderItem]="item" [nzItemLayout]="'horizontal'" [nzNoResult]="noComments">
+        <ng-template #item let-item>
+          <nz-comment [nzAuthor]="author" [nzDatetime]="(item.createdAt | date : 'dd/MM/yyy HH:mm')!">
+            <ng-template #author>
+              <user-avatar [userIdOrName]="item.authorId" />
+            </ng-template>
+            <nz-comment-content>
+              <p>{{ item.comment }}</p>
+            </nz-comment-content>
+          </nz-comment>
+        </ng-template>
+        <ng-template #noComments>
+          <div class="empty-comments" style="text-align: center; padding: 2rem">
+            <div style="font-size: 1.1rem; color: #888">Aucun commentaire pour l’instant.</div>
+          </div>
+        </ng-template>
+        <ng-container *ngIf="previousComments.length > 0">
+          <div class="previous-comments-button">
+            <button class="previous-comments-trigger" mat-icon-button [matMenuTriggerFor]="previousCommentsMenu">
+              <mat-icon>arrow_drop_down</mat-icon>
+            </button>
+            <mat-menu #previousCommentsMenu="matMenu">
+              <button mat-menu-item *ngFor="let prev of previousComments" (click)="input = prev.comment">
+                {{ prev.comment }}
+              </button>
+            </mat-menu>
+          </div>
+        </ng-container>
+      </nz-list>
 
-<nz-comment *ngIf="canComment">
-  <nz-comment-content>
-    <nz-form-item>
-      <textarea [(ngModel)]="input" nz-input rows="4" (keydown)="blockEvents($event)"></textarea>
-    </nz-form-item>
-    <nz-form-item>
-      <button
-        nz-button
-        nzType="primary"
-        [nzLoading]="submitting"
-        [disabled]="!input.trim()"
-        (click)="onSubmitComment()"
-      >
-        Publier
-      </button>
-    </nz-form-item>
-  </nz-comment-content>
-</nz-comment>
+      <nz-comment *ngIf="canComment">
+        <nz-comment-content>
+          <nz-form-item>
+            <textarea [(ngModel)]="input" nz-input rows="4" (keydown)="blockEvents($event)"></textarea>
+          </nz-form-item>
+          <nz-form-item>
+            <button
+              nz-button
+              nzType="primary"
+              [nzLoading]="submitting"
+              [disabled]="!input.trim()"
+              (click)="onSubmitComment()"
+            >
+              Publier
+            </button>
+          </nz-form-item>
+        </nz-comment-content>
+      </nz-comment>
+    </ng-container>
+    <ng-template #loading>
+      <div class="loading-spinner"><nz-spin></nz-spin> Chargement des commentaires...</div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>

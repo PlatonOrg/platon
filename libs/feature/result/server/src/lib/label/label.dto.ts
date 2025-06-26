@@ -14,4 +14,7 @@ export class LabelDTO extends BaseDTO implements Label {
 
   @IsString()
   color?: string
+
+  @IsString()
+  gradeChange?: string
 }

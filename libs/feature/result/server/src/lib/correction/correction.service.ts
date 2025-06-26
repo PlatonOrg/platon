@@ -8,6 +8,7 @@ import { ActivityCorrection, ExerciseCorrection } from '@platon/feature/result/c
 import { Repository } from 'typeorm'
 import { SessionEntity } from '../sessions/session.entity'
 import { CorrectionEntity } from './correction.entity'
+import { CorrectionLabelEntity } from '../label/correction-label/correction-label.entity'
 
 @Injectable()
 export class CorrectionService {
@@ -17,7 +18,9 @@ export class CorrectionService {
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(CorrectionEntity)
-    private readonly correctionRepository: Repository<CorrectionEntity>
+    private readonly correctionRepository: Repository<CorrectionEntity>,
+    @InjectRepository(CorrectionLabelEntity)
+    private readonly correctionLabelRepository: Repository<CorrectionLabelEntity>
   ) {}
 
   /**
@@ -68,23 +71,38 @@ export class CorrectionService {
     INNER JOIN "Sessions" activity_session ON activity_session.id=exercise_session.parent_id
     INNER JOIN "Activities" activity ON activity.id=exercise_session.activity_id
     INNER JOIN "Courses" course ON course.id=activity.course_id
+    INNER JOIN LATERAL (
+      SELECT * FROM "Answers" a
+      WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
+      ORDER BY a.created_at DESC
+      LIMIT 1
+    ) answer ON true
     LEFT JOIN "Corrections" correction ON correction.id=exercise_session.correction_id
     WHERE
       ${activityId ? 'activity.id=$2 AND' : ''}
       exercise_session.user_id<>$1 AND
+      answer.variables IS NOT NULL AND
       (activity_session.variables->'navigation'->>'terminated')::boolean = TRUE AND
       EXISTS (
         SELECT 1 FROM "ActivityCorrectorView" corrector
         WHERE corrector.activity_id=activity.id AND corrector.id=$1
       )
   `
+
+    const subQuery = `
+      select
+        l.*
+      from "CorrectionLabels" cl
+      left join "Labels" l on cl.label_id = l.id
+      where cl.session_id = $1
+    `
     const queryParams = activityId ? [correctorUserId, activityId] : [correctorUserId]
 
     const projections = (await this.sessionRepository.query(queryText, queryParams)) as Projection[]
 
     const activityMap = new Map<string, ActivityCorrection>()
 
-    projections.forEach((projection) => {
+    projections.forEach(async (projection) => {
       const navItem = projection.activityNavigation.exercises.find(
         (item: any) => item.sessionId === projection.exerciseSessionId
       )
@@ -99,6 +117,19 @@ export class CorrectionService {
         grade: projection.grade,
         exerciseId: navItem.id,
         exerciseName: projection.exerciseName,
+        labels: [],
+      }
+
+      const alreadyCorrected = exercise.correctedBy ?? false
+      if (alreadyCorrected) {
+        const labels = await this.correctionLabelRepository.query(subQuery, [projection.exerciseSessionId])
+        exercise.labels = labels.map((label: any) => ({
+          id: label.id,
+          name: label.name,
+          color: label.color,
+          description: label.description,
+          gradeChange: label.grade_change,
+        }))
       }
 
       if (!activityMap.has(projection.activityId)) {

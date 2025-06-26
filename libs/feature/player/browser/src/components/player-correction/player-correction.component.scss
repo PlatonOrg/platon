@@ -146,10 +146,13 @@ mat-toolbar {
   background-color: #3c2864 !important;
   color: white;
   position: sticky;
+  height: 38px;
   top: 0;
   z-index: 2;
   .setting-button {
     margin-left: auto;
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -191,12 +194,40 @@ mat-toolbar {
   align-items: baseline;
 }
 
+.left-col-wrapper {
+  overflow-y: auto;
+  height: 100%;
+}
+
 .mid-col-wrapper {
+  display:flex;
+  flex-direction: column;
+  gap: 0.5rem;
   padding: 0 0.5rem 0.5rem 0.5rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.divider {
+  margin: 0;
+  margin-top: 6px;
 }
 
 .swipe-container {
   display: inline-block;
   min-width: 100px;
   text-align: center;
+}
+
+
+#summarizeButton {
+  height: 30px;
+  background-color: inherit;
+  color: inherit;
+  box-shadow: inherit;
+}
+
+.statistic-wrapper {
+  display: flex;
+  gap: 0.2rem;
 }

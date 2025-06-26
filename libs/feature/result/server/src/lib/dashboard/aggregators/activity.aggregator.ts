@@ -138,7 +138,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
       if (userResult.correcting) {
         Object.keys(userResult.exercises).forEach((exerciseId) => {
           const exercice = userResult.exercises[exerciseId]
-          exercice.grade = -1
+          exercice.grade = -1 // TODO: We should do something else here
           exercice.state = AnswerStates.ANSWERED
         })
       }

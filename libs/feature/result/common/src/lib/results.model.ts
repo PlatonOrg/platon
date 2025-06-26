@@ -132,13 +132,6 @@ export interface UserActivityResultsDistribution {
   nbSuccess: Record<string, number>
 }
 
-export interface Datas {
-  /**
-   * The date of the data.
-   */
-  date?: string
-}
-
 export interface ExerciseDetails {
   /**
    * The unique identifier of the exercise.

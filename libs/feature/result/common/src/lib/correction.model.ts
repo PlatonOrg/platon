@@ -89,10 +89,16 @@ export interface ExerciseCorrection {
    * The max grade the user got for the exercise when he answered it.
    */
   grade?: number
+
+  /**
+   * List of labels put on this student copy
+   */
+  labels: Label[]
 }
 
 export interface UpsertCorrection {
   grade: number
+  labels: CorrectionLabel[]
 }
 
 export interface CorrectionLabel {
@@ -106,6 +112,7 @@ export interface Label {
   name: string
   description?: string
   color?: string
+  gradeChange?: string
 }
 
 export interface CreateLabel {
