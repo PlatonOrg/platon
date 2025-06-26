@@ -29,7 +29,7 @@ export class PropositionsComponent {
     this.closeEvent.emit()
   }
 
-  sendAndClose(type: string) {
+  protected sendAndClose(type: string) {
     switch (type) {
       case 'Date':
         this.sendEvent.emit('DateRange')
