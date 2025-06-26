@@ -6,8 +6,6 @@
   margin-bottom: 8px;
 }
 
-
-
 .add-restriction-button {
   margin-top: 16px;
 }
@@ -15,7 +13,7 @@
 :host ::ng-deep {
   .ant-card-head {
     min-height: auto;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--brand-border-color-light);
   }
 
   .ant-card-body {
@@ -23,7 +21,7 @@
   }
 
   .ant-card {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+    box-shadow: var(--brand-shadow-sm);
   }
 
   .ant-btn-dashed {
@@ -31,6 +29,6 @@
   }
 
   .ant-drawer-content-wrapper {
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--brand-shadow-md);
   }
 }
