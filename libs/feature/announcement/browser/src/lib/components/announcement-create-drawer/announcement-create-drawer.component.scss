@@ -21,16 +21,15 @@ nz-form-item.vertical-label textarea.ant-input {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 24px;
-  padding-top: 16px;
-  padding-bottom: 24px;
-  border-top: 1px solid #f0f0f0;
+  margin-top: 1px;
+  padding-top: 1%;
+  padding-bottom: 1px;
 }
 
 ui-editorjs {
   flex: 1;
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 15px;
 }
 
 .header {
@@ -40,8 +39,30 @@ ui-editorjs {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
+  padding: 6px;
   z-index: 10;
-  background-color: white;
   margin-bottom: 16px;
+}
+
+.role {
+  margin-top: 3px;
+}
+
+.role-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: 2px;
+
+
+  label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    ::ng-deep .ant-tag {
+      margin-right: 0;
+      margin-left: 3px;
+    }
+  }
 }

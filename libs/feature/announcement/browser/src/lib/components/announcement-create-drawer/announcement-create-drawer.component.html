@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <h1>Créer une annonce</h1>
+  <h1>{{ dialogTitle }}</h1>
 
   <form nz-form [formGroup]="form" (ngSubmit)="save()">
     <nz-spin [nzSpinning]="loading">
@@ -48,54 +48,35 @@
         </nz-form-control>
       </nz-form-item>
 
-      <!-- Rôles ciblés
-      <nz-form-label nzFor="targetedRoles">Rôles ciblés</nz-form-label>
-      <nz-form-control nzExtra="Laissez vide pour cibler tous les rôles">
-        <nz-select
-          formControlName="targetedRoles"
-          nzMode="multiple"
-          nzAllowClear
-          nzPlaceHolder="Sélectionner les rôles"
-        >
-          @for(role of userRoles; track role) {
-          <nz-option [nzValue]="role" [nzLabel]="role"></nz-option>
-          }
-        </nz-select>
-      </nz-form-control> -->
-
-      <!--  Date d'affichage
+      <!-- Partie du formulaire pour la sélection des rôles cibles -->
       <nz-form-item>
-        <nz-form-label nzFor="displayUntil">Afficher jusqu'au</nz-form-label>
+        <nz-form-label class="role" nzFor="targetedRoles">Rôles ciblés</nz-form-label>
         <nz-form-control>
-          <nz-date-picker
-            formControlName="displayUntil"
-            [nzFormat]="'dd/MM/yyyy'"
-            nzPlaceHolder="Sélectionner une date"
-            id="displayUntil"
-          >
-          </nz-date-picker>
-        </nz-form-control>
-      </nz-form-item> -->
+          <div class="role-checkboxes">
+            <!-- Admin role -->
+            <label nz-checkbox formControlName="targetAdmins" (ngModelChange)="updateTargetedRoles()">
+              <nz-tag [nzColor]="getRoleColor('admin')">{{ formatRoleName('admin') }}</nz-tag>
+            </label>
 
-      <!-- Durée d'affichage -->
-      <!-- <nz-form-item>
-        <nz-form-label nzFor="displayDurationInDays">Durée d'affichage (jours)</nz-form-label>
-        <nz-form-control>
-          <nz-input-number
-            formControlName="displayDurationInDays"
-            [nzMin]="1"
-            id="displayDurationInDays"
-            nzPlaceHolder="Nombre de jours"
-          ></nz-input-number>
+            <!-- Teacher role -->
+            <label nz-checkbox formControlName="targetTeachers" (ngModelChange)="updateTargetedRoles()">
+              <nz-tag [nzColor]="getRoleColor('teacher')">{{ formatRoleName('teacher') }}</nz-tag>
+            </label>
+
+            <!-- Student role -->
+            <label nz-checkbox formControlName="targetStudents" (ngModelChange)="updateTargetedRoles()">
+              <nz-tag [nzColor]="getRoleColor('student')">{{ formatRoleName('student') }}</nz-tag>
+            </label>
+          </div>
         </nz-form-control>
-      </nz-form-item> -->
+      </nz-form-item>
     </nz-spin>
   </form>
   <h2>Contenu de l'annonce</h2>
   <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)"></ui-editorjs>
 
   <div class="button-container">
-    <button nz-button nzType="primary" type="submit" [disabled]="loading">Créer</button>
+    <button nz-button nzType="primary" type="submit" [disabled]="loading">{{ submitButtonText }}</button>
     <button nz-button type="button" (click)="close()">Annuler</button>
   </div>
 </div>
