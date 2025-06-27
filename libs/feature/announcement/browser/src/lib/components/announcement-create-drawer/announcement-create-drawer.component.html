@@ -76,7 +76,9 @@
   <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)"></ui-editorjs>
 
   <div class="button-container">
-    <button nz-button nzType="primary" type="submit" [disabled]="loading">{{ submitButtonText }}</button>
+    <button nz-button nzType="primary" type="submit" [disabled]="loading" (click)="save()">
+      {{ submitButtonText }}
+    </button>
     <button nz-button type="button" (click)="close()">Annuler</button>
   </div>
 </div>

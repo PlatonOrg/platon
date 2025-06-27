@@ -21,17 +21,14 @@ import { Announcement } from '@platon/feature/announcement/common'
 import {
   //AnnouncementService,
   AnnouncementCreateDrawerComponent,
-  AnnouncementEditDrawerComponent,
 } from '@platon/feature/announcement/browser'
-//import { AnnouncementCreateDrawerComponent } from '../../../components/announcement-create-drawer/announcement-create-drawer.component'
-//import { AnnouncementEditDrawerComponent } from '../../../components/announcement-edit-drawer/announcement-edit-drawer.component'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
   standalone: true,
   selector: 'app-admin-announcements',
-  templateUrl: './announcements.page.html',
-  styleUrls: ['./announcements.page.scss'],
+  templateUrl: './announces.page.html',
+  styleUrls: ['./announces.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
@@ -53,7 +50,6 @@ import { firstValueFrom } from 'rxjs'
 
     DialogModule,
     AnnouncementCreateDrawerComponent,
-    AnnouncementEditDrawerComponent,
   ],
 })
 export class AdminAnnouncementsPage implements OnInit {
@@ -242,7 +238,7 @@ export class AdminAnnouncementsPage implements OnInit {
     if (confirmation) {
       try {
         //await firstValueFrom(this.announcementService.delete(id))
-        //this.announcements = this.announcements.filter((item) => item.id !== id)
+        this.announcements = this.announcements.filter((item) => item.id !== id)
         this.changeDetectorRef.markForCheck()
         this.dialogService.success('Annonce supprimée avec succès')
       } catch (error) {

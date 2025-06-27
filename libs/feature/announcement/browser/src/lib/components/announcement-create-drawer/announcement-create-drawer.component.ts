@@ -82,7 +82,7 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
   terms: OutputData = emptyEditorJsData();
 
   constructor(
-    public dialogRef: MatDialogRef<AnnouncementCreateDrawerComponent>, // AnnouncementCreateModalComponent
+    public dialogRef: MatDialogRef<AnnouncementCreateDrawerComponent>,
     private readonly fb: FormBuilder,
     //private readonly announcementService: AnnouncementService,
     private readonly dialogService: DialogService,
@@ -146,7 +146,6 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
       this.terms = this.announcement.data;
     }
 
-    // Indiquer qu'il n'y a pas encore de changements non sauvegardés
     this.hasUnsavedChanges = false;
   }
 
@@ -154,7 +153,6 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     return this.announcement ? 'Modifier l\'annonce' : 'Créer une annonce';
   }
 
-  // Texte du bouton de soumission
   get submitButtonText(): string {
     return this.announcement ? 'Mettre à jour' : 'Créer';
   }
@@ -174,11 +172,9 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
       targetedRoles.push('student' as UserRoles);
     }
 
-    // Mettre à jour le champ caché targetedRoles
     this.form.get('targetedRoles')?.setValue(targetedRoles);
   }
 
-  // Ces méthodes sont utilisées pour formater et colorer les tags de rôles
   protected getRoleColor(role: string): string {
     const colorMap: Record<string, string> = {
       'admin': 'red',
@@ -210,7 +206,6 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
   }
 
   async save(): Promise<void> {
-    // Vérification de validité du formulaire identique
 
     this.loading = true;
     this.changeDetectorRef.markForCheck();

@@ -31,21 +31,14 @@
             </nz-tag>
           </td>
           <td>{{ item.createdAt | date : 'dd/MM/yyyy HH:mm' }}</td>
-          <!-- <td>
-            <ng-container *ngIf="item.targetedRoles?.length; else allRoles">
-              <nz-tag *ngFor="let role of item.targetedRoles">{{ role }}</nz-tag>
-            </ng-container>
-            <ng-template #allRoles>
-              <nz-tag>Tous</nz-tag>
-            </ng-template>
-          </td> -->
-          <!-- Affichage des rôles dans la table -->
           <td>
             <ng-container *ngIf="item.targetedRoles?.length; else allRoles">
               <!-- Utiliser des nzTag avec des couleurs significatives selon le rôle -->
-              <nz-tag *ngFor="let role of item.targetedRoles" [nzColor]="getRoleColor(role)">
+              @for(role of item.targetedRoles; track role) {
+              <nz-tag [nzColor]="getRoleColor(role)">
                 {{ formatRoleName(role) }}
               </nz-tag>
+              }
             </ng-container>
             <ng-template #allRoles>
               <nz-tag nzColor="default">Tous les utilisateurs</nz-tag>
@@ -114,7 +107,7 @@
           <span nz-icon [nzType]="item.active ? 'eye-invisible' : 'eye'" nzTheme="outline"></span>
           {{ item.active ? 'Désactiver' : 'Activer' }}
         </button>
-        <button nz-button nzType="primary" nzSize="small">
+        <button nz-button nzType="primary" nzSize="small" (click)="openEditDialog(item)">
           <span nz-icon nzType="edit" nzTheme="outline"></span>
           Modifier
         </button>

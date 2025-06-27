@@ -1,0 +1,199 @@
+<!--
+<ui-layout-tabs>
+  <div class="announcements-container mat-app-background">
+    <div class="sidebar">
+      <div class="search-bar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="searchText" (ngModelChange)="search()" placeholder="Rechercher">
+        </mat-form-field>
+      </div>
+
+      <div class="announcements-list" *ngIf="!loading; else loadingTemplate">
+        <ng-container *ngIf="filteredAnnouncements.length > 0; else emptyList">
+          <div class="announcement-item" *ngFor="let announcement of filteredAnnouncements"
+               [class.selected]="selectedAnnouncement?.id === announcement.id"  (click)="selectAnnouncement(announcement)">
+
+            <div class="announcement-icon" [ngClass]="announcement.icon">
+              <mat-icon>{{announcement.icon || 'notifications'}}</mat-icon>
+            </div>
+
+            <div class="announcement-summary">
+              <h4 class="mat-title announcement-title">{{ announcement.title }}</h4>
+              <p class="mat-body-1 announcement-desc">{{ announcement.description }}</p>
+              <div class="announcement-meta">
+                <span class="date">{{ announcement.createdAt | date : 'dd/MM/yyyy' }}</span>
+                &lt;!&ndash;<div class="announcement-badges">
+                  <span class="badge" *ngFor="let role of announcement.targetedRoles?.slice(0, 2)">
+                    {{ formatRoleName(role) }}
+                  </span>
+                </div>&ndash;&gt;
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #emptyList>
+          <div class="empty-state">
+            <mat-icon>search_off</mat-icon>
+            <p>Aucune annonce ne correspond à votre recherche</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <ng-template #loadingTemplate>
+        <div class="loading-container">
+          &lt;!&ndash; Remplacer les mat-card par des div simples &ndash;&gt;
+          <div *ngFor="let i of [1,2,3]" class="loading-card">
+            <div class="loading-header">
+              <div class="loading-icon"></div>
+              <div class="loading-title"></div>
+            </div>
+            <div class="loading-text"></div>
+            <div class="loading-text short"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="content">
+      <div *ngIf="selectedAnnouncement; else noAnnouncementSelected" class="announcement-detail-card">
+        <div class="announcement-header">
+          &lt;!&ndash;<div class="header-icon">
+            <mat-icon>{{selectedAnnouncement.icon || 'notifications'}}</mat-icon>
+          </div>&ndash;&gt;
+          <h1 class="mat-headline-5">{{ selectedAnnouncement.title }}</h1>
+          <div class="announcement-subtitle">
+            Publié le {{ selectedAnnouncement.createdAt | date : 'dd MMMM yyyy' }}
+          </div>
+        </div>
+
+        <div class="announcement-content">
+          &lt;!&ndash;<div class="announcement-audience">
+            <mat-icon>people</mat-icon>
+            <span>Pour: </span>
+            <div class="audience-tags">
+              <mat-chip-set>
+                <mat-chip *ngFor="let role of selectedAnnouncement.targetedRoles">
+                  {{ formatRoleName(role) }}
+                </mat-chip>
+                <mat-chip *ngIf="!selectedAnnouncement.targetedRoles?.length">
+                  Tous les utilisateurs
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>&ndash;&gt;
+
+         &lt;!&ndash; <mat-divider></mat-divider>&ndash;&gt;
+
+          <div class="announcement-body">
+            <p class="announcement-description">{{ selectedAnnouncement.description }}</p>
+            <div class="announcement-content" *ngIf="selectedAnnouncement.data">
+              <div [innerHTML]="scriptContent"></div>
+              <wc-editorjs-viewer [id]="editorId"></wc-editorjs-viewer>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noAnnouncementSelected>
+        <div class="no-selection">
+          <mat-icon>announcement</mat-icon>
+          <p>Sélectionnez une annonce pour voir son contenu</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</ui-layout-tabs>
+-->
+
+<ui-layout-tabs>
+  <div class="announcements-container mat-app-background">
+    <!-- La structure du sidebar est maintenue, mais avec des ajustements pour assurer le défilement -->
+    <div class="sidebar">
+      <div class="search-bar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="searchText" (ngModelChange)="search()" placeholder="Rechercher">
+        </mat-form-field>
+      </div>
+
+      <!-- La liste d'annonces est scrollable -->
+      <div class="announcements-list" *ngIf="!loading; else loadingTemplate">
+        <ng-container *ngIf="filteredAnnouncements.length > 0; else emptyList">
+          <!-- Utilisation de trackBy pour optimiser le rendu -->
+          <div class="announcement-item"
+               *ngFor="let announcement of filteredAnnouncements; trackBy: trackByFn"
+               [class.selected]="selectedAnnouncement?.id === announcement.id"
+               (click)="selectAnnouncement(announcement)">
+
+            <div class="announcement-icon" [ngClass]="announcement.icon">
+              <mat-icon>{{announcement.icon || 'notifications'}}</mat-icon>
+            </div>
+
+            <div class="announcement-summary">
+              <h4 class="mat-title announcement-title">{{ announcement.title }}</h4>
+              <p class="mat-body-1 announcement-desc">{{ announcement.description }}</p>
+              <div class="announcement-meta">
+                <span class="date">{{ announcement.createdAt | date : 'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #emptyList>
+          <div class="empty-state">
+            <mat-icon>search_off</mat-icon>
+            <p>Aucune annonce ne correspond à votre recherche</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <ng-template #loadingTemplate>
+        <div class="loading-container">
+          <div *ngFor="let i of [1,2,3]" class="loading-card">
+            <div class="loading-header">
+              <div class="loading-icon"></div>
+              <div class="loading-title"></div>
+            </div>
+            <div class="loading-text"></div>
+            <div class="loading-text short"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="content">
+      <div *ngIf="selectedAnnouncement; else noAnnouncementSelected" class="announcement-detail-card">
+        <div class="announcement-header">
+          <h1 class="mat-headline-5">{{ selectedAnnouncement.title }}</h1>
+          <div class="announcement-subtitle">
+            Publié le {{ selectedAnnouncement.createdAt | date : 'dd MMMM yyyy' }}
+          </div>
+        </div>
+
+        <div class="announcement-content">
+          <div class="announcement-body">
+            <p class="announcement-description">{{ selectedAnnouncement.description }}</p>
+            <div class="announcement-content" *ngIf="selectedAnnouncement.data">
+              <!-- Conteneur dédié pour le script -->
+              <div id="script-container" [innerHTML]="scriptContent"></div>
+
+              <!-- Conteneur dédié pour le Web Component -->
+              <div id="viewer-container">
+                <wc-editorjs-viewer [id]="editorId"></wc-editorjs-viewer>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noAnnouncementSelected>
+        <div class="no-selection">
+          <mat-icon>announcement</mat-icon>
+          <p>Sélectionnez une annonce pour voir son contenu</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</ui-layout-tabs>

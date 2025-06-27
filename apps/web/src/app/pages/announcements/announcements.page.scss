@@ -1,0 +1,951 @@
+/*
+// Styles communs pour les deux thèmes
+.announcements-container {
+  display: flex;
+  height: calc(100vh - 156px);
+  overflow: hidden;
+
+  // Effet de transition global
+  * {
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+.sidebar {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+
+  .search-bar {
+    padding: 2px;  // Réduction du padding (était 5px)
+    border-bottom: 1px solid var(--brand-border-color-light);
+
+    .search-field {
+      width: 100%;
+
+      // Réduction de la hauteur du champ de recherche
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 8px;
+        padding-bottom: 4px;
+        min-height: 32px;
+      }
+
+      // Réduire la taille des icônes et du texte
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      // Réduire l'espacement interne
+      ::ng-deep .mat-mdc-form-field-flex {
+        margin-top: -4px;
+      }
+    }
+  }
+
+  // Ajuster la hauteur de la liste pour tenir compte de la nouvelle hauteur de la barre de recherche
+  .announcements-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: calc(100% - 50px); // Ajuster en fonction de la nouvelle hauteur de la barre de recherche
+  }
+
+  // Même chose pour le conteneur de chargement
+  .loading-container {
+    height: calc(100% - 50px); // Ajuster en fonction de la nouvelle hauteur de la barre de recherche
+  }
+
+  .announcements-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .announcement-item {
+      display: flex;
+      border-radius: 4px;
+      padding: 14px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--brand-border-color-light);
+
+      &:hover {
+        background-color: var(--brand-background-hover);
+        transform: none;
+        box-shadow: none;
+      }
+
+      &.selected {
+        border-left: 1px solid var(--brand-color-primary);
+
+        &:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: var(--brand-color-primary);
+          opacity: 0.05;
+          pointer-events: none;
+        }
+      }
+
+      .announcement-icon {
+        margin-right: 12px;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 2px;
+
+        mat-icon {
+          color: var(--brand-color-primary);
+          font-size: 20px;
+          height: 20px;
+          width: 20px;
+        }
+
+        &.warning mat-icon {
+          color: #f0983a;
+        }
+
+        &.book mat-icon {
+          color: #42a5f5;
+        }
+      }
+
+      .announcement-summary {
+        flex: 1;
+        overflow: hidden;
+
+        .announcement-title {
+          margin: 0 0 4px;
+          font-size: 15px;
+          font-weight: 500;
+          color: var(--brand-text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .announcement-desc {
+          margin: 0 0 8px;
+          font-size: 13px;
+          color: var(--brand-text-secondary);
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .announcement-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 12px;
+
+          .date {
+            color: var(--brand-text-secondary);
+          }
+
+          .announcement-badges {
+            display: flex;
+            gap: 4px;
+
+            .badge {
+              font-size: 10px;
+              background-color: var(--brand-color-primary);
+              color: white;
+              padding: 2px 6px;
+              border-radius: 4px;
+              white-space: nowrap;
+              opacity: 0.7;
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      color: var(--brand-text-secondary);
+
+      mat-icon {
+        font-size: 36px;
+        height: 36px;
+        width: 36px;
+        margin-bottom: 12px;
+        opacity: 0.7;
+      }
+
+      p {
+        text-align: center;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .loading-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .loading-card {
+      padding: 12px;
+
+      .loading-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+
+        .loading-icon {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          margin-right: 12px;
+          background-color: rgba(0, 0, 0, 0.1); // Couleur simple au lieu de gradient
+          animation: pulse 1.5s infinite alternate; // Animation pulse plus simple
+        }
+
+        .loading-title {
+          height: 16px;
+          width: 70%;
+          border-radius: 4px;
+          background-color: rgba(0, 0, 0, 0.1); // Couleur simple au lieu de gradient
+          animation: pulse 1.5s infinite alternate; // Animation pulse plus simple
+        }
+      }
+
+      .loading-text {
+        height: 10px;
+        width: 100%;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        background-color: rgba(0, 0, 0, 0.1); // Couleur simple au lieu de gradient
+        animation: pulse 1.5s infinite alternate; // Animation pulse plus simple
+
+        &.short {
+          width: 60%;
+        }
+      }
+    }
+  }
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+
+  .announcement-detail-card {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+
+    .announcement-header {
+      .header-icon {
+        background-color: var(--brand-color-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+
+        mat-icon {
+          color: white;
+        }
+      }
+    }
+
+    .announcement-audience {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      color: var(--brand-text-secondary);
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+      }
+
+      span {
+        margin-right: 8px;
+      }
+
+      .audience-tags {
+        mat-chip-set {
+          mat-chip {
+            background-color: rgba(var(--brand-color-primary-rgb), 0.1);
+            color: var(--brand-color-primary);
+            font-size: 12px;
+            min-height: 24px;
+          }
+        }
+      }
+    }
+
+    .announcement-body {
+      .announcement-description {
+        font-size: 16px;
+        color: var(--brand-text-primary);
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      .announcement-content {
+        padding: 16px;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .no-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--brand-text-secondary);
+
+    mat-icon {
+      font-size: 48px;
+      height: 48px;
+      width: 48px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+
+    p {
+      font-size: 16px;
+    }
+  }
+}
+
+// Styles spécifiques au thème clair
+:host-context(.light-theme) {
+  .announcements-container {
+    background-color: var(--brand-background-primary);
+  }
+
+  .sidebar {
+    background-color: var(--brand-background-primary);
+
+    .search-bar {
+      background-color: var(--brand-background-primary);
+
+      ::ng-deep .mat-mdc-form-field-flex,
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: var(--brand-background-primary);
+      }
+    }
+
+    .announcements-list {
+      background-color: var(--brand-background-primary);
+
+      .announcement-item {
+        background-color: transparent;
+
+        &.selected {
+          background-color: var(--brand-background-selected);
+        }
+      }
+    }
+
+    .loading-container {
+      .loading-card {
+        background-color: var(--brand-background-components);
+
+        .loading-icon,
+        .loading-title,
+        .loading-text {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+
+  .content {
+    background-color: var(--brand-background-primary);
+
+    .announcement-detail-card {
+      background-color: transparent;
+    }
+
+    .announcement-content {
+      background-color: var(--brand-background-primary);
+    }
+  }
+}
+
+// Styles spécifiques au thème sombre
+:host-context(.dark-theme) {
+  // Utiliser la couleur de announcement-content pour toute la page
+  .announcements-container,
+  .sidebar,
+  .sidebar .search-bar,
+  .sidebar .announcements-list,
+  .content {
+    background-color: var(--brand-background-components);
+  }
+
+  // Appliquer également aux éléments deep
+  .sidebar .search-bar ::ng-deep .mat-mdc-form-field-flex,
+  .sidebar .search-bar ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: var(--brand-background-components);
+  }
+
+  .sidebar .announcements-list .announcement-item {
+    background-color: var(--brand-background-components);
+
+    &.selected {
+      background-color: var(--brand-background-secondary);
+    }
+  }
+
+  .loading-container .loading-card {
+    background-color: var(--brand-background-secondary);
+
+    .loading-icon,
+    .loading-title,
+    .loading-text {
+      background-color: rgba(246, 246, 246, 0.1);
+    }
+  }
+
+  .content .announcement-detail-card {
+    background-color: var(--brand-background-components);
+  }
+
+  .content .announcement-content {
+    background-color: var(--brand-background-components);
+  }
+}
+
+// Animation pulse simplifiée (remplace shimmer)
+@keyframes pulse {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 0.3;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .announcements-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--brand-border-color);
+    max-height: 300px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
+*/
+// Styles communs pour les deux thèmes
+.announcements-container {
+  display: flex;
+  height: calc(100vh - 100px);
+  overflow: hidden;
+
+  // Effet de transition global
+  * {
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+.sidebar {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  height: 100%; // Assurer que le sidebar prend toute la hauteur
+  overflow: hidden; // Empêcher le défilement du sidebar lui-même
+
+  .search-bar {
+    padding: 2px;
+    border-bottom: 1px solid var(--brand-border-color-light);
+    flex-shrink: 0; // Empêcher la barre de recherche de rétrécir
+
+    .search-field {
+      width: 100%;
+
+      // Réduction de la hauteur du champ de recherche
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 8px;
+        padding-bottom: 4px;
+        min-height: 32px;
+      }
+
+      // Réduire la taille des icônes et du texte
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      // Réduire l'espacement interne
+      ::ng-deep .mat-mdc-form-field-flex {
+        margin-top: -4px;
+      }
+    }
+  }
+
+  .announcements-list {
+    flex: 1;
+    overflow-y: auto; // Activer le défilement vertical
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0; // CRUCIAL: permet à flex: 1 de fonctionner correctement avec overflow
+
+    .announcement-item {
+      display: flex;
+      border-radius: 4px;
+      padding: 14px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--brand-border-color-light);
+      flex-shrink: 0; // Empêcher les éléments de rétrécir
+
+      &:hover {
+        background-color: var(--brand-background-hover);
+        transform: none;
+        box-shadow: none;
+      }
+
+      &.selected {
+        border-left: 1px solid var(--brand-color-primary);
+
+        &:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: var(--brand-color-primary);
+          opacity: 0.05;
+          pointer-events: none;
+        }
+      }
+
+      .announcement-icon {
+        margin-right: 12px;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 2px;
+
+        mat-icon {
+          color: var(--brand-color-primary);
+          font-size: 20px;
+          height: 20px;
+          width: 20px;
+        }
+
+        &.warning mat-icon {
+          color: #f0983a;
+        }
+
+        &.book mat-icon {
+          color: #42a5f5;
+        }
+      }
+
+      .announcement-summary {
+        flex: 1;
+        overflow: hidden;
+
+        .announcement-title {
+          margin: 0 0 4px;
+          font-size: 15px;
+          font-weight: 500;
+          color: var(--brand-text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .announcement-desc {
+          margin: 0 0 8px;
+          font-size: 13px;
+          color: var(--brand-text-secondary);
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .announcement-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 12px;
+
+          .date {
+            color: var(--brand-text-secondary);
+          }
+
+          .announcement-badges {
+            display: flex;
+            gap: 4px;
+
+            .badge {
+              font-size: 10px;
+              background-color: var(--brand-color-primary);
+              color: white;
+              padding: 2px 6px;
+              border-radius: 4px;
+              white-space: nowrap;
+              opacity: 0.7;
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      color: var(--brand-text-secondary);
+
+      mat-icon {
+        font-size: 36px;
+        height: 36px;
+        width: 36px;
+        margin-bottom: 12px;
+        opacity: 0.7;
+      }
+
+      p {
+        text-align: center;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .loading-container {
+    flex: 1;
+    overflow-y: auto; // Activer le défilement vertical
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0; // CRUCIAL: permet à flex: 1 de fonctionner correctement avec overflow
+
+    .loading-card {
+      padding: 12px;
+      flex-shrink: 0; // Empêcher les éléments de rétrécir
+
+      .loading-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+
+        .loading-icon {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          margin-right: 12px;
+          background-color: rgba(0, 0, 0, 0.1);
+          animation: pulse 1.5s infinite alternate;
+        }
+
+        .loading-title {
+          height: 16px;
+          width: 70%;
+          border-radius: 4px;
+          background-color: rgba(0, 0, 0, 0.1);
+          animation: pulse 1.5s infinite alternate;
+        }
+      }
+
+      .loading-text {
+        height: 10px;
+        width: 100%;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        background-color: rgba(0, 0, 0, 0.1);
+        animation: pulse 1.5s infinite alternate;
+
+        &.short {
+          width: 60%;
+        }
+      }
+    }
+  }
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto; // Assurer que le contenu principal est également scrollable
+  padding: 24px;
+
+  .announcement-detail-card {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+
+    .announcement-header {
+      .header-icon {
+        background-color: var(--brand-color-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+
+        mat-icon {
+          color: white;
+        }
+      }
+    }
+
+    .announcement-audience {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      color: var(--brand-text-secondary);
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+      }
+
+      span {
+        margin-right: 8px;
+      }
+
+      .audience-tags {
+        mat-chip-set {
+          mat-chip {
+            background-color: rgba(var(--brand-color-primary-rgb), 0.1);
+            color: var(--brand-color-primary);
+            font-size: 12px;
+            min-height: 24px;
+          }
+        }
+      }
+    }
+
+    .announcement-body {
+      .announcement-description {
+        font-size: 16px;
+        color: var(--brand-text-primary);
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      .announcement-content {
+        padding: 16px;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .no-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--brand-text-secondary);
+
+    mat-icon {
+      font-size: 48px;
+      height: 48px;
+      width: 48px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+
+    p {
+      font-size: 16px;
+    }
+  }
+}
+
+// Styles spécifiques au thème clair
+:host-context(.light-theme) {
+  .announcements-container {
+    background-color: var(--brand-background-primary);
+  }
+
+  .sidebar {
+    background-color: var(--brand-background-primary);
+
+    .search-bar {
+      background-color: var(--brand-background-primary);
+
+      ::ng-deep .mat-mdc-form-field-flex,
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: var(--brand-background-primary);
+      }
+    }
+
+    .announcements-list {
+      background-color: var(--brand-background-primary);
+
+      .announcement-item {
+        background-color: transparent;
+
+        &.selected {
+          background-color: var(--brand-background-selected);
+        }
+      }
+    }
+
+    .loading-container {
+      .loading-card {
+        background-color: var(--brand-background-components);
+
+        .loading-icon,
+        .loading-title,
+        .loading-text {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+
+  .content {
+    background-color: var(--brand-background-primary);
+
+    .announcement-detail-card {
+      background-color: transparent;
+    }
+
+    .announcement-content {
+      background-color: var(--brand-background-primary);
+    }
+  }
+}
+
+// Styles spécifiques au thème sombre
+:host-context(.dark-theme) {
+  // Utiliser la couleur de announcement-content pour toute la page
+  .announcements-container,
+  .sidebar,
+  .sidebar .search-bar,
+  .sidebar .announcements-list,
+  .content {
+    background-color: var(--brand-background-components);
+  }
+
+  // Appliquer également aux éléments deep
+  .sidebar .search-bar ::ng-deep .mat-mdc-form-field-flex,
+  .sidebar .search-bar ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: var(--brand-background-components);
+  }
+
+  .sidebar .announcements-list .announcement-item {
+    background-color: var(--brand-background-components);
+
+    &.selected {
+      background-color: var(--brand-background-secondary);
+    }
+  }
+
+  .loading-container .loading-card {
+    background-color: var(--brand-background-secondary);
+
+    .loading-icon,
+    .loading-title,
+    .loading-text {
+      background-color: rgba(246, 246, 246, 0.1);
+    }
+  }
+
+  .content .announcement-detail-card {
+    background-color: var(--brand-background-components);
+  }
+
+  .content .announcement-content {
+    background-color: var(--brand-background-components);
+  }
+}
+
+// Animation pulse simplifiée
+@keyframes pulse {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 0.3;
+  }
+}
+
+// Styles pour la barre de défilement personnalisée
+.announcements-list::-webkit-scrollbar,
+.loading-container::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.announcements-list::-webkit-scrollbar-track,
+.loading-container::-webkit-scrollbar-track,
+.content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.announcements-list::-webkit-scrollbar-thumb,
+.loading-container::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+:host-context(.dark-theme) {
+  .announcements-list::-webkit-scrollbar-thumb,
+  .loading-container::-webkit-scrollbar-thumb,
+  .content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .announcements-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--brand-border-color);
+    max-height: 300px; // Limite la hauteur sur mobile mais permet le défilement
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
