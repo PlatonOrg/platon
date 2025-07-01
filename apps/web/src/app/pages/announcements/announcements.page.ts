@@ -150,9 +150,9 @@ export class AnnouncementsPage implements OnInit {
 
   private recreateWebComponent(): void {
     // 1. D'abord, trouvons et supprimons l'ancien composant s'il existe
-    const oldViewer = document.getElementById(this.editorId);
+    const oldViewer = document.getElementById(this.editorId)
     if (oldViewer) {
-      oldViewer.remove();
+      oldViewer.remove()
     }
 
     // 2. Créons un nouveau conteneur pour le script
@@ -167,7 +167,7 @@ export class AnnouncementsPage implements OnInit {
     if (container && this.selectedAnnouncement?.data) {
       // Créer un nouvel élément
       const newViewer = document.createElement('wc-editorjs-viewer')
-      newViewer.id = this.editorId;
+      newViewer.id = this.editorId
 
       // Ajouter l'élément au DOM
       container.appendChild(newViewer)
@@ -193,13 +193,13 @@ export class AnnouncementsPage implements OnInit {
 
           // Déclencher un événement personnalisé
           const event = new CustomEvent('dataChanged', {
-            detail: this.selectedAnnouncement?.data
+            detail: this.selectedAnnouncement?.data,
           })
           viewer.dispatchEvent(event)
         }
       }, 50)
     } else {
-      console.warn('Container not found or no data available');
+      console.warn('Container not found or no data available')
     }
   }
 
@@ -209,7 +209,7 @@ export class AnnouncementsPage implements OnInit {
    */
   get editorId(): string {
     // Ajouter un timestamp pour forcer le rafraîchissement du composant
-    return 'editor-viewer-' + (this.selectedAnnouncement?.id || 'default') + '-' + Date.now();
+    return 'editor-viewer-' + (this.selectedAnnouncement?.id || 'default') + '-' + Date.now()
   }
 
   protected formatRoleName(role: string): string {
@@ -233,8 +233,6 @@ export class AnnouncementsPage implements OnInit {
     </script>`
     return this.sanitizer.bypassSecurityTrustHtml(scriptHtml)
   }
-
-
 
   // Méthode pour créer des données de démonstration
   private getDemoAnnouncements(): Announcement[] {
@@ -610,8 +608,7 @@ export class AnnouncementsPage implements OnInit {
         active: true,
         icon: 'notification',
         targetedRoles: [UserRoles.teacher, UserRoles.admin],
-      }
-
+      },
     ]
   }
 }

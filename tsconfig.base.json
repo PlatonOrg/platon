@@ -72,7 +72,10 @@
       "@platon/shared/ui": ["libs/shared/ui/src/index.ts"],
       "announcement": ["libs/feature/announcement/browser/announcement/src/index.ts"],
       "browser": ["libs/feature/announcement/browser/src/index.ts"],
-      "common": ["libs/feature/announcement/common/src/index.ts"]
+      "common": ["libs/feature/announcement/common/src/index.ts"],
+      "@platon/shared/utils": ["libs/shared/utils/src/index.ts"],
+      "utils" : ["libs/shared/utils/src/index.ts"]
+
     }
   },
   "include": ["./graphql/*.ts"],
