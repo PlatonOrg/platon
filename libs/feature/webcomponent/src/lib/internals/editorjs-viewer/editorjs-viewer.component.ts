@@ -1,9 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core'
-import EdjsParser from 'editorjs-parser'
-import { ListParser } from './parsers/list-parser'
-import { ChecklistParser } from './parsers/checklist-parser'
-
-// TODO implements custom editorjs parser https://github.com/miadabdi/editorjs-parser#custom-or-overriding-parser-methods
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+  SecurityContext,
+} from '@angular/core'
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
+import { EditorjsViewerService } from '@platon/shared/utils'
 
 @Component({
   selector: 'wc-editorjs-viewer',
@@ -12,29 +16,30 @@ import { ChecklistParser } from './parsers/checklist-parser'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorjsViewerComponent implements OnInit {
-  private readonly parser = new EdjsParser(undefined, {
-    list: ListParser,
-    checklist: ChecklistParser,
-  })
-  @ViewChild('container', { static: true })
-  protected container!: ElementRef<HTMLElement>
+  protected sanitizedHtml: SafeHtml = ''
 
   constructor(
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly elementRef: ElementRef<HTMLElement>
+    private readonly elementRef: ElementRef<HTMLElement>,
+    private readonly editorjsViewerService: EditorjsViewerService,
+    private readonly sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
     const id = this.elementRef.nativeElement.getAttribute('id')
     const scriptNode = document.querySelector(`script[id="${id}"]`) as HTMLScriptElement
-    const containerNode = this.container.nativeElement
     try {
       const content = scriptNode.textContent?.trim() || '{}'
       const data = JSON.parse(content)
-      containerNode.innerHTML = this.parser.parse(data)
+      const htmlContent = this.editorjsViewerService.editorJStoHtml(data)
+
+      // Nettoyer le HTML pour éliminer les scripts malveillants
+      this.sanitizedHtml = this.sanitizer.sanitize(SecurityContext.HTML, htmlContent) || ''
+
       this.changeDetectorRef.detectChanges()
     } catch (error) {
       console.warn('Error parsing Editor.js output:', error)
+      this.sanitizedHtml = ''
     }
   }
 }
