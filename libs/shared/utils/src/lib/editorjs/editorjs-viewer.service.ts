@@ -1,3 +1,4 @@
+// @ts-ignore: No type definitions available for editorjs-parser
 import EdjsParser from 'editorjs-parser'
 import { ListParser } from './parsers/list-parser'
 import { ChecklistParser } from './parsers/checklist-parser'
