@@ -49,6 +49,7 @@ export const appRoutes: Route[] = [
         './pages/demo/demo.routes'
       ),
   },
+
   withAuthGuard(
     {
       path: 'editor',
@@ -63,6 +64,7 @@ export const appRoutes: Route[] = [
     },
     [UserRoles.teacher, UserRoles.admin]
   ),
+
   withAuthGuard({
     path: '',
     loadChildren: () => import('./pages/dashboard/dashboard.routes'),

@@ -18,6 +18,11 @@ export default [
           ),
       },
       {
+        title: 'PLaTon - Annonces',
+        path: 'announcements',
+        loadChildren: () => import('../announcements/announcements.routes'),
+      },
+      {
         title: 'PLaTon - Espace de travail',
         path: 'resources',
         loadChildren: () =>

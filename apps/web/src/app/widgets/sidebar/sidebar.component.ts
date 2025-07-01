@@ -49,6 +49,11 @@ export class SidebarComponent implements OnInit {
         icon: 'dashboard',
         title: 'Tableau de bord',
       },
+      {
+        url: '/announcements',
+        icon: 'announcement',
+        title: 'Annonces',
+      },
       // {
       //   url: '/agenda',
       //   icon: 'calendar_month',
@@ -86,11 +91,11 @@ export class SidebarComponent implements OnInit {
     )
 
     this.bottomLinks.push(
-      {
-        url: '/account/about-me',
-        icon: 'account_circle',
-        title: 'Mon compte',
-      },
+      // {
+      //   url: '/account/about-me',
+      //   icon: 'account_circle',
+      //   title: 'Mon compte',
+      // },
       ...(isTeacherRole(this.user.role)
         ? [
             {

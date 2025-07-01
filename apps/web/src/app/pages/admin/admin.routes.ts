@@ -53,7 +53,7 @@ export default [
           loadChildren: () =>
             import(
               /* webpackChunkName: "admin-announcements" */
-              './announcements/announcements.routes'
+              './announces/announces.routes'
             ),
         },
         { path: '**', pathMatch: 'full', redirectTo: 'users' },
