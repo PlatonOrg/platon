@@ -1,0 +1,141 @@
+
+# Platon avec Bulles Associatives (wc-binded-bubbles)
+
+## Objectif de l'exercice
+
+Cet exercice vise à entraîner les apprenants à associer correctement des éléments de gauche à ceux de droite sous forme de bulles interactives. Il s'agit ici d'un appariement question-réponse basé sur le composant `:wc-binded-bubbles`.
+
+---
+
+## Environnement d'exécution
+
+```python
+sandbox = "python"
+```
+
+---
+
+## Composant utilisé
+
+```python
+input1 = :wc-binded-bubbles
+input1.type = "text"
+input1.placeholder = "Entrez votre réponse ici"
+```
+
+Ce composant permet aux élèves de créer des associations entre deux listes d'éléments. Les appariements se font de manière interactive à l’aide de bulles.
+
+---
+
+## Énoncé
+
+```platon
+statement ==
+Associez les questions aux réponses correctes
+==
+```
+
+---
+
+## Builder : Génération dynamique des paires
+
+```python
+builder==#!lang=python
+```
+
+### a) Fonctionnement :
+- Récupère la variable `questions_reponses`, qui est une liste de paires (question, réponse).
+- Sélectionne aléatoirement `nbPair` paires.
+- Les paires sont ensuite mélangées et affichées à l’élève.
+- Chaque paire est insérée sous forme de dictionnaire contenant un `item1` (question) et un `item2` (réponse).
+
+Exemple de structure de donnée attendue pour `questions_reponses` :
+```python
+questions_reponses = [
+  ["Paris", "France"],
+  ["Berlin", "Allemagne"],
+  ["Madrid", "Espagne"]
+]
+```
+### b) Mais où est générée la variable `questions_reponses` ? Ah 😲...
+#### 📦 Fichier main.plc  - Variables de l'exercice
+  Le fichier `main.plc` contient la déclaration de **variables dynamiques** qui seront utilisées ou injectées dans le script principal de l'exercice (`main.ple`).
+
+  Voici la siginfication des variables visibles dans l'interface de PLaTon:
+
+  |Nom de Variable| Type| Description|
+  |:--------|:---------|:---------|
+  |`title`| Texte | Titre de l'exercice . Peut être redéfini dynamiquement|
+  | `statement` | Texte | Énoncé visible par l'élève . Injecté dans le champ `statement==` de `main.ple`|
+  |`before`| Code (python) | Code d'initialisation exécuté avant le `builder` .Sert à définir la variable `question_reponses|
+  | `nbPair` | Nombre | Nombre de paires (question-réponse) à afficher.|
+ #### 🧠 Exemple de code dans `before`
+  ```python
+      def operation(a, b, op):
+      try:
+          expression = f'{a} {op} {b}'
+          result = eval(expression)
+          if len(str(result)) > 6:
+              result = str(result)[:6]
+          return (expression, result)
+      except ZeroDivisionError:
+          return (expression, 'division by zero')
+      except Exception as e:
+          return ('invalid operation', str(e))
+
+    def createliste(a, b, ops=['+','-','%','//','**','*','/']):
+        s = []
+        val = set()
+        for op in ops:
+            q, r = operation(a, b, op)
+            if r not in val:
+                val.add(r)
+                s.append((q, r))
+        return s
+
+    import random
+    questions_reponses = []
+    while len(questions_reponses) < 3:
+        a, b = random.randint(-4, 5), random.randint(-3, 3)
+        questions_reponses = createliste(a, b)
+
+  ```
+---
+
+## Grader : Évaluation de l’exercice
+
+```python
+grader==#!lang=python
+```
+
+### Fonctionnement :
+- Parcourt les `items` pour vérifier l’état des bulles.
+- Une bulle est considérée comme "réussie" si son `state` est `"achieved"` ou `"disabled"`.
+- Le score est 100% si toutes les associations sont complètes.
+
+### Feedback fourni :
+- **Succès total** : "Bravo, tout juste"
+- **Succès partiel** : "C'est la fin, vous vous êtes trompés quelques fois"
+- **Incomplet** : "Vous ne pouvez valider que lorsque toutes les bulles ont éclaté."
+
+---
+
+## Formulaire à afficher
+
+```platon
+form ==
+{{input1}}
+==
+```
+
+---
+
+## Conseils d’utilisation
+
+- Vérifiez que les paires question-réponse sont bien définies dans `questions_reponses`.
+- Ajustez `nbPair` selon le nombre de paires à afficher.
+- Testez l’interaction en activant le mode debug avec : `input1["debug"] = True`.
+
+---
+
+Document généré automatiquement à partir du fichier `main.ple`.
