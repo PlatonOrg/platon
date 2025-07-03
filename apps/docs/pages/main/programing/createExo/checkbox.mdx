@@ -1,111 +1,78 @@
-
-# Documentation : Exercice Platon avec CheckBox
+# Checkbox (cases à cocher)
 
 ## Objectif de l'exercice
 
-L'objectif de cet exercice est de permettre à l'apprenant de s'entraîner à identifier une bonne réponse parmi plusieurs propositions affichées sous forme de cases à cocher. Une seule réponse est correcte. L'exercice est interactif, avec un contenu tiré aléatoirement à chaque tentative.
+  Cet exercice propose à l'apprenant de sélectionner la **bonne réponse** parmi plusieurs propositions affichées sous forme de cases à cocher (CheckBox). Une seule réponse est correcte.
 
----
-
-## Aperçu Visuel
-
-Un aperçu de l'exercice est présenté dans le fichier image `checkboxTemplate.png`. Ce visuel illustre l'affichage typique des choix à cocher ainsi que la correction avec les styles CSS indiquant les bonnes et mauvaises réponses.
-
----
+    L'exercice est dynamique : à chaque tentative, une ligne différente est tirée aléatoirement d’un fichier de données, et les choix sont mélangés.
 
 ## Fonctionnement technique
 
-### Initialisation
+### 1) Configuration initiale
+![Initconfig](../guide_checkbox/configInit_checkbox.png)
+* **checkbox :** Composant principal interactif de l'élève
+* **cBSolution:** affichage de la solution (non interactif)
+* **horizental:** affichage horizental si **True**
+
+### 2) Message Feedback
+![Feedback_message](../guide_checkbox/feedback_checkbox.png)
+
+>  Ces messages sont utilisés dans le **grader** pour informer l'utilisateur du résultat de sa sélection
+
+### 3) Builder (Génération de contenu)
+
 ```python
-sandbox="python"
-
-checkBox = :wc-checkbox-group
-cBSolution = :wc-checkbox-group
-cBSolution.disabled = true
-horizontal = False
+   builder ==#! lang=python
 ```
-- `checkBox` : composant que l'utilisateur interagit avec.
-- `cBSolution` : composant affichant la correction.
-- `horizontal` : active l'affichage horizontal si `True`.
+* Tire une ligne aléatoire depuis **fichier**.
+* Sépare la ligne en **titre** et **éléments**.
+* Mélange les choix (**suffle**) pour éviter les biais.
+* Formate les composants **checkBox** et **cBSolution**.
 
-### Messages de feedback
+    Exemple de ligne dans le fichier
+
+    ```python
+    India:Mumbai|Mumbai,Bangalore|Bangalore,Chennai|Chennai,New Delhi|New Delhi/
+    Madagascar: Ihosy|Ihosy, Fianarantsoa|Fianarantsoa,Diego|Diego,Antananarivo|Antananarivo/
+    ```
+* **Titre:**  "Madagascar"
+* **sol:** "Antananarivo"
+    > Pour chaque ligne de données, la dernière colonne contient la bonne réponse
+* Les autres choix sont des dictracteurs
+    > **cBSolution** permet d'afficher les bonnes et mauvaises réponses en couleur lors de la correction
+
+### 4) Formulaire et solution
+
+![FormulaireEtSolution](../guide_checkbox/formulaireEtSolution.png)
+
+Affiche dynamiquement :
+* Le formulaire d'interaction.
+* La solution correcte une fois l'exercice corrigé **(solution)**
+
+### 5) Grader (correction)
 ```python
-messages ==
-Bravo !
-Peu mieux faire ...
-Au moins vous avez trouvé une bonne réponse.
-C'est raté.
-==
+    grader ==#! lang=python
 ```
+* Parcourt les éléments sélectionnés **(checked)**
+* Si la réponse est correcte : grade = 100 et feedback **"Bravo"**
+* Sinon : grade = 0 , mise en forme CSS pour indiquer la bonne réponse
 
----
+## 📁 Fichier de données attendu
 
-### Builder (génération de contenu)
-```python
-builder==#!lang=python
+Chaque ligne doit être au format suivant :
+
+```makefile
+    Question:Choix_i | prononciation_choix_i,Bonne réponse | prononciation/
 ```
-- Sélectionne une ligne aléatoire du fichier `fichier`.
-- Sépare le titre et les choix.
-- Identifie la bonne réponse (marquée par un `|`).
-- Mélange les choix et prépare `checkBox` et `cBSolution`.
+> i allant de 1 à 4
+  Tous les éléments sont affichés mélangés à l'utilisateur.
 
-#### Format attendu dans le fichier source :
-```
-Question:Choix1,Choix2,BonneRéponse|,Choix4
-```
-- Le `|` marque la bonne réponse.
 
----
-
-### Formulaire et solution
-```python
-form ==
-{{checkBox}}
-==
-
-solution ==
-{{cBSolution}}
-==
-```
-- `form` affiche le questionnaire.
-- `solution` affiche les bonnes réponses avec styles.
-
----
-
-### Grader (correction)
-```python
-grader==#!lang=python
-```
-- Corrige la réponse de l'utilisateur.
-- Si la réponse est correcte : note 100 et feedback positif.
-- Sinon : note 0, avec mise en forme CSS pour montrer la bonne réponse.
-
----
-
-## Fonctionnalités principales
-
-| Composant       | Description                                                                 |
-|----------------|-----------------------------------------------------------------------------|
-| `checkBox`     | Interface d'interaction pour l'utilisateur                                 |
-| `cBSolution`   | Affiche la correction avec styles CSS                                      |
-| `builder`      | Génère dynamiquement le contenu à partir du fichier                     |
-| `grader`       | Calcule la note et formate les réponses selon la justesse                  |
-| `form/solution`| Intègration dans l'affichage Platon                                        |
-
----
-
-## Conseils d'utilisation
-
-- Adapter le fichier de données pour couvrir plusieurs thèmes.
-- Activer `horizontal = True` si besoin pour un affichage plus compact.
-- Enrichir les distracteurs pour renforcer l'effet pédagogique.
-
----
-
-## Fichier image associé
-
-Le fichier `checkboxTemplate.png` doit être présent dans le même dossier pour illustrer la documentation ou pour les besoins de la conception.
-
----
-
-Document rédigé automatiquement à partir du fichier `main.ple`.
+# Résumé des fonctionnalités
+|    Élément   |     Rôle  |
+|:------|:------|
+| `Checkbox`  |    Interface de sélection pour l'élève |
+| `cBSolution`| Affiche la solution avec styles CSS (`success-border`)|
+|  `builder` | Génére les choix aléatoires et extrait la réponse correcte|
+|`grader`| Corrige la réponse et applique les styles selon le résultat|
+|`form/solution`| Formate les composants à afficher dans Platon|
