@@ -149,6 +149,12 @@
       ],
       "@platon/shared/ui": [
         "libs/shared/ui/src/index.ts"
+      ],
+      "@platon/shared/utils": [
+        "libs/shared/utils/src/index.ts"
+      ],
+      "utils": [
+        "libs/shared/utils/src/index.ts"
       ]
     }
   },
