@@ -1,0 +1,119 @@
+
+# Documentation de l’exercice : Drag & Drop de vocabulaire
+
+## 🎯 Objectif pédagogique
+
+Ce module a pour but de faire associer à l’apprenant(e) des mots français avec leurs équivalents dans une autre langue (ici l'espagnol) à l'aide d'une activité **Drag & Drop**. L’objectif est de renforcer l’apprentissage du vocabulaire à travers une interaction visuelle et pratique.
+
+---
+
+## ⚙️ Environnement
+
+- **Langage d’exécution :** Python
+- **Type d'exercice :** Drag & Drop entre éléments de vocabulaire et leurs traductions.
+
+---
+
+## 🧩 Structure de l’exercice
+
+### 1. Variables d’interface définies
+
+#### Éléments de départ (drag)
+```plaintext
+depart1 à depart10
+```
+Chaque élément correspond à un mot en français, draggable par l’utilisateur.
+
+#### Zones d’arrivée (drop)
+```plaintext
+arrivee1 à arrivee8
+```
+Ces zones contiennent les traductions cibles (en espagnol), non-draggables.
+
+---
+
+### 2. Contenu généré dynamiquement (`builder`)
+
+Le builder exécute les étapes suivantes :
+
+- Génère les **paires de mots** (français/espagnol) via la variable `pairs`.
+- Échantillonne aléatoirement les paires s’il y en a trop (>10).
+- Crée dynamiquement les balises du formulaire HTML avec :
+  - Une ligne de zones d'arrivée (les catégories).
+  - Une ligne d’éléments à faire glisser.
+- Attribue les contenus (mots en français) aux éléments `depart`.
+- Attribue les valeurs (mots en espagnol) aux éléments `arrivee`.
+
+### Exemple de paire :
+```python
+("beurre", "mantequilla")
+```
+
+---
+
+## 🧠 Fonctionnement de l’évaluation (`grader`)
+
+Le code d’évaluation :
+
+- Compare la **valeur attendue** (issue de `dicsol`) avec la **valeur glissée** dans la zone de dépôt.
+- Calcule le **score** en pourcentage :
+```python
+(score = (n_correct / n_arrivees) * 100)
+```
+- Retourne un feedback :
+  - Succès si score > 90
+  - Sinon, message d'erreur avec le score
+
+---
+
+## 📃 Énoncé affiché à l’élève (`statement`)
+
+> Faites glisser les idées vers les catégories situées sur la première ligne.
+
+---
+
+## ✅ Solution (`solution`)
+
+Générée automatiquement, elle liste :
+- Chaque idée (mot en français)
+- La catégorie cible (traduction espagnole)
+
+Exemple :
+```
+L'idée "sucre" doit aller dans "azúcar".
+```
+
+---
+
+## 🧪 Variables optionnelles
+
+- `mode`: pour activer un comportement spécifique (ex: `liste`)
+- `pairs`: permet de passer une liste de paires personnalisées
+
+---
+
+## ⚠️ Limites gérées automatiquement
+
+- Maximum **10** départs
+- Maximum **8** catégories cibles (arrivées)
+- Minimum **2** catégories différentes
+
+Si ces conditions ne sont pas remplies, une exception est levée.
+
+---
+
+## 📦 Fichiers Platon concernés
+
+- `main.ple` : structure et logique principale
+- `main.plc` : définition des variables (notamment `pairs`)
+- `main.plf` : données de test ou personnalisations éventuelles
+
+---
+
+## ✍️ Auteur & Contributeurs
+
+Ce module a été conçu pour un usage pédagogique en cours de langue ou d’informatique.
+
+---
+
+**Dernière mise à jour :** Juillet 2025
