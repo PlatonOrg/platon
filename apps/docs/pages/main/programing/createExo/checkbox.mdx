@@ -1,0 +1,111 @@
+
+# Documentation : Exercice Platon avec CheckBox
+
+## Objectif de l'exercice
+
+L'objectif de cet exercice est de permettre à l'apprenant de s'entraîner à identifier une bonne réponse parmi plusieurs propositions affichées sous forme de cases à cocher. Une seule réponse est correcte. L'exercice est interactif, avec un contenu tiré aléatoirement à chaque tentative.
+
+---
+
+## Aperçu Visuel
+
+Un aperçu de l'exercice est présenté dans le fichier image `checkboxTemplate.png`. Ce visuel illustre l'affichage typique des choix à cocher ainsi que la correction avec les styles CSS indiquant les bonnes et mauvaises réponses.
+
+---
+
+## Fonctionnement technique
+
+### Initialisation
+```python
+sandbox="python"
+
+checkBox = :wc-checkbox-group
+cBSolution = :wc-checkbox-group
+cBSolution.disabled = true
+horizontal = False
+```
+- `checkBox` : composant que l'utilisateur interagit avec.
+- `cBSolution` : composant affichant la correction.
+- `horizontal` : active l'affichage horizontal si `True`.
+
+### Messages de feedback
+```python
+messages ==
+Bravo !
+Peu mieux faire ...
+Au moins vous avez trouvé une bonne réponse.
+C'est raté.
+==
+```
+
+---
+
+### Builder (génération de contenu)
+```python
+builder==#!lang=python
+```
+- Sélectionne une ligne aléatoire du fichier `fichier`.
+- Sépare le titre et les choix.
+- Identifie la bonne réponse (marquée par un `|`).
+- Mélange les choix et prépare `checkBox` et `cBSolution`.
+
+#### Format attendu dans le fichier source :
+```
+Question:Choix1,Choix2,BonneRéponse|,Choix4
+```
+- Le `|` marque la bonne réponse.
+
+---
+
+### Formulaire et solution
+```python
+form ==
+{{checkBox}}
+==
+
+solution ==
+{{cBSolution}}
+==
+```
+- `form` affiche le questionnaire.
+- `solution` affiche les bonnes réponses avec styles.
+
+---
+
+### Grader (correction)
+```python
+grader==#!lang=python
+```
+- Corrige la réponse de l'utilisateur.
+- Si la réponse est correcte : note 100 et feedback positif.
+- Sinon : note 0, avec mise en forme CSS pour montrer la bonne réponse.
+
+---
+
+## Fonctionnalités principales
+
+| Composant       | Description                                                                 |
+|----------------|-----------------------------------------------------------------------------|
+| `checkBox`     | Interface d'interaction pour l'utilisateur                                 |
+| `cBSolution`   | Affiche la correction avec styles CSS                                      |
+| `builder`      | Génère dynamiquement le contenu à partir du fichier                     |
+| `grader`       | Calcule la note et formate les réponses selon la justesse                  |
+| `form/solution`| Intègration dans l'affichage Platon                                        |
+
+---
+
+## Conseils d'utilisation
+
+- Adapter le fichier de données pour couvrir plusieurs thèmes.
+- Activer `horizontal = True` si besoin pour un affichage plus compact.
+- Enrichir les distracteurs pour renforcer l'effet pédagogique.
+
+---
+
+## Fichier image associé
+
+Le fichier `checkboxTemplate.png` doit être présent dans le même dossier pour illustrer la documentation ou pour les besoins de la conception.
+
+---
+
+Document rédigé automatiquement à partir du fichier `main.ple`.
