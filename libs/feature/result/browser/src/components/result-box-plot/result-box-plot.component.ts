@@ -1,67 +1,28 @@
-import * as echarts from 'echarts/core'
-import {
-  DatasetComponent,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  TransformComponent,
-} from 'echarts/components'
-import { BoxplotChart, ScatterChart } from 'echarts/charts'
-import { UniversalTransition } from 'echarts/features'
-import { CanvasRenderer } from 'echarts/renderers'
-import {
-  Component,
-  AfterViewInit,
-  ViewChild,
-  ElementRef,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  inject,
-  HostListener,
-  Input,
-} from '@angular/core'
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject, Input } from '@angular/core'
 import { ExerciseResults } from '@platon/feature/result/common'
+import { CommonModule } from '@angular/common'
+import { CoreEchartsDirective } from '@platon/core/browser'
+import { EChartsOption } from 'echarts'
 
 @Component({
   selector: 'result-box-plot',
   templateUrl: './result-box-plot.component.html',
   styleUrls: ['./result-box-plot.component.scss'],
+  imports: [CommonModule, CoreEchartsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
-export class ResultBoxPlotComponent implements AfterViewInit {
-  @ViewChild('chartContainer', { static: true }) chartContainer!: ElementRef
-  private chartInstance!: echarts.ECharts
+export class ResultBoxPlotComponent {
+  protected chart?: EChartsOption
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
 
   @Input()
   set data(data: ExerciseResults[] | undefined) {
-    this.chartInstance = echarts.init(this.chartContainer.nativeElement)
-    this.drawChart(data || [])
+    this.chart = this.drawChart(data || [])
     this.changeDetectorRef.detectChanges()
   }
 
-  constructor() {
-    echarts.use([
-      DatasetComponent,
-      TitleComponent,
-      TooltipComponent,
-      GridComponent,
-      TransformComponent,
-      BoxplotChart,
-      ScatterChart,
-      CanvasRenderer,
-      UniversalTransition,
-    ])
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.chartInstance.resize()
-    }, 0)
-  }
-
-  drawChart(data: ExerciseResults[]) {
+  drawChart(data: ExerciseResults[]): EChartsOption {
     // Préparation des données
     const preparedData = data.map((exercise) => {
       if (!exercise.details || exercise.details.length === 0) {
@@ -76,9 +37,9 @@ export class ResultBoxPlotComponent implements AfterViewInit {
       return [min, Q1, median, Q3, max]
     })
 
-    const option = {
+    return {
       title: {
-        text: 'Diagramme à moustaches',
+        text: 'Boxplot des résultats par exercice',
         left: 'center',
       },
       tooltip: {
@@ -111,6 +72,10 @@ export class ResultBoxPlotComponent implements AfterViewInit {
           show: true,
         },
       },
+      grid: {
+        show: true,
+        bottom: 80,
+      },
       series: [
         {
           name: 'Boxplot',
@@ -124,18 +89,6 @@ export class ResultBoxPlotComponent implements AfterViewInit {
           },
         },
       ],
-      grid: {
-        bottom: 80,
-      },
-    }
-
-    this.chartInstance.setOption(option)
-  }
-
-  @HostListener('window:resize')
-  onResize() {
-    if (this.chartInstance) {
-      this.chartInstance.resize()
     }
   }
 }
