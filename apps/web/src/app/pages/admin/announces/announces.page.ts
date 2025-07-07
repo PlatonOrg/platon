@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
 
@@ -18,10 +18,7 @@ import { UserRoles } from '@platon/core/common'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
 import { Announcement } from '@platon/feature/announcement/common'
-import {
-  //AnnouncementService,
-  AnnouncementCreateDrawerComponent,
-} from '@platon/feature/announcement/browser'
+import { AnnouncementService, AnnouncementCreateDrawerComponent } from '@platon/feature/announcement/browser'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
@@ -49,7 +46,7 @@ import { firstValueFrom } from 'rxjs'
     MatDialogModule,
 
     DialogModule,
-    AnnouncementCreateDrawerComponent,
+    //AnnouncementCreateDrawerComponent,
   ],
 })
 export class AdminAnnouncementsPage implements OnInit {
@@ -57,7 +54,7 @@ export class AdminAnnouncementsPage implements OnInit {
   protected loading = true
 
   constructor(
-    //private readonly announcementService: AnnouncementService,
+    private readonly announcementService: AnnouncementService,
     private readonly modalService: NzModalService,
     private readonly dialogService: DialogService,
     private readonly changeDetectorRef: ChangeDetectorRef,
@@ -70,8 +67,8 @@ export class AdminAnnouncementsPage implements OnInit {
 
   protected openCreateDialog(): void {
     const dialogRef = this.dialog.open(AnnouncementCreateDrawerComponent, {
-      width: '80%',
-      height: '80%',
+      width: '99%',
+      height: '100%',
       disableClose: true,
     })
 
@@ -85,123 +82,50 @@ export class AdminAnnouncementsPage implements OnInit {
 
   protected openEditDialog(announcement: Announcement): void {
     const dialogRef = this.dialog.open(AnnouncementCreateDrawerComponent, {
-      width: '80%',
-      height: '80%',
+      width: '99%',
+      height: '100%',
       disableClose: true,
       data: { announcement },
     })
 
     dialogRef.afterClosed().subscribe((result: Announcement | undefined) => {
       if (result) {
-        // Mettre à jour l'annonce dans le tableau
-        this.announcements = this.announcements.map((item) => (item.id === result.id ? result : item))
-        this.changeDetectorRef.markForCheck()
+        void this.updateAnnouncement(result)
       }
     })
   }
 
   async loadAnnouncements(): Promise<void> {
-    this.announcements = [
-      {
-        id: '1',
-        title: 'Nouvelle version de PLaTon disponible',
-        description: 'Découvrez les nouvelles fonctionnalités de la version 2.0 de PLaTon',
-        createdAt: new Date('2025-06-22T10:00:00'),
-        updatedAt: new Date('2025-06-22T10:00:00'),
-        active: true,
-        displayUntil: new Date('2025-07-22T23:59:59'),
-        displayDurationInDays: 30,
-        targetedRoles: [UserRoles.teacher, UserRoles.admin],
-        version: '2.0.0',
-        icon: 'notification',
-        data: {
-          time: new Date().getTime(),
-          blocks: [
-            {
-              type: 'header',
-              data: {
-                text: 'Bienvenue dans la version 2.0 de PLaTon !',
-                level: 2,
-              },
-            },
-            {
-              type: 'paragraph',
-              data: {
-                text: 'Nous sommes ravis de vous présenter les nouvelles fonctionnalités de cette version majeure :',
-              },
-            },
-            {
-              type: 'list',
-              data: {
-                style: 'unordered',
-                items: [
-                  'Tutoriels interactifs pour les nouveaux utilisateurs',
-                  'Interface améliorée pour la création de ressources',
-                  "Nouveaux types d'exercices disponibles",
-                  'Performance et stabilité améliorées',
-                ],
-              },
-            },
-            {
-              type: 'paragraph',
-              data: {
-                text: "N'hésitez pas à explorer ces nouvelles fonctionnalités et à nous faire part de vos commentaires.",
-              },
-            },
-          ],
-          version: '2.3.12',
-        },
-        actions: [
-          {
-            label: 'Découvrir les tutoriels',
-            url: '/tutorials',
-          },
-          {
-            label: 'En savoir plus',
-            url: '/documentation/v2',
-          },
-        ],
-      },
-    ]
-    this.loading = false
+    this.loading = true
     this.changeDetectorRef.markForCheck()
-    // this.loading = true
-    // this.changeDetectorRef.markForCheck()
-    // try {
-    //   const announcements = await firstValueFrom(
-    //     this.announcementService.search(
-    //       {
-    //         limit: 100,
-    //       },
-    //       ['data']
-    //     )
-    //   )
-    //   this.announcements = announcements
-    // } catch (error) {
-    //   this.dialogService.error('Erreur lors du chargement des annonces')
-    // } finally {
-    //   this.loading = false
-    //   this.changeDetectorRef.markForCheck()
-    // }
-  }
 
-  protected addAnnouncement(announcement: Announcement): void {
-    //this.announcements = [announcement, ...this.announcements]
-    this.changeDetectorRef.markForCheck()
+    try {
+      const announcements = await firstValueFrom(
+        /*this.announcementService.search({
+          limit: 100,
+        })*/
+        this.announcementService.search({})
+      )
+
+      this.announcements = announcements.resources
+    } catch (error) {
+      this.dialogService.error('Erreur lors du chargement des annonces')
+    } finally {
+      this.loading = false
+      this.changeDetectorRef.markForCheck()
+    }
   }
 
   protected updateAnnouncement(announcement: Announcement): void {
-    // this.announcements = this.announcements.map((item) => (item.id === announcement.id ? announcement : item))
+    this.announcements = this.announcements.map((item) => (item.id === announcement.id ? announcement : item))
     this.changeDetectorRef.markForCheck()
   }
 
-  // Dans votre composant announcements.page.ts
   protected getRoleColor(role: string): string {
     const colorMap: Record<string, string> = {
       admin: 'red',
       teacher: 'blue',
       student: 'green',
-      // Ajoutez d'autres rôles selon votre système
     }
 
     return colorMap[role] || 'default'
@@ -212,7 +136,6 @@ export class AdminAnnouncementsPage implements OnInit {
       admin: 'Administrateur',
       teacher: 'Enseignant',
       student: 'Étudiant',
-      // Ajoutez d'autres rôles selon votre système
     }
 
     return nameMap[role] || role
@@ -225,19 +148,22 @@ export class AdminAnnouncementsPage implements OnInit {
   }
 
   protected async deleteAnnouncement(id: string): Promise<void> {
-    const confirmation = await firstValueFrom(
+    const confirmed = await new Promise<boolean>((resolve) => {
       this.modalService.confirm({
         nzTitle: 'Êtes-vous sûr de vouloir supprimer cette annonce ?',
         nzContent: 'Cette action est irréversible.',
         nzOkText: 'Oui',
-        //nzOkType: 'danger',
+        nzOkType: 'primary',
         nzCancelText: 'Non',
-      }).afterClose
-    )
+        nzClosable: true,
+        nzOnOk: () => resolve(true),
+        nzOnCancel: () => resolve(false),
+      })
+    })
 
-    if (confirmation) {
+    if (confirmed) {
       try {
-        //await firstValueFrom(this.announcementService.delete(id))
+        await firstValueFrom(this.announcementService.delete(id))
         this.announcements = this.announcements.filter((item) => item.id !== id)
         this.changeDetectorRef.markForCheck()
         this.dialogService.success('Annonce supprimée avec succès')
@@ -249,18 +175,14 @@ export class AdminAnnouncementsPage implements OnInit {
 
   protected toggleActive(announcement: Announcement): void {
     const newStatus = !announcement.active
-    // this.announcementService
-    //   .update(announcement.id, {
-    //     active: newStatus,
-    //   })
-    //   .subscribe({
-    //     next: (updated) => {
-    //       this.updateAnnouncement(updated)
-    //       this.dialogService.success(`Annonce ${newStatus ? 'activée' : 'désactivée'} avec succès`)
-    //     },
-    //     error: () => {
-    //       this.dialogService.error(`Erreur lors ${newStatus ? "de l'activation" : 'de la désactivation'} de l'annonce`)
-    //     },
-    //   })
+    this.announcementService.update(announcement.id, { ...announcement, active: newStatus }).subscribe({
+      next: (updated) => {
+        this.updateAnnouncement(updated)
+        this.dialogService.success(`Annonce ${newStatus ? 'activée' : 'désactivée'} avec succès`)
+      },
+      error: () => {
+        this.dialogService.error(`Erreur lors ${newStatus ? "de l'activation" : 'de la désactivation'} de l'annonce`)
+      },
+    })
   }
 }
