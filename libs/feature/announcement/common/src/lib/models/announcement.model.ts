@@ -1,29 +1,100 @@
 import { User, UserRoles } from '@platon/core/common';
-import { OutputData } from '@editorjs/editorjs';
+
+
+export interface BlockToolData<Data extends object = any> {
+  [key: string]: any;
+}
+
+export interface BlockTuneData {
+  [key: string]: any;
+}
+
+export type BlockId = string;
+
+export interface OutputBlockData<Type extends string = string, Data extends object = any> {
+  /**
+   * Unique Id of the block
+   */
+  id?: BlockId;
+  /**
+   * Tool type
+   */
+  type: Type;
+  /**
+   * Saved Block data
+   */
+  data: BlockToolData<Data>;
+
+  /**
+   * Block Tunes data
+   */
+  tunes?: {[name: string]: BlockTuneData};
+}
+
+export interface EditorOutputData {
+  /**
+   * Editor's version
+   */
+  version?: string;
+
+  /**
+   * Timestamp of saving in milliseconds
+   */
+  time?: number;
+
+  /**
+   * Saved Blocks
+   */
+  blocks: OutputBlockData[];
+}
 
 
 export interface Announcement {
-  id: string;
+  readonly id: string;
+  readonly title: string;
+  readonly description: string;
+  readonly createdAt: Date;
+  readonly updatedAt?: Date;
+  readonly publisher?: User;
+  readonly active: boolean;
+
+  readonly displayUntil?: Date;
+  readonly displayDurationInDays?: number;
+  readonly targetedRoles?: UserRoles[];
+  readonly version?: string;
+  readonly icon?: string;
+  readonly data?: EditorOutputData;
+  readonly actions?: AnnouncementAction[];
+}
+
+export interface CreateAnnouncementInput {
   title: string;
   description: string;
-  createdAt: Date;
-  updatedAt?: Date;
-  advertiser?: User;
   active: boolean;
   displayUntil?: Date;
   displayDurationInDays?: number;
   targetedRoles?: UserRoles[];
-  version?: string; // Version de l'annonce, pour le suivi des changements
+  version?: string;
   icon?: string;
-  data?: OutputData; // Données EditorJS pour le contenu formaté
+  data?: EditorOutputData;
   actions?: AnnouncementAction[];
 }
+
+export interface UpdateAnnouncementInput extends CreateAnnouncementInput {}
+
 
 export interface AnnouncementAction {
   label: string; // Texte du bouton d'action
   url?: string; // URL vers laquelle rediriger
   type?: 'primary' | 'default' | 'dashed' | 'text' | 'link'; // Type de bouton
 }
+
+
+/*export enum AnnouncementOrderings {
+  TITLE = 'TITLE',
+  CREATE_AT = 'CREATE_AT',
+  UPDATE_AT = 'UPDATE_AT'
+}*/
 
 export interface AnnouncementFilters {
   search?: string;
