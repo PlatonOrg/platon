@@ -11,6 +11,7 @@ import { CommandsModule } from './commands/commands.module'
 import { FeatureDiscordServerModule, FeatureDiscordServerService } from '@platon/feature/discord/server'
 import { DiscordModule } from '@discord-nestjs/core'
 import { FeaturePeerServerModule } from '@platon/feature/peer/server'
+import { FeatureAnnouncementServerModule } from '@platon/feature/announcement/server'
 
 @Module({
   imports: [
@@ -23,11 +24,13 @@ import { FeaturePeerServerModule } from '@platon/feature/peer/server'
     FeatureNotificationServerModule,
     FeatureCasServerModule,
     FeaturePeerServerModule,
+    FeatureAnnouncementServerModule,
     CommandsModule,
     DiscordModule.forRootAsync({
       useClass: FeatureDiscordServerService,
     }),
     FeatureDiscordServerModule,
+    //
   ],
 })
 export class AppModule implements NestModule {
