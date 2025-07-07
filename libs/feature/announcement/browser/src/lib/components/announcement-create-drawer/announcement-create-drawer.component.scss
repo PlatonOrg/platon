@@ -29,7 +29,7 @@ nz-form-item.vertical-label textarea.ant-input {
 ui-editorjs {
   flex: 1;
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 70px;
 }
 
 .header {
@@ -63,6 +63,63 @@ ui-editorjs {
     ::ng-deep .ant-tag {
       margin-right: 0;
       margin-left: 3px;
+    }
+  }
+}
+
+
+
+// Styles pour les boutons radio avec icônes
+nz-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.icon-radio {
+  display: flex;
+  align-items: center;
+
+  nz-icon {
+    margin-right: 5px;
+  }
+}
+
+.active-duration-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+
+  .active-item {
+    flex: 0 0 auto;
+    min-width: 120px;
+  }
+
+  .duration-item {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+
+    .active-item,
+    .duration-item {
+      flex: 1;
+      min-width: auto;
+    }
+  }
+}
+
+// Pour les écrans plus petits, réduire la taille du texte
+@media screen and (max-width: 768px) {
+  .icon-radio {
+    font-size: 12px;
+
+    nz-icon {
+      font-size: 14px;
     }
   }
 }

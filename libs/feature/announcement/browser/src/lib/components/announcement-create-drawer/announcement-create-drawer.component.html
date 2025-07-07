@@ -41,12 +41,33 @@
 
       <div class="spacer"></div>
       <!-- Actif -->
-      <nz-form-item>
-        <nz-form-label nzFor="active">Actif</nz-form-label>
-        <nz-form-control>
-          <nz-switch formControlName="active"></nz-switch>
-        </nz-form-control>
-      </nz-form-item>
+
+      <div class="spacer"></div>
+      <!-- Actif et Durée d'affichage -->
+      <div class="active-duration-row">
+        <nz-form-item class="active-item">
+          <nz-form-label nzFor="active">Actif</nz-form-label>
+          <nz-form-control>
+            <nz-switch formControlName="active"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item class="duration-item">
+          <nz-form-label nzFor="displayDurationInDays">Durée (jours)</nz-form-label>
+          <nz-form-control nzErrorTip="Veuillez saisir un nombre valide">
+            <nz-input-number
+              formControlName="displayDurationInDays"
+              id="displayDurationInDays"
+              [nzMin]="1"
+              [nzMax]="365"
+              [nzStep]="1"
+              nzPlaceHolder="Nombre de jours"
+              style="width: 100%"
+            >
+            </nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
 
       <!-- Partie du formulaire pour la sélection des rôles cibles -->
       <nz-form-item>
@@ -71,9 +92,45 @@
         </nz-form-control>
       </nz-form-item>
     </nz-spin>
+    <!-- Sélection d'icône avec des boutons radio -->
+    <nz-form-item>
+      <nz-form-label nzFor="icon">Icône</nz-form-label>
+      <nz-form-control>
+        <nz-radio-group formControlName="icon" id="icon" class="icon-radio-group">
+          <label nz-radio-button nzValue="notification" class="icon-radio">
+            <nz-icon nzType="notification"></nz-icon>
+            <span>Notification</span>
+          </label>
+          <label nz-radio-button nzValue="bell" class="icon-radio">
+            <nz-icon nzType="bell"></nz-icon>
+            <span>Alerte</span>
+          </label>
+          <label nz-radio-button nzValue="info-circle" class="icon-radio">
+            <nz-icon nzType="info-circle"></nz-icon>
+            <span>Information</span>
+          </label>
+          <label nz-radio-button nzValue="tool" class="icon-radio">
+            <nz-icon nzType="tool"></nz-icon>
+            <span>Maintenance</span>
+          </label>
+          <label nz-radio-button nzValue="calendar" class="icon-radio">
+            <nz-icon nzType="calendar"></nz-icon>
+            <span>Événement</span>
+          </label>
+          <label nz-radio-button nzValue="warning" class="icon-radio">
+            <nz-icon nzType="warning"></nz-icon>
+            <span>Avertissement</span>
+          </label>
+          <label nz-radio-button nzValue="bulb" class="icon-radio">
+            <nz-icon nzType="bulb"></nz-icon>
+            <span>Announcement</span>
+          </label>
+        </nz-radio-group>
+      </nz-form-control>
+    </nz-form-item>
   </form>
   <h2>Contenu de l'annonce</h2>
-  <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)"></ui-editorjs>
+  <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)" class="ui-editorjs"></ui-editorjs>
 
   <div class="button-container">
     <button nz-button nzType="primary" type="submit" [disabled]="loading" (click)="save()">
