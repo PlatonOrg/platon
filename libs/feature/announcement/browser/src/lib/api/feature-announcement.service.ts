@@ -2,6 +2,7 @@ import { Injectable, signal, EventEmitter } from '@angular/core';
 import { User, UserRoles, isTeacherRole } from '@platon/core/common';
 import { TutorialSelectorService } from "@platon/feature/tuto/browser";
 import { AnnouncementDisplayStats, STORAGE_KEY, MAX_DISPLAY_COUNT,  MIN_INTERVAL_DAYS, TOTAL_PERIOD_DAYS, MS_PER_DAY, NotificationCloseReason } from "../models/data-storage.model";
+import { Announcement } from '@platon/feature/announcement/common'
 
 
 export interface FeatureAnnouncement {
@@ -37,10 +38,6 @@ export class FeatureAnnouncementService {
 
   isAnnouncementVisible = signal(false);
   currentAnnouncement = signal<FeatureAnnouncement | null>(null);
-
-  // private readonly MAX_DISPLAY_COUNT = 3; // Maximum 3 fois
-  // private readonly MIN_INTERVAL_DAYS = 2; // Minimum 2 jours entre affichages
-  // private readonly TOTAL_PERIOD_DAYS = 14; // Arrêter d'afficher après 14 jours
 
   private announcements: FeatureAnnouncement[] = [
     {
