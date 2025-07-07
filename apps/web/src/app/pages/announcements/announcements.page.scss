@@ -239,8 +239,11 @@
 
 .content {
   flex: 1;
-  overflow-y: auto; // Assurer que le contenu principal est également scrollable
+  overflow-y: auto;
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 
   .announcement-detail-card {
     border-radius: 0;
@@ -248,47 +251,19 @@
     border: none;
 
     .announcement-header {
-      .header-icon {
-        background-color: var(--brand-color-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-
-        mat-icon {
-          color: white;
-        }
-      }
-    }
-
-    .announcement-audience {
-      display: flex;
-      align-items: center;
+      //display: flex;
+      //align-items: center;
+      justify-content: space-between;
       margin-bottom: 16px;
-      color: var(--brand-text-secondary);
 
-      mat-icon {
-        margin-right: 8px;
-        font-size: 18px;
-        height: 18px;
-        width: 18px;
+      .title {
+        font-size: 17px;
+        font-weight: 1000;
+        color: var(--brand-text-primary);
+        margin: 0;
+        top-margin: 0;
       }
 
-      span {
-        margin-right: 8px;
-      }
-
-      .audience-tags {
-        mat-chip-set {
-          mat-chip {
-            background-color: rgba(var(--brand-color-primary-rgb), 0.1);
-            color: var(--brand-color-primary);
-            font-size: 12px;
-            min-height: 24px;
-          }
-        }
-      }
-    }
 
     .announcement-body {
       .announcement-description {
@@ -429,7 +404,6 @@
   }
 }
 
-// Animation pulse simplifiée
 @keyframes pulse {
   from {
     opacity: 0.6;
@@ -439,7 +413,6 @@
   }
 }
 
-// Styles pour la barre de défilement personnalisée
 .announcements-list::-webkit-scrollbar,
 .loading-container::-webkit-scrollbar,
 .content::-webkit-scrollbar {
@@ -484,4 +457,8 @@
   .content {
     padding: 16px;
   }
+}
+
+.spacer {
+  flex: 1;
 }
