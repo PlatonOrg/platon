@@ -26,6 +26,12 @@
   }
 
   @container list-item (max-width: 500px) {
+    .action {
+      margin-right: 12px;
+      .list-item-article-action-title {
+        display: none;
+      }
+    }
     .container-wide {
       display: none;
     }
