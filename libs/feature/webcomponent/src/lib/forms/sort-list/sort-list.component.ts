@@ -1,7 +1,18 @@
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
-import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, Output, OnInit } from '@angular/core'
+import { CdkDragDrop } from '@angular/cdk/drag-drop'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Injector,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { SortListComponentDefinition, SortListItem, SortListState } from './sort-list'
+import { resumeProxyMutations, suspendProxyMutations } from '../../web-component'
+import { v4 as uuidv4 } from 'uuid'
 
 @Component({
   selector: 'wc-sort-list',
@@ -14,34 +25,48 @@ export class SortListComponent implements WebComponentHooks<SortListState>, OnIn
   @Input() state!: SortListState
   @Output() stateChange = new EventEmitter<SortListState>()
 
-  constructor(readonly injector: Injector) {}
+  constructor(readonly injector: Injector, private readonly cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.state.isFilled = false
-  }
-
-  onChangeState() {
-    if (!Array.isArray(this.state.items)) {
-      this.state.items = []
-    }
-    this.state.items.forEach((item, index) => {
+    this.state.items = this.state.items.map((item) => {
       if (typeof item === 'string') {
-        this.state.items[index] = {
-          content: item,
-        }
+        return { id: this.generateUniqueId(), content: item }
       }
+      return item
     })
   }
 
-  drop(event: CdkDragDrop<SortListItem[]>) {
-    if (event.previousIndex !== event.currentIndex) {
-      this.state.isFilled = true
-    }
-    moveItemInArray(this.state.items, event.previousIndex, event.currentIndex)
+  generateUniqueId(): string {
+    return `item-${uuidv4()}`
   }
 
-  trackBy(index: number, item: SortListItem) {
-    return item.content || index
+  trackBy(index: number, item: SortListItem): string {
+    return item.id
+  }
+
+  drop(event: CdkDragDrop<SortListItem[]>): void {
+    if (event.previousIndex === event.currentIndex) return
+
+    suspendProxyMutations()
+    try {
+      // 2. Créer un tableau NORMAL (sans Proxy)
+      const plainItems = JSON.parse(JSON.stringify(this.state.items))
+
+      // 3. Faire l'opération sur le tableau normal
+      const [itemToMove] = plainItems.splice(event.previousIndex, 1)
+      plainItems.splice(event.currentIndex, 0, itemToMove)
+
+      // 4. Remplacer TOUT le tableau d'un coup
+      this.state.items = plainItems
+    } finally {
+      this.state.isFilled = true
+      resumeProxyMutations()
+      this.cdr.markForCheck()
+      if (this.stateChange) {
+        this.stateChange.emit(this.state)
+      }
+    }
   }
 
   getHorizontal() {
