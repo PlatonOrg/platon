@@ -253,10 +253,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   private checkFeatureAnnouncements(): void {
     if (this.user) {
-      // Délai pour laisser l'interface se charger complètement
-      this.featureAnnouncementService.resetAnnouncementStats('tutorials-feature-2025')
-      setTimeout(() => {
-        this.featureAnnouncementService.checkForAnnouncements(this.user as User)
+      this.featureAnnouncementService.resetAllAnnouncementStats()
+      setTimeout(async () => {
+        await this.featureAnnouncementService.checkForAnnouncements(this.user as User)
       }, 2000)
     }
   }
