@@ -27,7 +27,7 @@ export const CodeEditorComponentDefinition = defineWebComponent({
       },
       height: {
         type: 'number',
-        default: 400,
+        default: 500,
         description: "Le hauteur de l'éditeur en px.",
       },
       tabSize: {
