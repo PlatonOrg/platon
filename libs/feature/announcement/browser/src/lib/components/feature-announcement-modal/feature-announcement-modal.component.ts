@@ -5,10 +5,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { FeatureAnnouncementService, FeatureAnnouncement } from '../../api/feature-announcement.service';
+import { FeatureAnnouncementService } from '../../api/feature-announcement.service';
 import { NotificationCloseReason } from '../../models/data-storage.model'
 import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
 import { Subscription } from 'rxjs';
+import { Announcement } from '@platon/feature/announcement/common';
 
 @Component({
   selector: 'feature-announcement-modal',
@@ -38,7 +39,7 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
   currentTitle = 'Annonce';
   currentDescription = '';
   currentVersion = '';
-  hasPrimaryAction = false;
+  hasPrimaryAction = true;
   hasSecondaryAction = false;
   primaryActionText = 'OK';
   secondaryActionText = 'Annuler';
@@ -84,22 +85,13 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateProperties(announcement: FeatureAnnouncement): void {
+  private updateProperties(announcement: Announcement): void {
     this.currentIcon = announcement.icon || 'notification';
     this.currentTitle = announcement.title || 'Annonce';
     this.currentDescription = announcement.description || '';
     this.currentVersion = announcement.version || '';
-
-    this.hasPrimaryAction = !!announcement.actions?.primary;
-    this.hasSecondaryAction = !!announcement.actions?.secondary;
-
-    if (announcement.actions?.primary) {
-      this.primaryActionText = announcement.actions.primary.text;
-    }
-
-    if (announcement.actions?.secondary) {
-      this.secondaryActionText = announcement.actions.secondary.text;
-    }
+    this.hasPrimaryAction = true;
+    this.primaryActionText = 'Voir détails';
   }
 
   private showNotification(): void {
@@ -138,10 +130,7 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
   }
 
   onPrimaryAction(): void {
-    const announcement = this.announcement;
-    if (announcement?.actions.primary) {
-      announcement.actions.primary.action();
-    }
+    this.featureAnnouncementService.onAnnouncementClick();
   }
 
 

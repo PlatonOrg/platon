@@ -1,78 +1,105 @@
-import { Injectable, signal, EventEmitter } from '@angular/core';
-import { User, UserRoles, isTeacherRole } from '@platon/core/common';
+import { Injectable, signal, EventEmitter, OnDestroy } from '@angular/core'
+import { User } from '@platon/core/common';
 import { TutorialSelectorService } from "@platon/feature/tuto/browser";
 import { AnnouncementDisplayStats, STORAGE_KEY, MAX_DISPLAY_COUNT,  MIN_INTERVAL_DAYS, TOTAL_PERIOD_DAYS, MS_PER_DAY, NotificationCloseReason } from "../models/data-storage.model";
 import { Announcement } from '@platon/feature/announcement/common'
+import { AnnouncementService } from './announcement.service';
+import { Router } from '@angular/router'
+import { firstValueFrom } from 'rxjs'
 
 
-export interface FeatureAnnouncement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  version: string;
-  targetRoles: UserRoles[];
-  priority: 'low' | 'medium' | 'high';
-  actions: {
-    primary: {
-      text: string;
-      action: () => void;
-    };
-    secondary?: {
-      text: string;
-      action: () => void;
-    };
-  };
-}
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class FeatureAnnouncementService {
+export class FeatureAnnouncementService implements OnDestroy {
 
   announcementVisibilityChanged = new EventEmitter<boolean>();
 
   private _visible = false;
 
   isAnnouncementVisible = signal(false);
-  currentAnnouncement = signal<FeatureAnnouncement | null>(null);
+  currentAnnouncement = signal<Announcement | null>(null);
 
-  private announcements: FeatureAnnouncement[] = [
-    {
-      id: 'tutorials-feature-2025',
-      title: 'Nouvelle fonctionnalité : Tutoriels interactifs !',
-      description: `Découvrez nos nouveaux tutoriels pour maîtriser PLaTon rapidement !
-                   Apprenez à créer des ressources, gérer vos cours et organiser votre contenu pédagogique
-                   avec des guides pas-à-pas interactifs.`,
-      icon: 'graduation-cap',
-      version: '2025.1',
-      targetRoles: [UserRoles.teacher, UserRoles.admin],
-      priority: 'high',
-      actions: {
-        primary: {
-          text: 'Découvrir',
-          action: () => this.openTutorialSelector()
-        },
+  private announcements: Announcement[] = [];
+
+  constructor(private tutorialSelectorService: TutorialSelectorService,
+              private announcementService: AnnouncementService,
+              private router : Router)
+  {}
+
+
+  ngOnDestroy(): void {
+    this.cleanupExpiredAnnouncements()
+  }
+
+
+  /**
+   * Charge les annonces actives depuis la base de données
+   */
+  async loadActiveAnnouncements(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.announcementService.getActiveAnnouncements()
+      );
+
+      // Filtrer les annonces encore valides
+      this.announcements = response.resources.filter(announcement =>
+        this.isAnnouncementStillValid(announcement)
+      );
+
+      // Nettoyer les statistiques des annonces expirées
+      this.cleanupExpiredAnnouncements();
+    } catch (error) {
+      console.error('Erreur lors du chargement des annonces:', error);
+      this.announcements = [];
+    }
+  }
+
+
+  /**
+   * Vérifie si une annonce est encore valide temporellement
+   */
+  private isAnnouncementStillValid(announcement: Announcement): boolean {
+    const now = new Date();
+    if (announcement.displayUntil) {
+      const displayUntil = new Date(announcement.displayUntil);
+      if (now > displayUntil) {
+        return false;
       }
     }
-    // Possibilité d'ajouter d'autres annonces futures
-  ];
+    if (announcement.displayDurationInDays && announcement.createdAt) {
+      const createdAt = new Date(announcement.createdAt);
+      const durationMs = announcement.displayDurationInDays * MS_PER_DAY;
+      const expirationDate = new Date(createdAt.getTime() + durationMs);
 
-  constructor(private tutorialSelectorService: TutorialSelectorService) {}
+      if (now > expirationDate) {
+        return false;
+      }
+    }
 
+    // Si aucune date d'expiration n'est définie, on utilise TOTAL_PERIOD_DAYS
+    if (!announcement.displayUntil && !announcement.displayDurationInDays && announcement.createdAt) {
+      const createdAt = new Date(announcement.createdAt);
+      const defaultDurationMs = TOTAL_PERIOD_DAYS * MS_PER_DAY;
+      const defaultExpirationDate = new Date(createdAt.getTime() + defaultDurationMs);
 
+      if (now > defaultExpirationDate) {
+        return false;
+      }
+    }
 
+    return true;
+  }
 
   /**
    * Vérifie si une annonce doit être affichée pour l'utilisateur
    */
-  checkForAnnouncements(user: User): void {
-    if (!this.canUserSeeAnnouncements(user)) {
-      return;
-    }
+  async checkForAnnouncements(user: User): Promise<void> {
 
+    await this.loadActiveAnnouncements()
     const relevantAnnouncements = this.getRelevantAnnouncements(user);
     const announcementToShow = this.selectAnnouncementToShow(relevantAnnouncements);
 
@@ -81,27 +108,29 @@ export class FeatureAnnouncementService {
     }
   }
 
-  /**
-   * Vérifie si l'utilisateur peut voir les annonces
-   */
-  private canUserSeeAnnouncements(user: User): boolean {
-    return user.role === UserRoles.admin || isTeacherRole(user.role);
-  }
 
   /**
    * Récupère les annonces pertinentes pour l'utilisateur
    */
-  private getRelevantAnnouncements(user: User): FeatureAnnouncement[] {
-    return this.announcements.filter(announcement =>
-      announcement.targetRoles.includes(user.role)
-    );
+  private getRelevantAnnouncements(user: User): Announcement[] {
+    return this.announcements.filter(announcement => {
+      if (!announcement.targetedRoles || announcement.targetedRoles.length === 0) {
+        return true;
+      }
+      return announcement.targetedRoles.includes(user.role);
+    });
   }
 
   /**
    * Sélectionne l'annonce à afficher selon les règles de fréquence
    */
-  private selectAnnouncementToShow(announcements: FeatureAnnouncement[]): FeatureAnnouncement | null {
-    for (const announcement of announcements) {
+  private selectAnnouncementToShow(announcements: Announcement[]): Announcement | null {
+    // Trier par date de création (plus récentes en premier)
+    const sortedAnnouncements = announcements
+      .filter(a => this.isAnnouncementStillValid(a))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    for (const announcement of sortedAnnouncements) {
       if (this.shouldShowAnnouncement(announcement)) {
         return announcement;
       }
@@ -112,9 +141,16 @@ export class FeatureAnnouncementService {
   /**
    * Détermine si une annonce spécifique doit être affichée
    */
-  private shouldShowAnnouncement(announcement: FeatureAnnouncement): boolean {
+  private shouldShowAnnouncement(announcement: Announcement): boolean {
     const stats = this.getAnnouncementStats(announcement.id);
     const now = Date.now();
+
+    // Vérifier d'abord si l'annonce est encore valide temporellement
+    if (!this.isAnnouncementStillValid(announcement)) {
+      // Supprimer les statistiques de l'annonce expirée
+      this.removeAnnouncementStats(announcement.id);
+      return false;
+    }
 
     // Si l'utilisateur a déjà interagi ou explicitement refusé
     if (stats.dismissed || stats.interacted) {
@@ -132,14 +168,16 @@ export class FeatureAnnouncementService {
     }
 
     // Vérifier si assez de temps s'est écoulé depuis le dernier affichage
-    const daysSinceLastShown = (now - stats.lastShown) / MS_PER_DAY; //(1000 * 60 * 60 * 24);
+    const daysSinceLastShown = (now - stats.lastShown) / MS_PER_DAY;
     if (daysSinceLastShown < MIN_INTERVAL_DAYS) {
       return false;
     }
 
-    // Vérifier si on est dans la période totale d'affichage
-    const daysSinceFirstShown = (now - stats.firstShown) / MS_PER_DAY; //(1000 * 60 * 60 * 24);
-    if (daysSinceFirstShown > TOTAL_PERIOD_DAYS) {
+    // Calculer la période d'affichage effective pour cette annonce
+    const effectivePeriod = this.getEffectiveDisplayPeriod(announcement);
+    const daysSinceFirstShown = (now - stats.firstShown) / MS_PER_DAY;
+
+    if (daysSinceFirstShown > effectivePeriod) {
       return false;
     }
 
@@ -147,9 +185,61 @@ export class FeatureAnnouncementService {
   }
 
   /**
+   * Calcule la période d'affichage effective d'une annonce
+   */
+  private getEffectiveDisplayPeriod(announcement: Announcement): number {
+    if (announcement.displayDurationInDays) {
+      return announcement.displayDurationInDays;
+    }
+
+    if (announcement.displayUntil && announcement.createdAt) {
+      const createdAt = new Date(announcement.createdAt).getTime();
+      const displayUntil = new Date(announcement.displayUntil).getTime();
+      return (displayUntil - createdAt) / MS_PER_DAY;
+    }
+
+    // Utiliser la période par défaut
+    return TOTAL_PERIOD_DAYS;
+  }
+
+  /**
+   * Supprime les statistiques d'une annonce du localStorage
+   */
+  private removeAnnouncementStats(announcementId: string): void {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+
+    const allStats: Record<string, AnnouncementDisplayStats> = JSON.parse(stored);
+    delete allStats[announcementId];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allStats));
+  }
+
+  /**
+   * Navigue vers la page d'annonces avec l'annonce sélectionnée
+   */
+  navigateToAnnouncement(announcementId: string): void {
+    this.router.navigate(['/announcements'], {
+      queryParams: { highlight: announcementId }
+    });
+  }
+
+
+  /**
+   * Action principale : naviguer vers l'annonce
+   */
+  onAnnouncementClick(): void {
+    const announcement = this.currentAnnouncement();
+    if (announcement) {
+      this.recordAnnouncementInteraction(announcement.id);
+      this.dismissAnnouncement(NotificationCloseReason.INTERACTION);
+      this.navigateToAnnouncement(announcement.id);
+    }
+  }
+
+  /**
    * Affiche l'annonce
    */
-  private showAnnouncement(announcement: FeatureAnnouncement): void {
+  private showAnnouncement(announcement: Announcement): void {
     this.currentAnnouncement.set(announcement);
     this.isAnnouncementVisible.set(true);
     this.recordAnnouncementShown(announcement.id);
@@ -260,11 +350,7 @@ export class FeatureAnnouncementService {
    * Réinitialise les statistiques d'une annonce (pour testing)
    */
   resetAnnouncementStats(announcementId: string): void {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const allStats: Record<string, AnnouncementDisplayStats> = stored ? JSON.parse(stored) : {};
-
-    delete allStats[announcementId];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(allStats));
+    this.removeAnnouncementStats(announcementId);
   }
 
   /**
@@ -287,8 +373,31 @@ export class FeatureAnnouncementService {
    */
   protected forceShowAnnouncement(announcementId: string, user: User): void {
     const announcement = this.announcements.find(a => a.id === announcementId);
-    if (announcement && this.canUserSeeAnnouncements(user)) {
+    if (announcement) {
       this.showAnnouncement(announcement);
     }
+  }
+
+  /**
+   * Nettoie les statistiques des annonces expirées du localStorage
+   */
+  private cleanupExpiredAnnouncements(): void {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+
+    const allStats: Record<string, AnnouncementDisplayStats> = JSON.parse(stored);
+    const validAnnouncementIds = new Set(this.announcements.map(a => a.id));
+
+    // Filtrer les statistiques pour ne garder que celles des annonces encore valides
+    const cleanedStats: Record<string, AnnouncementDisplayStats> = {};
+
+    Object.entries(allStats).forEach(([announcementId, stats]) => {
+      // Garder les statistiques si l'annonce est encore valide
+      if (validAnnouncementIds.has(announcementId)) {
+        cleanedStats[announcementId] = stats;
+      }
+    });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedStats));
   }
 }
