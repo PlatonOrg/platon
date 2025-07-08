@@ -15,7 +15,6 @@ export class AnnouncementService {
 
   constructor(
     @InjectRepository(AnnouncementEntity) private readonly repository: Repository<AnnouncementEntity>,
-    //private readonly notificationService: NotificationService
   ) {}
 
   async create(announcement: Partial<AnnouncementEntity>): Promise<AnnouncementEntity> {
@@ -67,17 +66,9 @@ export class AnnouncementService {
       query.andWhere('announcement.active = :active', { active: filters.active })
     }
 
-    /*if (filters.order) {
-      const fields = {
-        TITLE: 'title',
-        CREATED_AT: 'created_at',
-        UPDATED_AT: 'updated_at',
-      }
 
-      query.orderBy(`announcement.${fields[filters.order]}`, filters.direction || 'ASC')
-    } else {*/
     query.orderBy('announcement.created_at', 'DESC')
-    //}
+
 
     if (filters.offset) {
       query.offset(filters.offset)
@@ -105,12 +96,10 @@ export class AnnouncementService {
 
 
   async getVisibleForUser(userId: string, userRole: UserRoles, filters: AnnouncementFilters = {}): Promise<[AnnouncementEntity[], number]> {
-    // Construction de la requête de base
     const queryBuilder = this.repository.createQueryBuilder('announcement')
       .leftJoinAndSelect('announcement.publisher', 'publisher')
       .where('announcement.active = :active', { active: true });
 
-    // Approche 1: Utiliser une requête SQL brute pour gérer correctement le type enum
     queryBuilder.andWhere(`
       (announcement."targetedRoles" IS NULL OR
        array_length(announcement."targetedRoles", 1) IS NULL OR
@@ -118,13 +107,11 @@ export class AnnouncementService {
     `, { userRole });
 
 
-    // Appliquer les filtres additionnels
     if (filters.search) {
       queryBuilder.andWhere('(announcement.title ILIKE :search OR announcement.description ILIKE :search)',
         { search: `%${filters.search}%` });
     }
 
-    // Limiter les résultats si nécessaire
     if (filters.limit) {
       queryBuilder.take(filters.limit);
     }
