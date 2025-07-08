@@ -68,6 +68,11 @@
             "output": "./assets/vendors/katex/"
           },
           {
+            "glob": "**/*",
+            "input": "./node_modules/katex/dist/",
+            "output": "./assets/vendors/katex/dist/"
+          },
+          {
             "glob": "**/*.js",
             "input": "./node_modules/emoji-toolkit/lib/js/",
             "output": "./assets/vendors/emoji-toolkit/"

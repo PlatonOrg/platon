@@ -19,6 +19,7 @@ import { ResourceLoaderService } from '@cisstech/nge/services'
 import { DOCUMENT } from '@angular/common'
 import { PresenterComponentDefinition, PresenterState } from './presenter'
 import { WebComponent, WebComponentHooks } from '../../web-component'
+import { Locale } from 'discord-api-types/v10'
 
 @Component({
   selector: 'wc-presenter',
@@ -67,6 +68,9 @@ export class PresenterComponent implements AfterViewInit, OnDestroy, WebComponen
 
     const revealOptions: Reveal.Options = {
       plugins: [RevealMarkdown, RevealMath.KaTeX, RevealHighlight],
+      katex: {
+        local: 'assets/vendors/katex',
+      },
     }
     setTimeout(() => {
       this._reveal = new Reveal(this.revealContainer.nativeElement, revealOptions)
