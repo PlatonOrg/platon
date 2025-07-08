@@ -240,6 +240,7 @@
     "common-tags": "^1.8.2",
     "crypto-js": "^4.2.0",
     "d3": "^7.8.5",
+    "d3-graphviz": "^5.0.2",
     "discord-interactions": "^3.4.0",
     "discord.js": "./shared/external_libs/discord.js",
     "dotenv": "^16.0.3",
