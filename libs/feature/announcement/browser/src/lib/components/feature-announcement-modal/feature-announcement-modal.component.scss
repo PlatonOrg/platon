@@ -11,9 +11,11 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     border: 1px solid #e8e8e8;
     background-color: var(--brand-background-components, #f0f4ff);
-    max-width: 280px;
+    max-width: 350px;
     margin-right: 16px;
+    margin-bottom: 4px; // Espacement entre les notifications
     animation: slideInFromRight 0.3s ease-out;
+    z-index: 1000;
   }
 
   .ant-notification-notice-content {
@@ -38,24 +40,23 @@
   z-index: 1;
 }
 
-
 .announcement-body {
-  padding: 34px 16px 14px;
+  padding: 25px 10px 4px;
 
   .announcement-title {
     text-align: center;
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     color: var(--brand-text-primary, #64748b);
     line-height: 1.3;
   }
 
   .announcement-description {
     text-align: left;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     color: var(--brand-text-primary, #64748b);
-    font-size: 13px;
+    font-size: 11px;
     line-height: 1.4;
 
     .description-text {
@@ -69,25 +70,27 @@
       color: var(--brand-text-secondary, #64748b);
     }
   }
-
 }
 
 .announcement-actions {
   display: flex;
   justify-content: center;
-  gap: 6px;
-  padding: 0 16px 12px;
+  gap: 2px;
+  padding: 0 10px 6px;
 
   .primary-action {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
-    font-size: 12px;
+    border-radius: 50px;
+    font-size: 11px;            /* Réduire la taille de police (était 12px) */
     transition: all 0.2s ease;
     color: white;
     border: none;
     cursor: pointer;
+    padding: 4px 6px 4px;          /* Ajouter padding réduit */
+    height: 26px;               /* Définir une hauteur spécifique */
+    min-width: 80px;            /* Définir une largeur minimale */
 
     &:hover {
       transform: translateY(-1px);
@@ -95,7 +98,6 @@
     }
   }
 }
-
 
 @keyframes slideInFromRight {
   from {
@@ -117,21 +119,14 @@
   }
 
   .announcement-body {
-    padding: 22px 14px 12px;
+    padding: 28px 12px 10px;
 
     .announcement-title {
       font-size: 13px;
     }
 
     .announcement-description {
-      font-size: 11px;
-    }
-  }
-
-  .announcement-actions {
-    .primary-action, .secondary-action {
-      font-size: 10px;
-      height: 26px;
+      font-size: 12px;
     }
   }
 }

@@ -1,24 +1,29 @@
-<ng-template #notificationTpl>
+<ng-template #notificationTpl let-notification>
   <div class="announcement-container">
-    <button nz-button nzType="text" nzSize="small" ngClass="" (click)="onClose()">
+    <button nz-button nzType="text" nzSize="small" (click)="onClose(notification)">
       <i nz-icon nzType="close"></i>
     </button>
+
     <div class="announcement-body">
       <h4 class="announcement-title">
-        <i nz-icon nzType="bulb" nzTheme="twotone" style="margin-right: 6px"></i>
-        {{ currentTitle }}
+        <i
+          nz-icon
+          [nzType]="notification.options.nzData.icon || 'notification'"
+          nzTheme="twotone"
+          style="margin-right: 6px"
+        ></i>
+        {{ notification.options.nzData.title || 'Annonce' }}
       </h4>
 
       <div class="announcement-description">
-        <p class="description-text">{{ currentDescription }}</p>
+        <p class="description-text">{{ notification.options.nzData.description || '' }}</p>
       </div>
     </div>
+
     <div class="announcement-actions">
-      @if(hasPrimaryAction){
-      <button nz-button nzType="primary" ngClass="primary-action" (click)="onPrimaryAction()">
-        {{ primaryActionText }}
+      <button nz-button nzType="primary" class="primary-action" (click)="onPrimaryAction(notification)">
+        Voir détails
       </button>
-      }
     </div>
   </div>
 </ng-template>
