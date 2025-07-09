@@ -1,40 +1,31 @@
-import { Injectable, signal, EventEmitter, OnDestroy } from '@angular/core'
-import { User } from '@platon/core/common';
+import { Injectable, signal, EventEmitter, OnDestroy, inject } from '@angular/core';
+import { User, UserRoles, isTeacherRole } from '@platon/core/common';
 import { TutorialSelectorService } from "@platon/feature/tuto/browser";
-import { AnnouncementDisplayStats, STORAGE_KEY, MAX_DISPLAY_COUNT,  MIN_INTERVAL_DAYS, TOTAL_PERIOD_DAYS, MS_PER_DAY, NotificationCloseReason } from "../models/data-storage.model";
+import { AnnouncementDisplayStats, STORAGE_KEY, MAX_DISPLAY_COUNT, MIN_INTERVAL_DAYS, TOTAL_PERIOD_DAYS, MS_PER_DAY, NotificationCloseReason } from "../models/data-storage.model";
 import { Announcement } from '@platon/feature/announcement/common'
 import { AnnouncementService } from './announcement.service';
-import { Router } from '@angular/router'
-import { firstValueFrom } from 'rxjs'
-
-
-
-
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FeatureAnnouncementService implements OnDestroy {
+  private readonly tutorialSelectorService = inject(TutorialSelectorService);
+  private readonly announcementService = inject(AnnouncementService);
+  private readonly router = inject(Router);
 
-  announcementVisibilityChanged = new EventEmitter<boolean>();
+  // Event émis quand la visibilité d'une annonce change
+  announcementVisibilityChanged = new EventEmitter<{ announcementId: string; visible: boolean }>();
 
-  private _visible = false;
-
-  isAnnouncementVisible = signal(false);
-  currentAnnouncement = signal<Announcement | null>(null);
+  // Signal pour les annonces visibles
+  visibleAnnouncements = signal<Announcement[]>([]);
 
   private announcements: Announcement[] = [];
 
-  constructor(private tutorialSelectorService: TutorialSelectorService,
-              private announcementService: AnnouncementService,
-              private router : Router)
-  {}
-
-
   ngOnDestroy(): void {
-    this.cleanupExpiredAnnouncements()
+    this.cleanupExpiredAnnouncements();
   }
-
 
   /**
    * Charge les annonces actives depuis la base de données
@@ -58,18 +49,21 @@ export class FeatureAnnouncementService implements OnDestroy {
     }
   }
 
-
   /**
    * Vérifie si une annonce est encore valide temporellement
    */
   private isAnnouncementStillValid(announcement: Announcement): boolean {
     const now = new Date();
+
+    // Vérifier la date d'expiration explicite
     if (announcement.displayUntil) {
       const displayUntil = new Date(announcement.displayUntil);
       if (now > displayUntil) {
         return false;
       }
     }
+
+    // Vérifier la durée d'affichage en jours
     if (announcement.displayDurationInDays && announcement.createdAt) {
       const createdAt = new Date(announcement.createdAt);
       const durationMs = announcement.displayDurationInDays * MS_PER_DAY;
@@ -80,7 +74,7 @@ export class FeatureAnnouncementService implements OnDestroy {
       }
     }
 
-    // Si aucune date d'expiration n'est définie, on utilise TOTAL_PERIOD_DAYS
+    // Si aucune date d'expiration n'est définie, utiliser TOTAL_PERIOD_DAYS
     if (!announcement.displayUntil && !announcement.displayDurationInDays && announcement.createdAt) {
       const createdAt = new Date(announcement.createdAt);
       const defaultDurationMs = TOTAL_PERIOD_DAYS * MS_PER_DAY;
@@ -98,44 +92,54 @@ export class FeatureAnnouncementService implements OnDestroy {
    * Vérifie si une annonce doit être affichée pour l'utilisateur
    */
   async checkForAnnouncements(user: User): Promise<void> {
+    if (!this.canUserSeeAnnouncements(user)) {
+      return;
+    }
 
-    await this.loadActiveAnnouncements()
+    // Recharger les annonces actives depuis la base de données
+    await this.loadActiveAnnouncements();
+
     const relevantAnnouncements = this.getRelevantAnnouncements(user);
-    const announcementToShow = this.selectAnnouncementToShow(relevantAnnouncements);
+    const announcementsToShow = this.selectAnnouncementsToShow(relevantAnnouncements);
 
-    if (announcementToShow) {
-      this.showAnnouncement(announcementToShow);
+    if (announcementsToShow.length > 0) {
+      this.showAnnouncements(announcementsToShow.reverse());
     }
   }
 
+  /**
+   * Vérifie si l'utilisateur peut voir les annonces
+   */
+  private canUserSeeAnnouncements(user: User): boolean {
+    return user.role === UserRoles.admin || isTeacherRole(user.role) || user.role === UserRoles.student;
+  }
 
   /**
    * Récupère les annonces pertinentes pour l'utilisateur
    */
   private getRelevantAnnouncements(user: User): Announcement[] {
     return this.announcements.filter(announcement => {
+      // Si aucun rôle ciblé n'est défini, l'annonce est pour tous
       if (!announcement.targetedRoles || announcement.targetedRoles.length === 0) {
         return true;
       }
+
+      // Sinon vérifier si le rôle de l'utilisateur est dans les rôles ciblés
       return announcement.targetedRoles.includes(user.role);
     });
   }
 
   /**
-   * Sélectionne l'annonce à afficher selon les règles de fréquence
+   * Sélectionne les annonces à afficher selon les règles de fréquence
    */
-  private selectAnnouncementToShow(announcements: Announcement[]): Announcement | null {
+  private selectAnnouncementsToShow(announcements: Announcement[]): Announcement[] {
     // Trier par date de création (plus récentes en premier)
     const sortedAnnouncements = announcements
       .filter(a => this.isAnnouncementStillValid(a))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    for (const announcement of sortedAnnouncements) {
-      if (this.shouldShowAnnouncement(announcement)) {
-        return announcement;
-      }
-    }
-    return null;
+    // Filtrer pour ne garder que les annonces qui doivent être affichées
+    return sortedAnnouncements.filter(announcement => this.shouldShowAnnouncement(announcement));
   }
 
   /**
@@ -203,15 +207,49 @@ export class FeatureAnnouncementService implements OnDestroy {
   }
 
   /**
-   * Supprime les statistiques d'une annonce du localStorage
+   * Affiche les annonces
    */
-  private removeAnnouncementStats(announcementId: string): void {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
+  private showAnnouncements(announcements: Announcement[]): void {
+    // Mettre à jour le signal avec toutes les annonces visibles
+    this.visibleAnnouncements.set(announcements);
 
-    const allStats: Record<string, AnnouncementDisplayStats> = JSON.parse(stored);
-    delete allStats[announcementId];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(allStats));
+    // Enregistrer l'affichage pour chaque annonce
+    announcements.forEach(announcement => {
+      this.recordAnnouncementShown(announcement.id);
+      // Émettre un événement pour chaque annonce
+      this.announcementVisibilityChanged.emit({
+        announcementId: announcement.id,
+        visible: true
+      });
+    });
+  }
+
+  /**
+   * Ferme une annonce spécifique
+   */
+  dismissAnnouncement(announcementId: string, reason: NotificationCloseReason): void {
+    // Enregistrer la fermeture de l'annonce
+    this.recordAnnouncementDismissed(announcementId, reason);
+
+    // Retirer l'annonce de la liste des annonces visibles
+    const currentAnnouncements = this.visibleAnnouncements();
+    const updatedAnnouncements = currentAnnouncements.filter(a => a.id !== announcementId);
+    this.visibleAnnouncements.set(updatedAnnouncements);
+
+    // Émettre un événement pour cette annonce spécifique
+    this.announcementVisibilityChanged.emit({
+      announcementId,
+      visible: false
+    });
+  }
+
+  /**
+   * Action principale : naviguer vers l'annonce
+   */
+  onAnnouncementClick(announcementId: string): void {
+    this.recordAnnouncementInteraction(announcementId);
+    this.dismissAnnouncement(announcementId, NotificationCloseReason.INTERACTION);
+    this.navigateToAnnouncement(announcementId);
   }
 
   /**
@@ -223,60 +261,53 @@ export class FeatureAnnouncementService implements OnDestroy {
     });
   }
 
-
   /**
-   * Action principale : naviguer vers l'annonce
+   * Vérifie si une annonce spécifique est visible
    */
-  onAnnouncementClick(): void {
-    const announcement = this.currentAnnouncement();
-    if (announcement) {
-      this.recordAnnouncementInteraction(announcement.id);
-      this.dismissAnnouncement(NotificationCloseReason.INTERACTION);
-      this.navigateToAnnouncement(announcement.id);
-    }
+  isAnnouncementVisible(announcementId: string): boolean {
+    return this.visibleAnnouncements().some(a => a.id === announcementId);
   }
 
   /**
-   * Affiche l'annonce
+   * Récupère une annonce spécifique par son ID
    */
-  private showAnnouncement(announcement: Announcement): void {
-    this.currentAnnouncement.set(announcement);
-    this.isAnnouncementVisible.set(true);
-    this.recordAnnouncementShown(announcement.id);
-    this._visible = true;
-    this.announcementVisibilityChanged.emit(true);
-  }
-
-    // Méthode pour cacher une annonce
-  hideAnnouncement(): void {
-    this._visible = false;
-    this.announcementVisibilityChanged.emit(false);
-  }
-
-
-
-  /**
-   * Ferme l'annonce
-   */
-  dismissAnnouncement(reason: NotificationCloseReason): void {
-    const currentAnnouncement = this.currentAnnouncement();
-    if (currentAnnouncement) {
-      this.recordAnnouncementDismissed(currentAnnouncement.id, reason);
-    }
-
-    this.isAnnouncementVisible.set(false);
-    this.currentAnnouncement.set(null);
-    this.hideAnnouncement();
-
+  getAnnouncement(announcementId: string): Announcement | undefined {
+    return this.visibleAnnouncements().find(a => a.id === announcementId);
   }
 
   /**
-   * Action principale : ouvrir le sélecteur de tutoriels
+   * Nettoie les statistiques des annonces expirées du localStorage
    */
-  private openTutorialSelector(): void {
-    this.recordAnnouncementInteraction(this.currentAnnouncement()?.id || '');
-    this.dismissAnnouncement(NotificationCloseReason.INTERACTION);
-    this.tutorialSelectorService.openTutorialSelector();
+  private cleanupExpiredAnnouncements(): void {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+
+    const allStats: Record<string, AnnouncementDisplayStats> = JSON.parse(stored);
+    const validAnnouncementIds = new Set(this.announcements.map(a => a.id));
+
+    // Filtrer les statistiques pour ne garder que celles des annonces encore valides
+    const cleanedStats: Record<string, AnnouncementDisplayStats> = {};
+
+    Object.entries(allStats).forEach(([announcementId, stats]) => {
+      // Garder les statistiques si l'annonce est encore valide
+      if (validAnnouncementIds.has(announcementId)) {
+        cleanedStats[announcementId] = stats;
+      }
+    });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedStats));
+  }
+
+  /**
+   * Supprime les statistiques d'une annonce du localStorage
+   */
+  private removeAnnouncementStats(announcementId: string): void {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+
+    const allStats: Record<string, AnnouncementDisplayStats> = JSON.parse(stored);
+    delete allStats[announcementId];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allStats));
   }
 
   /**
@@ -318,7 +349,7 @@ export class FeatureAnnouncementService implements OnDestroy {
   private recordAnnouncementDismissed(announcementId: string, reason: NotificationCloseReason): void {
     const stats = this.getAnnouncementStats(announcementId);
 
-    if (reason === NotificationCloseReason.CLOSE) {  // ALors ici je ne sais encore si on va garder le 'close' ou 'interaction'
+    if (reason === NotificationCloseReason.CLOSE) {
       stats.dismissed = true; // Ne plus jamais afficher
     }
     this.saveAnnouncementStats(announcementId, stats);
@@ -344,60 +375,17 @@ export class FeatureAnnouncementService implements OnDestroy {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allStats));
   }
 
-
-
-  /**
-   * Réinitialise les statistiques d'une annonce (pour testing)
-   */
+  // Méthodes pour le debugging et testing
   resetAnnouncementStats(announcementId: string): void {
     this.removeAnnouncementStats(announcementId);
   }
 
-  /**
-   * Réinitialise toutes les statistiques (pour testing)
-   */
   resetAllAnnouncementStats(): void {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  /**
-   * Obtient les statistiques de toutes les annonces (pour debugging)
-   */
   protected getAllAnnouncementStats(): Record<string, AnnouncementDisplayStats> {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : {};
-  }
-
-  /**
-   * Force l'affichage d'une annonce (pour testing)
-   */
-  protected forceShowAnnouncement(announcementId: string, user: User): void {
-    const announcement = this.announcements.find(a => a.id === announcementId);
-    if (announcement) {
-      this.showAnnouncement(announcement);
-    }
-  }
-
-  /**
-   * Nettoie les statistiques des annonces expirées du localStorage
-   */
-  private cleanupExpiredAnnouncements(): void {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
-
-    const allStats: Record<string, AnnouncementDisplayStats> = JSON.parse(stored);
-    const validAnnouncementIds = new Set(this.announcements.map(a => a.id));
-
-    // Filtrer les statistiques pour ne garder que celles des annonces encore valides
-    const cleanedStats: Record<string, AnnouncementDisplayStats> = {};
-
-    Object.entries(allStats).forEach(([announcementId, stats]) => {
-      // Garder les statistiques si l'annonce est encore valide
-      if (validAnnouncementIds.has(announcementId)) {
-        cleanedStats[announcementId] = stats;
-      }
-    });
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedStats));
   }
 }
