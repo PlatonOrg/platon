@@ -9,7 +9,7 @@ import {
   ViewChild,
 } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { RouterModule } from '@angular/router'
+import { ActivatedRoute, RouterModule } from "@angular/router";
 
 import { MatIconModule } from '@angular/material/icon'
 import { MatFormFieldModule } from '@angular/material/form-field'
@@ -94,7 +94,8 @@ export class AnnouncementsPage implements OnInit {
     private readonly dialogService: DialogService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly announcementService: AnnouncementService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -106,14 +107,31 @@ export class AnnouncementsPage implements OnInit {
     this.changeDetectorRef.markForCheck()
 
     try {
-      // Utilisation de getVisibleForUser qui filtre selon le rôle de l'utilisateur
       const result = await firstValueFrom(this.announcementService.getVisibleForUser({ active: true }))
       this.announcements = result.resources
       this.filteredAnnouncements = [...this.announcements]
 
-      if (!this.selectedAnnouncement && this.announcements.length > 0) {
-        this.selectedAnnouncement = this.announcements[0]
-      }
+      // Récupérer l'ID de l'annonce à partir des paramètres de l'URL
+      this.route.queryParams.subscribe(params => {
+        const highlightedId = params['highlight']
+
+        if (highlightedId && this.announcements.length > 0) {
+          // Chercher l'annonce par ID
+          const foundAnnouncement = this.announcements.find(a => a.id === highlightedId)
+          if (foundAnnouncement) {
+            this.selectedAnnouncement = foundAnnouncement
+          } else {
+            // Si l'annonce n'est pas trouvée, prendre la première par défaut
+            this.selectedAnnouncement = this.announcements[0]
+          }
+        } else if (this.announcements.length > 0) {
+          // Si pas d'ID spécifié, prendre la première annonce
+          this.selectedAnnouncement = this.announcements[0]
+        }
+
+        this.changeDetectorRef.markForCheck()
+      })
+
     } catch (error) {
       console.error('Erreur lors du chargement des annonces:', error)
       this.dialogService.error('Erreur lors du chargement des annonces')
@@ -122,6 +140,7 @@ export class AnnouncementsPage implements OnInit {
       this.changeDetectorRef.markForCheck()
     }
   }
+
 
   protected search(): void {
     if (!this.searchText.trim()) {
