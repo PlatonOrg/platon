@@ -189,15 +189,6 @@ export function defineWebComponent(definition: WebComponentDefinition): WebCompo
   return definition
 }
 
-// === PATCH: Désactivation globale de la détection de changements pour les opérations lourdes ===
-let __globalSuspendProxy__ = false
-export function suspendProxyMutations() {
-  __globalSuspendProxy__ = true
-}
-export function resumeProxyMutations() {
-  __globalSuspendProxy__ = false
-}
-
 function createState(component: WebComponentInstance, definition: WebComponentDefinition) {
   if (component.$__state__$) return component.$__state__$
 
@@ -211,10 +202,7 @@ function createState(component: WebComponentInstance, definition: WebComponentDe
     },
     set(target, key, value) {
       target[key] = value
-      // PATCH: Si le flag global est actif, on ne déclenche pas detectChanges
-      if (!__globalSuspendProxy__) {
-        detectChanges(component)
-      }
+      detectChanges(component)
       return true
     },
   }
@@ -272,20 +260,23 @@ function detectChanges(component: WebComponentInstance) {
   component.$__changeDetector__$ = component.$__changeDetector__$ ?? component.injector.get(ChangeDetectorRef)
   if (component.$__ngOnInitCalled__$) {
     component.stateChange?.next(component.state)
-    component.$__changeDetector__$.markForCheck()
-    component.$__changeDetector__$.detectChanges()
   }
 
-  if (!component.$__suspendChanges__$) {
-    component.$__suspendChanges__$ = true
-    if (component.onChangeState) {
-      component.onChangeState() // Peut provoquer plus de changements!
-    }
+  component.$__changeDetector__$.markForCheck()
+  component.$__changeDetector__$.detectChanges()
 
-    component.$__changeDetector__$.markForCheck()
-    component.$__changeDetector__$.detectChanges()
-    component.$__suspendChanges__$ = false
+  if (component.$__suspendChanges__$ || !component.$__ngOnInitCalled__$) {
+    return
   }
+
+  component.$__suspendChanges__$ = true
+  if (component.onChangeState) {
+    component.onChangeState()
+  }
+
+  component.$__changeDetector__$.markForCheck()
+  component.$__changeDetector__$.detectChanges()
+  component.$__suspendChanges__$ = false
 }
 
 /**

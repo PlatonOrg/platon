@@ -26,6 +26,7 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   timeoutID: NodeJS.Timeout | undefined
 
   constructor(readonly injector: Injector) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
   }
 
