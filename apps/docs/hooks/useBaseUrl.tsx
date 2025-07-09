@@ -7,7 +7,7 @@ export const useBaseUrl = () => {
     if (url.includes('github')) {
       url = `${url}/platon`
     }
-    setOrigin("http://127.0.0.1:4200/")
+    setOrigin(url)
   }, [])
   return origin
 }
