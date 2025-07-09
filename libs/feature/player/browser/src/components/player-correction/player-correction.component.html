@@ -112,11 +112,10 @@
                   <h1 style="margin: 0">
                     {{ correctedGrade }} / 100
                     <mat-icon
-                      [style.color]="
-                        exerciseCorrected.has(this.currentExercise?.exerciseSessionId || '') ? 'green' : 'white'
-                      "
+                      *ngIf="exerciseCorrected.has(this.currentExercise?.exerciseSessionId || '')"
+                      style="color: green"
                     >
-                      {{ exerciseCorrected.has(currentExercise?.exerciseSessionId || '') ? 'check_circle' : 'cancel' }}
+                      {{ 'check_circle' }}
                     </mat-icon>
                   </h1>
                 </div>

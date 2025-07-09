@@ -274,8 +274,8 @@ export class PlayerCorrectionComponent implements OnInit {
     this.currentExercise = undefined
     this.exercises = this.currentGroup?.users || []
     this.exercises.sort((a, b) => {
-      const aName = this.userMap.get(a.userId)?.username
-      const bName = this.userMap.get(b.userId)?.username
+      const aName = this.userMap.get(a.userId)?.lastName
+      const bName = this.userMap.get(b.userId)?.lastName
       return aName?.localeCompare(bName ?? '') ?? 0
     })
     // Take the current user's exercise if it exists
@@ -287,6 +287,7 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected onChooseGroup(group: ExerciseGroup): void {
+    this.resumeMode = false
     if (this.currentGroup === group) {
       return
     }
@@ -338,7 +339,7 @@ export class PlayerCorrectionComponent implements OnInit {
   get userOptions(): Array<{ label: string; value: string }> {
     return (
       this.currentGroup?.users?.map((user) => ({
-        label: `${this.userMap.get(user.userId)?.firstName} ${this.userMap.get(user.userId)?.lastName}`,
+        label: `${this.userMap.get(user.userId)?.lastName} ${this.userMap.get(user.userId)?.firstName}`,
         value: user.userId,
       })) ?? []
     )
