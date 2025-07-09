@@ -30,8 +30,6 @@ export class AnnouncementController {
   @Get()
   async search(@Query() filters: AnnouncementFiltersDTO): Promise<ListResponse<AnnouncementDTO>> {
     const [items, count] = await this.service.search(filters)
-    console.log('SEARCH CALLED');
-    console.log(items);
     return new ListResponse({
       resources: Mapper.mapAll(items, AnnouncementDTO),
       total: count

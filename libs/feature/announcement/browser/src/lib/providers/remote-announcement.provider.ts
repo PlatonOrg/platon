@@ -34,7 +34,6 @@ export class RemoteAnnouncementProvider extends AnnouncementProvider {
   }
 
   update(id: string, input: UpdateAnnouncementInput): Observable<Announcement> {
-    console.log('UPDATE CALLED 1');
     const params = buildHttpParams(input)
     return this.http
       .patch<ItemResponse<Announcement>>(`${this.API_BASE_PATH}/${id}`, input, { params })
