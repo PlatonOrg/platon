@@ -46,6 +46,7 @@ export class ConfettiComponent implements WebComponentHooks<ConfettiState>, OnIn
       this.state.mode = 'canon'
     }
   }
+
   onChangeState() {
     if (this.state) {
       // Check if trigger changed from false to true
@@ -130,7 +131,7 @@ export class ConfettiComponent implements WebComponentHooks<ConfettiState>, OnIn
 
     const frame = () => {
       confetti({
-        particleCount: safeColors.length, // Augmenté de 2 à 5
+        particleCount: safeColors.length,
         angle: 60,
         spread: 55,
         origin: { x: 0 },
@@ -138,7 +139,7 @@ export class ConfettiComponent implements WebComponentHooks<ConfettiState>, OnIn
       })?.catch((error) => console.error('Confetti error:', error))
 
       confetti({
-        particleCount: safeColors.length, // Augmenté de 2 à 5
+        particleCount: safeColors.length,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
