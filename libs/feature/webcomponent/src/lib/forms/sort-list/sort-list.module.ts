@@ -13,7 +13,7 @@ import { SortListComponent } from './sort-list.component'
 
 @NgModule({
   declarations: [SortListComponent],
-  imports: [BaseModule, CssPipeModule, NgeMarkdownModule, MatIconModule, DragDropModule],
+  imports: [BaseModule, MatIconModule, DragDropModule, CssPipeModule, NgeMarkdownModule],
   exports: [SortListComponent],
 })
 export class SortListModule implements IDynamicModule {

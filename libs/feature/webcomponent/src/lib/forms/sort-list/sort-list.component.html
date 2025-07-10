@@ -1,9 +1,10 @@
 <div>
   <ul
+    cdkDropList
     [class.disabled]="state.disabled"
     [cdkDropListDisabled]="state.disabled"
-    cdkDropList
-    (cdkDropListDropped)="drop($any($event))"
+    [cdkDropListData]="state.items"
+    (cdkDropListDropped)="drop($event)"
   >
     <li
       cdkDrag

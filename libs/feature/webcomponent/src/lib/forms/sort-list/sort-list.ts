@@ -3,6 +3,7 @@ import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-
 export interface SortListItem {
   css?: string
   content: string
+  id: string
 }
 
 export interface SortListState extends IWebComponent {
@@ -39,6 +40,10 @@ export const SortListComponentDefinition = defineWebComponent({
             content: {
               type: 'string',
               description: 'Contenu en markdown.',
+            },
+            id: {
+              type: 'string',
+              description: "Identifiant unique de l'item  généré automatiquement.",
             },
           },
         },

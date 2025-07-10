@@ -22,8 +22,8 @@ export class RenderDotDirective implements OnInit, OnChanges {
   ngOnInit() {
     this.resourceLoader
       .loadAllSync([
-        ['script', 'https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.2/d3.min.js'],
-        ['script', 'https://cdnjs.cloudflare.com/ajax/libs/d3-graphviz/5.0.2/d3-graphviz.min.js'],
+        ['script', 'assets/vendors/d3/d3.min.js'],
+        ['script', 'assets/vendors/d3-graphviz/d3-graphviz.min.js'],
       ])
       .pipe(take(1))
       .subscribe(() => {

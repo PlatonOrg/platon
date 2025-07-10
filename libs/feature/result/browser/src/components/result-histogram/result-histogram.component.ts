@@ -1,30 +1,21 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  Input,
-  ViewChild,
-  AfterViewInit,
-  HostListener,
-  Output,
-  EventEmitter,
-  OnChanges,
-} from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnChanges, OnInit } from '@angular/core'
+import { CoreEchartsDirective } from '@platon/core/browser'
 import { EChartsOption } from 'echarts'
-import { BarChart } from 'echarts/charts'
-import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components'
-import * as echarts from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
+import type { ECharts } from 'echarts'
+
 @Component({
   standalone: true,
   selector: 'result-histogram',
   templateUrl: './result-histogram.component.html',
   styleUrls: ['./result-histogram.component.scss'],
+  imports: [CommonModule, CoreEchartsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResultHistogramComponent implements AfterViewInit, OnChanges {
-  @ViewChild('chartContainer', { static: true }) chartContainer!: ElementRef
-  private chartInstance!: echarts.ECharts
+export class ResultHistogramComponent implements OnInit, OnChanges {
+  protected chart?: EChartsOption
+  private echartInstance?: ECharts
+  private sortedNotes: number[] = []
 
   @Input()
   data: number[] = []
@@ -35,47 +26,38 @@ export class ResultHistogramComponent implements AfterViewInit, OnChanges {
   @Output()
   highlightedValueChange: EventEmitter<number> = new EventEmitter<number>()
 
-  ngAfterViewInit() {
+  ngOnInit() {
     this.initChart()
-    setTimeout(() => {
-      this.chartInstance.resize()
-    }, 0)
-  }
-
-  constructor() {
-    echarts.use([GridComponent, BarChart, CanvasRenderer, TitleComponent, TooltipComponent])
   }
 
   ngOnChanges() {
-    if (this.chartInstance) {
-      this.drawChart()
+    this.chart = this.drawChart()
+    if (this.echartInstance) {
+      this.echartInstance.setOption(this.chart)
+    }
+  }
+
+  onChartInit(ec: ECharts): void {
+    this.echartInstance = ec
+  }
+
+  onChartClick(event: { dataIndex?: number }): void {
+    const dataIndex = event.dataIndex
+    if (dataIndex !== undefined && this.sortedNotes[dataIndex] !== undefined) {
+      const clickedNote = this.sortedNotes[dataIndex]
+      this.highlightedValueChange.emit(clickedNote)
+      this.highlightedValue = clickedNote
+      if (this.echartInstance) {
+        this.echartInstance.setOption(this.drawChart())
+      }
     }
   }
 
   private initChart(): void {
-    this.chartInstance = echarts.init(this.chartContainer.nativeElement)
-    this.drawChart()
-
-    this.chartInstance.on('click', (params) => {
-      if (params.componentType === 'series') {
-        const clickedCategory = params.name
-        if (clickedCategory !== undefined) {
-          let numericValue: number | undefined = parseInt(clickedCategory)
-          if (!isNaN(numericValue)) {
-            if (this.highlightedValue === numericValue) {
-              numericValue = undefined
-            }
-            this.highlightedValue = numericValue
-            this.highlightedValueChange?.emit(this.highlightedValue)
-            this.drawChart()
-          }
-        }
-      }
-    })
+    this.chart = this.drawChart()
   }
 
-  private drawChart(): void {
-    // Afficher toutes les notes présentes dans data, sans xLabels prédéfinis
+  private drawChart(): EChartsOption {
     const noteMap = new Map<number, number>()
     for (const note of this.data) {
       if (typeof note === 'number') {
@@ -84,17 +66,17 @@ export class ResultHistogramComponent implements AfterViewInit, OnChanges {
       }
     }
     // Trier les notes croissantes
-    const sortedNotes = Array.from(noteMap.keys()).sort((a, b) => a - b)
-    const counts = sortedNotes.map((n) => noteMap.get(n) ?? 0)
+    this.sortedNotes = Array.from(noteMap.keys()).sort((a, b) => a - b)
+    const counts = this.sortedNotes.map((n) => noteMap.get(n) ?? 0)
 
-    const option: EChartsOption = {
+    return {
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
       },
       xAxis: {
         type: 'category',
-        data: sortedNotes.map(String),
+        data: this.sortedNotes.map(String),
         name: 'Note',
         nameLocation: 'middle',
         nameGap: 24,
@@ -113,7 +95,7 @@ export class ResultHistogramComponent implements AfterViewInit, OnChanges {
           data: counts,
           itemStyle: {
             color: (params: { value: unknown; dataIndex: number }) => {
-              const value = sortedNotes[params.dataIndex]
+              const value = this.sortedNotes[params.dataIndex]
               if (
                 value !== undefined &&
                 this.highlightedValue !== undefined &&
@@ -138,15 +120,6 @@ export class ResultHistogramComponent implements AfterViewInit, OnChanges {
         containLabel: false,
       },
       title: { text: 'Répartition des notes', left: 'center' },
-    }
-
-    this.chartInstance.setOption(option)
-  }
-
-  @HostListener('window:resize')
-  private onResize(): void {
-    if (this.chartInstance) {
-      this.chartInstance.resize()
     }
   }
 }
