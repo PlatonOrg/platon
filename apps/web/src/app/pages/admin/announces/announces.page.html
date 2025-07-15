@@ -13,8 +13,8 @@
       <thead>
         <tr>
           <th nzWidth="180px">Titre</th>
-          <th nzWidth="200px">Description</th>
-          <th nzWidth="100px">État</th>
+          <th nzWidth="250px">Description</th>
+          <th nzWidth="50px">État</th>
           <th nzWidth="150px">Date de création</th>
           <th nzWidth="150px">Rôles ciblés</th>
           <th nzWidth="120px">Actions</th>
@@ -23,8 +23,8 @@
       <tbody>
         @for(item of announcementTable.data; track item) {
         <tr>
-          <td>{{ item.title }}</td>
-          <td>{{ item.description }}</td>
+          <td class="truncate-description">{{ item.title }}</td>
+          <td>{{ limitedDescription(item.description) }}</td>
           <td>
             <nz-tag [nzColor]="item.active ? 'green' : 'red'">
               {{ item.active ? 'Actif' : 'Inactif' }}
@@ -33,7 +33,6 @@
           <td>{{ item.createdAt | date : 'dd/MM/yyyy HH:mm' }}</td>
           <td>
             <ng-container *ngIf="item.targetedRoles?.length; else allRoles">
-              <!-- Utiliser des nzTag avec des couleurs significatives selon le rôle -->
               @for(role of item.targetedRoles; track role) {
               <nz-tag [nzColor]="getRoleColor(role)">
                 {{ formatRoleName(role) }}
@@ -45,6 +44,16 @@
             </ng-template>
           </td>
           <td>
+            <!-- Boutons d'actions  -->
+            <bouton
+              nz-button
+              nzType="text"
+              nzShape="circle"
+              nz-tooltip="Prévisualiser"
+              (click)="openPreviewDialog(item)"
+            >
+              <span nz-icon nzType="play-circle" nzTheme="twotone"></span>
+            </bouton>
             <button nz-button nzType="text" nzShape="circle" nz-tooltip="Modifier" (click)="openEditDialog(item)">
               <span nz-icon nzType="edit" nzTheme="outline"></span>
             </button>
@@ -95,7 +104,6 @@
           <span class="label">Rôles:</span>
           <span>
             <ng-container *ngIf="item.targetedRoles?.length; else mobileAllRoles">
-              <!-- Transformer les rôles en noms lisibles -->
               {{ formatRolesList(item.targetedRoles ?? []) }}
             </ng-container>
             <ng-template #mobileAllRoles>Tous les utilisateurs</ng-template>
@@ -103,6 +111,10 @@
         </div>
       </div>
       <div class="card-actions">
+        <button nz-button nzType="default" nzSize="small" (click)="openPreviewDialog(item)">
+          <span nz-icon nzType="play-circle" nzTheme="twotone"></span>
+          Aperçu
+        </button>
         <button nz-button nzType="default" nzSize="small" (click)="toggleActive(item)">
           <span nz-icon [nzType]="item.active ? 'eye-invisible' : 'eye'" nzTheme="outline"></span>
           {{ item.active ? 'Désactiver' : 'Activer' }}

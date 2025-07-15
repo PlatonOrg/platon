@@ -11,7 +11,16 @@
   }
 }
 
-// Table scrollable pour écrans moyens
+.truncate-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3em;
+}
+
 .desktop-table-container {
   overflow-x: auto;
   margin-bottom: 16px;
@@ -72,7 +81,6 @@
   }
 }
 
-// Responsive pour les boutons
 @media (max-width: 480px) {
   .page-header {
     flex-direction: column;
@@ -84,7 +92,6 @@
   }
 }
 
-// Pour écrans très petits, adaptation des boutons dans le tableau
 @media (max-width: 360px) {
   .button-text {
     display: none;

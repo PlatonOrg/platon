@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
 
@@ -18,7 +18,7 @@ import { UserRoles } from '@platon/core/common'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
 import { Announcement } from '@platon/feature/announcement/common'
-import { AnnouncementService, AnnouncementCreateDrawerComponent } from '@platon/feature/announcement/browser'
+import { AnnouncementService, AnnouncementCreateDrawerComponent, AnnouncementPreviewModalComponent } from '@platon/feature/announcement/browser'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
@@ -46,7 +46,6 @@ import { firstValueFrom } from 'rxjs'
     MatDialogModule,
 
     DialogModule,
-    //AnnouncementCreateDrawerComponent,
   ],
 })
 export class AdminAnnouncementsPage implements OnInit {
@@ -95,17 +94,33 @@ export class AdminAnnouncementsPage implements OnInit {
     })
   }
 
+
+  protected openPreviewDialog(announcement: Announcement): void {
+    const dialogRef = this.dialog.open(AnnouncementPreviewModalComponent, {
+      width: '99%',
+      height: '100%',
+      disableClose: true,
+      data: { announcement },
+    })
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result?.action === 'edit') {
+        this.openEditDialog(announcement)
+      }
+    })
+  }
+
+  protected limitedDescription(description: string): string {
+    return description.length > 200 ? description.slice(0, 200) + '...' : description
+  }
+
+
   async loadAnnouncements(): Promise<void> {
     this.loading = true
     this.changeDetectorRef.markForCheck()
 
     try {
-      const announcements = await firstValueFrom(
-        /*this.announcementService.search({
-          limit: 100,
-        })*/
-        this.announcementService.search({})
-      )
+      const announcements = await firstValueFrom(this.announcementService.search({}))
 
       this.announcements = announcements.resources
     } catch (error) {
