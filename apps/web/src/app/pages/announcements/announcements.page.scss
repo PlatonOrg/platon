@@ -1,11 +1,8 @@
-
-// Styles communs pour les deux thèmes
 .announcements-container {
   display: flex;
   height: calc(100vh - 70px);
   overflow: hidden;
 
-  // Effet de transition global
   * {
     transition: all 0.2s ease-in-out;
   }
@@ -15,31 +12,28 @@
   width: 320px;
   display: flex;
   flex-direction: column;
-  height: 100%; // Assurer que le sidebar prend toute la hauteur
-  overflow: hidden; // Empêcher le défilement du sidebar lui-même
+  height: 100%;
+  overflow: hidden;
 
   .search-bar {
     padding: 2px;
     border-bottom: 1px solid var(--brand-border-color-light);
-    flex-shrink: 0; // Empêcher la barre de recherche de rétrécir
+    flex-shrink: 0;
 
     .search-field {
       width: 100%;
 
-      // Réduction de la hauteur du champ de recherche
       ::ng-deep .mat-mdc-form-field-infix {
         padding-top: 8px;
         padding-bottom: 4px;
         min-height: 32px;
       }
 
-      // Réduire la taille des icônes et du texte
       ::ng-deep .mat-mdc-text-field-wrapper {
         padding-left: 10px;
         padding-right: 10px;
       }
 
-      // Réduire l'espacement interne
       ::ng-deep .mat-mdc-form-field-flex {
         margin-top: -4px;
       }
@@ -48,12 +42,12 @@
 
   .announcements-list {
     flex: 1;
-    overflow-y: auto; // Activer le défilement vertical
+    overflow-y: auto;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    min-height: 0; // CRUCIAL: permet à flex: 1 de fonctionner correctement avec overflow
+    min-height: 0;
 
     .announcement-item {
       display: flex;
@@ -63,7 +57,7 @@
       position: relative;
       overflow: hidden;
       border: 1px solid var(--brand-border-color-light);
-      flex-shrink: 0; // Empêcher les éléments de rétrécir
+      flex-shrink: 0;
 
       &:hover {
         background-color: var(--brand-background-hover);
@@ -187,16 +181,16 @@
 
   .loading-container {
     flex: 1;
-    overflow-y: auto; // Activer le défilement vertical
+    overflow-y: auto;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    min-height: 0; // CRUCIAL: permet à flex: 1 de fonctionner correctement avec overflow
+    min-height: 0;
 
     .loading-card {
       padding: 12px;
-      flex-shrink: 0; // Empêcher les éléments de rétrécir
+      flex-shrink: 0;
 
       .loading-header {
         display: flex;
@@ -251,8 +245,7 @@
     border: none;
 
     .announcement-header {
-      //display: flex;
-      //align-items: center;
+
       justify-content: space-between;
       margin-bottom: 16px;
 
@@ -302,7 +295,6 @@
   }
 }
 
-// Styles spécifiques au thème clair
 :host-context(.light-theme) {
   overflow: hidden;
   .announcements-container {
@@ -361,7 +353,6 @@
 
 // Styles spécifiques au thème sombre
 :host-context(.dark-theme) {
-  // Utiliser la couleur de announcement-content pour toute la page
   overflow: hidden;
   .announcements-container,
   .sidebar,
@@ -371,7 +362,6 @@
     background-color: var(--brand-background-components);
   }
 
-  // Appliquer également aux éléments deep
   .sidebar .search-bar ::ng-deep .mat-mdc-form-field-flex,
   .sidebar .search-bar ::ng-deep .mat-mdc-text-field-wrapper {
     background-color: var(--brand-background-components);
@@ -451,7 +441,7 @@
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--brand-border-color);
-    max-height: 300px; // Limite la hauteur sur mobile mais permet le défilement
+    max-height: 300px;
   }
 
   .content {

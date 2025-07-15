@@ -9,7 +9,7 @@ import {
   ViewChild,
 } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { ActivatedRoute, RouterModule } from "@angular/router";
+import { ActivatedRoute, RouterModule } from '@angular/router'
 
 import { MatIconModule } from '@angular/material/icon'
 import { MatFormFieldModule } from '@angular/material/form-field'
@@ -111,13 +111,11 @@ export class AnnouncementsPage implements OnInit {
       this.announcements = result.resources
       this.filteredAnnouncements = [...this.announcements]
 
-      // Récupérer l'ID de l'annonce à partir des paramètres de l'URL
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         const highlightedId = params['highlight']
 
         if (highlightedId && this.announcements.length > 0) {
-          // Chercher l'annonce par ID
-          const foundAnnouncement = this.announcements.find(a => a.id === highlightedId)
+          const foundAnnouncement = this.announcements.find((a) => a.id === highlightedId)
           if (foundAnnouncement) {
             this.selectedAnnouncement = foundAnnouncement
           } else {
@@ -125,22 +123,18 @@ export class AnnouncementsPage implements OnInit {
             this.selectedAnnouncement = this.announcements[0]
           }
         } else if (this.announcements.length > 0) {
-          // Si pas d'ID spécifié, prendre la première annonce
           this.selectedAnnouncement = this.announcements[0]
         }
 
         this.changeDetectorRef.markForCheck()
       })
-
     } catch (error) {
-      console.error('Erreur lors du chargement des annonces:', error)
       this.dialogService.error('Erreur lors du chargement des annonces')
     } finally {
       this.loading = false
       this.changeDetectorRef.markForCheck()
     }
   }
-
 
   protected search(): void {
     if (!this.searchText.trim()) {
@@ -158,10 +152,6 @@ export class AnnouncementsPage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  /**
-   * Solution 1: Forcer la recréation du Web Component à chaque changement
-   * Cette méthode est plus radicale mais plus fiable
-   */
   protected selectAnnouncement(announcement: Announcement): void {
     this.selectedAnnouncement = announcement
     this.changeDetectorRef.markForCheck()
@@ -175,9 +165,5 @@ export class AnnouncementsPage implements OnInit {
     }
 
     return nameMap[role] || role
-  }
-
-  protected trackByFn(index: number, announcement: Announcement): string {
-    return announcement.id
   }
 }
