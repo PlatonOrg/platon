@@ -8,7 +8,7 @@ import {
   OnInit,
   Input,
   Output,
-  ViewChild,
+  signal,
   CUSTOM_ELEMENTS_SCHEMA,
 } from '@angular/core'
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -28,7 +28,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
  import { FormsModule } from '@angular/forms';
 import { OutputData } from '@editorjs/editorjs';
 
@@ -41,10 +41,13 @@ import { emptyEditorJsData, UiEditorJsModule } from '@platon/shared/ui'
 import { Announcement, EditorOutputData, UpdateAnnouncementInput } from '@platon/feature/announcement/common'
 import { UserRoles } from '@platon/core/common';
 
-//import { AnnouncementService } from '@platon/feature/announcement/browser';
 import { firstValueFrom } from 'rxjs';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+
+import { AnnouncementPreviewModalComponent } from '../announcement-preview-modal/announcement-preview-modal.component'
 import { AnnouncementService } from '../../api/announcement.service'
+
+
 
 @Component({
   selector: 'announcement-create-drawer',
@@ -72,26 +75,25 @@ import { AnnouncementService } from '../../api/announcement.service'
     NzIconModule,
     DialogModule,
     FormsModule,
-    //UiModalDrawerComponent,
     UiEditorJsModule,
     NzRadioModule,
   ],
   templateUrl: './announcement-create-drawer.component.html',
   styleUrl: './announcement-create-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AnnouncementCreateDrawerComponent implements OnInit {
   @Input() announcement?: Announcement
-  @Output() created = new EventEmitter<Announcement>() // Pour la création
-  @Output() updated = new EventEmitter<Announcement>() // Pour l'édition
+  @Output() created = new EventEmitter<Announcement>()
+  @Output() updated = new EventEmitter<Announcement>()
 
-  form!: FormGroup
+  protected form!: FormGroup
   loading = false
   protected hasUnsavedChanges = false
-  readonly userRoles = Object.values(UserRoles) //['admin', 'teacher', 'student'];
 
   terms: OutputData = emptyEditorJsData()
+
 
   constructor(
     public dialogRef: MatDialogRef<AnnouncementCreateDrawerComponent>,
@@ -99,19 +101,20 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     private readonly announcementService: AnnouncementService,
     private readonly dialogService: DialogService,
     private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly dialog : MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
   ngOnInit(): void {
     this.createForm()
     this.announcement = this.data?.announcement || this.announcement
+
     if (this.announcement) {
       this.populateForm()
     }
 
     this.dialogRef.beforeClosed().subscribe(async () => {
       if (this.hasUnsavedChanges) {
-        // Optionnel: demander confirmation avant fermeture si des changements non sauvegardés
       }
     })
   }
@@ -130,17 +133,15 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
       targetedRoles: this.fb.control([]),
     })
 
-    // Surveiller les changements du formulaire
     this.form.valueChanges.subscribe(() => {
-      this.hasUnsavedChanges = true
-      this.changeDetectorRef.markForCheck()
+        this.hasUnsavedChanges = true
+        this.changeDetectorRef.markForCheck()
     })
   }
 
   private populateForm(): void {
     if (!this.announcement) return
 
-    // Pré-remplir le formulaire avec les données de l'annonce existante
     this.form.patchValue({
       title: this.announcement.title,
       description: this.announcement.description,
@@ -154,12 +155,43 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
       targetedRoles: this.announcement.targetedRoles || [],
     })
 
-    // Initialiser le contenu de l'éditeur
     if (this.announcement.data) {
       this.terms = this.announcement.data
     }
 
     this.hasUnsavedChanges = false
+  }
+
+
+  previewAnnouncement(): void {
+    this.updateTargetedRoles();
+
+    const previewData: Announcement = {
+      id: this.announcement?.id || 'preview',
+      title: this.form.value.title || 'Titre de l\'annonce',
+      description: this.form.value.description || 'Description de l\'annonce',
+      active: this.form.value.active !== undefined ? this.form.value.active : true,
+      icon: this.getIcon(this.form.value.icon || 'notification'),
+      displayUntil: this.form.value.displayUntil,
+      displayDurationInDays: this.form.value.displayDurationInDays,
+      targetedRoles: this.form.value.targetedRoles || [],
+      data: this.terms,
+      createdAt: this.announcement?.createdAt || new Date(),
+      updatedAt: this.announcement?.updatedAt || new  Date(),
+    };
+
+    const dialogRef = this.dialog.open(AnnouncementPreviewModalComponent, {
+      width: '99%',
+      height: '100%',
+      disableClose: true,
+      data: { announcement: previewData }
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result?.action === 'edit') {
+        // Pour l'instant on fait rien.
+      }
+    });
   }
 
   get dialogTitle(): string {
@@ -170,24 +202,15 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     return this.announcement ? 'Mettre à jour' : 'Créer'
   }
 
+
+
   protected updateTargetedRoles(): void {
-    const targetedRoles: UserRoles[] = [];
-
-    if (this.form.get('targetAdmins')?.value) {
-      targetedRoles.push(UserRoles.admin);
-    }
-
-    if (this.form.get('targetTeachers')?.value) {
-      targetedRoles.push(UserRoles.teacher);
-    }
-
-    if (this.form.get('targetStudents')?.value) {
-      targetedRoles.push(UserRoles.student);
-    }
-
-    this.form.get('targetedRoles')?.setValue(targetedRoles);
+    const targetedRoles: UserRoles[] = []
+    if (this.form.get('targetAdmins')?.value) targetedRoles.push(UserRoles.admin)
+    if (this.form.get('targetTeachers')?.value) targetedRoles.push(UserRoles.teacher)
+    if (this.form.get('targetStudents')?.value) targetedRoles.push(UserRoles.student)
+    this.form.get('targetedRoles')?.setValue(targetedRoles)
   }
-
 
   protected getRoleColor(role: string): string {
     const colorMap: Record<string, string> = {
@@ -219,14 +242,17 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+
   private getIcon(icon: string): string {
     switch (icon) {
       case 'Announcement':
         return 'announcement'
       default:
-        return icon;
+        return icon
     }
   }
+
+
 
   async save(): Promise<void> {
     this.loading = true;
@@ -245,8 +271,6 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
         targetedRoles: this.form.value.targetedRoles,
         data: this.terms as EditorOutputData,
       } as Announcement
-
-      console.log('Données envoyées au serveur :', formData);
 
       if (this.announcement) {
         const updatedAnnouncement = await firstValueFrom(
@@ -272,7 +296,6 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
         }
       }
     } catch (error) {
-      console.error('Erreur lors de la création/mise à jour :', error);
       const action = this.announcement ? 'la mise à jour' : 'la création';
       this.dialogService.error(`Erreur lors de ${action} de l'annonce`);
     } finally {

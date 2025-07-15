@@ -4,12 +4,25 @@
       <span>Fermer</span>
     </button>
 
-    <div class="save-state">
-      @if (hasUnsavedChanges) {
-      <mat-icon class="turn" matTooltip="Modifications non sauvegardées" matTooltipClass="tooltip">edit</mat-icon>
-      } @else {
-      <mat-icon matTooltip="Aucune modification" matTooltipClass="tooltip">check</mat-icon>
-      }
+    <div class="action-buttons">
+      <div class="save-state">
+        @if (hasUnsavedChanges) {
+        <mat-icon class="turn" matTooltip="Modifications non sauvegardées" matTooltipClass="tooltip">edit</mat-icon>
+        } @else {
+        <mat-icon matTooltip="Aucune modification" matTooltipClass="tooltip">check</mat-icon>
+        }
+      </div>
+
+      <button
+        nz-button
+        nzType="text"
+        nzShape="circle"
+        nz-tooltip="Prévisualiser"
+        class="preview-button"
+        (click)="previewAnnouncement()"
+      >
+        <span nz-icon nzType="play-circle" nzTheme="twotone"></span>
+      </button>
     </div>
   </div>
 

@@ -69,7 +69,6 @@ ui-editorjs {
 
 
 
-// Styles pour les boutons radio avec icônes
 nz-radio-group {
   display: flex;
   flex-wrap: wrap;
@@ -84,6 +83,29 @@ nz-radio-group {
   nz-icon {
     margin-right: 5px;
   }
+}
+
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-state, .preview-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.save-state mat-icon, .preview-button span[nz-icon] {
+  font-size: 25px;
+}
+
+.preview-button {
+  padding: 0;
 }
 
 .active-duration-row {
@@ -113,7 +135,6 @@ nz-radio-group {
   }
 }
 
-// Pour les écrans plus petits, réduire la taille du texte
 @media screen and (max-width: 768px) {
   .icon-radio {
     font-size: 12px;
