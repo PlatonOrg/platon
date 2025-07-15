@@ -43,12 +43,7 @@ export class AnnouncementService {
     return this.announcementProvider.delete(id)
   }
 
-  /**
-   * Récupère une annonce par son ID (admin uniquement)
-   */
- /* findById(id: string): Observable<Announcement> {
-    return this.announcementProvider.findById(id)
-  }*/
+
 
   /**
    * Récupère les annonces visibles pour l'utilisateur connecté
@@ -65,20 +60,5 @@ export class AnnouncementService {
     return this.getVisibleForUser({ active: true })
   }
 
-  /**
-   * Vérifie s'il y a de nouvelles annonces pour l'utilisateur
-   */
-  hasNewAnnouncements(): Observable<boolean> {
-    return new Observable(observer => {
-      this.getActiveAnnouncements().subscribe({
-        next: (response) => {
-          observer.next(response.total > 0)
-          observer.complete()
-        },
-        error: (error) => {
-          observer.error(error)
-        }
-      })
-    })
-  }
+
 }

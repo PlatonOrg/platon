@@ -19,7 +19,6 @@ export class AnnouncementService {
 
   async create(announcement: Partial<AnnouncementEntity>): Promise<AnnouncementEntity> {
     const newAnnouncennouncement = await this.repository.save(this.repository.create(announcement))
-    // Notifier les utilisateurs ciblés
     this.logger.log(`[${newAnnouncennouncement.id}] - ${newAnnouncennouncement.title} - a été créé`)
     if (newAnnouncennouncement.active) {
       // On publie l'annonce
@@ -120,7 +119,6 @@ export class AnnouncementService {
       queryBuilder.skip(filters.offset);
     }
 
-    // Tri par date de création
     queryBuilder.orderBy('announcement.createdAt', 'DESC');
 
     try {

@@ -1,6 +1,6 @@
 import { User, UserRoles } from '@platon/core/common';
 
-
+// On recreer les interfaces d'editorJs nous-même car on ne pas utiliser les siennes dans NestJs car ça vient d'Angular.
 export interface BlockToolData<Data extends object = any> {
   [key: string]: any;
 }
@@ -84,17 +84,12 @@ export interface UpdateAnnouncementInput extends CreateAnnouncementInput {}
 
 
 export interface AnnouncementAction {
-  label: string; // Texte du bouton d'action
+  label: string;
   url?: string; // URL vers laquelle rediriger
   type?: 'primary' | 'default' | 'dashed' | 'text' | 'link'; // Type de bouton
 }
 
 
-/*export enum AnnouncementOrderings {
-  TITLE = 'TITLE',
-  CREATE_AT = 'CREATE_AT',
-  UPDATE_AT = 'UPDATE_AT'
-}*/
 
 export interface AnnouncementFilters {
   search?: string;
