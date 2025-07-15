@@ -34,8 +34,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
-// Import du service de tutoriel
-import { TutorialSelectorService, ToolbarTutorialService } from '@platon/feature/tuto/browser'
+import { TutorialSelectorService } from '@platon/feature/tuto/browser'
 import { FeatureAnnouncementService, FeatureAnnouncementModalComponent } from '@platon/feature/announcement/browser'
 
 import { MatDividerModule } from '@angular/material/divider'
@@ -80,7 +79,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly breakpointObserver = inject(BreakpointObserver)
   private readonly elementRef = inject(ElementRef)
-  private readonly toolbarTutorialService = inject(ToolbarTutorialService)
   private readonly tutorialSelectorService = inject(TutorialSelectorService)
   private readonly featureAnnouncementService = inject(FeatureAnnouncementService) // Nouveau service
 
@@ -253,7 +251,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   private checkFeatureAnnouncements(): void {
     if (this.user) {
-      this.featureAnnouncementService.resetAllAnnouncementStats()
       setTimeout(async () => {
         await this.featureAnnouncementService.checkForAnnouncements(this.user as User)
       }, 2000)
