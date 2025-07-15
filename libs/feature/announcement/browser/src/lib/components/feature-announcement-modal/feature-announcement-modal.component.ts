@@ -39,7 +39,7 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
 
   private width = '290px'
   private posX = 60
-  private posY = 90
+  private posY = 50
 
   private readonly featureAnnouncementService = inject(FeatureAnnouncementService);
   private readonly notification = inject(NzNotificationService);
@@ -47,8 +47,6 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
   private subscription: Subscription[] = [];
   private activeNotifications = new Map<string, AnnouncementNotification>();
 
-  // Signal computed pour obtenir les annonces visibles
-  visibleAnnouncements = computed(() => this.featureAnnouncementService.visibleAnnouncements());
 
   ngOnInit(): void {
     this.subscription.push(
@@ -64,17 +62,11 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Afficher les annonces déjà visibles au moment de l'initialisation
-   /* const currentAnnouncements = this.featureAnnouncementService.visibleAnnouncements().reverse() ;
-    currentAnnouncements.forEach(announcement => {
-      this.showNotification(announcement);
-    });*/
   }
 
   ngOnDestroy(): void {
     this.subscription.forEach(sub => sub.unsubscribe());
 
-    // Nettoyer toutes les notifications actives
     this.activeNotifications.forEach(notif => {
       this.notification.remove(notif.notificationId);
     });
@@ -82,12 +74,10 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
   }
 
   private showNotification(announcement: Announcement): void {
-    // Éviter les doublons
     if (this.activeNotifications.has(announcement.id)) {
       return;
     }
 
-    // Calculer la position en fonction du nombre de notifications actives
     const notificationIndex = this.activeNotifications.size;
     console.log('Notification index: ', notificationIndex);
     const topPosition = this.posX + (notificationIndex * this.posY)
@@ -98,17 +88,16 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
         nzDuration: 0,
         nzPlacement: 'topRight',
         nzStyle: {
-          width: this.width,//'280px',
+          width: this.width,
           position: 'fixed',
           top: `${topPosition}px`,
           right: '5px',
-          zIndex: 1050 + notificationIndex // Z-index croissant pour éviter les superpositions
+          zIndex: 1050 + notificationIndex
         },
-        nzData: announcement // Passer directement l'annonce au lieu d'un objet wrapper
+        nzData: announcement
       }
     );
 
-    // Stocker la notification
     this.activeNotifications.set(announcement.id, {
       announcement,
       notificationId: ref.messageId,
@@ -122,26 +111,22 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
       this.notification.remove(notificationInfo.notificationId);
       this.activeNotifications.delete(announcementId);
 
-      // Réorganiser les positions des notifications restantes
       this.repositionNotifications();
     }
   }
 
   private repositionNotifications(): void {
-    // Créer un nouveau Map pour éviter les problèmes de concurrence
     const notificationsToReposition = Array.from(this.activeNotifications.entries());
 
-    // Supprimer toutes les notifications existantes
     notificationsToReposition.forEach(([announcementId, notif]) => {
       this.notification.remove(notif.notificationId);
     });
 
-    // Vider le Map
     this.activeNotifications.clear();
 
     // Recréer les notifications avec les nouvelles positions
     notificationsToReposition.forEach(([announcementId, notif], index) => {
-      const topPosition = this.posX + (index * this.posY); // Même logique que showNotification
+      const topPosition = this.posX + (index * this.posY);
 
       const ref = this.notification.template(
         this.notificationTpl,
@@ -149,17 +134,16 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
           nzDuration: 0,
           nzPlacement: 'topRight',
           nzStyle: {
-            width: this.width,//'280px',
+            width: this.width,
             position: 'fixed',
             top: `${topPosition}px`,
             right: '5px',
-            zIndex: 1050 + index // Z-index croissant pour éviter les superpositions
+            zIndex: 1050 + index
           },
-          nzData: notif.announcement // Passer directement l'annonce
+          nzData: notif.announcement
         }
       );
 
-      // Remettre dans le Map avec le nouvel ID
       this.activeNotifications.set(announcementId, {
         announcement: notif.announcement,
         notificationId: ref.messageId,
@@ -170,15 +154,13 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
 
 
   onPrimaryAction(notification: any): void {
-    // Extraire l'objet Announcement de la notification
     const announcement = notification?.options?.nzData;
 
     if (announcement && announcement.id) {
-      console.log('Id est clair : ', announcement.id);
       this.featureAnnouncementService.onAnnouncementClick(announcement.id);
-    } else {
+    } /*else {
       console.error('Invalid announcement object in primary action:', notification);
-    }
+    }*/
   }
 
 
@@ -194,16 +176,5 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
     } else {
       console.error('Invalid announcement object:', notification);
     }
-  }
-
-
-
-  // Méthodes utilitaires pour le template
-  isAnnouncementVisible(announcementId: string): boolean {
-    return this.featureAnnouncementService.isAnnouncementVisible(announcementId);
-  }
-
-  getAnnouncement(announcementId: string): Announcement | undefined {
-    return this.featureAnnouncementService.getAnnouncement(announcementId);
   }
 }

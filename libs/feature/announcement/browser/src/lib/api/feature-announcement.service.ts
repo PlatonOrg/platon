@@ -1,6 +1,5 @@
 import { Injectable, signal, EventEmitter, OnDestroy, inject } from '@angular/core';
 import { User, UserRoles, isTeacherRole } from '@platon/core/common';
-import { TutorialSelectorService } from "@platon/feature/tuto/browser";
 import { AnnouncementDisplayStats, STORAGE_KEY, MAX_DISPLAY_COUNT, MIN_INTERVAL_DAYS, TOTAL_PERIOD_DAYS, MS_PER_DAY, NotificationCloseReason } from "../models/data-storage.model";
 import { Announcement } from '@platon/feature/announcement/common'
 import { AnnouncementService } from './announcement.service';
@@ -11,7 +10,6 @@ import { firstValueFrom } from 'rxjs';
   providedIn: 'root'
 })
 export class FeatureAnnouncementService implements OnDestroy {
-  private readonly tutorialSelectorService = inject(TutorialSelectorService);
   private readonly announcementService = inject(AnnouncementService);
   private readonly router = inject(Router);
 
@@ -181,11 +179,7 @@ export class FeatureAnnouncementService implements OnDestroy {
     const effectivePeriod = this.getEffectiveDisplayPeriod(announcement);
     const daysSinceFirstShown = (now - stats.firstShown) / MS_PER_DAY;
 
-    if (daysSinceFirstShown > effectivePeriod) {
-      return false;
-    }
-
-    return true;
+    return daysSinceFirstShown > effectivePeriod ? false : true;
   }
 
   /**
@@ -261,12 +255,7 @@ export class FeatureAnnouncementService implements OnDestroy {
     });
   }
 
-  /**
-   * Vérifie si une annonce spécifique est visible
-   */
-  isAnnouncementVisible(announcementId: string): boolean {
-    return this.visibleAnnouncements().some(a => a.id === announcementId);
-  }
+
 
   /**
    * Récupère une annonce spécifique par son ID

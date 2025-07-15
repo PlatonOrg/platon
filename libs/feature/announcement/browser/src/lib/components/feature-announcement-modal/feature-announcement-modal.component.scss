@@ -13,7 +13,7 @@
     background-color: var(--brand-background-components, #f0f4ff);
     max-width: 350px;
     margin-right: 16px;
-    margin-bottom: 4px; // Espacement entre les notifications
+    margin-bottom: 4px;
     animation: slideInFromRight 0.3s ease-out;
     z-index: 1000;
   }
@@ -83,14 +83,14 @@
     align-items: center;
     justify-content: center;
     border-radius: 50px;
-    font-size: 11px;            /* Réduire la taille de police (était 12px) */
+    font-size: 11px;
     transition: all 0.2s ease;
     color: white;
     border: none;
     cursor: pointer;
-    padding: 4px 6px 4px;          /* Ajouter padding réduit */
-    height: 26px;               /* Définir une hauteur spécifique */
-    min-width: 80px;            /* Définir une largeur minimale */
+    padding: 4px 6px 4px;
+    height: 26px;
+    min-width: 80px;
 
     &:hover {
       transform: translateY(-1px);
