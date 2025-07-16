@@ -11,8 +11,6 @@ export class LTIMiddleware implements NestMiddleware {
   constructor(private readonly lti: LTIService, private readonly authService: AuthService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    this.logger.log(`[LTI MIDDLEWARE] Traitement de la requête: ${req.method} ${req.url}`)
-
     if (!req.body?.oauth_consumer_key) {
       this.logger.log(`[LTI MIDDLEWARE] Aucun oauth_consumer_key trouvé, passage au middleware suivant`)
       return next()
