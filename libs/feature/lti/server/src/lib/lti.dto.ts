@@ -22,19 +22,19 @@ export class LmsDTO extends BaseDTO implements Lms {
 }
 
 export class CreateLmsDTO implements CreateLms {
-  @IsString()
+  @IsString({ message: 'Name must be a string' })
   readonly name!: string
 
-  @IsUrl()
+  @IsUrl({ require_tld: false }, { message: 'URL must be a valid URL' })
   readonly url!: string
 
-  @IsUrl()
+  @IsUrl({ require_tld: false }, { message: 'Outcome URL must be a valid URL' })
   readonly outcomeUrl!: string
 
-  @IsString()
+  @IsString({ message: 'Consumer key must be a string' })
   readonly consumerKey!: string
 
-  @IsString()
+  @IsString({ message: 'Consumer secret must be a string' })
   readonly consumerSecret!: string
 }
 
