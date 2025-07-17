@@ -36,7 +36,7 @@ import { CourseService } from '../../api/course.service'
 export class CsvDownloadButtonComponent implements OnInit {
   @Input() courseId!: string
   @Input() activities!: Activity[]
-  @Input() type!: 'activity' | 'course'
+  @Input() type!: 'activity' | 'course' | 'test'
   @Input() name!: string
 
   groups: { id: string; name: string; groupId: string; courseId: string; checked: boolean }[] = []
@@ -160,6 +160,9 @@ export class CsvDownloadButtonComponent implements OnInit {
       // Generate the CSV content
 
       for (const student of results) {
+        if (this.type === 'test' && !student.username.startsWith('candidat.')) {
+          continue
+        }
         if (this.hasToCheckGroups && !checkedMembers?.some((member) => member.user?.id === student.id)) {
           if (!isGroupAllChecked || uncheckedMembers?.some((member) => member.user?.id === student.id)) {
             continue

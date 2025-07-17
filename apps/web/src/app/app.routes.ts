@@ -21,6 +21,18 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'candidate',
+    title: 'PLaTon - Connexion en tant que candidat',
+    data: {
+      ...alwaysLightTheme,
+    },
+    loadChildren: () =>
+      import(
+        /* webpackChunkName: "candidate" */
+        './pages/candidate/candidate.routes'
+      ),
+  },
+  {
     path: 'playground',
     title: 'PLaTon - Playground',
     loadChildren: () =>
@@ -63,8 +75,11 @@ export const appRoutes: Route[] = [
     },
     [UserRoles.teacher, UserRoles.admin]
   ),
-  withAuthGuard({
-    path: '',
-    loadChildren: () => import('./pages/dashboard/dashboard.routes'),
-  }),
+  withAuthGuard(
+    {
+      path: '',
+      loadChildren: () => import('./pages/dashboard/dashboard.routes'),
+    },
+    [UserRoles.student, UserRoles.teacher, UserRoles.admin, UserRoles.demo]
+  ),
 ]

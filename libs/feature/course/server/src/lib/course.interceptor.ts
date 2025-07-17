@@ -49,6 +49,7 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
           name: payload['context_title'],
           desc: `Cours PLaTOn rattaché à : ${payload['context_title']}`,
           ownerId: user.id,
+          isTest: false,
         })
 
         courseId = course.id

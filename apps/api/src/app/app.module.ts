@@ -7,6 +7,7 @@ import { FeatureNotificationServerModule } from '@platon/feature/notification/se
 import { FeaturePlayerServerModule } from '@platon/feature/player/server'
 import { FeatureResourceServerModule } from '@platon/feature/resource/server'
 import { FeatureResultServerModule } from '@platon/feature/result/server'
+import { FeatureTestsServerModule } from '@platon/feature/tests/server'
 import { CommandsModule } from './commands/commands.module'
 import { FeatureDiscordServerModule, FeatureDiscordServerService } from '@platon/feature/discord/server'
 import { DiscordModule } from '@discord-nestjs/core'
@@ -23,6 +24,7 @@ import { FeaturePeerServerModule } from '@platon/feature/peer/server'
     FeatureNotificationServerModule,
     FeatureCasServerModule,
     FeaturePeerServerModule,
+    FeatureTestsServerModule,
     CommandsModule,
     DiscordModule.forRootAsync({
       useClass: FeatureDiscordServerService,

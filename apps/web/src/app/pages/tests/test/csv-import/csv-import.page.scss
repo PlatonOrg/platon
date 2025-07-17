@@ -1,0 +1,178 @@
+mat-card {
+  width: 80vw;
+  overflow: hidden;
+
+  @media (max-width: 1279px) {
+    width: 95vw;
+  }
+}
+
+.add-csv {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 400px;
+  width: 90%;
+  margin: 5%;
+  border: 2px dashed var(--brand-color-primary);
+  border-radius: 12px;
+  color: var(--brand-color-primary);
+  padding: 20px;
+  text-align: center;
+  transition: background-color 0.3s, color 0.3s, transform 0.3s;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-csv.drag-over {
+  background-color: var(--brand-background-hover);
+  border-color: var(--brand-color-secondary);
+}
+
+.add-csv:hover {
+  background-color: var(--brand-background-hover);
+  transform: translateY(-5px);
+}
+
+.plus-icon {
+  font-size: 50px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: var(--brand-color-primary);
+}
+
+.add-csv-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.table-container {
+  width: 100%;
+  height: 60vh;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  border-radius: 10px;
+}
+
+.header-row {
+  background-color: var(--brand-color-primary);
+  color: white;
+  font-weight: bold;
+}
+
+thead th {
+  background-color: var(--brand-color-primary-contrast);
+  padding: 4px 16px;
+  text-align: left;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  mat-select {
+    color: var(--brand-text-primary);
+  }
+}
+
+tbody tr {
+  transition: background-color 0.3s ease;
+}
+
+tbody tr:nth-child(odd):not(.header-row) {
+  background-color: var(--brand-background-primary);
+}
+
+tbody tr:not(.header-row):hover {
+  background-color: var(--brand-background-hover);
+}
+
+tbody td {
+  border-bottom: 1px solid var(--brand-border-color);
+  width: fit-content;
+  white-space: nowrap;
+  padding: 4px 16px;
+}
+
+td div {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+thead th.firstName {
+  background-color: var(--brand-pastel-red);
+}
+td.firstName {
+  border-right: 2px solid var(--brand-pastel-red);
+  border-left: 2px solid var(--brand-pastel-red);
+}
+
+thead th.lastName {
+  background-color: var(--brand-pastel-blue);
+}
+td.lastName {
+  border-right: 2px solid var(--brand-pastel-blue);
+  border-left: 2px solid var(--brand-pastel-blue);
+}
+
+thead th.email {
+  background-color: var(--brand-pastel-green);
+}
+td.email {
+  border-right: 2px solid var(--brand-pastel-green);
+  border-left: 2px solid var(--brand-pastel-green);
+}
+
+tbody td.actions-col, thead th.actions-col {
+  background-color: var(--brand-color-primary-contrast);
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  box-shadow: -2px 0 4px -2px var(--brand-background-darker-10);
+  padding: 0;
+  width: auto;
+  border-bottom: none;
+  text-align: center;
+  button {
+    margin: 4px;
+  }
+}
+
+.confirm-button {
+  margin-bottom: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.confirm-loading-container {
+  margin: 12px 0;
+}
+
+.csv-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 400px;
+  width: 90%;
+  margin: 5%;
+  border: 2px dashed var(--brand-color-primary);
+  border-radius: 12px;
+  color: var(--brand-color-primary);
+  padding: 20px;
+  text-align: center;
+  cursor: wait;
+}

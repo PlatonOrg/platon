@@ -9,7 +9,7 @@
         </div>
         <div class="centered">
           <player-settings [player]="player" />
-          <button *ngIf="canGoDashboard" mat-raised-button [routerLink]="'/dashboard'">Retourner sur PLaTon</button>
+          <button *ngIf="canGoDashboard" mat-raised-button (click)="back()">Retour</button>
           <button mat-raised-button color="primary" [disabled]="empty" (click)="start()">Commencer</button>
         </div>
       </ng-container>

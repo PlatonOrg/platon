@@ -1,4 +1,12 @@
+@if (item.statistic) {
 <nz-ribbon [nzText]="item.statistic ? ribbon : null" [nzColor]="progressColor">
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+</nz-ribbon>
+} @else {
+<ng-container *ngTemplateOutlet="content"></ng-container>
+}
+
+<ng-template #content>
   <ui-list-item-article
     [style.--border-color]="'red'"
     [articleTitle]="title"
@@ -31,7 +39,7 @@
       <i nz-icon nzType="history" nzTheme="outline"></i>
     </ui-list-item-article-action>
   </ui-list-item-article>
-</nz-ribbon>
+</ng-template>
 
 <ng-template #ribbon>
   <nz-progress

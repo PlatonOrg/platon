@@ -1,6 +1,9 @@
 <header>
   <nz-page-header [nzTitle]="header" nzBackIcon>
-    <ng-template #header> Ajouter @if (challenge){ un challenge} @else { une activité } à votre cours</ng-template>
+    <ng-template #header>
+      Ajouter @if (challenge){ un challenge } @else { une activité } à votre @if (isTest) { test d'entrée } @else {
+      cours }
+    </ng-template>
   </nz-page-header>
 </header>
 <main>
@@ -36,11 +39,17 @@
       <ng-template uiStepperStep stepTitle="Activité" [stepIcon]="icon2" [stepValidator]="!!resourceInfo.valid">
         <section>
           <form [formGroup]="resourceInfo">
+            @if (isTest) {
+            <h4 id="resource">
+              Sélectionnez l'activité à ajouter au test d'entrée “{{ courseInfo.value.course?.name }}”.
+            </h4>
+            } @else {
             <h4 id="resource">
               Sélectionnez l'activité à ajouter à la section “{{ courseInfo.value.section?.name }}” du cours “{{
                 courseInfo.value.course?.name
               }}”.
             </h4>
+            }
             <resource-search-bar
               aria-labelledby="resource"
               formControlName="resource"
@@ -49,71 +58,75 @@
           </form>
         </section>
       </ng-template>
-      <!-- STEP 3 -->
-      <ng-template #icon3>
-        <mat-icon>settings</mat-icon>
-      </ng-template>
-      <ng-template uiStepperStep stepTitle="Configuration" [stepIcon]="icon3">
-        <section>
-          <form [formGroup]="settingsInfo">
-            <h4 id="challenge">Cette activité est-elle un challenge?</h4>
-            <nz-radio-group [nzDisabled]="challenge" aria-labelledby="challenge" formControlName="isChallenge">
-              <label nz-radio [nzValue]="true">Oui</label>
-              <label nz-radio [nzValue]="false">Non</label>
-            </nz-radio-group>
-            <p>
-              Les challenges sont des activités réalisables uniquement par les élèves du cours. Les résultats d'un
-              challenge sont visibles par tous dans la page du cours.
-            </p>
-            <h4 id="openDates">Souhaitez-vous limiter l'accès de cette activité à une date en particulier?</h4>
-            <div class="date-picker">
-              <nz-date-picker
-                [nzShowTime]="true"
-                [nzDisabledDate]="disabledDate"
-                aria-labelledby="openAt"
-                formControlName="openAt"
-                nzPlaceHolder="Date d'ouverture"
-                nzFormat="dd MMMM yyyy, HH:mm:ss"
-              />
-              <nz-date-picker
-                [nzShowTime]="true"
-                [nzDisabledDate]="disabledDate"
-                aria-labelledby="closeAt"
-                formControlName="closeAt"
-                nzPlaceHolder="Date de fermeture"
-                nzFormat="dd MMMM yyyy, HH:mm:ss"
-              />
-            </div>
-            <!-- <ng-container *ngIf="!settingsInfo.value.isChallenge">
-              <h4 id="members">Souhaitez-vous limiter l'accès de cette activité à des utilisateurs en particulier?</h4>
-              <course-member-select
-                [members]="members"
-                aria-labelledby="members"
-                formControlName="members"
-                placeholder="Laissez la sélection vide pour permettre l'accès à tous, y compris aux nouveaux membres."
-              />
-              <h4 id="members">Souhaitez-vous limiter l'accès de cette activité à des groupes en particulier?</h4>
-              <course-group-select
-                [groups]="courseGroups"
-                formControlName="groups"
-                placeholder="Laissez la sélection vide pour permettre l'accès à tous, y compris aux nouveaux membres."
-              />
-              <h4 id="members">Souhaitez-vous assigner des correcteurs à cette activité?</h4>
-              <course-member-select
-                [members]="members"
-                aria-labelledby="correctors"
-                formControlName="correctors"
-                placeholder="Laissez la sélection vide si cette activité est auto-corrigée."
-              />
+      <ng-container *ngIf="!isTest">
+        <!-- STEP 3 -->
+        <ng-template #icon3>
+          <mat-icon>settings</mat-icon>
+        </ng-template>
+        <ng-template uiStepperStep stepTitle="Configuration" [stepIcon]="icon3">
+          <section>
+            <form [formGroup]="settingsInfo">
+              <h4 id="challenge">Cette activité est-elle un challenge?</h4>
+              <nz-radio-group [nzDisabled]="challenge" aria-labelledby="challenge" formControlName="isChallenge">
+                <label nz-radio [nzValue]="true">Oui</label>
+                <label nz-radio [nzValue]="false">Non</label>
+              </nz-radio-group>
               <p>
-                Les personnes désignées comme correcteurs recevront une notification une fois qu'un participant termine
-                l'activité afin d'ajuster sa note si nécessaire. Si une activité contient des correcteurs, les résultats
-                d'un participant lui sera affiché uniquement après la correction de toutes ses questions.
+                Les challenges sont des activités réalisables uniquement par les élèves du cours. Les résultats d'un
+                challenge sont visibles par tous dans la page du cours.
               </p>
-            </ng-container> -->
-          </form>
-        </section>
-      </ng-template>
+              <h4 id="openDates">Souhaitez-vous limiter l'accès de cette activité à une date en particulier?</h4>
+              <div class="date-picker">
+                <nz-date-picker
+                  [nzShowTime]="true"
+                  [nzDisabledDate]="disabledDate"
+                  aria-labelledby="openAt"
+                  formControlName="openAt"
+                  nzPlaceHolder="Date d'ouverture"
+                  nzFormat="dd MMMM yyyy, HH:mm:ss"
+                />
+                <nz-date-picker
+                  [nzShowTime]="true"
+                  [nzDisabledDate]="disabledDate"
+                  aria-labelledby="closeAt"
+                  formControlName="closeAt"
+                  nzPlaceHolder="Date de fermeture"
+                  nzFormat="dd MMMM yyyy, HH:mm:ss"
+                />
+              </div>
+              <!-- <ng-container *ngIf="!settingsInfo.value.isChallenge">
+                <h4 id="members">
+                  Souhaitez-vous limiter l'accès de cette activité à des utilisateurs en particulier?
+                </h4>
+                <course-member-select
+                  [members]="members"
+                  aria-labelledby="members"
+                  formControlName="members"
+                  placeholder="Laissez la sélection vide pour permettre l'accès à tous, y compris aux nouveaux membres."
+                />
+                <h4 id="members">Souhaitez-vous limiter l'accès de cette activité à des groupes en particulier?</h4>
+                <course-group-select
+                  [groups]="courseGroups"
+                  formControlName="groups"
+                  placeholder="Laissez la sélection vide pour permettre l'accès à tous, y compris aux nouveaux membres."
+                />
+                <h4 id="members">Souhaitez-vous assigner des correcteurs à cette activité?</h4>
+                <course-member-select
+                  [members]="members"
+                  aria-labelledby="correctors"
+                  formControlName="correctors"
+                  placeholder="Laissez la sélection vide si cette activité est auto-corrigée."
+                />
+                <p>
+                  Les personnes désignées comme correcteurs recevront une notification une fois qu'un participant
+                  termine l'activité afin d'ajuster sa note si nécessaire. Si une activité contient des correcteurs, les
+                  résultats d'un participant lui sera affiché uniquement après la correction de toutes ses questions.
+                </p>
+              </ng-container> -->
+            </form>
+          </section>
+        </ng-template>
+      </ng-container>
     </ui-stepper>
   </nz-skeleton>
 </main>

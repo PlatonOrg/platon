@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import {
   AuthToken,
+  CreateCandidateAccountInput,
   ForbiddenResponse,
   NotFoundResponse,
   ResetPasswordInput,
@@ -124,5 +125,17 @@ export class AuthService {
 
   private async hash(data: string): Promise<string> {
     return bcrypt.hash(data, this.configService.get('auth.salt', { infer: true }) as number)
+  }
+
+  async createCandidateAccount(input: CreateCandidateAccountInput): Promise<string> {
+    const user = await this.userService.create({
+      username: 'candidat.' + randomUUID().split('-').join('_'),
+      firstName: input.firstName,
+      lastName: input.lastName,
+      email: input.email,
+      active: true,
+      role: UserRoles.candidate,
+    })
+    return user.id
   }
 }
