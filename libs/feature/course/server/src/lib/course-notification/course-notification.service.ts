@@ -7,18 +7,24 @@ import {
   CorrectorCreatedNotification,
   CorrectorRemovedNotification,
   CourseMemberCreationNotification,
+  ExerciseChangesNotification,
 } from '@platon/feature/course/common'
 import { NotificationService } from '@platon/feature/notification/server'
 import { DataSource } from 'typeorm'
 import { ActivityCorrectorView } from '../activity-corrector/activity-corrector.view'
 import { ActivityMemberView } from '../activity-member/activity-member.view'
 import { CourseMemberView } from '../course-member/course-member.view'
-
+import { PlayerExercise } from '@platon/feature/player/common'
+import { CourseMonitorPresenceService } from '../course-monitor-presence/course-monitor-presence.service'
 @Injectable()
 export class CourseNotificationService {
   private readonly logger = new Logger(CourseNotificationService.name)
 
-  constructor(private readonly dataSource: DataSource, private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly notificationService: NotificationService,
+    private readonly monitorPresenceService: CourseMonitorPresenceService
+  ) {}
 
   async notifyCourseMemberBeingCreated(members: CourseMemberView[]) {
     try {
@@ -193,6 +199,49 @@ export class CourseNotificationService {
           })
         )
       )
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
+
+  async notifyExerciseChanges(userId: string, sessionId: string, changes: PlayerExercise): Promise<void> {
+    try {
+      // Get session and activity information
+      const sessionInfo = (await this.dataSource.query(
+        `
+        SELECT s.id as session_id, s.activity_id, act.course_id
+        FROM "Sessions" AS s
+        JOIN "Activities" AS act ON act.id = s.activity_id
+        WHERE s.id = $1
+        `,
+        [sessionId]
+      )) as { session_id: string; activity_id: string; course_id: string }[]
+
+      if (!sessionInfo.length) {
+        this.logger.warn(`No session found with ID: ${sessionId}`)
+        return
+      }
+
+      const activityId = sessionInfo[0].activity_id
+
+      // Get active monitoring teachers for this activity
+      const activeMonitors = this.monitorPresenceService.getActiveMonitoringUsers(activityId)
+
+      if (activeMonitors.length > 0) {
+        this.logger.log(
+          `Sending exercise changes notifications to ${activeMonitors.length} active monitoring teachers for activity ${activityId}`
+        )
+
+        await this.notificationService.sendToAllUsers<ExerciseChangesNotification>(activeMonitors, {
+          type: 'EXERCISE-CHANGES',
+          userId: userId,
+          changes: {
+            ...changes,
+          },
+        })
+      } else {
+        this.logger.log(`No active monitors for activity ${activityId}, skipping exercise changes notification`)
+      }
     } catch (error) {
       this.logger.error(error)
     }

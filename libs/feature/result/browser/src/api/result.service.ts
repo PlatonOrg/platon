@@ -148,6 +148,8 @@ export class ResultService {
     return this.resultProvider.activityLeaderboard(input)
   }
 
+  //#region Correction
+
   findCorrection(activityId: string): Observable<ActivityCorrection> {
     return this.resultProvider.findCorrection(activityId)
   }
@@ -227,4 +229,6 @@ export class ResultService {
   deleteComment(comment: SessionComment): Observable<void> {
     return this.commentProvider.delete(comment)
   }
+
+  //#endregion
 }

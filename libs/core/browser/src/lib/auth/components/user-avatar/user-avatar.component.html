@@ -16,6 +16,10 @@
       <ng-container *ngSwitchCase="'inline'">
         <span>{{ user.firstName }} {{ user.lastName }} ({{ user.username }})</span>
       </ng-container>
+      <ng-container *ngSwitchCase="'no'">
+        <span>{{ user.firstName }} {{ user.lastName }} </span>
+        <span></span>
+      </ng-container>
       <ng-container *ngSwitchDefault> </ng-container>
     </ng-container>
   </div>

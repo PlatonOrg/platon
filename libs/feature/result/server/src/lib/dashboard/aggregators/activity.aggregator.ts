@@ -70,6 +70,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
           firstName: exerciseSession.user?.firstName ?? this.anonymous,
           lastName: exerciseSession.user?.lastName ?? this.anonymous,
           username: exerciseSession.user?.username ?? this.anonymous,
+          activitySessionId: exerciseSession.parentId,
         })
       )
     })
@@ -109,8 +110,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
           lastName: input.user?.lastName ?? this.anonymous,
           username: input.user?.username ?? this.anonymous,
         })
-
-      if (!userResult) return
+      userResult.activitySessionId = input.id
 
       const userExercise = userResult.exercises[exercise.id] ?? {
         id: exercise.id,
@@ -128,6 +128,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
 
       userExercise.sessionId = exerciseSession.id
       userResult.exercises[exercise.id] = userExercise
+
       this.userResults.set(userId, userResult)
     })
   }
@@ -143,6 +144,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
         })
       }
     })
+
     return results
   }
 }

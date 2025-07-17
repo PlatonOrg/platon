@@ -1,0 +1,217 @@
+.moderation-container {
+  padding: 0.5rem;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+
+  // S'assurer que les tooltips sont visibles
+  ::ng-deep .mat-mdc-tooltip {
+    z-index: 1000 !important;
+    font-size: 12px !important;
+  }
+
+  ::ng-deep .mat-mdc-tooltip .mdc-tooltip__surface {
+    background-color: rgba(97, 97, 97, 0.9) !important;
+    color: white !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+  }
+}
+
+.header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+
+  .selection-info h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #495057;
+    font-weight: 500;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    .action-separator {
+      width: 1px;
+      height: 24px;
+      background-color: #dee2e6;
+      margin: 0 0.5rem;
+    }
+
+    .action-open {
+      color: #28a745;
+
+      &:hover:not(:disabled) {
+        background-color: rgba(40, 167, 69, 0.1);
+      }
+    }
+
+    .action-close {
+      color: #dc3545;
+
+      &:hover:not(:disabled) {
+        background-color: rgba(220, 53, 69, 0.1);
+      }
+    }
+
+    button[mat-icon-button] {
+      display: flex;
+      &:disabled {
+        opacity: 0.4;
+      }
+    }
+  }
+}
+
+// Grid ultra-compact pour beaucoup d'utilisateurs
+.users-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.25rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 20px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  min-height: 32px;
+
+  &:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+  }
+
+  &.selected {
+    background: #e8f5e8;
+    border-color: #4caf50;
+    color: #2e7d32;
+
+    .user-avatar mat-icon {
+      color: #4caf50;
+    }
+  }
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #666;
+    transition: color 0.2s ease;
+  }
+}
+
+.user-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+// Responsive pour mobile
+@media (max-width: 768px) {
+  .moderation-container {
+    padding: 0.25rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 0.5rem;
+  }
+
+  .users-compact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.2rem;
+    max-height: 300px;
+  }
+
+  .user-chip {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+    min-height: 28px;
+  }
+
+  .user-name {
+    font-size: 0.75rem;
+  }
+}
+
+// Animation subtile pour la sélection
+.user-chip.selected {
+  animation: selectPulse 0.3s ease;
+}
+
+@keyframes selectPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Fix pour les tooltips Material - fond opaque et visible
+::ng-deep .mat-mdc-tooltip {
+  z-index: 1000 !important;
+  font-size: 12px !important;
+}
+
+::ng-deep .mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: #424242 !important;
+  color: white !important;
+  border-radius: 4px !important;
+  padding: 6px 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  opacity: 1 !important;
+}
+
+// Alternative: styles pour les tooltips Material plus récents
+::ng-deep .mat-tooltip {
+  background-color: #424242 !important;
+  color: white !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+  padding: 6px 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+// Pour être sûr, on force aussi les anciens sélecteurs
+::ng-deep .mat-tooltip-panel .mat-tooltip {
+  background-color: #424242 !important;
+  color: white !important;
+}

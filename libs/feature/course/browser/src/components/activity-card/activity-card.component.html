@@ -100,6 +100,16 @@
           type="activity"
           [courseId]="item.courseId"
         />
+        <a
+          *ngIf="item.permissions.viewStats"
+          nz-tooltip="Voir l'activité en direct"
+          nz-button
+          nzShape="round"
+          nzType="default"
+          [routerLink]="['/activities/monitor', item.courseId, item.id]"
+        >
+          <i nz-icon nzType="eye" nzTheme="outline"></i>
+        </a>
         <div class="spacer"></div>
         <a
           *ngIf="item.permissions.update"

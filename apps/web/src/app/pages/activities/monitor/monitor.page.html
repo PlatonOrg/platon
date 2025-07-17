@@ -1,0 +1,27 @@
+<h1>Monitoring de l'activité</h1>
+
+<ng-container *ngIf="context.results">
+  <!-- Composant de modération des utilisateurs -->
+  <course-activity-moderation [results]="context.results.users" (moderationAction)="onModerationAction($event)" />
+
+  <!-- Tableaux de résultats -->
+  <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" />
+</ng-container>
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Distribution des notes</mat-card-title>
+  </mat-card-header>
+  <mat-card-content style="height: 25rem; padding: 0.5rem">
+    <result-histogram [data]="gradeList" />
+  </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf="context.results">
+  <mat-card-header>
+    <mat-card-title>Statistiques par exercice</mat-card-title>
+  </mat-card-header>
+  <mat-card-content style="height: 25rem; padding: 0.5rem">
+    <result-box-plot [data]="context.results.exercises" />
+  </mat-card-content>
+</mat-card>

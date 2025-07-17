@@ -36,7 +36,7 @@ export class UserAvatarComponent {
   @Input() user?: User
   @Input() group?: UserGroup
   @Input({ transform: booleanAttribute }) noIcon = false
-  @Input() showUsername: 'stacked' | 'inline' | 'none' = 'stacked'
+  @Input() showUsername: 'stacked' | 'inline' | 'none' | 'no' = 'stacked'
 
   @Output() openGroupDetails = new EventEmitter<UserGroup>()
 

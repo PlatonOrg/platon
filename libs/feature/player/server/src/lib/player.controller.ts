@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IRequest, Public, UUIDParam } from '@platon/core/server'
+import { IRequest, Public, Roles, UUIDParam } from '@platon/core/server'
 import { EvalExerciseInput, NextOutput, PlayAnswersInput } from '@platon/feature/player/common'
 import {
   EvalExerciseOutputDTO,
@@ -14,6 +14,7 @@ import {
 } from './player.dto'
 import { PlayerService } from './player.service'
 import { Response } from 'express'
+import { UserRoles } from '@platon/core/common'
 
 @ApiBearerAuth()
 @Controller('player')
@@ -83,5 +84,14 @@ export class PlayerController {
   @Post('/saveTemporaryAnswer')
   async saveTemporaryAnswer(@Req() req: IRequest, @Body() input: EvalExerciseInput): Promise<void> {
     await this.playerService.saveTemporaryAnswer(input, req.user)
+  }
+
+  @Roles(UserRoles.admin, UserRoles.teacher)
+  @Post('/openSession/:activitySessionId')
+  openSession(
+    @Req() req: IRequest,
+    @UUIDParam('activitySessionId') activitySessionId: string
+  ): Promise<PlayActivityOutputDTO> {
+    return this.playerService.openSession(activitySessionId)
   }
 }

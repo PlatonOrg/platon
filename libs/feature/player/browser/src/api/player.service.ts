@@ -54,4 +54,8 @@ export class PlayerService {
   saveTemporaryAnswer(input: EvalExerciseInput): Observable<void> {
     return this.provider.saveTemporaryAnswer(input)
   }
+
+  openSession(sessionId: string): Observable<PlayActivityOuput> {
+    return this.provider.openSession(sessionId)
+  }
 }

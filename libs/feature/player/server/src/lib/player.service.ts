@@ -16,6 +16,7 @@ import { Activity } from '@platon/feature/course/common'
 import {
   ActivityEntity,
   ActivityService,
+  CourseNotificationService,
   ON_CHALLENGE_SUCCEEDED_EVENT,
   ON_RELOAD_ACTIVITY_EVENT,
   ON_TERMINATE_ACTIVITY_EVENT,
@@ -81,7 +82,8 @@ export class PlayerService extends PlayerManager {
     private readonly sessionService: SessionService,
     private readonly activityService: ActivityService,
     private readonly resourceFileService: ResourceFileService,
-    private readonly peerService: PeerService
+    private readonly peerService: PeerService,
+    private readonly courseNotificationService: CourseNotificationService
   ) {
     super(sandboxService)
   }
@@ -473,6 +475,10 @@ export class PlayerService extends PlayerManager {
         break
     }
     return [withExercisePlayer(exerciseSession), activitySession.variables.navigation]
+  }
+
+  protected notifyExerciseChanges(userId: string, sessionId: string, exercise: PlayerExercise): Promise<void> {
+    return this.courseNotificationService.notifyExerciseChanges(userId, sessionId, exercise)
   }
 
   protected createAnswer(answer: Partial<Answer>): Promise<Answer> {

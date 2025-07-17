@@ -3,13 +3,10 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { firstValueFrom, Subscription } from 'rxjs'
-
 import { MatIconModule } from '@angular/material/icon'
-
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
-
 import { DialogModule } from '@platon/core/browser'
 import { CourseActivityCardComponent } from '@platon/feature/course/browser'
 import {
@@ -20,7 +17,6 @@ import {
   ResultService,
   ResultBoxPlotComponent,
 } from '@platon/feature/result/browser'
-
 import { DurationPipe, UiLayoutBlockComponent, UiStatisticCardComponent } from '@platon/shared/ui'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { ActivityPresenter } from './activity.presenter'

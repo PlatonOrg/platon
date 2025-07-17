@@ -1,0 +1,66 @@
+<div class="moderation-container">
+  <mat-card>
+    <mat-card-header class="header-card">
+      <mat-card-title>Modération des activités</mat-card-title>
+      <div class="header">
+        <div class="actions">
+          <button
+            mat-icon-button
+            (click)="selectAll()"
+            [disabled]="getSelectedCount() === getTotalCount()"
+            matTooltip="Tout sélectionner"
+          >
+            <mat-icon>select_all</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            (click)="clearSelection()"
+            [disabled]="getSelectedCount() === 0"
+            matTooltip="Désélectionner tout"
+            title="Désélectionner tout"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+
+          <!-- Séparateur visuel -->
+          <div class="action-separator"></div>
+
+          <button
+            mat-icon-button
+            (click)="onOpenActivity()"
+            [disabled]="getSelectedCount() === 0"
+            matTooltip="Ouvrir l'activité pour les utilisateurs sélectionnés"
+            class="action-open"
+          >
+            <mat-icon>lock_open</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            (click)="onCloseActivity()"
+            [disabled]="getSelectedCount() === 0"
+            matTooltip="Fermer l'activité pour les utilisateurs sélectionnés"
+            class="action-close"
+          >
+            <mat-icon>lock</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Liste compacte des utilisateurs -->
+      <div class="users-compact-grid">
+        <div
+          *ngFor="let user of results; trackBy: trackByUserId"
+          class="user-chip"
+          [class.selected]="isUserSelected(user.id)"
+          (click)="toggleUserSelection(user.id, user.activitySessionId)"
+          [title]="user.firstName + ' ' + user.lastName"
+        >
+          <user-avatar [userIdOrName]="user.id" [showUsername]="'no'" />
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

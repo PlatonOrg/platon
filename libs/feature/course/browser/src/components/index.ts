@@ -1,6 +1,7 @@
 export * from './activity-card/activity-card.component'
 export * from './activity-grid/activity-grid.component'
 export * from './activity-table/activity-table.component'
+export * from './activity-moderation/activity-moderation.component'
 export * from './course-filters/course-filters.component'
 export * from './course-filters/course-filters.matcher'
 export * from './course-item/course-item.component'

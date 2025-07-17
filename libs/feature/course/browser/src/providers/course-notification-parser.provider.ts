@@ -15,6 +15,8 @@ import {
   CorrectorCreatedNotification,
   CorrectorRemovedNotification,
   CourseMemberCreationNotification,
+  ExerciseChangesNotification,
+  ModerationActivityChangesNotification,
   ResourceMovedByAdminNotification,
 } from '@platon/feature/course/common'
 import { NotificationParser, NotificationRenderer } from '@platon/feature/notification/browser'
@@ -163,6 +165,40 @@ export const ResourceMovedByAdminNotificationParser: NotificationParser<Resource
   },
 }
 
+export const ExerciseChangesNotificationParser: NotificationParser<ExerciseChangesNotification> = {
+  support(notification): boolean {
+    return notification.data.type === 'EXERCISE-CHANGES'
+  },
+  renderer(notification, injector: Injector): NotificationRenderer {
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
+    return {
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Des modifications ont été apportées à l'exercice dans la session`,
+      onClick: ({ onClose }) => {
+        console.error('ExerciseChangesNotificationParser nothing to do here')
+        onClose()
+      },
+    }
+  },
+}
+
+export const ModerationActivityChangesNotificationParser: NotificationParser<ModerationActivityChangesNotification> = {
+  support(notification): boolean {
+    return notification.data.type === 'MODERATION-ACTIVITY-CHANGES'
+  },
+  renderer(notification, injector: Injector): NotificationRenderer {
+    const themeAwareIconService = injector.get(ThemeAwareIconService)
+    return {
+      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
+      content: `Des modifications ont été apportées à l'activité dans la session`,
+      onClick: ({ onClose }) => {
+        console.error('ModerationActivityChangesNotificationParser nothing to do here')
+        onClose()
+      },
+    }
+  },
+} // TODO: User should have their activity automatically refreshed
+
 export const CourseNotificationParsers: NotificationParser<unknown>[] = [
   CourseMemberCreationNotificationParser,
   ActivityMemberCreationNotificationParser,
@@ -172,4 +208,6 @@ export const CourseNotificationParsers: NotificationParser<unknown>[] = [
   CorrectionAvailableNotificationParser,
   ActivityClosedNotificationParser,
   ResourceMovedByAdminNotificationParser,
+  ExerciseChangesNotificationParser,
+  ModerationActivityChangesNotificationParser,
 ]
