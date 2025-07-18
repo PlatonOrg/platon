@@ -31,6 +31,7 @@ import { WordSelectorComponentDefinition } from './forms/word-selector/word-sele
 import { EvaluatorComponentDefinition } from './forms/evaluator/evaluator'
 import { TimerComponentDefinition } from './widgets/timer/timer'
 import { ConfettiComponentDefinition } from './widgets/confetti/confetti'
+import { ImageClickerComponentDefinition } from './forms/image-clicker/image-clicker'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
@@ -80,6 +81,13 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     module: () =>
       import(/* webpackChunkName: "wc-evaluator" */ './forms/evaluator/evaluator.module').then(
         (m) => m.EvaluatorModule
+      ),
+  },
+  {
+    selector: 'wc-image-clicker',
+    module: () =>
+      import(/* webpackChunkName: "wc-image-clicker" */ './forms/image-clicker/image-clicker.module').then(
+        (m) => m.ImageClickerModule
       ),
   },
   {
@@ -356,5 +364,10 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: ConfettiComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: ImageClickerComponentDefinition,
   },
 ]
