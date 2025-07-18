@@ -44,7 +44,7 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
 
     const courseMatch = args.nextUrl.match(/\/courses\/(?<courseId>[^\\/]+)/)
     let courseId = courseMatch?.groups?.['courseId']
-    
+
     this.logger.log(`[LTI COURSE INTERCEPTOR] CourseId extrait de l'URL: ${courseId || 'NON TROUVÉ'}`)
     this.logger.log(`[LTI COURSE INTERCEPTOR] Payload complet:`, payload)
 
@@ -58,7 +58,7 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
       if (!lmsCoursePresent && role === CourseMemberRoles.teacher) {
         this.logger.log(`[LTI COURSE INTERCEPTOR] Création d'un nouveau cours par l'enseignant`)
         this.logger.log(`[LTI COURSE INTERCEPTOR] Titre du cours: ${payload['context_title']}`)
-        
+
         const course = await this.CourseService.create({
           name: payload['context_title'],
           desc: `Cours PLaTOn rattaché à : ${payload['context_title']}`,
@@ -73,7 +73,7 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
           lmsCourseId: payload['context_id'],
           courseId,
         })
-        
+
         this.logger.log(`[LTI COURSE INTERCEPTOR] Liaison LMS-Cours créée`)
 
         args.nextUrl = `/courses/${courseId}`
@@ -113,23 +113,27 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
         return this.courseMemberService.addUser(courseId, user.id, role)
       }
     )
-
+    const customActivity = payload['custom_activity']
+    if (courseId && customActivity) {
+      this.logger.log(`[LTI COURSE INTERCEPTOR] Activité personnalisée trouvée: ${customActivity}`)
+      args.nextUrl = `/player/activity/${customActivity}`
+    }
     const customGroups = payload['custom_groups']
     this.logger.log(`[LTI COURSE INTERCEPTOR] Groupes personnalisés: ${customGroups || 'AUCUN'}`)
-    
+
     if (courseId && customGroups && customGroups.length > 0) {
       const groups = customGroups.split(',')
       this.logger.log(`[LTI COURSE INTERCEPTOR] Traitement de ${groups.length} groupes: ${groups.join(', ')}`)
-      
+
       for (const group of groups) {
         this.logger.log(`[LTI COURSE INTERCEPTOR] Ajout au groupe: ${group}`)
         await this.courseGroupService.addCourseGroup(courseId, group)
         await this.courseGroupMemberService.addCourseGroupMember(group, user.id)
       }
-      
+
       this.logger.log(`[LTI COURSE INTERCEPTOR] Tous les groupes ont été traités`)
     }
-    
+
     this.logger.log(`[LTI COURSE INTERCEPTOR] Traitement terminé pour l'utilisateur: ${user.username}`)
   }
 }
