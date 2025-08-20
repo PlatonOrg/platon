@@ -165,6 +165,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   protected fullscreen = false
   protected selectedTheory?: ExerciseTheory
   protected runningAction?: PlayerActions
+  protected showLabelIfEnoughSpace = true
 
   get previewMode(): boolean {
     return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
@@ -176,14 +177,16 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       {
         id: 'check-answer-button',
         icon: 'check',
-        label: this.player.remainingAttempts ? `Évaluer (${this.player.remainingAttempts})` : 'Évaluer',
+        label: this.player.remainingAttempts
+          ? `Valider la réponse (${this.player.remainingAttempts})`
+          : 'Valider la réponse',
         tooltip: 'Valider',
         color: 'primary',
         danger: this.player.remainingAttempts === 1,
         visible: !this.reviewMode,
         disabled: this.disabled || !!this.runningAction,
         playerAction: PlayerActions.CHECK_ANSWER,
-        showLabel: !!this.player.remainingAttempts,
+        showLabel: this.showLabelIfEnoughSpace,
         run: async () => {
           this.removeAnswerFromLocalStorage()
           await this.evaluate(PlayerActions.CHECK_ANSWER)
@@ -191,12 +194,27 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         },
       },
       {
+        icon: 'save',
+        label: 'Sauvegarder',
+        tooltip: 'Sauvegarder',
+        visible: !this.reviewMode,
+        disabled: !!this.runningAction,
+        playerAction: PlayerActions.SAVE_ANSWER,
+        showLabel: this.showLabelIfEnoughSpace,
+        run: async () => {
+          await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
+          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
+          this.dialogService.success('Votre réponse a bien été sauvegardée.')
+        },
+      },
+      {
         icon: 'refresh',
-        label: 'Autre question',
-        tooltip: 'Autre question',
+        label: 'Recharger',
+        tooltip: 'Recharger',
         disabled: !!this.runningAction,
         visible: !this.reviewMode && !!this.player.settings?.actions?.reroll,
         playerAction: PlayerActions.REROLL_EXERCISE,
+        showLabel: this.showLabelIfEnoughSpace,
         run: () => this.evaluate(PlayerActions.REROLL_EXERCISE),
       },
       {
@@ -205,20 +223,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         tooltip: "Télécharger l'environnement",
         visible: this.previewMode,
         run: () => this.downloadEnvironment(),
-      },
-      {
-        icon: 'save',
-        label: 'Sauvegarder',
-        tooltip: 'Sauvegarder',
-        color: 'primary',
-        visible: !this.reviewMode,
-        disabled: !!this.runningAction,
-        playerAction: PlayerActions.SAVE_ANSWER,
-        run: async () => {
-          await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
-          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
-          this.dialogService.success('Votre réponse a bien été sauvegardée.')
-        },
       },
     ]
   }
@@ -238,19 +242,13 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         run: () => this.commentDrawer.open(),
       },
       {
-        icon: 'menu_book',
-        label: 'Théorie',
-        tooltip: 'Théorie',
-        menu: this.theoriesMenu,
-        visible: !!this.player.theories?.length,
-      },
-      {
         icon: 'key',
         label: 'Solution',
         tooltip: 'Solution',
         visible: this.player.settings?.actions?.solution && !this.player.solution,
         disabled: this.disabled || !!this.runningAction,
         playerAction: PlayerActions.SHOW_SOLUTION,
+        showLabel: this.showLabelIfEnoughSpace,
         run: async () => {
           await this.evaluate(PlayerActions.SHOW_SOLUTION)
           this.scrollIntoNode(this.containerSolution?.nativeElement, 'start')
@@ -262,11 +260,20 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         tooltip: 'Aide',
         visible: this.player.settings?.actions?.hints && !!this.player.hints,
         disabled: this.disabled || !!this.runningAction,
+        showLabel: this.showLabelIfEnoughSpace,
         playerAction: PlayerActions.NEXT_HINT,
         run: async () => {
           await this.evaluate(PlayerActions.NEXT_HINT)
           this.scrollIntoNode(this.containerHints?.nativeElement, 'center')
         },
+      },
+      {
+        icon: 'menu_book',
+        label: 'Théorie',
+        tooltip: 'Théorie',
+        showLabel: this.showLabelIfEnoughSpace,
+        menu: this.theoriesMenu,
+        visible: !!this.player.theories?.length,
       },
     ]
   }
@@ -377,6 +384,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       this.container.nativeElement.webkitRequestFullscreen ||
       this.container.nativeElement.mozRequestFullScreen ||
       this.container.nativeElement.msRequestFullscreen
+
+    if (this.container.nativeElement.offsetWidth < 900) {
+      this.showLabelIfEnoughSpace = false
+    }
 
     this.subscriptions.push(
       this.webComponentService.onSubmit.subscribe((id: string) => {
