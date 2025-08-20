@@ -68,3 +68,14 @@ export interface ResourceMovedByAdminNotification {
   circleId: string
   circleName: string
 }
+
+export const SOLUTION_DISAGREEMENT_NOTIFICATION = 'SOLUTION-DISAGREEMENT' as const
+
+export interface SolutionDisagreementNotification {
+  type: typeof SOLUTION_DISAGREEMENT_NOTIFICATION
+  exerciseId: string
+  exerciseTitle: string
+  studentId: string
+  studentName?: string
+  sessionId: string
+}

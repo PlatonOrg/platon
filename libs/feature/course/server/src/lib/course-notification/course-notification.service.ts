@@ -7,6 +7,7 @@ import {
   CorrectorCreatedNotification,
   CorrectorRemovedNotification,
   CourseMemberCreationNotification,
+  SolutionDisagreementNotification,
 } from '@platon/feature/course/common'
 import { NotificationService } from '@platon/feature/notification/server'
 import { DataSource } from 'typeorm'
@@ -193,6 +194,54 @@ export class CourseNotificationService {
           })
         )
       )
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
+
+  async notifySolutionDisagreement(sessionId: string, studentId: string): Promise<void> {
+    try {
+      // Get exercise session information
+      const sessionResults = (await this.dataSource.query(
+        `
+      SELECT 
+        s.id as "sessionId",
+        s.exercise_id as "exerciseId",
+        ex.title as "exerciseTitle",
+        ex.author_id as "authorId",
+        u.username as "studentName"
+      FROM "SessionExercises" s
+      INNER JOIN "Exercises" ex ON ex.id = s.exercise_id
+      INNER JOIN "Users" u ON u.id = $2
+      WHERE s.id = $1
+      `,
+        [sessionId, studentId]
+      )) as {
+        sessionId: string
+        exerciseId: string
+        exerciseTitle: string
+        authorId: string
+        studentName: string
+      }[]
+
+      if (sessionResults.length === 0) {
+        this.logger.warn(`Session ${sessionId} not found for solution disagreement notification`)
+        return
+      }
+
+      const session = sessionResults[0]
+
+      // Send notification to the exercise author
+      if (session.authorId) {
+        await this.notificationService.sendToUser<SolutionDisagreementNotification>(session.authorId, {
+          type: 'SOLUTION-DISAGREEMENT',
+          exerciseId: session.exerciseId,
+          exerciseTitle: session.exerciseTitle,
+          studentId: studentId,
+          studentName: session.studentName,
+          sessionId: sessionId,
+        })
+      }
     } catch (error) {
       this.logger.error(error)
     }

@@ -23,6 +23,7 @@ import {
   OnReloadActivityEventPayload,
   OnTerminateActivityEventPayload,
 } from '@platon/feature/course/server'
+import { CourseNotificationService } from '@platon/feature/course/server'
 import {
   ExercisePlayer,
   NextOutput,
@@ -81,7 +82,8 @@ export class PlayerService extends PlayerManager {
     private readonly sessionService: SessionService,
     private readonly activityService: ActivityService,
     private readonly resourceFileService: ResourceFileService,
-    private readonly peerService: PeerService
+    private readonly peerService: PeerService,
+    private readonly courseNotificationService: CourseNotificationService
   ) {
     super(sandboxService)
   }
@@ -782,5 +784,22 @@ export class PlayerService extends PlayerManager {
       ...variables,
       navigation,
     }
+  }
+
+  async disagreeSolution(sessionId: string, user?: User | null): Promise<void> {
+    if (!user) {
+      throw new ForbiddenResponse('User must be authenticated to disagree with solution')
+    }
+
+    // Verify the session exists and the user has access to it
+    const session = await this.sessionService.findById(sessionId, {})
+    if (!session) {
+      throw new NotFoundResponse('Session not found')
+    }
+
+    this.logger.log(`User ${user.id} disagreed with solution for session ${sessionId}`)
+
+    // Send notification to the exercise creator
+    await this.courseNotificationService.notifySolutionDisagreement(sessionId, user.id)
   }
 }

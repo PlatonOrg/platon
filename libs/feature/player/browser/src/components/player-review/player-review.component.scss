@@ -108,6 +108,14 @@ pre {
   margin-bottom: 1.5rem !important;
 }
 
+.solution-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
 .exercice-actions {
   display: flex;
   flex-direction: column;
