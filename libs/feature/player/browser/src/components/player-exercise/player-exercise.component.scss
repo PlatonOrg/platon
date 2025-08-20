@@ -124,6 +124,14 @@ pre {
   }
 }
 
+.exercice-actions-list-below {
+  display: flex;
+  align-items: center;
+  &.align-right {
+    justify-content: flex-end;
+  }
+}
+
 .spacer {
   flex: 1;
 }

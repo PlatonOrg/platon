@@ -123,13 +123,17 @@
     <mat-card-actions>
       <div class="exercice-actions">
         <div class="exercice-actions-list">
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions }" />
-        </div>
-        <div class="exercice-actions-list">
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: primaryActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: secondaryActions }" />
           <ng-container *ngTemplateOutlet="actionList; context: { $implicit: reviewModeActions }" />
           <div class="spacer"></div>
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: secondaryActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: primaryActions.reverse() }" />
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="exercice-actions-list-below">
+          <div class="spacer"></div>
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions }" />
         </div>
       </div>
     </mat-card-actions>
@@ -170,7 +174,6 @@
       [color]="action.color"
       [class.danger]="action.danger"
       [disabled]="action.disabled"
-      [nz-tooltip]="action.tooltip"
       [matMenuTriggerFor]="action.menu ?? null"
     >
       <nz-spin *ngIf="runningAction && runningAction === action.playerAction" nzSpinning nzSimple nzSize="small" />
