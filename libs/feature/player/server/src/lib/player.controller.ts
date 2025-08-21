@@ -84,4 +84,10 @@ export class PlayerController {
   async saveTemporaryAnswer(@Req() req: IRequest, @Body() input: EvalExerciseInput): Promise<void> {
     await this.playerService.saveTemporaryAnswer(input, req.user)
   }
+
+  @Public()
+  @Post('/disagree-solution')
+  async disagreeSolution(@Req() req: IRequest, @Body() input: { sessionId: string }): Promise<void> {
+    await this.playerService.disagreeSolution(input.sessionId, req.user)
+  }
 }

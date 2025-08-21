@@ -91,6 +91,11 @@
                     <div class="exercise-form">
                       <nge-markdown [data]="player!.solution!" />
                     </div>
+                    <div class="solution-actions">
+                      <wc-disagree-solution-button 
+                        [state]="{ sessionId: player.sessionId, text: 'Je pense que la solution est fausse' }"
+                      ></wc-disagree-solution-button>
+                    </div>
                   </mat-expansion-panel>
                 </mat-accordion>
               </ng-container>

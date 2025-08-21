@@ -31,6 +31,7 @@ import { WordSelectorComponentDefinition } from './forms/word-selector/word-sele
 import { EvaluatorComponentDefinition } from './forms/evaluator/evaluator'
 import { TimerComponentDefinition } from './widgets/timer/timer'
 import { ConfettiComponentDefinition } from './widgets/confetti/confetti'
+import { DisagreeSolutionButtonComponentDefinition } from './widgets/disagree-solution-button/disagree-solution-button'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
@@ -205,6 +206,13 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     module: () =>
       import(/* webpackChunkName: "wc-confetti" */ './widgets/confetti/confetti.module').then((m) => m.ConfettiModule),
   },
+  {
+    selector: 'wc-disagree-solution-button',
+    module: () =>
+      import(/* webpackChunkName: "wc-disagree-solution-button" */ './widgets/disagree-solution-button/disagree-solution-button.module').then(
+        (m) => m.DisagreeSolutionButtonModule
+      ),
+  },
 
   // INTERNALS
   {
@@ -356,5 +364,10 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: ConfettiComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: DisagreeSolutionButtonComponentDefinition,
   },
 ]

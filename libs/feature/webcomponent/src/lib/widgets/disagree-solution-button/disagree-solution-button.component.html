@@ -1,0 +1,11 @@
+<button
+  mat-raised-button
+  [color]="state.variant === 'primary' ? 'primary' : state.variant === 'danger' ? 'warn' : ''"
+  [disabled]="state.disabled"
+  (click)="onDisagreeClick()"
+  class="disagree-solution-button"
+>
+  <mat-icon>report_problem</mat-icon>
+  {{ state.text || 'Je pense que la solution est fausse' }}
+</button>
+<wc-base [(state)]="state"></wc-base>
