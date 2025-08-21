@@ -65,7 +65,14 @@ export class TutorialSelectorService {
       title: 'Découvrir comment créer une ressource',
       description: 'Tutoriel pour apprendre à créer une ressource dans l\'espace de travail',
       icon: 'add_circle_outline'
-    }
+    },
+    {
+      id: 'ide-basics',
+      title: 'Découverte de l\'IDE',
+      description: 'Maîtriser l\'environnement de développement',
+      icon: 'code'
+    },
+
   ];
 
 
@@ -154,7 +161,7 @@ export class TutorialSelectorService {
         break;
 
       default:
-        console.error(`Tutoriel inconnu dans la chaîne: ${currentTutorial}`);
+        //console.error(`Tutoriel inconnu dans la chaîne: ${currentTutorial}`);
         this.currentChainIndex++;
         this.executeNextTutorialInChain();
     }
@@ -180,7 +187,7 @@ export class TutorialSelectorService {
       }
     };
 
-    this.tutorialCompletionInterval = setInterval(checkTutorialCompletion, 500);
+    this.tutorialCompletionInterval = setInterval(checkTutorialCompletion, 100);
   }
 
    private tutorialCompletionInterval?: NodeJS.Timeout;

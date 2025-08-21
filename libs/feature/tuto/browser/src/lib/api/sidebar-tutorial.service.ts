@@ -84,6 +84,15 @@ export class SidebarTutorialService {
         }
       },
       {
+        id:'annonces',
+        title: 'Annonces',
+        text: 'Dans cette section vous trouverez des messages personnalisés pour les enseignants et les étudiants. Vous trouverez ici des informations importantes, des mises à jour ou des informations de soutien.',
+        attachTo: {
+          element: '#tuto-sidebar-annonces',
+          on: 'right'
+        }
+      },
+      {
         id: 'courses',
         title: 'Section Cours',
         text: 'Gérez tous vos cours, créez de nouvelles sessions et suivez la progression de vos étudiants. C\'est ici que vous organisez votre enseignement et structurez votre contenu pédagogique.',
@@ -130,17 +139,17 @@ export class SidebarTutorialService {
     }
 
     // Ajouter les liens du bas
-    steps.push(
-      {
-        id: 'account',
-        title: 'Mon compte',
-        text: 'Personnalisez votre profil enseignant, gérez vos préférences d\'interface et vos informations de contact. Les paramètres que vous définissez ici affectent votre expérience sur l\'ensemble de la plateforme.',
-        attachTo: {
-          element: '#tuto-sidebar-mon-compte',
-          on: 'right'
-        }
-      }
-    );
+   // steps.push(
+   //    {
+   //      id: 'account',
+   //      title: 'Mon compte',
+   //      text: 'Personnalisez votre profil enseignant, gérez vos préférences d\'interface et vos informations de contact. Les paramètres que vous définissez ici affectent votre expérience sur l\'ensemble de la plateforme.',
+   //      attachTo: {
+   //        element: '#tuto-sidebar-mon-compte',
+   //        on: 'right'
+   //      }
+   //    }
+   //  );
 
     // Documentation pour les enseignants
     if (isTeacherRole(user.role)) {
@@ -185,8 +194,11 @@ export class SidebarTutorialService {
   private buildNavigationChoiceHTML(user: User): string {
     const choices = this.getNavigationChoices(user);
 
-    let html = '<div class="navigation-selection-container" style="margin: 20px 0;">';
-    html += '<p style="margin-bottom: 16px; font-weight: 500;">Choisissez où vous souhaitez commencer :</p>';
+    let html = '<div class="navigation-selection-container" style="margin: 5px 0;">';
+    html += '<p style="margin-bottom: 16px; font-weight: 500;">' +
+      'Maintenant que vous avez exploré les différentes sections de l\'interface.' + '<br>' +
+      'Decouvrons ensemble comment naviguer efficacement dans PLaTon pour gérer vos cours et ressources. '+ '<br>' +
+      'Choisissez où vous souhaitez commencer :</p>';
 
     choices.forEach((choice) => {
       html += `

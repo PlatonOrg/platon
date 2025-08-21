@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { Router, RouterModule } from '@angular/router'
+import { Router, RouterModule, ActivatedRoute } from '@angular/router'
 import { Subscription } from 'rxjs'
 
 import { MatChipsModule } from '@angular/material/chips'
@@ -23,7 +23,7 @@ import { UiLayoutTabDirective, UiLayoutTabsComponent, UiModalIFrameComponent } f
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ResourcePresenter } from './resource.presenter'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
-import { ResourcePageTutorialService } from '@platon/feature/tuto/browser'
+import { ResourcePageTutorialService, ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 @Component({
   standalone: true,
@@ -68,6 +68,9 @@ export class ResourcePage implements OnInit, OnDestroy {
   private readonly router = inject(Router)
   private readonly resourcePageTutorialService = inject(ResourcePageTutorialService)
 
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly resourcesTutorialService = inject(ResourcesTutorialService)
+
   protected context = this.presenter.defaultContext()
 
   readonly status = Object.values(ResourceStatus)
@@ -85,7 +88,8 @@ export class ResourcePage implements OnInit, OnDestroy {
         this.changeDetectorRef.markForCheck()
       })
     )
-    this.checkFirstVisit()
+    //this.checkFirstVisit()
+    this.checkForTutorialContinuation()
   }
 
   ngOnDestroy(): void {
@@ -162,19 +166,49 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   /**
    * Vérifie si c'est la première visite de l'utilisateur
-   */
+
   private checkFirstVisit(): void {
     setTimeout(() => {
       this.startResourcesTutorial()
     }, 1000)
+  }*/
+
+  private checkForTutorialContinuation(): void {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      const fromTutorial = params['fromTutorial']
+      const isFromTutorialService = this.resourcesTutorialService.getIsFromTutorial()
+
+      if (fromTutorial === 'true' || isFromTutorialService) {
+        // L'utilisateur vient du tutoriel
+        setTimeout(() => {
+          this.startResourcePageTutorial()
+        }, 1000)
+        //this.startResourcePageTutorial()
+
+        // Nettoyer les paramètres d'URL
+        this.cleanTutorialParams()
+
+        // Réinitialiser le flag du service
+        this.resourcesTutorialService.resetTutorialFlag()
+      } else {
+        console.log('NOTHING')
+      }
+    })
   }
 
   /**
    * Démarre le tutoriel complet de l'espace de travail
    */
-  startResourcesTutorial(): void {
+  startResourcePageTutorial(): void {
     if (this.context.resource) {
       this.resourcePageTutorialService.startResourcePageTutorial(this.context.resource, false, false, false)
     }
+  }
+
+  private cleanTutorialParams(): void {
+    // Supprimer le paramètre fromTutorial de l'URL sans recharger la page
+    const url = new URL(window.location.href)
+    url.searchParams.delete('fromTutorial')
+    window.history.replaceState(null, '', url.toString())
   }
 }

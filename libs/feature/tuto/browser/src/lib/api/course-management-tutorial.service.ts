@@ -104,14 +104,14 @@ export class CourseManagementTutorialService {
                • Conseils de bonnes pratiques`,
         buttons: [
           {
-            text: 'Commencer le tutoriel',
-            action: () => this.shepherdService.next()
-          },
-          {
             text: 'Annuler',
             secondary: true,
             action: () => this.shepherdService.cancel()
-          }
+          },
+          {
+            text: 'Commencer le tutoriel',
+            action: () => this.shepherdService.next()
+          },
         ]
       },
       {

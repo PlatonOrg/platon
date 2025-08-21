@@ -9,7 +9,6 @@ import {
   Query,
   Patch,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common'
 import { AnnouncementService } from "./announcement.service";
 import { IRequest, Mapper, Roles, UUIDParam } from "@platon/core/server";

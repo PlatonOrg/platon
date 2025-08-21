@@ -54,13 +54,13 @@ export class ToolbarTutorialService {
         text: 'Ce tutoriel va vous présenter les fonctionnalités principales de la barre d\'outils. Vous apprendrez à naviguer et à créer des ressources.',
         buttons: [
           {
-            text: 'Commencer le tutoriel',
-            action: () => this.shepherdService.next()
-          },
-          {
             text: 'Passer le tutoriel',
             secondary: true,
             action: () => this.shepherdService.cancel()
+          },
+          {
+            text: 'Commencer le tutoriel',
+            action: () => this.shepherdService.next()
           }
         ]
       },
@@ -129,63 +129,63 @@ export class ToolbarTutorialService {
     );
 
     // Étapes spécifiques pour la création de ressources
-    if (this.canUserCreate(user)) {
-      steps.push(
-        {
-          id: 'resource-introduction',
-          title: 'Créons une ressource !',
-          text: 'Maintenant, découvrons comment créer une ressource. Vous pouvez créer différents types de contenus selon vos besoins pédagogiques.',
-          buttons: [
-            {
-              text: 'Découvrir les ressources',
-              action: () => this.shepherdService.next()
-            }
-          ]
-        },
-        {
-          id: 'resource-explanation',
-          title: 'Types de ressources',
-          text: this.getResourceExplanationText(user),
-          buttons: [
-            {
-              text: 'Choisir une ressource à créer',
-              action: () => this.shepherdService.next()
-            }
-          ]
-        },
-        {
-          id: 'resource-selection',
-          title: 'Quelle ressource voulez-vous créer ?',
-          text: this.buildResourceSelectionHTML(user/*, createResourceParentParam*/),
-          buttons: [
-            {
-              text: 'Créer la ressource sélectionnée',
-              action: () => this.handleResourceCreation(/*createResourceParentParam*/)
-            },
-            {
-              text: 'Terminer le tutoriel',
-              secondary: true,
-              action: () => this.shepherdService.complete()
-            }
-          ],
-          when: {
-            show: () => this.setupResourceSelection(user/*, createResourceParentParam*/)
-          }
-        }
-      );
-    } else {
+    // if (this.canUserCreate(user)) {
+    //   steps.push(
+    //     {
+    //       id: 'resource-introduction',
+    //       title: 'Créons une ressource !',
+    //       text: 'Maintenant, découvrons comment créer une ressource. Vous pouvez créer différents types de contenus selon vos besoins pédagogiques.',
+    //       buttons: [
+    //         {
+    //           text: 'Découvrir les ressources',
+    //           action: () => this.shepherdService.next()
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       id: 'resource-explanation',
+    //       title: 'Types de ressources',
+    //       text: this.getResourceExplanationText(user),
+    //       buttons: [
+    //         {
+    //           text: 'Choisir une ressource à créer',
+    //           action: () => this.shepherdService.next()
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       id: 'resource-selection',
+    //       title: 'Quelle ressource voulez-vous créer ?',
+    //       text: this.buildResourceSelectionHTML(user/*, createResourceParentParam*/),
+    //       buttons: [
+    //         {
+    //           text: 'Créer la ressource sélectionnée',
+    //           action: () => this.handleResourceCreation(/*createResourceParentParam*/)
+    //         },
+    //         {
+    //           text: 'Terminer le tutoriel',
+    //           secondary: true,
+    //           action: () => this.shepherdService.complete()
+    //         }
+    //       ],
+    //       when: {
+    //         show: () => this.setupResourceSelection(user/*, createResourceParentParam*/)
+    //       }
+    //     }
+    //   );
+    // } else {
       steps.push({
         id: 'tutorial-complete',
-        title: 'Tutoriel terminé !',
+        title: 'Tutoriel toolbar terminé !',
         text: 'Vous connaissez maintenant les principales fonctionnalités de la barre d\'outils PLaTon. Bonne exploration !',
         buttons: [
           {
-            text: 'Terminer',
+            text: 'Découvrir le sidebar',
             action: () => this.shepherdService.complete()
           }
         ]
       });
-    }
+    //}
 
     return steps;
   }

@@ -92,7 +92,7 @@ export class ResourcesTutorialService {
                 // Faire une recherche automatique d'exemple
                 this.shepherdService.enableEnterNavigation();
                 performSearch('Demo tutoriel');
-                setTimeout(() => this.shepherdService.next(), 1000);
+                setTimeout(() => this.shepherdService.next(), 100);
               }
             }
           }
@@ -240,6 +240,12 @@ export class ResourcesTutorialService {
         id: 'filter-drawer-intro',
         title: 'Panneau de filtres',
         text: 'Les filtres avancés vous permettent de préciser votre recherche selon différents critères.',
+        buttons: [
+          {
+            text: 'Suivant (Entrée)',
+            action: () => this.shepherdService.next(),
+          }
+          ],
         when: {
           show: async () => {
             return this.waitForFilterDrawer();
@@ -390,7 +396,18 @@ export class ResourcesTutorialService {
           selector: 'button[color="primary"]',
           event: 'click'
         },
-        buttons: [],
+        buttons: [
+          {
+            text: 'Cliquer sur le bouton "Appliquer"',
+            action: () => {
+              const applyButton = document.querySelector('button[color="primary"]') as HTMLElement;
+              if (applyButton) {
+                applyButton.click();
+              }
+              setTimeout(() => this.shepherdService.next(), 500);
+            }
+          },
+        ],
         when: {
           show: () => {
             // Mettre en évidence le bouton Appliquer
@@ -425,12 +442,12 @@ export class ResourcesTutorialService {
         title: 'Explorez un cercle',
         text: 'Cliquez sur n\'importe quel cercle pour voir son contenu. Les cercles sont des espaces d\'organisation pour regrouper des ressources par thème ou objectif.',
         attachTo: {
-          element: 'resource-item:first-child',
+          element: 'resource-item', //'resource-item:first-child',
           on: 'bottom'
         },
         buttons: [
           {
-            text: 'Compris, je vais explorer !',
+            text: 'J\'explore !',
             action: () => this.shepherdService.next()
           }
         ],
@@ -512,7 +529,7 @@ export class ResourcesTutorialService {
             <div>
               <strong>Prévisualiser</strong>
               <p style="margin: 4px 0; font-size: 14px; color: #666;">
-                Cliquez sur le titre ou l'icône prévisualiser pour voir le contenu de la ressource sans l'ouvrir en édition.
+                Cliquez sur le titre ou l'icône prévisualisée pour voir le contenu de la ressource sans l'ouvrir en édition.
               </p>
             </div>
           </div>
@@ -586,14 +603,10 @@ export class ResourcesTutorialService {
             resolve();
           }, 300);
         } else {
-          // Continuer à vérifier toutes les 100ms
           setTimeout(checkDrawer, 100);
         }
       };
-
-      // Commencer à vérifier
       checkDrawer();
-
       setTimeout(() => {
         resolve();
       }, 1000);

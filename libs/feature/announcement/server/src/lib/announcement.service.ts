@@ -19,7 +19,6 @@ export class AnnouncementService {
 
   async create(announcement: Partial<AnnouncementEntity>): Promise<AnnouncementEntity> {
     const newAnnouncennouncement = await this.repository.save(this.repository.create(announcement))
-    this.logger.log(`[${newAnnouncennouncement.id}] - ${newAnnouncennouncement.title} - a été créé`)
     if (newAnnouncennouncement.active) {
       // On publie l'annonce
     }
