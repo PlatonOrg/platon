@@ -274,7 +274,7 @@
     "katex": "^0.16.9",
     "llm-chunk": "^0.0.1",
     "marked": "^11.0.1",
-    "mathlive": "^0.102.0",
+    "mathlive": "^0.107.0",
     "mermaid": "^10.0.0",
     "monaco-editor": "^0.52.2",
     "nest-commander": "^3.15.0",
