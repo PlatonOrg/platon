@@ -22,7 +22,7 @@ import { MatMenuModule } from '@angular/material/menu'
 
 import { AuthService, ThemeService, UserAvatarComponent, UserService } from '@platon/core/browser'
 import { UserCharterComponent } from './user-charter/user-charter.component'
-import { User, UserCharter, UserRoles } from '@platon/core/common'
+import { User, UserCharter, UserRoles, isTeacherRole } from '@platon/core/common'
 import { NotificationDrawerComponent } from '@platon/feature/notification/browser'
 import { DiscordInvitationComponent, DiscordButtonComponent } from '@platon/feature/discord/browser'
 import { ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
@@ -147,6 +147,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
     }
 
+    this.firstLoginStartTuto()
     this.checkFeatureAnnouncements()
 
     this.subscriptions.push(
@@ -246,6 +247,17 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   protected async openTutorialSelector(): Promise<void> {
     if (this.user) {
       this.tutorialSelectorService.openTutorialSelector()
+    }
+  }
+
+  private firstLoginStartTuto(): void {
+    if (this.user && isTeacherRole(this.user.role) && this.user.firstLogin) {
+      // Si c'est vraiment la première connexion
+      // firstLogin est défini mais lastLogin n'existe pas ou est undefined
+      const isFirstLogin = !this.user.lastLogin || this.user.lastLogin <= this.user.firstLogin
+      if (isFirstLogin) {
+        this.tutorialSelectorService.startPlatformTutorial()
+      }
     }
   }
 

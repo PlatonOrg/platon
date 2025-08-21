@@ -94,12 +94,11 @@ export class ShepherdService {
       }
     });
 
-    // Ajouter les étapes
+    // Ajout des étapes
     steps.forEach(step => this.addStep(step));
 
     // Événements globaux du tour
     this.currentTour.on('start', () => {
-      console.log('Tutoriel démarré');
       document.body.classList.add('shepherd-active');
 
       // Configurer la navigation par Entrée si activée
@@ -177,6 +176,7 @@ export class ShepherdService {
       canClickTarget: stepConfig.canClickTarget ?? true
     };
 
+
     // Configuration de l'attachement
     if (stepConfig.attachTo) {
       stepOptions.attachTo = {
@@ -246,6 +246,8 @@ export class ShepherdService {
     return buttons;
   }
 
+
+
   /**
   * Passe à l'étape suivante
   */
@@ -309,107 +311,6 @@ export class ShepherdService {
     return this.currentTour?.getCurrentStep();
   }
 
-
-
-  /**
-   * Tutoriel d'introduction simple
-   */
-  startIntroTutorial(): void {
-    const steps: TutorialStep[] = [
-      {
-        id: 'welcome',
-        title: 'Bienvenue !',
-        text: 'Nous allons vous faire découvrir les fonctionnalités principales de cette application.<br><small>💡 Utilisez les flèches ← → ou la touche Entrée pour naviguer</small>',
-        buttons: [
-          {
-            text: 'Commencer (Entrée)',
-            action: () => this.next()
-          },
-          {
-            text: 'Passer',
-            secondary: true,
-            action: () => this.cancel()
-          }
-        ]
-      }
-    ];
-
-    this.startTutorial(steps, {
-      tourName: 'intro-tutorial'
-    });
-  }
-
-  /**
-  * Tutoriel avec interaction obligatoire
-  */
-  startInteractiveTutorial(targetElement: string, actionDescription: string, onComplete?: () => void): void {
-    const steps: TutorialStep[] = [
-      {
-        id: 'interactive-step',
-        title: 'Action requise',
-        text: actionDescription,
-        attachTo: {
-          element: targetElement,
-          on: 'bottom'
-        },
-        advanceOn: {
-          selector: targetElement,
-          event: 'click'
-        },
-        buttons: [], // Pas de boutons, avancement automatique
-        when: {
-          complete: onComplete
-        }
-      }
-    ];
-
-    this.startTutorial(steps, {
-      tourName: 'interactive-tutorial',
-      confirmCancel: false
-    });
-  }
-
-  /**
-  * Tutoriel avec validation personnalisée
-  */
-  startValidatedTutorial(
-    targetElement: string,
-    description: string,
-    validationFn: () => boolean,
-    onValidation?: () => void
-  ): void {
-    const checkAndProceed = () => {
-      if (validationFn()) {
-        if (onValidation) onValidation();
-        this.next();
-      } else {
-        // Optionnel: afficher un message d'erreur
-        console.log('Validation échouée, veuillez compléter l\'action requise.');
-      }
-    };
-
-    const steps: TutorialStep[] = [
-      {
-        id: 'validated-step',
-        title: 'Étape avec validation',
-        text: description + '<br><small>💡 Appuyez sur Entrée pour vérifier et continuer</small>',
-        attachTo: {
-          element: targetElement,
-          on: 'bottom'
-        },
-        buttons: [
-          {
-            text: 'Vérifier et continuer (Entrée)',
-            action: checkAndProceed
-          }
-        ]
-      }
-    ];
-
-    this.startTutorial(steps, {
-      tourName: 'validated-tutorial'
-    });
-  }
 
   /**
    * Désactive temporairement la navigation par Entrée

@@ -168,7 +168,7 @@ export class CourseManagementTutorialService {
               this.startCourseDetailsTutorial(this.selectedCourse!);
             }, 0);
           } else {
-            throw new Error(`Course not found for index ${index}`);
+            //throw new Error(`Course not found for index ${index}`);
           }
         });
       });
@@ -456,20 +456,6 @@ export class CourseManagementTutorialService {
   private buildCommonFinalSteps(course: Course): TutorialStep[] {
     return [
       {
-        id: 'course-structure',
-        title: 'Structure du cours',
-        text: `Votre cours est maintenant structuré avec des sections et des activités.<br><br>
-              <strong>Comment bien organiser votre cours ?</strong><br>
-              • Utilisez des sections pour regrouper par thématiques<br>
-              • Ajoutez des activités pertinentes dans chaque section<br>
-              • Assurez-vous que la progression est logique pour les étudiants`,
-        attachTo: {
-          element: '#tuto-course-dashboard-content',
-          on: 'right'
-        }
-      },
-      // ... autres étapes finales ...
-      {
         id: 'tutorial-complete',
         title: 'Félicitations ! 🎉',
         text: `Excellent travail ! Vous maîtrisez maintenant la gestion de cours sur PLaTon.<br><br>
@@ -489,101 +475,5 @@ export class CourseManagementTutorialService {
       }
     ];
   }
-  /**
-   * Démarre un tutoriel rapide sur un aspect spécifique
-   */
-  startQuickTutorial(
-    topic: 'sections' | 'activities' | 'search' | 'statistics',
-    course?: Course
-  ): void {
-    let steps: TutorialStep[] = [];
 
-    switch (topic) {
-      case 'sections':
-        steps = this.buildSectionsTutorialSteps();
-        break;
-      case 'activities':
-        steps = this.buildActivitiesTutorialSteps();
-        break;
-      case 'search':
-        steps = this.buildSearchTutorialSteps();
-        break;
-      case 'statistics':
-        steps = this.buildStatisticsTutorialSteps();
-        break;
-    }
-
-    this.shepherdService.startTutorial(steps, {
-      tourName: `course-${topic}-quick-tutorial`,
-      useModalOverlay: false
-    });
-  }
-
-  /**
-   * Tutoriel rapide sur les sections
-   */
-  private buildSectionsTutorialSteps(): TutorialStep[] {
-    return [
-      {
-        id: 'sections-quick',
-        title: 'Gestion des sections',
-        text: `Les sections organisent votre cours en chapitres thématiques. Utilisez-les pour structurer votre contenu de manière logique et progressive.`,
-        attachTo: {
-          element: '#tuto-course-sections-container',
-          on: 'right'
-        }
-      }
-    ];
-  }
-
-  /**
-   * Tutoriel rapide sur les activités
-   */
-  private buildActivitiesTutorialSteps(): TutorialStep[] {
-    return [
-      {
-        id: 'activities-quick',
-        title: 'Ajout d\'activités',
-        text: `Cliquez sur "Ajouter une activité" dans une section pour créer des exercices, projets ou évaluations pour vos étudiants.`,
-        attachTo: {
-          element: '#tuto-course-add-activity-button',
-          on: 'bottom'
-        }
-      }
-    ];
-  }
-
-  /**
-   * Tutoriel rapide sur la recherche
-   */
-  private buildSearchTutorialSteps(): TutorialStep[] {
-    return [
-      {
-        id: 'search-quick',
-        title: 'Fonction de recherche',
-        text: `Important : Les activités n'apparaissent dans la recherche que si l'étudiant les a suivies au moins une fois.`,
-        attachTo: {
-          element: '#tuto-course-search-bar',
-          on: 'bottom'
-        }
-      }
-    ];
-  }
-
-  /**
-   * Tutoriel rapide sur les statistiques
-   */
-  private buildStatisticsTutorialSteps(): TutorialStep[] {
-    return [
-      {
-        id: 'statistics-quick',
-        title: 'Statistiques du cours',
-        text: `Suivez la progression de vos étudiants, le temps passé sur les activités et l'engagement général grâce à ces indicateurs.`,
-        attachTo: {
-          element: '#tuto-course-statistics',
-          on: 'left'
-        }
-      }
-    ];
-  }
 }

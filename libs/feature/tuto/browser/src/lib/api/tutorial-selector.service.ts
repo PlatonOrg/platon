@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 import { ShepherdService } from './shepherd/shepherd.service';
 import { ResourcesTutorialService } from './resources-tutorial.service';
 import {SidebarTutorialService} from './sidebar-tutorial.service';
-import {ToolbarTutorialService} from './toolbar-tutorial.service'
+import {ToolbarTutorialService} from './toolbar-tutorial.service';
+import {IdeTutorialService} from './ide-tutorial.service';
+import {SharedResourceTutorialService} from './shared-resource-tutorial.service'
 import {ResourceCreationTutorialService} from './resource-creation-tutorial.service';
 import {TutorialSelectorModalComponent} from '../components/tutorial-selector-modal/tutorial-selector-modal.component';
 import {User} from '@platon/core/common';
@@ -31,11 +33,18 @@ export class TutorialSelectorService {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly shepherdService: ShepherdService,
-     private readonly sidebarTutorialService: SidebarTutorialService,
+    private readonly sidebarTutorialService: SidebarTutorialService,
     private readonly toolbarTutorialService: ToolbarTutorialService,
     private readonly resourcesTutorialService: ResourcesTutorialService,
-    private readonly resourceCreationTutorialService: ResourceCreationTutorialService
+    private readonly resourceCreationTutorialService: ResourceCreationTutorialService,
+    private readonly ideTutorialService: IdeTutorialService,
+    private readonly sharedResourceTutorailService: SharedResourceTutorialService,
   ) {
+    this.initUser()
+  }
+
+  async initUser() : Promise<void> {
+    this.user = await this.authService.ready()
   }
 
   protected user?: User
@@ -57,7 +66,7 @@ export class TutorialSelectorService {
     {
       id: 'course-management',
       title: 'Gestion de cours',
-      description: 'Organiser et gérer un cours : sections, activités et contenu pédagogique',
+      description: 'Créer et organiser un cours : sections, activités et contenu pédagogique',
       icon: 'book'
     },
     {
@@ -72,6 +81,12 @@ export class TutorialSelectorService {
       description: 'Maîtriser l\'environnement de développement',
       icon: 'code'
     },
+    {
+      id : 'shared-resources',
+      title: 'Partage d\'une ressource aux non utilisateurs de la plateforme',
+      description: 'Apprendre à partager un exercice PLaTon au grand public',
+      icon: 'share'
+    }
 
   ];
 
@@ -87,7 +102,6 @@ export class TutorialSelectorService {
   async startTutorial(tutorialId: string): Promise<void> {
     this.shepherdService.complete();
     this.closeTutorialSelector();
-    this.user = await this.authService.ready()
 
 
     switch (tutorialId) {
@@ -113,6 +127,12 @@ export class TutorialSelectorService {
           }
         );
         break;
+      case 'ide-basics':
+        this.ideTutorial()
+        break
+      case 'shared-resources':
+        this.sharedResourceTutorial()
+        break
       default:
         break;
     }
@@ -123,13 +143,23 @@ export class TutorialSelectorService {
     this.resourceCreationTutorialService.startResourceCreationTutorial(this.user);
   }
 
+  private ideTutorial(){
+    if(!this.user) return
+    this.ideTutorialService.startIdeTutorial()
+  }
+
+  private sharedResourceTutorial(){
+    if(!this.user) return
+    this.sharedResourceTutorailService.startIdeTutorial()
+  }
+
 
  /**
    * Lance le tutoriel de découverte de la plateforme
    * Commence par le tutoriel de la barre d'outils, puis enchaîne avec celui
    * de la barre latérale une fois le premier terminé
    */
-  private startPlatformTutorial(): void {
+  startPlatformTutorial(): void {
     if (!this.user) return;
 
     this.currentTutorialChain = ['toolbar', 'sidebar'];
@@ -161,7 +191,6 @@ export class TutorialSelectorService {
         break;
 
       default:
-        //console.error(`Tutoriel inconnu dans la chaîne: ${currentTutorial}`);
         this.currentChainIndex++;
         this.executeNextTutorialInChain();
     }

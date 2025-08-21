@@ -50,29 +50,24 @@ export class SidebarTutorialService {
   ): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
-        id: 'welcome',
-        title: 'Bienvenue dans la navigation PLaTon !',
-        text: 'Ce tutoriel va vous présenter les différentes sections de l\'interface enseignant. Découvrons ensemble comment naviguer efficacement dans PLaTon pour gérer vos cours et ressources.',
-        buttons: [
-          {
-            text: 'Commencer le tutoriel',
-            action: () => this.shepherdService.next()
-          },
-          {
-            text: 'Passer le tutoriel',
-            secondary: true,
-            action: () => this.shepherdService.cancel()
-          }
-        ]
-      },
-      {
         id: 'logo',
         title: 'Logo PLaTon',
         text: 'Le logo PLaTon vous permet de revenir rapidement au tableau de bord depuis n\'importe quelle page, vous donnant un accès rapide à toutes les fonctionnalités essentielles.',
         attachTo: {
           element: '#tuto-sidebar-logo',
           on: 'right'
-        }
+        },
+        buttons: [
+          {
+            text: 'Passer le tutoriel',
+            secondary: true,
+            action: () => this.shepherdService.cancel()
+          },
+          {
+            text: 'Suivant (Entrée)',
+            action: () => this.shepherdService.next()
+          }
+        ]
       },
       {
         id: 'dashboard',
@@ -138,18 +133,7 @@ export class SidebarTutorialService {
       });
     }
 
-    // Ajouter les liens du bas
-   // steps.push(
-   //    {
-   //      id: 'account',
-   //      title: 'Mon compte',
-   //      text: 'Personnalisez votre profil enseignant, gérez vos préférences d\'interface et vos informations de contact. Les paramètres que vous définissez ici affectent votre expérience sur l\'ensemble de la plateforme.',
-   //      attachTo: {
-   //        element: '#tuto-sidebar-mon-compte',
-   //        on: 'right'
-   //      }
-   //    }
-   //  );
+
 
     // Documentation pour les enseignants
     if (isTeacherRole(user.role)) {
@@ -171,13 +155,13 @@ export class SidebarTutorialService {
       text: this.buildNavigationChoiceHTML(user),
       buttons: [
         {
-          text: 'Aller à la section choisie',
-          action: () => this.handleNavigationChoice()
-        },
-        {
           text: 'Terminer le tutoriel',
           secondary: true,
           action: () => this.shepherdService.complete()
+        },
+        {
+          text: 'Aller à la section choisie',
+          action: () => this.handleNavigationChoice()
         }
       ],
       when: {
@@ -195,7 +179,7 @@ export class SidebarTutorialService {
     const choices = this.getNavigationChoices(user);
 
     let html = '<div class="navigation-selection-container" style="margin: 5px 0;">';
-    html += '<p style="margin-bottom: 16px; font-weight: 500;">' +
+    html += '<p style="margin-bottom: 16px; font-weight: 500; color: var(--brand-text-primary);">' +
       'Maintenant que vous avez exploré les différentes sections de l\'interface.' + '<br>' +
       'Decouvrons ensemble comment naviguer efficacement dans PLaTon pour gérer vos cours et ressources. '+ '<br>' +
       'Choisissez où vous souhaitez commencer :</p>';
@@ -209,26 +193,27 @@ export class SidebarTutorialService {
                align-items: center;
                padding: 12px;
                margin: 8px 0;
-               border: 2px solid #e1e5e9;
+               border: 2px solid var(--brand-border-color);
                border-radius: 8px;
                cursor: pointer;
                transition: all 0.2s ease;
+               background: var(--brand-background-card);
              ">
           <div style="
             width: 40px;
             height: 40px;
-            background: #f0f2f5;
+            background: var(--brand-background-components);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 12px;
           ">
-            <mat-icon style="font-size: 20px; color: #666;">${choice.icon}</mat-icon>
+            <mat-icon style="font-size: 20px; color: var(--brand-text-secondary);">${choice.icon}</mat-icon>
           </div>
           <div>
-            <div style="font-weight: 600; margin-bottom: 4px;">${choice.title}</div>
-            <div style="font-size: 14px; color: #666;">${choice.description}</div>
+            <div style="font-weight: 600; margin-bottom: 4px; color: var(--brand-text-primary);">${choice.title}</div>
+            <div style="font-size: 14px; color: var(--brand-text-secondary);">${choice.description}</div>
           </div>
         </div>
       `;
@@ -238,12 +223,12 @@ export class SidebarTutorialService {
     html += `
       <style>
         .navigation-option:hover {
-          border-color: #1890ff !important;
-          background-color: #f6fdff !important;
+          border-color: rgba(var(--brand-color-primary-rgb), 0.6) !important;
+          background-color: rgba(var(--brand-color-primary-rgb), 0.05) !important;
         }
         .navigation-option.selected {
-          border-color: #1890ff !important;
-          background-color: #e6f7ff !important;
+          border-color: rgba(var(--brand-color-primary-rgb), 0.8) !important;
+          background-color: rgba(var(--brand-color-primary-rgb), 0.1) !important;
         }
       </style>
     `;
@@ -256,12 +241,7 @@ export class SidebarTutorialService {
    */
   private getNavigationChoices(user: User): NavigationChoice[] {
     const choices: NavigationChoice[] = [
-      // {
-      //   title: 'Tableau de bord',
-      //   url: '/dashboard',
-      //   icon: '📊📈',
-      //   description: 'Commencer par voir votre vue d\'ensemble'
-      // },
+
       {
         title: 'Cours',
         url: '/courses',
@@ -269,12 +249,7 @@ export class SidebarTutorialService {
         description: 'Explorer les cours disponibles',
         queryParams: { tutorial: 'course-management' }
       },
-      // {
-      //   title: 'Corrections',
-      //   url: '/corrections',
-      //   icon: '📝',
-      //   description: 'Voir vos exercices à corriger'
-      // }
+
     ];
 
     if (isTeacherRole(user.role)) {
@@ -286,22 +261,6 @@ export class SidebarTutorialService {
         queryParams: { tutorial: 'workspace' }
       });
     }
-
-    // if (user.role === UserRoles.admin) {
-    //   choices.push({
-    //     title: 'Administration',
-    //     url: '/admin',
-    //     icon: '🔧',
-    //     description: 'Gérer la plateforme'
-    //   });
-    // }
-
-    // choices.push({
-    //   title: 'Mon compte',
-    //   url: '/account/about-me',
-    //   icon: '👤',
-    //   description: 'Configurer votre profil'
-    // });
 
     return choices;
   }

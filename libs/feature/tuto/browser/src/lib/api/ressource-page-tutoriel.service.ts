@@ -15,7 +15,6 @@ export class ResourcePageTutorialService {
    * Démarre le tutoriel pour la page d'une ressource
    */
   startResourcePageTutorial(
-    //user: User,
     resource: Resource,
     isOwner: boolean,
     isMember: boolean,
@@ -48,13 +47,13 @@ export class ResourcePageTutorialService {
         text: `Découvrons ensemble les fonctionnalités disponibles pour ${this.getResourceTypeText(resource.type)}. Ce tutoriel vous montrera comment interagir avec cette ressource.`,
         buttons: [
           {
-            text: 'Commencer le tutoriel',
-            action: () => this.shepherdService.next()
-          },
-          {
             text: 'Passer le tutoriel',
             secondary: true,
             action: () => this.shepherdService.cancel()
+          },
+          {
+            text: 'Commencer le tutoriel',
+            action: () => this.shepherdService.next()
           }
         ]
       },
@@ -164,54 +163,30 @@ export class ResourcePageTutorialService {
     // Onglets de navigation
     steps.push(
       {
-        id: 'tabs',
-        title: 'Navigation par onglets',
-        text: 'Explorez les différentes sections de cette ressource.',
-        attachTo: {
-          element: 'ui-layout-tabs',
-          on: 'bottom'
-        }
+      id: 'tabs',
+      title: 'Navigation par onglets',
+       text: `<div style="text-align: center; padding: 20px;">
+           <h4>🗂️ Navigation par onglets</h4>
+           <p>Cette ressource est organisée en plusieurs sections accessibles via les onglets ci-dessous :</p>
+
+           <div style="text-align: left; margin: 20px 0;">
+             <p><strong>📊 Vue d'ensemble</strong> : Statistiques et informations générales</p>
+             <p><strong>📁 Explorer</strong> : ${resource.type === 'CIRCLE' ? 'Contenu du cercle' : 'Fichiers et contenu'}</p>
+             <p><strong>📜 Événements</strong> : Historique des modifications</p>
+             <p><strong>⚙️ Paramètres</strong> : Configuration et permissions</p>
+           </div>
+
+           <p style="font-size: 14px; color: var(--brand-text-secondary);">
+             Cliquez sur chaque onglet pour explorer les différentes sections !
+           </p>
+         </div>`,
+      attachTo: {
+        element: '.ant-tabs',
+        on: 'bottom'
       },
-      {
-        id: 'overview-tab',
-        title: 'Vue d\'ensemble',
-        text: 'Consultez les statistiques, l\'activité récente et les informations générales de la ressource.',
-        attachTo: {
-          element: 'ui-layout-tab:first-child',
-          on: 'bottom'
-        }
-      },
-      {
-        id: 'browse-tab',
-        title: 'Explorer',
-        text: resource.type === 'CIRCLE' ?
-          'Parcourez les ressources contenues dans ce cercle.' :
-          'Explorez les fichiers et le contenu de cette ressource.',
-        attachTo: {
-          element: 'ui-layout-tab:nth-child(2)',
-          on: 'bottom'
-        }
-      },
-      {
-        id: 'events-tab',
-        title: 'Événements',
-        text: 'Consultez l\'historique des modifications et activités sur cette ressource.',
-        attachTo: {
-          element: 'ui-layout-tab:nth-child(3)',
-          on: 'bottom'
-        }
-      },
-      {
-        id: 'settings-tab',
-        title: 'Paramètres',
-        text: isOwner ?
-          'Gérez les permissions, membres et paramètres avancés de votre ressource.' :
-          'Consultez les informations détaillées et les paramètres de la ressource.',
-        attachTo: {
-          element: 'ui-layout-tab:nth-child(4)',
-          on: 'bottom'
-        }
-      },
+      when: {
+      }
+    },
       {
         id: 'tutorial-complete',
         title: 'Tutoriel terminé !',
@@ -245,6 +220,8 @@ export class ResourcePageTutorialService {
         return 'cette ressource';
     }
   }
+
+
 
   /**
    * Construit le texte d'explication du statut

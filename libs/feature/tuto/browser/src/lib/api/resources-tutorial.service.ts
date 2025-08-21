@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service';
 import { User } from '@platon/core/common';
 import { Resource } from '@platon/feature/resource/common';
@@ -8,10 +9,21 @@ import { Resource } from '@platon/feature/resource/common';
   providedIn: 'root'
 })
 export class ResourcesTutorialService {
-  constructor(
-    private shepherdService: ShepherdService
-  ) {}
+  private readonly router = inject(Router)
+  private readonly shepherdService = inject(ShepherdService)
 
+  // Flag pour indiquer qu'on vient du tutoriel
+  private isFromTutorial = false
+
+  // Méthode pour vérifier si on vient du tutoriel
+  getIsFromTutorial(): boolean {
+    return this.isFromTutorial
+  }
+
+  // Méthode pour réinitialiser le flag
+  resetTutorialFlag(): void {
+    this.isFromTutorial = false
+  }
 
   startResourcesTutorial(
     user: User,
@@ -45,13 +57,13 @@ export class ResourcesTutorialService {
         text: 'Ce tutoriel va vous apprendre à rechercher, prévisualiser et éditer des ressources pédagogiques. Découvrons ensemble comment utiliser efficacement cet espace.',
         buttons: [
           {
-            text: 'Commencer le tutoriel',
-            action: () => { this.shepherdService.next(); this.shepherdService.disableEnterNavigation(); }
-          },
-          {
             text: 'Passer le tutoriel',
             secondary: true,
             action: () => this.shepherdService.cancel()
+          },
+          {
+            text: 'Commencer le tutoriel',
+            action: () => { this.shepherdService.next(); this.shepherdService.disableEnterNavigation(); }
           }
         ]
       },
@@ -89,7 +101,6 @@ export class ResourcesTutorialService {
                 this.shepherdService.enableEnterNavigation();
                 this.shepherdService.next();
               } else {
-                // Faire une recherche automatique d'exemple
                 this.shepherdService.enableEnterNavigation();
                 performSearch('Demo tutoriel');
                 setTimeout(() => this.shepherdService.next(), 100);
@@ -99,10 +110,9 @@ export class ResourcesTutorialService {
         ],
         when: {
           show: () => {
-            // Mettre en évidence la barre de recherche
             const searchBar = document.querySelector('#tuto-resources-searchbar') as HTMLElement;
             if (searchBar) {
-              searchBar.style.boxShadow = '0 0 0 3px rgba(24, 144, 255, 0.3)';
+              searchBar.style.boxShadow = '0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.3)';
               searchBar.style.borderRadius = '8px';
             }
           },
@@ -117,36 +127,28 @@ export class ResourcesTutorialService {
       }
     ];
 
-    if (items.length > 0 || hasSearched()) {
-      steps.push(
-        {
-          id: 'search-results',
-          title: 'Résultats de recherche',
-          text: 'Voici les ressources trouvées. Chaque carte représente une ressource avec ses informations principales : nom, type, auteur et statistiques.',
-          attachTo: {
-            element: '#tuto-resources-list',
-            on: 'top'
-          },
-          when: {
-            show: () => this.waitForResults(items, hasSearched)
-          }
+    steps.push(
+      {
+        id: 'search-results',
+        title: 'Résultats de recherche',
+        text: 'Voici les ressources trouvées. Chaque carte représente une ressource avec ses informations principales : nom, type, auteur et statistiques.',
+        attachTo: {
+          element: '#tuto-resources-list',
+          on: 'top'
         },
-        {
-          id: 'resource-actions',
-          title: 'Actions sur les ressources',
-          text: this.buildResourceActionsHTML(),
-          when: {
-            show: () => this.highlightFirstResource()
-          },
-          buttons: [
-            {
-              text: 'Compris !',
-              action: () => this.shepherdService.next()
-            }
-          ]
+        when: {
+          show: () => this.waitForResults(items, hasSearched)
         }
-      );
-    }
+      },
+      {
+        id: 'resource-actions',
+        title: 'Actions sur les ressources',
+        text: this.buildResourceActionsHTML(),
+        when: {
+          show: () => this.highlightFirstResource()
+        },
+      }
+    );
 
     steps.push(
       {
@@ -170,9 +172,18 @@ export class ResourcesTutorialService {
       {
         id: 'sidebar',
         title: 'Panneau latéral',
-        text: 'Ce panneau affiche votre espace personnel et les ressources récemment consultées. Vous pouvez le réduire pour gagner de l\'espace.',
+        text: 'Ce panneau affiche votre espace personnel et les ressources récemment consultées.',
         attachTo: {
           element: '#tuto-resources-sidebar',
+          on: 'left'
+        }
+      },
+      {
+        id: 'collapse-button',
+        title: 'Réduire le panneau',
+        text: 'Cliquez ici pour réduire le panneau latéral et gagner de l\'espace.',
+        attachTo: {
+          element: '#tuto-resources-collapse-button',
           on: 'left'
         }
       },
@@ -197,7 +208,7 @@ export class ResourcesTutorialService {
       {
         id: 'filter-button-intro',
         title: 'Utilisons les filtres avancés !',
-        text: 'Maintenant que vous connaissez l\'interface, apprenons à filtrer précisément les résultats. Cliquez sur le bouton filtre dans la barre de recherche.',
+        text: 'Maintenant que vous connaissez l\'interface, apprenons à filtrer précisément les résultats.</br> <b>Cliquez sur le bouton filtre dans la barre de recherche.</b>',
         attachTo: {
           element: '#tuto_filter_list',
           on: 'bottom'
@@ -208,23 +219,19 @@ export class ResourcesTutorialService {
         },
         buttons: [
           {
-            text: 'Cliquer sur le bouton filtre',
+            text: 'Précédent',//'Cliquer sur le bouton filtre',
+            secondary: true,
             action: () => {
-              const filterButton = document.querySelector('#tuto_filter_list') as HTMLElement;
-              if (filterButton) {
-                filterButton.click();
-              }
-              setTimeout(() => this.shepherdService.next(), 500);
+              this.shepherdService.previous()
             }
           }
         ],
         when: {
           show: () => {
-            // Mettre en évidence le bouton filtre
             const filterButton = document.querySelector('#tuto_filter_list') as HTMLElement;
             if (filterButton) {
               filterButton.style.animation = 'pulseButton 2s ease-in-out infinite';
-              filterButton.style.boxShadow = '0 0 0 3px rgba(24, 144, 255, 0.5)';
+              filterButton.style.boxShadow = '0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.5)';
             }
           },
           hide: () => {
@@ -245,7 +252,7 @@ export class ResourcesTutorialService {
             text: 'Suivant (Entrée)',
             action: () => this.shepherdService.next(),
           }
-          ],
+        ],
         when: {
           show: async () => {
             return this.waitForFilterDrawer();
@@ -255,22 +262,28 @@ export class ResourcesTutorialService {
       {
         id: 'filter-drawer-open',
         title: 'Panneau de recherche avancée',
-        text: 'Voici le panneau de recherche avancée. Vous allez maintenant apprendre à filtrer par type de ressource. Cochez uniquement "Cercle" pour voir tous les cercles disponibles.',
+        text: `<div style="text-align: center; padding: 10px;">
+                <h4>🎯 Filtres avancés ouverts !</h4>
+                <p>Le panneau de recherche avancée est maintenant ouvert sur la droite de votre écran.</p>
+                <p><strong>Prochaine étape :</strong> Nous allons apprendre à filtrer par type de ressource dans la section mise en évidence.</p>
+              </div>`,
+        buttons: [
+          {
+            text: 'Parfait, continuons !',
+            action: () => this.shepherdService.next(),
+          }
+        ],
         when: {
           show: async () => {
-            // Attendre que le drawer soit complètement visible
             await this.waitForFilterDrawer();
-
-            // Attendre que l'élément spécifique soit présent dans le DOM
             await this.waitForElement('#tuto-recherche-avancee');
 
-            // Puis effacer automatiquement la recherche
             const searchInput = document.querySelector('ui-search-bar input[type="search"]') as HTMLInputElement;
             if (searchInput) {
               searchInput.value = '';
               searchInput.dispatchEvent(new Event('input', { bubbles: true }));
               searchInput.dispatchEvent(new Event('change', { bubbles: true }));
-              performSearch(''); // Effacer la recherche
+              performSearch('');
             }
           }
         }
@@ -285,51 +298,9 @@ export class ResourcesTutorialService {
         },
         buttons: [
           {
-            text: 'Faire la sélection pour moi',
-            action: () => {
-              // Attendre un peu pour que le DOM soit prêt
-              setTimeout(() => {
-                // Sélectionner automatiquement Cercle et désélectionner les autres
-                const checkboxes = document.querySelectorAll('#tuto-types-recourses mat-checkbox');
-                checkboxes.forEach(checkbox => {
-                  const formControlName = (checkbox as HTMLElement).getAttribute('formcontrolname') ||
-                                         (checkbox as HTMLElement).getAttribute('formControlName') ||
-                                         (checkbox as HTMLElement).getAttribute('ng-reflect-name');
-
-                  if (formControlName === 'CIRCLE') {
-                    // Cocher Cercle s'il n'est pas déjà coché
-                    if (!this.isCheckboxChecked(checkbox as HTMLElement)) {
-                      const input = checkbox.querySelector('input[type="checkbox"]') as HTMLInputElement;
-                      if (input) {
-                        input.click();
-                      } else {
-                        (checkbox as HTMLElement).click();
-                      }
-                    }
-                  } else if (formControlName) {
-                    // Décocher les autres s'ils sont cochés
-                    if (this.isCheckboxChecked(checkbox as HTMLElement)) {
-                      const input = checkbox.querySelector('input[type="checkbox"]') as HTMLInputElement;
-                      if (input) {
-                        input.click();
-                      } else {
-                        (checkbox as HTMLElement).click();
-                      }
-                    }
-                  }
-                });
-
-                // Avancer au bout de 500ms pour laisser le temps aux changements
-                setTimeout(() => this.shepherdService.next(), 500);
-              }, 100);
-            }
-          },
-          {
             text: 'J\'ai coché "Cercle"',
             action: () => {
-              // Attendre un peu pour s'assurer que le DOM est à jour
               setTimeout(() => {
-                // Chercher toutes les checkboxes dans la section
                 const typeSection = document.querySelector('#tuto-types-recourses');
                 if (!typeSection) {
                   console.error('Section types non trouvée');
@@ -338,10 +309,17 @@ export class ResourcesTutorialService {
                 }
 
                 const allCheckboxes = typeSection.querySelectorAll('mat-checkbox');
-
                 let circleChecked = false;
-
+                let caseChecked = 0;
                 allCheckboxes.forEach(cb => {
+                  if(this.isCheckboxChecked(cb as HTMLElement)){
+                    caseChecked++;
+                  }
+                })
+                if (caseChecked !== 1) {
+                  alert('Veuillez cocher seulement la case "Cercle" pour continuer.');
+                } else {
+                  allCheckboxes.forEach(cb => {
                   const formControlName = (cb as HTMLElement).getAttribute('formcontrolname') ||
                                          (cb as HTMLElement).getAttribute('formControlName') ||
                                          (cb as HTMLElement).getAttribute('ng-reflect-name');
@@ -351,10 +329,11 @@ export class ResourcesTutorialService {
                   }
                 });
 
-                if (circleChecked) {
-                  this.shepherdService.next();
-                } else {
-                  alert('Veuillez cocher la case "Cercle" pour continuer.');
+                  if (circleChecked) {
+                    this.shepherdService.next();
+                  } else {
+                    alert('Veuillez cocher la case "Cercle" pour continuer.');
+                  }
                 }
               }, 100);
             }
@@ -362,14 +341,13 @@ export class ResourcesTutorialService {
         ],
         when: {
           show: () => {
-            // Mettre en évidence la section types
             setTimeout(() => {
               const typeSection = document.querySelector('#tuto-types-recourses') as HTMLElement;
               if (typeSection) {
-                typeSection.style.backgroundColor = 'rgba(24, 144, 255, 0.05)';
+                typeSection.style.backgroundColor = 'rgba(var(--brand-color-primary-rgb), 0.05)';
                 typeSection.style.padding = '10px';
                 typeSection.style.borderRadius = '8px';
-                typeSection.style.border = '2px solid rgba(24, 144, 255, 0.3)';
+                typeSection.style.border = '2px solid rgba(var(--brand-color-primary-rgb), 0.3)';
               }
             }, 300);
           },
@@ -398,19 +376,15 @@ export class ResourcesTutorialService {
         },
         buttons: [
           {
-            text: 'Cliquer sur le bouton "Appliquer"',
+            text: 'Précédent',
+            secondary: true,
             action: () => {
-              const applyButton = document.querySelector('button[color="primary"]') as HTMLElement;
-              if (applyButton) {
-                applyButton.click();
-              }
-              setTimeout(() => this.shepherdService.next(), 500);
+              this.shepherdService.previous()
             }
           },
         ],
         when: {
           show: () => {
-            // Mettre en évidence le bouton Appliquer
             const applyButton = document.querySelector('button[color="primary"]') as HTMLElement;
             if (applyButton) {
               applyButton.style.animation = 'pulseButton 2s ease-in-out infinite';
@@ -430,54 +404,42 @@ export class ResourcesTutorialService {
         text: 'Voici tous les cercles disponibles ! Chaque cercle peut contenir des exercices, activités et autres ressources.',
         when: {
           show: () => {
-            // Attendre que les résultats soient chargés
             setTimeout(() => {
               this.highlightCircles();
             }, 1000);
           }
         }
       },
-      {
-        id: 'click-circle',
-        title: 'Explorez un cercle',
-        text: 'Cliquez sur n\'importe quel cercle pour voir son contenu. Les cercles sont des espaces d\'organisation pour regrouper des ressources par thème ou objectif.',
-        attachTo: {
-          element: 'resource-item', //'resource-item:first-child',
-          on: 'bottom'
-        },
-        buttons: [
-          {
-            text: 'J\'explore !',
-            action: () => this.shepherdService.next()
-          }
-        ],
-        when: {
-          show: () => {
-            // Ajouter un listener sur les cercles
-            setTimeout(() => {
-              const circles = document.querySelectorAll('resource-item');
-              circles.forEach(circle => {
-                circle.addEventListener('click', () => {
-                  // Terminer le tutoriel quand l'utilisateur clique sur un cercle
-                  setTimeout(() => this.shepherdService.complete(), 500);
-                });
-              });
-            }, 500);
-          }
-        }
-      },
-      {
-        id: 'tutorial-complete',
-        title: 'Tutoriel terminé !',
-        text: this.buildCompletionHTML(),
-        buttons: [
-          {
-            text: 'Terminer',
-            action: () => this.shepherdService.complete()
-          }
-        ]
-      }
     );
+
+    const clickCircleStep: TutorialStep = {
+      id: 'click-circle',
+      title: 'Explorez le premier cercle',
+      text: 'Cliquez sur le <strong>premier cercle</strong> de la liste pour découvrir son contenu et continuer le tutoriel.',
+      attachTo: {
+        element: '#tuto-title-resource',
+        on: 'bottom'
+      },
+      advanceOn: {
+        selector: '#tuto-title-resource',
+        event: 'click'
+      },
+      buttons: [
+        {
+          text: 'Cliquer sur le premier cercle',
+          action: () => this.clickFirstCircle()
+        }
+      ],
+      when: {
+        show: () => {
+          this.addTutorialParamToFirstCircleLinks()
+        },
+        hide: () => {
+        }
+      }
+    }
+
+    steps.push(clickCircleStep)
 
     return steps;
   }
@@ -503,10 +465,9 @@ export class ResourcesTutorialService {
       const firstResource = document.querySelector('resource-item:first-child') as HTMLElement;
       if (firstResource) {
         firstResource.style.transition = 'all 0.3s ease';
-        firstResource.style.boxShadow = '0 0 0 3px rgba(24, 144, 255, 0.3)';
+        firstResource.style.boxShadow = '0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.3)';
         firstResource.style.borderRadius = '8px';
 
-        // Nettoyer après le tutoriel
         setTimeout(() => {
           firstResource.style.boxShadow = '';
           firstResource.style.borderRadius = '';
@@ -521,84 +482,48 @@ export class ResourcesTutorialService {
   private buildResourceActionsHTML(): string {
     return `
       <div style="padding: 20px; max-width: 400px;">
-        <h3 style="margin-bottom: 16px; font-weight: 600;">Actions disponibles sur chaque ressource :</h3>
+      <h3 style="margin-bottom: 16px; font-weight: 600;">Actions disponibles sur chaque ressource :</h3>
 
-        <div style="margin-bottom: 16px;">
-          <div style="display: flex; align-items: center; margin-bottom: 12px;">
-            <mat-icon style="color: #1890ff; margin-right: 12px;">▸</mat-icon>
-            <div>
-              <strong>Prévisualiser</strong>
-              <p style="margin: 4px 0; font-size: 14px; color: #666;">
-                Cliquez sur le titre ou l'icône prévisualisée pour voir le contenu de la ressource sans l'ouvrir en édition.
-              </p>
-            </div>
-          </div>
+      <div style="margin-bottom: 16px;">
 
-          <div style="display: flex; align-items: center; margin-bottom: 12px;">
-            <mat-icon style="color: #52c41a; margin-right: 12px;">✎</mat-icon>
-            <div>
-              <strong>Éditer</strong>
-              <p style="margin: 4px 0; font-size: 14px; color: #666;">
-                Cliquez sur le bouton crayon pour modifier la ressource (si vous en avez les droits).
-              </p>
-            </div>
-          </div>
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+        <svg viewBox="64 64 896 896" focusable="false" fill="currentColor" width="3.5em" height="3.5em" data-icon="edit" aria-hidden="true" style="margin-right: 16px;"><path d="M257.7 752c2 0 4-.2 6-.5L431.9 722c2-.4 3.9-1.3 5.3-2.8l423.9-423.9a9.96 9.96 0 000-14.1L694.9 114.9c-1.9-1.9-4.4-2.9-7.1-2.9s-5.2 1-7.1 2.9L256.8 538.8c-1.5 1.5-2.4 3.3-2.8 5.3l-29.5 168.2a33.5 33.5 0 009.4 29.8c6.6 6.4 14.9 9.9 23.8 9.9zm67.4-174.4L687.8 215l73.3 73.3-362.7 362.6-88.9 15.7 15.6-89zM880 836H144c-17.7 0-32 14.3-32 32v36c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-36c0-17.7-14.3-32-32-32z"></path></svg>
+        <div>
+          <strong>Éditer</strong>
+          <p style="margin: 4px 0; font-size: 14px; color: var(--brand-text-secondary);">
+          Cliquez sur le bouton crayon pour modifier la ressource (si vous en avez les droits).
+          </p>
+        </div>
         </div>
 
-        <div style="padding: 12px; background: #f0f2f5; border-radius: 8px; margin-top: 16px;">
-          <p style="margin: 0; font-size: 14px;">
-            <strong>💡 Astuce :</strong> Les actions disponibles dépendent de vos permissions sur chaque ressource.
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+        <svg viewBox="64 64 896 896" focusable="false" fill="currentColor" width="3.5em" height="3.5em" data-icon="play-circle" aria-hidden="true" style="margin-right: 16px;"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path><path d="M719.4 499.1l-296.1-215A15.9 15.9 0 00398 297v430c0 13.1 14.8 20.5 25.3 12.9l296.1-215a15.9 15.9 0 000-25.8zm-257.6 134V390.9L628.5 512 461.8 633.1z"></path></svg>
+        <div>
+          <strong>Prévisualiser</strong>
+          <p style="margin: 4px 0; font-size: 14px; color: var(--brand-text-secondary);">
+          Cliquez sur le titre ou l'icône prévisualisée pour voir le contenu de la ressource sans l'ouvrir en édition.
           </p>
+        </div>
         </div>
       </div>
-    `;
-  }
 
-  /**
-   * Construit le HTML de fin de tutoriel
-   */
-  private buildCompletionHTML(): string {
-    return `
-      <div style="padding: 20px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
-        <h3 style="margin-bottom: 16px; font-weight: 600;">Bravo ! Vous maîtrisez maintenant l'espace de travail.</h3>
-
-        <div style="text-align: left; max-width: 400px; margin: 0 auto;">
-          <p style="margin-bottom: 16px;">Vous savez maintenant :</p>
-          <ul style="list-style: none; padding: 0;">
-            <li style="margin-bottom: 8px;">✅ Rechercher des ressources efficacement</li>
-            <li style="margin-bottom: 8px;">✅ Utiliser les filtres pour affiner vos recherches</li>
-            <li style="margin-bottom: 8px;">✅ Prévisualiser et éditer des ressources</li>
-            <li style="margin-bottom: 8px;">✅ Naviguer dans l'arbre des cercles</li>
-            <li style="margin-bottom: 8px;">✅ Accéder à votre espace personnel</li>
-            <li style="margin-bottom: 8px;">✅ Filtrer par type de ressource</li>
-            <li style="margin-bottom: 8px;">✅ Explorer les cercles et leur contenu</li>
-          </ul>
-        </div>
-
-        <div style="margin-top: 24px; padding: 16px; background: #e6f7ff; border-radius: 8px;">
-          <p style="margin: 0; font-size: 14px;">
-            <strong>Prochaine étape :</strong> Essayez de créer votre première ressource en utilisant le bouton "+" dans la barre d'outils !
-          </p>
-        </div>
-
-        <p style="margin-top: 16px; font-size: 14px; color: #666;">
-          Vous pouvez relancer ce tutoriel à tout moment en cliquant sur le bouton d'aide.
+      <div style="padding: 12px; background: var(--brand-background-components); border-radius: 8px; margin-top: 16px;">
+        <p style="margin: 0; font-size: 14px;">
+        <strong>💡 Astuce :</strong> Les actions disponibles dépendent de vos permissions sur chaque ressource.
         </p>
       </div>
+      </div>
     `;
   }
 
-
   /**
- * Attend que le drawer de filtres soit ouvert et visible
- */
+   * Attend que le drawer de filtres soit ouvert et visible
+   */
   private waitForFilterDrawer(): Promise<void> {
     return new Promise<void>((resolve) => {
       const checkDrawer = () => {
         const drawer = document.querySelector('.ant-drawer-content-wrapper');
         if (drawer && (drawer as HTMLElement).offsetWidth > 0) {
-
           setTimeout(() => {
             resolve();
           }, 300);
@@ -617,27 +542,22 @@ export class ResourcesTutorialService {
    * Vérifie si une checkbox est cochée
    */
   private isCheckboxChecked(checkbox: HTMLElement): boolean {
-  // Chercher d'abord l'input
     const input = checkbox.querySelector('input[type="checkbox"]');
     if (input && (input as HTMLInputElement).checked) {
       return true;
     }
 
-    // Autres moyens de vérifier (en fonction du framework)
-    // Pour Angular Material
     const isCheckedClass = checkbox.classList.contains('mat-checkbox-checked') ||
                           checkbox.classList.contains('mat-mdc-checkbox-checked');
     if (isCheckedClass) {
       return true;
     }
 
-    // Pour Ant Design
     const antChecked = checkbox.classList.contains('ant-checkbox-checked');
     if (antChecked) {
       return true;
     }
 
-    // Vérifier l'attribut aria-checked
     const ariaChecked = checkbox.getAttribute('aria-checked');
     if (ariaChecked === 'true') {
       return true;
@@ -656,7 +576,7 @@ export class ResourcesTutorialService {
       setTimeout(() => {
         element.style.transition = 'all 0.3s ease';
         element.style.transform = 'translateX(5px)';
-        element.style.boxShadow = '0 2px 8px rgba(24, 144, 255, 0.2)';
+        element.style.boxShadow = '0 2px 8px rgba(var(--brand-color-primary-rgb), 0.2)';
 
         setTimeout(() => {
           element.style.transform = '';
@@ -691,7 +611,7 @@ export class ResourcesTutorialService {
     });
   }
 
-    /**
+  /**
    * Attend qu'un élément spécifique soit présent dans le DOM
    */
   private waitForElement(selector: string): Promise<HTMLElement> {
@@ -699,20 +619,16 @@ export class ResourcesTutorialService {
       const checkElement = () => {
         const element = document.querySelector(selector) as HTMLElement;
         if (element) {
-          // L'élément est présent dans le DOM
           setTimeout(() => {
             resolve(element);
-          }, 100); // Court délai pour s'assurer que l'élément est complètement rendu
+          }, 100);
         } else {
-          // Continuer à vérifier toutes les 100ms
           setTimeout(checkElement, 100);
         }
       };
 
-      // Commencer à vérifier
       checkElement();
 
-      // Timeout de sécurité après 5 secondes
       setTimeout(() => {
         console.warn(`Timeout waiting for element: ${selector}`);
         resolve(document.querySelector(selector) as HTMLElement);
@@ -720,5 +636,131 @@ export class ResourcesTutorialService {
     });
   }
 
+  /**
+   * Force le clic sur le premier cercle
+   */
+  private clickFirstCircle(): void {
+    const firstCircle = document.querySelector('resource-item:first-child') as HTMLElement
+    if (firstCircle) {
+      this.isFromTutorial = true
 
+      const resourceId = this.getResourceIdFromElement(firstCircle)
+
+      if (resourceId) {
+        this.router.navigate(['/resources', resourceId], {
+          queryParams: { fromTutorial: 'true' }
+        }).then(() => {
+          this.shepherdService.complete()
+        })
+      } else {
+        firstCircle.click()
+      }
+    }
+  }
+
+  /**
+   * Ajoute le paramètre fromTutorial aux liens du premier cercle
+   */
+  private addTutorialParamToFirstCircleLinks(): void {
+    const firstCircle = document.querySelector('resource-item:first-child') as HTMLElement
+    if (!firstCircle) return
+
+    const links = firstCircle.querySelectorAll('a[href*="/resources/"]') as NodeListOf<HTMLAnchorElement>
+
+    links.forEach(link => {
+      if (!link.dataset.originalHref) {
+        link.dataset.originalHref = link.href
+      }
+
+      const url = new URL(link.href)
+      url.searchParams.set('fromTutorial', 'true')
+      link.href = url.toString()
+    })
+
+    firstCircle.addEventListener('click', this.handleFirstCircleClick.bind(this), { once: false })
+  }
+
+  /**
+   * Gère le clic sur le premier cercle
+   */
+  private handleFirstCircleClick = (event: Event): void => {
+    const target = event.target as HTMLElement
+    const link = target.closest('a[href*="/resources/"]') as HTMLAnchorElement
+
+    if (!link) {
+      event.preventDefault()
+      this.clickFirstCircle()
+    } else {
+      this.clickFirstCircle()
+    }
+  }
+
+  /**
+   * Met en évidence le premier cercle
+   */
+  private highlightFirstCircle(): void {
+    setTimeout(() => {
+      const firstCircle = document.querySelector('resource-item:first-child') as HTMLElement
+      if (firstCircle) {
+        firstCircle.style.transition = 'all 0.3s ease'
+        firstCircle.style.transform = 'scale(1.02)'
+        firstCircle.style.boxShadow = '0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.5)'
+        firstCircle.style.borderRadius = '8px'
+        firstCircle.style.animation = 'pulseHighlight 2s ease-in-out infinite'
+
+        this.addPulseAnimation()
+      }
+    }, 300)
+  }
+
+  /**
+   * Ajoute l'animation CSS pour le pulse
+   */
+  private addPulseAnimation(): void {
+    const styleId = 'tutorial-pulse-animation'
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style')
+      style.id = styleId
+      style.textContent = `
+        @keyframes pulseHighlight {
+          0%, 100% {
+            box-shadow: 0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.5);
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(var(--brand-color-primary-rgb), 0.3);
+          }
+        }
+        @keyframes pulseButton {
+          0%, 100% {
+            box-shadow: 0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.5);
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(var(--brand-color-primary-rgb), 0.3);
+          }
+        }
+      `
+      document.head.appendChild(style)
+    }
+  }
+
+  /**
+   * Récupère l'ID de la ressource depuis l'élément DOM
+   */
+  private getResourceIdFromElement(element: HTMLElement): string | null {
+    const resourceId = element.getAttribute('data-resource-id') ||
+                      element.getAttribute('data-id') ||
+                      element.querySelector('[data-resource-id]')?.getAttribute('data-resource-id')
+
+    if (resourceId) {
+      return resourceId
+    }
+
+    const link = element.querySelector('a[href*="/resources/"]') as HTMLAnchorElement
+    if (link) {
+      const matches = link.href.match(/\/resources\/([^\/\?]+)/)
+      return matches ? matches[1] : null
+    }
+
+    return null
+  }
 }
