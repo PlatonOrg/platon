@@ -50,16 +50,46 @@ export class ToolbarTutorialService {
     const steps: TutorialStep[] = [
       {
         id: 'welcome',
-        title: 'Bienvenue dans PLaTon !',
-        text: 'Ce tutoriel va vous présenter les fonctionnalités principales de la barre d\'outils. Vous apprendrez à naviguer et à créer des ressources.',
+        title: 'Bienvenue dans PLaTon ! 🎉',
+        text: `<div style="text-align: center; padding: 20px;">
+                <h3 style="color: var(--brand-text-primary);
+                            margin: 0 0 12px 0;
+                            font-weight: 600;">
+                  Découvrez votre plateforme d'apprentissage
+                </h3>
+
+                <p style="color: var(--brand-text-secondary);
+                          margin: 0 0 20px 0;
+                          line-height: 1.5;">
+                  Ce tutoriel vous présente les fonctionnalités essentielles de PLaTon pour créer et gérer vos ressources pédagogiques.
+                </p>
+
+                <div style="background: var(--brand-background-components);
+                            border-radius: 8px;
+                            padding: 16px;
+                            margin: 16px 0;
+                            border-left: 3px solid var(--brand-color-primary);">
+                  <div style="text-align: left; color: var(--brand-text-primary); font-size: 14px;">
+                    • Navigation dans l'interface<br>
+                    • Création de ressources<br>
+                    • Personnalisation des paramètres
+                  </div>
+                </div>
+
+                <p style="color: var(--brand-text-secondary);
+                          font-size: 13px;
+                          margin: 16px 0 0 0;">
+                  ⏱️ Durée : ~2 minutes | 💡 Interruptible à tout moment
+                </p>
+              </div>`,
         buttons: [
           {
-            text: 'Passer le tutoriel',
+            text: 'Passer',
             secondary: true,
             action: () => this.shepherdService.cancel()
           },
           {
-            text: 'Commencer le tutoriel',
+            text: 'Commencer',
             action: () => this.shepherdService.next()
           }
         ]
