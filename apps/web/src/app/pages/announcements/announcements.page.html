@@ -1,0 +1,81 @@
+<div class="announcements-container mat-app-background">
+  <div class="sidebar">
+    <div class="search-bar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="searchText" (ngModelChange)="search()" placeholder="Rechercher" />
+      </mat-form-field>
+    </div>
+
+    <div class="announcements-list">
+      @if (!loading) { @if (filteredAnnouncements.length > 0) { @for (announcement of filteredAnnouncements; track
+      announcement.id) {
+      <div
+        class="announcement-item"
+        [class]="{ selected: selectedAnnouncement?.id === announcement.id }"
+        (click)="selectAnnouncement(announcement)"
+      >
+        <div class="announcement-icon">
+          <i nz-icon [nzType]="announcement.icon || 'notification'" nzTheme="twotone" style="margin-top: 4px"></i>
+        </div>
+
+        <div class="announcement-summary">
+          <h4 class="mat-title announcement-title">{{ announcement.title }}</h4>
+          <p class="mat-body-1 announcement-desc">{{ announcement.description }}</p>
+          <div class="announcement-meta">
+            <span class="date">{{ announcement.createdAt | date : 'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+      } } @else {
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <p>Aucune annonce ne correspond à votre recherche</p>
+      </div>
+      } } @else {
+      <div class="loading-container">
+        @for (i of [1, 2, 3]; track i) {
+        <div class="loading-card">
+          <div class="loading-header">
+            <div class="loading-icon"></div>
+            <div class="loading-title"></div>
+          </div>
+          <div class="loading-text"></div>
+          <div class="loading-text short"></div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="content">
+    @if (selectedAnnouncement) {
+    <div class="announcement-detail-card">
+      <div class="announcement-header">
+        <div class="title">
+          <h1>{{ selectedAnnouncement.title }}</h1>
+        </div>
+        <div class="announcement-subtitle">Publié le {{ selectedAnnouncement.createdAt | date : 'dd MMMM yyyy' }}</div>
+        <div>Par {{ selectedAnnouncement.publisher?.firstName }} {{ selectedAnnouncement.publisher?.lastName }}</div>
+      </div>
+      <nz-spacer></nz-spacer>
+      <div class="announcement-content">
+        <div class="announcement-body">
+          <p class="announcement-description">{{ selectedAnnouncement.description }}</p>
+          @if (selectedAnnouncement.data) {
+          <div id="viewer-container">
+            <ui-editorjs-viewer [data]="selectedAnnouncement.data"></ui-editorjs-viewer>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    } @else {
+    <div class="no-selection">
+      <mat-icon>announcement</mat-icon>
+      <p>Sélectionnez une annonce pour voir son contenu</p>
+    </div>
+    }
+  </div>
+</div>

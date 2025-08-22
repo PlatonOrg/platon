@@ -90,8 +90,13 @@
                 <mat-icon>content_copy</mat-icon>
               </button>
             </div>
-            <div class="terminal-body" #terminalBody>
+            <!-- <div class="terminal-body" #terminalBody>
               <pre><code>{{player?.platon_logs?.join('\n')}}</code></pre>
+            </div> -->
+            <div class="terminal-body" #terminalBody>
+              @for (log of player?.platon_logs; track $index) {
+              <div [class]="'terminal-line ' + (isErrorLog(log) ? 'error-line' : 'normal-line')">{{ log }}</div>
+              }
             </div>
           </div>
         </ng-container>

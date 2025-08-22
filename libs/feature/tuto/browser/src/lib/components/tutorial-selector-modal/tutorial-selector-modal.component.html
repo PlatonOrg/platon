@@ -1,0 +1,32 @@
+@if (tutorialService.isModalOpen()) {
+<div class="modal-overlay" (click)="onOverlayClick()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Choisissez un tutoriel</h2>
+      <button class="close-button" (click)="tutorialService.closeTutorialSelector()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-description">Sélectionnez le tutoriel que vous souhaitez suivre pour découvrir PLaTon.</p>
+
+      <div class="tutorials-grid">
+        @for (tutorial of tutorialService.tutorials; track tutorial.id) {
+        <div class="tutorial-card" (click)="selectTutorial(tutorial.id)">
+          <div class="tutorial-icon">
+            <mat-icon>{{ tutorial.icon }}</mat-icon>
+          </div>
+          <div class="tutorial-content">
+            <h3>{{ tutorial.title }}</h3>
+            <p>{{ tutorial.description }}</p>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="tutorialService.closeTutorialSelector()">Annuler</button>
+    </div>
+  </div>
+</div>
+}

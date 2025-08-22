@@ -1,0 +1,134 @@
+<div class="page-header">
+  <h1>Gestion des annonces</h1>
+  <button nz-button nzType="primary" nz-tooltip="Créer une nouvelle annonce" (click)="openCreateDialog()">
+    <span nz-icon nzType="plus" nzTheme="outline"></span>
+    <span class="button-text">Créer une annonce</span>
+  </button>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <!-- Table pour écrans moyens et grands -->
+  <div class="desktop-table-container">
+    <nz-table #announcementTable [nzData]="announcements" nzSize="small" [nzScroll]="{ x: '800px' }">
+      <thead>
+        <tr>
+          <th nzWidth="180px">Titre</th>
+          <th nzWidth="250px">Description</th>
+          <th nzWidth="50px">État</th>
+          <th nzWidth="150px">Date de création</th>
+          <th nzWidth="150px">Rôles ciblés</th>
+          <th nzWidth="120px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(item of announcementTable.data; track item) {
+        <tr>
+          <td class="truncate-description">{{ item.title }}</td>
+          <td>{{ limitedDescription(item.description) }}</td>
+          <td>
+            <nz-tag [nzColor]="item.active ? 'green' : 'red'">
+              {{ item.active ? 'Actif' : 'Inactif' }}
+            </nz-tag>
+          </td>
+          <td>{{ item.createdAt | date : 'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <ng-container *ngIf="item.targetedRoles?.length; else allRoles">
+              @for(role of item.targetedRoles; track role) {
+              <nz-tag [nzColor]="getRoleColor(role)">
+                {{ formatRoleName(role) }}
+              </nz-tag>
+              }
+            </ng-container>
+            <ng-template #allRoles>
+              <nz-tag nzColor="default">Tous les utilisateurs</nz-tag>
+            </ng-template>
+          </td>
+          <td>
+            <!-- Boutons d'actions  -->
+            <bouton
+              nz-button
+              nzType="text"
+              nzShape="circle"
+              nz-tooltip="Prévisualiser"
+              (click)="openPreviewDialog(item)"
+            >
+              <span nz-icon nzType="play-circle" nzTheme="twotone"></span>
+            </bouton>
+            <button nz-button nzType="text" nzShape="circle" nz-tooltip="Modifier" (click)="openEditDialog(item)">
+              <span nz-icon nzType="edit" nzTheme="outline"></span>
+            </button>
+            <button
+              nz-button
+              nzType="text"
+              nzShape="circle"
+              [nzType]="item.active ? 'primary' : 'default'"
+              (click)="toggleActive(item)"
+              [nz-tooltip]="item.active ? 'Désactiver' : 'Activer'"
+            >
+              <span nz-icon [nzType]="item.active ? 'eye-invisible' : 'eye'" nzTheme="outline"></span>
+            </button>
+            <button
+              nz-button
+              nzDanger
+              nzType="text"
+              nzShape="circle"
+              (click)="deleteAnnouncement(item.id)"
+              nz-tooltip="Supprimer"
+            >
+              <span nz-icon nzType="delete" nzTheme="outline"></span>
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </nz-table>
+  </div>
+
+  <!-- Cards pour les petits écrans (mobile) -->
+  <div class="mobile-card-container">
+    @for(item of announcements; track item) {
+    <nz-card class="announcement-card">
+      <div class="card-header">
+        <h3>{{ item.title }}</h3>
+        <nz-tag [nzColor]="item.active ? 'green' : 'red'">
+          {{ item.active ? 'Actif' : 'Inactif' }}
+        </nz-tag>
+      </div>
+      <p class="description">{{ item.description }}</p>
+      <div class="card-info">
+        <div class="info-item">
+          <span class="label">Date:</span>
+          <span>{{ item.createdAt | date : 'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Rôles:</span>
+          <span>
+            <ng-container *ngIf="item.targetedRoles?.length; else mobileAllRoles">
+              {{ formatRolesList(item.targetedRoles ?? []) }}
+            </ng-container>
+            <ng-template #mobileAllRoles>Tous les utilisateurs</ng-template>
+          </span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button nz-button nzType="default" nzSize="small" (click)="openPreviewDialog(item)">
+          <span nz-icon nzType="play-circle" nzTheme="twotone"></span>
+          Aperçu
+        </button>
+        <button nz-button nzType="default" nzSize="small" (click)="toggleActive(item)">
+          <span nz-icon [nzType]="item.active ? 'eye-invisible' : 'eye'" nzTheme="outline"></span>
+          {{ item.active ? 'Désactiver' : 'Activer' }}
+        </button>
+        <button nz-button nzType="primary" nzSize="small" (click)="openEditDialog(item)">
+          <span nz-icon nzType="edit" nzTheme="outline"></span>
+          Modifier
+        </button>
+        <button nz-button nzDanger nzSize="small" (click)="deleteAnnouncement(item.id)">
+          <span nz-icon nzType="delete" nzTheme="outline"></span>
+          Supprimer
+        </button>
+      </div>
+    </nz-card>
+    }
+  </div>
+</nz-spin>

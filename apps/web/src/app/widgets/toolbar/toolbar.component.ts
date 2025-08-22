@@ -22,7 +22,7 @@ import { MatMenuModule } from '@angular/material/menu'
 
 import { AuthService, ThemeService, UserAvatarComponent, UserService } from '@platon/core/browser'
 import { UserCharterComponent } from './user-charter/user-charter.component'
-import { User, UserCharter, UserRoles } from '@platon/core/common'
+import { User, UserCharter, UserRoles, isTeacherRole } from '@platon/core/common'
 import { NotificationDrawerComponent } from '@platon/feature/notification/browser'
 import { DiscordInvitationComponent, DiscordButtonComponent } from '@platon/feature/discord/browser'
 import { ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
@@ -34,6 +34,10 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
+import { TutorialSelectorService } from '@platon/feature/tuto/browser'
+import { FeatureAnnouncementService, FeatureAnnouncementModalComponent } from '@platon/feature/announcement/browser'
+
+import { MatDividerModule } from '@angular/material/divider'
 
 @Component({
   standalone: true,
@@ -44,28 +48,24 @@ import { UiModalTemplateComponent } from '@platon/shared/ui'
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
     MatMenuModule,
+    MatDividerModule,
     MatButtonModule,
-
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
     NzPopoverModule,
-
     ResourcePipesModule,
     UserAvatarComponent,
     NotificationDrawerComponent,
     DiscordInvitationComponent,
     DiscordButtonComponent,
-
     UiModalTemplateComponent,
-
     NzPopoverModule,
     NzModalModule,
-
     UserCharterComponent,
+    FeatureAnnouncementModalComponent,
   ],
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
@@ -79,6 +79,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly breakpointObserver = inject(BreakpointObserver)
   private readonly elementRef = inject(ElementRef)
+  private readonly tutorialSelectorService = inject(TutorialSelectorService)
+  private readonly featureAnnouncementService = inject(FeatureAnnouncementService) // Nouveau service
 
   private readonly subscriptions: Subscription[] = []
 
@@ -144,6 +146,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.userCharter = await firstValueFrom(this.userService.findUserCharterById(this.user.id))
       this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
     }
+
+    this.firstLoginStartTuto()
+    this.checkFeatureAnnouncements()
 
     this.subscriptions.push(
       this.breakpointObserver
@@ -237,5 +242,30 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         buttonElement.click()
       }
     })
+  }
+
+  protected async openTutorialSelector(): Promise<void> {
+    if (this.user) {
+      this.tutorialSelectorService.openTutorialSelector()
+    }
+  }
+
+  private firstLoginStartTuto(): void {
+    if (this.user && isTeacherRole(this.user.role) && this.user.firstLogin) {
+      // Si c'est vraiment la première connexion
+      // firstLogin est défini mais lastLogin n'existe pas ou est undefined
+      const isFirstLogin = !this.user.lastLogin || this.user.lastLogin <= this.user.firstLogin
+      if (isFirstLogin) {
+        this.tutorialSelectorService.startPlatformTutorial()
+      }
+    }
+  }
+
+  private checkFeatureAnnouncements(): void {
+    if (this.user) {
+      setTimeout(async () => {
+        await this.featureAnnouncementService.checkForAnnouncements(this.user as User)
+      }, 2000)
+    }
   }
 }

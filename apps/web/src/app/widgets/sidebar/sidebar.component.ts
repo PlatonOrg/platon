@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
-import { RouterModule } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { User, UserRoles, isTeacherRole } from '@platon/core/common'
+import { SidebarTutorialService } from '@platon/feature/tuto/browser'
+import { NzModalModule } from 'ng-zorro-antd/modal'
 
 type NavLink = {
   url?: string | null
@@ -18,8 +20,7 @@ type NavLink = {
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule, NzModalModule],
 })
 export class SidebarComponent implements OnInit {
   protected readonly topLinks: NavLink[] = []
@@ -29,7 +30,12 @@ export class SidebarComponent implements OnInit {
 
   protected user?: User
 
-  constructor(private readonly authService: AuthService, private readonly changeDetectorRef: ChangeDetectorRef) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly sidebarTutorialService: SidebarTutorialService,
+    private readonly router: Router
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.user = await this.authService.ready()
@@ -42,6 +48,11 @@ export class SidebarComponent implements OnInit {
         url: '/dashboard',
         icon: 'dashboard',
         title: 'Tableau de bord',
+      },
+      {
+        url: '/announcements',
+        icon: 'announcement',
+        title: 'Annonces',
       },
       // {
       //   url: '/agenda',
@@ -80,11 +91,11 @@ export class SidebarComponent implements OnInit {
     )
 
     this.bottomLinks.push(
-      {
-        url: '/account/about-me',
-        icon: 'account_circle',
-        title: 'Mon compte',
-      },
+      // {
+      //   url: '/account/about-me',
+      //   icon: 'account_circle',
+      //   title: 'Mon compte',
+      // },
       ...(isTeacherRole(this.user.role)
         ? [
             {
@@ -96,7 +107,6 @@ export class SidebarComponent implements OnInit {
           ]
         : [])
     )
-
     this.changeDetectorRef.markForCheck()
   }
 
@@ -109,5 +119,9 @@ export class SidebarComponent implements OnInit {
     } else {
       this.expandedLinks.add(link.title)
     }
+  }
+
+  protected generateId(title: string): string {
+    return 'tuto-sidebar-' + title.toLowerCase().replace(/ /g, '-')
   }
 }

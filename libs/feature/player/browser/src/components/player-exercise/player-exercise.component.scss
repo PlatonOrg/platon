@@ -229,34 +229,44 @@ button.primary {
   }
 }
 
+
+
 .terminal-body {
   padding: 12px;
   color: #fff;
   max-height: 300px;
   overflow-y: auto;
+  font-family: 'Consolas', 'Monaco', monospace;
+  background: #1a1a1a;
 
-  // La barre de défilement est là
   &::-webkit-scrollbar {
     width: 8px;
   }
 
   &::-webkit-scrollbar-track {
-    background: #ffffff;
+    background: #333333;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #ffffff;
+    background-color: #666666;
     border-radius: 4px;
   }
 
-  pre {
+  // Supprimer les marges des lignes pour éviter les espaces
+  .terminal-line {
     margin: 0;
+    padding: 0;
+    line-height: 1.3;
+    color: #ffffff;
     white-space: pre-wrap;
     word-wrap: break-word;
   }
 
-  code {
-    font-family: 'Consolas', 'Monaco', monospace;
+  .error-line {
+    color: #ff6b6b;
+  }
+
+  .normal-line {
     color: #ffffff;
   }
 }

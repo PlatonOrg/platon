@@ -166,7 +166,6 @@ export class CourseActivitySettingsComponent implements OnInit {
           ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.restrictions))]
           : []),
       ])
-      console.log('Après la fonction update : ', res)
       this.activity = res[0]
       this.activityChange.emit(
         (this.activity = {

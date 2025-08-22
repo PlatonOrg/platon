@@ -2,48 +2,68 @@
   <button id="tuto-toolbar-menu-button" nz-button nzType="text" (click)="drawerOpenedChange.emit(!drawerOpened)">
     <mat-icon class="icon-color">menu</mat-icon>
   </button>
+
   <img
     *ngIf="!drawerOpened"
-    id="tuto-toolbar-logo"
     class="logo"
     src="assets/images/logo/platon.svg"
     alt="Logo PLaTon"
     [routerLink]="'/dashboard'"
+    title="Retour au tableau de bord"
   />
+
   <span class="icon-color" *ngIf="!mobile">PLaTon</span>
   <div class="spacer"></div>
 
   <ng-container *ngIf="canCreate">
-    <div class="menu-trigger-container">
-      <button
-        nz-button
-        nzType="primary"
-        nzShape="round"
-        nzSize="small"
-        (click)="userCharterAccepted ? null : acceptUserCharter()"
-        [matMenuTriggerFor]="userCharterAccepted ? actionMenu : null"
-      >
-        <span nz-icon nzType="plus"></span>
-      </button>
-      <span #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionMenu"></span>
-    </div>
+    <!-- Selectionner un tutoriel nz-tooltip="tutoriels" -->
+    <button id="tuto-help-button" nz-button nzType="text" nzSize="small" (click)="openTutorialSelector()">
+      <mat-icon class="icon-color">play_lesson</mat-icon>
+    </button>
+
+    <button
+      id="tuto-create-menu-container"
+      nz-button
+      nzType="primary"
+      nzShape="round"
+      nzSize="small"
+      (click)="userCharterAccepted ? null : acceptUserCharter()"
+      [matMenuTriggerFor]="userCharterAccepted ? actionMenu : null"
+    >
+      <span nz-icon nzType="plus"></span>
+    </button>
+    <span #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionMenu"></span>
   </ng-container>
 
-  <!-- *ngIf="!loggedToDiscord" -->
-  <button *ngIf="false" nz-button nzType="text" nzSize="small" (click)="openDiscordModal()" class="discord-button">
+  <!-- Bouton Discord (désactivé) -->
+  <button
+    *ngIf="false"
+    id="tuto-discord-button"
+    nz-button
+    nzType="text"
+    nzSize="small"
+    (click)="openDiscordModal()"
+    class="discord-button"
+  >
     <discord-button class="discord-button" />
   </button>
 
+  <!-- Sélecteur de thème -->
   <button id="tuto-toolbar-theme-button" nz-button nzType="text" nzSize="small" [matMenuTriggerFor]="themeMenu">
-    <mat-icon class="icon-color"> {{ themeIcon }} </mat-icon>
+    <mat-icon class="icon-color">{{ themeIcon }}</mat-icon>
   </button>
+
+  <!-- Notifications -->
   <button id="tuto-toolbar-notifications-button" nz-button nzType="text" nzSize="small" (click)="notifDrawer.open()">
     <nz-badge [nzCount]="(notifDrawer.count | async) || 0" [nzOffset]="[0, -4]">
-      <mat-icon class="icon-color"> notifications </mat-icon>
+      <mat-icon class="icon-color">notifications</mat-icon>
     </nz-badge>
   </button>
+
+  <!-- Avatar utilisateur -->
   <user-avatar
     *ngIf="user"
+    id="tuto-user-avatar"
     [user]="user"
     [size]="32"
     [showUsername]="mobile ? 'none' : 'stacked'"
@@ -52,8 +72,9 @@
   />
 </header>
 
-<mat-menu #actionMenu="matMenu">
-  <button mat-menu-item [routerLink]="['/courses/create']">
+<!-- Menu de création de ressources -->
+<mat-menu #actionMenu="matMenu" id="tuto-action-menu">
+  <button mat-menu-item [routerLink]="['/courses/create']" id="tuto-create-course" *ngIf="canCreateCourse">
     <mat-icon>local_library</mat-icon>
     <span>Créer un cours</span>
   </button>
@@ -62,6 +83,7 @@
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'CIRCLE', parent: createResourceParentParam }"
+    id="tuto-create-circle"
   >
     <mat-icon>{{ 'CIRCLE' | resourceIcon }}</mat-icon>
     <span>Créer un cercle</span>
@@ -71,6 +93,7 @@
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'ACTIVITY', parent: createResourceParentParam }"
+    id="tuto-create-activity"
   >
     <mat-icon>{{ 'ACTIVITY' | resourceIcon }}</mat-icon>
     <span>Créer une activité</span>
@@ -80,28 +103,31 @@
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'EXERCISE', parent: createResourceParentParam }"
+    id="tuto-create-exercise"
   >
     <mat-icon>{{ 'EXERCISE' | resourceIcon }}</mat-icon>
     <span>Créer un exercice</span>
   </button>
 </mat-menu>
 
-<mat-menu class="icon-color" #avatarMenu="matMenu">
-  <button mat-menu-item [routerLink]="'/account'">
+<!-- Menu utilisateur -->
+<mat-menu class="icon-color" #avatarMenu="matMenu" id="tuto-avatar-menu">
+  <button mat-menu-item [routerLink]="'/account'" id="tuto-account">
     <mat-icon>account_circle</mat-icon>
     <span>Mon compte</span>
   </button>
-  <button *ngIf="canCreate" mat-menu-item [routerLink]="'/resources/' + personalCircleId">
+  <button *ngIf="canCreate" mat-menu-item [routerLink]="'/resources/' + personalCircleId" id="tuto-personal-circle">
     <mat-icon>group_work</mat-icon>
     <span>Mon cercle</span>
   </button>
-  <button mat-menu-item (click)="signOut()">
+  <button mat-menu-item (click)="signOut()" id="tuto-logout">
     <mat-icon>logout</mat-icon>
     <span>Déconnexion</span>
   </button>
 </mat-menu>
 
-<mat-menu #notifMenu="matMenu">
+<!-- Menu des notifications (pour référence future) -->
+<mat-menu #notifMenu="matMenu" id="tuto-notif-menu">
   <button mat-menu-item>
     <mat-icon>account_circle</mat-icon>
     <span>Compte</span>
@@ -112,21 +138,23 @@
   </button>
 </mat-menu>
 
-<mat-menu #themeMenu="matMenu">
-  <button mat-menu-item (click)="lightTheme()">
+<!-- Menu des thèmes -->
+<mat-menu #themeMenu="matMenu" id="tuto-theme-menu">
+  <button mat-menu-item (click)="lightTheme()" id="tuto-light-theme">
     <mat-icon>light_mode</mat-icon>
     <span>Thème clair</span>
   </button>
-  <button mat-menu-item (click)="darkTheme()">
+  <button mat-menu-item (click)="darkTheme()" id="tuto-dark-theme">
     <mat-icon>dark_mode</mat-icon>
     <span>Thème sombre</span>
   </button>
-  <button mat-menu-item (click)="systemTheme()">
+  <button mat-menu-item (click)="systemTheme()" id="tuto-system-theme">
     <mat-icon>auto_awesome</mat-icon>
     <span>Thème système</span>
   </button>
 </mat-menu>
 
+<!-- Modal Discord -->
 <div #discordModal>
   <ui-modal-template [title]="'Discord'" #modal>
     <ng-template>
@@ -138,12 +166,18 @@
   </ui-modal-template>
 </div>
 
-<notif-drawer #notifDrawer />
+<!-- Drawer des notifications -->
+<notif-drawer #notifDrawer id="tuto-notif-drawer" />
 
+<!-- Composant de charte utilisateur -->
 <app-user-charter
   [user]="user"
   [userCharter]="userCharter"
   [userCharterModalVisible]="userCharterModalVisible"
   (userCharterModalVisibleChange)="userCharterModalVisible = $event"
   (userCharterAccepted)="onUserCharterAccepted($event)"
-></app-user-charter>
+  id="tuto-user-charter"
+>
+</app-user-charter>
+
+<feature-announcement-modal></feature-announcement-modal>

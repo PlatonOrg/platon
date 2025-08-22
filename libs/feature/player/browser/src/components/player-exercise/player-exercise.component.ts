@@ -592,6 +592,11 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  protected isErrorLog(log: string): boolean {
+    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
+    return errorPattern.test(log)
+  }
+
   protected async copyToClipboard(text: string | undefined): Promise<void> {
     if (!text) return
 
