@@ -33,24 +33,20 @@ export const Playground: React.FC<PlaygroundProps> = ({ items, height = '700px',
       }))
   }, [items, baseUrl])
 
-useEffect(() => {
-  const handler = (event: MessageEvent) => {
-    if (event.data?.type === 'resize') {
-      console.log('resizing iframe', event.data.height)
-      iframeRefs.current.forEach((iframe) => {
-        if (iframe?.contentWindow === event.source) {
-          iframe.style.height = `${event.data.height}px`
-        }
-      })
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === 'resize') {
+        iframeRefs.current.forEach((iframe) => {
+          if (iframe?.contentWindow === event.source) {
+            iframe.style.height = `${event.data.height}px`
+          }
+        })
+      }
     }
-  }
 
-  window.addEventListener('message', handler)
-  return () => window.removeEventListener('message', handler)
-}, [])
-
-
-
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [])
 
   if (filteredItems.length === 0) {
     return <div>No playground items available</div>

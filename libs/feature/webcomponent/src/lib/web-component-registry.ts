@@ -30,6 +30,8 @@ import { FoldableFeedbackComponentDefinition } from './widgets/foldable-feedback
 import { WordSelectorComponentDefinition } from './forms/word-selector/word-selector'
 import { EvaluatorComponentDefinition } from './forms/evaluator/evaluator'
 import { TimerComponentDefinition } from './widgets/timer/timer'
+import { ConfettiComponentDefinition } from './widgets/confetti/confetti'
+import { ImageClickerComponentDefinition } from './forms/image-clicker/image-clicker'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
@@ -79,6 +81,13 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     module: () =>
       import(/* webpackChunkName: "wc-evaluator" */ './forms/evaluator/evaluator.module').then(
         (m) => m.EvaluatorModule
+      ),
+  },
+  {
+    selector: 'wc-image-clicker',
+    module: () =>
+      import(/* webpackChunkName: "wc-image-clicker" */ './forms/image-clicker/image-clicker.module').then(
+        (m) => m.ImageClickerModule
       ),
   },
   {
@@ -198,6 +207,11 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
     selector: 'wc-timer',
     module: () => import(/* webpackChunkName: "wc-timer" */ './widgets/timer/timer.module').then((m) => m.TimerModule),
+  },
+  {
+    selector: 'wc-confetti',
+    module: () =>
+      import(/* webpackChunkName: "wc-confetti" */ './widgets/confetti/confetti.module').then((m) => m.ConfettiModule),
   },
 
   // INTERNALS
@@ -345,5 +359,15 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: TimerComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: ConfettiComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: ImageClickerComponentDefinition,
   },
 ]

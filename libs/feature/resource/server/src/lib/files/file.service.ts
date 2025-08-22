@@ -73,8 +73,8 @@ export class ResourceFileService {
       EXERCISE: 'exercises',
     }[resource.type]
 
-    // const extendsExpr = (resourceId: string, resourceVersion: string) =>
-    //   `@extends /${resourceId}:${resourceVersion}/${EXERCISE_MAIN_FILE}`
+    const commentedExtendsExpr = (resourceId: string, resourceVersion: string) =>
+      `// @extends /${resourceId}:${resourceVersion}/${EXERCISE_MAIN_FILE} \n// ⬆︎ Garder cette ligne commentée.`
 
     return {
       repo: await Repo.get(path.join(directory, resource.id), {
@@ -88,7 +88,7 @@ export class ResourceFileService {
           : undefined,
         defaultFiles: resource.templateId
           ? {
-              [EXERCISE_MAIN_FILE]: '', // extendsExpr(resource.templateId, resource.templateVersion || LATEST),
+              [EXERCISE_MAIN_FILE]: commentedExtendsExpr(resource.templateId, resource.templateVersion || LATEST),
               [TEMPLATE_OVERRIDE_FILE]: '{}',
               'readme.md': README_PLE,
             }

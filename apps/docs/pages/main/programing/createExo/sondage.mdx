@@ -1,0 +1,42 @@
+# Sondage Interactif
+## 🧩 Objectif
+Créer une activité interactive de **sondage** permettant aux participants de :
+ - Choisir une ou plusieurs propositions
+ - Répondre sous forme de **boutons radio** ou de **cases à cocher**
+ - Voir leur choix validé avec un retour personnalisé
+
+ ## ⚙️ Paramètres configurables (main.plc)
+ Le fichier `main.plc` contient les variables utilisées pour rendre l'exercice réutilisable:
+
+ |Variable | Description |
+ |:--------|:------------|
+ |`title`| Le titre affiché en haut de l'exercice|
+ |`statement`|L'énoncé ou la consigne du sondage |
+ |`les choix`| La liste des propositions (une par ligne)|
+ |`CB`| Booléen : `true` pour activer les cases à cocher (checkbox), `false` pour boutons radio|
+
+\
+ **Remarque:** Ces variables peuvent être modifiées dans l'interface graphique de PLaTon
+
+## 🛠️ Composants utilisés
+### Entrées
+ * `:wc-radio-group` -> Sélection **unique**
+ * `:wc-checkbox-group` -> Sélection **multiple**
+
+ \
+Ces composants sont créés dynamiquement dans la section `builder` .
+
+## 🧱 Code de construction (builder)
+
+```python
+    if CB:
+      theinput = checkBox
+    else:
+      theinput = radiogroup
+      theinput["disabled"] = False
+      propositions = leschoix.split("\n")
+      theinput["items"] = [{"content": choix} for choix in propositions]
+```
+🔹Ce code :
+* Active le bon type de composant (radio ou checkbox) selon al variable `CB`
+* Génère dynamiquement les options à partir de `leschoix`
