@@ -190,7 +190,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         run: async () => {
           this.removeAnswerFromLocalStorage()
           await this.evaluate(PlayerActions.CHECK_ANSWER)
-          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
+          if (this.player?.feedbacks && this.player.feedbacks.some((feedback) => feedback.content)) {
+            this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
+          }
         },
       },
       {
@@ -203,7 +205,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         showLabel: this.showLabelIfEnoughSpace,
         run: async () => {
           await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
-          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
           this.dialogService.success('Votre réponse a bien été sauvegardée.')
         },
       },
