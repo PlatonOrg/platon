@@ -145,7 +145,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
 
   protected readOnly?: boolean
 
-  protected step = 0
+  protected step = 2
 
   @Input()
   protected editor!: Editor

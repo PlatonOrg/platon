@@ -186,6 +186,8 @@ export class ActivityService {
       },
     })
 
+    console.log(changes)
+
     if (!activity) {
       throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
     }

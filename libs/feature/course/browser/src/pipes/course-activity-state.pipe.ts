@@ -21,10 +21,10 @@ const LABELS: Record<ActivityOpenStates, string> = {
 export class CourseActivityStatePipe implements PipeTransform {
   transform(value: Activity): State {
     return {
-      opened: () => ({ color: 'lime', state: 'opened', label: LABELS['opened'] }),
-      closed: () => ({ color: 'volcano', state: 'closed', label: LABELS['closed'] }),
+      opened: () => ({ color: '#339D55', state: 'opened', label: LABELS['opened'] }),
+      closed: () => ({ color: '#FF4D4F', state: 'closed', label: LABELS['closed'] }),
       planned: () => ({
-        color: 'blue',
+        color: '#1890FF',
         state: 'planned',
         label:
           LABELS['planned'] +

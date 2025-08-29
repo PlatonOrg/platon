@@ -1,0 +1,17 @@
+<div class="color-picker-container">
+  <div class="color-section">
+    <div class="color-header">
+      <span class="color-label">Couleur de l'activité</span>
+      <div class="color-preview" [style.background-color]="currentColor"></div>
+    </div>
+    <div>
+      <nz-slider
+        [ngModel]="hue"
+        (ngModelChange)="onHueChange($event)"
+        [nzMin]="0"
+        [nzMax]="359"
+        [nzTooltipVisible]="'never'"
+      ></nz-slider>
+    </div>
+  </div>
+</div>

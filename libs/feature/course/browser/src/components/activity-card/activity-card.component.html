@@ -1,122 +1,133 @@
 <ng-container *ngIf="item | courseActivityState as activityState">
-  <nz-ribbon [nzText]="activityState.label" [nzColor]="activityState.color">
-    <mat-card>
-      <img src="/assets/images/illustrations/laptop1.svg" alt="Activité" />
-      <mat-card-header>
-        <mat-card-title>
-          {{ item.title }}
-          <a
-            *ngIf="item.isChallenge"
-            nz-button
-            nzType="link"
-            [routerLink]="['/courses', item.courseId, 'challenges']"
-            [queryParams]="{
-              activity: item.id
-            }"
-            queryParamsHandling="merge"
-          >
-            <span nz-tooltip="Afficher les résultats du challenge" nz-icon nzType="trophy" nzTheme="twotone"></span>
-          </a>
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <nz-row [nzGutter]="[24, 24]" nzAlign="middle" nzJustify="center">
-          <nz-col nzSpan="12">
-            <mat-card-subtitle>
-              <b>Date de création</b>
-              <span> {{ item.createdAt | date }}</span>
-            </mat-card-subtitle>
-            <mat-card-subtitle>
-              <b>Date d'ouverture</b>
-              <span>
-                {{ item.openAt | date : 'medium' }}
-                <ng-container *ngIf="!item.openAt">
-                  <span nz-icon nzType="stop" nzTheme="outline"></span>
-                </ng-container>
-              </span>
-            </mat-card-subtitle>
-            <mat-card-subtitle>
-              <b>Date de fermeture</b>
-              <span>
-                {{ item.closeAt | date : 'medium' }}
-                <ng-container *ngIf="!item.closeAt">
-                  <span nz-icon nzType="stop" nzTheme="outline"></span>
-                </ng-container>
-              </span>
-            </mat-card-subtitle>
-            <mat-card-subtitle>
-              <b>Nombre d'exercices</b>
-              <span>
-                {{ item.exerciseCount }}
-              </span>
-            </mat-card-subtitle>
-          </nz-col>
-          <nz-col nzSpan="12">
-            <nz-progress
-              *ngIf="item.permissions.answer"
-              nz-tooltip="Avancement sur les exercices"
-              [nzPercent]="item.progression"
-              nzType="circle"
-            />
-          </nz-col>
-        </nz-row>
-      </mat-card-content>
-      <mat-card-actions>
+  <mat-card>
+    <div class="card-header" [style.background-color]="color"></div>
+    <mat-card-header>
+      <mat-card-title>
+        <a
+          *ngIf="item.isChallenge"
+          nz-button
+          nzType="link"
+          [routerLink]="['/courses', item.courseId, 'challenges']"
+          [queryParams]="{
+            activity: item.id
+          }"
+          queryParamsHandling="merge"
+        >
+          <span nz-tooltip="Afficher les résultats du challenge" nz-icon nzType="trophy" nzTheme="twotone"></span>
+        </a>
+        {{ item.title }}
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="ribbon-container">
+        <nz-ribbon [nzText]="activityState.label" [nzColor]="activityState.color"></nz-ribbon>
+      </div>
+      <div class="card-content">
+        <div class="circle-progression-container">
+          <nz-progress
+            *ngIf="item.permissions.answer"
+            nz-tooltip="Avancement sur les exercices"
+            [nzPercent]="item.progression"
+            nzType="circle"
+            nzStrokeWidth="8"
+            [nzWidth]="150"
+            [nzStrokeColor]="color"
+            [nzFormat]="test"
+          />
+        </div>
+        <div class="dates-container">
+          <div class="date-item">
+            <span>
+              {{ item.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              <ng-container *ngIf="!item.openAt"> - </ng-container>
+            </span>
+            <span class="date-label"> Ouverture </span>
+          </div>
+          <div class="separator"></div>
+          <div class="date-item">
+            <span>
+              {{ item.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              <ng-container *ngIf="!item.closeAt"> - </ng-container>
+            </span>
+            <span class="date-label"> Fermeture </span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <div>
         <a
           *ngIf="item.permissions.answer"
-          nz-tooltip="Lancer"
+          nz-tooltip="Lancer l'activité"
           nz-button
           nzShape="round"
           nzType="primary"
           target="_blank"
           [routerLink]="['/player/activity', item.id]"
+          class="action-button"
         >
-          <i nz-icon nzType="play-circle" nzTheme="outline"></i>
+          <mat-icon fontSet="material-icons">play_arrow</mat-icon>
+          Lancer
         </a>
-
-        <a
+        <button
           *ngIf="item.permissions.viewResource"
-          nz-tooltip="Ouvrir la ressource associée"
+          nz-tooltip="Ouvrir l'éditeur de l'activité"
           nz-button
           nzShape="round"
-          [routerLink]="['/resources', item.resourceId]"
+          (click)="openTab(editorUrl)"
+          class="action-button"
         >
-          <span nz-icon nzType="paper-clip" nzTheme="outline"></span>
-        </a>
-        <a
-          *ngIf="item.permissions.viewStats"
-          nz-tooltip="Statistiques"
+          <mat-icon>edit</mat-icon>
+          Editer
+        </button>
+      </div>
+      <div>
+        <button
+          *ngIf="item.permissions.update || item.permissions.viewStats"
+          class="more-button"
           nz-button
+          nzType="text"
           nzShape="round"
-          nzType="default"
-          [routerLink]="['/activities', item.courseId, item.id]"
+          (click)="$event.stopPropagation()"
+          nz-dropdown
+          nzTrigger="click"
+          [nzDropdownMenu]="moreActions"
+          nzPlacement="topLeft"
         >
-          <i nz-icon nzType="bar-chart" nzTheme="outline"></i>
-        </a>
-        <course-csv-download-button
-          *ngIf="item.permissions.update"
-          [activities]="[item]"
-          [name]="item.title"
-          type="activity"
-          [courseId]="item.courseId"
-        />
-        <div class="spacer"></div>
-        <a
-          *ngIf="item.permissions.update"
-          nz-tooltip="Paramètres"
-          nz-button
-          nzShape="round"
-          nzType="default"
-          (click)="modal.open()"
-        >
-          <i nz-icon nzType="setting" nzTheme="outline"></i>
-        </a>
-      </mat-card-actions>
-    </mat-card>
-  </nz-ribbon>
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <nz-dropdown-menu #moreActions="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item *ngIf="item.permissions.viewStats" [routerLink]="['/activities', item.courseId, item.id]">
+              Statistiques
+            </li>
+            <li nz-menu-item>
+              <course-csv-download-button
+                *ngIf="item.permissions.update"
+                [activities]="[item]"
+                [name]="item.title"
+                type="activity"
+                [courseId]="item.courseId"
+              />
+            </li>
+            <li nz-menu-item *ngIf="item.permissions.update" (click)="modal.open()">Paramètres</li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </mat-card-actions>
+  </mat-card>
 </ng-container>
 <ui-modal-drawer size="large" [title]="item.title" #modal>
   <ng-template>
     <course-activity-settings [(activity)]="item" />
   </ng-template>
 </ui-modal-drawer>
+<ng-template #test>
+  <div class="progression">
+    <span class="progression-value">{{ item.progression }}</span>
+    <span class="progression-unit">%</span>
+  </div>
+  <div class="progression-exercises">
+    {{ completedExercises }}/{{ item.exerciseCount }} terminé{{ completedExercises > 1 ? 's' : '' }}
+  </div>
+</ng-template>

@@ -12,12 +12,14 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angul
 import { RouterModule } from '@angular/router'
 
 import { MatIconModule } from '@angular/material/icon'
+import { MatButtonModule } from '@angular/material/button'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzCardModule } from 'ng-zorro-antd/card'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
 import {
@@ -32,6 +34,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
 import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
+import { CourseColorPickerComponent } from '../color-picker/color-picker.component'
 
 @Component({
   standalone: true,
@@ -45,20 +48,25 @@ import { RestrictionManagerComponent } from './restriction-manager/restriction-m
     ReactiveFormsModule,
     RouterModule,
     MatIconModule,
+    MatButtonModule,
     NzSpinModule,
     NzButtonModule,
     NzSkeletonModule,
     NzDatePickerModule,
     NzPopconfirmModule,
-    DialogModule,
     NzCardModule,
+    NzDividerModule,
+    DialogModule,
     RestrictionManagerComponent,
+    CourseColorPickerComponent,
   ],
 })
 export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
   @Output() activityChange = new EventEmitter<Activity>()
   restrictions: RestrictionList[] = [] as RestrictionList[]
+
+  currentHue = 210
 
   protected form = new FormGroup({
     openAt: new FormControl<Date | undefined>(undefined),
@@ -80,6 +88,8 @@ export class CourseActivitySettingsComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
+    this.currentHue = this.activity.colorHue ?? 210
+
     this.loading = true
 
     const course = await firstValueFrom(
@@ -128,6 +138,11 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  onHueChange(newHue: number): void {
+    this.currentHue = newHue
+    this.changeDetectorRef.markForCheck()
+  }
+
   protected newRestriction() {
     this.restrictions.push({
       restriction: [
@@ -160,6 +175,11 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected async update(): Promise<void> {
     this.updating = true
     try {
+      await firstValueFrom(
+        this.courseService.updateActivity(this.activity, {
+          colorHue: this.currentHue,
+        })
+      )
       const dateRange = this.getMainDate()
       const res = await Promise.all([
         ...(!this.activity.isChallenge
@@ -173,6 +193,7 @@ export class CourseActivitySettingsComponent implements OnInit {
           openAt: dateRange?.start || undefined,
           closeAt: dateRange?.end || undefined,
           state: res[0].state,
+          colorHue: this.currentHue,
         })
       )
 

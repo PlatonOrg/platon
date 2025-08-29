@@ -2,6 +2,9 @@
   <div>
     <div>
       <section>
+        <div class="color-section">
+          <course-color-picker [hue]="currentHue" (hueChange)="onHueChange($event)"></course-color-picker>
+        </div>
         <div class="example-button-row">
           <div class="data-form">
             @for(restriction of restrictions; track restriction; let i = $index) {
