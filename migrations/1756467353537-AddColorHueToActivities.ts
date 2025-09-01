@@ -10,12 +10,7 @@ export class AddColorHueToActivities1756467353537 implements MigrationInterface 
         await queryRunner.query(`DELETE FROM "typeorm_metadata" WHERE "type" = $1 AND "name" = $2 AND "schema" = $3`, ["VIEW","ActivityMemberView","public"]);
         await queryRunner.query(`DROP VIEW "ActivityMemberView"`);
 
-        await queryRunner.query(`ALTER TABLE "Courses" DROP COLUMN "is_test"`);
         await queryRunner.query(`ALTER TABLE "Activities" ADD "color_hue" integer`);
-        await queryRunner.query(`ALTER TYPE "public"."Users_role_enum" RENAME TO "Users_role_enum_old"`);
-        await queryRunner.query(`CREATE TYPE "public"."Users_role_enum" AS ENUM('admin', 'teacher', 'student', 'demo')`);
-        await queryRunner.query(`ALTER TABLE "Users" ALTER COLUMN "role" TYPE "public"."Users_role_enum" USING "role"::"text"::"public"."Users_role_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."Users_role_enum_old"`);
 
         await queryRunner.query(`CREATE VIEW "CourseMemberView" AS
     -- Select distinct users from courses, including those in user groups
@@ -123,12 +118,7 @@ export class AddColorHueToActivities1756467353537 implements MigrationInterface 
         await queryRunner.query(`DELETE FROM "typeorm_metadata" WHERE "type" = $1 AND "name" = $2 AND "schema" = $3`, ["VIEW","ActivityMemberView","public"]);
         await queryRunner.query(`DROP VIEW "ActivityMemberView"`);
 
-        await queryRunner.query(`CREATE TYPE "public"."Users_role_enum_old" AS ENUM('admin', 'teacher', 'student', 'demo', 'candidate')`);
-        await queryRunner.query(`ALTER TABLE "Users" ALTER COLUMN "role" TYPE "public"."Users_role_enum_old" USING "role"::"text"::"public"."Users_role_enum_old"`);
-        await queryRunner.query(`DROP TYPE "public"."Users_role_enum"`);
-        await queryRunner.query(`ALTER TYPE "public"."Users_role_enum_old" RENAME TO "Users_role_enum"`);
         await queryRunner.query(`ALTER TABLE "Activities" DROP COLUMN "color_hue"`);
-        await queryRunner.query(`ALTER TABLE "Courses" ADD "is_test" boolean NOT NULL DEFAULT false`);
 
         await queryRunner.query(`CREATE VIEW "CourseMemberView" AS
     -- Select distinct users from courses, including those in user groups
