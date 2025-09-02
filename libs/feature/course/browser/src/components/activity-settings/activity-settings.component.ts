@@ -81,6 +81,8 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected courseMembers: CourseMember[] = []
   protected courseGroups: CourseGroup[] = []
 
+  protected activityColors: number[] = []
+
   constructor(
     private readonly courseService: CourseService,
     private readonly dialogService: DialogService,
@@ -89,6 +91,8 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.currentHue = this.activity.colorHue ?? 210
+
+    this.activityColors = await firstValueFrom(this.courseService.getCourseColors(this.activity.courseId))
 
     this.loading = true
 

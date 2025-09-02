@@ -32,7 +32,8 @@
             nzStrokeWidth="8"
             [nzWidth]="150"
             [nzStrokeColor]="color"
-            [nzFormat]="test"
+            [nzFormat]="progressionTemplate"
+            nzStatus="normal"
           />
         </div>
         <div class="dates-container">
@@ -122,7 +123,7 @@
     <course-activity-settings [(activity)]="item" />
   </ng-template>
 </ui-modal-drawer>
-<ng-template #test>
+<ng-template #progressionTemplate>
   <div class="progression">
     <span class="progression-value">{{ item.progression }}</span>
     <span class="progression-unit">%</span>

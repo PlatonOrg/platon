@@ -69,9 +69,7 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
     })
 
     if (this.item.colorHue === undefined || this.item.colorHue === null) {
-      const seed = this.item.id ? this.hashString(this.item.id) : Math.random()
-      const hue = Math.floor(seed * 360)
-      await firstValueFrom(this.courseService.updateActivity(this.item, { colorHue: hue }))
+      await firstValueFrom(this.courseService.updateActivity(this.item, { colorHue: -1 }))
     }
   }
 
@@ -84,31 +82,31 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
       return this.hueToCSS(this.item.colorHue)
     }
 
-    return this.getRandomColorForActivity()
+    return this.hueToCSS(-1)
+  }
+
+  private get presetColors(): string[] {
+    return [
+      'var(--brand-color-primary)',
+      'var(--brand-background-darker-10)',
+      'var(--brand-background-darker-20)',
+      'var(--brand-background-darker-30)',
+    ]
   }
 
   private hueToCSS(hue: number): string {
+    if (hue < 0) {
+      const presetIndex = Math.abs(hue) - 1
+      if (presetIndex >= 0 && presetIndex < this.presetColors.length) {
+        return this.presetColors[presetIndex]
+      }
+      return this.presetColors[0]
+    }
+
     const isDark = this.themeService.isDark
     const saturation = isDark ? 40 : 80
     const lightness = isDark ? 40 : 80
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`
-  }
-
-  private getRandomColorForActivity(): string {
-    const seed = this.item.id ? this.hashString(this.item.id) : Math.random()
-    const hue = Math.floor(seed * 360)
-
-    return this.hueToCSS(hue)
-  }
-
-  private hashString(str: string): number {
-    let hash = 0
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i)
-      hash = (hash << 5) - hash + char
-      hash = hash & hash
-    }
-    return Math.abs(hash) / 2147483647
   }
 
   get completedExercises(): number {

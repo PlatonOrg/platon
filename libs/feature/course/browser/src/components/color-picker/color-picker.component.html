@@ -2,16 +2,44 @@
   <div class="color-section">
     <div class="color-header">
       <span class="color-label">Couleur de l'activité</span>
-      <div class="color-preview" [style.background-color]="currentColor"></div>
+
+      @if (hasFrequentColors) {
+      <div class="colors-container">
+        <div class="colors-title">Couleurs fréquentes</div>
+        <div class="colors-content">
+          @for(color of frequentColors; track color; let i = $index) {
+          <div
+            class="color-preview-frequent"
+            [class.selected]="isFrequentColorSelected(color)"
+            [style.background-color]="hueToCSS(color)"
+            (click)="onFrequentColorClick(color)"
+          ></div>
+          }
+        </div>
+      </div>
+      }
+
+      <div class="colors-container">
+        <div class="colors-title">Choix de couleur</div>
+        <div class="colors-content">
+          @for(color of presetColors; track color; let i = $index) {
+          <div
+            class="color-preview"
+            [class.selected]="isPresetColorSelected(i)"
+            [style.background-color]="color"
+            (click)="onPresetColorClick(i)"
+          ></div>
+          }
+          <div
+            class="color-preview"
+            [class.selected]="isCurrentColorSelected()"
+            [style.background-color]="currentColor"
+            (click)="onCurrentColorClick()"
+          ></div>
+        </div>
+      </div>
     </div>
-    <div>
-      <nz-slider
-        [ngModel]="hue"
-        (ngModelChange)="onHueChange($event)"
-        [nzMin]="0"
-        [nzMax]="359"
-        [nzTooltipVisible]="'never'"
-      ></nz-slider>
-    </div>
+
+    <nz-slider [ngModel]="customHue" (ngModelChange)="onHueChange($event)" [nzMin]="0" [nzMax]="359"> </nz-slider>
   </div>
 </div>

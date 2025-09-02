@@ -179,6 +179,10 @@ export class CourseService {
     return this.activityProvider.reopen(activity)
   }
 
+  getCourseColors(courseId: string): Observable<number[]> {
+    return this.activityProvider.getCourseColors(courseId)
+  }
+
   //#endregion
 
   //#region Activity Restrictions

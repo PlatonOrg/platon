@@ -186,8 +186,6 @@ export class ActivityService {
       },
     })
 
-    console.log(changes)
-
     if (!activity) {
       throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
     }
@@ -441,5 +439,24 @@ export class ActivityService {
     activities: ActivityEntity[]
   ): Promise<{ start: Date | undefined; end: Date | undefined }> {
     return this.activityDatesService.updateActivitiesDates(activities)
+  }
+
+  async getCourseColors(courseId: string): Promise<number[]> {
+    const activities = await this.repository.find({
+      where: { courseId },
+    })
+
+    const colorHues = activities
+      .map((activity) => activity.colorHue)
+      .filter((colorHue): colorHue is number => colorHue !== undefined && colorHue >= 0)
+
+    const colorCount = new Map<number, number>()
+    colorHues.forEach((color) => {
+      colorCount.set(color, (colorCount.get(color) || 0) + 1)
+    })
+
+    return Array.from(colorCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([color]) => color)
   }
 }

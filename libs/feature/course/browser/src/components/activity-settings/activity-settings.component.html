@@ -3,7 +3,11 @@
     <div>
       <section>
         <div class="color-section">
-          <course-color-picker [hue]="currentHue" (hueChange)="onHueChange($event)"></course-color-picker>
+          <course-color-picker
+            [hue]="currentHue"
+            [activityColors]="activityColors"
+            (hueChange)="onHueChange($event)"
+          ></course-color-picker>
         </div>
         <div class="example-button-row">
           <div class="data-form">
