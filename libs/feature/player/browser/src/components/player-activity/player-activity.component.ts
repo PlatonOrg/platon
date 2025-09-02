@@ -34,7 +34,11 @@ import {
 } from '@platon/feature/player/common'
 
 import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
-import { ActivityClosedNotification, ActivityOpenStates } from '@platon/feature/course/common'
+import {
+  ActivityClosedNotification,
+  ActivityOpenStates,
+  ModerationActivityChangesNotification,
+} from '@platon/feature/course/common'
 
 import { MatIconModule } from '@angular/material/icon'
 import { ActivatedRoute, RouterModule } from '@angular/router'
@@ -53,6 +57,7 @@ import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { HttpErrorResponse } from '@angular/common/http'
+import { SixcodeComponent } from '@platon/shared/ui'
 
 @Component({
   standalone: true,
@@ -80,6 +85,8 @@ import { HttpErrorResponse } from '@angular/common/http'
     UserAvatarComponent,
     NgeMarkdownModule,
 
+    SixcodeComponent,
+
     PlayerResultsComponent,
     PlayerExerciseComponent,
     PlayerSettingsComponent,
@@ -92,6 +99,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   private readonly dialogService = inject(DialogService)
   private readonly playerService = inject(PlayerService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly notificationService = inject(NotificationService)
 
   protected state?: ActivityOpenStates
   protected answerStates: Record<string, AnswerStates> = {}
@@ -116,6 +124,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected onKeydownFn = this.onKeydown.bind(this)
   protected onContextMenuFn = this.onContextMenu.bind(this)
   protected loadingNext = false
+  protected code = ''
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
   protected errorTemplate!: TemplateRef<object>
@@ -173,15 +182,13 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected modalForceChoiceProgress = 0
   private countdownInterval: NodeJS.Timeout | undefined
   private autoChoiceTimeout: NodeJS.Timeout | undefined
+  private notificationSeen: Set<string> = new Set()
 
   @ViewChild('modalFooter', { static: true }) modalFooter!: TemplateRef<object>
 
   @ViewChildren('playerExercise') playerExerciseComponents!: QueryList<PlayerExerciseComponent>
 
-  constructor(
-    private readonly notificationSerivce: NotificationService,
-    private readonly nzModalService: NzModalService
-  ) {}
+  constructor(private readonly nzModalService: NzModalService) {}
 
   ngOnInit(): void {
     this.calculateAnswerStates(this.player.navigation)
@@ -210,21 +217,26 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     }
 
     this.subscriptions.push(
-      this.notificationSerivce.paginate().subscribe(async ({ notifications }) => {
-        if (this.notificationsCount === -1) {
-          this.notificationsCount = notifications.length
-        } else if (notifications.length !== this.notificationsCount) {
-          this.notificationsCount = notifications.length
-          if (
-            notifications.length > 0 &&
-            (notifications[0].data as ActivityClosedNotification).type === 'ACTIVITY-CLOSED' &&
-            (notifications[0].data as ActivityClosedNotification).activityId === this.player.activityId
-          ) {
-            this.state = 'closed'
-            await this.terminateModal(false, "L'activité a été fermée par l'enseignant.")
-          }
+      this.notificationService.paginate(1).subscribe(async ({ notifications }) => {
+        if (
+          notifications.length > 0 &&
+          (notifications[0].data as ActivityClosedNotification).type === 'ACTIVITY-CLOSED' &&
+          (notifications[0].data as ActivityClosedNotification).activityId === this.player.activityId
+        ) {
+          this.state = 'closed'
+          await this.terminateModal(false, "L'activité a été fermée par l'enseignant.")
+        } else if (
+          notifications.length > 0 &&
+          (notifications[0].data as ModerationActivityChangesNotification).type === 'MODERATION-ACTIVITY-CHANGES' &&
+          !this.notificationSeen.has(notifications[0].id)
+        ) {
+          this.notificationSeen.add(notifications[0].id)
+          const activity = (notifications[0].data as ModerationActivityChangesNotification).activity as ActivityPlayer
+          this.player = { ...this.player, ...activity }
+          this.start().catch(console.error)
+          await firstValueFrom(this.notificationService.deleteNotification(notifications[0].id))
+          this.changeDetectorRef.markForCheck()
         }
-        this.changeDetectorRef.markForCheck()
       })
     )
   }
@@ -327,6 +339,26 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     this.changeDetectorRef.markForCheck()
   }
 
+  protected async open(code: string): Promise<void> {
+    try {
+      const output = await firstValueFrom(this.playerService.openSessionWithCode(this.player.sessionId, code))
+      this.player = output.activity
+      await this.start()
+      this.changeDetectorRef.markForCheck()
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 403) {
+        this.dialogService.error("Vous n'êtes pas autorisé à ouvrir cette session.")
+      } else if (error instanceof Error) {
+        this.dialogService.error("Une erreur est survenue lors de l'ouverture de la session.")
+      }
+      return
+    }
+  }
+
+  protected async onCodeComplete(code: string): Promise<void> {
+    await this.open(code)
+  }
+
   private saveAnswersToSessionStorage(): void {
     if (!this.playerExerciseComponents) {
       return
@@ -406,7 +438,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
         if (modifiedNextExercisesHistoryPosition != undefined) {
           output.navigation.nextExercisesHistoryPosition = modifiedNextExercisesHistoryPosition
         }
-        this.player.navigation = output.navigation
+        this.player = { ...this.player, navigation: output.navigation }
       }
 
       this.exercises = output.exercises
@@ -521,7 +553,9 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   private initializeCountdown(): void {
     this.countdownBreakpoints = []
     this.countdownColor = 'black'
-    this.player.startedAt = this.player.startedAt || new Date()
+    console.log('initializeCountdown', this.player.startedAt)
+    this.player = { ...this.player, startedAt: this.player.startedAt || new Date() }
+
     this.countdown = getClosingTime(this.player)
 
     const changeColor = (color: string, message: string) => {

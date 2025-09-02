@@ -53,6 +53,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
   @Column({ default: 0 })
   order!: number
 
+  @Column({ default: '' })
+  code!: string
+
   // VIRTUAL COLUMNS
   // TODO: use expanders instead of virtual columns
 
@@ -81,4 +84,12 @@ export class ActivityEntity extends BaseEntity implements Activity {
     query: (alias) => `SELECT (${alias}.source->'variables'->'settings'->'navigation'->>'mode' = 'peer')::boolean`,
   })
   readonly isPeerComparison!: boolean
+
+  @VirtualColumn({
+    query: (alias) => `SELECT (
+      COALESCE((${alias}."source"->'variables'->'settings'->'security'->>'terminateOnLeavePage')::boolean, false) OR
+      COALESCE((${alias}."source"->'variables'->'settings'->'security'->>'terminateOnLoseFocus')::boolean, false)
+    ) AS security`,
+  })
+  readonly security!: boolean // true if the activity can terminate earlier with user behavior
 }

@@ -186,18 +186,12 @@ export const ModerationActivityChangesNotificationParser: NotificationParser<Mod
   support(notification): boolean {
     return notification.data.type === 'MODERATION-ACTIVITY-CHANGES'
   },
-  renderer(notification, injector: Injector): NotificationRenderer {
-    const themeAwareIconService = injector.get(ThemeAwareIconService)
+  renderer(): NotificationRenderer {
     return {
-      icon: themeAwareIconService.createIcon(`/assets/images/courses/course.svg`),
-      content: `Des modifications ont été apportées à l'activité dans la session`,
-      onClick: ({ onClose }) => {
-        console.error('ModerationActivityChangesNotificationParser nothing to do here')
-        onClose()
-      },
+      content: '',
     }
   },
-} // TODO: User should have their activity automatically refreshed
+}
 
 export const CourseNotificationParsers: NotificationParser<unknown>[] = [
   CourseMemberCreationNotificationParser,

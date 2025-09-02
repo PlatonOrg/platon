@@ -94,4 +94,14 @@ export class PlayerController {
   ): Promise<PlayActivityOutputDTO> {
     return this.playerService.openSession(activitySessionId)
   }
+
+  @Public()
+  @Post('/openSessionWithCode/:activitySessionId')
+  openSessionWithCode(
+    @Req() req: IRequest,
+    @UUIDParam('activitySessionId') activitySessionId: string,
+    @Body('code') code: string
+  ): Promise<PlayActivityOutputDTO> {
+    return this.playerService.openSessionWithCode(activitySessionId, code)
+  }
 }

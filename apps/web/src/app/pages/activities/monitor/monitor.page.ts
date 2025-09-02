@@ -57,8 +57,6 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
         this.context = context
         this.columnOrder = context.results?.exercises.map((e) => e.title)
         this.changeDetectorRef.markForCheck()
-        console.error(this.context)
-        // Subscribe to monitor presence when the context is ready
         if (context.state === 'READY' && context.activity && context.course) {
           await this.monitorPresenceService
             .subscribeToMonitorPresence(context.activity.id, context.course.id)
@@ -70,8 +68,6 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
       this.presenter.onDeletedActivity.subscribe(() => this.location.back()).add(() => this.subscriptions.push()),
       this.presenter.onExerciseChanges
         .subscribe(async () => {
-          // this.updateUserContext(event)
-          // this.updateExerciseContext(event)
           if (this.context.activity && this.context.course) {
             await this.presenter.refresh(this.context.course.id, this.context.activity.id)
           }
@@ -109,7 +105,6 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
           this.dialogService.error(`Erreur lors de l'ouverture de l'activité pour l'utilisateur ${fullName}`)
         }
       })
-
       await Promise.allSettled(promises)
     } catch (error) {
       this.dialogService.error("Une erreur est survenue lors de l'ouverture des sessions.")

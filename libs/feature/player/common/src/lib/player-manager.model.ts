@@ -72,7 +72,10 @@ export abstract class PlayerManager {
     }
 
     if (!activityVariables.navigation.terminated) {
-      return { activity: withActivityPlayer(activitySession) }
+      const result = { activity: withActivityPlayer(activitySession) }
+      if (!session.userId) return result
+      await this.notifyModerationActivityChanges(session.userId, result)
+      return result
     }
     activityVariables.navigation.terminated = false
     activitySession.variables = activityVariables
@@ -80,34 +83,50 @@ export abstract class PlayerManager {
       variables: activitySession.variables,
     })
 
-    return {
+    const result = {
       activity: withActivityPlayer(activitySession),
     }
+
+    if (!session.userId) return result
+    await this.notifyModerationActivityChanges(session.userId, result)
+    return result
   }
 
-  // async openSessionByPassword(sessionId: string, user?: User, password?: string): Promise<PlayActivityOuput> {
-  //   const session = withSessionAccessGuard(await this.findSessionById(sessionId), user)
-  //   const activitySession = session.parent || session
-  //   const activityVariables = activitySession.variables
+  async openSessionWithCode(sessionId: string, code: string): Promise<PlayActivityOuput> {
+    const session = await this.findSessionById(sessionId)
+    if (!session) {
+      throw new ForbiddenResponse(`Session with id ${sessionId} not found.`)
+    }
+    if (code !== session.activity?.code) {
+      throw new ForbiddenResponse(`Invalid activity code.`)
+    }
+    const activitySession = session.parent || session
+    const activityVariables = activitySession.variables
 
-  //   console.log('Opening session:', sessionId, 'for user:', user?.id)
-  //   if (this.isExpired(activitySession)) {
-  //     throw new ForbiddenResponse(`This session is expired.`)
-  //   }
+    if (this.isExpired(activitySession)) {
+      throw new ForbiddenResponse(`This session is expired.`)
+    }
 
-  //   if (!activityVariables.navigation.terminated) {
-  //     return { activity: withActivityPlayer(activitySession) }
-  //   }
-  //   activityVariables.navigation.terminated = false
-  //   activitySession.variables = activityVariables
-  //   await this.updateSession(activitySession.id, {
-  //     variables: activitySession.variables,
-  //   })
+    if (!activityVariables.navigation.terminated) {
+      const result = { activity: withActivityPlayer(activitySession) }
+      if (!session.userId) return result
+      await this.notifyModerationActivityChanges(session.userId, result)
+      return result
+    }
+    activityVariables.navigation.terminated = false
+    activitySession.variables = activityVariables
+    await this.updateSession(activitySession.id, {
+      variables: activitySession.variables,
+    })
 
-  //   return {
-  //     activity: withActivityPlayer(activitySession),
-  //   }
-  // }
+    const result = {
+      activity: withActivityPlayer(activitySession),
+    }
+
+    if (!session.userId) return result
+    await this.notifyModerationActivityChanges(session.userId, result)
+    return result
+  }
 
   async evaluate(input: EvalExerciseInput, user?: User): Promise<ExercisePlayer | [ExercisePlayer, PlayerNavigation]> {
     const session = withSessionAccessGuard(await this.findExerciseSessionById(input.sessionId), user)
@@ -409,6 +428,7 @@ export abstract class PlayerManager {
   protected abstract createAnswer(answer: Partial<Answer>): Promise<Answer>
   protected abstract updateSession(sessionId: string, changes: PartialDeep<Session>): Promise<void>
   protected abstract notifyExerciseChanges(userId: string, sessionId: string, exercise: PlayerExercise): Promise<void>
+  protected abstract notifyModerationActivityChanges(userId: string, activityChange: PlayActivityOuput): Promise<void>
 
   protected abstract findGrades(sessionId: string): Promise<number[]>
   protected abstract findSessionById(sessionId: string): Promise<Session | null | undefined>

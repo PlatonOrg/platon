@@ -1,0 +1,88 @@
+.sixcode-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.code-inputs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.code-input {
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  color: #333333;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+
+  &:focus {
+    border-color: var(--brand-highlight-primary, #2976d2);
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+    background-color: #fafafa;
+  }
+
+  &:disabled {
+    background-color: #f5f5f5;
+    border-color: #d0d0d0;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &::placeholder {
+    color: #bdbdbd;
+    opacity: 1;
+  }
+
+  // Style pour les navigateurs qui supportent les inputs de type password
+  &[type="password"] {
+    letter-spacing: 0.1em;
+  }
+
+  // Animation pour la saisie - utilise maintenant une classe conditionnelle
+  &.filled {
+    border-color: #4caf50;
+    background-color: #f1f8e9;
+  }
+
+  // Style pour les erreurs (peut être ajouté via une classe)
+  &.error {
+    border-color: #f44336;
+    background-color: #ffebee;
+
+    &:focus {
+      border-color: #f44336;
+      box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .code-input {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+
+  .code-inputs {
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .code-input {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+  }
+}

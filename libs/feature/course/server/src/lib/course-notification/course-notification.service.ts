@@ -8,13 +8,14 @@ import {
   CorrectorRemovedNotification,
   CourseMemberCreationNotification,
   ExerciseChangesNotification,
+  ModerationActivityChangesNotification,
 } from '@platon/feature/course/common'
 import { NotificationService } from '@platon/feature/notification/server'
 import { DataSource } from 'typeorm'
 import { ActivityCorrectorView } from '../activity-corrector/activity-corrector.view'
 import { ActivityMemberView } from '../activity-member/activity-member.view'
 import { CourseMemberView } from '../course-member/course-member.view'
-import { PlayerExercise } from '@platon/feature/player/common'
+import { PlayActivityOuput, PlayerExercise } from '@platon/feature/player/common'
 import { CourseMonitorPresenceService } from '../course-monitor-presence/course-monitor-presence.service'
 @Injectable()
 export class CourseNotificationService {
@@ -242,6 +243,18 @@ export class CourseNotificationService {
       } else {
         this.logger.log(`No active monitors for activity ${activityId}, skipping exercise changes notification`)
       }
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
+
+  async notifyModerationActivityChanges(userId: string, activity: PlayActivityOuput): Promise<void> {
+    try {
+      await this.notificationService.sendToUser<ModerationActivityChangesNotification>(userId, {
+        type: 'MODERATION-ACTIVITY-CHANGES',
+        activity: activity.activity,
+      })
+      console.log(`Moderation activity changes notification sent to user ${userId} for activity ${activity.activity}`)
     } catch (error) {
       this.logger.error(error)
     }

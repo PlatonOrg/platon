@@ -3,6 +3,7 @@
 <ng-container *ngIf="context.results">
   <!-- Composant de modération des utilisateurs -->
   <course-activity-moderation [results]="context.results.users" (moderationAction)="onModerationAction($event)" />
+  <span> {{ context.activity?.code }} </span>
 
   <!-- Tableaux de résultats -->
   <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" />

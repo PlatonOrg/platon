@@ -59,6 +59,7 @@ export class ActivityController {
       ...(await this.activityService.fromInput(input)),
       courseId,
       creatorId: req.user.id,
+      code: Math.random().toString(36).substring(2, 8).toUpperCase(),
     })
     return new ItemResponse({
       resource: Mapper.map(activity, ActivityDTO),

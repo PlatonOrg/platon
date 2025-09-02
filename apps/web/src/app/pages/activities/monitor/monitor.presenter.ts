@@ -2,17 +2,9 @@
 import { Injectable, OnDestroy } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { AuthService, DialogService } from '@platon/core/browser'
-import { ListResponse, User } from '@platon/core/common'
+import { User } from '@platon/core/common'
 import { CourseService } from '@platon/feature/course/browser'
-import {
-  Activity,
-  Course,
-  CourseMember,
-  CourseMemberFilters,
-  CreateCourseMember,
-  EXERCISE_CHANGES_NOTIFICATION,
-  UpdateCourse,
-} from '@platon/feature/course/common'
+import { Activity, Course, EXERCISE_CHANGES_NOTIFICATION } from '@platon/feature/course/common'
 import { ResultService } from '@platon/feature/result/browser'
 import { ActivityResults } from '@platon/feature/result/common'
 import { PlayerExercise } from '@platon/feature/player/common'
@@ -63,47 +55,6 @@ export class MonitorPresenter implements OnDestroy {
     return { state: 'LOADING' }
   }
 
-  // Members
-
-  async addMember(input: CreateCourseMember): Promise<void> {
-    const { course } = this.context.value as Required<Context>
-    try {
-      await firstValueFrom(this.courseService.createMember(course, input))
-    } catch {
-      this.alertError()
-    }
-  }
-
-  async deleteMember(member: CourseMember): Promise<void> {
-    try {
-      await firstValueFrom(this.courseService.deleteMember(member))
-    } catch {
-      this.alertError()
-    }
-  }
-
-  async searchMembers(filters: CourseMemberFilters = {}): Promise<ListResponse<CourseMember>> {
-    const { course } = this.context.value as Required<Context>
-    return firstValueFrom(this.courseService.searchMembers(course, filters))
-  }
-
-  async update(input: UpdateCourse): Promise<boolean> {
-    const { course } = this.context.value as Required<Context>
-    try {
-      const changes = await firstValueFrom(this.courseService.update(course.id, input))
-      this.context.next({
-        ...this.context.value,
-        course: changes,
-      })
-
-      this.dialogService.success('Les informations du cours ont bien été modifiées !')
-      return true
-    } catch {
-      this.alertError()
-      return false
-    }
-  }
-
   async refresh(courseId: string, activityId: string): Promise<void> {
     const [user, course, activity, results] = await Promise.all([
       this.authService.ready(),
@@ -132,10 +83,6 @@ export class MonitorPresenter implements OnDestroy {
     } catch (error) {
       this.context.next({ state: layoutStateFromError(error) })
     }
-  }
-
-  private alertError(): void {
-    this.dialogService.error('Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !')
   }
 
   private async subscribeToExerciseChanges(): Promise<void> {

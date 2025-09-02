@@ -23,6 +23,7 @@ export interface Activity {
   readonly progression: number
   readonly permissions: ActivityPermissions
   readonly restrictions?: RestrictionList[] | null
+  readonly code: string
 }
 
 export interface ActivityFilters {

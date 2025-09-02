@@ -58,4 +58,8 @@ export class PlayerService {
   openSession(sessionId: string): Observable<PlayActivityOuput> {
     return this.provider.openSession(sessionId)
   }
+
+  openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput> {
+    return this.provider.openSessionWithCode(sessionId, code)
+  }
 }

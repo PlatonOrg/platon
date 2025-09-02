@@ -39,7 +39,6 @@ import {
   withActivityFeedbacksGuard,
   withActivityPlayer,
   withExercisePlayer,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   withSessionAccessGuard,
 } from '@platon/feature/player/common'
 import { ResourceFileService } from '@platon/feature/resource/server'
@@ -475,6 +474,10 @@ export class PlayerService extends PlayerManager {
         break
     }
     return [withExercisePlayer(exerciseSession), activitySession.variables.navigation]
+  }
+
+  protected notifyModerationActivityChanges(userId: string, activityChange: PlayActivityOuput): Promise<void> {
+    return this.courseNotificationService.notifyModerationActivityChanges(userId, activityChange)
   }
 
   protected notifyExerciseChanges(userId: string, sessionId: string, exercise: PlayerExercise): Promise<void> {
