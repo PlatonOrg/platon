@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import {
@@ -18,6 +18,8 @@ import { randomUUID } from 'crypto'
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name)
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
@@ -30,12 +32,7 @@ export class AuthService {
     if (!user.password || !(await bcrypt.compare(input.password, user.password))) {
       throw new BadRequestException('Password is incorrect')
     }
-    user.lastLogin = new Date()
-    if (!user.firstLogin) {
-      user.firstLogin = new Date()
-    }
 
-    await this.userService.update(user.id, user)
     return this.authenticate(user.id, user.username)
   }
 
@@ -61,11 +58,6 @@ export class AuthService {
       active: true,
       role: UserRoles.demo,
     })
-
-    anonymousUser.lastLogin = new Date()
-    if (!anonymousUser.firstLogin) {
-      anonymousUser.firstLogin = new Date()
-    }
 
     const token = await this.authenticate(anonymousUser.id, anonymousUser.username)
 
@@ -115,6 +107,10 @@ export class AuthService {
         }
       ),
     ])
+    // Intentionally not blocking authentication if login tracking fails
+    this.userService.touchLastLogin(userId).catch((error) => {
+      this.logger.error('Failed to update last login:', error)
+    })
 
     return {
       accessToken,
