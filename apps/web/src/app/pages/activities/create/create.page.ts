@@ -87,6 +87,7 @@ export class ActivityCreatePage implements OnInit {
   protected members: CourseMember[] = []
   protected courseGroups: CourseGroup[] = []
   protected hasFirstStep = true
+  protected isTest = false
 
   @ViewChild(UiStepperComponent)
   protected stepper!: UiStepperComponent
@@ -127,6 +128,7 @@ export class ActivityCreatePage implements OnInit {
 
     const courseId = queryParamMap.get('course')
     const sectionId = queryParamMap.get('section')
+    this.isTest = queryParamMap.get('isTest') === '1'
     if (sectionId) {
       this.hasFirstStep = false
     }
@@ -210,7 +212,11 @@ export class ActivityCreatePage implements OnInit {
         ])
       }
 
-      await this.router.navigateByUrl(`/courses/${course?.id}`, { replaceUrl: true })
+      if (this.isTest) {
+        await this.router.navigateByUrl(`/tests/${course?.id}`, { replaceUrl: true })
+      } else {
+        await this.router.navigateByUrl(`/courses/${course?.id}`, { replaceUrl: true })
+      }
     } catch {
       this.dialogService.error(
         "Une erreur est survenue lors de la création de l'activité, veuillez réessayer un peu plus tard !"

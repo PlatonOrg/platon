@@ -1,0 +1,73 @@
+nz-button i {
+  color: var(--brand-text-primary);
+}
+
+button {
+  margin: 0 4px;
+}
+
+// .overtime-container {
+//   width: 100%;
+//   height: 100%;
+//   display: flex;
+//   align-items: center;
+// }
+
+// .circle {
+//   width: 28px;
+//   height: 28px;
+//   margin: 0 8px;
+//   border-radius: 50%;
+//   border : 2px solid rgb(180, 180, 180);
+//   cursor: pointer;
+// }
+
+// .selected {
+//   border : 2px solid var(--brand-color-primary);
+//   box-shadow: 0 0 5px var(--brand-color-primary);
+// }
+
+// /* 1/4 rempli = 25% */
+// .quarter {
+//   background: conic-gradient(
+//     rgb(180, 180, 180) 0% 25%,
+//     rgba(0, 0, 0, 0) 25% 100%
+//   );
+// }
+
+// .quarter.selected {
+//   background: conic-gradient(
+//     var(--brand-color-primary) 0% 25%,
+//     rgba(0, 0, 0, 0) 25% 100%
+//   );
+// }
+
+// /* 1/3 rempli ≈ 33.33% */
+// .third {
+//   background: conic-gradient(
+//     rgb(180, 180, 180) 0% 33.33%,
+//     rgba(0, 0, 0, 0) 33.33% 100%
+//   );
+// }
+
+// .third.selected {
+//   background: conic-gradient(
+//     var(--brand-color-primary) 0% 33.33%,
+//     rgba(0, 0, 0, 0) 33.33% 100%
+//   );
+// }
+
+// /* 1/2 rempli = 50% */
+// .half {
+//   background: conic-gradient(
+//     rgb(180, 180, 180) 0% 50%,
+//     rgba(0, 0, 0, 0) 50% 100%
+//   );
+// }
+
+// .half.selected {
+//   background: conic-gradient(
+//     var(--brand-color-primary) 0% 50%,
+//     rgba(0, 0, 0, 0) 50% 100%
+//   );
+// }

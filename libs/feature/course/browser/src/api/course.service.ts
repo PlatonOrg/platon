@@ -26,6 +26,7 @@ import {
   ActivityGroup,
   CourseMemberRoles,
   RestrictionList,
+  CreateTestMember,
 } from '@platon/feature/course/common'
 import { Observable, Subject, tap } from 'rxjs'
 import { ActivityCorrectorProvider } from '../models/activity-corrector.provider'
@@ -105,6 +106,14 @@ export class CourseService {
   //#region Members
   createMember(course: Course, input: CreateCourseMember): Observable<CourseMember> {
     return this.courseMemberProvider.create(course, input).pipe(tap((member) => this.addMemberEvent.next(member)))
+  }
+
+  createTestMembers(course: Course, input: CreateTestMember[]): Observable<ListResponse<CourseMember>> {
+    return this.courseMemberProvider.createTestMembers(course, input).pipe(
+      tap((members) => {
+        members.resources.forEach((member) => this.addMemberEvent.next(member))
+      })
+    )
   }
 
   updateMemberRole(member: CourseMember, role: CourseMemberRoles): Observable<CourseMember> {

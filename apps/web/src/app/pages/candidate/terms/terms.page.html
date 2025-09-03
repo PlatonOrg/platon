@@ -1,0 +1,18 @@
+<div class="container">
+  <mat-card>
+    <h1>Termes et conditions</h1>
+    <div class="terms-content">
+      @if (terms) {
+      <ui-editorjs-viewer [data]="terms"></ui-editorjs-viewer>
+      }
+    </div>
+    <div class="actions">
+      <label nz-checkbox [(ngModel)]="hasReadTerms" class="read-terms-checkbox">
+        J'ai lu et compris les termes et conditions
+      </label>
+      <button nz-button nzType="primary" [disabled]="!hasReadTerms" (click)="onAccept()" class="accept-button">
+        Accepter
+      </button>
+    </div>
+  </mat-card>
+</div>

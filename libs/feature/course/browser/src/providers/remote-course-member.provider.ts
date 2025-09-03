@@ -8,6 +8,7 @@ import {
   CourseMemberFilters,
   CourseMemberRoles,
   CreateCourseMember,
+  CreateTestMember,
   UpdateCourseMemberRole,
 } from '@platon/feature/course/common'
 import { Observable, map } from 'rxjs'
@@ -27,6 +28,12 @@ export class RemoteCourseMemberProvider extends CourseMemberProvider {
     return this.http
       .post<ItemResponse<CourseMember>>(`/api/v1/courses/${course.id}/members`, input)
       .pipe(map((e) => e.resource))
+  }
+
+  createTestMembers(course: Course, input: CreateTestMember[]): Observable<ListResponse<CourseMember>> {
+    return this.http
+      .post<ListResponse<CourseMember>>(`/api/v1/courses/${course.id}/members/test`, input)
+      .pipe(map((e) => e))
   }
 
   updateRole(member: CourseMember, role: CourseMemberRoles): Observable<CourseMember> {

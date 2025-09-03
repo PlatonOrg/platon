@@ -32,6 +32,12 @@ export interface CreateCourseMember {
   readonly role?: CourseMemberRoles
 }
 
+export interface CreateTestMember {
+  readonly firstName: string
+  readonly lastName: string
+  readonly email: string
+}
+
 export interface UpdateCourseMemberRole {
   readonly id: string
   readonly role: CourseMemberRoles

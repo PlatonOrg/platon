@@ -76,6 +76,15 @@ export default [
           ),
       },
       {
+        title: "PLaTon - Tests d'entrée",
+        path: 'tests',
+        loadChildren: () =>
+          import(
+            /* webpackChunkName: "tests" */
+            '../tests/tests.routes'
+          ),
+      },
+      {
         title: 'PLaTon - Administration',
         path: 'admin',
         loadChildren: () =>

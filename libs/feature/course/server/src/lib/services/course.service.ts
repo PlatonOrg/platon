@@ -25,7 +25,10 @@ export class CourseService {
       ...filters,
       order: filters.order || CourseOrderings.UPDATED_AT,
       direction: filters.direction || OrderingDirections.DESC,
+      isTest: filters.isTest || false,
     }
+
+    query.andWhere('course.is_test = :isTest', { isTest: filters.isTest })
 
     if (!filters.showAll && filters.members?.length) {
       query.andWhere('(member.id IN (:...ids))', {

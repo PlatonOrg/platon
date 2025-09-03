@@ -1,0 +1,62 @@
+<a *ngIf="canEdit" class="add-button" nz-button nzType="primary" nz-tooltip="Ajouter" [routerLink]="['../csv-import']">
+  <span nz-icon nzType="plus" nzTheme="outline"></span><span>Ajouter des candidats avec un CSV</span>
+</a>
+<a *ngIf="canEdit" class="add-button" nz-button nz-tooltip="Ajouter" (click)="openAddCandidateModal()">
+  <span nz-icon nzType="plus" nzTheme="outline"></span><span>Ajouter un candidat</span>
+</a>
+<mat-card class="member-card">
+  <div class="card-title">
+    <div>Liste des candidats</div>
+  </div>
+  <div class="card-content">
+    <tests-candidates-table
+      [members]="candidates"
+      [total]="candidates.length"
+      [editable]="true"
+      (deleted)="removeMember($event)"
+      [testId]="testId"
+    ></tests-candidates-table>
+  </div>
+</mat-card>
+
+<ui-modal-template #addCandidateModal title="Ajouter un candidat" width="500px">
+  <ng-template>
+    <form nz-form [formGroup]="candidateForm" [nzLayout]="'vertical'">
+      <nz-form-item>
+        <nz-form-label nzRequired>Prénom</nz-form-label>
+        <nz-form-control nzErrorTip="Le prénom est requis (minimum 2 caractères)">
+          <input nz-input placeholder="Prénom" formControlName="firstName" maxlength="50" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Nom</nz-form-label>
+        <nz-form-control nzErrorTip="Le nom est requis (minimum 2 caractères)">
+          <input nz-input placeholder="Nom" formControlName="lastName" maxlength="50" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Email</nz-form-label>
+        <nz-form-control nzErrorTip="Veuillez saisir une adresse email valide">
+          <input nz-input placeholder="email@exemple.com" formControlName="email" type="email" maxlength="100" />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-template>
+
+  <ng-template>
+    <button nz-button nzType="default" (click)="cancelAddCandidate()" [disabled]="isSubmittingCandidate">
+      Annuler
+    </button>
+    <button
+      nz-button
+      nzType="primary"
+      (click)="addCandidate()"
+      [nzLoading]="isSubmittingCandidate"
+      [disabled]="!isFormValid"
+    >
+      Ajouter
+    </button>
+  </ng-template>
+</ui-modal-template>

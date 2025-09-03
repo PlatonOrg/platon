@@ -33,6 +33,7 @@ enum UserRoles {
   teacher
   student
   demo
+  candidate
 }
 
 type Notification {

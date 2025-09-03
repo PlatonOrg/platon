@@ -1,0 +1,101 @@
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+
+  h1 {
+    margin: 0;
+    padding: 16px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .settings {
+    margin: 24px;
+  }
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  background: var(--brand-background-components);
+  border: 1px solid var(--brand-border-color-light);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  min-height: 40px;
+  width: 100%;
+  gap: 12px;
+}
+
+.settings-item-danger {
+  display: flex;
+  align-items: center;
+  background: var(--brand-background-components);
+  border: 1px solid red;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  min-height: 40px;
+  width: 100%;
+  gap: 12px;
+  .settings-item-title {
+    color: red;
+    i {
+      color: red;
+    }
+  }
+}
+
+.settings-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  color: var(--brand-color-primary);
+  font-size: 14px;
+  white-space: nowrap;
+
+  i {
+    font-size: 16px;
+    color: var(--brand-color-primary);
+  }
+}
+
+.date-picker-compact {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
+
+  .separator {
+    color: var(--brand-color-primary);
+    font-weight: 500;
+  }
+
+  nz-date-picker {
+    flex: 1;
+  }
+}
+
+.informations {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .mat-form-field {
+    width: 100%;
+  }
+
+  button {
+    width: 200px;
+  }
+}
+
+.danger-actions button {
+  margin-right: 8px;
+}

@@ -1,0 +1,88 @@
+@if (confirmLoading) {
+<div class="confirm-loading-container">
+  <nz-spin nzSimple></nz-spin>
+</div>
+} @else {
+<a *ngIf="hasFile" class="confirm-button" nz-button nzType="primary" nz-tooltip="Ajouter" (click)="confirmImport()">
+  <span nz-icon nzType="check" nzTheme="outline"></span><span>Valider et importer les candidats</span>
+</a>
+}
+<mat-card>
+  @if (!hasFile) { @if (csvLoading) {
+  <div class="csv-loading-container">
+    <nz-spin nzSimple></nz-spin>
+  </div>
+  } @else {
+  <div
+    class="add-csv"
+    [class.drag-over]="isDragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="triggerFileInput()"
+  >
+    <span class="plus-icon">+</span>
+    <p class="add-csv-text">Glissez-déposez un fichier CSV ou cliquez pour en ajouter un</p>
+    <input type="file" id="csvFileInput" accept=".csv" (change)="handleFileUpload($event)" hidden />
+  </div>
+  } } @else {
+  <div class="table-container" #tableContainer (scroll)="onTableScroll()">
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let _ of tableData[0]; let i = index" [class]="tableHeaders[i]">
+            <mat-select [(ngModel)]="tableHeaders[i]" canSelectNullableOptions panelWidth="fit-content">
+              @for (option of headersOptions; track option) {
+              <mat-option [value]="option.value" (click)="onColumnSelect(i, option.value)">
+                {{ option.label }}
+              </mat-option>
+              }
+            </mat-select>
+          </th>
+          <th class="actions-col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of paginatedTableData; let i = index" [ngClass]="{ 'header-row': hasHeader && i === 0 }">
+          <td *ngFor="let cell of row; let j = index" [class]="tableHeaders[j]">
+            {{ cell }}
+          </td>
+          <td class="actions-col">
+            <button
+              *ngIf="i === 0"
+              nz-button
+              [nzType]="hasHeader ? 'default' : 'primary'"
+              nzShape="circle"
+              nzSize="small"
+              (click)="toggleHeader()"
+              nz-tooltip
+              [nzTooltipTitle]="hasHeader ? 'Désactiver l\'en-tête' : 'Activer l\'en-tête'"
+            >
+              <span nz-icon nzType="insert-row-above" nzTheme="outline"></span>
+            </button>
+            <button
+              nz-button
+              nzDanger
+              nzType="primary"
+              nzShape="circle"
+              nz-popconfirm
+              nzOkText="Retirer"
+              nzOkType="danger"
+              nzSize="small"
+              [nzPopconfirmTitle]="'Voulez-vous vraiment retirer cette ligne ?'"
+              (nzOnConfirm)="deleteRow(i)"
+              nz-tooltip
+              nzTooltipTitle="Retirer la ligne"
+            >
+              <i nz-icon nzType="delete"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="scrollLoading" style="text-align: center; margin: 16px 0">
+      <nz-spin nzSimple></nz-spin>
+    </div>
+  </div>
+  }
+</mat-card>
