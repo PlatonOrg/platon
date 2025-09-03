@@ -1,4 +1,50 @@
 <mat-card #container>
+  @if(hasErrors()) {
+  <div class="custom-error-page">
+    <div class="error-illustration">
+      <mat-icon class="error-icon">bug_report</mat-icon>
+    </div>
+
+    <div class="error-content">
+      <h2 class="error-title">Oups ! Un problème est survenu</h2>
+      <p class="error-description">
+        Nous avons rencontré une erreur lors de l'exécution de cet exercice. Cela peut être dû à un problème temporaire
+        ou à une configuration incorrecte.
+      </p>
+
+      <div class="error-actions">
+        <button mat-stroked-button color="accent" class="contact-button" (click)="contactTeacher()">
+          <mat-icon>email</mat-icon>
+          Contacter mon enseignant
+        </button>
+
+        <button mat-stroked-button color="accent" (click)="retryExercise()" *ngIf="!editorPreview">
+          <mat-icon>refresh</mat-icon>
+          Réessayer
+        </button>
+      </div>
+
+      <div class="error-tips">
+        <h4>Que puis-je faire ?</h4>
+        <ul>
+          <li>Vérifiez votre connexion internet</li>
+          <li>Actualisez la page</li>
+          <li>Contactez votre enseignant si le problème persiste</li>
+        </ul>
+      </div>
+    </div>
+
+    <details class="technical-details">
+      <summary>
+        <mat-icon>info</mat-icon>
+        Détails techniques
+      </summary>
+      <div class="details-content">
+        <pre>{{ errorServerSignal() }}</pre>
+      </div>
+    </details>
+  </div>
+  } @else {
   <mat-card-header>
     <div>
       <div>
@@ -44,7 +90,7 @@
         <ng-container *ngIf="player?.feedbacks">
           <ng-container *ngFor="let feedback of player?.feedbacks">
             @if (!feedback.content) {
-            <!-- noting -->
+            <!-- nothing -->
             } @else if (isFeedbackContentAnObject(feedback)) {
             <wc-foldable-feedback [state]="{ content: feedback.content }"></wc-foldable-feedback>
             } @else {
@@ -90,9 +136,6 @@
                 <mat-icon>content_copy</mat-icon>
               </button>
             </div>
-            <!-- <div class="terminal-body" #terminalBody>
-              <pre><code>{{player?.platon_logs?.join('\n')}}</code></pre>
-            </div> -->
             <div class="terminal-body" #terminalBody>
               @for (log of player?.platon_logs; track $index) {
               <div [class]="'terminal-line ' + (isErrorLog(log) ? 'error-line' : 'normal-line')">{{ log }}</div>
@@ -143,7 +186,9 @@
       </div>
     </mat-card-actions>
   </nz-skeleton>
+  }
 </mat-card>
+
 <mat-menu #theories="matMenu">
   <ng-container *ngFor="let item of player?.theories; trackBy: trackTheory">
     @if (item.url|filePreviewSupported) {
@@ -155,6 +200,7 @@
     }
   </ng-container>
 </mat-menu>
+
 <ui-modal-drawer #commentDrawer title="Commentaires">
   <ng-template>
     <player-comments
@@ -165,6 +211,7 @@
     />
   </ng-template>
 </ui-modal-drawer>
+
 <ng-template #errorTemplate let-data="data">
   <pre>{{ data.message }}</pre>
 </ng-template>
