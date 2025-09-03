@@ -125,6 +125,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected onContextMenuFn = this.onContextMenu.bind(this)
   protected loadingNext = false
   protected code = ''
+  protected isCodeError = false
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
   protected errorTemplate!: TemplateRef<object>
@@ -344,14 +345,18 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       const output = await firstValueFrom(this.playerService.openSessionWithCode(this.player.sessionId, code))
       this.player = output.activity
       await this.start()
-      this.changeDetectorRef.markForCheck()
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 403) {
         this.dialogService.error("Vous n'êtes pas autorisé à ouvrir cette session.")
+        this.isCodeError = true
+        setTimeout(() => {
+          this.isCodeError = false
+        }, 2000)
       } else if (error instanceof Error) {
         this.dialogService.error("Une erreur est survenue lors de l'ouverture de la session.")
       }
-      return
+    } finally {
+      this.changeDetectorRef.markForCheck()
     }
   }
 

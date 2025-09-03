@@ -3,6 +3,7 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
+
 }
 
 .code-inputs {
@@ -48,14 +49,9 @@
     letter-spacing: 0.1em;
   }
 
-  // Animation pour la saisie - utilise maintenant une classe conditionnelle
-  &.filled {
-    border-color: #4caf50;
-    background-color: #f1f8e9;
-  }
-
   // Style pour les erreurs (peut être ajouté via une classe)
   &.error {
+    animation: inputShake 0.5s ease-in-out;
     border-color: #f44336;
     background-color: #ffebee;
 
@@ -63,6 +59,18 @@
       border-color: #f44336;
       box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
     }
+  }
+}
+
+@keyframes inputShake {
+  0%, 100% {
+    transform: translateX(0) scale(1);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px) scale(1.02);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px) scale(1.02);
   }
 }
 
@@ -76,6 +84,18 @@
 
   .code-inputs {
     gap: 0.25rem;
+  }
+
+  @keyframes inputShake {
+    0%, 100% {
+      transform: translateX(0) scale(1);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-2px) scale(1.02);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(2px) scale(1.02);
+    }
   }
 }
 

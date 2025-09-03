@@ -25,6 +25,7 @@ export class SixcodeComponent implements OnInit {
   @Input() disabled = false
   @Input() placeholder = '•'
   @Input() autoFocus = true
+  @Input() error = false
 
   @ViewChildren('codeInput') codeInputs!: QueryList<ElementRef<HTMLInputElement>>
 
@@ -66,6 +67,7 @@ export class SixcodeComponent implements OnInit {
 
   onKeyDown(event: KeyboardEvent, index: number): void {
     const input = event.target as HTMLInputElement
+    this.error = false
 
     // Gérer la touche Backspace
     if (event.key === 'Backspace') {

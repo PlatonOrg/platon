@@ -34,7 +34,8 @@
             changer de page."
           />
 
-          <ui-sixcode (codeComplete)="onCodeComplete($event)" />
+          <h3>Demande le code à ton enseignant pour te débloquer !</h3>
+          <ui-sixcode (codeComplete)="onCodeComplete($event)" [error]="isCodeError" />
 
           <div class="markdown-container">
             <nge-markdown [data]="player.conclusion" />

@@ -1,13 +1,13 @@
-<div class="sixcode-container">
+<div class="sixcode-container" [class.error]="error">
   <div class="code-inputs">
     <input
       #codeInput
       *ngFor="let code of codes; let i = index"
       type="password"
       class="code-input"
-      [class.filled]="codes[i].length > 0"
       [value]="code"
       [disabled]="disabled"
+      [class.error]="error"
       [placeholder]="placeholder"
       maxlength="1"
       autocomplete="off"
