@@ -15,7 +15,10 @@ import {
   Output,
   TemplateRef,
   ViewChild,
+  AfterViewInit,
   inject,
+  computed,
+  signal,
 } from '@angular/core'
 import { Subscription, firstValueFrom } from 'rxjs'
 
@@ -30,9 +33,8 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
-import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
+import { DialogModule, DialogService, UserAvatarComponent, AuthService } from '@platon/core/browser'
 import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
-
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
@@ -114,13 +116,17 @@ type FullscreenElement = HTMLElement & {
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
+export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
   private readonly subscriptions: Subscription[] = []
   private readonly dialogService = inject(DialogService)
+  private readonly authService = inject(AuthService)
   private readonly playerService = inject(PlayerService)
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly webComponentService = inject(WebComponentService)
+
+  protected readonly playerSignal = signal<ExercisePlayer | undefined>(undefined)
 
   @Input() state?: AnswerStates
   @Input() player?: ExercisePlayer
@@ -380,6 +386,23 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     if (!this.player) {
       this.player = this.players[this.index]
     }
+
+    this.playerSignal.set(this.player)
+
+    this.subscriptions.push(
+      this.webComponentService.onSubmit.subscribe((id: string) => {
+        if (!this.container?.nativeElement) return
+        const component = this.container.nativeElement.querySelector(`[id="${id}"]`)
+        if (component) {
+          this.evaluate(PlayerActions.CHECK_ANSWER).catch(console.error)
+        }
+      })
+    )
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.container?.nativeElement) return
+
     this.requestFullscreen =
       this.container.nativeElement.requestFullscreen ||
       this.container.nativeElement.webkitRequestFullscreen ||
@@ -389,15 +412,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     if (this.container.nativeElement.offsetWidth < 900) {
       this.showLabelIfEnoughSpace = false
     }
-
-    this.subscriptions.push(
-      this.webComponentService.onSubmit.subscribe((id: string) => {
-        const component = this.container.nativeElement.querySelector(`[id="${id}"]`)
-        if (component) {
-          this.evaluate(PlayerActions.CHECK_ANSWER).catch(console.error)
-        }
-      })
-    )
   }
 
   ngOnDestroy(): void {
@@ -408,6 +422,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     if (this.players?.length) {
       this.index = this.reviewMode ? this.players.length - 1 : 0
       this.player = this.players[this.index]
+
+      this.playerSignal.set(this.player)
+
       this.clearNotification?.()
       this.clearNotification = undefined
     }
@@ -415,11 +432,13 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
 
   protected previousAttempt(): void {
     this.player = this.players[--this.index]
+    this.playerSignal.set(this.player)
     this.changeDetectorRef.markForCheck()
   }
 
   protected nextAttempt(): void {
     this.player = this.players[++this.index]
+    this.playerSignal.set(this.player)
     this.changeDetectorRef.markForCheck()
   }
 
@@ -477,6 +496,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private forEachComponent(consumer: (component: any) => void): void {
+    if (!this.container?.nativeElement) {
+      return
+    }
     const form = this.container.nativeElement.querySelector('#form')
     if (form) {
       form.querySelectorAll('[cid]').forEach((node) => {
@@ -527,6 +549,8 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
 
       this.player = output.exercise
 
+      this.playerSignal.set(this.player)
+
       // little hack here to nge-markdown component to detect change in the case where theses
       // values are not modified during the evaluation on the server side
       const markdowns = ['form' as const, 'statement' as const, 'solution' as const]
@@ -537,6 +561,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       })
 
       this.player.form = this.player.form + ''
+      //console.log('ET DE DEUX ' + JSON.stringify(output))
       if (output.navigation) {
         this.evaluated.emit(output.navigation)
       }
@@ -596,6 +621,61 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   protected isErrorLog(log: string): boolean {
     const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
     return errorPattern.test(log)
+  }
+
+  // protected errorServer(): string {
+  //   return (this.player?.platon_logs?.filter((log) => this.isErrorLog(log)) || []).join('')
+  // }
+  protected readonly errorServerSignal = computed(() => {
+    const player = this.playerSignal()
+    if (!player) return ''
+    return this.getErrorLogsFromPlayer(player).join('')
+  })
+
+  readonly hasErrors = computed(() => {
+    const player = this.playerSignal()
+    if (!player) return false
+
+    const errorLogs = this.getErrorLogsFromPlayer(player)
+    return !this.editorPreview && errorLogs.length > 0
+  })
+
+  private getErrorLogsFromPlayer(player: ExercisePlayer): string[] {
+    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
+    return player.platon_logs?.filter((log) => errorPattern.test(log)) || []
+  }
+  readonly httpError = signal<HttpErrorResponse | null>(null)
+
+  protected async contactTeacher(): Promise<void> {
+    const subject = encodeURIComponent(`Problème avec l'exercice: ${this.player?.title || 'Exercice'}`)
+    const user = await this.authService.ready()
+    const { firstName: first = '', lastName: last = '' } = user || {}
+    const body = encodeURIComponent(`
+  Bonjour,
+
+  J'ai rencontré un problème avec l'exercice "${this.player?.title || 'Exercice'}" dans PLaTon.
+
+  Détails de l'erreur:
+  ${this.errorServerSignal()}
+
+  Pourriez-vous m'aider à résoudre ce problème ?
+
+  Merci,
+  ${last} ${first}
+    `)
+
+    const teacherEmail = this.getTeacherEmail()
+    const mailtoLink = `mailto:${teacherEmail}?subject=${subject}&body=${body}`
+
+    window.open(mailtoLink, '_self')
+  }
+
+  protected retryExercise(): void {
+    window.location.reload()
+  }
+
+  private getTeacherEmail(): string {
+    return ''
   }
 
   protected async copyToClipboard(text: string | undefined): Promise<void> {

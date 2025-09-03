@@ -7,6 +7,14 @@ import sys
 import json
 import jsonpickle
 import types
+import sys
+import os
+from typing import Optional, Any
+import traceback
+from datetime import datetime, timezone
+sys.path.append("/utils/libs/platon")
+from PlatonLog import PlatonLog
+
 
 class StopExec(Exception):
     """
@@ -32,7 +40,6 @@ def with_try_clause(code, excpt):
         + '\\n'.join(["    " + line for line in code.split('\\n')])
         + "\\nexcept " + excpt.__name__ + ":\\n    pass"
     )
-
 
 def component(selector):
     """
@@ -98,6 +105,12 @@ def jsonify(d, keep_classes=True):
 
     return jsonpickle.encode(d, unpicklable=False)
 
+
+
+
+
+
+
 list_platon_logs = []
 def platon_log(*args, **kwargs):
     """
@@ -149,9 +162,9 @@ if __name__ == "__main__":
 
         This will execute the script code, serialize the resulting variables, and save them in "output.json".
     """
-
+    platon_logger = PlatonLog()
     with open("script.py", "r") as f:
-        script = f.read()
+            script = f.read()
 
     with open("variables.json", "r") as f:
         variables = json.load(f)
@@ -162,17 +175,77 @@ if __name__ == "__main__":
     variables['component'] = component
     variables['StopExec'] = StopExec
     variables['platon_log'] = platon_log
-    exec(with_try_clause(script, StopExec), variables)
-    exec("", glob)
+    try:
+        exec(with_try_clause(script, StopExec), variables)
+        exec("", glob)
+    except Exception as e:
+        # Ne pas catcher les erreurs de timeout - les laisser se propager
+        def is_timeout_error(exception):
+            """Détecte si une exception est liée à un timeout"""
+            # Types de timeout connus
+            timeout_types = [
+                TimeoutError,
+            ]
 
-    variables['platon_logs'] = list_platon_logs
+            # Importer et vérifier les types de timeout optionnels
+            try:
+                import socket
+                timeout_types.append(socket.timeout)
+            except (ImportError, AttributeError):
+                pass
 
-    for key in glob:
-        if key in variables and variables[key] == glob[key]:
-            del variables[key]
+            try:
+                import subprocess
+                timeout_types.append(subprocess.TimeoutExpired)
+            except (ImportError, AttributeError):
+                pass
 
-    with open('output.json', 'w') as output:
-      print(jsonify(variables, False), file=output)
+            try:
+                import asyncio
+                timeout_types.append(asyncio.TimeoutError)
+            except (ImportError, AttributeError):
+                pass
+
+            try:
+                import concurrent.futures
+                timeout_types.append(concurrent.futures.TimeoutError)
+            except (ImportError, AttributeError):
+                pass
+
+            # Vérifier si l'exception est un type de timeout connu
+            for timeout_type in timeout_types:
+                if isinstance(exception, timeout_type):
+                    return True
+
+            # Vérifier si le nom de la classe contient "timeout"
+            class_name = exception.__class__.__name__.lower()
+            if 'timeout' in class_name:
+                return True
+
+            # Vérifier si le message d'erreur contient des mots-clés de timeout
+            error_message = str(exception).lower()
+            timeout_keywords = ['timeout', 'timed out', 'time out', 'deadline exceeded']
+            for keyword in timeout_keywords:
+                if keyword in error_message:
+                    return True
+
+            return False
+
+        if is_timeout_error(e):
+            raise
+
+        platon_logger.maxlog_exception(e)
+        val = platon_logger.push2platonlog()
+        platon_log(val)
+    finally:
+        variables['platon_logs'] = list_platon_logs
+
+        for key in glob:
+            if key in variables and variables[key] == glob[key]:
+                del variables[key]
+
+        with open('output.json', 'w') as output:
+            print(jsonify(variables, False), file=output)
 
     sys.exit(0)
 `
