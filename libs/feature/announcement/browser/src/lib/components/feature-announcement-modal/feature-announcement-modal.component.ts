@@ -158,14 +158,11 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
 
     if (announcement && announcement.id) {
       this.featureAnnouncementService.onAnnouncementClick(announcement.id);
-    } /*else {
-      console.error('Invalid announcement object in primary action:', notification);
-    }*/
+    }
   }
 
 
   onClose(notification: any): void {
-    console.log('Close clicked for:', notification);
 
     // Extraire l'objet Announcement de la notification
     const announcement = notification?.options?.nzData;
@@ -173,8 +170,6 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
     if (announcement && announcement.id) {
       this.featureAnnouncementService.dismissAnnouncement(announcement.id, NotificationCloseReason.CLOSE);
       this.hideNotification(announcement.id);
-    } else {
-      console.error('Invalid announcement object:', notification);
     }
   }
 }
