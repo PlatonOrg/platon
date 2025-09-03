@@ -254,7 +254,6 @@ export class CourseNotificationService {
         type: 'MODERATION-ACTIVITY-CHANGES',
         activity: activity.activity,
       })
-      console.log(`Moderation activity changes notification sent to user ${userId} for activity ${activity.activity}`)
     } catch (error) {
       this.logger.error(error)
     }

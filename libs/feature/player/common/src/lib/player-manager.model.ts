@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ForbiddenResponse, User } from '@platon/core/common'
+import { ForbiddenResponse, User, UserRoles } from '@platon/core/common'
 import { ActivityVariables, ExerciseVariables, patchExerciseMeta } from '@platon/feature/compiler'
 import { Activity } from '@platon/feature/course/common'
 import { Answer, ExerciseSession, Session, answerStateFromGrade } from '@platon/feature/result/common'
@@ -36,7 +36,16 @@ export abstract class PlayerManager {
   constructor(private readonly sandboxManager: SandboxManager) {}
 
   async terminate(sessionId: string, user?: User): Promise<PlayActivityOuput> {
-    const session = withSessionAccessGuard(await this.findSessionById(sessionId), user)
+    let session: Session
+    if (user?.role === UserRoles.teacher || user?.role === UserRoles.admin) {
+      const foundSession = await this.findSessionById(sessionId)
+      if (!foundSession) {
+        throw new ForbiddenResponse(`Session with id ${sessionId} not found.`)
+      }
+      session = foundSession
+    } else {
+      session = withSessionAccessGuard(await this.findSessionById(sessionId), user)
+    }
 
     const activitySession = session.parent || session
     const activityVariables = activitySession.variables
@@ -52,6 +61,14 @@ export abstract class PlayerManager {
 
     if (activitySession.activity) {
       this.onTerminate?.(activitySession.activity)
+    }
+
+    if (user?.role === UserRoles.teacher || user?.role === UserRoles.admin) {
+      if (session.userId) {
+        await this.notifyModerationActivityChanges(session.userId, {
+          activity: withActivityPlayer(activitySession),
+        })
+      }
     }
 
     return {

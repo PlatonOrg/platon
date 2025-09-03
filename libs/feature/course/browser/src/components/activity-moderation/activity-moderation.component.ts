@@ -25,10 +25,12 @@ export interface ActivityModerationEvent {
 })
 export class ActivityModerationComponent {
   @Input({ required: true }) results: UserResults[] = []
+  @Input() code?: string
 
   @Output() moderationAction = new EventEmitter<ActivityModerationEvent>()
 
   protected selectedUsers = new Map<string, string>() // Map<userId, sessionId>
+  protected isCodeRevealed = false
 
   toggleUserSelection(userId: string, sessionId: string): void {
     if (this.selectedUsers.has(userId)) {
@@ -90,5 +92,9 @@ export class ActivityModerationComponent {
       })
       this.clearSelection()
     }
+  }
+
+  toggleCodeVisibility(): void {
+    this.isCodeRevealed = !this.isCodeRevealed
   }
 }

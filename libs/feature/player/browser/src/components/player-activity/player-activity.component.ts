@@ -233,7 +233,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
           this.notificationSeen.add(notifications[0].id)
           const activity = (notifications[0].data as ModerationActivityChangesNotification).activity as ActivityPlayer
           this.player = { ...this.player, ...activity }
-          this.start().catch(console.error)
+          this.player.navigation.terminated ? this.terminate().catch(console.error) : this.start().catch(console.error)
           await firstValueFrom(this.notificationService.deleteNotification(notifications[0].id))
           this.changeDetectorRef.markForCheck()
         }

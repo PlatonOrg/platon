@@ -2,6 +2,21 @@
   <mat-card>
     <mat-card-header class="header-card">
       <mat-card-title>Modération des activités</mat-card-title>
+
+      @if (code) {
+      <div class="activity-code">
+        <span class="code-label">Code d'activité :</span>
+        <span
+          class="code-spoiler"
+          [class.revealed]="isCodeRevealed"
+          (click)="toggleCodeVisibility()"
+          [title]="isCodeRevealed ? 'Cliquer pour cacher' : 'Cliquer pour révéler le code'"
+        >
+          {{ isCodeRevealed ? code : '●●●●●●' }}
+        </span>
+      </div>
+      }
+
       <div class="header">
         <div class="actions">
           <button

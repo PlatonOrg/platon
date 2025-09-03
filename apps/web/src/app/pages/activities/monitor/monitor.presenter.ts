@@ -140,8 +140,8 @@ export class MonitorPresenter implements OnDestroy {
     await firstValueFrom(this.playerService.openSession(sessionId))
   }
 
-  closeActivityForUser(sessionId: string): void {
-    this.playerService.terminate(sessionId)
+  async closeActivityForUser(sessionId: string): Promise<void> {
+    await firstValueFrom(this.playerService.terminate(sessionId))
   }
 }
 
