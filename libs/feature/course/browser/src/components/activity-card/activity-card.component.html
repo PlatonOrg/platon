@@ -111,6 +111,9 @@
                 [courseId]="item.courseId"
               />
             </li>
+            <li nz-menu-item *ngIf="item.permissions.viewResource" [routerLink]="['/resources', item.resourceId]">
+              Ouvrir la ressource associée
+            </li>
             <li nz-menu-item *ngIf="item.permissions.update" (click)="modal.open()">Paramètres</li>
           </ul>
         </nz-dropdown-menu>
