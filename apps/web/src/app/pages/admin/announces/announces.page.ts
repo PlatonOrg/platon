@@ -18,7 +18,11 @@ import { UserRoles } from '@platon/core/common'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
 import { Announcement } from '@platon/feature/announcement/common'
-import { AnnouncementService, AnnouncementCreateDrawerComponent, AnnouncementPreviewModalComponent } from '@platon/feature/announcement/browser'
+import {
+  AnnouncementService,
+  AnnouncementCreateDrawerComponent,
+  AnnouncementPreviewModalComponent,
+} from '@platon/feature/announcement/browser'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
@@ -94,7 +98,6 @@ export class AdminAnnouncementsPage implements OnInit {
     })
   }
 
-
   protected openPreviewDialog(announcement: Announcement): void {
     const dialogRef = this.dialog.open(AnnouncementPreviewModalComponent, {
       width: '99%',
@@ -110,10 +113,9 @@ export class AdminAnnouncementsPage implements OnInit {
     })
   }
 
-  protected limitedDescription(description: string): string {
-    return description.length > 200 ? description.slice(0, 200) + '...' : description
+  protected limitedDescription(description: string, limit: number): string {
+    return description.length > limit ? description.slice(0, limit) + '...' : description
   }
-
 
   async loadAnnouncements(): Promise<void> {
     this.loading = true
