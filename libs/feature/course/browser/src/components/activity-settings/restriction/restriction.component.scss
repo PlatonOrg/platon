@@ -1,19 +1,34 @@
 .restriction-container {
-  display: flex;
-  align-items: center;
+  position: relative;
   background: var(--brand-background-components);
   border: 1px solid var(--brand-border-color-light);
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  min-height: 40px;
+  border-radius: 6px;
+  padding: 10px;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    border-color: var(--brand-color-primary);
+    box-shadow: 0 2px 8px rgba(23, 28, 143, 0.08);
+  }
 }
 
 .restriction-row {
   display: flex;
   align-items: center;
-  width: 100%;
   gap: 12px;
+  min-height: 32px;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }
 
 .restriction-header {
@@ -21,71 +36,165 @@
   align-items: center;
   gap: 8px;
   min-width: 140px;
-  color: var(--brand-color-primary);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--brand-text-primary);
   white-space: nowrap;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    min-width: auto;
+    margin-bottom: 4px;
+  }
 
   i {
-    font-size: 16px;
+    font-size: 14px;
     color: var(--brand-color-primary);
+    min-width: 16px;
   }
 }
 
 .date-picker-compact {
   display: flex;
   align-items: center;
-  flex: 1;
   gap: 8px;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 6px;
+  }
 
   .separator {
     color: var(--brand-color-primary);
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0 4px;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      transform: rotate(90deg);
+      margin: 4px 0;
+    }
   }
 
   nz-date-picker {
     flex: 1;
+    min-width: 140px;
+    width: 100%;
   }
 }
 
 .select-container {
   flex: 1;
+  min-width: 200px;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    min-width: auto;
+  }
 }
 
-.delete-button {
-  margin-left: 8px;
-  padding: 4px 8px;
+.delete-rule-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--brand-text-tertiary);
+  border-radius: 3px;
+  opacity: 0;
+  transition: all 0.2s ease;
+
+  .restriction-container:hover & {
+    opacity: 0.6;
+  }
+
+  &:hover {
+    opacity: 1;
+    background: #ff4d4f;
+    color: white;
+    transform: scale(1.1);
+  }
 
   i {
-    font-size: 16px;
+    font-size: 10px;
   }
 }
 
-:host ::ng-deep {
-  .ant-picker {
-    border: 1px solid var(--brand-border-color-light);
-    height: 28px;
+.others-info-container {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
 
-    input {
+  .others-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: var(--brand-background-hover);
+    border: 1px solid var(--brand-border-color-light);
+    border-radius: 4px;
+
+    .info-text {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
       font-size: 13px;
+      color: var(--brand-text-primary);
+      line-height: 1.4;
+
+      i {
+        color: var(--brand-color-primary);
+        font-size: 14px;
+        margin-top: 1px;
+        flex-shrink: 0;
+      }
+
+      span {
+        flex: 1;
+      }
+    }
+
+    .limitation-text {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--brand-text-secondary);
+      line-height: 1.4;
+      padding: 8px;
+      background: var(--brand-background-dialog);
+      border: 1px solid #ffd591;
+      border-radius: 4px;
+
+      i {
+        color: #fa8c16;
+        font-size: 13px;
+        margin-top: 1px;
+        flex-shrink: 0;
+      }
+
+      span {
+        flex: 1;
+        font-style: italic;
+      }
     }
   }
 
-  course-member-select,
-  course-group-select {
-    .ant-select {
-      width: 100%;
-    }
+  @media (max-width: 768px) {
+    .others-info {
+      padding: 10px;
 
-    .ant-select-selector {
-      height: 28px !important;
-      padding: 0 8px !important;
-
-      .ant-select-selection-search-input {
-        height: 26px !important;
-      }
-
-      .ant-select-selection-placeholder {
-        line-height: 28px !important;
+      .info-text, .limitation-text {
+        font-size: 12px;
       }
     }
   }
