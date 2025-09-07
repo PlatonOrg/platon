@@ -35,6 +35,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
   @Column({ type: 'jsonb', default: {} })
   source!: PLSourceFile<ActivityVariables>
 
+  @Column({ name: 'ignore_restrictions', nullable: true, default: true })
+  ignoreRestrictions?: boolean
+
   @Column({ type: 'jsonb', default: {} })
   restrictions?: RestrictionList[] | null
 

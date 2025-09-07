@@ -36,10 +36,7 @@ import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
 
-// -------------------------------------------------------------------------------
-import { Activity, RestrictionConfig } from '@platon/feature/course/common'
 import { CourseGroupService } from '../course-group/course-group.service'
-import { UserRoles } from '@platon/core/common'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
@@ -58,7 +55,7 @@ export class ActivityService {
     private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
     private readonly courseGroup: CourseGroupService,
-    private readonly activityDatesService: ActivityDatesService, // Nouveau service injecté
+    private readonly activityDatesService: ActivityDatesService,
 
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -142,8 +139,6 @@ export class ActivityService {
     }
     return Optional.of(activities)
   }
-
-  //------------------------------------------------------
 
   async findByCourseId(courseId: string, activityId: string): Promise<Optional<ActivityEntity>> {
     const qb = this.createQueryBuilder(courseId)
