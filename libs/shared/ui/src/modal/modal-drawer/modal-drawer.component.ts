@@ -34,6 +34,7 @@ export class UiModalDrawerComponent {
 
   @Input() title = ''
   @Input() bodyStyle: Record<string, string> = {}
+  @Input() nzExtra?: string | TemplateRef<NonNullable<unknown>>
   @Input() size: NzDrawerSize = 'default'
   @Input() placement: NzDrawerPlacement = 'right'
   @Input({ transform: booleanAttribute }) closable = true
