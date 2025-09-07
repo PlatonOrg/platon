@@ -118,11 +118,22 @@
     </mat-card-actions>
   </mat-card>
 </ng-container>
-<ui-modal-drawer size="large" [title]="item.title" #modal>
+<ui-modal-drawer size="large" [title]="item.title" [nzExtra]="drawerAction" #modal>
   <ng-template>
-    <course-activity-settings [(activity)]="item" />
+    <course-activity-settings
+      #settingsComponent
+      [(activity)]="item"
+      (activityChange)="onActivityChange($event)"
+      (saveRequested)="onSaveRequested()"
+    />
   </ng-template>
 </ui-modal-drawer>
+<ng-template #drawerAction>
+  <button nz-button nzType="primary" nzSize="default" (click)="saveSettings()" class="save-btn">
+    <i nz-icon nzType="save" nzTheme="outline"></i>
+    Enregistrer les modifications
+  </button>
+</ng-template>
 <ng-template #progressionTemplate>
   <div class="progression">
     <span class="progression-value">{{ item.progression }}</span>

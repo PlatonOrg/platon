@@ -1,5 +1,16 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject, OnDestroy, OnInit } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  inject,
+  OnDestroy,
+  OnInit,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ViewChild,
+} from '@angular/core'
+import { NzDrawerModule } from 'ng-zorro-antd/drawer'
 import { RouterModule } from '@angular/router'
 import { firstValueFrom, Subscription } from 'rxjs'
 
@@ -51,8 +62,10 @@ import { CourseService } from '../../api/course.service'
     CsvDownloadButtonComponent,
 
     UiModalDrawerComponent,
+    NzDrawerModule,
     CourseActivitySettingsComponent,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CourseActivityCardComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService)
@@ -62,6 +75,8 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
   private themeSubscription?: Subscription
 
   @Input() item!: Activity
+  @ViewChild('settingsComponent') settingsComponent?: CourseActivitySettingsComponent
+  @ViewChild('modal') modal?: UiModalDrawerComponent
 
   async ngOnInit(): Promise<void> {
     this.themeSubscription = this.themeService.themeChange.subscribe(() => {
@@ -119,5 +134,21 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
 
   get editorUrl(): string {
     return this.resourceService.editorUrl(this.item.resourceId, 'latest')
+  }
+
+  protected async saveSettings(): Promise<void> {
+    if (this.settingsComponent) {
+      await this.settingsComponent.update()
+      this.cdr.markForCheck()
+    }
+  }
+
+  protected onSaveRequested(): void {
+    this.modal?.close()
+  }
+
+  protected onActivityChange(activity: Activity): void {
+    this.item = activity
+    this.cdr.markForCheck()
   }
 }
