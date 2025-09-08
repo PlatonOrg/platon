@@ -561,7 +561,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       })
 
       this.player.form = this.player.form + ''
-      //console.log('ET DE DEUX ' + JSON.stringify(output))
       if (output.navigation) {
         this.evaluated.emit(output.navigation)
       }
@@ -623,9 +622,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     return errorPattern.test(log)
   }
 
-  // protected errorServer(): string {
-  //   return (this.player?.platon_logs?.filter((log) => this.isErrorLog(log)) || []).join('')
-  // }
   protected readonly errorServerSignal = computed(() => {
     const player = this.playerSignal()
     if (!player) return ''
@@ -644,30 +640,26 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
     return player.platon_logs?.filter((log) => errorPattern.test(log)) || []
   }
-  readonly httpError = signal<HttpErrorResponse | null>(null)
 
-  protected async contactTeacher(): Promise<void> {
+  get mailtoLink(): string {
     const subject = encodeURIComponent(`Problème avec l'exercice: ${this.player?.title || 'Exercice'}`)
-    const user = await this.authService.ready()
-    const { firstName: first = '', lastName: last = '' } = user || {}
+
     const body = encodeURIComponent(`
-  Bonjour,
-
-  J'ai rencontré un problème avec l'exercice "${this.player?.title || 'Exercice'}" dans PLaTon.
-
-  Détails de l'erreur:
-  ${this.errorServerSignal()}
-
-  Pourriez-vous m'aider à résoudre ce problème ?
-
-  Merci,
-  ${last} ${first}
+    Bonjour,
+  
+    J'ai rencontré un problème avec l'exercice "${this.player?.title || 'Exercice'}" dans PLaTon.
+  
+    Détails de l'erreur:
+    ${this.errorServerSignal()}
+  
+    Pourriez-vous m'aider à résoudre ce problème ?
+  
+    Merci,
+    Nom Prenom
     `)
 
     const teacherEmail = this.getTeacherEmail()
-    const mailtoLink = `mailto:${teacherEmail}?subject=${subject}&body=${body}`
-
-    window.open(mailtoLink, '_self')
+    return `mailto:${teacherEmail}?subject=${subject}&body=${body}`
   }
 
   protected retryExercise(): void {
