@@ -12,6 +12,7 @@
 .more-button {
   margin: 0;
   padding: 0;
+
   mat-icon {
     margin: 0;
   }
@@ -24,10 +25,12 @@
 mat-card {
   width: 100%;
   transition: box-shadow 0.5s;
+
   &:hover {
     box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-      0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
   }
+
   border-radius: 5px;
 }
 
@@ -95,7 +98,7 @@ mat-card-actions {
 
   .separator {
     width: 1px;
-    background-color:  var(--brand-border-color-light);
+    background-color: var(--brand-border-color-light);
   }
 }
 
@@ -136,6 +139,221 @@ mat-icon {
       justify-content: space-between;
       align-items: center;
       width: 100%;
+    }
+  }
+}
+
+
+::ng-deep .access-warning-modal {
+  .ant-modal-header {
+    background: var(--brand-background-card);
+    border-bottom: 1px solid var(--brand-border-color-light);
+
+    .ant-modal-title {
+      color: var(--brand-text-primary);
+      font-family: var(--brand-font);
+      font-weight: 600;
+    }
+  }
+
+  .ant-modal-body {
+    background: var(--brand-background-card);
+    padding: 20px 24px;
+  }
+
+  .ant-modal-footer {
+    background: var(--brand-background-card);
+    border-top: 1px solid var(--brand-border-color-light);
+    padding: 16px 24px;
+
+    .ant-btn {
+      font-family: var(--brand-font);
+
+      &.cancel-btn {
+        color: var(--brand-text-primary);
+        border-color: var(--brand-border-color);
+        background-color: var(--brand-background-components);
+
+        &:hover {
+          background-color: var(--brand-background-hover);
+          border-color: var(--brand-color-primary);
+          color: var(--brand-color-primary);
+        }
+      }
+
+      &.confirm-btn {
+        background-color: var(--brand-text-error);
+        border-color: var(--brand-text-error);
+
+        &:hover {
+          background-color: var(--brand-text-error);
+          opacity: 0.85;
+        }
+
+        &.ant-btn-loading {
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+}
+
+
+.access-warning-content {
+  font-family: var(--brand-font);
+
+  .warning-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--brand-background-hover);
+    border-radius: 8px;
+    border-left: 4px solid var(--brand-color-primary);
+
+    i {
+      color: var(--brand-color-primary);
+      font-size: 24px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      margin: 0;
+      color: var(--brand-text-primary);
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+  }
+
+  .warning-body {
+    p {
+      color: var(--brand-text-primary);
+      line-height: 1.6;
+      margin: 16px 0 8px 0;
+      font-size: 14px;
+
+      strong {
+        color: var(--brand-text-primary);
+        font-weight: 600;
+      }
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+
+  .situation-box {
+    background: var(--brand-background-components);
+    border: 1px solid var(--brand-border-color);
+    border-left: 4px solid var(--brand-color-secondary);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0 20px 0;
+    color: var(--brand-text-primary);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .consequences-list {
+    background: var(--brand-pastel-red);
+    border: 1px solid var(--brand-border-color-light);
+    border-left: 4px solid var(--brand-text-error);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0 20px 0;
+
+    ul {
+      margin: 0;
+      padding: 0 0 0 20px;
+
+      li {
+        color: var(--brand-text-primary);
+        margin-bottom: 8px;
+        font-size: 14px;
+        line-height: 1.5;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  .recommendation-box {
+    background: var(--brand-pastel-green);
+    border: 1px solid var(--brand-border-color);
+    border-left: 4px solid var(--brand-color-secondary);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 20px 0 0 0;
+    color: var(--brand-text-primary);
+    font-size: 14px;
+    line-height: 1.6;
+
+    strong {
+      color: var(--brand-color-secondary);
+      font-weight: 600;
+    }
+  }
+}
+
+// === ADAPTATION RESPONSIVE ===
+@media (max-width: 768px) {
+  ::ng-deep .access-warning-modal {
+    .ant-modal {
+      margin: 16px;
+      max-width: calc(100vw - 32px);
+    }
+
+    .ant-modal-body {
+      padding: 16px;
+    }
+
+    .ant-modal-footer {
+      padding: 12px 16px;
+
+      .ant-btn {
+        margin-right: 8px;
+        margin-bottom: 8px;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
+  .access-warning-content {
+    .warning-header {
+      flex-direction: column;
+      text-align: center;
+      gap: 12px;
+      padding: 12px;
+
+      h3 {
+        font-size: 16px;
+      }
+
+      i {
+        align-self: center;
+        margin-top: 0;
+      }
+    }
+
+    .situation-box,
+    .consequences-list,
+    .recommendation-box {
+      padding: 12px;
+      margin: 10px 0;
+    }
+
+    .consequences-list ul {
+      padding-left: 16px;
     }
   }
 }
