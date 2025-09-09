@@ -35,6 +35,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
   @Column({ type: 'jsonb', default: {} })
   source!: PLSourceFile<ActivityVariables>
 
+  @Column({ name: 'ignore_restrictions', nullable: true, default: true })
+  ignoreRestrictions?: boolean
+
   @Column({ type: 'jsonb', default: {} })
   restrictions?: RestrictionList[] | null
 
@@ -52,6 +55,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
 
   @Column({ default: 0 })
   order!: number
+
+  @Column({ type: 'integer', name: 'color_hue', nullable: true })
+  colorHue?: number
 
   // VIRTUAL COLUMNS
   // TODO: use expanders instead of virtual columns

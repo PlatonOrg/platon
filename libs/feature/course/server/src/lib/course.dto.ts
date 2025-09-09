@@ -21,6 +21,9 @@ export class CourseDTO extends BaseDTO implements Course {
   @ApiProperty()
   readonly ownerId!: string
 
+  @ApiProperty()
+  readonly isTest!: boolean
+
   @IsOptional()
   @ApiProperty({ type: CourseStatisticDTO })
   @Type(() => CourseStatisticDTO)

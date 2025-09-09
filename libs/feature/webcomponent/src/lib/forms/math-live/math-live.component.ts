@@ -13,6 +13,7 @@ import { MathfieldElement } from 'mathlive'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import { MathLiveComponentDefinition, MathLiveState } from './math-live'
+import { ComputeEngine } from '@cortex-js/compute-engine'
 
 @Component({
   selector: 'wc-math-live',
@@ -33,6 +34,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
   box!: ElementRef<HTMLElement>
 
   displayMenu = true
+  computeEngine = new ComputeEngine()
 
   constructor(readonly injector: Injector, readonly changeDetection: WebComponentChangeDetectorService) {}
 
@@ -47,7 +49,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
     this.mathfield.oninput = () => {
       this.changeDetection
         .ignore(this, () => {
-          this.state.value = this.mathfield.getValue('latex')
+          this.state.value = this.computeEngine.parse(this.mathfield.getValue('latex-expanded')).latex
           this.state.isFilled = true
         })
         .catch(console.error)

@@ -20,157 +20,252 @@ export class ActivityDatesService {
 
   /**
    * Met à jour les dates d'ouverture et de fermeture des activités en fonction des restrictions
-   * @param activities Liste des activités à mettre à jour
-   * @returns Dates d'ouverture et de fermeture ou undefined
    */
   async updateActivitiesDates(
     activities: ActivityEntity[]
   ): Promise<{ start: Date | undefined; end: Date | undefined }> {
-    const dateRangeGlobale: { start: Date | undefined; end: Date | undefined } = {
+    const globalDateRange: { start: Date | undefined; end: Date | undefined } = {
       start: undefined,
       end: undefined,
     }
 
     for (const activity of activities) {
-      if (activity?.restrictions && activity.restrictions.length > 0) {
-        let isExist = false
+      const dateRange = await this.getActivityDatesForUser(activity, this.request.user)
 
-        // Vérifier les restrictions pour l'utilisateur actuel
-        for (const restriction of activity.restrictions) {
-          const dateRange = await this.findUserAccess(activity, restriction.restriction, this.request.user)
-
-          if (dateRange && activity) {
-            activity.openAt = dateRange.start
-            activity.closeAt = dateRange.end
-            dateRangeGlobale.start = dateRange.start
-            dateRangeGlobale.end = dateRange.end
-            isExist = true
-
-            break // Sortir de la boucle une fois une date trouvée
-          }
-        }
-
-        // Si aucune restriction spécifique trouvée, chercher les restrictions vides
-        if (!isExist) {
-          isExist = await this.handleEmptyRestrictions(activity, dateRangeGlobale)
-        }
-
-        // Si toujours pas de date trouvée, définir des dates par défaut dans le passé
-        if (!isExist) {
-          const yesterday = new Date()
-          yesterday.setDate(yesterday.getDate() - 1)
-
-          activity.openAt = yesterday
-          activity.closeAt = yesterday
-          dateRangeGlobale.start = yesterday
-          dateRangeGlobale.end = yesterday
-        }
+      if (dateRange) {
+        activity.openAt = dateRange.start
+        activity.closeAt = dateRange.end
+        globalDateRange.start = dateRange.start
+        globalDateRange.end = dateRange.end
       }
     }
 
-    return dateRangeGlobale
+    return globalDateRange
   }
 
   /**
-   * Recherche des accès utilisateur dans les restrictions
-   * @param activity Activité à vérifier
-   * @param restrictions Liste des restrictions
-   * @param user Utilisateur actuel
-   * @returns Configuration de date ou null
+   * Détermine les dates d'accès pour un utilisateur et une activité donnés
    */
-  private async findUserAccess(
+  private async getActivityDatesForUser(
+    activity: ActivityEntity,
+    user: User
+  ): Promise<{ start: Date | undefined; end: Date | undefined } | null> {
+    // Si ignoreRestrictions est activé, utiliser les dates de base de l'activité
+    if (activity.ignoreRestrictions) {
+      return {
+        start: activity.openAt !== null ? activity.openAt : undefined,
+        end: activity.closeAt !== null ? activity.closeAt : undefined,
+      }
+    }
+
+    // Si pas de restrictions, utiliser les dates de base
+    if (!activity.restrictions || activity.restrictions.length === 0) {
+      return {
+        start: activity.openAt !== null ? activity.openAt : undefined,
+        end: activity.closeAt !== null ? activity.closeAt : undefined,
+      }
+    }
+
+    // Chercher l'accès de l'utilisateur dans les périodes d'accès
+    for (const restrictionList of activity.restrictions) {
+      const accessResult = await this.checkUserAccessInPeriod(activity, restrictionList.restriction, user)
+
+      if (accessResult.hasAccess) {
+        return accessResult.dateRange
+      }
+    }
+
+    // Si l'utilisateur n'a accès à aucune période spécifique, vérifier "Others"
+    const othersAccess = await this.checkOthersAccess(activity, user)
+    if (othersAccess) {
+      return othersAccess
+    }
+
+    // Aucun accès trouvé - retourner les dates de l'activité avec fermeture dans le passé
+    return this.getNoAccessDates(activity)
+  }
+
+  /**
+   * Vérifie l'accès d'un utilisateur dans une période spécifique
+   */
+  private async checkUserAccessInPeriod(
     activity: Activity,
     restrictions: Restriction[],
     user: User
-  ): Promise<RestrictionConfig['DateRange'] | null> {
-    // Vérifier s'il existe des restrictions de type Members ou Groups
-    const hasMembersRestriction = restrictions.some((r) => r.type === 'Members')
-    const hasGroupRestriction = restrictions.some((r) => r.type === 'Groups')
-
-    // Si les deux restrictions sont absentes et que c'est un étudiant, on autorise l'accès
-    if (!hasMembersRestriction && !hasGroupRestriction) {
-      // Vérifier s'il y a une restriction de type DateRange
-      const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
-      if (dateRangeRestriction) {
-        return dateRangeRestriction.config as RestrictionConfig['DateRange']
-      }
-      return { start: undefined, end: undefined }
+  ): Promise<{
+    hasAccess: boolean
+    dateRange: { start: Date | undefined; end: Date | undefined } | null
+  }> {
+    // Si la période contient "Others", on ne la traite pas ici
+    if (restrictions.some((r) => r.type === 'Others')) {
+      return { hasAccess: false, dateRange: null }
     }
 
-    // Traitement normal pour chaque restriction
-    for (const restriction of restrictions) {
-      let hasAccess = false
+    let userHasAccess = false
 
+    for (const restriction of restrictions) {
       switch (restriction.type) {
         case 'Members':
-          hasAccess = await this.checkMembers(activity, restriction.config as RestrictionConfig['Members'], user)
+          userHasAccess = await this.checkMembersAccess(
+            activity,
+            restriction.config as RestrictionConfig['Members'],
+            user
+          )
           break
         case 'Groups':
-          hasAccess = await this.checkGroups(activity, restriction.config as RestrictionConfig['Groups'], user)
+          userHasAccess = await this.checkGroupsAccess(
+            activity,
+            restriction.config as RestrictionConfig['Groups'],
+            user
+          )
           break
         case 'Correctors':
-          hasAccess = await this.checkMembers(activity, restriction.config as RestrictionConfig['Correctors'], user)
-          break
-        default:
+          userHasAccess = await this.checkCorrectorsAccess(
+            activity,
+            restriction.config as RestrictionConfig['Correctors'],
+            user
+          )
           break
       }
 
-      if (hasAccess) {
-        // Vérifier si la restriction contient une DateRange
-        const dateRangeRestriction = restrictions.find((r) => r.type === 'DateRange')
-        if (dateRangeRestriction) {
-          return dateRangeRestriction.config as RestrictionConfig['DateRange']
-        }
-        return { start: undefined, end: undefined }
+      if (userHasAccess) {
+        break
       }
     }
+
+    if (!userHasAccess) {
+      return { hasAccess: false, dateRange: null }
+    }
+
+    // Utilisateur a accès, récupérer les dates de cette période
+    const dateRange = this.extractDateRange(restrictions)
+    return { hasAccess: true, dateRange }
+  }
+
+  /**
+   * Vérifie l'accès "Others" pour un utilisateur
+   */
+  private async checkOthersAccess(
+    activity: ActivityEntity,
+    user: User
+  ): Promise<{ start: Date | undefined; end: Date | undefined } | null> {
+    if (!activity.restrictions) {
+      return null
+    }
+
+    // Trouver la période avec "Others"
+    for (const restrictionList of activity.restrictions) {
+      const hasOthers = restrictionList.restriction.some((r) => r.type === 'Others')
+
+      if (hasOthers) {
+        // Vérifier que l'utilisateur n'est dans aucune autre période spécifique
+        const isInSpecificPeriod = await this.isUserInAnySpecificPeriod(activity, user)
+
+        if (!isInSpecificPeriod) {
+          return this.extractDateRange(restrictionList.restriction)
+        }
+      }
+    }
+
     return null
   }
 
   /**
-   * Vérifie si l'utilisateur est dans la liste des membres autorisés
-   * @param activity Activité à vérifier
-   * @param config Configuration de restriction
-   * @param user Utilisateur actuel
-   * @returns true si l'utilisateur a accès
+   * Vérifie si un utilisateur est dans une période spécifique (non-Others)
    */
-  private async checkMembers(
-    activity: Activity,
-    config: RestrictionConfig['Members'] | RestrictionConfig['Correctors'],
-    user: User
-  ): Promise<boolean> {
-    // Vérifier si l'utilisateur est un membre du cours
-    const member = await this.courseMemberService.getByUserIdAndCourseId(user.id, activity.courseId)
-    if (!member.isPresent()) {
+  private async isUserInAnySpecificPeriod(activity: Activity, user: User): Promise<boolean> {
+    if (!activity.restrictions) {
       return false
     }
 
-    // Vérifier si l'utilisateur est dans la liste des membres
-    if ('members' in config) {
-      return config.members?.some((memberId: string) => member.get().id === memberId) ?? false
-    }
+    for (const restrictionList of activity.restrictions) {
+      if (restrictionList.restriction.some((r) => r.type === 'Others')) {
+        continue
+      }
 
-    // Vérifier si l'utilisateur est dans la liste des correcteurs
-    if ('correctors' in config) {
-      return config.correctors?.some((correctorId: string) => member.get().id === correctorId) ?? false
+      const accessResult = await this.checkUserAccessInPeriod(activity, restrictionList.restriction, user)
+      if (accessResult.hasAccess) {
+        return true
+      }
     }
 
     return false
   }
 
   /**
-   * Vérifie si l'utilisateur est dans un groupe autorisé
-   * @param activity Activité à vérifier
-   * @param config Configuration de restriction
-   * @param user Utilisateur actuel
-   * @returns true si l'utilisateur a accès
+   * Extrait la date range d'une liste de restrictions
    */
-  private async checkGroups(activity: Activity, config: RestrictionConfig['Groups'], user: User): Promise<boolean> {
-    // Vérifier si l'utilisateur est dans un des groupes autorisés
-    if (!activity) {
+  private extractDateRange(restrictions: Restriction[]): { start: Date | undefined; end: Date | undefined } {
+    const dateRestriction = restrictions.find((r) => r.type === 'DateRange')
+
+    if (dateRestriction) {
+      return dateRestriction.config as RestrictionConfig['DateRange']
+    }
+
+    return { start: undefined, end: undefined }
+  }
+
+  /**
+   * Retourne les dates pour un utilisateur sans accès
+   */
+  private getNoAccessDates(activity: ActivityEntity): { start: Date | undefined; end: Date | undefined } {
+    const baseStart = activity.openAt
+    const now = new Date()
+    const pastDate = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Hier
+
+    return {
+      start: baseStart || pastDate,
+      end: pastDate, // Toujours fermé dans le passé
+    }
+  }
+
+  /**
+   * Vérifie l'accès d'un utilisateur dans la liste des membres
+   */
+  private async checkMembersAccess(
+    activity: Activity,
+    config: RestrictionConfig['Members'],
+    user: User
+  ): Promise<boolean> {
+    const member = await this.courseMemberService.getByUserIdAndCourseId(user.id, activity.courseId)
+
+    if (!member.isPresent()) {
       return false
     }
-    for (const groupId of config.groups || []) {
+
+    return config.members?.includes(member.get().id) ?? false
+  }
+
+  /**
+   * Vérifie l'accès d'un utilisateur dans la liste des correcteurs
+   */
+  private async checkCorrectorsAccess(
+    activity: Activity,
+    config: RestrictionConfig['Correctors'],
+    user: User
+  ): Promise<boolean> {
+    const member = await this.courseMemberService.getByUserIdAndCourseId(user.id, activity.courseId)
+
+    if (!member.isPresent()) {
+      return false
+    }
+
+    return config.correctors?.includes(member.get().id) ?? false
+  }
+
+  /**
+   * Vérifie l'accès d'un utilisateur dans les groupes autorisés
+   */
+  private async checkGroupsAccess(
+    activity: Activity,
+    config: RestrictionConfig['Groups'],
+    user: User
+  ): Promise<boolean> {
+    if (!config.groups?.length) {
+      return false
+    }
+
+    for (const groupId of config.groups) {
       const isMember = await this.courseGroupService.isMember(groupId, user.id)
       if (isMember) {
         return true
@@ -181,62 +276,43 @@ export class ActivityDatesService {
   }
 
   /**
-   * Gère les restrictions vides (sans membres ni groupes)
-   * @param activity Activité à vérifier
-   * @param dateRangeGlobale Dates globales à mettre à jour
-   * @returns true si une date a été trouvée
+   * Rouvre ou ferme toutes les restrictions d'une activité
    */
-  private async handleEmptyRestrictions(
-    activity: ActivityEntity,
-    dateRangeGlobale: { start: Date | undefined; end: Date | undefined }
-  ): Promise<boolean> {
-    if (!activity.restrictions || activity.restrictions.length === 0) {
-      return false
+  async reopenOrCloseAllRestrictions(activity: Activity, isOpen: boolean): Promise<void> {
+    if (!activity.restrictions?.length) {
+      return
     }
-    for (const restriction of activity.restrictions) {
-      let condition = 0
 
-      for (const rest of restriction.restriction) {
-        if (rest.type === 'Members') {
-          const isMember = (config: RestrictionConfig[keyof RestrictionConfig]): config is { members?: string[] } => {
-            return 'members' in config
-          }
+    activity.restrictions.forEach((restrictionList) => {
+      restrictionList.restriction.forEach((restriction) => {
+        if (restriction.type === 'DateRange') {
+          const config = restriction.config as RestrictionConfig['DateRange']
 
-          if (isMember(rest.config) && (!rest.config.members || rest.config.members.length === 0)) {
-            condition++
-          }
-        }
-
-        if (rest.type === 'Groups') {
-          const isGroup = (config: RestrictionConfig[keyof RestrictionConfig]): config is { groups?: string[] } => {
-            return 'groups' in config
-          }
-
-          if (isGroup(rest.config) && (!rest.config.groups || rest.config.groups.length === 0)) {
-            condition++
+          if (isOpen) {
+            config.end = undefined
+          } else {
+            config.end = new Date()
           }
         }
+      })
+    })
 
-        // Si les deux conditions sont remplies (membres vide ET groupes vide)
-        if (condition === 2) {
-          const dateRangeRestriction = restriction.restriction.find((r) => r.type === 'DateRange')
+    // Si on rouvre et qu'il n'y a aucune période accessible, ajouter une période "Others"
+    if (isOpen) {
+      const hasAccessiblePeriod = activity.restrictions.some((restrictionList) =>
+        restrictionList.restriction.some((r) => r.type === 'Others')
+      )
 
-          if (dateRangeRestriction) {
-            const dateRange = dateRangeRestriction.config as RestrictionConfig['DateRange']
-            activity.openAt = dateRange.start
-            activity.closeAt = dateRange.end
-            dateRangeGlobale.start = dateRange.start
-            dateRangeGlobale.end = dateRange.end
-            return true
-          }
-        }
+      if (!hasAccessiblePeriod) {
+        this.addDefaultOthersPeriod(activity)
       }
     }
-
-    return false
   }
 
-  private reopenForAll(activity: Activity): void {
+  /**
+   * Ajoute une période "Others" par défaut pour donner accès à tous
+   */
+  private addDefaultOthersPeriod(activity: Activity): void {
     if (activity?.restrictions) {
       activity.restrictions.push({
         restriction: [
@@ -247,37 +323,14 @@ export class ActivityDatesService {
               end: undefined,
             },
           },
+          {
+            type: 'Others',
+            config: {
+              enabled: true,
+            },
+          },
         ],
       })
-    }
-  }
-
-  async reopenOrCloseAllRestrictions(activity: Activity, isOpen: boolean): Promise<void> {
-    if (activity?.restrictions && activity.restrictions.length > 0) {
-      activity.restrictions.forEach((restrictionList) => {
-        restrictionList.restriction.forEach((restric) => {
-          const isDateRange = (
-            config: RestrictionConfig[keyof RestrictionConfig]
-          ): config is RestrictionConfig['DateRange'] => {
-            return config !== undefined || 'start' in config || 'end' in config
-          }
-          if (isDateRange(restric.config) && isOpen) {
-            restric.config.end = undefined
-          } else if (isDateRange(restric.config) && !isOpen) {
-            restric.config.end = new Date()
-          }
-        })
-      })
-
-      if (isOpen) {
-        const isNotEmpty = await this.handleEmptyRestrictions(activity as ActivityEntity, {
-          start: undefined,
-          end: undefined,
-        })
-        if (!isNotEmpty) {
-          this.reopenForAll(activity) // Ajouter une restriction permettant aux gens qui n'ont pas d'accès d'avoir un accès par default
-        }
-      }
     }
   }
 }

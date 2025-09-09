@@ -136,6 +136,35 @@ export class PlayerService extends PlayerManager {
     return this.sandboxService.downloadEnvironment(session.source as PLSourceFile<ExerciseVariables>, session.envid)
   }
 
+  /**
+   * Vérifie si une activité est accessible en fonction de ses dates d'ouverture et de fermeture
+   * @param activity L'activité à vérifier
+   * @throws ForbiddenResponse si l'activité n'est pas encore ouverte ou est fermée
+   */
+  private async checkActivityDateRestrictions(activity: ActivityEntity): Promise<void> {
+    if (activity.ignoreRestrictions) {
+      return
+    }
+    const dateRange = await this.activityService.updateActivitiesDates([activity])
+    if (dateRange && dateRange.start) {
+      const startTime = new Date(dateRange.start).getTime()
+      const nowTime = new Date().getTime()
+
+      if (startTime > nowTime) {
+        throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
+      }
+    }
+
+    if (dateRange && dateRange.end) {
+      const endTime = new Date(dateRange.end).getTime()
+      const nowTime = new Date().getTime()
+
+      if (endTime < nowTime) {
+        throw new ForbiddenResponse("L'activité est fermée.")
+      }
+    }
+  }
+
   async playActivity(activityId: string, user: User): Promise<PlayActivityOuput> {
     let activitySession = await this.sessionService.findUserActivity(activityId, user.id)
     if (!activitySession) {
@@ -148,6 +177,10 @@ export class PlayerService extends PlayerManager {
         isBuilt: true,
       })
     }
+    if (activitySession.activity) {
+      await this.checkActivityDateRestrictions(activitySession.activity)
+    }
+
     return { activity: withActivityPlayer(activitySession) }
   }
 
@@ -169,25 +202,7 @@ export class PlayerService extends PlayerManager {
       throw new NotFoundResponse(`Activity not found: ${activitySessionId}`)
     }
 
-    const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
-
-    if (dateRange && dateRange.start) {
-      const startTime = new Date(dateRange.start).getTime()
-      const nowTime = new Date().getTime()
-
-      if (startTime > nowTime) {
-        throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
-      }
-    }
-
-    if (dateRange && dateRange.end) {
-      const endTime = new Date(dateRange.end).getTime()
-      const nowTime = new Date().getTime()
-
-      if (endTime < nowTime) {
-        throw new ForbiddenResponse("L'activité est fermée.")
-      }
-    }
+    await this.checkActivityDateRestrictions(activitySession.activity)
     // Fin des modifs
 
     // CREATE PLAYERS

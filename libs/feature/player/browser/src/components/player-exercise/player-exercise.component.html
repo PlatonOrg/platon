@@ -1,5 +1,5 @@
 <mat-card #container>
-  @if(hasErrors()) {
+  @if (hasErrors()) {
   <div class="custom-error-page">
     <div class="error-illustration">
       <mat-icon class="error-icon">bug_report</mat-icon>
@@ -13,10 +13,12 @@
       </p>
 
       <div class="error-actions">
-        <button mat-stroked-button color="accent" class="contact-button" (click)="contactTeacher()">
-          <mat-icon>email</mat-icon>
-          Contacter mon enseignant
-        </button>
+        <a [href]="mailtoLink">
+          <button mat-stroked-button color="accent" class="contact-button">
+            <mat-icon>email</mat-icon>
+            Contacter mon enseignant
+          </button>
+        </a>
 
         <button mat-stroked-button color="accent" (click)="retryExercise()" *ngIf="!editorPreview">
           <mat-icon>refresh</mat-icon>
@@ -56,7 +58,8 @@
         </mat-card-title>
         <mat-card-subtitle *ngIf="player?.author">
           @if (player!.author!|isUUID) {
-          <user-avatar [userIdOrName]="player!.author!" [size]="24" /> } @else {
+          <user-avatar [userIdOrName]="player!.author!" [size]="24" />
+          } @else {
           {{ player?.author }}
           }
         </mat-card-subtitle>
@@ -193,10 +196,14 @@
   <ng-container *ngFor="let item of player?.theories; trackBy: trackTheory">
     @if (item.url|filePreviewSupported) {
     <button mat-menu-item (click)="selectedTheory = item; modalPlayerTheory.open()">
-      <mat-icon>preview</mat-icon> {{ item.title }}
+      <mat-icon>preview</mat-icon>
+      {{ item.title }}
     </button>
     } @else {
-    <a mat-menu-item [href]="item.url" target="_blank"> <mat-icon>open_in_new</mat-icon>{{ item.title }}</a>
+    <a mat-menu-item [href]="item.url" target="_blank">
+      <mat-icon>open_in_new</mat-icon>
+      {{ item.title }}</a
+    >
     }
   </ng-container>
 </mat-menu>
@@ -255,6 +262,9 @@
     </ng-container>
   </ng-template>
   <ng-template>
-    <a mat-button [href]="selectedTheory?.url" target="_blank"><mat-icon>download</mat-icon> Télécharger</a>
+    <a mat-button [href]="selectedTheory?.url" target="_blank">
+      <mat-icon>download</mat-icon>
+      Télécharger</a
+    >
   </ng-template>
 </ui-modal-template>

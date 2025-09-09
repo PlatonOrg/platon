@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { BaseDTO, toArray, toBoolean, toDate } from '@platon/core/server'
+import { BaseDTO, toArray, toBoolean, toDate, toNumber } from '@platon/core/server'
 import {
   Activity,
   ActivityFilters,
@@ -67,9 +67,19 @@ export class ActivityDTO extends BaseDTO implements Activity {
   @Exclude()
   readonly source?: unknown
 
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty()
+  readonly ignoreRestrictions?: boolean
+
   @Type(() => RestrictionListDTO)
   @IsOptional()
   readonly restrictions?: RestrictionListDTO[] | null
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  readonly colorHue?: number
 }
 
 export class ActivityFiltersDTO implements ActivityFilters {
@@ -135,6 +145,17 @@ export class UpdateCourseActivityDTO implements UpdateActivity {
   @IsOptional()
   @ApiProperty()
   readonly closeAt?: Date | null
+
+  @Transform(({ value }) => toNumber(value))
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  readonly colorHue?: number | null
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty()
+  readonly ignoreRestrictions?: boolean
 }
 
 export class ReloadCourseActivityDTO implements ReloadActivity {

@@ -1,0 +1,30 @@
+nz-page-header {
+  padding-left: 0;
+}
+
+p {
+  margin: 1rem 0;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.container-toolbar {
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 720px) {
+  p {
+    width: 70%;
+  }
+}
+
+.title {
+  max-width: 70vw;
+  word-wrap: normal;
+  word-break: normal;
+  white-space: normal;
+  overflow-wrap: break-word;
+}

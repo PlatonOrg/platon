@@ -116,6 +116,26 @@ export class UserService {
     }
   }
 
+  async touchLastLogin(userIdOrName: string): Promise<void> {
+    const now = new Date()
+    const isId = isUUID4(userIdOrName)
+
+    // Use a query to update lastLogin and firstLogin (if null) in a single operation
+    const updateResult = await this.repository
+      .createQueryBuilder()
+      .update(UserEntity)
+      .set({
+        lastLogin: now,
+        firstLogin: () => `COALESCE(first_login, '${now.toISOString()}')`,
+      })
+      .where(isId ? 'id = :id' : 'username = :username', isId ? { id: userIdOrName } : { username: userIdOrName })
+      .execute()
+
+    if (updateResult.affected === 0) {
+      throw new NotFoundResponse(`User not found: ${userIdOrName}`)
+    }
+  }
+
   async delete(userIdOrName: string): Promise<UserEntity> {
     const user = (await this.findByIdOrName(userIdOrName)).orElseThrow(
       () => new NotFoundResponse(`User not found: ${userIdOrName}`)

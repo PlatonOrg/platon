@@ -11,7 +11,7 @@ import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
 import differenceInCalendarDays from 'date-fns/differenceInCalendarDays'
 import differenceInMilliseconds from 'date-fns/differenceInMilliseconds'
 import { FormsModule } from '@angular/forms'
-import { NzButtonModule, NzButtonSize } from 'ng-zorro-antd/button'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzSpaceModule } from 'ng-zorro-antd/space'
@@ -93,5 +93,9 @@ export class RestrictionComponent {
 
   protected isGroupsConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Groups'] {
     return 'groups' in config
+  }
+
+  protected isOtherConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Others'] {
+    return 'other' in config
   }
 }

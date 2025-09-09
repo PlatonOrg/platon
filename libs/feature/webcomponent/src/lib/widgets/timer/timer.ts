@@ -1,10 +1,9 @@
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component'
 
 export interface TimerState extends IWebComponent {
-  mode: 'chronometer' | 'countdown'
   alignment: 'center' | 'left' | 'right'
   countDownTime: number
-  time: number
+  disabled: boolean
 }
 
 export const TimerComponentDefinition = defineWebComponent({
@@ -16,23 +15,12 @@ export const TimerComponentDefinition = defineWebComponent({
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
-    required: ['mode'],
+    required: [],
     properties: {
-      mode: {
-        type: 'string',
-        enum: ['chronometer', 'countdown'],
-        default: 'chronometer',
-        description: 'Mode du chronomètre.',
-      },
       countDownTime: {
         type: 'number',
         default: 0,
         description: 'Temps du compte à rebours en secondes.',
-      },
-      time: {
-        type: 'number',
-        default: 0,
-        description: 'Temps écoulé en secondes.',
       },
       alignment: {
         type: 'string',
@@ -40,10 +28,14 @@ export const TimerComponentDefinition = defineWebComponent({
         default: 'center',
         description: 'Alignement du chronomètre.',
       },
+      disabled: {
+        type: 'boolean',
+        default: false,
+        description: 'Désactiver le chronomètre.',
+      },
     },
   },
   showcase: {
-    mode: 'countdown',
     countDownTime: 120,
     alignment: 'right',
   },

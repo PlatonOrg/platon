@@ -36,10 +36,7 @@ import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
 
-// -------------------------------------------------------------------------------
-import { Activity, RestrictionConfig } from '@platon/feature/course/common'
 import { CourseGroupService } from '../course-group/course-group.service'
-import { UserRoles } from '@platon/core/common'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
@@ -58,7 +55,7 @@ export class ActivityService {
     private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
     private readonly courseGroup: CourseGroupService,
-    private readonly activityDatesService: ActivityDatesService, // Nouveau service injecté
+    private readonly activityDatesService: ActivityDatesService,
 
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -142,8 +139,6 @@ export class ActivityService {
     }
     return Optional.of(activities)
   }
-
-  //------------------------------------------------------
 
   async findByCourseId(courseId: string, activityId: string): Promise<Optional<ActivityEntity>> {
     const qb = this.createQueryBuilder(courseId)
@@ -439,5 +434,24 @@ export class ActivityService {
     activities: ActivityEntity[]
   ): Promise<{ start: Date | undefined; end: Date | undefined }> {
     return this.activityDatesService.updateActivitiesDates(activities)
+  }
+
+  async getCourseColors(courseId: string): Promise<number[]> {
+    const activities = await this.repository.find({
+      where: { courseId },
+    })
+
+    const colorHues = activities
+      .map((activity) => activity.colorHue)
+      .filter((colorHue): colorHue is number => colorHue !== undefined && colorHue >= 0)
+
+    const colorCount = new Map<number, number>()
+    colorHues.forEach((color) => {
+      colorCount.set(color, (colorCount.get(color) || 0) + 1)
+    })
+
+    return Array.from(colorCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([color]) => color)
   }
 }

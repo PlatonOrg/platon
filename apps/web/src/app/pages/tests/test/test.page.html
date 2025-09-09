@@ -1,0 +1,55 @@
+<ui-layout-tabs [state]="context.state">
+  <ng-container *ngIf="context.course as course">
+    <header>
+      <nz-page-header [nzSubtitle]="header" nzBackIcon>
+        <ng-template #header>
+          <nz-breadcrumb nzSeparator="">
+            <nz-breadcrumb-item>
+              <span
+                nz-typography
+                [nzEditable]="course.permissions?.update"
+                [nzContent]="course.name"
+                (nzContentChange)="updateName($event)"
+                class="title"
+              ></span>
+            </nz-breadcrumb-item>
+            <div class="spacer"></div>
+          </nz-breadcrumb>
+        </ng-template>
+      </nz-page-header>
+    </header>
+    <p
+      nz-typography
+      [nzEditable]="course.permissions?.update"
+      [nzContent]="course.desc"
+      (nzContentChange)="updateDesc($event)"
+    ></p>
+    <div class="container-toolbar">
+      <nz-tag>
+        <span nz-icon nzType="calendar" nzTheme="outline"></span>
+        <span
+          >Créé le {{ course.createdAt | date }} par
+          <user-avatar [userIdOrName]="course.ownerId" noIcon showUsername="inline" />
+        </span>
+      </nz-tag>
+    </div>
+  </ng-container>
+  <ui-layout-tab [link]="['dashboard']">
+    <ng-template>
+      <span nz-icon nzType="dashboard" nzTheme="outline"></span>
+      Vue d'ensemble
+    </ng-template>
+  </ui-layout-tab>
+  <ui-layout-tab *ngIf="context.course?.permissions?.update" [link]="['candidates']">
+    <ng-template>
+      <span nz-icon nzType="team" nzTheme="outline"></span>
+      Candidats
+    </ng-template>
+  </ui-layout-tab>
+  <ui-layout-tab *ngIf="context.course?.permissions?.update" [link]="['results']">
+    <ng-template>
+      <span nz-icon nzType="bar-chart" nzTheme="outline"></span>
+      Résultats
+    </ng-template>
+  </ui-layout-tab>
+</ui-layout-tabs>

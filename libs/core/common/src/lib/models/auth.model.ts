@@ -30,4 +30,10 @@ export interface SignUpInput {
   role: UserRoles
 }
 
+export interface CreateCandidateAccountInput {
+  email: string
+  lastName: string
+  firstName: string
+}
+
 export const TOKEN_EXPIRED_ERROR_CODE = 'auth/token-expired'

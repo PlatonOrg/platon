@@ -251,11 +251,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   private firstLoginStartTuto(): void {
-    if (this.user && isTeacherRole(this.user.role) && this.user.firstLogin) {
+    if (this.user && isTeacherRole(this.user.role) && this.user.firstLogin && this.user.lastLogin) {
       // Si c'est vraiment la première connexion
       // firstLogin est défini mais lastLogin n'existe pas ou est undefined
-      const isFirstLogin = !this.user.lastLogin || this.user.lastLogin <= this.user.firstLogin
-      if (isFirstLogin) {
+      const isFirstLogin = this.user.lastLogin <= this.user.firstLogin
+      const tutoSeen = localStorage.getItem('tutoSeen') === 'true'
+
+      if (isFirstLogin && !tutoSeen) {
+        localStorage.setItem('tutoSeen', 'true')
         this.tutorialSelectorService.startPlatformTutorial()
       }
     }

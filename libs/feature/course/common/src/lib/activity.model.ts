@@ -22,7 +22,11 @@ export interface Activity {
   readonly timeSpent: number
   readonly progression: number
   readonly permissions: ActivityPermissions
+
+  readonly ignoreRestrictions?: boolean
   readonly restrictions?: RestrictionList[] | null
+
+  readonly colorHue?: number
 }
 
 export interface ActivityFilters {
@@ -44,6 +48,8 @@ export interface CreateActivity {
 export interface UpdateActivity {
   readonly openAt?: Date | null
   readonly closeAt?: Date | null
+  readonly colorHue?: number | null
+  readonly ignoreRestrictions?: boolean
 }
 
 export interface ReloadActivity {

@@ -34,6 +34,18 @@ export class ActivityController {
     })
   }
 
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Get('/colors')
+  async getCourseColors(
+    @Req() req: IRequest,
+    @UUIDParam('courseId') courseId: string
+  ): Promise<ItemResponse<number[]>> {
+    const colors = await this.activityService.getCourseColors(courseId)
+    return new ItemResponse({
+      resource: colors,
+    })
+  }
+
   @Get('/:activityId')
   async find(
     @Req() req: IRequest,

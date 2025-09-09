@@ -1,17 +1,17 @@
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { ShepherdService, TutorialStep } from './shepherd/shepherd.service';
-import { ResourceCreationTutorialService } from './resource-creation-tutorial.service';
-import { User, UserRoles } from '@platon/core/common';
-import { Course } from '@platon/feature/course/common';
+import { Injectable } from '@angular/core'
+import { Router } from '@angular/router'
+import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
+import { ResourceCreationTutorialService } from './resource-creation-tutorial.service'
+import { User, UserRoles } from '@platon/core/common'
+import { Course } from '@platon/feature/course/common'
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CourseManagementTutorialService {
-  private selectedCourse: Course | null = null;
-  private availableCourses: Course[] = [];
-  private isResearchActivity : boolean = true
+  private selectedCourse: Course | null = null
+  private availableCourses: Course[] = []
+  private isResearchActivity: boolean = true
 
   constructor(
     private shepherdService: ShepherdService,
@@ -23,24 +23,23 @@ export class CourseManagementTutorialService {
    * Démarre le tutoriel de gestion de cours
    */
   startCourseManagementTutorial(user: User, courses: Course[] = []): void {
-    this.selectedCourse = null;
-    this.availableCourses = courses;
-
+    this.selectedCourse = null
+    this.availableCourses = courses
 
     // Vérifier s'il y a des cours disponibles
     if (!courses.length) {
-      this.startNoCoursesTutorial(user);
-      return;
+      this.startNoCoursesTutorial(user)
+      return
     }
 
-    const steps = this.buildCoursesListTutorialSteps(user);
+    const steps = this.buildCoursesListTutorialSteps(user)
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'course-management-tutorial',
       useModalOverlay: true,
       confirmCancel: true,
-      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de gestion de cours ?'
-    });
+      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de gestion de cours ?',
+    })
   }
 
   /**
@@ -60,31 +59,31 @@ export class CourseManagementTutorialService {
         buttons: [
           {
             text: 'Apprendre à créer un cours',
-            action: () => this.redirectToResourceCreationTutorial(user)
+            action: () => this.redirectToResourceCreationTutorial(user),
           },
           {
             text: 'Annuler',
             secondary: true,
-            action: () => this.shepherdService.cancel()
-          }
-        ]
-      }
-    ];
+            action: () => this.shepherdService.cancel(),
+          },
+        ],
+      },
+    ]
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'no-courses-tutorial',
-      useModalOverlay: true
-    });
+      useModalOverlay: true,
+    })
   }
 
   /**
    * Redirige vers le tutoriel de création de ressource
    */
   private redirectToResourceCreationTutorial(user: User): void {
-    this.shepherdService.complete();
+    this.shepherdService.complete()
     setTimeout(() => {
-      this.resourceCreationTutorialService.startResourceCreationTutorial(user);
-    }, 500);
+      this.resourceCreationTutorialService.startResourceCreationTutorial(user)
+    }, 500)
   }
 
   /**
@@ -106,13 +105,13 @@ export class CourseManagementTutorialService {
           {
             text: 'Annuler',
             secondary: true,
-            action: () => this.shepherdService.cancel()
+            action: () => this.shepherdService.cancel(),
           },
           {
             text: 'Commencer le tutoriel',
-            action: () => this.shepherdService.next()
+            action: () => this.shepherdService.next(),
           },
-        ]
+        ],
       },
       {
         id: 'select-course',
@@ -121,111 +120,93 @@ export class CourseManagementTutorialService {
                <strong>Cliquez sur l'un des cours ci-dessous</strong> pour commencer le tutoriel de gestion.`,
         attachTo: {
           element: '#tuto-courses-course-list',
-          on: 'top'
+          on: 'top',
         },
         buttons: [
           {
-            text: 'J\'ai cliqué sur un cours',
-            action: () => this.checkCourseSelection()
-          }
+            text: 'Precedent',
+            secondary: true,
+            action: () => this.shepherdService.previous(),
+          },
         ],
         when: {
-          show: () => this.setupCourseSelectionListeners()
-        }
-      }
-    ];
+          show: () => this.setupCourseSelectionListeners(),
+        },
+      },
+    ]
 
-    return steps;
+    return steps
   }
-
 
   /**
    * Configure les listeners pour la sélection de cours
    */
   private setupCourseSelectionListeners(): void {
     setTimeout(() => {
-      const courseItems = document.querySelectorAll('.tuto-course-item-container, ui-list-item-article');
+      const courseItems = document.querySelectorAll('.tuto-course-item-container, ui-list-item-article')
 
       courseItems.forEach((item, index) => {
-        const courseContainer = item.closest('[data-course-id]') || item;
+        const courseContainer = item.closest('[data-course-id]') || item
 
         item.addEventListener('click', (event) => {
-
           // Récupérer l'ID du cours depuis l'attribut data
-          const courseId = courseContainer.getAttribute('data-course-id');
+          const courseId = courseContainer.getAttribute('data-course-id')
 
           if (courseId) {
-            this.selectedCourse = this.availableCourses.find(c => c.id === courseId) || null;
+            this.selectedCourse = this.availableCourses.find((c) => c.id === courseId) || null
           } else {
-            this.selectedCourse = this.availableCourses[index] || null;
+            this.selectedCourse = this.availableCourses[index] || null
           }
 
           if (this.selectedCourse) {
-            this.shepherdService.complete();
+            this.shepherdService.complete()
 
             // Démarrer le tutoriel de gestion après redirection
             setTimeout(() => {
-              this.startCourseDetailsTutorial(this.selectedCourse!);
-            }, 0);
+              this.startCourseDetailsTutorial(this.selectedCourse!)
+            }, 0)
           } else {
-            //throw new Error(`Course not found for index ${index}`);
+            /* Empty */
           }
-        });
-      });
+        })
+      })
       if (courseItems.length === 0) {
-
-        const broadItems = document.querySelectorAll('nz-ribbon, course-item, [data-course-id]');
+        const broadItems = document.querySelectorAll('nz-ribbon, course-item, [data-course-id]')
 
         broadItems.forEach((item, index) => {
           item.addEventListener('click', (event) => {
-
-            const courseId = item.getAttribute('data-course-id');
+            const courseId = item.getAttribute('data-course-id')
             if (courseId) {
-              this.selectedCourse = this.availableCourses.find(c => c.id === courseId) || null;
+              this.selectedCourse = this.availableCourses.find((c) => c.id === courseId) || null
             } else {
-              this.selectedCourse = this.availableCourses[index] || null;
+              this.selectedCourse = this.availableCourses[index] || null
             }
 
             if (this.selectedCourse) {
-              this.shepherdService.complete();
+              this.shepherdService.complete()
               setTimeout(() => {
-                this.startCourseDetailsTutorial(this.selectedCourse!);
-              }, 200);
+                this.startCourseDetailsTutorial(this.selectedCourse!)
+              }, 200)
             }
-          });
-        });
+          })
+        })
       }
-    }, 800);
-  }
-
-  /**
-   * Vérifie si un cours a été sélectionné
-   */
-  private checkCourseSelection(): void {
-    if (this.selectedCourse) {
-      this.shepherdService.complete();
-      setTimeout(() => {
-        this.startCourseDetailsTutorial(this.selectedCourse!);
-      }, 100);
-    } else {
-      alert('Veuillez d\'abord cliquer sur un cours dans la liste.');
-    }
+    }, 800)
   }
 
   /**
    * Démarre le tutoriel détaillé de gestion de cours
    */
   startCourseDetailsTutorial(course: Course): void {
-    const steps = this.buildCourseDetailsTutorialSteps(course);
+    const steps = this.buildCourseDetailsTutorialSteps(course)
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'course-details-tutorial',
       useModalOverlay: true,
       confirmCancel: true,
-      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de gestion de cours ?'
-    });
+      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de gestion de cours ?',
+    })
   }
-
 
   /**
    * Construit les étapes du tutoriel détaillé
@@ -234,15 +215,15 @@ export class CourseManagementTutorialService {
     const steps: TutorialStep[] = [
       {
         id: 'course-overview',
-        title: `Bienvenue dans le cours "${course.name}" !`,
-        text: `Parfait ! Nous sommes maintenant dans la page de gestion du cours.<br><br>
+        title: `Bienvenue !`,
+        text: `Parfait ! Nous sommes maintenant dans la page de gestion du cours : "${course.name}".<br><br>
                Cette interface vous permet de gérer complètement votre cours : structure, contenu, paramètres et membres.`,
         buttons: [
           {
-            text: 'Découvrir l\'interface',
-            action: () => this.shepherdService.next()
-          }
-        ]
+            text: "Découvrir l'interface",
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
       {
         id: 'course-header',
@@ -253,11 +234,11 @@ export class CourseManagementTutorialService {
                • <strong>Informations</strong> : date de création et créateur`,
         attachTo: {
           element: '#tuto-course-header',
-          on: 'bottom'
-        }
+          on: 'bottom',
+        },
       },
       {
-        id: 'course-tabs',
+        id: 'tuto-course-tab-dashboard',
         title: 'Navigation par onglets',
         text: `Les onglets vous permettent d'accéder aux différentes sections :<br><br>
                • <strong>Vue d'ensemble</strong> : organisation du contenu<br>
@@ -267,13 +248,13 @@ export class CourseManagementTutorialService {
       },
       {
         id: 'dashboard-overview',
-        title: 'Vue d\'ensemble du cours',
+        title: "Vue d'ensemble du cours",
         text: `Nous sommes dans l'onglet "Vue d'ensemble" qui est le cœur de la gestion de contenu.<br><br>
                Ici vous pouvez créer des <strong>sections</strong> pour organiser vos <strong>activités</strong>.`,
         attachTo: {
           element: '#tuto-course-dashboard-content',
-          on: 'right'
-        }
+          on: 'right',
+        },
       },
       {
         id: 'search-and-actions',
@@ -285,8 +266,8 @@ export class CourseManagementTutorialService {
                • <strong>Exporter</strong> les données du cours`,
         attachTo: {
           element: '#tuto-course-dashboard-header',
-          on: 'bottom'
-        }
+          on: 'bottom',
+        },
       },
       {
         id: 'sections-explanation',
@@ -304,19 +285,19 @@ export class CourseManagementTutorialService {
                Cliquez sur <strong>"Ajouter une section"</strong> pour commencer.`,
         attachTo: {
           element: '#tuto-course-add-section-button',
-          on: 'bottom'
+          on: 'bottom',
         },
         advanceOn: {
           selector: '#tuto-course-add-section-button',
-          event: 'click'
+          event: 'click',
         },
         buttons: [
           {
             text: 'Section déjà créée',
             secondary: true,
-            action: () => this.shepherdService.next()
-          }
-        ]
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
       {
         id: 'section-created',
@@ -327,9 +308,9 @@ export class CourseManagementTutorialService {
                • <strong>Réorganiser</strong> l'ordre des sections<br>
                • <strong>Ajouter des activités</strong> dans cette section`,
         attachTo: {
-          element: '#tuto-course-sections-container',
-          on: 'right'
-        }
+          element: 'tuto-course-no-activities',
+          on: 'right',
+        },
       },
       {
         id: 'section-management',
@@ -340,61 +321,65 @@ export class CourseManagementTutorialService {
                • <strong>Modification du nom</strong> : clic direct sur le titre`,
         attachTo: {
           element: '#tuto-course-section-actions',
-          on: 'left'
-        }
+          on: 'left',
+        },
       },
       {
         id: 'add-activity',
         title: 'Ajoutons une activité !',
         text: `Une section sans activité est comme un chapitre vide.<br><br>
-              Cliquez sur <strong>"Ajouter une activité"</strong> pour créer votre premier exercice.`,
+        Cliquez sur <strong>"Ajouter une activité"</strong> pour créer votre premier exercice.`,
         attachTo: {
           element: '#tuto-course-add-activity-button',
-          on: 'bottom'
+          on: 'bottom',
+        },
+        advanceOn: {
+          selector: '#tuto-course-add-activity-button',
+          event: 'click',
         },
         buttons: [
           {
-            text: 'Activité déjà ajoutée',
+            text: 'Precedent',
             secondary: true,
+            action: () => this.shepherdService.previous(),
+          },
+          {
+            text: 'Activité déjà ajoutée',
             action: () => {
-              this.isResearchActivity = false;
-              this.shepherdService.complete();
+              this.isResearchActivity = false
+              this.shepherdService.complete()
               setTimeout(() => {
-                this.continueWithDetailsTutorial(course);
-              }, 100);
-            }
-          }
+                this.continueWithDetailsTutorial(course)
+              }, 100)
+            },
+          },
         ],
-      }
-    ];
+      },
+    ]
 
-    return steps;
+    return steps
   }
 
-    /**
+  /**
    * Continue le tutoriel après le choix de l'utilisateur
    */
   private continueWithDetailsTutorial(course: Course): void {
     // Déterminer les prochaines étapes en fonction du choix de l'utilisateur
-    const nextSteps = this.buildExistingActivitySteps(course);
+    const nextSteps = this.buildExistingActivitySteps(course)
 
     this.shepherdService.startTutorial(nextSteps, {
       tourName: 'course-details-tutorial-continued',
       useModalOverlay: true,
       confirmCancel: true,
-      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de gestion de cours ?'
-    });
+      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de gestion de cours ?',
+    })
   }
-
-
-
 
   /**
    * Construit les étapes pour le flux avec activité existante
    */
   private buildExistingActivitySteps(course: Course): TutorialStep[] {
     return [
-      // Étapes spécifiques au cas où l'activité existe déjà
       {
         id: 'existing-activity',
         title: 'Activité existante',
@@ -403,34 +388,21 @@ export class CourseManagementTutorialService {
         buttons: [
           {
             text: 'Continuer',
-            action: () => this.shepherdService.next()
-          }
-        ]
-      },
-      {
-        id: 'course-structure',
-        title: 'Structure du cours',
-        text: `Votre cours est maintenant structuré avec des sections et des activités.<br><br>
-               <strong>Comment bien organiser votre cours ?</strong><br>
-               • Utilisez des sections pour regrouper par thématiques<br>
-               • Ajoutez des activités pertinentes dans chaque section<br>
-               • Assurez-vous que la progression est logique pour les étudiants`,
-        attachTo: {
-          element: '#tuto-course-dashboard-content',
-          on: 'right'
-        }
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
       {
         id: 'view-modes',
-        title: 'Modes d\'affichage',
+        title: "Modes d'affichage",
         text: `Vous pouvez changer la façon dont le contenu est affiché :<br><br>
                • <strong>Mode cartes</strong> : affichage visuel par sections<br>
                • <strong>Mode tableau</strong> : vue d'ensemble condensée<br><br>
                Choisissez le mode qui convient le mieux à votre façon de travailler.`,
         attachTo: {
           element: '#tuto-course-view-mode',
-          on: 'left'
-        }
+          on: 'left',
+        },
       },
 
       {
@@ -443,11 +415,70 @@ export class CourseManagementTutorialService {
                Ces données vous aident à suivre l'engagement de vos étudiants.`,
         attachTo: {
           element: '#tuto-course-statistics',
-          on: 'left'
-        }
+          on: 'left',
+        },
       },
-      ...this.buildCommonFinalSteps(course)
-    ];
+      {
+        id: 'check-activities-exist',
+        title: 'Activités disponibles',
+        text: `Parfait ! Vous avez des activités dans votre cours.<br><br>
+         Découvrons maintenant comment interpréter les informations d'une activité.`,
+        when: {
+          show: () => {
+            const activityCard = document.querySelector('.tuto-course-activities-grid course-activity-card')
+            if (!activityCard) {
+              // Alors c'est simple, on saute toutes etapes suivantes et afficher la fin
+              for (let i = 0; i < 5; i++) {
+                this.shepherdService.next()
+              }
+            }
+          },
+        },
+      },
+      {
+        id: 'activity-card-overview',
+        title: "Découverte d'une activité",
+        text: `Voici une carte d'activité qui contient toutes les informations essentielles pour gérer l'activité.`,
+        attachTo: {
+          element: '#tuto-first-activity-card',
+          on: 'left',
+        },
+      },
+      {
+        id: 'activity-status',
+        title: "Statut de l'activité",
+        text: `Le badge indique l'état actuel :<br><br>
+         • <strong>Ouvert</strong> : L'utilisateur peut acceder à l'activité<br>
+         • <strong>Fermé</strong> : accès restreint<br>
+         • <strong>Planifié</strong> : ouverture programmée`,
+        attachTo: {
+          element: '#tuto-first-activity-card .ribbon-container',
+          on: 'right',
+        },
+      },
+      {
+        id: 'activity-progression',
+        title: 'Suivi de la progression',
+        text: `Le cercle de progression montre votre avancement sur cette activité.<br><br>`,
+        attachTo: {
+          element: '#tuto-first-activity-card .circle-progression-container',
+          on: 'right',
+        },
+      },
+      {
+        id: 'activity-actions',
+        title: "Actions sur l'activité",
+        text: `Les boutons d'action vous permettent de :<br><br>
+         <strong>Lancer</strong> : tester l'activité comme un étudiant<br>
+         <strong>Éditer</strong> : modifier le contenu<br>
+         <strong>⋮ Menu</strong> : paramètres (<b>important pour gérer les périodes d'accès aux utilisateurs</b>), statistiques, export`,
+        attachTo: {
+          element: '#tuto-first-activity-card mat-card-actions',
+          on: 'top',
+        },
+      },
+      ...this.buildCommonFinalSteps(course),
+    ]
   }
 
   /**
@@ -465,15 +496,14 @@ export class CourseManagementTutorialService {
               ✅ Ajout d'activités<br>
               ✅ Fonctionnalités de recherche<br>
               ✅ Bonnes pratiques d'organisation<br><br>
-              Vous êtes maintenant prêt à créer des cours engageants et bien structurés !`,
+              Vous êtes maintenant prêt à créer des cours bien structurés !`,
         buttons: [
           {
             text: 'Terminer le tutoriel',
-            action: () => this.shepherdService.complete()
-          }
-        ]
-      }
-    ];
+            action: () => this.shepherdService.complete(),
+          },
+        ],
+      },
+    ]
   }
-
 }
