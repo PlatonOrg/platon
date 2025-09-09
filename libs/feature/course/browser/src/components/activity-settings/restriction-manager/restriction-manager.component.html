@@ -40,12 +40,12 @@
       [typesRequired]="typesRestrictionPresent"
     ></course-propositions>
 
-    <!-- Bouton d'ajout de règle -->
+    <!-- Bouton d'ajout de critère -->
     @if (!containsCorrectorsAndOthers() && restrictions.length < 4) {
     <div class="add-restriction-button">
       <button nz-button nzBlock class="add-rule-btn" (click)="openBottomSheet()">
         <i nz-icon nzType="plus"></i>
-        Ajouter une règle
+        Ajouter un type/groupe d'utilisateurs
       </button>
     </div>
     }

@@ -11,9 +11,13 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   computed,
   signal,
+  ViewChild,
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
+
+import differenceInCalendarDays from 'date-fns/differenceInCalendarDays'
+import differenceInMilliseconds from 'date-fns/differenceInMilliseconds'
 
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
@@ -72,7 +76,7 @@ export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
   @Output() activityChange = new EventEmitter<Activity>()
   @Output() saveRequested = new EventEmitter<void>()
-  accessPeriods: RestrictionList[] = [] as RestrictionList[]
+  protected accessPeriods: RestrictionList[] = [] as RestrictionList[]
 
   currentHue = 210
 
@@ -83,6 +87,14 @@ export class CourseActivitySettingsComponent implements OnInit {
     correctors: new FormControl<string[] | undefined>(undefined),
     groups: new FormControl<string[] | undefined>(undefined),
   })
+
+  protected editOpenDate = false
+  protected editCloseDate = false
+  protected tempOpenDate?: Date
+  protected tempCloseDate?: Date
+
+  @ViewChild('openDatePicker') openDatePicker?: any
+  @ViewChild('closeDatePicker') closeDatePicker?: any
 
   private readonly loadingSignal = signal(false)
   private readonly updatingSignal = signal(false)
@@ -138,6 +150,9 @@ export class CourseActivitySettingsComponent implements OnInit {
       this.accessPeriods = [...this.activity.restrictions]
     }
 
+    this.tempOpenDate = this.activity.openAt ? new Date(this.activity.openAt) : undefined
+    this.tempCloseDate = this.activity.closeAt ? new Date(this.activity.closeAt) : undefined
+
     this.loadingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }
@@ -169,6 +184,10 @@ export class CourseActivitySettingsComponent implements OnInit {
       ],
     })
     this.changeDetectorRef.markForCheck()
+  }
+
+  get accessPeriodsLength(): number {
+    return this.accessPeriods.length
   }
 
   protected onDropAccessPeriod(event: CdkDragDrop<RestrictionList[]>) {
@@ -297,6 +316,10 @@ export class CourseActivitySettingsComponent implements OnInit {
     return member.user ? userDisplayName(member.user) : member.group?.name || `Membre ${memberId}`
   }
 
+  hasOthersRule(): boolean {
+    return this.accessPeriods.some((period) => period.restriction.some((r) => r.type === 'Others'))
+  }
+
   /**
    * Méthode mise à jour pour vérifier tous les conflits
    */
@@ -304,7 +327,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     // Vérification des "Tous les autres" multiples
     if (this.checkSameOthers()) {
       this.dialogService.error(
-        'Vous avez plusieurs périodes d\'accès avec la règle "Tous les autres".\n' +
+        'Vous avez plusieurs périodes d\'accès avec le type "Tous les autres".\n' +
           'Une seule est autorisée car elle inclut automatiquement tous les utilisateurs restants.\n' +
           "Supprimez ou modifiez pour en garder qu'une seule.",
         { duration: 15000 }
@@ -319,7 +342,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         'Périodes incomplètes détectées :\n\n' +
           dateOnlyCheck.details.join('\n') +
           '\n\nChaque période doit définir QUI peut accéder (pas seulement QUAND).' +
-          '\n\nAjoutez des règles ou supprimez cette période.',
+          "\n\nAjoutez des types d'utilisateurs ou supprimez cette période.",
         { duration: 15000 }
       )
       return false
@@ -364,6 +387,40 @@ export class CourseActivitySettingsComponent implements OnInit {
     return true
   }
 
+  /**
+   * Désactive les dates dans le passé pour la date d'ouverture
+   */
+  protected disabledOpenDate = (current: Date): boolean => {
+    return differenceInCalendarDays(current, new Date()) < 0
+  }
+
+  /**
+   * Désactive les dates dans le passé et avant la date d'ouverture pour la date de fermeture
+   */
+  protected disabledCloseDate = (current: Date): boolean => {
+    // Si on a une date d'ouverture (temporaire ou de l'activité), la date de fermeture doit être après
+    const openDate = this.tempOpenDate || this.activity.openAt
+    if (openDate) {
+      return differenceInCalendarDays(current, new Date(openDate)) < 0
+    }
+    // Sinon, juste interdire les dates dans le passé
+    return differenceInCalendarDays(current, new Date()) < 0
+  }
+
+  /**
+   * Vérifie que la date de fermeture est supérieure à la date d'ouverture
+   */
+  private checkCloseDateIsSuperiorToOpenDate(openDate?: Date, closeDate?: Date): boolean {
+    if (openDate && closeDate) {
+      if (differenceInMilliseconds(closeDate, openDate) > 0) {
+        return true
+      }
+      this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
+      return false
+    }
+    return true
+  }
+
   async update(): Promise<void> {
     if (!this.allCheckAccessPeriodspassed()) {
       return
@@ -378,9 +435,14 @@ export class CourseActivitySettingsComponent implements OnInit {
           })
         )
       } else {
+        if (!this.checkCloseDateIsSuperiorToOpenDate(this.tempOpenDate, this.tempCloseDate)) {
+          return
+        }
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
+            openAt: this.tempOpenDate,
+            closeAt: this.tempCloseDate,
           })
         )
       }

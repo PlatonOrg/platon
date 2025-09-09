@@ -12,7 +12,7 @@
   </div>
 
   <!-- Section Périodes d'accès -->
-  <div class="access-periods-section">
+  <div class="access-periods-section" (click)="$event.stopPropagation()">
     <div class="section-header">
       <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
       <h3>Périodes d'accès</h3>
@@ -31,34 +31,69 @@
         <!-- Affichage des dates actuelles de l'activité -->
         <div class="current-activity-dates">
           <div class="dates-info">
-            <div class="date-item">
+            <div class="date-item clickable-date" (click)="editOpenDate = !editOpenDate">
               <i nz-icon nzType="calendar" nzTheme="outline"></i>
               <div class="date-content">
                 <span class="date-label">Ouverture</span>
-                <span class="date-value">
+
+                <!-- Mode affichage -->
+                <span class="date-value" *ngIf="!editOpenDate">
                   {{ activity.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
                   <ng-container *ngIf="!activity.openAt">Aucune date définie</ng-container>
+                  <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                 </span>
+
+                <!-- Mode édition -->
+                <div class="date-edit" *ngIf="editOpenDate">
+                  <nz-date-picker
+                    [nzShowTime]="true"
+                    [(ngModel)]="tempOpenDate"
+                    [nzDisabledDate]="disabledOpenDate"
+                    nzPlaceHolder="Date d'ouverture"
+                    nzFormat="dd/MM/yyyy HH:mm"
+                    nzSize="small"
+                    #openDatePicker
+                  />
+                </div>
               </div>
             </div>
 
             <div class="date-separator">→</div>
 
-            <div class="date-item">
+            <div class="date-item clickable-date" (click)="editCloseDate = !editCloseDate">
               <i nz-icon nzType="calendar" nzTheme="outline"></i>
               <div class="date-content">
                 <span class="date-label">Fermeture</span>
-                <span class="date-value">
+
+                <!-- Mode affichage -->
+                <span class="date-value" *ngIf="!editCloseDate">
                   {{ activity.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
                   <ng-container *ngIf="!activity.closeAt">Aucune date définie</ng-container>
+                  <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                 </span>
+
+                <!-- Mode édition -->
+                <div class="date-edit" *ngIf="editCloseDate">
+                  <nz-date-picker
+                    [nzShowTime]="true"
+                    [(ngModel)]="tempCloseDate"
+                    [nzDisabledDate]="disabledCloseDate"
+                    nzPlaceHolder="Date de fermeture"
+                    nzFormat="dd/MM/yyyy HH:mm"
+                    nzSize="small"
+                    #closeDatePicker
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           <div class="access-info">
             <i nz-icon nzType="team" nzTheme="outline"></i>
-            <span>Tous les membres du cours ont accès à cette activité aux dates indiquées ci-dessus.</span>
+            <span
+              >Tous les membres du cours ont accès à cette activité aux dates indiquées ci-dessus.<br />
+              Cliquez sur une date si vous souhaitez la changer. <b>N'oubliez pas d'enregister vos changement.</b></span
+            >
           </div>
         </div>
 
@@ -73,7 +108,7 @@
           class="empty-action-btn"
         >
           <i nz-icon nzType="plus"></i>
-          Créer la première période
+          Créer la première période d'accès
         </button>
       </div>
       } @else { @for (period of accessPeriods; track period; let i = $index) {
@@ -209,7 +244,32 @@
       </div>
 
       <div class="warning-body" style="margin-top: 12px">
-        <p><strong>Actuellement :</strong> Tous les membres du cours ont accès à cette activité aux dates indiquées.</p>
+        <p>
+          <strong>Actuellement :</strong> Tous les membres du cours ont accès à cette activité aux dates suivantes :
+        </p>
+        <div class="date-item">
+          <i nz-icon nzType="calendar" nzTheme="outline"></i>
+          <div class="date-content">
+            <span class="date-label">Ouverture : </span>
+            <span class="date-value">
+              {{ activity.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              <ng-container *ngIf="!activity.openAt">Aucune date définie</ng-container>
+            </span>
+          </div>
+        </div>
+
+        <div class="date-item">
+          <i nz-icon nzType="calendar" nzTheme="outline"></i>
+          <div class="date-content">
+            <span class="date-label">Fermeture : </span>
+            <span class="date-value">
+              {{ activity.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              <ng-container *ngIf="!activity.closeAt">Aucune date définie</ng-container>
+            </span>
+          </div>
+        </div>
+
+        <div class="separator"></div>
 
         <p><strong>En ajoutant cette période :</strong></p>
         <ul style="margin: 8px 0; padding-left: 20px">
@@ -230,7 +290,7 @@
           "
         >
           <strong style="color: var(--brand-text-primary)">💡 Conseil :</strong> Pour que les membres non spécifiés
-          gardent l'accès, créez une période supplémentaire avec la règle "Tous les autres".
+          gardent l'accès, créez une période supplémentaire avec le type "Tous les autres".
         </div>
       </div>
     </div>
