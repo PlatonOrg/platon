@@ -42,12 +42,27 @@ nz-select {
   width: 30%;
 }
 
-.save-button {
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
   margin-top: 16px;
+}
+
+button {
   width: 128px;
 }
 
 resource-version {
   width: 100%;
   margin-top: 16px;
+}
+
+.selected-template-title {
+  max-height: 1.5em;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

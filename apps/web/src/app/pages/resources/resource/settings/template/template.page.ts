@@ -13,7 +13,8 @@ import { ResourceFileService, ResourceService, ResourceVersionComponent } from '
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { MatCardModule } from '@angular/material/card'
-import { FileVersion, FileVersions, LATEST } from '@platon/feature/resource/common'
+import { FileVersion, FileVersions, LATEST, Resource } from '@platon/feature/resource/common'
+import { RouterModule } from '@angular/router'
 
 @Component({
   standalone: true,
@@ -23,6 +24,7 @@ import { FileVersion, FileVersions, LATEST } from '@platon/feature/resource/comm
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    RouterModule,
     UiFilePreviewComponent,
     NzSelectModule,
     FormsModule,
@@ -48,6 +50,8 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
   protected versions!: FileVersions
   protected versionInfo?: FileVersion
 
+  protected template?: Resource
+
   protected invalidTemplateId = false
   protected errorMessage = ''
 
@@ -59,6 +63,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe((context) => {
         this.context = context
+        console.log(this.context)
         this.changeDetectorRef.markForCheck()
       })
     )
@@ -68,6 +73,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
 
     if (this.templateId) {
       await this.updateVersions(this.templateId)
+      this.template = await firstValueFrom(this.resourceService.find({ id: this.templateId }))
     }
 
     this.changeDetectorRef.markForCheck()
@@ -86,6 +92,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
   }
 
   protected async onChangeTemplate(templateId: string) {
+    this.template = undefined
     if (!this.isUUID4(templateId)) {
       this.invalidTemplateId = true
       this.errorMessage = "Cet ID n'est pas valide"
@@ -104,6 +111,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
         this.changeDetectorRef.markForCheck()
         return
       }
+      this.template = await firstValueFrom(this.resourceService.find({ id: templateId }))
       await this.updateVersions(templateId)
       this.templateVersion = LATEST
       this.invalidTemplateId = false
@@ -124,5 +132,9 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
         this.resourceService.updateTemplate(this.context.resource.id, this.templateId, this.templateVersion)
       )
     }
+  }
+
+  protected openTemplate(): void {
+    window.open('/resources/' + this.templateId, '_blank')
   }
 }
