@@ -17,6 +17,20 @@
       "problemMatcher": []
     },
     {
+      "label": "Run Project with genkit",
+      "dependsOn": [
+        "Run Docker",
+        "Run Backend with genkit",
+        "Run Frontend"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "revealProblems": "never",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Run Project without Documentation",
       "dependsOn": [
         "Run Docker",
@@ -37,6 +51,21 @@
       "options": {
         "cwd": "./bin/docker"
       },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Backend with genkit",
+      "type": "shell",
+      "hide": false,
+      "command": "bash",
+      "args": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use && NX_DAEMON=false yarn serve:api:genkit"
+      ],
       "presentation": {
         "reveal": "always",
         "panel": "new"
