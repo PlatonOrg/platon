@@ -32,4 +32,5 @@ export abstract class ResourceProvider {
   abstract listOwners(): Observable<User[]>
   abstract isConfigurableExercise(resourceId: string): Observable<boolean>
   abstract updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource>
+  abstract updateCertification(resourceId: string, certified: boolean): Observable<Resource>
 }

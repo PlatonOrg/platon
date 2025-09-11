@@ -23,6 +23,8 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { FormsModule } from '@angular/forms'
 import { Subscription } from 'rxjs'
 import { OverviewPresenter } from './overview.presenter'
+import { TemplateSelectionComponent } from '@platon/feature/resource/browser'
+import { UserRoles } from '@platon/core/common'
 
 @Component({
   standalone: true,
@@ -53,6 +55,8 @@ import { OverviewPresenter } from './overview.presenter'
     UiError404Component,
     UiError500Component,
     UiStatisticCardComponent,
+
+    TemplateSelectionComponent,
   ],
   providers: [OverviewPresenter],
 })
@@ -64,6 +68,10 @@ export class OverviewPage implements OnInit, OnDestroy {
   protected context = this.presenter.defaultContext()
   protected learningInsightsDate = new Date()
   protected learningInsightsOption: 'score' | 'duration' = 'score'
+
+  get canSeeTemplates(): boolean {
+    return this.context.user?.role === UserRoles.admin || this.context.user?.role === UserRoles.teacher
+  }
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(

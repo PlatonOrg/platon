@@ -1,0 +1,53 @@
+<div class="template-selection-container">
+  <div class="header">
+    <h2>Choisir un modèle d'exercice</h2>
+    <p class="subtitle">Sélectionnez un modèle pour créer votre exercice</p>
+  </div>
+
+  <div class="templates-grid">
+    @for (template of templates; track template.id) {
+    <div class="template-card" (click)="selectTemplate(template.id)">
+      <div class="template-image">
+        <img
+          class="static-image"
+          [src]="'/api/v1/files/' + template.id + '/logo.jpg?download&version=latest'"
+          alt="Aperçu QCM"
+          loading="lazy"
+        />
+        <img
+          class="animated-image"
+          [src]="'/api/v1/files/' + template.id + '/demo.gif?download&version=latest'"
+          alt="Démonstration QCM"
+          loading="lazy"
+        />
+      </div>
+      <div class="template-content">
+        <h3 class="template-title">{{ template.name }}</h3>
+        <p class="template-description">
+          {{ template.desc }}
+        </p>
+        <div class="template-stats">
+          <span class="stat-item">
+            <mat-icon>inventory</mat-icon>
+            <span>{{ templateReferences(template) }} exercices</span>
+          </span>
+          <span class="stat-item">
+            <mat-icon>trending_up</mat-icon>
+            <span>{{ templateUtilizations(template) }} utilisations</span>
+          </span>
+        </div>
+      </div>
+      <div class="template-overlay">
+        <mat-icon>arrow_forward</mat-icon>
+      </div>
+    </div>
+    }
+  </div>
+
+  <div class="footer">
+    <p class="footer-text">
+      <mat-icon>lightbulb</mat-icon>
+      Vous pourrez personnaliser votre exercice après avoir sélectionné un modèle
+    </p>
+  </div>
+</div>

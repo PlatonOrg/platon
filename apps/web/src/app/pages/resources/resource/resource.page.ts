@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule, ActivatedRoute } from '@angular/router'
-import { Subscription } from 'rxjs'
+import { firstValueFrom, Subscription } from 'rxjs'
 
 import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
@@ -17,7 +17,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography'
 
 import { DialogModule } from '@platon/core/browser'
 import { CircleTreeComponent, ResourcePipesModule, ResourceSharingComponent } from '@platon/feature/resource/browser'
-import { ResourceStatus } from '@platon/feature/resource/common'
+import { ExerciseResourceMeta, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 import { UiLayoutTabDirective, UiLayoutTabsComponent, UiModalIFrameComponent } from '@platon/shared/ui'
 
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
@@ -77,6 +77,9 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected isChangingWatchingState = false
 
+  protected configurable = false
+  protected certifiedTemplate = false
+
   get isOtherPersonal(): boolean {
     return this.context.resource!.personal && this.context.resource!.ownerId !== this.context.user!.id
   }
@@ -85,6 +88,13 @@ export class ResourcePage implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
+
+        if (this.context.resource?.type === ResourceTypes.EXERCISE) {
+          const metadata = this.context.resource?.metadata as ExerciseResourceMeta
+          this.configurable = metadata?.configurable
+          this.certifiedTemplate = metadata?.certifiedTemplate
+        }
+
         this.changeDetectorRef.markForCheck()
       })
     )
@@ -210,5 +220,11 @@ export class ResourcePage implements OnInit, OnDestroy {
     const url = new URL(window.location.href)
     url.searchParams.delete('fromTutorial')
     window.history.replaceState(null, '', url.toString())
+  }
+
+  protected async updateCertification(certified: boolean): Promise<void> {
+    if (await this.presenter.updateCertification(certified)) {
+      this.certifiedTemplate = certified
+    }
   }
 }

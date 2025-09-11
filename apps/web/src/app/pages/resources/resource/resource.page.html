@@ -101,6 +101,28 @@
       </nz-button-group>
       <div class="spacer"></div>
       <nz-button-group>
+        @if (isAdmin() && configurable) { @if (certifiedTemplate) {
+        <button
+          nz-button
+          nzType="primary"
+          (click)="updateCertification(false)"
+          nz-tooltip
+          nzTooltipTitle="Retirer le statut de template certifié"
+        >
+          <i nz-icon nzType="safety-certificate" nzTheme="outline"></i>
+        </button>
+        } @else {
+        <button
+          nz-button
+          nzType="default"
+          (click)="updateCertification(true)"
+          nz-tooltip
+          nzTooltipTitle="Marquer comme template certifié"
+        >
+          <i nz-icon nzType="safety-certificate" nzTheme="fill"></i>
+        </button>
+
+        } }
         <button
           id="tuto-move-to-owner-button"
           *ngIf="isAdmin() && context.resource.type !== 'CIRCLE' && !context.resource.parent?.personal!"

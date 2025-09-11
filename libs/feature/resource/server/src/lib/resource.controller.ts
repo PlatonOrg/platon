@@ -425,4 +425,33 @@ export class ResourceController {
 
     return new ItemResponse({ resource })
   }
+
+  @Patch('/:id/certification')
+  async updateCertification(
+    @Req() req: IRequest,
+    @UUIDParam('id') id: string,
+    @Body('certified') certified: boolean
+  ): Promise<ItemResponse<ResourceDTO>> {
+    const existing = await this.resourceService.findByIdOrCode(id)
+    if (!existing.isPresent()) {
+      throw new NotFoundResponse(`Resource not found: ${id}`)
+    }
+
+    if (existing.get().type !== ResourceTypes.EXERCISE) {
+      throw new BadRequestResponse(`Resource is not an exercise: ${id}`)
+    }
+
+    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: existing.get() })
+    if (!permissions.write) {
+      throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
+    }
+
+    if (req.user.role !== 'admin') {
+      throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
+    }
+
+    const resource = Mapper.map(await this.resourceService.updateCertification(id, certified), ResourceDTO)
+
+    return new ItemResponse({ resource })
+  }
 }

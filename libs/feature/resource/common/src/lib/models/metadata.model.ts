@@ -12,6 +12,7 @@ export interface ActivityResourceMeta {
 
 export interface ExerciseResourceMeta {
   configurable: boolean
+  certifiedTemplate: boolean
   config?: PleConfigJSON
   versions: FileVersion[]
 }

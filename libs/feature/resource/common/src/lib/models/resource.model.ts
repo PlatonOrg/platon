@@ -372,6 +372,11 @@ export interface ResourceFilters extends ExpandableModel<ResourceExpandableField
   readonly configurable?: boolean
 
   /**
+   * Filter resources by whether they are certified templates or not.
+   */
+  readonly certifiedTemplate?: boolean
+
+  /**
    * Filter activities by their navigation settings.
    */
   readonly navigation?: ActivityNavigationModes

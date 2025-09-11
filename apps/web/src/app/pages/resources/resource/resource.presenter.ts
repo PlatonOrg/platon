@@ -17,6 +17,7 @@ import {
   ResourceInvitation,
   ResourceMember,
   ResourceMemberFilters,
+  ResourceMeta,
   ResourceStatistic,
   UpdateResource,
 } from '@platon/feature/resource/common'
@@ -317,6 +318,33 @@ export class ResourcePresenter implements OnDestroy {
     }
   }
 
+  // Certification
+
+  async updateCertification(certified: boolean): Promise<boolean> {
+    const { resource } = this.context.value as Required<Context>
+    if (resource.type !== 'EXERCISE') {
+      this.dialogService.error('Seules les ressources de type exercice peuvent être certifiées.')
+      return false
+    }
+    try {
+      await firstValueFrom(this.resourceService.updateCertification(resource.id, certified))
+      if (certified) {
+        this.dialogService.success(
+          "L'exercice a bien été certifié. Il sera désormais accessible aux utilisateurs externes."
+        )
+      } else {
+        this.dialogService.success(
+          "La certification de l'exercice a bien été retirée. Il ne sera plus accessible aux utilisateurs externes."
+        )
+      }
+      await this.refresh(resource.id)
+      return true
+    } catch {
+      this.alertError()
+      return false
+    }
+  }
+
   // Deleting
 
   async delete(): Promise<boolean> {
@@ -340,7 +368,7 @@ export class ResourcePresenter implements OnDestroy {
         this.resourceService.find({
           id,
           markAsViewed: this.isInitialLoading,
-          expands: ['parent', 'statistic'],
+          expands: ['parent', 'statistic', 'metadata'],
         })
       ),
       firstValueFrom(this.resourceService.tree()),
@@ -352,6 +380,7 @@ export class ResourcePresenter implements OnDestroy {
       parent: resource.parent,
       resource,
       statistic: resource.statistic,
+      metadata: resource.metadata,
       circles,
     })
   }
@@ -407,4 +436,5 @@ export interface Context {
 
   circles?: CircleTree
   statistic?: ResourceStatistic
+  metadata?: ResourceMeta
 }

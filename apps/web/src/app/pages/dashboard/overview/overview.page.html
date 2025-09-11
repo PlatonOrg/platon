@@ -18,6 +18,9 @@
 </nz-skeleton>
 
 <ng-template #content>
+  @if (canSeeTemplates) {
+  <resource-template-selection></resource-template-selection>
+  } @else {
   <ng-container *ngIf="context.dashboard">
     <nz-row [nzGutter]="[24, 24]" nzAlign="top">
       <nz-col nzSpan="24">
@@ -155,6 +158,6 @@
           </mat-card-content>
         </mat-card>
       </nz-col>
-    </nz-row>
-  </ng-container>
+    </nz-row> </ng-container
+  >}
 </ng-template>

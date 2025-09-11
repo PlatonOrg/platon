@@ -217,7 +217,7 @@ export class ResourceService {
     query.leftJoinAndSelect('resource.topics', 'topic')
     query.leftJoinAndSelect('resource.levels', 'level')
 
-    if (filters.configurable != null || filters.navigation != null) {
+    if (filters.configurable != null || filters.navigation != null || filters.certifiedTemplate != null) {
       query.leftJoin('ResourceMeta', 'metadata', 'metadata.resource_id = resource.id')
     }
 
@@ -321,6 +321,12 @@ export class ResourceService {
     if (filters.navigation) {
       query.andWhere(`(type <> 'ACTIVITY' OR metadata.meta->'settings'->'navigation'->>'mode' = :navigation)`, {
         navigation: filters.navigation,
+      })
+    }
+
+    if (filters.certifiedTemplate != null) {
+      query.andWhere(`(type <> 'EXERCISE' OR metadata.meta->'certifiedTemplate' = :certifiedTemplate)`, {
+        certifiedTemplate: filters.certifiedTemplate,
       })
     }
 
@@ -583,5 +589,24 @@ export class ResourceService {
       })
     )
     Logger.log(`Merging levels ${oldLevel.name} into ${newLevel.name}`, 'ResourceService')
+  }
+
+  async updateCertification(resourceId: string, certified: boolean): Promise<ResourceEntity> {
+    const resource = await this.repository.findOne({ where: { id: resourceId } })
+    if (!resource || resource.type !== ResourceTypes.EXERCISE) {
+      throw new NotFoundResponse(`Resource not found or not an exercise: ${resourceId}`)
+    }
+
+    let metadata = await this.metadataRepo.findOne({ where: { resourceId } })
+    if (!metadata) {
+      metadata = this.metadataRepo.create({ resourceId, meta: {} })
+    }
+
+    const meta = metadata.meta as ExerciseResourceMeta
+    meta.certifiedTemplate = certified
+    metadata.meta = meta
+
+    await this.metadataRepo.save(metadata)
+    return this.repository.save(resource)
   }
 }
