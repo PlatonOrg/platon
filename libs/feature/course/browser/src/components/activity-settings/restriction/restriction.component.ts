@@ -94,4 +94,8 @@ export class RestrictionComponent {
   protected isGroupsConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Groups'] {
     return 'groups' in config
   }
+
+  protected isOtherConfig(config: RestrictionConfig[keyof RestrictionConfig]): config is RestrictionConfig['Others'] {
+    return 'other' in config
+  }
 }

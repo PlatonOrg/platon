@@ -1,12 +1,11 @@
 <div class="restriction-container">
   @switch (restriction.type) { @case ('DateRange') {
   <div class="restriction-row">
-    <!-- Date Range Section -->
     <div class="restriction-header">
       <i nz-icon nzType="calendar" nzTheme="outline"></i>
-      <span>Période d'accès :</span>
+      <span>Période d'accès</span>
     </div>
-    @if(isDateRangeConfig(restriction.config)) {
+    @if (isDateRangeConfig(restriction.config)) {
     <div class="date-picker-compact">
       <nz-date-picker
         [nzShowTime]="true"
@@ -14,7 +13,6 @@
         [(ngModel)]="restriction.config.start"
         nzPlaceHolder="Date d'ouverture"
         nzFormat="dd/MM/yyyy HH:mm"
-        [nzBorderless]="true"
       />
       <span class="separator">→</span>
       <nz-date-picker
@@ -24,32 +22,29 @@
         (ngModelChange)="checkEndDateIsSuperiorStartDate()"
         nzPlaceHolder="Date de fermeture"
         nzFormat="dd/MM/yyyy HH:mm"
-        [nzBorderless]="true"
       />
     </div>
     }
   </div>
-  } @case ('Groups') { @if(isGroupsConfig(restriction.config)) {
+  } @case ('Groups') { @if (isGroupsConfig(restriction.config)) {
   <div class="restriction-row">
-    <!-- Group Section -->
     <div class="restriction-header">
       <i nz-icon nzType="team" nzTheme="outline"></i>
-      <span>Groupes autorisés :</span>
+      <span>Groupes autorisés</span>
     </div>
     <div class="select-container">
       <course-group-select
         [groups]="courseGroups"
         [(ngModel)]="restriction.config.groups"
-        placeholder="Tous les groupes"
+        placeholder="Ajouter des groupes"
       />
     </div>
   </div>
-  } } @case ('Correctors') { @if(isCorrectorsConfig(restriction.config)) {
+  } } @case ('Correctors') { @if (isCorrectorsConfig(restriction.config)) {
   <div class="restriction-row">
-    <!-- Correctors Section -->
     <div class="restriction-header">
       <i nz-icon nzType="audit" nzTheme="outline"></i>
-      <span>Correcteurs :</span>
+      <span>Correcteurs</span>
     </div>
     <div class="select-container">
       <course-member-select
@@ -59,30 +54,56 @@
       />
     </div>
   </div>
-  } } @case ('Members') { @if(isMembersConfig(restriction.config)) {
+  } } @case ('Members') { @if (isMembersConfig(restriction.config)) {
   <div class="restriction-row">
-    <!-- Members Section -->
     <div class="restriction-header">
       <i nz-icon nzType="user" nzTheme="outline"></i>
-      <span>Utilisateurs autorisés :</span>
+      <span>Utilisateurs autorisés</span>
     </div>
     <div class="select-container">
       <course-member-select
         [members]="courseMembers"
         [(ngModel)]="restriction.config.members"
-        placeholder="Tous les utilisateurs"
+        placeholder="Ajouter des utilisateurs"
       />
     </div>
   </div>
-  } } }
+  } } @case ('Others') {
+  <div class="restriction-row">
+    <div class="restriction-header">
+      <i nz-icon nzType="usergroup-add" nzTheme="outline"></i>
+      <span>Tous les autres</span>
+    </div>
+    <div class="others-info-container">
+      <div class="others-info">
+        <div class="info-text">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+          <span
+            >Cette période inclut automatiquement tous les utilisateurs qui ne sont assignés à aucune autre période
+            d'accès.</span
+          >
+        </div>
+        <div class="limitation-text">
+          <i nz-icon nzType="exclamation-circle" nzTheme="outline"></i>
+          <span
+            >Avec cette règle, vous ne pouvez ajouter que des correcteurs (pas de groupes ou utilisateurs
+            spécifiques).</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  } }
+
+  <!-- Bouton de suppression de règle (pas de période) -->
+  @if (restriction.type !== 'DateRange') {
   <button
-    *ngIf="!isMainRestriction && restriction.type !== 'DateRange'"
-    nz-button
-    nzType="text"
-    nzDanger
+    class="delete-rule-btn"
     (click)="removeRestriction()"
-    class="delete-button"
+    nz-tooltip="Supprimer cette règle"
+    nzTooltipPlacement="left"
   >
-    <i nz-icon nzType="delete"></i>
+    <i nz-icon nzType="close"></i>
   </button>
+  }
 </div>

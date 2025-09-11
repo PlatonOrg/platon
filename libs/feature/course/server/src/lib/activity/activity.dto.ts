@@ -67,6 +67,11 @@ export class ActivityDTO extends BaseDTO implements Activity {
   @Exclude()
   readonly source?: unknown
 
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty()
+  readonly ignoreRestrictions?: boolean
+
   @Type(() => RestrictionListDTO)
   @IsOptional()
   readonly restrictions?: RestrictionListDTO[] | null
@@ -146,6 +151,11 @@ export class UpdateCourseActivityDTO implements UpdateActivity {
   @IsOptional()
   @ApiProperty()
   readonly colorHue?: number | null
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty()
+  readonly ignoreRestrictions?: boolean
 }
 
 export class ReloadCourseActivityDTO implements ReloadActivity {

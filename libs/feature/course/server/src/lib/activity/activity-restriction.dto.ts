@@ -1,5 +1,5 @@
 import { Type, Transform, TypeHelpOptions } from 'class-transformer'
-import { IsEnum, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator'
+import { IsEnum, IsDate, IsOptional, IsString, ValidateNested, IsBoolean } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { toArray, toDate } from '@platon/core/server'
 import { Restriction } from '@platon/feature/course/common'
@@ -9,17 +9,8 @@ export enum RestrictionType {
   Correctors = 'Correctors',
   Groups = 'Groups',
   Members = 'Members',
+  Other = 'Others',
 }
-
-// export enum ConditionType {
-//   Must = 'must',
-//   MustNot = 'mustNot',
-// }
-
-// export enum AllConditionsType {
-//   All = 'all',
-//   Any = 'any',
-// }
 
 export class DateRangeConfigDTO {
   @Transform(({ value }) => toDate(value))
@@ -59,6 +50,13 @@ export class GroupsConfigDTO {
   readonly groups?: string[]
 }
 
+export class OtherConfigDTO {
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty()
+  readonly enable?: boolean
+}
+
 export class RestrictionDTO implements Restriction {
   @IsEnum(RestrictionType)
   @ApiProperty({ enum: RestrictionType })
@@ -79,6 +77,8 @@ export class RestrictionDTO implements Restriction {
         return CorrectorsConfigDTO
       case RestrictionType.Groups:
         return GroupsConfigDTO
+      case RestrictionType.Other:
+        return OtherConfigDTO
       default:
         return Object
     }
@@ -89,22 +89,7 @@ export class RestrictionDTO implements Restriction {
     | { members?: string[] }
     | { correctors?: string[] }
     | { groups?: string[] }
-
-  /*@IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => RestrictionDTO)
-  @ApiProperty({ type: () => [RestrictionDTO] })
-  readonly restrictions?: Restriction[]
-
-  @IsOptional()
-  @IsEnum(ConditionType)
-  @ApiProperty({ enum: ConditionType })
-  readonly condition?: ConditionType
-
-  @IsOptional()
-  @IsEnum(AllConditionsType)
-  @ApiProperty({ enum: AllConditionsType })
-  readonly allConditions?: AllConditionsType*/
+    | { enabled?: boolean }
 }
 
 export class RestrictionListDTO {
