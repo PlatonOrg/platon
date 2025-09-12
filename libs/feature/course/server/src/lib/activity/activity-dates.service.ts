@@ -214,8 +214,8 @@ export class ActivityDatesService {
     const pastDate = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Hier
 
     return {
-      start: baseStart || pastDate,
-      end: pastDate, // Toujours fermé dans le passé
+      start: pastDate,
+      end: pastDate, 
     }
   }
 
