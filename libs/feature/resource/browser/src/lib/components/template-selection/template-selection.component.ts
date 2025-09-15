@@ -8,8 +8,10 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { MatIconModule } from '@angular/material/icon'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { firstValueFrom } from 'rxjs'
 import { ResourceService } from '../../api/resource.service'
+import { TemplateCardComponent } from '../template-card/template-card.component'
 
 @Component({
   standalone: true,
@@ -25,6 +27,8 @@ import { ResourceService } from '../../api/resource.service'
     NzPopconfirmModule,
     UserAvatarComponent,
     MatIconModule,
+    MatTooltipModule,
+    TemplateCardComponent,
   ],
 })
 export class TemplateSelectionComponent implements OnInit {
@@ -59,13 +63,5 @@ export class TemplateSelectionComponent implements OnInit {
         template: templateId,
       },
     })
-  }
-
-  protected templateReferences(template: Resource): number {
-    return template.statistic?.exercise?.references?.template ?? 0
-  }
-
-  protected templateUtilizations(template: Resource): number {
-    return template.statistic?.exercise?.references?.referencesAttemptCount ?? 0
   }
 }
