@@ -434,7 +434,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             ignoreRestrictions: false,
           })
         )
-      } else {
+      } else if (this.activity.ignoreRestrictions) {
         if (!this.checkCloseDateIsSuperiorToOpenDate(this.tempOpenDate, this.tempCloseDate)) {
           return
         }
