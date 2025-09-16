@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core'
+import { Component, EventEmitter, Output, input } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { NzDrawerModule } from 'ng-zorro-antd/drawer'
 import { NzListModule } from 'ng-zorro-antd/list'
@@ -14,38 +14,49 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 export class PropositionsComponent {
   @Output() closeEvent = new EventEmitter<void>()
   @Output() sendEvent = new EventEmitter<string>()
+  typesRequired = input.required<string[]>()
 
   protected menuItems = [
-    { title: 'Date', description: 'Empêcher l’accès jusqu’à (ou à partir) d’une date et heure donnée.' },
-    { title: 'Correcteurs', description: 'Ajouter des correcteurs spécifiques à l’activité.' },
     {
-      title: 'Groupe',
-      description: 'Ajouter un groupe spécifique pour l’activité.',
+      type: 'DateRange',
+      title: 'Période temporelle',
+      description: 'Définir une plage de dates pendant laquelle cette période est active.',
     },
-    { title: 'Membres', description: 'Ajouter des membres spécifiques à l’activité.' },
+    {
+      type: 'Members',
+      title: 'Utilisateurs spécifiques',
+      description: 'Sélectionner des utilisateurs précis qui auront accès pendant cette période.',
+    },
+    {
+      type: 'Groups',
+      title: 'Groupes spécifiques',
+      description: 'Sélectionner des groupes entiers qui auront accès pendant cette période.',
+    },
+    {
+      type: 'Correctors',
+      title: 'Correcteurs',
+      description: "Désigner des correcteurs spécifiques pour cette période d'accès.",
+    },
+    {
+      type: 'Others',
+      title: 'Tous les autres',
+      description: "Inclure automatiquement tous les utilisateurs qui ne sont dans aucune autre période d'accès.",
+    },
   ]
+
+  get propositions() {
+    if (this.typesRequired().includes('Others')) {
+      return this.menuItems.filter((item) => item.type === 'Correctors')
+    }
+    return this.menuItems.filter((item) => !this.typesRequired().includes(item.type))
+  }
 
   protected close() {
     this.closeEvent.emit()
   }
 
   protected sendAndClose(type: string) {
-    switch (type) {
-      case 'Date':
-        this.sendEvent.emit('DateRange')
-        break
-      case 'Correcteurs':
-        this.sendEvent.emit('Correctors')
-        break
-      case 'Groupe':
-        this.sendEvent.emit('Groups')
-        break
-      case 'Membres':
-        this.sendEvent.emit('Members')
-        break
-      default:
-        break
-    }
+    this.sendEvent.emit(type)
     this.close()
   }
 }

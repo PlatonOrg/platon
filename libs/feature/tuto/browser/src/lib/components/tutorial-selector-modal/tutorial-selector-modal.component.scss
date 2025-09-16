@@ -1,0 +1,126 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background: var(--brand-background-components);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--brand-border-color);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--brand-text-secondary);
+
+  &:hover {
+    color: var(--brand-text-primary);
+  }
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-description {
+  margin-bottom: 20px;
+  color: var(--brand-text-secondary);
+}
+
+.tutorials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.tutorial-card {
+  border: 1px solid var(--brand-border-color);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background-color: var(--brand-background-components);
+
+  &:hover {
+    border-color: var(--brand-color-primary);
+    box-shadow: 0 2px 8px rgba(var(--brand-color-primary-rgb), 0.15);
+  }
+}
+
+.tutorial-icon {
+  color: var(--brand-color-primary);
+}
+
+.tutorial-content {
+  h3 {
+    margin: 0 0 8px 0;
+    color: var(--brand-text-primary);
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: var(--brand-text-secondary);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+.modal-footer {
+  padding: 20px;
+  border-top: 1px solid var(--brand-border-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  padding: 8px 16px;
+  border: 1px solid var(--brand-border-color);
+  background: var(--brand-background-components);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--brand-text-primary);
+
+  &:hover {
+    background-color: var(--brand-background-hover);
+  }
+}
+
+// Animation pour l'entrée du modal
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-overlay {
+  animation: fadeIn 0.2s ease-out;
+}

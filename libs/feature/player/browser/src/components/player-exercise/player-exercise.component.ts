@@ -15,7 +15,10 @@ import {
   Output,
   TemplateRef,
   ViewChild,
+  AfterViewInit,
   inject,
+  computed,
+  signal,
 } from '@angular/core'
 import { Subscription, firstValueFrom } from 'rxjs'
 
@@ -30,9 +33,8 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
-import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
+import { DialogModule, DialogService, UserAvatarComponent, AuthService } from '@platon/core/browser'
 import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
-
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
@@ -114,13 +116,17 @@ type FullscreenElement = HTMLElement & {
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
+export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
   private readonly subscriptions: Subscription[] = []
   private readonly dialogService = inject(DialogService)
+  private readonly authService = inject(AuthService)
   private readonly playerService = inject(PlayerService)
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly webComponentService = inject(WebComponentService)
+
+  protected readonly playerSignal = signal<ExercisePlayer | undefined>(undefined)
 
   @Input() state?: AnswerStates
   @Input() player?: ExercisePlayer
@@ -165,6 +171,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   protected fullscreen = false
   protected selectedTheory?: ExerciseTheory
   protected runningAction?: PlayerActions
+  protected showLabelIfEnoughSpace = true
 
   get previewMode(): boolean {
     return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
@@ -176,27 +183,45 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       {
         id: 'check-answer-button',
         icon: 'check',
-        label: this.player.remainingAttempts ? `Évaluer (${this.player.remainingAttempts})` : 'Évaluer',
+        label: this.player.remainingAttempts
+          ? `Valider la réponse (${this.player.remainingAttempts})`
+          : 'Valider la réponse',
         tooltip: 'Valider',
         color: 'primary',
         danger: this.player.remainingAttempts === 1,
         visible: !this.reviewMode,
         disabled: this.disabled || !!this.runningAction,
         playerAction: PlayerActions.CHECK_ANSWER,
-        showLabel: !!this.player.remainingAttempts,
+        showLabel: this.showLabelIfEnoughSpace,
         run: async () => {
           this.removeAnswerFromLocalStorage()
           await this.evaluate(PlayerActions.CHECK_ANSWER)
-          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
+          if (this.player?.feedbacks && this.player.feedbacks.some((feedback) => feedback.content)) {
+            this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
+          }
+        },
+      },
+      {
+        icon: 'save',
+        label: 'Sauvegarder',
+        tooltip: 'Sauvegarder',
+        visible: !this.reviewMode,
+        disabled: !!this.runningAction,
+        playerAction: PlayerActions.SAVE_ANSWER,
+        showLabel: this.showLabelIfEnoughSpace,
+        run: async () => {
+          await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
+          this.dialogService.success('Votre réponse a bien été sauvegardée.')
         },
       },
       {
         icon: 'refresh',
-        label: 'Autre question',
-        tooltip: 'Autre question',
+        label: 'Recharger',
+        tooltip: 'Recharger',
         disabled: !!this.runningAction,
         visible: !this.reviewMode && !!this.player.settings?.actions?.reroll,
         playerAction: PlayerActions.REROLL_EXERCISE,
+        showLabel: this.showLabelIfEnoughSpace,
         run: () => this.evaluate(PlayerActions.REROLL_EXERCISE),
       },
       {
@@ -205,20 +230,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         tooltip: "Télécharger l'environnement",
         visible: this.previewMode,
         run: () => this.downloadEnvironment(),
-      },
-      {
-        icon: 'save',
-        label: 'Sauvegarder',
-        tooltip: 'Sauvegarder',
-        color: 'primary',
-        visible: !this.reviewMode,
-        disabled: !!this.runningAction,
-        playerAction: PlayerActions.SAVE_ANSWER,
-        run: async () => {
-          await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
-          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
-          this.dialogService.success('Votre réponse a bien été sauvegardée.')
-        },
       },
     ]
   }
@@ -238,19 +249,13 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         run: () => this.commentDrawer.open(),
       },
       {
-        icon: 'menu_book',
-        label: 'Théorie',
-        tooltip: 'Théorie',
-        menu: this.theoriesMenu,
-        visible: !!this.player.theories?.length,
-      },
-      {
         icon: 'key',
         label: 'Solution',
         tooltip: 'Solution',
         visible: this.player.settings?.actions?.solution && !this.player.solution,
         disabled: this.disabled || !!this.runningAction,
         playerAction: PlayerActions.SHOW_SOLUTION,
+        showLabel: this.showLabelIfEnoughSpace,
         run: async () => {
           await this.evaluate(PlayerActions.SHOW_SOLUTION)
           this.scrollIntoNode(this.containerSolution?.nativeElement, 'start')
@@ -262,11 +267,20 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
         tooltip: 'Aide',
         visible: this.player.settings?.actions?.hints && !!this.player.hints,
         disabled: this.disabled || !!this.runningAction,
+        showLabel: this.showLabelIfEnoughSpace,
         playerAction: PlayerActions.NEXT_HINT,
         run: async () => {
           await this.evaluate(PlayerActions.NEXT_HINT)
           this.scrollIntoNode(this.containerHints?.nativeElement, 'center')
         },
+      },
+      {
+        icon: 'menu_book',
+        label: 'Théorie',
+        tooltip: 'Théorie',
+        showLabel: this.showLabelIfEnoughSpace,
+        menu: this.theoriesMenu,
+        visible: !!this.player.theories?.length,
       },
     ]
   }
@@ -372,20 +386,32 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     if (!this.player) {
       this.player = this.players[this.index]
     }
-    this.requestFullscreen =
-      this.container.nativeElement.requestFullscreen ||
-      this.container.nativeElement.webkitRequestFullscreen ||
-      this.container.nativeElement.mozRequestFullScreen ||
-      this.container.nativeElement.msRequestFullscreen
+
+    this.playerSignal.set(this.player)
 
     this.subscriptions.push(
       this.webComponentService.onSubmit.subscribe((id: string) => {
+        if (!this.container?.nativeElement) return
         const component = this.container.nativeElement.querySelector(`[id="${id}"]`)
         if (component) {
           this.evaluate(PlayerActions.CHECK_ANSWER).catch(console.error)
         }
       })
     )
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.container?.nativeElement) return
+
+    this.requestFullscreen =
+      this.container.nativeElement.requestFullscreen ||
+      this.container.nativeElement.webkitRequestFullscreen ||
+      this.container.nativeElement.mozRequestFullScreen ||
+      this.container.nativeElement.msRequestFullscreen
+
+    if (this.container.nativeElement.offsetWidth < 900) {
+      this.showLabelIfEnoughSpace = false
+    }
   }
 
   ngOnDestroy(): void {
@@ -396,6 +422,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
     if (this.players?.length) {
       this.index = this.reviewMode ? this.players.length - 1 : 0
       this.player = this.players[this.index]
+
+      this.playerSignal.set(this.player)
+
       this.clearNotification?.()
       this.clearNotification = undefined
     }
@@ -403,11 +432,13 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
 
   protected previousAttempt(): void {
     this.player = this.players[--this.index]
+    this.playerSignal.set(this.player)
     this.changeDetectorRef.markForCheck()
   }
 
   protected nextAttempt(): void {
     this.player = this.players[++this.index]
+    this.playerSignal.set(this.player)
     this.changeDetectorRef.markForCheck()
   }
 
@@ -465,6 +496,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private forEachComponent(consumer: (component: any) => void): void {
+    if (!this.container?.nativeElement) {
+      return
+    }
     const form = this.container.nativeElement.querySelector('#form')
     if (form) {
       form.querySelectorAll('[cid]').forEach((node) => {
@@ -514,6 +548,8 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       )
 
       this.player = output.exercise
+
+      this.playerSignal.set(this.player)
 
       // little hack here to nge-markdown component to detect change in the case where theses
       // values are not modified during the evaluation on the server side
@@ -579,6 +615,59 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges {
       this.runningAction = undefined
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  protected isErrorLog(log: string): boolean {
+    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
+    return errorPattern.test(log)
+  }
+
+  protected readonly errorServerSignal = computed(() => {
+    const player = this.playerSignal()
+    if (!player) return ''
+    return this.getErrorLogsFromPlayer(player).join('')
+  })
+
+  readonly hasErrors = computed(() => {
+    const player = this.playerSignal()
+    if (!player) return false
+
+    const errorLogs = this.getErrorLogsFromPlayer(player)
+    return !this.editorPreview && errorLogs.length > 0
+  })
+
+  private getErrorLogsFromPlayer(player: ExercisePlayer): string[] {
+    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
+    return player.platon_logs?.filter((log) => errorPattern.test(log)) || []
+  }
+
+  get mailtoLink(): string {
+    const subject = encodeURIComponent(`Problème avec l'exercice: ${this.player?.title || 'Exercice'}`)
+
+    const body = encodeURIComponent(`
+    Bonjour,
+  
+    J'ai rencontré un problème avec l'exercice "${this.player?.title || 'Exercice'}" dans PLaTon.
+  
+    Détails de l'erreur:
+    ${this.errorServerSignal()}
+  
+    Pourriez-vous m'aider à résoudre ce problème ?
+  
+    Merci,
+    Nom Prenom
+    `)
+
+    const teacherEmail = this.getTeacherEmail()
+    return `mailto:${teacherEmail}?subject=${subject}&body=${body}`
+  }
+
+  protected retryExercise(): void {
+    window.location.reload()
+  }
+
+  private getTeacherEmail(): string {
+    return ''
   }
 
   protected async copyToClipboard(text: string | undefined): Promise<void> {

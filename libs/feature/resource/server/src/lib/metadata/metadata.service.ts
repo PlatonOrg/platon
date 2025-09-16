@@ -143,6 +143,7 @@ export class ResourceMetadataService {
     const { resource, entityManager } = args
     const meta: ExerciseResourceMeta = {
       configurable: false,
+      certifiedTemplate: false,
       versions: [],
     }
 

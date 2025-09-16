@@ -1,0 +1,154 @@
+<div class="container">
+  <div class="header">
+    <button nz-button class="close-button" nzType="primary" (click)="close()">
+      <span>Fermer</span>
+    </button>
+
+    <div class="action-buttons">
+      <div class="save-state">
+        @if (hasUnsavedChanges) {
+        <mat-icon class="turn" matTooltip="Modifications non sauvegardées" matTooltipClass="tooltip">edit</mat-icon>
+        } @else {
+        <mat-icon matTooltip="Aucune modification" matTooltipClass="tooltip">check</mat-icon>
+        }
+      </div>
+
+      <button
+        nz-button
+        nzType="text"
+        nzShape="circle"
+        nz-tooltip="Prévisualiser"
+        class="preview-button"
+        (click)="previewAnnouncement()"
+      >
+        <span nz-icon nzType="play-circle" nzTheme="twotone"></span>
+      </button>
+    </div>
+  </div>
+
+  <h1>{{ dialogTitle }}</h1>
+
+  <form nz-form [formGroup]="form" (ngSubmit)="save()">
+    <nz-spin [nzSpinning]="loading">
+      <!-- Titre -->
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="title">Titre</nz-form-label>
+        <nz-form-control nzErrorTip="Veuillez saisir un titre">
+          <input nz-input formControlName="title" id="title" placeholder="Titre de l'annonce" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Description -->
+      <nz-form-item class="vertical-label">
+        <nz-form-label nzRequired nzFor="description">Description brève</nz-form-label>
+        <nz-form-control nzErrorTip="Veuillez saisir une description">
+          <textarea
+            nz-input
+            [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+            formControlName="description"
+            id="description"
+            placeholder="Description courte de l'annonce"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="spacer"></div>
+      <!-- Actif -->
+
+      <div class="spacer"></div>
+      <!-- Actif et Durée d'affichage -->
+      <div class="active-duration-row">
+        <nz-form-item class="active-item">
+          <nz-form-label nzFor="active">Actif</nz-form-label>
+          <nz-form-control>
+            <nz-switch formControlName="active"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item class="duration-item">
+          <nz-form-label nzFor="displayDurationInDays">Durée (jours)</nz-form-label>
+          <nz-form-control nzErrorTip="Veuillez saisir un nombre valide">
+            <nz-input-number
+              formControlName="displayDurationInDays"
+              id="displayDurationInDays"
+              [nzMin]="1"
+              [nzMax]="365"
+              [nzStep]="1"
+              nzPlaceHolder="Nombre de jours"
+              style="width: 100%"
+            >
+            </nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Partie du formulaire pour la sélection des rôles cibles -->
+      <nz-form-item>
+        <nz-form-label class="role" nzFor="targetedRoles">Rôles ciblés</nz-form-label>
+        <nz-form-control>
+          <div class="role-checkboxes">
+            <!-- Admin role -->
+            <label nz-checkbox formControlName="targetAdmins" (ngModelChange)="updateTargetedRoles()">
+              <nz-tag [nzColor]="getRoleColor('admin')">{{ formatRoleName('admin') }}</nz-tag>
+            </label>
+
+            <!-- Teacher role -->
+            <label nz-checkbox formControlName="targetTeachers" (ngModelChange)="updateTargetedRoles()">
+              <nz-tag [nzColor]="getRoleColor('teacher')">{{ formatRoleName('teacher') }}</nz-tag>
+            </label>
+
+            <!-- Student role -->
+            <label nz-checkbox formControlName="targetStudents" (ngModelChange)="updateTargetedRoles()">
+              <nz-tag [nzColor]="getRoleColor('student')">{{ formatRoleName('student') }}</nz-tag>
+            </label>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-spin>
+    <!-- Sélection d'icône avec des boutons radio -->
+    <nz-form-item>
+      <nz-form-label nzFor="icon">Icône</nz-form-label>
+      <nz-form-control>
+        <nz-radio-group formControlName="icon" id="icon" class="icon-radio-group">
+          <label nz-radio-button nzValue="notification" class="icon-radio">
+            <nz-icon nzType="notification"></nz-icon>
+            <span>Notification</span>
+          </label>
+          <label nz-radio-button nzValue="bell" class="icon-radio">
+            <nz-icon nzType="bell"></nz-icon>
+            <span>Alerte</span>
+          </label>
+          <label nz-radio-button nzValue="info-circle" class="icon-radio">
+            <nz-icon nzType="info-circle"></nz-icon>
+            <span>Information</span>
+          </label>
+          <label nz-radio-button nzValue="tool" class="icon-radio">
+            <nz-icon nzType="tool"></nz-icon>
+            <span>Maintenance</span>
+          </label>
+          <label nz-radio-button nzValue="calendar" class="icon-radio">
+            <nz-icon nzType="calendar"></nz-icon>
+            <span>Événement</span>
+          </label>
+          <label nz-radio-button nzValue="warning" class="icon-radio">
+            <nz-icon nzType="warning"></nz-icon>
+            <span>Avertissement</span>
+          </label>
+          <label nz-radio-button nzValue="bulb" class="icon-radio">
+            <nz-icon nzType="bulb"></nz-icon>
+            <span>Announcement</span>
+          </label>
+        </nz-radio-group>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+  <h2>Contenu de l'annonce</h2>
+  <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)" class="ui-editorjs"></ui-editorjs>
+
+  <div class="button-container">
+    <button nz-button nzType="primary" type="submit" [disabled]="loading" (click)="save()">
+      {{ submitButtonText }}
+    </button>
+    <button nz-button type="button" (click)="close()">Annuler</button>
+  </div>
+</div>

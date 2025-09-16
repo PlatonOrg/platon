@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { Router, RouterModule } from '@angular/router'
-import { Subscription } from 'rxjs'
+import { Router, RouterModule, ActivatedRoute } from '@angular/router'
+import { firstValueFrom, Subscription } from 'rxjs'
 
 import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
@@ -17,12 +17,13 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography'
 
 import { DialogModule } from '@platon/core/browser'
 import { CircleTreeComponent, ResourcePipesModule, ResourceSharingComponent } from '@platon/feature/resource/browser'
-import { ResourceStatus } from '@platon/feature/resource/common'
+import { ExerciseResourceMeta, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 import { UiLayoutTabDirective, UiLayoutTabsComponent, UiModalIFrameComponent } from '@platon/shared/ui'
 
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ResourcePresenter } from './resource.presenter'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
+import { ResourcePageTutorialService, ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 @Component({
   standalone: true,
@@ -65,12 +66,19 @@ export class ResourcePage implements OnInit, OnDestroy {
   private readonly presenter = inject(ResourcePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly router = inject(Router)
+  private readonly resourcePageTutorialService = inject(ResourcePageTutorialService)
+
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly resourcesTutorialService = inject(ResourcesTutorialService)
 
   protected context = this.presenter.defaultContext()
 
   readonly status = Object.values(ResourceStatus)
 
   protected isChangingWatchingState = false
+
+  protected configurable = false
+  protected certifiedTemplate = false
 
   get isOtherPersonal(): boolean {
     return this.context.resource!.personal && this.context.resource!.ownerId !== this.context.user!.id
@@ -80,9 +88,18 @@ export class ResourcePage implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
+
+        if (this.context.resource?.type === ResourceTypes.EXERCISE) {
+          const metadata = this.context.resource?.metadata as ExerciseResourceMeta
+          this.configurable = metadata?.configurable
+          this.certifiedTemplate = metadata?.certifiedTemplate
+        }
+
         this.changeDetectorRef.markForCheck()
       })
     )
+    //this.checkFirstVisit()
+    this.checkForTutorialContinuation()
   }
 
   ngOnDestroy(): void {
@@ -155,5 +172,59 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected referencesNumber(): number {
     return this.context.resource?.statistic?.exercise?.references?.total || 0
+  }
+
+  /**
+   * Vérifie si c'est la première visite de l'utilisateur
+
+  private checkFirstVisit(): void {
+    setTimeout(() => {
+      this.startResourcesTutorial()
+    }, 1000)
+  }*/
+
+  private checkForTutorialContinuation(): void {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      const fromTutorial = params['fromTutorial']
+      const isFromTutorialService = this.resourcesTutorialService.getIsFromTutorial()
+
+      if (fromTutorial === 'true' || isFromTutorialService) {
+        // L'utilisateur vient du tutoriel
+        setTimeout(() => {
+          this.startResourcePageTutorial()
+        }, 1000)
+        //this.startResourcePageTutorial()
+
+        // Nettoyer les paramètres d'URL
+        this.cleanTutorialParams()
+
+        // Réinitialiser le flag du service
+        this.resourcesTutorialService.resetTutorialFlag()
+      } else {
+        console.log('NOTHING')
+      }
+    })
+  }
+
+  /**
+   * Démarre le tutoriel complet de l'espace de travail
+   */
+  startResourcePageTutorial(): void {
+    if (this.context.resource) {
+      this.resourcePageTutorialService.startResourcePageTutorial(this.context.resource, false, false, false)
+    }
+  }
+
+  private cleanTutorialParams(): void {
+    // Supprimer le paramètre fromTutorial de l'URL sans recharger la page
+    const url = new URL(window.location.href)
+    url.searchParams.delete('fromTutorial')
+    window.history.replaceState(null, '', url.toString())
+  }
+
+  protected async updateCertification(certified: boolean): Promise<void> {
+    if (await this.presenter.updateCertification(certified)) {
+      this.certifiedTemplate = certified
+    }
   }
 }

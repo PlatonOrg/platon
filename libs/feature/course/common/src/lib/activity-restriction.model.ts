@@ -1,4 +1,4 @@
-export type RestrictionType = 'DateRange' | 'Correctors' | 'Groups' | 'Members'
+export type RestrictionType = 'DateRange' | 'Correctors' | 'Groups' | 'Members' | 'Others'
 
 export interface RestrictionConfig {
   DateRange: {
@@ -13,6 +13,9 @@ export interface RestrictionConfig {
   }
   Groups: {
     groups?: string[]
+  }
+  Others: {
+    enabled?: boolean
   }
 }
 

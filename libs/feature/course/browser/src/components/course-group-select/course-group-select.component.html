@@ -1,5 +1,5 @@
 <nz-tree-select
-  [(ngModel)]="selection"
+  [ngModel]="selection"
   [nzNodes]="nodes"
   (ngModelChange)="onChangeSelection($event)"
   [nzShowSearch]="true"
@@ -8,6 +8,7 @@
   [nzPlaceHolder]="placeholder || ''"
   [nzTreeTemplate]="template"
   [nzVirtualHeight]="nodes.length <= 15 ? '' : '300px'"
+  [nzMultiple]="true"
 />
 
 <ng-template #template let-node>

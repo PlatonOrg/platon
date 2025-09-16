@@ -1,10 +1,25 @@
-<nz-ribbon [nzText]="item.statistic ? ribbon : null" [nzColor]="progressColor">
+@if (item.statistic) {
+<nz-ribbon
+  [nzText]="item.statistic ? ribbon : null"
+  [nzColor]="progressColor"
+  class="tuto-course-item-container"
+  [attr.data-course-id]="item.id"
+  [id]="'tuto-course-item-' + item.id"
+>
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+</nz-ribbon>
+} @else {
+<ng-container *ngTemplateOutlet="content"></ng-container>
+}
+
+<ng-template #content>
   <ui-list-item-article
     [style.--border-color]="'red'"
     [articleTitle]="title"
     [articleDescription]="desc"
     [articleIconTemplate]="image"
     [articleUrl]="['/courses/', item.id]"
+    class="tuto-course-article"
   >
     <ui-list-item-article-action
       *ngIf="item.statistic"
@@ -31,7 +46,7 @@
       <i nz-icon nzType="history" nzTheme="outline"></i>
     </ui-list-item-article-action>
   </ui-list-item-article>
-</nz-ribbon>
+</ng-template>
 
 <ng-template #ribbon>
   <nz-progress

@@ -1,0 +1,147 @@
+// Base container
+:host {
+  display: block;
+  width: 100%;
+}
+
+// Typography
+h1 {
+  width: 100%;
+  text-align: center;
+  margin: 2rem 0 1rem;
+  font-size: 2rem;
+  font-weight: 600;
+  position: relative;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background: var(--brand-color-primary);
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+  }
+}
+
+// Layout components
+header {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  button {
+    margin-top: 1.2rem;
+  }
+}
+
+// List of tests
+.tests-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 2rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.test-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.test-card {
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--brand-background-components);
+  position: relative;
+  border: 1px solid var(--brand-border-color);
+
+  .test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .test-statistics {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+
+      .statistic-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--brand-text-secondary);
+
+        mat-icon {
+          font-size: 1.2rem;
+          color: var(--brand-color-primary);
+          margin-top: 0.2rem;
+          height: 100%;
+        }
+
+        span {
+          font-size: 0.9rem;
+          font-weight: 600;
+          line-height: 1.5;
+          margin-top: 0.1rem;
+        }
+      }
+    }
+  }
+
+  p {
+    margin: 0.75rem 0;
+    color: var(--brand-text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .test-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+
+    .date {
+      font-size: 0.85rem;
+      color: var(--brand-text-tertiary);
+    }
+
+    .voir-icon {
+      font-size: 1.2rem;
+      color: var(--brand-color-primary);
+    }
+  }
+}
+
+@keyframes iconShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(2px); }
+  50% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+.test-card-link:hover .voir-icon {
+  animation: iconShake 0.4s ease-in-out;
+}

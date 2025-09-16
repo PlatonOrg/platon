@@ -30,6 +30,7 @@ export class LTIController {
 
   @Post('/lms')
   async createLms(@Body() input: CreateLmsDTO): Promise<CreatedResponse<LmsDTO>> {
+    console.log('Creating Lms with input:', input)
     const resource = Mapper.map(await this.service.createLms(input), LmsDTO)
     return new CreatedResponse({ resource })
   }

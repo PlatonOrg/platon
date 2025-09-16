@@ -1,0 +1,80 @@
+<div class="container">
+  <div class="header">
+    <button nz-button class="close-button" (click)="close()">
+      <span>Fermer</span>
+    </button>
+    <div class="save-state">
+      @if (hasUnsavedChanges) {
+      <mat-icon class="turn" matTooltip="Sauvegarde en cours..." matTooltipClass="tooltip">sync</mat-icon>
+      } @else {
+      <div>Sauvegardé</div>
+      }
+    </div>
+  </div>
+  <h1>Mail d'invitation <i>(Mode édition)</i></h1>
+  <as-split direction="horizontal">
+    <as-split-area size="60" class="editor-area">
+      <as-split direction="vertical">
+        <as-split-area size="70">
+          <div class="subject-input">
+            <div class="subject-label">Objet :</div>
+            <input
+              nz-input
+              type="text"
+              [(ngModel)]="subject"
+              (ngModelChange)="onChangeSubject()"
+              placeholder="Objet du mail"
+            />
+          </div>
+          <ui-editorjs *ngIf="mail" [ngModel]="mail" (ngModelChange)="onChangeData($event)"></ui-editorjs>
+        </as-split-area>
+        <as-split-area size="30">
+          <div class="variables-list">
+            <h2>Liste des variables</h2>
+            <ul>
+              <li
+                *ngFor="let variable of variables; trackBy: trackByVariableName"
+                (click)="copyVariableToClipboard(variable.name)"
+                [class.copied]="copiedVariable === variable.name"
+              >
+                <div class="variable-content">
+                  <div class="variable-name-container">
+                    <span class="variable-name">{{ '{{ ' + variable.name + ' }}'}}</span>
+                    <mat-icon class="copy-icon">
+                      {{ copiedVariable === variable.name ? 'check' : 'content_copy' }}
+                    </mat-icon>
+                  </div>
+                  <span class="variable-description">{{ variable.description }}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+    <as-split-area size="40" class="preview-area">
+      <h2 class="preview-title">Aperçu du mail</h2>
+      <div class="preview-subject">
+        <div class="subject-label">Objet :</div>
+        <span class="subject-text">{{ subject }}</span>
+      </div>
+      <div class="preview-content">
+        <ui-editorjs-viewer [data]="mail"></ui-editorjs-viewer>
+      </div>
+      <div class="preview-footer">
+        @if (isWaitingForSend) {
+        <button nz-button (click)="cancelSendAllMails()">
+          <span>Annuler</span>
+        </button>
+        <button nz-button nzType="primary" (click)="sendAllMails()">
+          <span>Envoyer</span>
+        </button>
+        } @else {
+        <button nz-button nzType="primary" (click)="initSendAllMails()">
+          <span>Envoyer à tous les candidats</span>
+        </button>
+        }
+      </div>
+    </as-split-area>
+  </as-split>
+</div>

@@ -80,6 +80,7 @@ export class CourseCreatePage {
         this.courseService.create({
           name: infos.name as string,
           desc: infos.desc as string,
+          isTest: false,
         })
       )
 

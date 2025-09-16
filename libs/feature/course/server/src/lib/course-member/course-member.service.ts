@@ -124,37 +124,41 @@ export class CourseMemberService {
     return [members, count]
   }
 
-  async addUser(courseId: string, userId: string, role: CourseMemberRoles): Promise<CourseMemberEntity> {
+  async addUser(courseId: string, userId: string, role: CourseMemberRoles, notify = true): Promise<CourseMemberEntity> {
     const member = await this.repository.save(this.repository.create({ courseId, userId, role }))
-    this.notificationService
-      .notifyCourseMemberBeingCreated(
-        await this.view.find({
-          where: {
-            courseId,
-            memberId: member.id,
-          },
+    if (notify) {
+      this.notificationService
+        .notifyCourseMemberBeingCreated(
+          await this.view.find({
+            where: {
+              courseId,
+              memberId: member.id,
+            },
+          })
+        )
+        .catch((error) => {
+          this.logger.error('Failed to send notification', error)
         })
-      )
-      .catch((error) => {
-        this.logger.error('Failed to send notification', error)
-      })
+    }
     return member
   }
 
-  async addGroup(courseId: string, groupId: string): Promise<CourseMemberEntity> {
+  async addGroup(courseId: string, groupId: string, notify = true): Promise<CourseMemberEntity> {
     const member = await this.repository.save(this.repository.create({ courseId, groupId }))
-    this.notificationService
-      .notifyCourseMemberBeingCreated(
-        await this.view.find({
-          where: {
-            courseId,
-            memberId: member.id,
-          },
+    if (notify) {
+      this.notificationService
+        .notifyCourseMemberBeingCreated(
+          await this.view.find({
+            where: {
+              courseId,
+              memberId: member.id,
+            },
+          })
+        )
+        .catch((error) => {
+          this.logger.error('Failed to send notification', error)
         })
-      )
-      .catch((error) => {
-        this.logger.error('Failed to send notification', error)
-      })
+    }
     return member
   }
 
@@ -188,5 +192,13 @@ export class CourseMemberService {
       where: { courseId, id: user.id, role: CourseMemberRoles.teacher },
     })
     return result != null
+  }
+
+  async getCoursesByMemberId(memberId: string): Promise<string[]> {
+    const members = await this.view.find({ where: { memberId } })
+    if (members.length === 0) {
+      return []
+    }
+    return members.map((member) => member.courseId)
   }
 }

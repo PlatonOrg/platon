@@ -1,6 +1,6 @@
 <ui-layout-tabs [state]="context.state">
   <ng-container *ngIf="context.course as course">
-    <header>
+    <header id="tuto-course-header">
       <nz-page-header [nzSubtitle]="header" nzBackIcon>
         <ng-template #header>
           <nz-breadcrumb nzSeparator="">
@@ -12,6 +12,7 @@
                 [nzContent]="course.name"
                 (nzContentChange)="updateName($event)"
                 class="title"
+                id="tuto-course-title"
               ></span>
             </nz-breadcrumb-item>
             <div class="spacer"></div>
@@ -24,8 +25,9 @@
       [nzEditable]="course.permissions?.update"
       [nzContent]="course.desc"
       (nzContentChange)="updateDesc($event)"
+      id="tuto-course-description"
     ></p>
-    <div class="container-toolbar">
+    <div class="container-toolbar" id="tuto-course-toolbar">
       <nz-tag>
         <span nz-icon nzType="calendar" nzTheme="outline"></span>
         <span
@@ -42,37 +44,42 @@
         nzPopoverPlacement="left"
         [nzPopoverTrigger]="'click'"
         [nzPopoverContent]="sharingPopover"
+        id="tuto-course-share-button"
       >
         <i nz-icon nzType="link" nzTheme="outline"></i>
         Partager
       </button>
     </div>
   </ng-container>
-  <ui-layout-tab [link]="['dashboard']">
+  <ui-layout-tab [link]="['dashboard']" id="tuto-course-tab-dashboard">
     <ng-template>
       <span nz-icon nzType="dashboard" nzTheme="outline"></span>
       Vue d'ensemble
     </ng-template>
   </ui-layout-tab>
-  <ui-layout-tab *ngIf="context.course?.statistic?.challengeCount" [link]="['challenges']">
+  <ui-layout-tab
+    *ngIf="context.course?.statistic?.challengeCount"
+    [link]="['challenges']"
+    id="tuto-course-tab-challenges"
+  >
     <ng-template>
       <span nz-icon nzType="trophy" nzTheme="outline"></span>
       Challenges
     </ng-template>
   </ui-layout-tab>
-  <ui-layout-tab [link]="['members']">
+  <ui-layout-tab [link]="['members']" id="tuto-course-tab-members">
     <ng-template>
       <span nz-icon nzType="team" nzTheme="outline"></span>
       Membres
     </ng-template>
   </ui-layout-tab>
-  <ui-layout-tab [link]="['groups']">
+  <ui-layout-tab [link]="['groups']" id="tuto-course-tab-groups">
     <ng-template>
       <span nz-icon nzType="team" nzTheme="outline"></span>
       Groupes
     </ng-template>
   </ui-layout-tab>
-  <ui-layout-tab *ngIf="context.course?.permissions?.update" [link]="['settings']">
+  <ui-layout-tab *ngIf="context.course?.permissions?.update" [link]="['settings']" id="tuto-course-tab-settings">
     <ng-template>
       <span nz-icon nzType="setting" nzTheme="outline"></span>
       Paramètres

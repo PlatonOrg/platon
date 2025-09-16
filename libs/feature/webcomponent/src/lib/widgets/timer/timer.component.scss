@@ -1,26 +1,106 @@
-
-
 .timer-display {
   font-size: 1.2rem;
   font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .wc-timer {
   border-radius: 0.5rem;
   padding: 0.5rem 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
+// Animation pulse de base
+.wc-timer.pulse {
+  animation: timer-pulse 2s ease-in-out infinite;
+}
+
+// Animation pulse rapide (pour les dernières secondes)
+.wc-timer.pulse-urgent {
+  animation: timer-pulse-urgent 0.8s ease-in-out infinite;
+}
+
+// Animation pour les dernières 10 secondes
+.wc-timer.critical {
+  animation: timer-critical 0.5s ease-in-out infinite;
+  border-color: #dc2626 !important;
+}
+
+// Keyframes pour l'animation pulse normale
+@keyframes timer-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+// Keyframes pour l'animation pulse urgente
+@keyframes timer-pulse-urgent {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.8);
+    background-color: transparent;
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+    background-color: rgba(220, 38, 38, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    background-color: transparent;
+  }
+}
+
+// Keyframes pour l'animation du texte
+@keyframes text-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// Keyframes pour l'animation critique
+@keyframes timer-critical {
+  0%, 100% {
+    background-color: transparent;
+    color: var(--brand-text-primary);
+  }
+  50% {
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+  }
+}
+
+// Styles de position
 .wc-timer--center {
   position: absolute;
-  top: 0;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  border-left: 1px solid var(--brand-text-primary);
-  border-bottom: 1px solid var(--brand-text-primary);
-  border-right: 1px solid var(--brand-text-primary);
+  border: 1px solid var(--brand-text-primary);
+
+  // Ajuster le transform pour l'animation pulse avec translateX
+  &.pulse {
+    animation: timer-pulse-center 2s ease-in-out infinite;
+  }
+
+  &.pulse-urgent {
+    animation: timer-pulse-urgent-center 0.8s ease-in-out infinite;
+  }
 }
-
-
 
 .wc-timer--left {
   position: absolute;
@@ -28,7 +108,6 @@
   left: 0;
   border-right: 1px solid var(--brand-text-primary);
   border-bottom: 1px solid var(--brand-text-primary);
-
 }
 
 .wc-timer--right {
@@ -37,4 +116,46 @@
   right: 0;
   border-left: 1px solid var(--brand-text-primary);
   border-bottom: 1px solid var(--brand-text-primary);
+}
+
+// Keyframes spécifiques pour le center (avec translateX)
+@keyframes timer-pulse-center {
+  0% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+@keyframes timer-pulse-urgent-center {
+  0% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.8);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.08);
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+// Classes utilitaires pour contrôler les animations
+.wc-timer {
+  &.no-animation {
+    animation: none !important;
+  }
+
+  &.paused {
+    animation-play-state: paused;
+  }
 }

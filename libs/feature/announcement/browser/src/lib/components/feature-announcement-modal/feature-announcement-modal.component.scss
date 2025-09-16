@@ -1,0 +1,132 @@
+:host {
+  display: block;
+}
+
+// Styles pour toutes les notifications
+::ng-deep .ant-notification {
+  .ant-notification-notice {
+    padding: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border: 1px solid #e8e8e8;
+    background-color: var(--brand-background-components, #f0f4ff);
+    max-width: 350px;
+    margin-right: 16px;
+    margin-bottom: 4px;
+    animation: slideInFromRight 0.3s ease-out;
+    z-index: 1000;
+  }
+
+  .ant-notification-notice-content {
+    width: 100%;
+    padding: 0;
+  }
+
+  .ant-notification-notice-close {
+    display: none;
+  }
+}
+
+.announcement-container {
+  width: 100%;
+  position: relative;
+}
+
+.announcement-container > button[nz-button] {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
+
+.announcement-body {
+  padding: 25px 10px 4px;
+
+  .announcement-title {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--brand-text-primary, #64748b);
+    line-height: 1.3;
+  }
+
+  .announcement-description {
+    text-align: left;
+    margin-bottom: 8px;
+    color: var(--brand-text-primary, #64748b);
+    font-size: 11px;
+    line-height: 1.4;
+
+    .description-text {
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--brand-text-secondary, #64748b);
+    }
+  }
+}
+
+.announcement-actions {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 10px 6px;
+
+  .primary-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+    font-size: 11px;
+    transition: all 0.2s ease;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px 4px;
+    height: 26px;
+    min-width: 80px;
+
+    &:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  ::ng-deep .ant-notification {
+    .ant-notification-notice {
+      max-width: 240px;
+    }
+  }
+
+  .announcement-body {
+    padding: 28px 12px 10px;
+
+    .announcement-title {
+      font-size: 13px;
+    }
+
+    .announcement-description {
+      font-size: 12px;
+    }
+  }
+}

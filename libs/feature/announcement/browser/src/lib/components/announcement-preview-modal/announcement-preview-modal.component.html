@@ -1,0 +1,57 @@
+<div class="announcement-preview-container">
+  <div class="preview-header">
+    <h2 mat-dialog-title>
+      <i nz-icon [nzType]="announcement().icon || 'notification'" nzTheme="outline"></i>
+      Prévisualisation de l'annonce
+    </h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content class="preview-content">
+    @if (announcement(); as announcement) {
+    <div class="announcement-header">
+      <h1>{{ announcement.title }}</h1>
+      <div class="announcement-meta">
+        <div class="announcement-date">
+          <span>Publié le {{ announcement.createdAt | date : 'dd MMMM yyyy' }}</span>
+        </div>
+        @if (announcement.targetedRoles?.length) {
+        <div class="announcement-roles">
+          <span>Destiné à : </span>
+          @for (role of announcement.targetedRoles; track role) {
+          <nz-tag [nzColor]="getRoleColor(role)">{{ formatRoleName(role) }}</nz-tag>
+          }
+        </div>
+        } @else {
+        <div class="announcement-roles">
+          <span>Destiné à : </span>
+          <nz-tag>Tous les utilisateurs</nz-tag>
+        </div>
+        }
+      </div>
+    </div>
+
+    <nz-divider></nz-divider>
+
+    <div class="announcement-body">
+      <p class="announcement-description">{{ announcement.description }}</p>
+
+      <div class="announcement-content">
+        @if (announcement.data) {
+        <ui-editorjs-viewer [data]="announcement.data"></ui-editorjs-viewer>
+        }
+      </div>
+    </div>
+    }
+  </div>
+
+  <div mat-dialog-actions class="button-container">
+    <button mat-button (click)="close()">Fermer</button>
+    <button mat-raised-button color="primary" (click)="backToEdit()">
+      <mat-icon>edit</mat-icon>
+      Retour à l'édition
+    </button>
+  </div>
+</div>

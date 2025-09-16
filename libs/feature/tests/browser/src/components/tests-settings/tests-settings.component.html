@@ -1,0 +1,99 @@
+<div class="container">
+  <h1>Paramètres</h1>
+  <div class="settings">
+    @if (activity) {
+    <div class="settings-item">
+      <div class="settings-item-title">
+        <i nz-icon nzType="calendar" nzTheme="outline"></i>
+        <span>Période d'accès :</span>
+      </div>
+      <div class="date-picker-compact">
+        <nz-date-picker
+          [nzShowTime]="true"
+          nzPlaceHolder="Date d'ouverture"
+          [nzDisabledDate]="disabledDateStart"
+          nzFormat="dd/MM/yyyy HH:mm"
+          [nzBorderless]="true"
+          [(ngModel)]="startDate"
+          (ngModelChange)="onChangeData()"
+        />
+        <span class="separator">→</span>
+        <nz-date-picker
+          [nzShowTime]="true"
+          [nzDisabledDate]="disabledDateEnd"
+          nzPlaceHolder="Date de fermeture"
+          nzFormat="dd/MM/yyyy HH:mm"
+          [nzBorderless]="true"
+          [(ngModel)]="endDate"
+          (ngModelChange)="onChangeData()"
+        />
+      </div>
+    </div>
+    } @if (course) {
+    <div class="settings-item">
+      <div class="settings-item-title">
+        <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+        <span>Informations :</span>
+      </div>
+      <form class="informations" nz-form [nzLayout]="'vertical'" [formGroup]="form" (ngSubmit)="saveChanges()">
+        <mat-form-field appearance="fill">
+          <mat-label>Nom</mat-label>
+          <input formControlName="name" matInput />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Description</mat-label>
+          <textarea cdkTextareaAutosize formControlName="desc" matInput></textarea>
+        </mat-form-field>
+        <ng-container *ngIf="savingDesc; else actions">
+          <nz-spin></nz-spin>
+        </ng-container>
+        <ng-template #actions>
+          <button nz-button nzType="primary" type="submit" [disabled]="!canSubmit">Mettre à jour</button>
+        </ng-template>
+      </form>
+    </div>
+    <div class="settings-item-danger">
+      <div class="settings-item-title">
+        <i nz-icon nzType="warning" nzTheme="outline"></i>
+        <span>Zone de danger :</span>
+      </div>
+      <div class="danger-actions">
+        @if (updating) {
+        <nz-spin nzTip="Rechargement de l'activité..."></nz-spin>
+        } @else {
+        <button
+          nz-button
+          [disabled]="!canEdit"
+          nzDanger
+          nz-popconfirm
+          [nzPopconfirmTitle]="confirmReload"
+          (nzOnConfirm)="reload()"
+        >
+          Recharger
+        </button>
+        }
+        <button
+          nz-button
+          nzType="primary"
+          [disabled]="!canEdit"
+          nzDanger
+          nz-popconfirm
+          nzOkText="Supprimer"
+          nzOkType="danger"
+          nzPopconfirmTitle="Êtes-vous sûr de vouloir supprimer ce test ?"
+          (nzOnConfirm)="deleteCourse()"
+        >
+          Supprimer le test
+        </button>
+      </div>
+    </div>
+    }
+  </div>
+</div>
+<ng-template #confirmReload>
+  <p>Êtes-vous sûr de vouloir recharger cette activité ?</p>
+  <ul>
+    <li>L'activité sera remplacée par sa dernière version publiée.</li>
+    <li>Après avoir supprimé l'activité, toutes ses réponses seront effacées.</li>
+  </ul>
+</ng-template>

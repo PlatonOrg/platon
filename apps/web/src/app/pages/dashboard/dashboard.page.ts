@@ -9,7 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar'
 
 import { SidebarComponent } from '../../widgets/sidebar/sidebar.component'
 import { ToolbarComponent } from '../../widgets/toolbar/toolbar.component'
-
+import { TutorialSelectorModalComponent } from '@platon/feature/tuto/browser'
 @Component({
   standalone: true,
   selector: 'app-dashboard',
@@ -24,9 +24,9 @@ import { ToolbarComponent } from '../../widgets/toolbar/toolbar.component'
     MatButtonModule,
     MatToolbarModule,
     MatSidenavModule,
-
     ToolbarComponent,
     SidebarComponent,
+    TutorialSelectorModalComponent,
   ],
 })
 export class DashboardPage {

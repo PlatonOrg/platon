@@ -18,7 +18,9 @@ import { RESULT_PROVIDERS } from '@platon/feature/result/browser'
 import { PEER_PROVIDERS } from '@platon/feature/peer/browser'
 import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
 import { DISCORD_PROVIDERS } from '@platon/feature/discord/browser'
+import { ANNOUNCEMENT_PROVIDERS } from '@platon/feature/announcement/browser'
 import { appRoutes } from './app.routes'
+import { TESTS_PROVIDERS } from '@platon/feature/tests/browser'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -40,5 +42,7 @@ export const appConfig: ApplicationConfig = {
     CAS_PROVIDERS,
     TAG_PROVIDERS,
     DISCORD_PROVIDERS,
+    TESTS_PROVIDERS,
+    ANNOUNCEMENT_PROVIDERS,
   ],
 }

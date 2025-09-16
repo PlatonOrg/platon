@@ -1,0 +1,11 @@
+<div class="candidate-loading">
+  <div class="candidate-card">
+    @if (error){
+    <p class="error-message">{{ error }}</p>
+    } @else {
+    <p>Vérification de votre invitation en cours...</p>
+    <nz-spin nzSimple nzSize="large" class="spinner"></nz-spin>
+    <p>Vous allez être redirigé automatiquement.</p>
+    }
+  </div>
+</div>

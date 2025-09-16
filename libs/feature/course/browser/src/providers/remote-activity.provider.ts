@@ -86,4 +86,10 @@ export class RemoteActivityProvider extends ActivityProvider {
       )
       .pipe(map((response) => response.resource))
   }
+
+  getCourseColors(courseId: string): Observable<number[]> {
+    return this.http
+      .get<ItemResponse<number[]>>(`/api/v1/courses/${courseId}/activities/colors`)
+      .pipe(map((response) => response.resource))
+  }
 }

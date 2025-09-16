@@ -104,6 +104,10 @@ export class ResourceService {
   updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource> {
     return this.resourceProvider.updateTemplate(resourceId, templateId, templateVersion)
   }
+
+  updateCertification(resourceId: string, certified: boolean): Observable<Resource> {
+    return this.resourceProvider.updateCertification(resourceId, certified)
+  }
   //#endregion
 
   //#region Members

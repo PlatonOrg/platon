@@ -1,0 +1,99 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.truncate-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3em;
+}
+
+.desktop-table-container {
+  overflow-x: auto;
+  margin-bottom: 16px;
+
+  @media (max-width: 767px) {
+    display: none;
+  }
+}
+
+// Cards pour mobile
+.mobile-card-container {
+  display: none;
+
+  @media (max-width: 767px) {
+    display: block;
+  }
+
+  .announcement-card {
+    margin-bottom: 16px;
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+    }
+
+    .description {
+      margin-bottom: 12px;
+      color: var(--brand-text-secondary);
+    }
+
+    .card-info {
+      margin-bottom: 16px;
+
+      .info-item {
+        display: flex;
+        margin-bottom: 4px;
+
+        .label {
+          font-weight: 500;
+          margin-right: 8px;
+          min-width: 60px;
+        }
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .button-text {
+    display: none;
+  }
+}

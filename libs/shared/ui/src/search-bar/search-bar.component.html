@@ -4,6 +4,7 @@
 
 <input
   #searchRef
+  id="tuto-search-bar"
   type="search"
   [placeholder]="searchbar?.placeholder || ''"
   [formControl]="control"
@@ -12,7 +13,13 @@
   (focus)="startFiltering(control.value)"
 />
 
-<button *ngIf="showFilterButton" mat-button (click)="onFilter()">
+<button
+  id="tuto_filter_list"
+  data-tutorial-target="filter-button"
+  *ngIf="showFilterButton"
+  mat-button
+  (click)="onFilter()"
+>
   <mat-icon>filter_list</mat-icon>
 </button>
 

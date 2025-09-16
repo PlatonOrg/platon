@@ -56,6 +56,9 @@ import {
   ResourceTypes,
 } from '@platon/feature/resource/common'
 
+import { ShepherdService } from '@platon/feature/tuto/browser'
+import { ResourcesTutorialService } from '@platon/feature/tuto/browser'
+
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
 
@@ -117,6 +120,8 @@ export default class ResourcesPage implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly resourceService = inject(ResourceService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly shepherdService = inject(ShepherdService)
+  private readonly resourcesTutorialService = inject(ResourcesTutorialService)
 
   protected readonly searchbar: SearchBar<string> = {
     placeholder: 'Essayez un nom, un topic, un niveau...',
@@ -283,6 +288,11 @@ export default class ResourcesPage implements OnInit, OnDestroy {
         this.totalMatches = response.total
         this.searching = false
 
+        // Marquer qu'une recherche a été effectuée
+        if (e.q && e.q.length > 0) {
+          this.hasSearched = true
+        }
+        this.checkForResourcesTutorial()
         this.changeDetectorRef.markForCheck()
       })
     )
@@ -290,6 +300,8 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     this.checkScreenSize()
     window.addEventListener('resize', this.handleResize)
   }
+
+  hasSearched = false
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())
@@ -369,5 +381,57 @@ export default class ResourcesPage implements OnInit, OnDestroy {
   protected toggleDrawer(): void {
     this.drawerVisible = !this.drawerVisible
     this.changeDetectorRef.markForCheck()
+  }
+
+  private checkFirstVisit(): void {
+    if (this.user) {
+      setTimeout(() => {
+        this.startResourcesTutorial()
+      }, 100) // Délai de 100 ms pour permettre à la page de se charger
+    }
+  }
+
+  /**
+   * Démarre le tutoriel complet de l'espace de travail
+   */
+  startResourcesTutorial(): void {
+    if (!this.user) return
+
+    this.resourcesTutorialService.startResourcesTutorial(
+      this.user,
+      this.items,
+      () => this.hasSearched,
+      (query: string) => {
+        this.searchbar.value = query
+        this.search(this.filters, query)
+      }
+    )
+  }
+
+  private checkForResourcesTutorial(): void {
+    this.subscriptions.push(
+      this.activatedRoute.queryParams.subscribe((params: any) => {
+        if (params['tutorial'] === 'workspace' && this.user) {
+          this.resetTutorialParam()
+
+          setTimeout(() => {
+            this.startResourcesTutorial()
+          }, 500)
+        }
+      })
+    )
+  }
+
+  /**
+   * Réinitialise le paramètre tutorial dans l'URL
+   */
+  private resetTutorialParam(): void {
+    this.router
+      .navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { tutorial: null },
+        queryParamsHandling: 'merge',
+      })
+      .catch(console.error)
   }
 }

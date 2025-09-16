@@ -30,12 +30,27 @@ export class CourseMemberSelectComponent implements ControlValueAccessor {
   protected nodes: NzTreeNodeOptions[] = []
   protected selection: string[] = []
 
+  private readonly SELECT_ALL_KEY = '__SELECT_ALL__'
+  private memberIds: string[] = []
+  private isUpdatingProgrammatically = false
+
   @Input() placeholder?: string
 
   @Input()
   set members(value: CourseMember[]) {
-    this.nodes = value.map((member) => {
+    this.memberIds = []
+
+    const memberNodes = value.map((member) => {
       const title = member.user ? userDisplayName(member.user) : member.group?.name || ''
+
+      this.memberIds.push(member.id)
+
+      if (member.group) {
+        member.group.users.forEach((user) => {
+          this.memberIds.push(`${member.id}:${user.id}`)
+        })
+      }
+
       return {
         key: member.id,
         value: {
@@ -58,6 +73,15 @@ export class CourseMemberSelectComponent implements ControlValueAccessor {
           : undefined,
       } as NzTreeNodeOptions
     })
+
+    const selectAllNode: NzTreeNodeOptions = {
+      key: this.SELECT_ALL_KEY,
+      value: null,
+      title: 'Sélectionner tout',
+      isLeaf: true,
+    }
+
+    this.nodes = [selectAllNode, ...memberNodes]
   }
 
   constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
@@ -73,7 +97,8 @@ export class CourseMemberSelectComponent implements ControlValueAccessor {
   }
 
   writeValue(value: string[]): void {
-    this.selection = value
+    this.selection = value || []
+    this.updateSelectionWithSelectAll()
     this.changeDetectorRef.markForCheck()
   }
 
@@ -90,8 +115,61 @@ export class CourseMemberSelectComponent implements ControlValueAccessor {
   }
 
   protected onChangeSelection(selection: string[]): void {
-    this.selection = selection
-    this.onTouch(selection)
-    this.onChange(selection)
+    if (this.isUpdatingProgrammatically) {
+      return
+    }
+
+    const newHasSelectAll = selection.includes(this.SELECT_ALL_KEY)
+    const previousHasSelectAll = this.selection.includes(this.SELECT_ALL_KEY)
+
+    this.isUpdatingProgrammatically = true
+
+    // Cas 1 : "Sélectionner tout" vient d'être coché
+    if (newHasSelectAll && !previousHasSelectAll) {
+      this.selection = [this.SELECT_ALL_KEY, ...this.memberIds]
+    }
+    // Cas 2 : "Sélectionner tout" vient d'être décoché
+    else if (!newHasSelectAll && previousHasSelectAll) {
+      this.selection = []
+    }
+    // Cas 3 : Modification d'un ou plusieurs membres individuels
+    else {
+      const memberSelection = selection.filter((id) => id !== this.SELECT_ALL_KEY)
+
+      if (this.areAllMembersSelectedInArray(memberSelection)) {
+        this.selection = [this.SELECT_ALL_KEY, ...memberSelection]
+      } else {
+        this.selection = memberSelection
+      }
+    }
+
+    setTimeout(() => {
+      this.isUpdatingProgrammatically = false
+      this.changeDetectorRef.detectChanges()
+    }, 0)
+
+    const finalMemberSelection = this.selection.filter((id) => id !== this.SELECT_ALL_KEY)
+
+    this.onTouch()
+    this.onChange(finalMemberSelection)
+  }
+
+  private areAllMembersSelected(): boolean {
+    const selectedMembers = this.selection.filter((id) => id !== this.SELECT_ALL_KEY)
+    return this.areAllMembersSelectedInArray(selectedMembers)
+  }
+
+  private areAllMembersSelectedInArray(selectedMembers: string[]): boolean {
+    return (
+      this.memberIds.length > 0 &&
+      selectedMembers.length === this.memberIds.length &&
+      this.memberIds.every((id) => selectedMembers.includes(id))
+    )
+  }
+
+  private updateSelectionWithSelectAll(): void {
+    if (this.areAllMembersSelected() && !this.selection.includes(this.SELECT_ALL_KEY)) {
+      this.selection = [this.SELECT_ALL_KEY, ...this.selection]
+    }
   }
 }

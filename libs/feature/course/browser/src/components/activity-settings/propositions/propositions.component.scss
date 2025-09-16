@@ -1,7 +1,6 @@
 .menu-item {
   padding: 12px;
   border-bottom: 1px solid var(--brand-border-color-light);
-  cursor: pointer;
 }
 
 .menu-item:hover {
@@ -19,7 +18,7 @@
   border: none;
   background-color: var(--brand-color-primary);
   color: var(--brand-color-primary-contrast);
-  transition: all 0.3s ease;
+
 
   &:hover {
     background-color: var(--brand-color-primary-tint);

@@ -1,0 +1,18 @@
+<div class="image-container" [class.disabled]="state.disabled" (click)="onImageClick($event)">
+  <img #imageRef [src]="state.imageUrl" alt="Clickable" [ngStyle]="imageStyles" />
+  <div
+    *ngFor="let point of displayedPoints; let i = index"
+    [class]="getPointClass(point)"
+    [ngClass]="{
+      numbered: state.clickDisplayMode === 'numbered-order'
+    }"
+    [ngStyle]="getPointStyles(point)"
+    (contextmenu)="onPointRightClick($event, point)"
+  >
+    <span *ngIf="state.clickDisplayMode === 'numbered-order'" class="point-number">
+      {{ getPointNumber(point) }}
+    </span>
+  </div>
+</div>
+
+<wc-base [(state)]="state"></wc-base>

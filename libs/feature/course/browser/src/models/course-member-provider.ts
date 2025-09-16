@@ -5,11 +5,13 @@ import {
   CourseMemberFilters,
   CourseMemberRoles,
   CreateCourseMember,
+  CreateTestMember,
 } from '@platon/feature/course/common'
 import { Observable } from 'rxjs'
 
 export abstract class CourseMemberProvider {
   abstract create(course: Course, input: CreateCourseMember): Observable<CourseMember>
+  abstract createTestMembers(course: Course, input: CreateTestMember[]): Observable<ListResponse<CourseMember>>
   abstract updateRole(member: CourseMember, role: CourseMemberRoles): Observable<CourseMember>
   abstract search(course: Course | string, filters?: CourseMemberFilters): Observable<ListResponse<CourseMember>>
   abstract delete(member: CourseMember): Observable<void>

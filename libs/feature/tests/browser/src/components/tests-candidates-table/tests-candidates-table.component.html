@@ -1,0 +1,83 @@
+<nz-table
+  #nzTable
+  [nzSize]="'small'"
+  [nzData]="members"
+  [nzTotal]="total"
+  [nzLoading]="loading"
+  [nzShowSizeChanger]="true"
+  [nzShowPagination]="true"
+  [nzFrontPagination]="!canFilterOnServer"
+  (nzQueryParams)="onQueryParamsChange($event)"
+>
+  <thead>
+    <tr>
+      @for (column of columns; track column.key) {
+      <th
+        [nzColumnKey]="column.key"
+        [(nzSortOrder)]="column.sortOrder!"
+        [nzSortFn]="column.sortFn!"
+        [nzFilters]="column.listOfFilter!"
+        [nzFilterFn]="column.filterFn!"
+        [nzFilterMultiple]="column.filterMultiple!"
+      >
+        {{ column.name }}
+      </th>
+      }
+      <th *ngIf="editable" nzAlign="center">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let member of nzTable.data">
+      <td>
+        <user-avatar #avatar [user]="$any(member.user)" />
+      </td>
+      <td>
+        <a [href]="'mailto:' + member.user?.email" class="user-email">{{ member.user?.email }}</a>
+      </td>
+      <td>{{ member.createdAt | date }}</td>
+      <!-- <td>
+        <div class="overtime-container">
+          <div class="circle" [ngClass]="{ selected: TMPovertimeTable[member.id] === 'none' }"></div>
+          <div class="circle quarter" [ngClass]="{ selected: TMPovertimeTable[member.id] === 'quarter' }"></div>
+          <div class="circle third" [ngClass]="{ selected: TMPovertimeTable[member.id] === 'third' }"></div>
+          <div class="circle half" [ngClass]="{ selected: TMPovertimeTable[member.id] === 'half' }"></div>
+        </div>
+      </td> -->
+      <td>Pas commencé</td>
+      <td nzAlign="center" *ngIf="editable && !disabled">
+        <button
+          nz-button
+          nzShape="circle"
+          nz-popconfirm
+          nzOkText="Envoyer"
+          nzOkType="primary"
+          [nzPopconfirmTitle]="
+            'Voulez-vous vraiment envoyer le mail d\'invitation au candidat “' +
+            member.user?.firstName +
+            ' ' +
+            member.user?.lastName +
+            '“ ?'
+          "
+          (nzOnConfirm)="sendMailToCandidate(member.id)"
+        >
+          <i nz-icon nzType="mail"></i>
+        </button>
+        <button
+          nz-button
+          nzDanger
+          nzType="primary"
+          nzShape="circle"
+          nz-popconfirm
+          nzOkText="Retirer"
+          nzOkType="danger"
+          [nzPopconfirmTitle]="
+            'Voulez-vous vraiment retirer le candidat “' + member.user?.firstName + ' ' + member.user?.lastName + '“ ?'
+          "
+          (nzOnConfirm)="deleted.emit(member)"
+        >
+          <i nz-icon nzType="delete"></i>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>

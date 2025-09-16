@@ -13,10 +13,12 @@ import {
   CourseGroup,
   CourseGroupDetail,
   CourseMember,
+  CourseMemberFilters,
   CourseMemberRoles,
   CourseSection,
   CreateCourseMember,
   CreateCourseSection,
+  CreateTestMember,
   UpdateCourse,
   UpdateCourseSection,
 } from '@platon/feature/course/common'
@@ -67,6 +69,17 @@ export class CoursePresenter implements OnDestroy {
     }
   }
 
+  async addTestMembers(input: CreateTestMember[]): Promise<CourseMember[]> {
+    const { course } = this.context.value as Required<Context>
+    try {
+      const response = await firstValueFrom(this.courseService.createTestMembers(course, input))
+      return response.resources
+    } catch {
+      this.alertError()
+      return []
+    }
+  }
+
   async deleteMember(member: CourseMember): Promise<void> {
     try {
       await firstValueFrom(this.courseService.deleteMember(member))
@@ -88,6 +101,15 @@ export class CoursePresenter implements OnDestroy {
         this.alertError()
       }
     }
+  }
+
+  async searchMembers(filters?: CourseMemberFilters): Promise<CourseMember[]> {
+    const { course } = this.context.value
+    if (!course) {
+      return []
+    }
+    const response = await firstValueFrom(this.courseService.searchMembers(course, filters))
+    return response.resources
   }
 
   // Sections

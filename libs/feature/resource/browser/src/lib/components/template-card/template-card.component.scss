@@ -1,0 +1,233 @@
+.template-card {
+  height: 100%;
+  position: relative;
+  background: var(--brand-background-components);
+  border: 1px solid var(--brand-border-color-light);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.15),
+      0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: var(--brand-color-primary);
+
+    .template-overlay {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .template-image {
+      .static-image {
+        opacity: 0;
+      }
+
+      .animated-image {
+        opacity: 1;
+      }
+    }
+  }
+
+  &:active {
+    transform: translateY(-4px);
+  }
+}
+
+.template-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--brand-background-secondary), var(--brand-background-components));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.4s ease;
+    border-radius: 0;
+  }
+
+  .static-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 1;
+  }
+
+  .animated-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--brand-color-primary), var(--brand-color-secondary));
+    opacity: 0.1;
+    z-index: -1;
+  }
+
+  img {
+    &:not([src]),
+    &[src=""] {
+      background: var(--brand-background-secondary);
+      &::before {
+        content: "📷";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        opacity: 0.3;
+      }
+    }
+  }
+}
+
+.template-content {
+  flex: 1;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--brand-text-primary);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.template-description {
+  font-size: 0.875rem;
+  color: var(--brand-text-secondary);
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  flex: 1;
+
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 3.675rem;
+  max-height: 3.675rem;
+}
+
+.template-stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--brand-text-tertiary);
+  font-size: 0.8rem;
+
+  mat-icon {
+    font-size: 0.9rem !important;
+    width: 0.9rem !important;
+    height: 0.9rem !important;
+  }
+}
+
+.template-overlay {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--brand-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(1rem);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  mat-icon {
+    color: white;
+    font-size: 1.25rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive design pour mobile
+@media (max-width: 768px) {
+  .template-content {
+    padding: 1rem;
+  }
+
+  .template-title {
+    font-size: 1.25rem;
+  }
+
+  .template-description {
+    font-size: 0.95rem;
+  }
+
+  .template-stats {
+    justify-content: center;
+  }
+}
+
+// Styles pour les tooltips
+::ng-deep .custom-tooltip {
+  background-color: var(--brand-background-components) !important;
+  color: var(--brand-text-primary) !important;
+  font-size: 0.875rem !important;
+  border: 1px solid var(--brand-border-color-light) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  max-width: 250px !important;
+}
+
+::ng-deep .mat-mdc-tooltip {
+  --mdc-plain-tooltip-container-color: var(--brand-background-components);
+  --mdc-plain-tooltip-supporting-text-color: var(--brand-text-primary);
+}

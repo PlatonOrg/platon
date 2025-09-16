@@ -1,0 +1,140 @@
+// Style pour les tutoriels Shepherd.js avec les variables globales
+.shepherd-element {
+  background-color: var(--brand-background-components);
+  color: var(--brand-text-primary);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  z-index: 10000;
+  font-family: var(--brand-font);
+
+  // En-tête
+  .shepherd-header {
+    padding: 8px 16px !important;
+    min-height: unset !important;
+    background-color: var(--brand-color-primary);
+    align-items: center;
+
+    .shepherd-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2 !important;
+      margin: 0 !important;
+      padding: 0;
+      color: var(--brand-text-primary);
+    }
+
+    .shepherd-cancel-icon {
+      color: var(--brand-text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      // transition: color 0.3s ease;
+      padding: 0 !important;
+      margin: 0 !important;
+      opacity: 0.8;
+      &:hover {
+        color: var(--brand-text-primary);
+        opacity: 1;
+      }
+    }
+  }
+
+  // Contenu
+  .shepherd-text {
+    padding: 16px;
+    color: var(--brand-text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+
+    a {
+      color: var(--brand-color-primary);
+    }
+  }
+
+  // Boutons
+  .shepherd-footer {
+    padding: 0 16px 16px;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .shepherd-button {
+      min-height: 32px;
+      height: auto;
+      padding: 6px 15px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.2;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      cursor: pointer;
+      border: none;
+      white-space: normal;
+      text-align: center;
+      max-width: 100%;
+      word-break: break-word;
+
+      &.shepherd-button-primary {
+        background-color: var(--brand-color-primary);
+        color: var(--brand-color-primary-contrast);
+
+        &:hover, &:focus {
+          background-color: var(--brand-color-primary-tint);
+        }
+      }
+
+      &.shepherd-button-secondary {
+        background-color: transparent;
+        border: 1px solid var(--brand-border-color);
+        color: var(--brand-text-primary);
+
+        &:hover, &:focus {
+          border-color: var(--brand-color-primary);
+          color: var(--brand-color-primary);
+        }
+      }
+    }
+  }
+
+  // Flèche
+  .shepherd-arrow:before {
+    background-color: var(--brand-background-components);
+  }
+}
+
+// Overlay du tutoriel
+.shepherd-modal-overlay-container .shepherd-modal-overlay {
+  opacity: 0.5;
+  background-color: #000;
+}
+
+// Animation pour mettre en évidence les éléments
+@keyframes shepherdHighlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--brand-color-primary-rgb), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(var(--brand-color-primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--brand-color-primary-rgb), 0);
+  }
+}
+
+// Classe pour les éléments mis en évidence
+.shepherd-highlighted {
+  animation: shepherdHighlight 1.5s infinite;
+  z-index: 10001 !important;
+}
+
+.dark-theme {
+  .shepherd-element {
+    .shepherd-header {
+      color: var(--brand-text-primary);
+
+      .shepherd-title, .shepherd-cancel-icon {
+        color: var(--brand-background-components); // S'assurer que le texte et les icônes sont visibles
+      }
+    }
+  }
+}

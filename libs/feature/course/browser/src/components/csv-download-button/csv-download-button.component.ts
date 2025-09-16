@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core'
 
 import { firstValueFrom } from 'rxjs'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { NzMenuModule } from 'ng-zorro-antd/menu'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 
@@ -22,28 +21,23 @@ import { CourseService } from '../../api/course.service'
   templateUrl: './csv-download-button.component.html',
   styleUrls: ['./csv-download-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    NzButtonModule,
-    NzIconModule,
-    NzToolTipModule,
-    NzDropDownModule,
-    NzMenuModule,
-    NzCheckboxModule,
-  ],
+  imports: [CommonModule, FormsModule, NzButtonModule, NzIconModule, NzDropDownModule, NzMenuModule, NzCheckboxModule],
 })
 export class CsvDownloadButtonComponent implements OnInit {
   @Input() courseId!: string
   @Input() activities!: Activity[]
-  @Input() type!: 'activity' | 'course'
+  @Input() type!: 'activity' | 'course' | 'test'
   @Input() name!: string
 
   groups: { id: string; name: string; groupId: string; courseId: string; checked: boolean }[] = []
   activityMembers: ActivityMember[] = []
   hasToCheckGroups = false
 
-  constructor(private readonly resultService: ResultService, private readonly courseService: CourseService) {}
+  constructor(
+    private readonly resultService: ResultService,
+    private readonly courseService: CourseService,
+    private changeDetectorRef: ChangeDetectorRef
+  ) {}
 
   async ngOnInit(): Promise<void> {
     let groups = (await firstValueFrom(this.courseService.listGroups(this.courseId))).resources
@@ -95,6 +89,8 @@ export class CsvDownloadButtonComponent implements OnInit {
     }
 
     this.groups = groups.map((group) => ({ ...group, checked: true }))
+
+    this.changeDetectorRef.markForCheck()
   }
 
   toggleAllCheckboxes() {
@@ -160,6 +156,9 @@ export class CsvDownloadButtonComponent implements OnInit {
       // Generate the CSV content
 
       for (const student of results) {
+        if (this.type === 'test' && !student.username.startsWith('candidat.')) {
+          continue
+        }
         if (this.hasToCheckGroups && !checkedMembers?.some((member) => member.user?.id === student.id)) {
           if (!isGroupAllChecked || uncheckedMembers?.some((member) => member.user?.id === student.id)) {
             continue
