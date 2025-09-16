@@ -29,6 +29,7 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { firstValueFrom } from 'rxjs'
 import { SelectionModel } from '@angular/cdk/collections'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
 
 type TemplateSource = {
   circle: CircleTree
@@ -60,6 +61,7 @@ type TemplateSource = {
     NzCollapseModule,
     NzSkeletonModule,
     NzPageHeaderModule,
+    NzAlertModule,
 
     UiStepDirective,
     UiStepperComponent,

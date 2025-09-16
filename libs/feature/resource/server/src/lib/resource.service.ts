@@ -435,6 +435,18 @@ export class ResourceService {
     const resource = await this.repository.findOneOrFail({ where: { id } })
     const parent = await this.repository.findOneOrFail({ where: { id: parentId } })
 
+    if (resource.type == ResourceTypes.ACTIVITY) {
+      const exercises = (
+        await this.search({
+          usedBy: [resource.id],
+          types: [ResourceTypes.EXERCISE],
+          personal: true,
+        })
+      )[0]
+
+      await Promise.all(exercises.map((e) => this.move(e.id, parentId)))
+    }
+
     resource.parentId = parent.id
     resource.personal = parent.personal
     return this.repository.save(resource)

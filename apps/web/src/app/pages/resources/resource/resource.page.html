@@ -157,10 +157,10 @@
         </button>
         <button
           id="tuto-move-button"
-          *ngIf="context.resource.type === 'EXERCISE' && canMove()"
+          *ngIf="context.resource.type !== 'CIRCLE' && canMove()"
           nz-button
           [routerLink]="['/resources/move']"
-          [queryParams]="{ type: 'EXERCISE', id: context.resource.id, parent: context.resource.parentId }"
+          [queryParams]="{ type: context.resource.type, id: context.resource.id, parent: context.resource.parentId }"
         >
           <i nz-icon nzType="copy" nzTheme="outline"></i>
           <span class="hide-on-mobile">Déplacer</span>

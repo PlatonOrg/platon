@@ -9,6 +9,13 @@
 </header>
 <main>
   <section>
+    <nz-alert
+      *ngIf="type === 'ACTIVITY'"
+      nzType="warning"
+      nzMessage="Le déplacement d'une activité entraînera automatiquement le déplacement de tous les exercices de votre cercle qui sont utilisés par cette activité vers le même cercle de destination."
+      nzShowIcon
+      nzBanner
+    ></nz-alert>
     <h4>
       Sélectionnez le cercle dans lequel vous voulez ajouter
       {{ type | resourceType : true | lowercase }}.
