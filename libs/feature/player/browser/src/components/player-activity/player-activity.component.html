@@ -47,30 +47,51 @@
             </div>
           </section>
 
-          <nz-alert
-            *ngIf="terminatedAfterLoseFocus && !terminatedAfterLeavePage"
-            nzShowIcon
-            nzType="error"
-            nzMessage="Activité auto terminée"
-            nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de
-        cliquer en dehors de la page."
-          />
+          <section
+            class="alert-section"
+            *ngIf="(terminatedAfterLoseFocus && !terminatedAfterLeavePage) || terminatedAfterLeavePage"
+          >
+            <nz-alert
+              *ngIf="terminatedAfterLoseFocus && !terminatedAfterLeavePage"
+              nzShowIcon
+              nzType="error"
+              nzMessage="Activité auto terminée"
+              nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de cliquer en dehors de la page."
+              class="custom-alert"
+            />
 
-          <nz-alert
-            *ngIf="terminatedAfterLeavePage"
-            nzShowIcon
-            nzType="error"
-            nzMessage="Activité auto terminée"
-            nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de
-            changer de page."
-          />
+            <nz-alert
+              *ngIf="terminatedAfterLeavePage"
+              nzShowIcon
+              nzType="error"
+              nzMessage="Activité auto terminée"
+              nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de changer de page."
+              class="custom-alert"
+            />
+          </section>
 
-          <h3>Demande le code à ton enseignant pour te débloquer !</h3>
-          <ui-sixcode (codeComplete)="onCodeComplete($event)" [error]="isCodeError" />
+          <!-- CODE DE DÉBLOCAGE -->
+          <section class="unlock-section">
+            <h3 class="section-title">
+              <mat-icon>lock_open</mat-icon>
+              Code de déblocage
+            </h3>
+            <div class="unlock-content">
+              <p>Demande le code à ton enseignant pour te débloquer !</p>
+              <ui-sixcode (codeComplete)="onCodeComplete($event)" [error]="isCodeError" />
+            </div>
+          </section>
 
-          <div class="markdown-container">
-            <nge-markdown [data]="player.conclusion" />
-          </div>
+          <!-- CONCLUSION -->
+          <section class="conclusion-section" *ngIf="player.conclusion">
+            <h3 class="section-title">
+              <mat-icon>check_circle</mat-icon>
+              Conclusion de l'activité
+            </h3>
+            <div class="conclusion-content">
+              <nge-markdown [data]="player.conclusion" />
+            </div>
+          </section>
 
           <player-results [player]="player" />
 

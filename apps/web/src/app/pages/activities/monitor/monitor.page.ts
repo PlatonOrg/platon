@@ -3,7 +3,7 @@ import { MonitorPresenter } from './monitor.presenter'
 import { Subscription } from 'rxjs'
 import { CommonModule, Location } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { RouterModule } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 import { DialogModule, DialogService } from '@platon/core/browser'
 import {
   ResultBoxPlotComponent,
@@ -16,6 +16,8 @@ import {
   ActivityModerationEvent,
 } from '@platon/feature/course/browser'
 import { MatCardModule } from '@angular/material/card'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
 
 @Component({
   standalone: true,
@@ -31,6 +33,8 @@ import { MatCardModule } from '@angular/material/card'
 
     DialogModule,
     MatCardModule,
+    NzButtonModule,
+    NzIconModule,
 
     ResultByMembersComponent,
     ResultHistogramComponent,
@@ -42,6 +46,7 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   private readonly presenter = inject(MonitorPresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly location = inject(Location)
+  private readonly router = inject(Router)
   private readonly monitorPresenceService = inject(CourseMonitorPresenceService)
   private readonly dialogService = inject(DialogService)
 
@@ -140,6 +145,12 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
       case 'close':
         await this.closeSessionsForUsers(selections)
         break
+    }
+  }
+
+  protected async navigateToCourse(): Promise<void> {
+    if (this.context.course?.id) {
+      await this.router.navigate(['/courses', this.context.course.id])
     }
   }
 }
