@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common'
-import { User, UserRoles } from '@platon/core/common'
+import { User } from '@platon/core/common'
 import { Activity, Restriction, RestrictionConfig } from '@platon/feature/course/common'
 import { ActivityEntity } from './activity.entity'
 import { CourseMemberService } from '../course-member/course-member.service'
@@ -209,13 +209,12 @@ export class ActivityDatesService {
    * Retourne les dates pour un utilisateur sans accès
    */
   private getNoAccessDates(activity: ActivityEntity): { start: Date | undefined; end: Date | undefined } {
-    const baseStart = activity.openAt
     const now = new Date()
     const pastDate = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Hier
 
     return {
       start: pastDate,
-      end: pastDate, 
+      end: pastDate,
     }
   }
 

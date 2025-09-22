@@ -56,7 +56,6 @@ export class CourseService {
     private readonly courseSectionProvider: CourseSectionProvider,
     private readonly courseDemoProvider: CourseDemoProvider,
     private readonly courseGroupProvider: CourseGroupProvider,
-
     private readonly activityProvider: ActivityProvider,
     private readonly activityMemberProvider: ActivityMemberProvider,
     private readonly activityCorrectorProvider: ActivityCorrectorProvider,
@@ -83,6 +82,7 @@ export class CourseService {
   create(input: CreateCourse): Observable<Course> {
     return this.courseProvider.create(input)
   }
+
   //#endregion
 
   //#region Courses Demo
@@ -101,6 +101,7 @@ export class CourseService {
   deleteDemo(courseId: string): Observable<void> {
     return this.courseDemoProvider.delete(courseId)
   }
+
   //#endregion
 
   //#region Members
@@ -127,6 +128,7 @@ export class CourseService {
   deleteMember(member: CourseMember): Observable<void> {
     return this.courseMemberProvider.delete(member).pipe(tap(() => this.deleteMemberEvent.next(member)))
   }
+
   //#endregion
 
   //#region Sections
@@ -149,6 +151,7 @@ export class CourseService {
   deleteSection(section: CourseSection): Observable<void> {
     return this.courseSectionProvider.delete(section)
   }
+
   //#endregion
 
   //#region Activities
@@ -218,6 +221,7 @@ export class CourseService {
   deleteActivityMember(member: ActivityMember): Observable<void> {
     return this.activityMemberProvider.delete(member)
   }
+
   //#endregion
 
   //#region Activity Correctors
@@ -239,6 +243,7 @@ export class CourseService {
   deleteActivityCorrector(corrector: ActivityCorrector): Observable<void> {
     return this.activityCorrectorProvider.delete(corrector)
   }
+
   //#endregion
 
   //#region Groups
@@ -272,6 +277,10 @@ export class CourseService {
 
   deleteGroup(courseId: string, groupId: string): Observable<void> {
     return this.courseGroupProvider.deleteGroup(courseId, groupId)
+  }
+
+  isMemberOfGroup(courseId: string, groupId: string): Observable<boolean> {
+    return this.courseGroupProvider.isMemberOfGroup(courseId, groupId)
   }
 
   //#endregion

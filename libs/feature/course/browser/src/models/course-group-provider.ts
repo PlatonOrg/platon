@@ -18,4 +18,6 @@ export abstract class CourseGroupProvider {
   abstract addCourseGroup(courseId: string): Observable<ItemResponse<CourseGroup>>
 
   abstract deleteGroup(courseId: string, groupId: string): Observable<void>
+
+  abstract isMemberOfGroup(courseId: string, groupId: string): Observable<boolean>
 }
