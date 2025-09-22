@@ -50,8 +50,6 @@ export class TemplateSelectionComponent implements OnInit {
       )
     ).resources
 
-    console.log(this.templates)
-
     this.changeDetector.markForCheck()
   }
 
