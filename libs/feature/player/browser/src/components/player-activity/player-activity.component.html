@@ -1,21 +1,52 @@
-<h1>{{ player.title }}</h1>
 <main>
   <mat-card *ngIf="!exercises; else showExercices">
     <mat-card-content>
-      <!-- INTRODUCTION -->
+      <!-- TITRE ET INTRODUCTION -->
       <ng-container *ngIf="showIntroduction">
-        <div class="markdown-container">
-          <nge-markdown [data]="player.introduction" />
-        </div>
-        <div class="centered">
-          <player-settings [player]="player" />
-          <button *ngIf="canGoDashboard" mat-raised-button (click)="back()">Retour</button>
-          <button mat-raised-button color="primary" [disabled]="empty" (click)="start()">Commencer</button>
+        <!-- TITRE DE L'ACTIVITÉ -->
+        <section *ngIf="player.title" class="title-section">
+          <div class="title-container">
+            <h1 class="activity-title">{{ player.title }}</h1>
+          </div>
+        </section>
+
+        <!-- INTRODUCTION -->
+        <section class="introduction-section" *ngIf="player.introduction">
+          <h3 class="section-title">
+            <mat-icon>description</mat-icon>
+            Description de l'activité
+          </h3>
+          <div class="introduction-content">
+            <nge-markdown [data]="player.introduction" />
+          </div>
+        </section>
+
+        <!-- PARAMÈTRES DE L'ACTIVITÉ -->
+        <player-settings [player]="player" />
+
+        <!-- BOUTONS D'ACTION -->
+        <div class="action-buttons">
+          <button *ngIf="canGoDashboard" mat-raised-button (click)="back()">
+            <mat-icon>arrow_back</mat-icon>
+            Retour
+          </button>
+          <button mat-raised-button color="primary" [disabled]="empty" (click)="start()">
+            <mat-icon>play_arrow</mat-icon>
+            Commencer
+          </button>
         </div>
       </ng-container>
+
       <!-- CONCLUSION -->
       <div class="centered">
         <ng-container *ngIf="showConclusion">
+          <!-- TITRE DE CONCLUSION -->
+          <section *ngIf="player.title" class="title-section">
+            <div class="title-container">
+              <h1 class="activity-title">{{ player.title }}</h1>
+            </div>
+          </section>
+
           <nz-alert
             *ngIf="terminatedAfterLoseFocus && !terminatedAfterLeavePage"
             nzShowIcon
@@ -34,24 +65,52 @@
         cliquer changer de page."
           />
 
-          <div class="markdown-container">
-            <nge-markdown [data]="player.conclusion" />
-          </div>
+          <!-- CONCLUSION -->
+          <section class="conclusion-section" *ngIf="player.conclusion">
+            <h3 class="section-title">
+              <mat-icon>summarize</mat-icon>
+              Conclusion
+            </h3>
+            <div class="conclusion-content">
+              <nge-markdown [data]="player.conclusion" />
+            </div>
+          </section>
 
           <player-results [player]="player" />
 
-          <button *ngIf="canGoDashboard" mat-raised-button color="primary" [routerLink]="'/dashboard'">
-            Retourner sur PLaTon
-          </button>
+          <div class="action-buttons">
+            <button *ngIf="canGoDashboard" mat-raised-button color="primary" (click)="back()">
+              <mat-icon>home</mat-icon>
+              Retourner sur PLaTon
+            </button>
+          </div>
         </ng-container>
+
         <!-- PLANNING -->
         <ng-container *ngIf="state === 'planned'">
-          <nz-countdown
-            *ngIf="countdown"
-            nzTitle="Temps restant avant ouverture"
-            [nzValue]="countdown"
-            (nzCountdownFinish)="onFinishCountdown()"
-          />
+          <!-- TITRE EN ATTENTE -->
+          <section *ngIf="player.title" class="title-section">
+            <div class="title-container">
+              <h1 class="activity-title">{{ player.title }}</h1>
+            </div>
+          </section>
+
+          <!-- BLOC CHRONO -->
+          <section class="countdown-section">
+            <h3 class="section-title">
+              <mat-icon>schedule</mat-icon>
+              Ouverture de l'activité
+            </h3>
+            <div class="countdown-content">
+              <nz-countdown
+                *ngIf="countdown"
+                nzTitle="Temps restant avant ouverture"
+                [nzValue]="countdown"
+                (nzCountdownFinish)="onFinishCountdown()"
+              />
+            </div>
+          </section>
+
           <player-settings [player]="player" />
         </ng-container>
       </div>
@@ -101,16 +160,6 @@
   >
     Navigation
   </button>
-  <!-- <button
-    class="terminate-button"
-    mat-fab
-    extended
-    color="primary"
-    (click)="terminateModal(true, 'Êtes-vous sûr de vouloir quitter cette activité ?')"
-  >
-    <mat-icon>check</mat-icon>
-    Terminer
-  </button> -->
 </footer>
 <ng-template #navigation>
   <player-navigation [player]="player" (navigate)="play($event)" [terminate]="terminate.bind(this)" />
@@ -127,10 +176,10 @@
 <ng-template #modalFooter>
   <div class="modalButtons">
     <button nz-button nzType="primary" (click)="modalConfirm()" [nzLoading]="isModalLoading">
-      Valider tous les exercices et terminer l’activité
+      Valider tous les exercices et terminer l'activité
     </button>
     <button nz-button nzType="primary" nzDanger (click)="modalCancel()">
-      Terminer l’activité sans valider les exercices
+      Terminer l'activité sans valider les exercices
       <nz-progress
         *ngIf="isModalForceChoice"
         [nzPercent]="modalForceChoiceProgress"

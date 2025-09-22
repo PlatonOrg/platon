@@ -145,8 +145,9 @@ export class PlayerService extends PlayerManager {
     if (activity.ignoreRestrictions) {
       return
     }
-    const dateRange = await this.activityService.updateActivitiesDates([activity])
-    if (dateRange && dateRange.start) {
+    await this.activityService.updateActivitiesDates([activity])
+    //const dateRange =
+    /*if (dateRange && dateRange.start) {
       const startTime = new Date(dateRange.start).getTime()
       const nowTime = new Date().getTime()
 
@@ -162,7 +163,7 @@ export class PlayerService extends PlayerManager {
       if (endTime < nowTime) {
         throw new ForbiddenResponse("L'activité est fermée.")
       }
-    }
+    }*/
   }
 
   async playActivity(activityId: string, user: User): Promise<PlayActivityOuput> {

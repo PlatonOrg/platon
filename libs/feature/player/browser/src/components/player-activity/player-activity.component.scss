@@ -28,6 +28,101 @@ main {
   width: 100%;
 }
 
+mat-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+
+  mat-card-content {
+    padding: 2rem;
+  }
+}
+
+
+.title-section {
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 970px;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  margin: 0 auto 1.5rem auto;
+}
+
+.activity-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+.introduction-section,
+.conclusion-section {
+  max-width: 970px;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  margin: 0 auto 1.5rem auto;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+
+  mat-icon {
+    color: #2196f3;
+    font-size: 1.3rem;
+  }
+}
+
+.introduction-content,
+.conclusion-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  line-height: 1.6;
+}
+
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+
+  button {
+    min-width: 140px;
+    height: 44px;
+    border-radius: 22px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    mat-icon {
+      font-size: 1.1rem;
+    }
+  }
+}
+
 player-exercise {
   display: block;
   margin-bottom: 1.5rem;
@@ -38,7 +133,15 @@ player-results {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 70%;
+  max-width: 80%;
+  margin: 2rem auto;
+}
+
+player-settings {
+  width: 100%;
+  max-width: 970px;
+  margin: 0 auto;
+  padding: 0;
 }
 
 player-navigation {
@@ -79,13 +182,7 @@ footer.glass {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  button {
-    margin-top: 1.5rem;
-  }
-}
-
-.markdown-container {
-  max-width: 100%;
+  width: 100%;
 }
 
 .terminate-button {
@@ -110,10 +207,114 @@ nz-progress {
   margin-left: 1rem;
 }
 
-// TABLET
+.countdown-section {
+  width: 100%;
+  max-width: 970px;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  margin: 0 auto 1.5rem auto;
+}
+
+.countdown-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  line-height: 1.6;
+  text-align: center;
+
+  nz-countdown {
+    display: block;
+
+    ::ng-deep {
+      .ant-statistic {
+        text-align: center;
+
+        .ant-statistic-title {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #666;
+          margin-bottom: 0.75rem;
+          line-height: 1.4;
+        }
+
+        .ant-statistic-content {
+          font-size: 1.8rem;
+          font-weight: 600;
+          color: #2196f3;
+          text-shadow: 0 1px 3px rgba(33, 150, 243, 0.1);
+          line-height: 1.2;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 991px) {
+  .countdown-section {
+    padding: 1.25rem;
+  }
+
+  .countdown-content {
+    padding: 1.25rem;
+
+    nz-countdown ::ng-deep .ant-statistic {
+      .ant-statistic-title {
+        font-size: 0.85rem;
+      }
+
+      .ant-statistic-content {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .countdown-section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .countdown-content {
+    padding: 1rem;
+
+    nz-countdown ::ng-deep .ant-statistic {
+      .ant-statistic-title {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .ant-statistic-content {
+        font-size: 1.3rem;
+      }
+    }
+  }
+}
+
 @media (max-width: 991px) {
   :host {
-    padding: 0 4rem;
+    padding: 1rem 3rem;
+  }
+
+  .title-container {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+  }
+
+  .title-icon {
+    font-size: 1.75rem;
+  }
+
+  .activity-title {
+    font-size: 1.5rem;
+  }
+
+  mat-card mat-card-content {
+    padding: 1.5rem;
   }
 
   footer {
@@ -134,6 +335,14 @@ nz-progress {
   player-navigation {
     min-width: 60vw;
   }
+
+  player-results {
+    max-width: 90%;
+  }
+
+  player-settings {
+    max-width: 100%;
+  }
 }
 
 pre {
@@ -143,13 +352,54 @@ pre {
   margin: 2rem 0;
 }
 
-// MOBILE
+
 @media (max-width: 768px) {
   :host {
-    padding: 0 1rem;
+    padding: 1rem;
+  }
+
+  .title-container {
+    padding: 1rem;
+  }
+
+  .title-icon {
+    font-size: 1.5rem;
+  }
+
+  .activity-title {
+    font-size: 1.3rem;
+  }
+
+  .introduction-section,
+  .conclusion-section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .introduction-content,
+  .conclusion-content {
+    padding: 1rem;
+  }
+
+  mat-card mat-card-content {
+    padding: 1rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+
+    button {
+      width: 100%;
+      max-width: 280px;
+    }
   }
 
   player-results {
+    max-width: 100%;
+  }
+
+  player-settings {
     max-width: 100%;
   }
 }

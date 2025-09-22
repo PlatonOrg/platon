@@ -1,117 +1,169 @@
-<table>
-  <tbody>
-    <tr>
-      <td class="font-normal">Exercices</td>
-      <td>{{ player.navigation.exercises.length }}</td>
-    </tr>
-    <tr *ngIf="player.settings?.duration">
-      <td class="font-normal">Durée</td>
-      <td>
-        {{ player.settings!.duration! | duration : 'seconds' }}
-      </td>
-    </tr>
-    <tr *ngIf="player.openAt">
-      <td>Date d'ouverture</td>
-      <td>{{ player.openAt | date : 'dd/MM/yyyy HH:mm' }}</td>
-    </tr>
-    <tr *ngIf="player.closeAt">
-      <td class="font-normal">Date de fermeture</td>
-      <td>{{ player.closeAt | date : 'dd/MM/yyyy HH:mm' }}</td>
-    </tr>
-    <tr *ngIf="player.settings?.navigation?.mode">
-      <td class="font-normal">Mode de navigation</td>
-      <td>
-        <div [ngSwitch]="player.settings?.navigation?.mode">
-          <div *ngSwitchCase="'manual'">Progressive</div>
-          <div *ngSwitchCase="'composed'">Composée</div>
+<div class="settings-container">
+  <!-- INFORMATIONS GÉNÉRALES -->
+  <section class="settings-section">
+    <h3 class="section-title">
+      <mat-icon>info</mat-icon>
+      Informations sur l'activité
+    </h3>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <mat-icon class="info-icon">quiz</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Nombre d'exercices</span>
+          <span class="info-value">{{ player.navigation.exercises.length }}</span>
         </div>
-      </td>
-    </tr>
+      </div>
 
-    <tr>
-      <td class="font-normal">Nombre d'essais maximum par question</td>
-      <td>{{ player.settings?.actions?.retry || 'Aucune limite' }}</td>
-    </tr>
+      <div class="info-item" *ngIf="player.settings?.duration">
+        <mat-icon class="info-icon">schedule</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Durée autorisée</span>
+          <span class="info-value">{{ player.settings!.duration! | duration : 'seconds' }}</span>
+        </div>
+      </div>
 
-    <tr>
-      <td>Feedback</td>
-      <td></td>
-    </tr>
+      <div class="info-item" *ngIf="player.openAt">
+        <mat-icon class="info-icon">event</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Ouverture</span>
+          <span class="info-value">{{ player.openAt | date : 'dd/MM/yyyy à HH:mm' }}</span>
+        </div>
+      </div>
 
-    <tr>
-      <td class="font-normal">Feedback après chaque réponse</td>
-      <td>
-        <ng-container *ngTemplateOutlet="bool; context: { $implicit: player.settings?.feedback?.validation }" />
-      </td>
-    </tr>
-    <tr>
-      <td class="font-normal">Feedback à la fin de l'activité</td>
-      <td>
-        <ng-container *ngTemplateOutlet="bool; context: { $implicit: player.settings?.feedback?.review }" />
-      </td>
-    </tr>
+      <div class="info-item" *ngIf="player.closeAt">
+        <mat-icon class="info-icon">event_busy</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Fermeture</span>
+          <span class="info-value">{{ player.closeAt | date : 'dd/MM/yyyy à HH:mm' }}</span>
+        </div>
+      </div>
 
-    <tr>
-      <td>Actions</td>
-      <td></td>
-    </tr>
+      <div class="info-item" *ngIf="player.settings?.navigation?.mode">
+        <mat-icon class="info-icon">navigation</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Mode de navigation</span>
+          <span class="info-value">
+            <span [ngSwitch]="player.settings?.navigation?.mode">
+              <span *ngSwitchCase="'manual'">Progressive</span>
+              <span *ngSwitchCase="'composed'">Tous les exercices visibles</span>
+              <span *ngSwitchDefault>{{ player.settings?.navigation?.mode }}</span>
+            </span>
+          </span>
+        </div>
+      </div>
 
-    <tr>
-      <td class="font-normal">Autorisation de changer de question</td>
-      <td>
-        <ng-container *ngTemplateOutlet="bool; context: { $implicit: player.settings?.actions?.reroll }" />
-      </td>
-    </tr>
-    <tr>
-      <td class="font-normal">Autorisation d'utiliser des aides</td>
-      <td>
-        <ng-container *ngTemplateOutlet="bool; context: { $implicit: player.settings?.actions?.hints }" />
-      </td>
-    </tr>
-    <tr>
-      <td class="font-normal">Autorisation d'accéder aux théories</td>
-      <td>
-        <ng-container *ngTemplateOutlet="bool; context: { $implicit: player.settings?.actions?.theories }" />
-      </td>
-    </tr>
-    <tr>
-      <td class="font-normal">Autorisation d'accéder à la solution</td>
-      <td>
-        <ng-container *ngTemplateOutlet="bool; context: { $implicit: player.settings?.actions?.solution }" />
-      </td>
-    </tr>
+      <div class="info-item">
+        <mat-icon class="info-icon">refresh</mat-icon>
+        <div class="info-content">
+          <span class="info-label">Essais par question</span>
+          <span class="info-value">
+            {{ player.settings?.actions?.retry || 'Illimités' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <tr>
-      <td>Sécurité</td>
-      <td></td>
-    </tr>
+  <!-- FONCTIONNALITÉS DISPONIBLES -->
+  <section class="settings-section" *ngIf="hasAvailableFeatures">
+    <h3 class="section-title">
+      <mat-icon>check_circle</mat-icon>
+      Fonctionnalités disponibles
+    </h3>
 
-    <tr>
-      <td class="font-normal">Blocage du copier coller</td>
-      <td>
-        <ng-container *ngTemplateOutlet="bool; context: { $implicit: player.settings?.security?.noCopyPaste }" />
-      </td>
-    </tr>
+    <div class="features-grid">
+      <div class="feature-item feature-enabled" *ngIf="player.settings?.feedback?.validation">
+        <mat-icon class="feature-icon">feedback</mat-icon>
+        <div class="feature-content">
+          <span class="feature-label">Feedback immédiat</span>
+          <span class="feature-description">Vous recevrez un retour après chaque réponse</span>
+        </div>
+      </div>
 
-    <tr>
-      <td class="font-normal">Fin de l'activité en cas de clique en dehors de la page</td>
-      <td>
-        <ng-container
-          *ngTemplateOutlet="bool; context: { $implicit: player.settings?.security?.terminateOnLoseFocus }"
-        />
-      </td>
-    </tr>
+      <div class="feature-item feature-enabled" *ngIf="player.settings?.feedback?.review">
+        <mat-icon class="feature-icon">assignment_turned_in</mat-icon>
+        <div class="feature-content">
+          <span class="feature-label">Résultats détaillés</span>
+          <span class="feature-description">Résultats complets disponibles à la fin</span>
+        </div>
+      </div>
 
-    <tr>
-      <td class="font-normal">Fin de l'activité en cas d'affichage d'une autre page</td>
-      <td>
-        <ng-container
-          *ngTemplateOutlet="bool; context: { $implicit: player.settings?.security?.terminateOnLeavePage }"
-        />
-      </td>
-    </tr>
-  </tbody>
-</table>
-<ng-template #bool let-value>
-  <mat-icon [style.color]="value ? '#7CFC00' : '#FF0000'">{{ !!value ? 'check_circle' : 'cancel' }}</mat-icon>
-</ng-template>
+      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.hints">
+        <mat-icon class="feature-icon">lightbulb</mat-icon>
+        <div class="feature-content">
+          <span class="feature-label">Indices disponibles</span>
+          <span class="feature-description">Des aides peuvent être demandées</span>
+        </div>
+      </div>
+
+      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.theories">
+        <mat-icon class="feature-icon">menu_book</mat-icon>
+        <div class="feature-content">
+          <span class="feature-label">Accès aux théories</span>
+          <span class="feature-description">Consulter les ressources théoriques</span>
+        </div>
+      </div>
+
+      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.solution">
+        <mat-icon class="feature-icon">key</mat-icon>
+        <div class="feature-content">
+          <span class="feature-label">Solutions consultables</span>
+          <span class="feature-description">Accès aux corrections détaillées</span>
+        </div>
+      </div>
+
+      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.reroll">
+        <mat-icon class="feature-icon">shuffle</mat-icon>
+        <div class="feature-content">
+          <span class="feature-label">Changement de question</span>
+          <span class="feature-description">Possibilité de générer une nouvelle question</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESTRICTIONS IMPORTANTES -->
+  <section class="settings-section" *ngIf="hasSecurityRestrictions">
+    <h3 class="section-title warning">
+      <mat-icon>warning</mat-icon>
+      Restrictions importantes
+    </h3>
+
+    <div class="restrictions-list">
+      <div class="restriction-item" *ngIf="player.settings?.security?.noCopyPaste">
+        <mat-icon class="restriction-icon">content_paste_off</mat-icon>
+        <div class="restriction-content">
+          <span class="restriction-label">Copier-coller bloqué</span>
+          <span class="restriction-description">Les actions copier, coller et couper sont désactivées</span>
+        </div>
+      </div>
+
+      <div class="restriction-item" *ngIf="player.settings?.security?.terminateOnLoseFocus">
+        <mat-icon class="restriction-icon">visibility_off</mat-icon>
+        <div class="restriction-content">
+          <span class="restriction-label">Surveillance du focus</span>
+          <span class="restriction-description">L'activité se terminera si vous cliquez en dehors de la page</span>
+        </div>
+      </div>
+
+      <div class="restriction-item" *ngIf="player.settings?.security?.terminateOnLeavePage">
+        <mat-icon class="restriction-icon">exit_to_app</mat-icon>
+        <div class="restriction-content">
+          <span class="restriction-label">Surveillance de la page</span>
+          <span class="restriction-description">L'activité se terminera si vous changez d'onglet ou de fenêtre</span>
+        </div>
+      </div>
+
+      <div class="restriction-item" *ngIf="hasRetryLimit">
+        <mat-icon class="restriction-icon">block</mat-icon>
+        <div class="restriction-content">
+          <span class="restriction-label">Essais limités</span>
+          <span class="restriction-description">
+            Maximum {{ retryLimit }} essai{{ retryLimit > 1 ? 's' : '' }} par question
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

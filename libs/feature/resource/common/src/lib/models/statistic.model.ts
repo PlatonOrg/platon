@@ -22,6 +22,7 @@ export interface ExerciseResourceStatistic {
     readonly total: number
     readonly activity: number
     readonly template: number
+    readonly referencesAttemptCount: number
   }
 }
 

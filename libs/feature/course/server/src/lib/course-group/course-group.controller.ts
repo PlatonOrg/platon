@@ -53,7 +53,6 @@ export class CourseGroupController {
   @Get('/:groupId/')
   async isMemberOfGroup(@Req() req: IRequest, @Param('groupId') groupId: string): Promise<ItemResponse<boolean>> {
     const isMember = await this.courseGroupService.isMember(groupId, req.user.id)
-    console.log('value : ', isMember)
     return new ItemResponse({ resource: isMember })
   }
 }
