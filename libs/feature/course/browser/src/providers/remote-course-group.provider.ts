@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { CourseGroupProvider } from '../models/course-group-provider'
 import { CourseGroup, CourseMember } from '@platon/feature/course/common'
-import { Observable } from 'rxjs'
+import { map, Observable } from 'rxjs'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 
 @Injectable()
@@ -41,5 +41,11 @@ export class RemoteCourseGroupProvider extends CourseGroupProvider {
 
   deleteGroup(courseId: string, groupId: string): Observable<void> {
     return this.http.delete<void>(`/api/v1/courseGroups/${courseId}/${groupId}`)
+  }
+
+  isMemberOfGroup(courseId: string, groupId: string): Observable<boolean> {
+    return this.http
+      .get<ItemResponse<boolean>>(`/api/v1/courseGroups/${courseId}/${groupId}`)
+      .pipe(map((response) => response.resource))
   }
 }

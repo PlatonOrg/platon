@@ -56,16 +56,12 @@ export class ActivityService {
     private readonly courseMemberService: CourseMemberService,
     private readonly courseGroup: CourseGroupService,
     private readonly activityDatesService: ActivityDatesService,
-
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
-
     @InjectRepository(ResourceEntity)
     private readonly resourceRepository: Repository<ResourceEntity>,
-
     @InjectRepository(CourseGroupMemberEntity)
     private readonly courseGroupMemberRepository: Repository<CourseGroupMemberEntity>,
-
     private readonly activityGroupService: ActivityGroupService
   ) {}
 
@@ -317,6 +313,7 @@ export class ActivityService {
     })
     await consumer(activity)
   }
+
   async fromInput(input: CreateActivity | UpdateActivity): Promise<ActivityEntity> {
     const activity = new ActivityEntity()
 

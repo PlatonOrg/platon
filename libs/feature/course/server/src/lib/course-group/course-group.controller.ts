@@ -48,4 +48,12 @@ export class CourseGroupController {
     await this.courseGroupMemberService.deleteAllMembersFromGroup(groupId)
     await this.courseGroupService.delete(groupId)
   }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Get('/:groupId/')
+  async isMemberOfGroup(@Req() req: IRequest, @Param('groupId') groupId: string): Promise<ItemResponse<boolean>> {
+    const isMember = await this.courseGroupService.isMember(groupId, req.user.id)
+    console.log('value : ', isMember)
+    return new ItemResponse({ resource: isMember })
+  }
 }
