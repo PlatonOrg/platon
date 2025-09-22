@@ -234,6 +234,10 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
         ) {
           this.notificationSeen.add(notifications[0].id)
           const activity = (notifications[0].data as ModerationActivityChangesNotification).activity as ActivityPlayer
+          if (activity.sessionId !== this.player.sessionId) {
+            await firstValueFrom(this.notificationService.deleteNotification(notifications[0].id))
+            return
+          }
           this.player = { ...this.player, ...activity }
           this.player.navigation.terminated ? this.terminate().catch(console.error) : this.start().catch(console.error)
           await firstValueFrom(this.notificationService.deleteNotification(notifications[0].id))
@@ -559,7 +563,6 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   private initializeCountdown(): void {
     this.countdownBreakpoints = []
     this.countdownColor = 'black'
-    console.log('initializeCountdown', this.player.startedAt)
     this.player = { ...this.player, startedAt: this.player.startedAt || new Date() }
 
     this.countdown = getClosingTime(this.player)

@@ -153,4 +153,13 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
       await this.router.navigate(['/courses', this.context.course.id])
     }
   }
+
+  protected isOpen(): boolean {
+    const openAt = this.context.activity?.openAt
+    const closeAt = this.context.activity?.closeAt
+    return (
+      (openAt === undefined || openAt === null || new Date() >= new Date(openAt)) &&
+      (closeAt === undefined || closeAt === null || new Date() <= new Date(closeAt))
+    )
+  }
 }

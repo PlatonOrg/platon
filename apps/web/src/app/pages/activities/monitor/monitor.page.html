@@ -9,6 +9,7 @@
   <h1 class="page-title">Suivi de l'activité</h1>
 </div>
 
+@if (isOpen()) {
 <!-- Message d'information -->
 <div class="info-banner">
   <i class="info-icon" nz-icon nzType="info-circle"></i>
@@ -33,3 +34,11 @@
     <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" />
   </div>
 </ng-container>
+} @else {
+  <div class="info-banner">
+  <i class="info-icon" nz-icon nzType="info-circle"></i>
+  <p class="info-text">
+    <strong>Information :</strong> L'activité doit être ouverte pour accéder au suivi.
+  </p>
+</div>
+}
