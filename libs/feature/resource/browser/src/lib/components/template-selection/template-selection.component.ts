@@ -50,6 +50,12 @@ export class TemplateSelectionComponent implements OnInit {
       )
     ).resources
 
+    this.templates.sort((a, b) => {
+      const aRefs = a.statistic?.exercise?.references?.template ?? 0
+      const bRefs = b.statistic?.exercise?.references?.template ?? 0
+      return bRefs - aRefs
+    })
+
     this.changeDetector.markForCheck()
   }
 
