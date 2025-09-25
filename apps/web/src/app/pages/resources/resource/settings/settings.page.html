@@ -12,7 +12,7 @@
       </a>
       <app-resource-informations />
     </nz-tab>
-    <nz-tab *ngIf="context.resource?.templateId">
+    <nz-tab *ngIf="context.resource?.type === 'EXERCISE'">
       <a *nzTabLink nz-tab-link [routerLink]="['.']" [queryParams]="{ tab: 'template' }" queryParamsHandling="merge">
         Template
       </a>

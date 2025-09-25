@@ -23,7 +23,7 @@ import {
   User,
 } from '@platon/core/common'
 import { IRequest, Mapper, Public, UserDTO, UserService, UUIDParam } from '@platon/core/server'
-import { ACTIVITY_MAIN_FILE, EXERCISE_MAIN_FILE } from '@platon/feature/compiler'
+import { ACTIVITY_MAIN_FILE, EXERCISE_MAIN_FILE, TEMPLATE_OVERRIDE_FILE } from '@platon/feature/compiler'
 import { ResourceMovedByAdminNotification } from '@platon/feature/course/common'
 import { NotificationService } from '@platon/feature/notification/server'
 import { LATEST, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
@@ -407,6 +407,8 @@ export class ResourceController {
       throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
     }
 
+    const wasNotTemplate = !existing.get().templateId
+
     const resource = Mapper.map(
       await this.resourceService.update(existing.get(), {
         templateId,
@@ -422,6 +424,41 @@ export class ResourceController {
       dependOnVersion: templateVersion,
       isTemplate: true,
     })
+
+    if (wasNotTemplate) {
+      try {
+        const { repo } = await this.fileService.repo(existing.get(), req)
+
+        const ploExists = await repo.exists(TEMPLATE_OVERRIDE_FILE)
+        if (!ploExists) {
+          await repo.touch(TEMPLATE_OVERRIDE_FILE, '{}')
+        }
+      } catch (error) {
+        console.error(`Failed to create PLO file for resource ${id}:`, error)
+      }
+    }
+
+    return new ItemResponse({ resource })
+  }
+
+  @Delete('/:id/template')
+  async removeTemplate(@Req() req: IRequest, @UUIDParam('id') id: string): Promise<ItemResponse<ResourceDTO>> {
+    const existing = await this.resourceService.findByIdOrCode(id)
+    if (!existing.isPresent()) {
+      throw new NotFoundResponse(`Resource not found: ${id}`)
+    }
+
+    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: existing.get() })
+    if (!permissions.write) {
+      throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
+    }
+
+    const resource = Mapper.map(
+      await this.resourceService.deleteTemplate(id),
+      ResourceDTO
+    )
+
+    await this.dependencyService.deleteDependencyForVersion(id, LATEST)
 
     return new ItemResponse({ resource })
   }

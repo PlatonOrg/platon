@@ -105,6 +105,10 @@ export class ResourceService {
     return this.resourceProvider.updateTemplate(resourceId, templateId, templateVersion)
   }
 
+  deleteTemplate(resourceId: string): Observable<Resource> {
+    return this.resourceProvider.deleteTemplate(resourceId)
+  }
+
   updateCertification(resourceId: string, certified: boolean): Observable<Resource> {
     return this.resourceProvider.updateCertification(resourceId, certified)
   }

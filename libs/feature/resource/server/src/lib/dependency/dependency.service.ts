@@ -130,6 +130,10 @@ export class ResourceDependencyService {
     return await this.repository.save(newDependency)
   }
 
+  async deleteDependencyForVersion(resourceId: string, resourceVersion: string): Promise<void> {
+    await this.repository.delete({ resourceId, resourceVersion })
+  }
+
   /**
    * Deletes a resource dependency.
    *
