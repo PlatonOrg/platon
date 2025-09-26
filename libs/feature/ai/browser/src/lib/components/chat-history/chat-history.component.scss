@@ -1,0 +1,111 @@
+:host {
+  display: block;
+  padding: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.chat-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  position: relative;
+
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    transform: translateX(2px);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background-color: rgba(0, 0, 0, 0.08);
+    transform: translateX(1px);
+  }
+}
+
+.chat-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-text-primary);
+  line-height: 1.4;
+  margin-bottom: 4px;
+
+  // Truncate long titles
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 99%;
+}
+
+.chat-date {
+  font-size: 12px;
+  color: var(--brand-text-secondary);
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+// Custom scrollbar for webkit browsers
+:host::-webkit-scrollbar {
+  width: 4px;
+}
+
+:host::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:host::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .chat-item {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .chat-title {
+    color: #e0e0e0;
+  }
+
+  .chat-date {
+    color: #a0a0a0;
+  }
+
+  :host::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// Empty state (when no chats)
+:host:empty::after {
+  content: "Aucun chat récent";
+  display: block;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  padding: 32px 16px;
+  font-style: italic;
+}

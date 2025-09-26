@@ -93,6 +93,16 @@ export default [
             '../admin/admin.routes'
           ),
       },
+      {
+        title: 'IA',
+        path: 'ai',
+        loadChildren: () =>
+          import(
+            /* webpackChunkName: "ai" */
+            '../ai/ai.routes'
+          ),
+      },
+
       { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

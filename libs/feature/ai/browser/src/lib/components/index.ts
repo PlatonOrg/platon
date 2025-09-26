@@ -1,1 +1,2 @@
-export const index = 0
+export * from './main-chat/main-chat.component'
+export * from './chat-history/chat-history.component'

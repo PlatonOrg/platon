@@ -96,6 +96,15 @@ export class SidebarComponent implements OnInit {
               title: 'Administration',
             },
           ]
+        : []),
+      ...(isTeacherRole(this.user.role)
+        ? [
+            {
+              url: '/ai',
+              icon: 'network_intel_node',
+              title: 'IA',
+            },
+          ]
         : [])
     )
 

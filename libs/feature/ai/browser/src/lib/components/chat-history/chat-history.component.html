@@ -1,0 +1,6 @@
+@for(chat of chats.slice(0, 15); track chat.id) {
+<div class="chat-item" (click)="onSelectChat(chat)">
+  <div class="chat-title">{{ chat.title || 'Nouveau chat' }}</div>
+  <div class="chat-date">{{ formatDate(chat.updatedAt) }}</div>
+</div>
+}

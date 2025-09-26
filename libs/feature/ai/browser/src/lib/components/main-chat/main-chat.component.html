@@ -1,0 +1,90 @@
+<div class="chat-container" [class.has-messages]="messages.length > 0">
+  <!-- Header -->
+  <menu class="menu">
+    <div class="menu-content">
+      <button class="menu-btn" (click)="newChat()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Nouveau chat
+      </button>
+      <ai-chat-history [chats]="chats" />
+    </div>
+  </menu>
+
+  <div class="main">
+    <!-- Messages Container -->
+    <div class="messages-container" #messagesContainer>
+      <div class="messages-wrapper">
+        <!-- Messages -->
+        <div class="messages" *ngIf="messages.length > 0">
+          <div
+            class="message"
+            [class.user-message]="message.type === 'user'"
+            [class.assistant-message]="message.type === 'ai'"
+            *ngFor="let message of messages; trackBy: trackByMessageId"
+          >
+            <div class="message-avatar">
+              <div class="avatar">
+                @if (message.type === 'user') {
+                <user-avatar [user]="user" [showUsername]="'none'" />
+                } @else {
+                <user-avatar [userIdOrName]="'ypicker'" [showUsername]="'none'" />
+                }
+              </div>
+            </div>
+            <div
+              class="message-content"
+              [ngStyle]="message.type === 'user' ? { 'max-width': '70%', width: 'fit-content' } : {}"
+            >
+              <div class="message-text" [ngStyle]="message.type === 'user' ? { 'text-align': 'justify' } : {}">
+                <nge-markdown [data]="message.displayText || message.text" />
+              </div>
+              <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Container -->
+    <div class="input-container" [class.centered]="messages.length === 0" [class.transitioning]="isTransitioning">
+      <div class="input-wrapper">
+        <div class="input-box">
+          <textarea
+            #messageInput
+            [(ngModel)]="currentMessage"
+            (keydown)="onKeyDown($event)"
+            placeholder="Envoyez un message à PLaTon..."
+            rows="1"
+            class="message-input"
+          ></textarea>
+          <button
+            class="send-button"
+            (click)="onSendMessage()"
+            [disabled]="!currentMessage.trim() || isTyping"
+            [class.sending]="isTyping"
+          >
+            <svg
+              *ngIf="!isTyping"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+            <div *ngIf="isTyping" class="loading-spinner"></div>
+          </button>
+        </div>
+        <div class="input-footer">
+          <p>
+            Les informations générées peuvent contenir des erreurs. Vérifiez toujours avant de prendre des décisions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

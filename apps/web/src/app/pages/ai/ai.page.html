@@ -1,0 +1,11 @@
+<div class="ai-page">
+  <ai-main-chat
+    [messages]="context.messages"
+    [user]="context.user"
+    [isTyping]="context.state === 'LOADING'"
+    [chats]="context.chats"
+    (sendMessage)="onSendMessage($event)"
+    (startNewChat)="onStartNewChat()"
+  >
+  </ai-main-chat>
+</div>
