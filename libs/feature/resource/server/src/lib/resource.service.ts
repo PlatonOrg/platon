@@ -431,6 +431,14 @@ export class ResourceService {
     return this.repository.save(resource)
   }
 
+  async deleteTemplate(resourceId: string): Promise<ResourceEntity> {
+    const resource: any = await this.repository.findOneOrFail({ where: { id: resourceId } })
+    resource.template = null
+    resource.templateId = null
+    resource.templateVersion = null
+    return this.repository.save(resource)
+  }
+
   async move(id: string, parentId: string): Promise<ResourceEntity> {
     const resource = await this.repository.findOneOrFail({ where: { id } })
     const parent = await this.repository.findOneOrFail({ where: { id: parentId } })

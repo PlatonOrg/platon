@@ -29,7 +29,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
 
-import { DialogModule, DialogService } from '@platon/core/browser'
+import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import {
   Activity,
   CourseGroup,
@@ -43,7 +43,7 @@ import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
 import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
 import { CourseColorPickerComponent } from '../color-picker/color-picker.component'
-import { userDisplayName } from '@platon/core/common'
+import { User, userDisplayName } from '@platon/core/common'
 
 @Component({
   standalone: true,
@@ -107,10 +107,12 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected courseGroups: CourseGroup[] = []
 
   protected activityColors: number[] = []
+  private user?: User
 
   constructor(
     private readonly courseService: CourseService,
     private readonly dialogService: DialogService,
+    private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {}
 
@@ -120,6 +122,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.activityColors = await firstValueFrom(this.courseService.getCourseColors(this.activity.courseId))
 
     this.loadingSignal.set(true)
+    this.user = (await this.authService.ready()) as User
 
     const course = await firstValueFrom(
       this.courseService.find({
@@ -195,14 +198,6 @@ export class CourseActivitySettingsComponent implements OnInit {
       moveItemInArray(this.accessPeriods, event.previousIndex, event.currentIndex)
       this.changeDetectorRef.markForCheck()
     }
-  }
-
-  private getMainDate(): RestrictionConfig['DateRange'] | { start: Date; end: Date } {
-    if (this.accessPeriods.length === 0) {
-      return { start: undefined, end: undefined }
-    }
-    const dateRange = this.accessPeriods[0].restriction.find((r) => r.type === 'DateRange')
-    return dateRange ? (dateRange.config as RestrictionConfig['DateRange']) : { start: undefined, end: undefined }
   }
 
   private checkSameOthers(): boolean {
@@ -415,10 +410,61 @@ export class CourseActivitySettingsComponent implements OnInit {
       if (differenceInMilliseconds(closeDate, openDate) > 0) {
         return true
       }
-      this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
-      return false
+      if (closeDate !== undefined) {
+        console.log(closeDate, openDate)
+        this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
+        return false
+      }
     }
     return true
+  }
+
+  private async getUserSpecificDate(defaultDate?: Date): Promise<{ start: Date | undefined; end: Date | undefined }> {
+    if (!this.user) return { start: undefined, end: undefined }
+
+    const userSpecificPeriod = await this.findUserSpecificAccessPeriod()
+    if (userSpecificPeriod) {
+      const dateRange = userSpecificPeriod.restriction.find((r) => r.type === 'DateRange')
+      if (dateRange) {
+        return (dateRange.config as RestrictionConfig['DateRange']) || { start: undefined, end: undefined }
+      }
+    }
+
+    return { start: undefined, end: undefined }
+  }
+
+  private async findUserSpecificAccessPeriod(): Promise<RestrictionList | null> {
+    if (!this.user) return null
+    for (const period of this.accessPeriods) {
+      const membersRestriction = period.restriction.find((r) => r.type === 'Members')
+      if (membersRestriction) {
+        const config = membersRestriction.config as RestrictionConfig['Members']
+        const isUserInMembers = config.members?.some((memberId) => {
+          if (memberId.includes(':')) {
+            const [, userId] = memberId.split(':')
+            return userId === this.user!.id
+          } else {
+            const member = this.courseMembers.find((m) => m.id === memberId)
+            return member?.user?.id === this.user!.id
+          }
+        })
+        if (isUserInMembers) return period
+      }
+
+      const groupsRestriction = period.restriction.find((r) => r.type === 'Groups')
+      if (groupsRestriction) {
+        const config = groupsRestriction.config as RestrictionConfig['Groups']
+        for (const groupId of config.groups!) {
+          const isMemberOfGroup = await firstValueFrom(
+            this.courseService.isMemberOfGroup(this.activity.courseId, groupId)
+          )
+          if (isMemberOfGroup) {
+            return period
+          }
+        }
+      }
+    }
+    return null
   }
 
   async update(): Promise<void> {
@@ -447,22 +493,34 @@ export class CourseActivitySettingsComponent implements OnInit {
         )
       }
 
-      const dateRange = this.getMainDate()
       const result = await Promise.all([
         ...(!this.activity.isChallenge
           ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.accessPeriods))]
           : []),
       ])
       this.activity = result[0]
-      this.activityChange.emit(
-        (this.activity = {
-          ...this.activity,
-          openAt: dateRange?.start || undefined,
-          closeAt: dateRange?.end || undefined,
-          state: result[0].state,
-          colorHue: this.currentHue,
-        })
-      )
+      if (this.accessPeriods.length > 0) {
+        const userSpecificDate = await this.getUserSpecificDate()
+        this.activityChange.emit(
+          (this.activity = {
+            ...this.activity,
+            openAt: userSpecificDate.start,
+            closeAt: userSpecificDate.end,
+            //state: result[0].state,
+            colorHue: this.currentHue,
+          })
+        )
+      } else {
+        this.activityChange.emit(
+          (this.activity = {
+            ...this.activity,
+            openAt: this.activity.openAt,
+            closeAt: this.activity.closeAt,
+            state: result[0].state,
+            colorHue: this.currentHue,
+          })
+        )
+      }
 
       this.dialogService.success('Activité mise à jour !')
       this.saveRequested.emit()

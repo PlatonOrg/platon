@@ -38,8 +38,8 @@
 
                 <!-- Mode affichage -->
                 <span class="date-value" *ngIf="!editOpenDate">
-                  {{ activity.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-                  <ng-container *ngIf="!activity.openAt">Aucune date définie</ng-container>
+                  {{ tempOpenDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+                  <ng-container *ngIf="!tempOpenDate">Aucune date définie</ng-container>
                   <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                 </span>
 
@@ -67,8 +67,8 @@
 
                 <!-- Mode affichage -->
                 <span class="date-value" *ngIf="!editCloseDate">
-                  {{ activity.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-                  <ng-container *ngIf="!activity.closeAt">Aucune date définie</ng-container>
+                  {{ tempCloseDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+                  <ng-container *ngIf="!tempCloseDate">Aucune date définie</ng-container>
                   <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                 </span>
 

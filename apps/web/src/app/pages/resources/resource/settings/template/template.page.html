@@ -4,6 +4,16 @@
       <mat-card-title> Configuration du Template </mat-card-title>
     </mat-card-header>
     <mat-card-content>
+      @if (templateId === '' && !isCreating) {
+        <div class="empty-state">
+          <div class="empty-message">
+            Aucun template n'est actuellement configuré pour cette ressource.
+          </div>
+          <button nz-button nzType="primary" class="add-template-btn" (click)="isCreating = true">
+            <span>Ajouter un template</span>
+          </button>
+        </div>
+      } @else {
       <div>
         @if (invalidTemplateId) {
         <nz-alert nzType="error" [nzMessage]="errorMessage" nzShowIcon></nz-alert>
@@ -45,7 +55,21 @@
         <button nz-button (click)="openTemplate()" [disabled]="template === undefined">
           <span>Voir le template</span>
         </button>
+        <button
+          nz-button
+          nzDanger
+          nz-popconfirm
+          nzPopconfirmTitle="Êtes-vous sûr de vouloir supprimer ce template ?"
+          nzPopconfirmPlacement="top"
+          nzOkText="Supprimer"
+          nzCancelText="Annuler"
+          (nzOnConfirm)="removeTemplate()"
+          nzOkDanger
+          [disabled]="template === undefined">
+          <span>Supprimer</span>
+        </button>
       </div>
+    }
     </mat-card-content>
   </mat-card>
 </div>
