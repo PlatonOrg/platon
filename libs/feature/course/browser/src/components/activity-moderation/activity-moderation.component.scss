@@ -26,57 +26,6 @@
   border-radius: 6px;
   margin-bottom: 1rem;
 
-  .activity-code {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-
-    .code-label {
-      color: var(--brand-text-secondary);
-      font-weight: 500;
-    }
-
-    .code-spoiler {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', monospace;
-      font-weight: bold;
-      user-select: none;
-      position: relative;
-      letter-spacing: 2px;
-
-      // État caché (par défaut)
-      background-color: #2c2f33;
-      color: var(--brand-text-secondary);
-      border: 1px solid var(--brand-color-primary);
-
-      &:hover {
-        background-color: var(--brand-background-hover);
-        border-color: var(--brand-color-primary);
-      }
-
-      // État révélé
-      &.revealed {
-        background-color: var(--brand-background-components);
-        color: var(--brand-color-primary);
-        border-color: var(--brand-color-primary);
-
-        &:hover {
-          background-color: rgba(114, 137, 218, 0.2);
-        }
-      }
-
-      // Animation de révélation
-      &.revealed {
-        animation: spoilerReveal 0.3s ease-out;
-      }
-    }
-  }
-
   .selection-info h3 {
     margin: 0;
     font-size: 1rem;
@@ -117,6 +66,57 @@
       &:disabled {
         opacity: 0.4;
       }
+    }
+  }
+}
+
+.activity-code {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+
+  .code-label {
+    color: var(--brand-text-secondary);
+    font-weight: 500;
+  }
+
+  .code-spoiler {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', monospace;
+    font-weight: bold;
+    user-select: none;
+    position: relative;
+    letter-spacing: 2px;
+
+    // État caché (par défaut)
+    background-color: #2c2f33;
+    color: var(--brand-text-secondary);
+    border: 1px solid var(--brand-color-primary);
+
+    &:hover {
+      background-color: var(--brand-background-hover);
+      border-color: var(--brand-color-primary);
+    }
+
+    // État révélé
+    &.revealed {
+      background-color: var(--brand-background-components);
+      color: var(--brand-color-primary);
+      border-color: var(--brand-color-primary);
+
+      &:hover {
+        background-color: rgba(114, 137, 218, 0.2);
+      }
+    }
+
+    // Animation de révélation
+    &.revealed {
+      animation: spoilerReveal 0.3s ease-out;
     }
   }
 }

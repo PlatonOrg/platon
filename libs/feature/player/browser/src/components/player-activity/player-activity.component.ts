@@ -220,27 +220,39 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.notificationService.paginate(1).subscribe(async ({ notifications }) => {
-        if (
-          notifications.length > 0 &&
-          (notifications[0].data as ActivityClosedNotification).type === 'ACTIVITY-CLOSED' &&
-          (notifications[0].data as ActivityClosedNotification).activityId === this.player.activityId
-        ) {
-          this.state = 'closed'
-          await this.terminateModal(false, "L'activité a été fermée par l'enseignant.")
+        if (notifications.length === 0) return
+
+        const notification = notifications[0]
+        const notificationData = notification.data
+
+        if ((notificationData as ActivityClosedNotification).type === 'ACTIVITY-CLOSED') {
+          const activityClosedData = notificationData as ActivityClosedNotification
+          if (activityClosedData.activityId === this.player.activityId) {
+            this.state = 'closed'
+            await this.terminateModal(false, "L'activité a été fermée par l'enseignant.")
+          }
         } else if (
-          notifications.length > 0 &&
-          (notifications[0].data as ModerationActivityChangesNotification).type === 'MODERATION-ACTIVITY-CHANGES' &&
-          !this.notificationSeen.has(notifications[0].id)
+          (notificationData as ModerationActivityChangesNotification).type === 'MODERATION-ACTIVITY-CHANGES' &&
+          !this.notificationSeen.has(notification.id)
         ) {
-          this.notificationSeen.add(notifications[0].id)
-          const activity = (notifications[0].data as ModerationActivityChangesNotification).activity as ActivityPlayer
+          this.notificationSeen.add(notification.id)
+          const moderationData = notificationData as ModerationActivityChangesNotification
+          const activity = moderationData.activity as ActivityPlayer
+
           if (activity.sessionId !== this.player.sessionId) {
-            await firstValueFrom(this.notificationService.deleteNotification(notifications[0].id))
+            await firstValueFrom(this.notificationService.deleteNotification(notification.id))
             return
           }
+
           this.player = { ...this.player, ...activity }
-          this.player.navigation.terminated ? this.terminate().catch(console.error) : this.start().catch(console.error)
-          await firstValueFrom(this.notificationService.deleteNotification(notifications[0].id))
+
+          if (this.player.navigation.terminated) {
+            this.terminate().catch(console.error)
+          } else {
+            this.start().catch(console.error)
+          }
+
+          await firstValueFrom(this.notificationService.deleteNotification(notification.id))
           this.changeDetectorRef.markForCheck()
         }
       })

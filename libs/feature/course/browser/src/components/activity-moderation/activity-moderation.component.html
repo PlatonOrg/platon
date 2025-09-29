@@ -1,23 +1,8 @@
 <div class="moderation-container">
   <mat-card>
     <mat-card-header class="header-card">
-      <mat-card-title>Modération des activités</mat-card-title>
-
-      @if (code) {
-      <div class="activity-code">
-        <span class="code-label">Code d'activité :</span>
-        <span
-          class="code-spoiler"
-          [class.revealed]="isCodeRevealed"
-          (click)="toggleCodeVisibility()"
-          [title]="isCodeRevealed ? 'Cliquer pour cacher' : 'Cliquer pour révéler le code'"
-        >
-          {{ isCodeRevealed ? code : '●●●●●●' }}
-        </span>
-      </div>
-      }
-
-      <div class="header">
+      <mat-card-title>Modération de l'activité</mat-card-title>
+      <!-- <div class="header">
         <div class="actions">
           <button
             mat-icon-button
@@ -38,7 +23,6 @@
             <mat-icon>clear</mat-icon>
           </button>
 
-          <!-- Séparateur visuel -->
           <div class="action-separator"></div>
 
           <button
@@ -61,11 +45,23 @@
             <mat-icon>lock</mat-icon>
           </button>
         </div>
-      </div>
+      </div> -->
     </mat-card-header>
     <mat-card-content>
-      <!-- Liste compacte des utilisateurs -->
-      <div class="users-compact-grid">
+      @if (code) {
+      <div class="activity-code">
+        <span class="code-label">Code de déblocage :</span>
+        <span
+          class="code-spoiler"
+          [class.revealed]="isCodeRevealed"
+          (click)="toggleCodeVisibility()"
+          [title]="isCodeRevealed ? 'Cliquer pour cacher' : 'Cliquer pour révéler le code'"
+        >
+          {{ isCodeRevealed ? code : '●●●●●●' }}
+        </span>
+      </div>
+      }
+      <!--<div class="users-compact-grid">
         <div
           *ngFor="let user of results; trackBy: trackByUserId"
           class="user-chip"
@@ -75,7 +71,7 @@
         >
           <user-avatar [userIdOrName]="user.id" [showUsername]="'no'" />
         </div>
-      </div>
+      </div> -->
     </mat-card-content>
   </mat-card>
 </div>

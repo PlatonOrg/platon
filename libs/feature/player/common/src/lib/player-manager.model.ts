@@ -89,10 +89,7 @@ export abstract class PlayerManager {
     }
 
     if (!activityVariables.navigation.terminated) {
-      const result = { activity: withActivityPlayer(activitySession) }
-      if (!session.userId) return result
-      await this.notifyModerationActivityChanges(session.userId, result)
-      return result
+      return { activity: withActivityPlayer(activitySession) }
     }
     activityVariables.navigation.terminated = false
     activitySession.variables = activityVariables
@@ -125,10 +122,7 @@ export abstract class PlayerManager {
     }
 
     if (!activityVariables.navigation.terminated) {
-      const result = { activity: withActivityPlayer(activitySession) }
-      if (!session.userId) return result
-      await this.notifyModerationActivityChanges(session.userId, result)
-      return result
+      return { activity: withActivityPlayer(activitySession) }
     }
     activityVariables.navigation.terminated = false
     activitySession.variables = activityVariables
