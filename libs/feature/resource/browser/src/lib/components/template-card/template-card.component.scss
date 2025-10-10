@@ -162,6 +162,17 @@
   }
 }
 
+.stat-item-action {
+  cursor: pointer;
+  color: var(--brand-color-primary);
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: var(--brand-color-primary-dark, var(--brand-color-primary));
+    transform: scale(1.05);
+  }
+}
+
 .template-overlay {
   position: absolute;
   top: 1rem;

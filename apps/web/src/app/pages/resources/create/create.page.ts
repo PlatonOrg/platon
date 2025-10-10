@@ -99,6 +99,7 @@ export class ResourceCreatePage implements OnInit {
   protected loading = true
   protected creating = false
   protected editionMode?: 'scratch' | 'template'
+  protected mode?: string
   protected loadingTemplates = false
   protected isFinished = false
   protected user?: User
@@ -148,6 +149,8 @@ export class ResourceCreatePage implements OnInit {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes
     this.parentId = this.activatedRoute.snapshot.queryParamMap.get('parent') || undefined
     const templateId = this.activatedRoute.snapshot.queryParamMap.get('template') || undefined
+    this.mode = this.activatedRoute.snapshot.queryParamMap.get('mode') || undefined
+
     if (templateId) {
       this.template = await firstValueFrom(this.resourceService.find({ id: templateId }))
       this.editionMode = 'template'
@@ -190,6 +193,7 @@ export class ResourceCreatePage implements OnInit {
     this.userCharterAccepted = userCharter?.acceptedUserCharter ?? false
 
     this.loading = false
+
     this.changeDetectorRef.markForCheck()
   }
 
@@ -218,10 +222,14 @@ export class ResourceCreatePage implements OnInit {
           topics: tags.topics as string[],
         })
       )
-      if (resource.type === 'EXERCISE' || resource.type === 'ACTIVITY') {
-        window.open(`/editor/${resource.id}?version=latest`, '_blank')
+      if (this.mode && this.mode === 'configure') {
+        this.router.navigate(['/resources/builder', resource.id], { replaceUrl: true }).catch(console.error)
+      } else {
+        if (resource.type === 'EXERCISE' || resource.type === 'ACTIVITY') {
+          window.open(`/editor/${resource.id}?version=latest`, '_blank')
+        }
+        this.router.navigate(['/resources', resource.id, 'overview'], { replaceUrl: true }).catch(console.error)
       }
-      this.router.navigate(['/resources', resource.id, 'overview'], { replaceUrl: true }).catch(console.error)
     } catch {
       this.dialogService.error('Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !')
     } finally {

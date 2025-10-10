@@ -61,6 +61,7 @@ export class TemplateSelectionComponent implements OnInit {
       queryParams: {
         type: ResourceTypes.EXERCISE,
         template: templateId,
+        mode: 'configure',
       },
     })
   }

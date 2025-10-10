@@ -98,7 +98,6 @@ export class ResourcePage implements OnInit, OnDestroy {
         this.changeDetectorRef.markForCheck()
       })
     )
-    //this.checkFirstVisit()
     this.checkForTutorialContinuation()
   }
 
@@ -174,41 +173,22 @@ export class ResourcePage implements OnInit, OnDestroy {
     return this.context.resource?.statistic?.exercise?.references?.total || 0
   }
 
-  /**
-   * Vérifie si c'est la première visite de l'utilisateur
-
-  private checkFirstVisit(): void {
-    setTimeout(() => {
-      this.startResourcesTutorial()
-    }, 1000)
-  }*/
-
   private checkForTutorialContinuation(): void {
     this.activatedRoute.queryParams.subscribe((params) => {
       const fromTutorial = params['fromTutorial']
       const isFromTutorialService = this.resourcesTutorialService.getIsFromTutorial()
 
       if (fromTutorial === 'true' || isFromTutorialService) {
-        // L'utilisateur vient du tutoriel
         setTimeout(() => {
           this.startResourcePageTutorial()
         }, 1000)
-        //this.startResourcePageTutorial()
 
-        // Nettoyer les paramètres d'URL
         this.cleanTutorialParams()
-
-        // Réinitialiser le flag du service
         this.resourcesTutorialService.resetTutorialFlag()
-      } else {
-        console.log('NOTHING')
       }
     })
   }
 
-  /**
-   * Démarre le tutoriel complet de l'espace de travail
-   */
   startResourcePageTutorial(): void {
     if (this.context.resource) {
       this.resourcePageTutorialService.startResourcePageTutorial(this.context.resource, false, false, false)
@@ -216,7 +196,6 @@ export class ResourcePage implements OnInit, OnDestroy {
   }
 
   private cleanTutorialParams(): void {
-    // Supprimer le paramètre fromTutorial de l'URL sans recharger la page
     const url = new URL(window.location.href)
     url.searchParams.delete('fromTutorial')
     window.history.replaceState(null, '', url.toString())
