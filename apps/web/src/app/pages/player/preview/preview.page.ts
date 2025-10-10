@@ -78,7 +78,10 @@ export class PlayerPreviewPage implements OnInit {
   protected async onClose() {
     const queryParams = this.activatedRoute.snapshot.queryParamMap
     const sessionId = queryParams.get('sessionId')
-    if (sessionId) {
+    const fromBuilder = queryParams.get('fromBuilder')
+
+    // Only clean up if NOT from builder
+    if (sessionId && fromBuilder !== 'true') {
       await firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(sessionId)))
     }
   }

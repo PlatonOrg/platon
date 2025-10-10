@@ -34,6 +34,17 @@ export default [
   ),
   withAuthGuard(
     {
+      path: 'builder',
+      loadChildren: () =>
+        import(
+          /* webpackChunkName: "resource-builder" */
+          './builder/builder.routes'
+        ),
+    },
+    ['admin', 'teacher']
+  ),
+  withAuthGuard(
+    {
       path: ':id',
       loadChildren: () =>
         import(
