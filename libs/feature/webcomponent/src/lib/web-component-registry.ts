@@ -32,6 +32,7 @@ import { EvaluatorComponentDefinition } from './forms/evaluator/evaluator'
 import { TimerComponentDefinition } from './widgets/timer/timer'
 import { ConfettiComponentDefinition } from './widgets/confetti/confetti'
 import { ImageClickerComponentDefinition } from './forms/image-clicker/image-clicker'
+import { CrosswordComponentDefinition } from './forms/crossword/crossword'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
@@ -165,6 +166,11 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
       import(/* webpackChunkName: "wc-drag-drop" */ './forms/drag-drop/drag-drop.module').then((m) => m.DragDropModule),
   },
   {
+    selector : 'wc-crossword',
+    module : () =>
+      import(/* webpackChunkName: "wc-crossword" */ './forms/crossword/crossword.module').then((m) => m.CrosswordModule),
+  },
+  {
     selector: 'wc-feedback',
     module: () =>
       import(/* webpackChunkName: "wc-feedback" */ './widgets/feedback/feedback.module').then((m) => m.FeedbackModule),
@@ -249,6 +255,11 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: CodeViewerComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: CrosswordComponentDefinition,
   },
   {
     provide: WEB_COMPONENT_DEFINITIONS,
