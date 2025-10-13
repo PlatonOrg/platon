@@ -50,6 +50,28 @@ export class CourseMemberService {
     return Optional.ofNullable(member)
   }
 
+  async findByIds(courseId: string, ids: string[]): Promise<CourseMemberEntity[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
+    const query = this.repository.createQueryBuilder('member')
+    query.leftJoinAndSelect('member.user', 'user')
+    query.leftJoinAndSelect('member.group', 'group')
+    query.leftJoinAndSelect('group.users', 'groupusers')
+
+    query.where('member.course_id = :courseId', { courseId }).andWhere('member.id IN (:...ids)', { ids })
+
+    const members = await query.getMany()
+    members.forEach((member) => {
+      if (member && !member.user?.id) {
+        member.user = undefined
+      }
+    })
+
+    return members
+  }
+
   async findViewsByCourseId(courseId: string): Promise<CourseMemberView[]> {
     return this.view.find({ where: { courseId } })
   }

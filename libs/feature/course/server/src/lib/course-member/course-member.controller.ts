@@ -73,7 +73,7 @@ export class CourseMemberController {
       )
     )
 
-    const AddedMembers: CourseMemberDTO[] = []
+    const addedMemberIds: string[] = []
 
     for (const member of input) {
       const key = `${member.firstName?.toLowerCase() ?? ''}|${member.lastName?.toLowerCase() ?? ''}|${
@@ -84,14 +84,17 @@ export class CourseMemberController {
       } else {
         const id = await this.authService.createCandidateAccount(member)
         const newMember = await this.courseMemberService.addUser(courseId, id, CourseMemberRoles.student, false)
-        AddedMembers.push(Mapper.map(newMember, CourseMemberDTO))
+        addedMemberIds.push(newMember.id)
         existingMembersSet.add(key)
       }
     }
 
+    const addedMembers =
+      addedMemberIds.length > 0 ? await this.courseMemberService.findByIds(courseId, addedMemberIds) : []
+
     return new ListResponse({
-      total: AddedMembers.length,
-      resources: Mapper.mapAll(AddedMembers, CourseMemberDTO),
+      total: addedMembers.length,
+      resources: Mapper.mapAll(addedMembers, CourseMemberDTO),
     })
   }
 
