@@ -223,7 +223,7 @@ export class ResourceCreatePage implements OnInit {
         })
       )
       if (this.mode && this.mode === 'configure') {
-        this.router.navigate(['/resources/builder', resource.id], { replaceUrl: true }).catch(console.error)
+        this.router.navigate(['/builder', resource.id], { replaceUrl: true }).catch(console.error)
       } else {
         if (resource.type === 'EXERCISE' || resource.type === 'ACTIVITY') {
           window.open(`/editor/${resource.id}?version=latest`, '_blank')
