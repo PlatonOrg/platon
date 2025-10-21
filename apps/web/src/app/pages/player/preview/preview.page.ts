@@ -25,6 +25,9 @@ export class PlayerPreviewPage implements OnInit {
   protected loading = true
   protected error?: unknown
 
+  private sessionId?: string
+  private isFromBuilder = false
+
   constructor(
     private readonly playerService: PlayerService,
     private readonly activatedRoute: ActivatedRoute,
@@ -43,6 +46,9 @@ export class PlayerPreviewPage implements OnInit {
       const sessionId = queryParams.get('sessionId')
       const accessToken = queryParams.get('accessToken')
       const refreshToken = queryParams.get('refreshToken')
+      this.sessionId = sessionId || undefined
+      this.isFromBuilder = queryParams.get('fromBuilder') === 'true'
+
       if (accessToken && refreshToken) {
         // used for preview in vscode
         await this.authService.signInWithToken({ accessToken, refreshToken })
@@ -76,13 +82,9 @@ export class PlayerPreviewPage implements OnInit {
 
   @HostListener('window:beforeunload')
   protected async onClose() {
-    const queryParams = this.activatedRoute.snapshot.queryParamMap
-    const sessionId = queryParams.get('sessionId')
-    const fromBuilder = queryParams.get('fromBuilder')
-
     // Only clean up if NOT from builder
-    if (sessionId && fromBuilder !== 'true') {
-      await firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(sessionId)))
+    if (this.sessionId && !this.isFromBuilder) {
+      await firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(this.sessionId)))
     }
   }
 }
