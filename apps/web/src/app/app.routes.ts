@@ -79,6 +79,18 @@ export const appRoutes: Route[] = [
 
   withAuthGuard(
     {
+      path: 'builder',
+      loadChildren: () =>
+        import(
+          /* webpackChunkName: "resource-builder" */
+          './pages/builder/builder.routes'
+        ),
+    },
+    [UserRoles.teacher, UserRoles.admin]
+  ),
+
+  withAuthGuard(
+    {
       path: '',
       loadChildren: () => import('./pages/dashboard/dashboard.routes'),
     },
