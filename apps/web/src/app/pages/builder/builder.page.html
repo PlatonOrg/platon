@@ -1,0 +1,99 @@
+<div class="builder-page">
+  @if (loading) {
+  <div class="loading-container">
+    <nz-spin nzSimple [nzSize]="'large'" nzTip="Chargement de la configuration..."></nz-spin>
+  </div>
+  } @if (error) {
+  <nz-alert nzType="error" [nzMessage]="error" nzShowIcon [nzCloseable]="true" (nzOnClose)="goBack()"> </nz-alert>
+  } @if (!loading && !error && resource) {
+  <!-- Header avec toolbar -->
+  <div class="builder-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="builder-title">{{ resource.name }}</h1>
+    <div class="header-actions">
+      <div class="preview-toolbar">
+        <button mat-icon-button class="toolbar-btn active" title="Valider">
+          <mat-icon>check_circle</mat-icon>
+        </button>
+        <button mat-icon-button class="toolbar-btn" title="Jouer">
+          <mat-icon>play_circle</mat-icon>
+        </button>
+        <button mat-icon-button class="toolbar-btn" title="Paramètres">
+          <mat-icon>settings</mat-icon>
+        </button>
+      </div>
+      <button mat-raised-button color="primary" (click)="save()" [disabled]="saving">
+        <mat-icon>save</mat-icon>
+        <span>Sauvegarder</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Layout principal: 3 colonnes -->
+  <div class="builder-layout">
+    <!-- Bouton toggle sidebar -->
+    @if (!sidebarOpen) {
+    <button mat-icon-button class="sidebar-toggle" (click)="toggleSidebar()" title="Afficher la barre latérale">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    }
+
+    <!-- Colonne gauche: Sidebar avec sections -->
+    @if (sidebarOpen) {
+    <div class="builder-sidebar" [style.width.px]="sidebarWidth">
+      <div class="sidebar-header">
+        <mat-icon>list</mat-icon>
+        <h2>contenu</h2>
+        <button mat-icon-button class="sidebar-close" (click)="toggleSidebar()" title="Masquer la barre latérale">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+      </div>
+      <div class="content-list">
+        @for (input of inputs; track $index) {
+        <div class="content-item" [class.selected]="selectionIndex === $index" (click)="selectInput($index)">
+          <span class="content-name">{{ input.name }}</span>
+          <div class="content-actions"></div>
+        </div>
+        }
+      </div>
+      <!-- Si c'est le createur du template alors il peut ajouter du contenu -->
+      @if (isTemplateCreator) {
+      <button mat-stroked-button class="add-content-btn">
+        <mat-icon>add</mat-icon>
+        AJOUTER DU CONTENU
+      </button>
+      }
+    </div>
+
+    <!-- Séparateur redimensionnable pour la sidebar -->
+    <div class="resizer resizer-sidebar" (mousedown)="onResizerMouseDown($event, 'sidebar')"></div>
+    }
+
+    <!-- Colonne centrale: Configuration du contenu sélectionné -->
+    <div class="builder-main">
+      @if (selection) {
+      <div class="config-panel">
+        <app-ple-input mode="plo" [disabled]="saving" [(input)]="selection" (inputChange)="onInputChange($event)" />
+      </div>
+      } @else {
+      <div class="empty-state">
+        <mat-icon>touch_app</mat-icon>
+        <p>Sélectionnez un élément dans la liste pour le configurer</p>
+      </div>
+      }
+    </div>
+
+    <!-- Séparateur redimensionnable pour la preview -->
+    <div class="resizer resizer-preview" (mousedown)="onResizerMouseDown($event, 'preview')"></div>
+
+    <!-- Colonne droite: Prévisualisation -->
+    <div class="builder-preview" [style.width.px]="previewWidth">
+      <div class="preview-content">
+        <app-builder-iframe [src]="previewUrl" />
+      </div>
+    </div>
+  </div>
+  }
+</div>
