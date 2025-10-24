@@ -24,9 +24,9 @@
       class="access-periods-container"
       cdkDropList
       (cdkDropListDropped)="onDropAccessPeriod($event)"
-      [cdkDropListData]="accessPeriods"
+      [cdkDropListData]="accessPeriods()"
     >
-      @if (accessPeriods.length === 0) {
+      @if (accessPeriods().length === 0) {
       <div class="empty-state">
         <!-- Affichage des dates actuelles de l'activité -->
         <div class="current-activity-dates">
@@ -111,7 +111,7 @@
           Créer la première période d'accès
         </button>
       </div>
-      } @else { @for (period of accessPeriods; track period; let i = $index) {
+      } @else { @for (period of accessPeriods(); track period; let i = $index) {
       <div class="access-period-item" cdkDrag [cdkDragData]="period">
         <course-restriction-manager
           [activity]="activity"
@@ -126,7 +126,7 @@
     </div>
 
     <!-- Bouton d'ajout -->
-    @if (accessPeriods.length > 0) {
+    @if (accessPeriods().length > 0) {
     <div class="add-period-section">
       <button nz-button nzType="dashed" nzBlock (click)="newAccessPeriod()" class="add-period-btn">
         <i nz-icon nzType="plus"></i>

@@ -32,6 +32,7 @@ import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import {
   Activity,
+  calculateActivityOpenState,
   CourseGroup,
   CourseMember,
   Restriction,
@@ -76,25 +77,17 @@ export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
   @Output() activityChange = new EventEmitter<Activity>()
   @Output() saveRequested = new EventEmitter<void>()
-  protected accessPeriods: RestrictionList[] = [] as RestrictionList[]
+  protected accessPeriods = signal<RestrictionList[]>([])
 
   currentHue = 210
-
-  protected form = new FormGroup({
-    openAt: new FormControl<Date | undefined>(undefined),
-    closeAt: new FormControl<Date | undefined>(undefined),
-    members: new FormControl<string[] | undefined>(undefined),
-    correctors: new FormControl<string[] | undefined>(undefined),
-    groups: new FormControl<string[] | undefined>(undefined),
-  })
 
   protected editOpenDate = false
   protected editCloseDate = false
   protected tempOpenDate?: Date
   protected tempCloseDate?: Date
 
-  @ViewChild('openDatePicker') openDatePicker?: any
-  @ViewChild('closeDatePicker') closeDatePicker?: any
+  @ViewChild('openDatePicker') openDatePicker?: unknown
+  @ViewChild('closeDatePicker') closeDatePicker?: unknown
 
   private readonly loadingSignal = signal(false)
   private readonly updatingSignal = signal(false)
@@ -140,17 +133,11 @@ export class CourseActivitySettingsComponent implements OnInit {
 
     this.courseMembers = courseMembers.resources
     this.courseGroups = courseGroups.resources
-
-    this.form.patchValue({
-      openAt: this.activity.openAt,
-      closeAt: this.activity.closeAt,
-      members: activityMembers.resources.map((m) => `${m.member.id}${m.user ? ':' + m.user.id : ''}`),
-      correctors: activityCorrectors.resources.map((c) => `${c.member.id}${c.user ? ':' + c.user.id : ''}`),
-      groups: activityGroups.resources.map((g) => g.groupId),
-    })
+    console.log(this.courseMembers, activityGroups.resources)
 
     if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
-      this.accessPeriods = [...this.activity.restrictions]
+      this.accessPeriods.set([...this.activity.restrictions])
+      console.debug('Loaded restrictions:', this.activity.restrictions)
     }
 
     this.tempOpenDate = this.activity.openAt ? new Date(this.activity.openAt) : undefined
@@ -166,49 +153,59 @@ export class CourseActivitySettingsComponent implements OnInit {
   }
 
   protected updateRestriction(index: number, updatedRestrictions: Restriction[]) {
-    if (updatedRestrictions.length === 0) {
-      this.accessPeriods.splice(index, 1)
-    } else {
-      this.accessPeriods[index] = { restriction: updatedRestrictions }
-    }
-    this.changeDetectorRef.markForCheck()
+    this.accessPeriods.update((periods) => {
+      if (updatedRestrictions.length === 0) {
+        return periods.filter((_, i) => i !== index)
+      } else {
+        const updated = [...periods]
+        updated[index] = { restriction: updatedRestrictions }
+        return updated
+      }
+    })
   }
 
   protected newAccessPeriod() {
-    this.accessPeriods.push({
-      restriction: [
-        {
-          type: 'DateRange',
-          config: {
-            start: undefined,
-            end: undefined,
+    this.accessPeriods.update((periods) => [
+      ...periods,
+      {
+        restriction: [
+          {
+            type: 'DateRange',
+            config: {
+              start: undefined,
+              end: undefined,
+            },
           },
-        },
-      ],
-    })
-    this.changeDetectorRef.markForCheck()
+        ],
+      },
+    ])
   }
 
   get accessPeriodsLength(): number {
-    return this.accessPeriods.length
+    return this.accessPeriods().length
   }
 
   protected onDropAccessPeriod(event: CdkDragDrop<RestrictionList[]>) {
     if (event.previousIndex !== event.currentIndex) {
-      moveItemInArray(this.accessPeriods, event.previousIndex, event.currentIndex)
-      this.changeDetectorRef.markForCheck()
+      this.accessPeriods.update((periods) => {
+        const updated = [...periods]
+        moveItemInArray(updated, event.previousIndex, event.currentIndex)
+        return updated
+      })
     }
   }
 
   private checkSameOthers(): boolean {
-    const periodsWithOthers = this.accessPeriods.filter((period) => period.restriction.some((r) => r.type === 'Others'))
+    const periodsWithOthers = this.accessPeriods().filter((period) =>
+      period.restriction.some((r) => r.type === 'Others')
+    )
     return periodsWithOthers.length > 1
   }
 
   private checkDateOnlyPeriods(): { indices: number[]; details: string[] } {
     const result = { indices: [] as number[], details: [] as string[] }
 
-    this.accessPeriods.forEach((period, index) => {
+    this.accessPeriods().forEach((period, index) => {
       if (period.restriction.length === 1 && period.restriction[0].type === 'DateRange') {
         result.indices.push(index + 1)
         result.details.push(`Période n°${index + 1} : seulement une date définie`)
@@ -225,7 +222,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     const result = { hasConflicts: false, conflicts: [] as Array<{ groupId: string; periods: number[] }> }
     const groupToPeriods = new Map<string, number[]>()
 
-    this.accessPeriods.forEach((period, periodIndex) => {
+    this.accessPeriods().forEach((period, periodIndex) => {
       period.restriction.forEach((restriction) => {
         if (restriction.type === 'Groups') {
           const config = restriction.config as RestrictionConfig['Groups']
@@ -233,7 +230,10 @@ export class CourseActivitySettingsComponent implements OnInit {
             if (!groupToPeriods.has(groupId)) {
               groupToPeriods.set(groupId, [])
             }
-            groupToPeriods.get(groupId)!.push(periodIndex + 1)
+            const periods = groupToPeriods.get(groupId)
+            if (periods) {
+              periods.push(periodIndex + 1)
+            }
           })
         }
       })
@@ -256,7 +256,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     const result = { hasConflicts: false, conflicts: [] as Array<{ memberId: string; periods: number[] }> }
     const memberToPeriods = new Map<string, number[]>()
 
-    this.accessPeriods.forEach((period, periodIndex) => {
+    this.accessPeriods().forEach((period, periodIndex) => {
       period.restriction.forEach((restriction) => {
         if (restriction.type === 'Members') {
           const config = restriction.config as RestrictionConfig['Members']
@@ -264,7 +264,10 @@ export class CourseActivitySettingsComponent implements OnInit {
             if (!memberToPeriods.has(memberId)) {
               memberToPeriods.set(memberId, [])
             }
-            memberToPeriods.get(memberId)!.push(periodIndex + 1)
+            const periods = memberToPeriods.get(memberId)
+            if (periods) {
+              periods.push(periodIndex + 1)
+            }
           })
         }
       })
@@ -312,7 +315,7 @@ export class CourseActivitySettingsComponent implements OnInit {
   }
 
   hasOthersRule(): boolean {
-    return this.accessPeriods.some((period) => period.restriction.some((r) => r.type === 'Others'))
+    return this.accessPeriods().some((period) => period.restriction.some((r) => r.type === 'Others'))
   }
 
   /**
@@ -419,7 +422,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     return true
   }
 
-  private async getUserSpecificDate(defaultDate?: Date): Promise<{ start: Date | undefined; end: Date | undefined }> {
+  private async getUserSpecificDate(_defaultDate?: Date): Promise<{ start: Date | undefined; end: Date | undefined }> {
     if (!this.user) return { start: undefined, end: undefined }
 
     const userSpecificPeriod = await this.findUserSpecificAccessPeriod()
@@ -435,17 +438,32 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   private async findUserSpecificAccessPeriod(): Promise<RestrictionList | null> {
     if (!this.user) return null
-    for (const period of this.accessPeriods) {
+    for (const period of this.accessPeriods()) {
       const membersRestriction = period.restriction.find((r) => r.type === 'Members')
       if (membersRestriction) {
         const config = membersRestriction.config as RestrictionConfig['Members']
         const isUserInMembers = config.members?.some((memberId) => {
           if (memberId.includes(':')) {
             const [, userId] = memberId.split(':')
-            return userId === this.user!.id
+            return userId === this.user?.id
           } else {
             const member = this.courseMembers.find((m) => m.id === memberId)
-            return member?.user?.id === this.user!.id
+            return member?.user?.id === this.user?.id
+          }
+        })
+        if (isUserInMembers) return period
+      }
+
+      const correctorsRestriction = period.restriction.find((r) => r.type === 'Correctors')
+      if (correctorsRestriction) {
+        const config = correctorsRestriction.config as RestrictionConfig['Correctors']
+        const isUserInMembers = config.correctors?.some((memberId) => {
+          if (memberId.includes(':')) {
+            const [, userId] = memberId.split(':')
+            return userId === this.user?.id
+          } else {
+            const member = this.courseMembers.find((m) => m.id === memberId)
+            return member?.user?.id === this.user?.id
           }
         })
         if (isUserInMembers) return period
@@ -454,7 +472,8 @@ export class CourseActivitySettingsComponent implements OnInit {
       const groupsRestriction = period.restriction.find((r) => r.type === 'Groups')
       if (groupsRestriction) {
         const config = groupsRestriction.config as RestrictionConfig['Groups']
-        for (const groupId of config.groups!) {
+        const groups = config.groups || []
+        for (const groupId of groups) {
           const isMemberOfGroup = await firstValueFrom(
             this.courseService.isMemberOfGroup(this.activity.courseId, groupId)
           )
@@ -473,7 +492,8 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
     this.updatingSignal.set(true)
     try {
-      if (this.activity.ignoreRestrictions && this.accessPeriods.length > 0) {
+      const periods = this.accessPeriods()
+      if (this.activity.ignoreRestrictions && periods.length > 0) {
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
@@ -495,18 +515,18 @@ export class CourseActivitySettingsComponent implements OnInit {
 
       const result = await Promise.all([
         ...(!this.activity.isChallenge
-          ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.accessPeriods))]
+          ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, periods))]
           : []),
       ])
       this.activity = result[0]
-      if (this.accessPeriods.length > 0) {
+      if (periods.length > 0) {
         const userSpecificDate = await this.getUserSpecificDate()
         this.activityChange.emit(
           (this.activity = {
             ...this.activity,
             openAt: userSpecificDate.start,
             closeAt: userSpecificDate.end,
-            //state: result[0].state,
+            state: calculateActivityOpenState({ openAt: userSpecificDate.start, closeAt: userSpecificDate.end }),
             colorHue: this.currentHue,
           })
         )
@@ -575,6 +595,9 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.updatingSignal.set(true)
     this.changeDetectorRef.markForCheck()
     const activity = await firstValueFrom(this.courseService.closeActivity(this.activity))
+    if (activity.restrictions) {
+      this.accessPeriods.set(activity.restrictions)
+    }
     this.activityChange.emit(
       (this.activity = {
         ...this.activity,
@@ -582,9 +605,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
-    this.form.patchValue({
-      closeAt: this.activity.closeAt,
-    })
+
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }
@@ -593,6 +614,9 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.updatingSignal.set(true)
     this.changeDetectorRef.markForCheck()
     const activity = await firstValueFrom(this.courseService.reopenActivity(this.activity))
+    if (activity.restrictions) {
+      this.accessPeriods.set(activity.restrictions)
+    }
     this.activityChange.emit(
       (this.activity = {
         ...this.activity,
@@ -600,9 +624,6 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
-    this.form.patchValue({
-      closeAt: this.activity.closeAt,
-    })
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }
