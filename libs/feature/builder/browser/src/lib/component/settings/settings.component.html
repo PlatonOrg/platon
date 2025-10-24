@@ -1,0 +1,52 @@
+@if (selectedSetting()) {
+<div class="settings-panel">
+  <div class="settings-header">
+    <mat-icon>{{ selectedSetting()!.icon }}</mat-icon>
+    <h2>{{ selectedSetting()!.label }}</h2>
+  </div>
+
+  <!-- Panneau de sélection de thème -->
+  @if (selectedSetting()!.type === 'theme') {
+  <div class="theme-selector">
+    <h3>Choisissez votre thème</h3>
+    <div class="theme-options">
+      <button mat-raised-button class="theme-option" [class.selected]="isLightTheme()" (click)="applyTheme('light')">
+        <mat-icon>light_mode</mat-icon>
+        <span>Thème clair</span>
+      </button>
+
+      <button mat-raised-button class="theme-option" [class.selected]="isDarkTheme()" (click)="applyTheme('dark')">
+        <mat-icon>dark_mode</mat-icon>
+        <span>Thème sombre</span>
+      </button>
+
+      <button
+        mat-raised-button
+        class="theme-option"
+        [class.selected]="!isLightTheme() && !isDarkTheme()"
+        (click)="applyTheme('system')"
+      >
+        <mat-icon>auto_awesome</mat-icon>
+        <span>Thème système</span>
+      </button>
+    </div>
+  </div>
+  }
+
+  <!-- Panneau Mode prévisualisation -->
+  @if (selectedSetting()!.type === 'preview') {
+  <div class="preview-settings">
+    <h3>Mode prévisualisation</h3>
+    <p>Options de prévisualisation à venir...</p>
+  </div>
+  }
+
+  <!-- Panneau Mode développeur -->
+  @if (selectedSetting()!.type === 'developer') {
+  <div class="developer-settings">
+    <h3>Mode développeur</h3>
+    <p>Options de développement à venir...</p>
+  </div>
+  }
+</div>
+}
