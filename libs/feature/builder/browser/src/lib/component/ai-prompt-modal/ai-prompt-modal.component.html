@@ -1,0 +1,99 @@
+<div class="ai-modal">
+  <h2 mat-dialog-title>
+    <mat-icon>auto_awesome</mat-icon>
+    Transformer avec l'IA
+  </h2>
+
+  <mat-dialog-content>
+    <div class="modal-content">
+      <!-- Sélection du provider -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Provider IA</mat-label>
+        <mat-select [(ngModel)]="provider" (selectionChange)="onProviderChange()">
+          <mat-option value="openai">
+            <span class="provider-option">OpenAI (ChatGPT)</span>
+          </mat-option>
+          <mat-option value="anthropic">
+            <span class="provider-option">Anthropic (Claude)</span>
+          </mat-option>
+          <mat-option value="mistral">
+            <span class="provider-option">Mistral AI</span>
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>dns</mat-icon>
+      </mat-form-field>
+
+      <!-- Sélection du modèle -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Modèle</mat-label>
+        <mat-select [(ngModel)]="model">
+          @if (provider === 'openai') { @for (m of openaiModels; track m.value) {
+          <mat-option [value]="m.value">{{ m.label }}</mat-option>
+          } } @if (provider === 'anthropic') { @for (m of anthropicModels; track m.value) {
+          <mat-option [value]="m.value">{{ m.label }}</mat-option>
+          } } @if (provider === 'mistral') { @for (m of mistralModels; track m.value) {
+          <mat-option [value]="m.value">{{ m.label }}</mat-option>
+          } }
+        </mat-select>
+        <mat-icon matSuffix>psychology</mat-icon>
+      </mat-form-field>
+
+      <!-- Clé API -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Clé API</mat-label>
+        <input matInput type="password" [(ngModel)]="apiKey" placeholder="sk-... ou api-..." />
+        <mat-icon matSuffix>key</mat-icon>
+        <mat-hint>Votre clé ne sera jamais envoyée à nos serveurs</mat-hint>
+      </mat-form-field>
+
+      <!-- Exemples de prompts -->
+      <div class="examples-section">
+        <label class="examples-label">
+          <mat-icon>lightbulb</mat-icon>
+          Exemples de transformations
+        </label>
+        <div class="examples-chips">
+          @for (example of examplePrompts; track example) {
+          <button mat-stroked-button class="example-chip" (click)="useExamplePrompt(example)">
+            {{ example }}
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- Prompt principal -->
+      <mat-form-field appearance="outline" class="full-width prompt-field">
+        <mat-label>Décrivez la transformation souhaitée</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="prompt"
+          rows="6"
+          placeholder="Ex: Traduis tous les textes en anglais et rends les titres plus accrocheurs"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="6"
+          cdkAutosizeMaxRows="12"
+        >
+        </textarea>
+        <mat-hint>Soyez précis dans vos instructions</mat-hint>
+      </mat-form-field>
+
+      <!-- Avertissement -->
+      <nz-alert
+        nzType="info"
+        nzMessage="Comment ça marche ?"
+        nzDescription="L'IA va analyser votre configuration actuelle et la transformer selon vos instructions. Les types de champs ne seront pas modifiés, uniquement les valeurs."
+        nzShowIcon
+        [nzCloseable]="false"
+      >
+      </nz-alert>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Annuler</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!prompt.trim()">
+      <mat-icon>auto_awesome</mat-icon>
+      Transformer
+    </button>
+  </mat-dialog-actions>
+</div>
