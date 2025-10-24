@@ -232,7 +232,7 @@ if __name__ == "__main__":
             return False
 
         if is_timeout_error(e):
-            raise
+            raise e
 
         platon_logger.maxlog_exception(e)
         val = platon_logger.push2platonlog()
