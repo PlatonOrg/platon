@@ -5,7 +5,6 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
-  AfterViewInit,
   inject,
   HostListener,
 } from '@angular/core'
@@ -16,8 +15,9 @@ import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatDividerModule } from '@angular/material/divider'
 import { MatToolbarModule } from '@angular/material/toolbar'
+import { MatDialog } from '@angular/material/dialog'
 import { PleInput, Variables } from '@platon/feature/compiler'
-import { ResourceFileService, ResourceService } from '@platon/feature/resource/browser'
+import { ResourceFileService, ResourceService, getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
 import { Resource } from '@platon/feature/resource/common'
 import { DialogModule, DialogService, StorageService } from '@platon/core/browser'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
@@ -25,8 +25,25 @@ import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { firstValueFrom } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
 import { PleInputEditorModule } from '../editor/contributions/editors/ple-input/ple-input.module'
-import { BuilderIFrameComponent } from './builder-iframe/builder-iframe.component'
-import { getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
+import {
+  AIPromptModalComponent,
+  AIPromptModalData,
+  BuilderIFrameComponent,
+  BuilderService,
+  SettingsComponent,
+  type SettingItem,
+} from '@platon/feature/builder/browser'
+
+// Interface pour les sections de la sidebar
+interface SidebarSection {
+  id: string
+  label: string
+  icon: string
+  collapsed: boolean
+}
+
+// Type pour le mode d'affichage principal
+type MainViewMode = 'input' | 'setting'
 
 @Component({
   standalone: true,
@@ -46,10 +63,11 @@ import { getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
     NzAlertModule,
     BuilderIFrameComponent,
     PleInputEditorModule,
+    SettingsComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class BuilderPage implements OnInit, AfterViewInit {
+export class BuilderPage implements OnInit {
   private readonly router = inject(Router)
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
@@ -59,6 +77,9 @@ export class BuilderPage implements OnInit, AfterViewInit {
   private readonly storageService = inject(StorageService)
   private readonly http = inject(HttpClient)
 
+  private readonly dialog = inject(MatDialog)
+  private readonly builderService = inject(BuilderService)
+
   protected resource?: Resource
   protected template?: Resource
   protected isTemplateCreator = false
@@ -66,10 +87,22 @@ export class BuilderPage implements OnInit, AfterViewInit {
   protected overrides: Variables = {}
   protected loading = true
   protected saving = false
+  protected aiTransforming = false
   protected error?: string
 
   protected selection: PleInput | undefined
   protected selectionIndex = -1
+
+  // Gestion des paramètres
+  protected mainViewMode: MainViewMode = 'input'
+  protected selectedSetting: SettingItem | null = null
+
+  // Liste des paramètres disponibles (pour la sidebar)
+  protected readonly settingItems: SettingItem[] = [
+    { id: 'theme', label: 'Thème', icon: 'palette', type: 'theme' },
+    { id: 'preview', label: 'Mode prévisualisation', icon: 'preview', type: 'preview' },
+    { id: 'developer', label: 'Mode développeur', icon: 'code', type: 'developer' },
+  ]
 
   protected previewSessionId = uuidv4()
   protected showPreview = true
@@ -78,8 +111,16 @@ export class BuilderPage implements OnInit, AfterViewInit {
   private debounceTimeout?: ReturnType<typeof setTimeout>
 
   // Largeurs des colonnes
-  protected sidebarWidth = 200 //205 //240 //280
-  protected previewWidth = 850 //800
+  protected sidebarWidth = 200
+  protected previewWidth = 850
+  protected sidebarMinWidth = 60 // Largeur mode icône uniquement
+
+  // Sections de la sidebar
+  protected sidebarSections: SidebarSection[] = [
+    { id: 'content', label: 'Contenu', icon: 'list', collapsed: false },
+    { id: 'settings', label: 'Paramètres', icon: 'settings', collapsed: true },
+    { id: 'history', label: 'Historique', icon: 'history', collapsed: true },
+  ]
 
   // État du redimensionnement
   private isResizing = false
@@ -89,11 +130,43 @@ export class BuilderPage implements OnInit, AfterViewInit {
 
   protected toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen
+
+    // Ajuster la largeur selon l'état
+    if (this.sidebarOpen) {
+      this.sidebarWidth = 200 // Largeur complète
+    } else {
+      this.sidebarWidth = this.sidebarMinWidth // Mode icône uniquement
+    }
+
     this.changeDetectorRef.markForCheck()
   }
 
-  ngAfterViewInit(): void {
-    // Les événements de souris sont gérés via @HostListener
+  protected toggleSection(sectionId: string): void {
+    const section = this.sidebarSections.find((s) => s.id === sectionId)
+    if (section) {
+      // Si la sidebar est fermée, on l'ouvre d'abord
+      if (!this.sidebarOpen) {
+        this.sidebarOpen = true
+        this.sidebarWidth = 200
+      }
+
+      // Toggle la section
+      section.collapsed = !section.collapsed
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
+  protected isSectionActive(sectionId: string): boolean {
+    const section = this.sidebarSections.find((s) => s.id === sectionId)
+    return section ? !section.collapsed : false
+  }
+
+  protected selectSetting(setting: SettingItem): void {
+    this.selectedSetting = setting
+    this.mainViewMode = 'setting'
+    this.selection = undefined
+    this.selectionIndex = -1
+    this.changeDetectorRef.markForCheck()
   }
 
   protected onResizerMouseDown(e: MouseEvent, column: 'sidebar' | 'preview'): void {
@@ -118,7 +191,18 @@ export class BuilderPage implements OnInit, AfterViewInit {
     if (this.resizingColumn === 'sidebar') {
       // Redimensionner la sidebar (mouvement vers la droite = agrandir)
       const newWidth = this.startWidth + delta
-      this.sidebarWidth = Math.max(200, Math.min(600, newWidth))
+      const minWidth = this.sidebarOpen ? 150 : this.sidebarMinWidth
+      this.sidebarWidth = Math.max(minWidth, Math.min(600, newWidth))
+
+      if (this.sidebarWidth <= 150 && this.sidebarOpen) {
+        this.sidebarOpen = false
+        this.sidebarWidth = this.sidebarMinWidth
+      }
+      // Si on agrandit, passer en mode complet
+      else if (this.sidebarWidth > 150 && !this.sidebarOpen) {
+        this.sidebarOpen = true
+        this.sidebarWidth = 200
+      }
     } else if (this.resizingColumn === 'preview') {
       // Redimensionner la preview (mouvement vers la gauche = agrandir)
       const newWidth = this.startWidth - delta
@@ -165,7 +249,7 @@ export class BuilderPage implements OnInit, AfterViewInit {
 
       const config = JSON.parse(configContent)
       this.inputs = config.inputs || []
-
+      console.log(configContent)
       try {
         const overridesFile = await firstValueFrom(
           this.resourceFileService.read(this.resource.id, 'main.plo', 'latest')
@@ -225,6 +309,9 @@ export class BuilderPage implements OnInit, AfterViewInit {
   protected selectInput(index: number): void {
     this.selection = this.inputs[index]
     this.selectionIndex = index
+    this.mainViewMode = 'input'
+    this.selectedSetting = null
+    this.changeDetectorRef.markForCheck()
   }
 
   protected async save(): Promise<void> {
@@ -307,6 +394,84 @@ export class BuilderPage implements OnInit, AfterViewInit {
   protected async openInEditor(): Promise<void> {
     if (this.resource) {
       window.open(`/editor/${this.resource.id}?version=latest`, '_blank')
+    }
+  }
+
+  protected async openAITransform(): Promise<void> {
+    const dialogRef = this.dialog.open(AIPromptModalComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      disableClose: false,
+      autoFocus: true,
+    })
+
+    const result: AIPromptModalData | null = await firstValueFrom(dialogRef.afterClosed())
+
+    if (!result) {
+      return
+    }
+
+    try {
+      this.aiTransforming = true
+      this.changeDetectorRef.markForCheck()
+
+      const response = await firstValueFrom(
+        this.builderService.transformInputsWithAI({
+          inputs: this.inputs,
+          prompt: result.prompt,
+          provider: result.provider,
+          model: result.model,
+        })
+      )
+
+      // Mettre à jour les inputs avec les nouvelles valeurs
+      this.inputs = response.inputs.map((transformedInput: PleInput) => {
+        const originalInput = this.inputs.find((i) => i.name === transformedInput.name)
+        return {
+          ...originalInput,
+          ...transformedInput,
+        }
+      })
+
+      // Mettre à jour les overrides
+      this.inputs.forEach((input) => {
+        this.overrides[input.name] = input.value
+      })
+
+      // Rafraîchir la sélection si elle existe
+      if (this.selection && this.selectionIndex >= 0) {
+        this.selection = this.inputs[this.selectionIndex]
+      }
+
+      // Recharger la prévisualisation
+      await this.reloadPreview()
+
+      const usageText = response.usage ? ` (${response.usage.totalTokens} tokens utilisés)` : ''
+
+      this.dialogService.success(`Configuration transformée avec succès !${usageText}`)
+    } catch (error: unknown) {
+      console.error('Erreur lors de la transformation IA:', error)
+
+      let errorMessage = 'Erreur lors de la transformation IA'
+
+      if (error && typeof error === 'object') {
+        const err = error as { status?: number; error?: { message?: string }; message?: string }
+
+        if (err.status === 401) {
+          errorMessage = 'Clé API invalide ou expirée'
+        } else if (err.status === 429) {
+          errorMessage = 'Limite de requêtes atteinte. Veuillez réessayer plus tard.'
+        } else if (err.error?.message) {
+          errorMessage = err.error.message
+        } else if (err.message) {
+          errorMessage = err.message
+        }
+      }
+
+      this.dialogService.error(errorMessage)
+    } finally {
+      this.aiTransforming = false
+      this.changeDetectorRef.markForCheck()
     }
   }
 
