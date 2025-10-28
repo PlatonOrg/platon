@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule, ActivatedRoute } from '@angular/router'
 import { firstValueFrom, Subscription } from 'rxjs'
+import { Title } from '@angular/platform-browser'
 
 import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
@@ -80,6 +81,9 @@ export class ResourcePage implements OnInit, OnDestroy {
   protected configurable = false
   protected certifiedTemplate = false
 
+  // for the tab name
+  constructor(private titleService: Title){}
+
   get isOtherPersonal(): boolean {
     return this.context.resource!.personal && this.context.resource!.ownerId !== this.context.user!.id
   }
@@ -96,6 +100,10 @@ export class ResourcePage implements OnInit, OnDestroy {
         }
 
         this.changeDetectorRef.markForCheck()
+
+        if (this.context.resource?.name) {
+          this.titleService.setTitle('Ressource - ' + this.context.resource?.name)
+        }
       })
     )
     //this.checkFirstVisit()

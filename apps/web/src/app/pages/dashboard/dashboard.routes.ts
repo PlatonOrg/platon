@@ -23,7 +23,6 @@ export default [
         loadChildren: () => import('../announcements/announcements.routes'),
       },
       {
-        title: 'PLaTon - Espace de travail',
         path: 'resources',
         loadChildren: () =>
           import(
@@ -50,7 +49,6 @@ export default [
           ),
       },
       {
-        title: 'PLaTon - Cours',
         path: 'courses',
         loadChildren: () =>
           import(

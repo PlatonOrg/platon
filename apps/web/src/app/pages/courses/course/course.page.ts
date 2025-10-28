@@ -19,6 +19,7 @@ import { CourseSharingComponent } from '@platon/feature/course/browser'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { CoursePresenter } from './course.presenter'
+import { Title } from '@angular/platform-browser'
 
 @Component({
   standalone: true,
@@ -57,11 +58,18 @@ export class CoursePage implements OnInit, OnDestroy {
 
   protected context = this.presenter.defaultContext()
 
+  // for the tab name
+  constructor(private titleService: Title){}
+
   ngOnInit(): void {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
         this.changeDetectorRef.markForCheck()
+
+        if (this.context.course?.name) {
+          this.titleService.setTitle('Cours - ' + this.context.course?.name)
+        }
       })
     )
   }

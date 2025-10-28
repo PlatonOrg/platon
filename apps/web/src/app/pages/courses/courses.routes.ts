@@ -3,10 +3,12 @@ import { CoursesPage } from './courses.page'
 
 export default [
   {
+    title: 'PLaTon - Cours',
     path: '',
     component: CoursesPage,
   },
   {
+    title: 'PLaTon - Création',
     path: 'create',
     loadChildren: () =>
       import(
