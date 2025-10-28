@@ -27,6 +27,23 @@ button {
   font-size: medium;
 }
 
+.bubbles-item button.mat-fab.extended {
+  width: 100px;
+  max-width: 100px;
+  overflow: hidden;
+}
+
+.bubbles-item ::ng-deep .mdc-button__label {
+  white-space: nowrap;
+  overflow-x: scroll !important;
+  overflow-y: hidden;
+  display: block;
+  width: 100%;
+  max-height: 40px ;
+  padding-bottom: 35px;
+  padding-top: 5px;
+
+}
 .bubbles-items button.checked,
 .bubbles-items a.checked {
   animation: changeColorChecked 1s forwards;
@@ -61,6 +78,29 @@ button {
 .bubbles-item a:hover {
   transform: translateY(-0.1em);
   border-width: 3px;
+}
+
+.bubbles-item span {
+  display: block;
+  white-space: nowrap;
+}
+
+/* scrollbar indicator  */
+.scroll-arrow-indicator {
+  display: inline-block;
+  position: relative;
+
+  padding-left: 15px;
+
+  &::before {
+    content: '\2192'; // arrow unicode
+    position: absolute;
+    left: 10px;
+    bottom: -30px;
+    color: var(--brand-color-primary);
+    font-size: 40px;
+    font-weight: bold;
+  }
 }
 
 @keyframes changeColorChecked {
