@@ -457,7 +457,7 @@ export class CourseActivitySettingsComponent implements OnInit {
       const correctorsRestriction = period.restriction.find((r) => r.type === 'Correctors')
       if (correctorsRestriction) {
         const config = correctorsRestriction.config as RestrictionConfig['Correctors']
-        const isUserInMembers = config.correctors?.some((memberId) => {
+        const isUserInCorrectors = config.correctors?.some((memberId) => {
           if (memberId.includes(':')) {
             const [, userId] = memberId.split(':')
             return userId === this.user?.id
@@ -466,7 +466,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             return member?.user?.id === this.user?.id
           }
         })
-        if (isUserInMembers) return period
+        if (isUserInCorrectors) return period
       }
 
       const groupsRestriction = period.restriction.find((r) => r.type === 'Groups')
@@ -542,6 +542,20 @@ export class CourseActivitySettingsComponent implements OnInit {
         )
       }
 
+      // Quick fix pour attribuer les correcteurs. À revoir plus tard.
+      // TODO: Optimiser cette partie pour que ce soit fait côté serveur lors de la mise à jour des restrictions.
+      await firstValueFrom(
+        this.courseService.updateActivityCorrectors(
+          this.activity,
+          this.getCorrectors().map((memberId) => {
+            return {
+              userId: this.courseMembers.find((m) => memberId.startsWith(m.id))?.user?.id,
+              memberId,
+            }
+          })
+        )
+      )
+
       this.dialogService.success('Activité mise à jour !')
       this.saveRequested.emit()
     } catch (error) {
@@ -553,6 +567,18 @@ export class CourseActivitySettingsComponent implements OnInit {
       this.updatingSignal.set(false)
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  private getCorrectors(): string[] {
+    const correctors = new Set<string>()
+    this.accessPeriods()
+      .flatMap((period: RestrictionList) =>
+        period.restriction
+          .filter((r: Restriction) => r.type === 'Correctors')
+          .flatMap((r: Restriction) => (r.config as RestrictionConfig['Correctors']).correctors || [])
+      )
+      .forEach((corrector: string) => correctors.add(corrector))
+    return Array.from(correctors)
   }
 
   protected async reload(): Promise<void> {

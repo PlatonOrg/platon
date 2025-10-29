@@ -175,6 +175,14 @@ export abstract class PlayerManager {
     let variables = exerciseSession.variables
     variables.feedback = { type: 'info', content: '' }
 
+    const submissionFiles = await Promise.all(
+      exerciseSession?.submissions?.map(async (file) => ({
+        path: 'submission/' + basename(file.fileName),
+        content: (await file.getContent()).toString(),
+        hash: '',
+      })) || []
+    )
+
     const output = await this.sandboxManager.run(
       {
         envid,
@@ -184,6 +192,7 @@ export abstract class PlayerManager {
           content: file.content,
           hash: file.hash,
         })),
+        submissionFiles: submissionFiles,
       },
       variables.grader
     )

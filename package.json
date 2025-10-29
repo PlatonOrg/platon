@@ -115,6 +115,7 @@
     "@types/crypto-js": "^4.2.2",
     "@types/d3": "^7.4.0",
     "@types/echarts": "^4.9.22",
+    "@types/fs-extra": "^11.0.4",
     "@types/graphql-iso-date": "^3.4.0",
     "@types/graphql-relay": "^0.7.0",
     "@types/intro.js": "^5.1.0",

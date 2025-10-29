@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core'
-// ❌ Pas d'import ES6 ici car on utilise "export ="
-// import CrosswordLayout from 'crossword-layout-generator';
 
 import * as clg from 'crossword-layout-generator'
 import { Result } from '../model/result'
@@ -16,7 +14,7 @@ export class CrossWordService {
   private userAnswers: Result[] = []
   private userGrid: string[][] = []
   private lastPosition = [-1, -1]
-  lastStatusPos = 'U' // 'U' unkonw user must choose by himself (crossing or end of a word), 'V' vertical, 'H' horizontal
+  lastStatusPos = 'U' // 'U' unknown, user must choose by himself (crossing or end of a word), 'V' vertical, 'H' horizontal
 
   generateGridService(words: { clue: string; answer: string }[]) {
     const layout = clg.generateLayout(words)

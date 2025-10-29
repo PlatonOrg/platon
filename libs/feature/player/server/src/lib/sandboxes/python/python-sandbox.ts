@@ -208,6 +208,11 @@ export class PythonSandbox implements Sandbox {
       }
     }
 
+    // Always add submission files if present
+    for (const file of input.submissionFiles || []) {
+      pack.entry({ name: file.path }, file.content || '')
+    }
+
     pack.finalize()
 
     const gzip = zlib.createGzip()

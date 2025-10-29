@@ -3,8 +3,9 @@ import { BaseEntity, UserEntity } from '@platon/core/server'
 import { ActivityVariables, ExerciseVariables, PLSourceFile } from '@platon/feature/compiler'
 import { ActivityEntity } from '@platon/feature/course/server'
 import { Session } from '@platon/feature/result/common'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { CorrectionEntity } from '../correction/correction.entity'
+import { StudentSubmissionEntity } from '../submissions/submission.entity'
 
 @Entity('Sessions')
 @Index('Sessions_exercise_idx', ['parentId', 'id'])
@@ -40,6 +41,9 @@ export class SessionEntity<TVariables = any> extends BaseEntity implements Sessi
   @ManyToOne(() => CorrectionEntity, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'correction_id' })
   correction?: CorrectionEntity | null
+
+  @OneToMany(() => StudentSubmissionEntity, (submission) => submission.session)
+  submissions?: StudentSubmissionEntity[] | null
 
   @Column({ type: 'jsonb', default: {} })
   variables!: TVariables

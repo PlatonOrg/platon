@@ -10,6 +10,12 @@ export interface SandboxInput {
         hash: string
       }[]
     | null
+  submissionFiles?:
+    | {
+        path: string
+        content: string
+      }[]
+    | null
   variables: ExerciseVariables | ActivityVariables
 }
 

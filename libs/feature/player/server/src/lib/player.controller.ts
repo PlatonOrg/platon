@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IRequest, Public, UUIDParam } from '@platon/core/server'
+import { IRequest, Public, UUIDParam, getContentDisposition } from '@platon/core/server'
 import { EvalExerciseInput, NextOutput, PlayAnswersInput } from '@platon/feature/player/common'
 import {
   EvalExerciseOutputDTO,
@@ -64,7 +64,7 @@ export class PlayerController {
   async downloadEnvironment(@Req() req: IRequest, @UUIDParam('sessionId') sessionId: string, @Res() res: Response) {
     const { envid, content } = await this.playerService.downloadEnvironment(sessionId, req.user)
     res.setHeader('Content-Type', 'application/gzip')
-    res.setHeader('Content-Disposition', `attachment; filename=${envid}.tgz`)
+    res.setHeader('Content-Disposition', getContentDisposition(`${envid}.tgz`))
     const buffer = Buffer.from(content, 'binary')
     res.send(buffer)
   }

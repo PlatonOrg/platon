@@ -15,6 +15,7 @@ export class WebComponentService {
    * Emits when a component is auto-submitted.
    */
   readonly onSubmit = this.submitEvent.asObservable()
+  private context: { [key: string]: unknown } = {}
 
   constructor(
     @Optional()
@@ -58,5 +59,13 @@ export class WebComponentService {
   submit(component: WebComponentHooks) {
     const elementRef = component.injector.get<ElementRef<HTMLElement>>(ElementRef)
     this.submitEvent.next(elementRef.nativeElement.id)
+  }
+
+  setContext(context: { [key: string]: unknown }) {
+    this.context = context
+  }
+
+  getContext(): { [key: string]: unknown } {
+    return this.context
   }
 }

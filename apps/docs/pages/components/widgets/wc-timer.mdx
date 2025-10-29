@@ -35,28 +35,12 @@ Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du c
     <ComponentProperties schema={{
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
-  "required": [
-    "mode"
-  ],
+  "required": [],
   "properties": {
-    "mode": {
-      "type": "string",
-      "enum": [
-        "chronometer",
-        "countdown"
-      ],
-      "default": "chronometer",
-      "description": "Mode du chronomètre."
-    },
     "countDownTime": {
       "type": "number",
       "default": 0,
       "description": "Temps du compte à rebours en secondes."
-    },
-    "time": {
-      "type": "number",
-      "default": 0,
-      "description": "Temps écoulé en secondes."
     },
     "alignment": {
       "type": "string",
@@ -67,6 +51,11 @@ Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du c
       ],
       "default": "center",
       "description": "Alignement du chronomètre."
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le chronomètre."
     }
   }
 }} />
@@ -76,28 +65,12 @@ Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du c
     {
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
-  "required": [
-    "mode"
-  ],
+  "required": [],
   "properties": {
-    "mode": {
-      "type": "string",
-      "enum": [
-        "chronometer",
-        "countdown"
-      ],
-      "default": "chronometer",
-      "description": "Mode du chronomètre."
-    },
     "countDownTime": {
       "type": "number",
       "default": 0,
       "description": "Temps du compte à rebours en secondes."
-    },
-    "time": {
-      "type": "number",
-      "default": 0,
-      "description": "Temps écoulé en secondes."
     },
     "alignment": {
       "type": "string",
@@ -108,6 +81,11 @@ Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du c
       ],
       "default": "center",
       "description": "Alignement du chronomètre."
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le chronomètre."
     }
   }
 }
