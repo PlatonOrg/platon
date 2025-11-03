@@ -116,8 +116,9 @@ export class ResourceFileController {
     }
 
     await repo.release(input.name, input.message)
-
-    await this.dependencyService.createDependencyForNewVersion(resourceId, input.name)
+    if (resource.template) { // ignore this if you didn't inherit from a template
+      await this.dependencyService.createDependencyForNewVersion(resourceId, input.name)
+    }
 
     this.eventService.emit<OnReleaseRepoEventPayload>(ON_RELEASE_REPO_EVENT, {
       repo,
