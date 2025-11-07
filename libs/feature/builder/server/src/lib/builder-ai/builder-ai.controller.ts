@@ -16,7 +16,6 @@ export class BuilderAiController {
   ): Promise<AITransformOutput> {
     if (!apiKey) {
       throw new UnauthorizedException('Clé API manquante')
-
     }
 
     return this.builderAiService.transformInputsWithAI(input, apiKey)

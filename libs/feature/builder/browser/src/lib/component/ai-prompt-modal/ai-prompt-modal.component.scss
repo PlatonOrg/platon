@@ -8,8 +8,8 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--brand-color-primary);
+  color: var(--brand-color-primary-contrast);
   margin: -24px -24px 0 -24px;
 
   .header-icon {
@@ -18,7 +18,7 @@
     justify-content: center;
     width: 48px;
     height: 48px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--brand-color-primary-shade);
     border-radius: 12px;
 
     mat-icon {
@@ -36,10 +36,10 @@
   }
 
   .close-btn {
-    color: white;
+    color: var(--brand-color-primary-contrast);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--brand-color-primary-shade);
     }
   }
 }
@@ -53,13 +53,13 @@ mat-dialog-content {
 .dialog-description {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: #f5f7ff;
+  background: var(--brand-background-components);
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--brand-color-primary);
 
   p {
     margin: 0;
-    color: #4a5568;
+    color: var(--brand-text-secondary);
     line-height: 1.6;
   }
 }
@@ -80,7 +80,7 @@ mat-dialog-content {
     margin: 0 0 0.75rem 0;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #4a5568;
+    color: var(--brand-text-primary);
   }
 
   .example-chips {
@@ -94,9 +94,9 @@ mat-dialog-content {
       border-radius: 20px;
 
       &:hover:not(:disabled) {
-        background: #f5f7ff;
-        border-color: #667eea;
-        color: #667eea;
+        background: var(--brand-background-hover);
+        border-color: var(--brand-color-primary);
+        color: var(--brand-color-primary);
       }
     }
   }
@@ -108,8 +108,8 @@ mat-dialog-content {
   gap: 0.5rem;
   margin-top: 1rem;
   padding: 0.75rem;
-  background: #fee;
-  color: #c33;
+  background: var(--brand-pastel-red);
+  color: var(--brand-text-error);
   border-radius: 6px;
 
   mat-icon {
@@ -121,7 +121,7 @@ mat-dialog-content {
 
 mat-dialog-actions {
   padding: 1rem 1.5rem !important;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--brand-border-color);
 
   button {
     display: flex;
