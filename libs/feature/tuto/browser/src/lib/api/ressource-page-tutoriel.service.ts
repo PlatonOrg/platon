@@ -170,10 +170,10 @@ export class ResourcePageTutorialService {
            <p>Cette ressource est organisée en plusieurs sections accessibles via les onglets ci-dessous :</p>
 
            <div style="text-align: left; margin: 20px 0;">
-             <p><strong>📊 Vue d'ensemble</strong> : Statistiques et informations générales</p>
-             <p><strong>📁 Explorer</strong> : ${resource.type === 'CIRCLE' ? 'Contenu du cercle' : 'Fichiers et contenu'}</p>
-             <p><strong>📜 Événements</strong> : Historique des modifications</p>
-             <p><strong>⚙️ Paramètres</strong> : Configuration et permissions</p>
+             <p><strong>Vue d'ensemble</strong> : Statistiques et informations générales</p>
+             <p><strong>Explorer</strong> : ${resource.type === 'CIRCLE' ? 'Contenu du cercle' : 'Fichiers et contenu'}</p>
+             <p><strong>Événements</strong> : Historique des modifications</p>
+             <p><strong>Paramètres</strong> : Configuration et permissions</p>
            </div>
 
            <p style="font-size: 14px; color: var(--brand-text-secondary);">
