@@ -37,24 +37,98 @@
         <mat-icon>widgets</mat-icon>
       </ng-template>
       <ng-template uiStepperStep stepTitle="Activité" [stepIcon]="icon2" [stepValidator]="!!resourceInfo.valid">
-        <section>
+        <section #activitySection>
           <form [formGroup]="resourceInfo">
             @if (isTest) {
             <h4 id="resource">
-              Sélectionnez l'activité à ajouter au test d'entrée “{{ courseInfo.value.course?.name }}”.
+              Sélectionnez l'activité à ajouter au test d'entrée "{{ courseInfo.value.course?.name }}".
             </h4>
             } @else {
             <h4 id="resource">
-              Sélectionnez l'activité à ajouter à la section “{{ courseInfo.value.section?.name }}” du cours “{{
+              Sélectionnez l'activité à ajouter à la section "{{ courseInfo.value.section?.name }}" du cours "{{
                 courseInfo.value.course?.name
-              }}”.
+              }}".
             </h4>
             }
-            <resource-search-bar
-              aria-labelledby="resource"
-              formControlName="resource"
-              [filters]="{ types: ['ACTIVITY'], watchers: [user.id] }"
-            />
+
+            <!-- SearchBar avec filtres intégrés -->
+            <ui-search-bar [searchbar]="activitySearchBar" aria-labelledby="resource">
+              <ng-template let-context>{{ context }}</ng-template>
+            </ui-search-bar>
+
+            <!-- Indicateurs de filtres -->
+            <div class="filter-indicators">
+              <ui-filter-indicators
+                [filters]="resourceFilters()"
+                (filtersChange)="search($event, $event.search)"
+                [indicators]="filterIndicators()"
+              />
+            </div>
+
+            <!-- Activité sélectionnée -->
+            @if (resourceInfo.value.resource) {
+            <div class="selected-activity-banner">
+              <div class="banner-content">
+                <div class="banner-info">
+                  <mat-icon class="check-icon">check_circle</mat-icon>
+                  <div class="activity-details">
+                    <span class="activity-name">{{ resourceInfo.value.resource.name }}</span>
+                    @if (resourceInfo.value.resource.topics.length > 0 || resourceInfo.value.resource.levels.length > 0)
+                    {
+                    <div class="activity-tags">
+                      @for (topic of resourceInfo.value.resource.topics; track topic.id) {
+                      <nz-tag [nzColor]="'blue'">{{ topic.name }}</nz-tag>
+                      } @for (level of resourceInfo.value.resource.levels; track level.id) {
+                      <nz-tag [nzColor]="'orange'">{{ level.name }}</nz-tag>
+                      }
+                    </div>
+                    }
+                  </div>
+                </div>
+                <div class="banner-actions">
+                  <button nz-button nzSize="small" nzType="default" (click)="deselectActivity()">Changer</button>
+                  <button nz-button nzSize="small" nzType="primary" (click)="stepper.nextStep()">Suivant</button>
+                </div>
+              </div>
+            </div>
+            }
+
+            <!-- Résultats de recherche -->
+            <ng-container *ngIf="!searching(); else spinner">
+              <ng-container [ngPlural]="totalMatches()">
+                <ng-template ngPluralCase="=0"></ng-template>
+                <ng-template ngPluralCase="=1">
+                  <p class="results-count">1 activité trouvée</p>
+                </ng-template>
+                <ng-template ngPluralCase="other">
+                  <p class="results-count">{{ totalMatches() }} activités trouvées</p>
+                </ng-template>
+              </ng-container>
+
+              <app-activity-list
+                [items]="items()"
+                [selectedId]="resourceInfo.value.resource?.id"
+                (activityClicked)="selectActivity($event)"
+              >
+                <h2>Aucune activité ne correspond à votre recherche</h2>
+                <ul>
+                  <li>Vérifiez les termes de votre recherche</li>
+                  <li>Essayez d'autres critères de recherche</li>
+                </ul>
+              </app-activity-list>
+
+              <nz-spin
+                class="spinner-pagination"
+                nzSize="large"
+                [nzTip]="'Chargement...'"
+                [nzSpinning]="paginating()"
+              />
+              <div style="height: 8px" *ngIf="hasMore()" viewportIntersection (intersected)="loadMore()"></div>
+            </ng-container>
+
+            <ng-template #spinner>
+              <nz-spin class="spinner-main" nzSimple nzSize="large" />
+            </ng-template>
           </form>
         </section>
       </ng-template>
@@ -143,3 +217,14 @@
     </button>
   </ng-template>
 </footer>
+
+<resource-filters
+  #filtersComponent
+  [circles]="circles()"
+  [topics]="topics()"
+  [levels]="levels()"
+  [owners]="owners()"
+  [filters]="resourceFilters()"
+  [disableTypesField]="true"
+  (triggered)="onFiltersApplied($event)"
+/>
