@@ -80,6 +80,7 @@ export const appRoutes: Route[] = [
   withAuthGuard(
     {
       path: 'builder',
+      title: 'PLaTon - Builder',
       loadChildren: () =>
         import(
           /* webpackChunkName: "resource-builder" */
