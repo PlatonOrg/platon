@@ -18,6 +18,12 @@
 </app-user-charter>
 }@else {
 <main>
+  @if (mode === 'configure' && creating) {
+  <div class="quick-create-loading">
+    <nz-spin nzSize="large" nzTip="Création rapide de votre exercice..."></nz-spin>
+    <p>Vous serez redirigé vers le builder dans un instant</p>
+  </div>
+  } @else {
   <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
     <ui-stepper #stepper (finished)="create()" (changed)="$event === 2 && preloadTemplates()">
       <ng-template uiStepperStep stepTitle="Choix du cercle" stepIcon="apartment" [stepValidator]="!!this.parentId">
@@ -205,6 +211,7 @@
       </ng-template>
     </ui-stepper>
   </nz-skeleton>
+  }
 </main>
 <footer>
   <ng-container *ngIf="creating; else showControls">

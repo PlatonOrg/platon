@@ -157,6 +157,13 @@ export class ResourceCreatePage implements OnInit {
     }
 
     const user = (await this.authService.ready()) as User
+
+    // Mode configure : création rapide et redirection vers le builder
+    if (this.mode === 'configure' && templateId) {
+      await this.createQuickResource(user, templateId)
+      return
+    }
+
     const [tree, topics, levels, userCharter] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.tagService.listTopics()),
@@ -200,6 +207,60 @@ export class ResourceCreatePage implements OnInit {
   protected onChangeParentId(id?: string): void {
     this.parentId = id
     this.parentName = id ? branchFromCircleTree(this.tree, id)?.name : undefined
+  }
+
+  private async createQuickResource(user: User, templateId: string): Promise<void> {
+    try {
+      this.creating = true
+      this.loading = false
+      this.changeDetectorRef.markForCheck()
+
+      const personalCircle = await firstValueFrom(this.resourceService.circle(user.username))
+
+      const timestamp = new Date().toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+      const templateName = 'Exercice'
+      const defaultName = `${templateName} - ${timestamp}`
+
+      const resource = await firstValueFrom(
+        this.resourceService.create({
+          type: this.type,
+          parentId: personalCircle.id,
+          templateId,
+          templateVersion: LATEST,
+          name: defaultName,
+          desc: 'Exercice créé en mode configuration rapide avec le template : ' + this.template?.name,
+          code: undefined,
+          levels: [],
+          topics: [],
+        })
+      )
+
+      await this.router.navigate(['/builder', resource.id], { replaceUrl: true })
+      //window.open(`/builder/${resource.id}`, '_blank')
+      //this.router.navigate(['/resources', resource.id, 'overview'], { replaceUrl: true }).catch(console.error)
+    } catch (error) {
+      this.dialogService.error('Une erreur est survenue lors de la création de la ressource')
+
+      this.router
+        .navigate(['/resources/create'], {
+          queryParams: {
+            type: this.type,
+            template: templateId,
+          },
+          replaceUrl: true,
+        })
+        .catch(console.error)
+    } finally {
+      this.creating = false
+      this.loading = false
+      this.changeDetectorRef.markForCheck()
+    }
   }
 
   protected async create(): Promise<void> {
