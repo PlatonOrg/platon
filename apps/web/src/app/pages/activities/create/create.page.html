@@ -51,12 +51,10 @@
             </h4>
             }
 
-            <!-- SearchBar avec filtres intégrés -->
             <ui-search-bar [searchbar]="activitySearchBar" aria-labelledby="resource">
               <ng-template let-context>{{ context }}</ng-template>
             </ui-search-bar>
 
-            <!-- Indicateurs de filtres -->
             <div class="filter-indicators">
               <ui-filter-indicators
                 [filters]="resourceFilters()"

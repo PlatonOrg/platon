@@ -71,13 +71,11 @@ form {
   gap: 1rem;
 }
 
-// Style pour ui-search-bar
 ui-search-bar {
   margin-bottom: 1rem;
   width: 100%;
 }
 
-// Indicateurs de filtres
 .filter-indicators {
   margin-bottom: 1rem;
 }
@@ -89,14 +87,12 @@ ui-search-bar {
   margin-bottom: 1rem;
 }
 
-// Liste d'activités
 app-activity-list {
   display: block;
   width: 100%;
   margin-bottom: 1rem;
 }
 
-// Spinners
 .spinner-main {
   display: flex;
   justify-content: center;
