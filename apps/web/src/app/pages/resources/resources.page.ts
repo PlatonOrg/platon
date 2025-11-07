@@ -56,7 +56,6 @@ import {
   ResourceTypes,
 } from '@platon/feature/resource/common'
 
-import { ShepherdService } from '@platon/feature/tuto/browser'
 import { ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 const PAGINATION_LIMIT = 15
@@ -120,7 +119,6 @@ export default class ResourcesPage implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly resourceService = inject(ResourceService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
-  private readonly shepherdService = inject(ShepherdService)
   private readonly resourcesTutorialService = inject(ResourcesTutorialService)
 
   protected readonly searchbar: SearchBar<string> = {
@@ -383,17 +381,6 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     this.changeDetectorRef.markForCheck()
   }
 
-  private checkFirstVisit(): void {
-    if (this.user) {
-      setTimeout(() => {
-        this.startResourcesTutorial()
-      }, 100) // Délai de 100 ms pour permettre à la page de se charger
-    }
-  }
-
-  /**
-   * Démarre le tutoriel complet de l'espace de travail
-   */
   startResourcesTutorial(): void {
     if (!this.user) return
 
