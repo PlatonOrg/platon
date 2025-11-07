@@ -7,6 +7,7 @@ import {
   OnInit,
   inject,
   HostListener,
+  signal,
 } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -30,11 +31,8 @@ import {
   AIPromptModalData,
   BuilderIFrameComponent,
   BuilderService,
-  SettingsComponent,
-  type SettingItem,
 } from '@platon/feature/builder/browser'
-
-// Interface pour les sections de la sidebar
+import { type SettingItem, SettingsPage } from './settings/settings.page'
 interface SidebarSection {
   id: string
   label: string
@@ -63,7 +61,7 @@ type MainViewMode = 'input' | 'setting'
     NzAlertModule,
     BuilderIFrameComponent,
     PleInputEditorModule,
-    SettingsComponent,
+    SettingsPage,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -90,6 +88,9 @@ export class BuilderPage implements OnInit {
   protected aiTransforming = false
   protected error?: string
 
+  // Signal pour tracker les changements non sauvegardés
+  protected readonly hasUnsavedChanges = signal(false)
+
   protected selection: PleInput | undefined
   protected selectionIndex = -1
 
@@ -102,6 +103,7 @@ export class BuilderPage implements OnInit {
     { id: 'theme', label: 'Thème', icon: 'palette', type: 'theme' },
     { id: 'preview', label: 'Mode prévisualisation', icon: 'preview', type: 'preview' },
     { id: 'developer', label: 'Mode développeur', icon: 'code', type: 'developer' },
+    { id: 'save', label: 'Option sauvegarde', icon: 'save', type: 'save' },
   ]
 
   protected previewSessionId = uuidv4()
@@ -150,7 +152,6 @@ export class BuilderPage implements OnInit {
         this.sidebarWidth = 200
       }
 
-      // Toggle la section
       section.collapsed = !section.collapsed
       this.changeDetectorRef.markForCheck()
     }
@@ -293,6 +294,8 @@ export class BuilderPage implements OnInit {
       this.inputs = [...this.inputs.slice(0, index), { ...input }, ...this.inputs.slice(index + 1)]
     }
 
+    this.hasUnsavedChanges.set(true)
+
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout)
     }
@@ -350,6 +353,8 @@ export class BuilderPage implements OnInit {
         console.log('Fichier main.plo créé avec succès')
       }
 
+      this.hasUnsavedChanges.set(false)
+
       this.dialogService.success('Configuration sauvegardée avec succès')
     } catch (error) {
       console.error('Erreur lors de la sauvegarde :', error)
@@ -358,6 +363,13 @@ export class BuilderPage implements OnInit {
       this.saving = false
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  protected async onResourceUpdated(updatedResource: Resource): Promise<void> {
+    this.resource = updatedResource
+    this.hasUnsavedChanges.set(true)
+    await this.save()
+    this.changeDetectorRef.markForCheck()
   }
 
   protected async togglePreview(): Promise<void> {
@@ -443,6 +455,8 @@ export class BuilderPage implements OnInit {
         this.selection = this.inputs[this.selectionIndex]
       }
 
+      this.hasUnsavedChanges.set(true)
+
       // Recharger la prévisualisation
       await this.reloadPreview()
 
@@ -498,7 +512,8 @@ export class BuilderPage implements OnInit {
   }
 
   @HostListener('window:beforeunload')
-  private cleanLocalStorage(): void {
+  private onBeforeUnload(): void {
+    // Nettoyer le localStorage
     if (this.previewSessionId) {
       firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(this.previewSessionId))).catch(
         console.error

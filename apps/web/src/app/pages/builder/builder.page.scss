@@ -18,10 +18,32 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.75rem 1.5rem;
-  //background: //white;
+  padding: 1px 3px; //0.75rem 1.5rem;
   border-bottom: 1px solid var(--brand-border-color);
   min-height: 64px;
+
+  .back-btn {
+    display: flex;
+    padding: 1px 1px;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    color: var(--brand-text-secondary);
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: var(--brand-background-hover);
+      color: var(--brand-color-primary);
+    }
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
 
   .builder-title {
     flex: 1;
@@ -32,6 +54,29 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .unsaved-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      background: var(--brand-pastel-red);
+      color: var(--brand-text-error);
+      border-radius: 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+      animation: pulse 2s ease-in-out infinite;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
   }
 
   .header-actions {
@@ -43,12 +88,36 @@
 
   .preview-toolbar {
     display: flex;
+    padding: 1px 12px;
     align-items: center;
     gap: 0.25rem;
 
+    .label {
+      //border-color: var(--brand-color-primary);
+      //transform: translateY(-4px);
+      //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
-    label{
-      color: var(--brand-color-primary);
+      mat-icon {
+        color: var(--brand-color-primary);
+      }
+
+
+      &:hover {
+        border-color: var(--brand-color-primary);
+        //transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+        mat-icon {
+          color: var(--brand-color-primary);
+        }
+      }
+      // background: var(--brand-color-primary);
+      // border-color: var(--brand-color-primary);
+
+      // mat-icon,
+      // span {
+      //   color: var(--brand-color-primary-contrast);
+      // }
     }
   }
 }
@@ -101,7 +170,6 @@
   overflow: hidden;
   transition: width 0.3s ease;
 
-  // Mode icône uniquement (collapsed)
   &.collapsed {
     .section-label,
     .collapse-icon {
@@ -146,7 +214,6 @@
     }
   }
 
-  // Section individuelle
   .sidebar-section {
     border-bottom: 1px solid var(--brand-border-color-light);
 
@@ -165,7 +232,6 @@
       }
     }
 
-    // Header de section
     .section-header {
       display: flex;
       align-items: center;
@@ -206,13 +272,11 @@
       }
     }
 
-    // Contenu de section
     .section-content {
       animation: slideDown 0.2s ease;
     }
   }
 
-  // Footer avec bouton toggle
   .sidebar-footer {
     padding: 0.5rem;
     border-top: 1px solid var(--brand-border-color);
@@ -227,12 +291,10 @@
     }
   }
 
-  // Liste de contenu (section content)
   .content-list {
     padding: 0.5rem;
   }
 
-  // Styles unifiés pour tous les items de la sidebar
   .content-item,
   .setting-item,
   .history-item {
@@ -280,7 +342,6 @@
       }
     }
 
-    // Style spécifique pour l'état selected (seulement pour content-item)
     &.selected {
       background: var(--brand-background-card);
       border-color: var(--brand-color-primary);
@@ -323,7 +384,6 @@
     }
   }
 
-  // Liste des paramètres et historique
   .settings-list,
   .history-list {
     padding: 0.5rem;
@@ -333,12 +393,22 @@
 // Animation pour le slide down
 @keyframes slideDown {
   from {
-    opacity: 0;
+    opacity: 12;
     max-height: 0;
   }
   to {
     opacity: 1;
     max-height: 1000px;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }
 
@@ -348,7 +418,7 @@
   min-width: 300px;
   background: var(--brand-background-primary);
   overflow-y: auto;
-  overflow-x: auto; // Active la scrollbar horizontale
+  overflow-x: auto;
   padding: 1.5rem;
 
   &::-webkit-scrollbar {
@@ -405,7 +475,7 @@
 .builder-preview {
   flex-shrink: 0;
   min-width: 300px;
-  background: var(--brand-background-primary); // Correct
+  background: var(--brand-background-primary);
   border-left: 1px solid var(--brand-border-color);
   display: flex;
   flex-direction: column;

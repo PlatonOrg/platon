@@ -1,0 +1,143 @@
+// Panneau de paramètres
+.settings-panel {
+  max-width: 800px;
+  margin: 0 auto;
+
+  .settings-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--brand-border-color);
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: var(--brand-color-primary);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--brand-text-primary);
+    }
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--brand-text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  // Sélecteur de thème
+  .theme-selector {
+    .theme-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+
+      .theme-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 2rem 1rem;
+        background: var(--brand-background-components);
+        border: 0.7px solid var(--brand-border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          color: var(--brand-text-secondary);
+        }
+
+        span {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: var(--brand-text-primary);
+        }
+
+        &:hover {
+          border-color: var(--brand-color-primary);
+          transform: translateY(-4px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+          mat-icon {
+            color: var(--brand-color-primary);
+          }
+        }
+
+        &.selected {
+          background: var(--brand-color-primary);
+          border-color: var(--brand-color-primary);
+
+          mat-icon,
+          span {
+            color: var(--brand-color-primary-contrast);
+          }
+        }
+      }
+    }
+  }
+
+  // Paramètres de prévisualisation
+  .preview-settings,
+  .developer-settings {
+    p {
+      color: var(--brand-text-secondary);
+      font-size: 0.875rem;
+    }
+  }
+
+  // Panneau d'informations de la ressource
+  .resource-info-settings {
+    padding: 1rem;
+
+    h3 {
+      margin-bottom: 1.5rem;
+      color: var(--foreground-color);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    .form-field-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .field-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--brand-text-primary);
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    nz-spin {
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+    }
+  }
+}
