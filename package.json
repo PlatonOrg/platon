@@ -258,6 +258,7 @@
     "editorjs-toggle-block": "0.3.16",
     "editorjs-undo": "2.0.28",
     "emoji-toolkit": "^7.0.0",
+    "fs-extra": "^11.3.2",
     "fuse.js": "^7.0.0",
     "genkit": "^1.0.5",
     "graphql": "^16.6.0",
