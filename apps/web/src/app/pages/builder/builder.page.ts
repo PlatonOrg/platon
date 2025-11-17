@@ -32,7 +32,10 @@ import {
   BuilderIFrameComponent,
   BuilderService,
 } from '@platon/feature/builder/browser'
+import { UiModalIFrameComponent } from '@platon/shared/ui'
+
 import { type SettingItem, SettingsPage } from './settings/settings.page'
+
 interface SidebarSection {
   id: string
   label: string
@@ -62,6 +65,7 @@ type MainViewMode = 'input' | 'setting'
     BuilderIFrameComponent,
     PleInputEditorModule,
     SettingsPage,
+    UiModalIFrameComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -160,6 +164,13 @@ export class BuilderPage implements OnInit {
   protected isSectionActive(sectionId: string): boolean {
     const section = this.sidebarSections.find((s) => s.id === sectionId)
     return section ? !section.collapsed : false
+  }
+
+  protected redirectToSaveOptions(): void {
+    const setting = this.settingItems.find((item) => item.id === 'save')
+    if (setting) {
+      this.selectSetting(setting)
+    }
   }
 
   protected selectSetting(setting: SettingItem): void {
@@ -401,6 +412,17 @@ export class BuilderPage implements OnInit {
     } catch (error) {
       console.error('Erreur lors du rechargement de la prévisualisation:', error)
     }
+  }
+
+  protected get previewUrlFrame(): string {
+    if (!this.resource) {
+      return ''
+    }
+    firstValueFrom(
+      this.storageService.set(getPreviewOverridesStorageKey(this.previewSessionId), JSON.stringify(this.overrides))
+    ).catch(console.error)
+
+    return `/player/preview/${this.resource.id}?version=latest&sessionId=${this.previewSessionId}`
   }
 
   protected async openInEditor(): Promise<void> {

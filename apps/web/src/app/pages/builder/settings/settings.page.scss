@@ -88,7 +88,6 @@
     }
   }
 
-  // Paramètres de prévisualisation
   .preview-settings,
   .developer-settings {
     p {
@@ -97,7 +96,6 @@
     }
   }
 
-  // Panneau d'informations de la ressource
   .resource-info-settings {
     padding: 1rem;
 
@@ -131,7 +129,12 @@
     .form-actions {
       display: flex;
       justify-content: flex-end;
+
       margin-top: 1rem;
+
+      .button{
+        background-color: var(--brand-color-primary);
+      }
     }
 
     nz-spin {

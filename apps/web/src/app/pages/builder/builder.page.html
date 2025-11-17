@@ -31,11 +31,16 @@
           <mat-icon>auto_awesome</mat-icon>
           <span>Transformer avec l'IA</span>
         </button>
-        <button class="label" mat-stroked-button title="Prévisualiser grand écran">
+        <button
+          class="label"
+          mat-stroked-button
+          (click)="iframe.open(previewUrlFrame)"
+          title="Prévisualiser grand écran"
+        >
           <mat-icon>play_circle</mat-icon>
           <span>Prévisualiser</span>
         </button>
-        <button class="label" mat-stroked-button (click)="save()" [disabled]="saving">
+        <button class="label" mat-stroked-button (click)="redirectToSaveOptions()" [disabled]="saving">
           <mat-icon>save</mat-icon>
           <span>Sauvegarder</span>
         </button>
@@ -167,3 +172,5 @@
   </div>
   }
 </div>
+
+<ui-modal-iframe width="100vw" height="100vh" [closable]="true" #iframe />
