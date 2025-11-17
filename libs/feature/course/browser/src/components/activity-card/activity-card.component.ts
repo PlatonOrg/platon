@@ -142,9 +142,6 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
     return this.resourceService.editorUrl(this.item.resourceId, 'latest')
   }
 
-  /**
-   * Méthode principale de sauvegarde avec vérification
-   */
   protected async saveSettings(): Promise<void> {
     if (!this.settingsComponent) {
       return
@@ -187,12 +184,12 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
             <h4 style="margin: 0 0 8px 0; color: var(--brand-text-primary);">Certains étudiants n'auront pas accès à cette activité</h4>
           </div>
         </div>
-        
+
         <p style="color: var(--brand-text-primary); margin: 16px 0 8px 0;"><strong>Situation actuelle :</strong></p>
         <div style="background: var(--brand-background-components); border: 1px solid var(--brand-border-color); border-left: 4px solid var(--brand-color-secondary); border-radius: 6px; padding: 16px; margin: 12px 0 20px 0;">
           Vous avez créé des périodes d'accès spécifiques, mais aucune période "Tous les autres".
         </div>
-        
+
         <p style="color: var(--brand-text-primary); margin: 16px 0 8px 0;"><strong>Conséquences :</strong></p>
         <div style="background: var(--brand-pastel-red); border: 1px solid var(--brand-border-color-light); border-left: 4px solid var(--brand-text-error); border-radius: 6px; padding: 16px; margin: 12px 0 20px 0;">
           <ul style="margin: 0; padding-left: 20px;">
@@ -200,18 +197,15 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
             <li>Les nouveaux étudiants n'y auront pas accès automatiquement</li>
           </ul>
         </div>
-        
+
         <div style="background: var(--brand-pastel-green); border: 1px solid var(--brand-border-color); border-left: 4px solid var(--brand-color-secondary); border-radius: 6px; padding: 16px; margin: 20px 0 0 0;">
-          <strong style="color: var(--brand-color-secondary);">Recommandation :</strong> 
+          <strong style="color: var(--brand-color-secondary);">Recommandation :</strong>
           Ajoutez une période d'accès avec le type "Tous les autres" si vous voulez que tous les étudiants du cours aient accès à cette activité.
         </div>
       </div>
     `
   }
 
-  /**
-   * Effectue la sauvegarde
-   */
   private async performSave(): Promise<void> {
     if (!this.settingsComponent) {
       return
@@ -225,17 +219,11 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Ferme le modal d'avertissement
-   */
   closeAccessWarningModal(): void {
     this.showAccessWarningModal = false
     this.cdr.markForCheck()
   }
 
-  /**
-   * Confirme la sauvegarde avec accès restreint
-   */
   async confirmRestrictedSave(): Promise<void> {
     this.showAccessWarningModal = false
     await this.performSave()

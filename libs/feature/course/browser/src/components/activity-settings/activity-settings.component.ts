@@ -13,7 +13,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core'
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 
 import differenceInCalendarDays from 'date-fns/differenceInCalendarDays'
@@ -44,7 +44,8 @@ import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
 import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
 import { CourseColorPickerComponent } from '../color-picker/color-picker.component'
-import { User, userDisplayName } from '@platon/core/common'
+import { User } from '@platon/core/common'
+import { ActivityRestrictionsValidatorService } from '../../services/activity-restrictions-validator.service'
 
 @Component({
   standalone: true,
@@ -106,7 +107,8 @@ export class CourseActivitySettingsComponent implements OnInit {
     private readonly courseService: CourseService,
     private readonly dialogService: DialogService,
     private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly validatorService: ActivityRestrictionsValidatorService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -123,7 +125,7 @@ export class CourseActivitySettingsComponent implements OnInit {
       })
     )
 
-    const [courseMembers, activityMembers, activityCorrectors, courseGroups, activityGroups] = await Promise.all([
+    const [courseMembers, _activityMembers, _activityCorrectors, courseGroups, activityGroups] = await Promise.all([
       firstValueFrom(this.courseService.searchMembers(course)),
       firstValueFrom(this.courseService.searchActivityMembers(this.activity)),
       firstValueFrom(this.courseService.searchActivityCorrector(this.activity)),
@@ -195,206 +197,28 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
-  private checkSameOthers(): boolean {
-    const periodsWithOthers = this.accessPeriods().filter((period) =>
-      period.restriction.some((r) => r.type === 'Others')
-    )
-    return periodsWithOthers.length > 1
-  }
-
-  private checkDateOnlyPeriods(): { indices: number[]; details: string[] } {
-    const result = { indices: [] as number[], details: [] as string[] }
-
-    this.accessPeriods().forEach((period, index) => {
-      if (period.restriction.length === 1 && period.restriction[0].type === 'DateRange') {
-        result.indices.push(index + 1)
-        result.details.push(`Période n°${index + 1} : seulement une date définie`)
-      }
-    })
-
-    return result
-  }
-
-  /**
-   * Vérifie les conflits de groupes entre les périodes d'accès
-   */
-  private checkGroupConflicts(): { hasConflicts: boolean; conflicts: Array<{ groupId: string; periods: number[] }> } {
-    const result = { hasConflicts: false, conflicts: [] as Array<{ groupId: string; periods: number[] }> }
-    const groupToPeriods = new Map<string, number[]>()
-
-    this.accessPeriods().forEach((period, periodIndex) => {
-      period.restriction.forEach((restriction) => {
-        if (restriction.type === 'Groups') {
-          const config = restriction.config as RestrictionConfig['Groups']
-          config.groups?.forEach((groupId) => {
-            if (!groupToPeriods.has(groupId)) {
-              groupToPeriods.set(groupId, [])
-            }
-            const periods = groupToPeriods.get(groupId)
-            if (periods) {
-              periods.push(periodIndex + 1)
-            }
-          })
-        }
-      })
-    })
-
-    groupToPeriods.forEach((periods, groupId) => {
-      if (periods.length > 1) {
-        result.hasConflicts = true
-        result.conflicts.push({ groupId, periods })
-      }
-    })
-
-    return result
-  }
-
-  /**
-   * Vérifie les conflits de membres entre les périodes d'accès
-   */
-  private checkMemberConflicts(): { hasConflicts: boolean; conflicts: Array<{ memberId: string; periods: number[] }> } {
-    const result = { hasConflicts: false, conflicts: [] as Array<{ memberId: string; periods: number[] }> }
-    const memberToPeriods = new Map<string, number[]>()
-
-    this.accessPeriods().forEach((period, periodIndex) => {
-      period.restriction.forEach((restriction) => {
-        if (restriction.type === 'Members') {
-          const config = restriction.config as RestrictionConfig['Members']
-          config.members?.forEach((memberId) => {
-            if (!memberToPeriods.has(memberId)) {
-              memberToPeriods.set(memberId, [])
-            }
-            const periods = memberToPeriods.get(memberId)
-            if (periods) {
-              periods.push(periodIndex + 1)
-            }
-          })
-        }
-      })
-    })
-
-    memberToPeriods.forEach((periods, memberId) => {
-      if (periods.length > 1) {
-        result.hasConflicts = true
-        result.conflicts.push({ memberId, periods })
-      }
-    })
-
-    return result
-  }
-
-  /**
-   * Trouve le nom d'un groupe par son ID
-   */
-  private getGroupName(groupId: string): string {
-    const group = this.courseGroups.find((g) => g.id === groupId)
-    return group?.name || `Groupe ${groupId}`
-  }
-
-  /**
-   * Trouve le nom d'un membre par son ID
-   */
-  private getMemberName(memberId: string): string {
-    const [memberIdPart] = memberId.split(':')
-    const member = this.courseMembers.find((m) => m.id === memberIdPart)
-
-    if (!member) {
-      return `Membre ${memberId}`
-    }
-
-    // Si c'est un membre avec userId spécifique
-    if (memberId.includes(':')) {
-      const [, userId] = memberId.split(':')
-      if (member.group) {
-        const user = member.group.users.find((u) => u.id === userId)
-        return user ? userDisplayName(user) : `Utilisateur ${userId}`
-      }
-    }
-
-    return member.user ? userDisplayName(member.user) : member.group?.name || `Membre ${memberId}`
-  }
-
   hasOthersRule(): boolean {
-    return this.accessPeriods().some((period) => period.restriction.some((r) => r.type === 'Others'))
+    return this.validatorService.hasOthersRule(this.accessPeriods())
   }
 
-  /**
-   * Méthode mise à jour pour vérifier tous les conflits
-   */
   private allCheckAccessPeriodspassed(): boolean {
-    // Vérification des "Tous les autres" multiples
-    if (this.checkSameOthers()) {
-      this.dialogService.error(
-        'Vous avez plusieurs périodes d\'accès avec le type "Tous les autres".\n' +
-          'Une seule est autorisée car elle inclut automatiquement tous les utilisateurs restants.\n' +
-          "Supprimez ou modifiez pour en garder qu'une seule.",
-        { duration: 15000 }
-      )
-      return false
+    const result = this.validatorService.validateRestrictions(
+      this.accessPeriods(),
+      this.courseMembers,
+      this.courseGroups
+    )
+
+    if (!result.isValid && result.errorMessage) {
+      this.dialogService.error(result.errorMessage, { duration: 15000 })
     }
 
-    // Vérification des périodes avec seulement des dates
-    const dateOnlyCheck = this.checkDateOnlyPeriods()
-    if (dateOnlyCheck.indices.length > 0) {
-      this.dialogService.error(
-        'Périodes incomplètes détectées :\n\n' +
-          dateOnlyCheck.details.join('\n') +
-          '\n\nChaque période doit définir QUI peut accéder (pas seulement QUAND).' +
-          "\n\nAjoutez des types d'utilisateurs ou supprimez cette période.",
-        { duration: 15000 }
-      )
-      return false
-    }
-
-    // Vérification des conflits de groupes
-    const groupConflicts = this.checkGroupConflicts()
-    if (groupConflicts.hasConflicts) {
-      const conflictMessages = groupConflicts.conflicts.map((conflict) => {
-        const groupName = this.getGroupName(conflict.groupId)
-        return `${groupName} (périodes n°${conflict.periods.join(', ')})`
-      })
-
-      this.dialogService.error(
-        'Conflits de groupes détectés :\n\n' +
-          conflictMessages.join('\n') +
-          "\n\nUn groupe ne peut être assigné qu'à une seule période d'accès.\n" +
-          'Supprimez les doublons pour éviter les conflits.',
-        { duration: 15000 }
-      )
-      return false
-    }
-
-    // Vérification des conflits de membres
-    const memberConflicts = this.checkMemberConflicts()
-    if (memberConflicts.hasConflicts) {
-      const conflictMessages = memberConflicts.conflicts.map((conflict) => {
-        const memberName = this.getMemberName(conflict.memberId)
-        return `${memberName} (périodes n°${conflict.periods.join(', ')})`
-      })
-
-      this.dialogService.error(
-        "Conflits d'utilisateurs détectés :\n\n" +
-          conflictMessages.join('\n') +
-          "\n\nUn utilisateur ne peut être assigné qu'à une seule période d'accès.\n" +
-          'Supprimez les doublons pour éviter les conflits.',
-        { duration: 15000 }
-      )
-      return false
-    }
-
-    return true
+    return result.isValid
   }
 
-  /**
-   * Désactive les dates dans le passé pour la date d'ouverture
-   */
   protected disabledOpenDate = (current: Date): boolean => {
     return differenceInCalendarDays(current, new Date()) < 0
   }
 
-  /**
-   * Désactive les dates dans le passé et avant la date d'ouverture pour la date de fermeture
-   */
   protected disabledCloseDate = (current: Date): boolean => {
     // Si on a une date d'ouverture (temporaire ou de l'activité), la date de fermeture doit être après
     const openDate = this.tempOpenDate || this.activity.openAt
@@ -405,9 +229,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     return differenceInCalendarDays(current, new Date()) < 0
   }
 
-  /**
-   * Vérifie que la date de fermeture est supérieure à la date d'ouverture
-   */
   private checkCloseDateIsSuperiorToOpenDate(openDate?: Date, closeDate?: Date): boolean {
     if (openDate && closeDate) {
       if (differenceInMilliseconds(closeDate, openDate) > 0) {
