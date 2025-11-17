@@ -135,11 +135,9 @@ export class CourseActivitySettingsComponent implements OnInit {
 
     this.courseMembers = courseMembers.resources
     this.courseGroups = courseGroups.resources
-    console.log(this.courseMembers, activityGroups.resources)
 
     if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
       this.accessPeriods.set([...this.activity.restrictions])
-      console.debug('Loaded restrictions:', this.activity.restrictions)
     }
 
     this.tempOpenDate = this.activity.openAt ? new Date(this.activity.openAt) : undefined
@@ -319,6 +317,16 @@ export class CourseActivitySettingsComponent implements OnInit {
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
             ignoreRestrictions: false,
+          })
+        )
+      } else if (!this.activity.ignoreRestrictions && periods.length === 0) {
+        console.log('Updating activity with ignoreRestrictions false and no periods')
+        await firstValueFrom(
+          this.courseService.updateActivity(this.activity, {
+            colorHue: this.currentHue,
+            openAt: this.tempOpenDate,
+            closeAt: this.tempCloseDate,
+            ignoreRestrictions: true,
           })
         )
       } else if (this.activity.ignoreRestrictions) {
