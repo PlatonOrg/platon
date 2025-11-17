@@ -2,7 +2,8 @@
   [ngModel]="selection"
   [nzNodes]="nodes"
   (ngModelChange)="onChangeSelection($event)"
-  [nzShowSearch]="true"
+  nzShowSearch
+  [nzHideUnMatched]="true"
   [nzCheckable]="true"
   [nzDisabled]="disabled"
   [nzPlaceHolder]="placeholder || ''"
