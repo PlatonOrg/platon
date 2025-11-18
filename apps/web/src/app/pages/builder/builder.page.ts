@@ -17,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatDividerModule } from '@angular/material/divider'
 import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatDialog } from '@angular/material/dialog'
+import { NzModalService } from 'ng-zorro-antd/modal'
 import { PleInput, Variables } from '@platon/feature/compiler'
 import { ResourceFileService, ResourceService, getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
 import { Resource } from '@platon/feature/resource/common'
@@ -43,7 +44,6 @@ interface SidebarSection {
   collapsed: boolean
 }
 
-// Type pour le mode d'affichage principal
 type MainViewMode = 'input' | 'setting'
 
 @Component({
@@ -81,6 +81,7 @@ export class BuilderPage implements OnInit {
 
   private readonly dialog = inject(MatDialog)
   private readonly builderService = inject(BuilderService)
+  private readonly modal = inject(NzModalService)
 
   protected resource?: Resource
   protected template?: Resource
@@ -92,17 +93,14 @@ export class BuilderPage implements OnInit {
   protected aiTransforming = false
   protected error?: string
 
-  // Signal pour tracker les changements non sauvegardés
   protected readonly hasUnsavedChanges = signal(false)
 
   protected selection: PleInput | undefined
   protected selectionIndex = -1
 
-  // Gestion des paramètres
   protected mainViewMode: MainViewMode = 'input'
   protected selectedSetting: SettingItem | null = null
 
-  // Liste des paramètres disponibles (pour la sidebar)
   protected readonly settingItems: SettingItem[] = [
     { id: 'theme', label: 'Thème', icon: 'palette', type: 'theme' },
     { id: 'preview', label: 'Mode prévisualisation', icon: 'preview', type: 'preview' },
@@ -161,12 +159,12 @@ export class BuilderPage implements OnInit {
     }
   }
 
-  protected isSectionActive(sectionId: string): boolean {
-    const section = this.sidebarSections.find((s) => s.id === sectionId)
-    return section ? !section.collapsed : false
-  }
+  // protected isSectionActive(sectionId: string): boolean {
+  //   const section = this.sidebarSections.find((s) => s.id === sectionId)
+  //   return section ? !section.collapsed : false
+  // }
 
-  protected redirectToSaveOptions(): void {
+  redirectToSaveOptions(): void {
     const setting = this.settingItems.find((item) => item.id === 'save')
     if (setting) {
       this.selectSetting(setting)
@@ -511,10 +509,63 @@ export class BuilderPage implements OnInit {
     }
   }
 
-  protected goBack(): void {
+  private confirmUnsavedChanges(): Promise<'cancel' | 'save' | 'discard'> {
+    return new Promise((resolve) => {
+      const modalRef = this.modal.create({
+        nzTitle: 'Modifications non sauvegardées',
+        nzContent: 'Vous avez des modifications non sauvegardées. Que voulez-vous faire ?',
+        nzClosable: false,
+        nzCancelText: null,
+        nzOkText: null,
+        nzFooter: [
+          {
+            label: 'Annuler',
+            type: 'default',
+            onClick: () => {
+              modalRef.destroy()
+              resolve('cancel')
+            },
+          },
+          {
+            label: 'Quitter sans sauvegarder',
+            type: 'primary',
+            danger: true,
+            onClick: () => {
+              modalRef.destroy()
+              resolve('discard')
+            },
+          },
+          {
+            label: 'Sauvegarder',
+            type: 'primary',
+            onClick: () => {
+              modalRef.destroy()
+              resolve('save')
+            },
+          },
+        ],
+      })
+    })
+  }
+
+  protected async goBack(): Promise<void> {
+    if (this.hasUnsavedChanges()) {
+      const action = await this.confirmUnsavedChanges()
+
+      if (action === 'cancel') {
+        return
+      }
+
+      if (action === 'save') {
+        this.redirectToSaveOptions()
+        return
+      }
+    }
+    console.log('Navigation vers la liste des ressources')
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout)
     }
+    console.log('Nettoyage des données de prévisualisation')
 
     if (this.previewSessionId) {
       firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(this.previewSessionId))).catch(
@@ -533,9 +584,14 @@ export class BuilderPage implements OnInit {
     return input.name
   }
 
-  @HostListener('window:beforeunload')
-  private onBeforeUnload(): void {
-    // Nettoyer le localStorage
+  @HostListener('window:beforeunload', ['$event'])
+  private onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges()) {
+      event.preventDefault()
+      event.returnValue = true
+      return
+    }
+
     if (this.previewSessionId) {
       firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(this.previewSessionId))).catch(
         console.error
