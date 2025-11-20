@@ -36,6 +36,7 @@ import {
   CircleTree,
   LATEST,
   Resource,
+  ResourceStatus,
   ResourceTypes,
   branchFromCircleTree,
   circleAncestors,
@@ -209,6 +210,7 @@ export class ResourceCreatePage implements OnInit {
         this.resourceService.create({
           type: this.type,
           parentId: this.parentId as string,
+          status: ResourceStatus.DRAFT,
           templateId: this.editionMode === 'template' ? this.template?.id : undefined,
           templateVersion: this.editionMode === 'template' ? LATEST : undefined,
           name: infos.name as string,
