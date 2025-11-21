@@ -6,7 +6,6 @@
   } @if (error) {
   <nz-alert nzType="error" [nzMessage]="error" nzShowIcon [nzCloseable]="true" (nzOnClose)="goBack()"> </nz-alert>
   } @if (!loading && !error && resource) {
-  <!-- Header avec toolbar -->
   <div class="builder-header">
     <button mat-icon-button (click)="goBack()" class="back-btn" title="Retour au tableau de bord">
       <mat-icon>arrow_back</mat-icon>
@@ -52,11 +51,9 @@
   <div class="builder-layout">
     <!-- Colonne gauche: Sidebar avec sections -->
     <div class="builder-sidebar" [class.collapsed]="!sidebarOpen" [style.width.px]="sidebarWidth">
-      <!-- Liste des sections avec icônes -->
       <div class="sidebar-sections">
         @for (section of sidebarSections; track section.id) {
         <div class="sidebar-section" [class.active]="!section.collapsed">
-          <!-- Header de section (toujours visible) -->
           <div class="section-header" (click)="toggleSection(section.id)" [title]="section.label">
             <mat-icon class="section-icon">{{ section.icon }}</mat-icon>
             @if (sidebarOpen) {
@@ -72,14 +69,14 @@
           <div class="section-content">
             <!-- Section Contenu -->
             @if (section.id === 'content') {
-            <div class="content-list">
+            <div class="sidebar-list">
               @for (input of inputs; track $index) {
               <div class="content-item" [class.selected]="selectionIndex === $index" (click)="selectInput($index)">
                 <mat-icon>description</mat-icon>
                 <span class="item-label">{{ input.name }}</span>
               </div>
               } @if (isTemplateCreator) {
-              <!-- Je rajouterai cette fonctionnalité plus tard -->
+              <!-- Je rajouterai cette fonctionnalité plus tard ou jamais -->
               <button mat-stroked-button class="add-content-btn">
                 <mat-icon>add</mat-icon>
                 AJOUTER DU CONTENU
@@ -90,7 +87,7 @@
 
             <!-- Section Paramètres -->
             @if (section.id === 'settings') {
-            <div class="settings-list">
+            <div class="sidebar-list">
               @for (setting of settingItems; track setting.id) {
               <div
                 class="setting-item"
@@ -104,27 +101,12 @@
               }
             </div>
             }
-
-            <!-- Section Historique -->
-            @if (section.id === 'history') {
-            <div class="history-list">
-              <div class="history-item">
-                <mat-icon>schedule</mat-icon>
-                <span class="item-label">Dernière modification: Il y a 5 min</span>
-              </div>
-              <div class="history-item">
-                <mat-icon>restore</mat-icon>
-                <span class="item-label">Version précédente disponible</span>
-              </div>
-            </div>
-            }
           </div>
           }
         </div>
         }
       </div>
 
-      <!-- Bouton toggle en bas de sidebar -->
       <div class="sidebar-footer">
         <button
           mat-icon-button
@@ -152,6 +134,10 @@
         [resource]="resource"
         (resourceUpdated)="onResourceUpdated($event)"
       />
+      } @else if (mainViewMode === 'history') {
+      <div class="history-panel">
+        <app-version-history [resource]="resource" (versionChanged)="onVersionChanged($event)" />
+      </div>
       } @else {
       <div class="empty-state">
         <mat-icon>touch_app</mat-icon>

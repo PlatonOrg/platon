@@ -119,7 +119,6 @@ export class SettingsPage implements OnInit {
         firstValueFrom(this.tagService.listTopics()),
         firstValueFrom(this.tagService.listLevels()),
       ])
-      console.log('Tags chargés:', { topics, levels })
       this.topics.set(topics)
       this.levels.set(levels)
 
@@ -134,7 +133,6 @@ export class SettingsPage implements OnInit {
         })
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des tags:', error)
       this.dialogService.error('Erreur lors du chargement des données')
     } finally {
       this.loading.set(false)
@@ -165,7 +163,6 @@ export class SettingsPage implements OnInit {
       this.dialogService.success('Informations mises à jour avec succès')
       this.resourceUpdated.emit(updatedResource)
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error)
       this.dialogService.error('Erreur lors de la sauvegarde des informations')
     } finally {
       this.saving.set(false)

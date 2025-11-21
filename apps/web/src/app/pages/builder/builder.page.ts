@@ -36,6 +36,7 @@ import {
 import { UiModalIFrameComponent } from '@platon/shared/ui'
 
 import { type SettingItem, SettingsPage } from './settings/settings.page'
+import { VersionHistoryComponent } from './version-history'
 
 interface SidebarSection {
   id: string
@@ -44,7 +45,7 @@ interface SidebarSection {
   collapsed: boolean
 }
 
-type MainViewMode = 'input' | 'setting'
+type MainViewMode = 'input' | 'setting' | 'history'
 
 @Component({
   standalone: true,
@@ -66,6 +67,7 @@ type MainViewMode = 'input' | 'setting'
     PleInputEditorModule,
     SettingsPage,
     UiModalIFrameComponent,
+    VersionHistoryComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -94,6 +96,7 @@ export class BuilderPage implements OnInit {
   protected error?: string
 
   protected readonly hasUnsavedChanges = signal(false)
+  protected currentVersion = 'latest'
 
   protected selection: PleInput | undefined
   protected selectionIndex = -1
@@ -114,12 +117,10 @@ export class BuilderPage implements OnInit {
   protected sidebarOpen = true
   private debounceTimeout?: ReturnType<typeof setTimeout>
 
-  // Largeurs des colonnes
   protected sidebarWidth = 200
   protected previewWidth = 850
   protected sidebarMinWidth = 60 // Largeur mode icône uniquement
 
-  // Sections de la sidebar
   protected sidebarSections: SidebarSection[] = [
     { id: 'content', label: 'Contenu', icon: 'list', collapsed: false },
     { id: 'settings', label: 'Paramètres', icon: 'settings', collapsed: true },
@@ -155,14 +156,16 @@ export class BuilderPage implements OnInit {
       }
 
       section.collapsed = !section.collapsed
+
+      if (sectionId === 'history' /*&& !section.collapsed*/) {
+        this.mainViewMode = 'history'
+        this.selection = undefined
+        this.selectionIndex = -1
+        this.selectedSetting = null
+      }
       this.changeDetectorRef.markForCheck()
     }
   }
-
-  // protected isSectionActive(sectionId: string): boolean {
-  //   const section = this.sidebarSections.find((s) => s.id === sectionId)
-  //   return section ? !section.collapsed : false
-  // }
 
   redirectToSaveOptions(): void {
     const setting = this.settingItems.find((item) => item.id === 'save')
@@ -381,16 +384,6 @@ export class BuilderPage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  protected async togglePreview(): Promise<void> {
-    this.showPreview = !this.showPreview
-
-    if (this.showPreview && this.resource) {
-      await this.reloadPreview()
-    }
-
-    this.changeDetectorRef.markForCheck()
-  }
-
   private async reloadPreview(): Promise<void> {
     if (!this.resource) return
 
@@ -456,7 +449,6 @@ export class BuilderPage implements OnInit {
         })
       )
 
-      // Mettre à jour les inputs avec les nouvelles valeurs
       this.inputs = response.inputs.map((transformedInput: PleInput) => {
         const originalInput = this.inputs.find((i) => i.name === transformedInput.name)
         return {
@@ -465,19 +457,16 @@ export class BuilderPage implements OnInit {
         }
       })
 
-      // Mettre à jour les overrides
       this.inputs.forEach((input) => {
         this.overrides[input.name] = input.value
       })
 
-      // Rafraîchir la sélection si elle existe
       if (this.selection && this.selectionIndex >= 0) {
         this.selection = this.inputs[this.selectionIndex]
       }
 
       this.hasUnsavedChanges.set(true)
 
-      // Recharger la prévisualisation
       await this.reloadPreview()
 
       const usageText = response.usage ? ` (${response.usage.totalTokens} tokens utilisés)` : ''
@@ -506,6 +495,30 @@ export class BuilderPage implements OnInit {
     } finally {
       this.aiTransforming = false
       this.changeDetectorRef.markForCheck()
+    }
+  }
+
+  // ICI J'IMPORTE LA NOUVELLE VERSION
+  protected async onVersionChanged(data: { version: string; overrides: Variables }): Promise<void> {
+    try {
+      this.overrides = data.overrides
+      if (data.version !== this.currentVersion) {
+        this.hasUnsavedChanges.set(true)
+      }
+
+      this.inputs = this.inputs.map((input) => ({
+        ...input,
+        value: this.overrides[input.name] ?? input.value,
+      }))
+
+      if (this.selection && this.selectionIndex >= 0) {
+        this.selection = this.inputs[this.selectionIndex]
+      }
+      await this.reloadPreview()
+      this.dialogService.success(`Affichage de la version "${data.version}"`)
+      this.changeDetectorRef.markForCheck()
+    } catch (error) {
+      this.dialogService.error('Impossible de charger la version sélectionnée')
     }
   }
 
@@ -580,7 +593,7 @@ export class BuilderPage implements OnInit {
     }
   }
 
-  protected trackInput(index: number, input: PleInput): string {
+  protected trackInput(_: number, input: PleInput): string {
     return input.name
   }
 
@@ -589,7 +602,6 @@ export class BuilderPage implements OnInit {
     if (this.hasUnsavedChanges()) {
       event.preventDefault()
       event.returnValue = true
-      return
     }
 
     if (this.previewSessionId) {
