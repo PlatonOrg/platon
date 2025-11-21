@@ -18,10 +18,12 @@
             [disabled]="item.state === 'disabled'"
           >
             <span
-            [attr.data-item-id]="item.id"
-            [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
-            #scrollableDiv>
-            {{ item.content }}</span>
+              [attr.data-item-id]="item.id"
+              [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
+              #scrollableDiv
+            >
+              <nge-markdown [data]="item.content"></nge-markdown
+            ></span>
           </button>
         </div>
       </ng-container>
@@ -43,10 +45,12 @@
             [disabled]="item.state === 'disabled'"
           >
             <span
-            [attr.data-item-id]="item.id"
-            [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
-            #scrollableDiv>
-            {{ item.content }}</span>
+              [attr.data-item-id]="item.id"
+              [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
+              #scrollableDiv
+            >
+              <nge-markdown [data]="item.content"></nge-markdown
+            ></span>
           </button>
         </div>
       </ng-container>
