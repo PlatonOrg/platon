@@ -598,7 +598,7 @@ export class BuilderPage implements OnInit {
   }
 
   @HostListener('window:beforeunload', ['$event'])
-  private onBeforeUnload(event: BeforeUnloadEvent): void {
+  protected onBeforeUnload(event: BeforeUnloadEvent): void {
     if (this.hasUnsavedChanges()) {
       event.preventDefault()
       event.returnValue = true
