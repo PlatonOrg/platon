@@ -81,7 +81,7 @@ export class ResourcesTutorialService {
         title: 'Barre de recherche',
         text: 'Utilisez cette barre pour rechercher des ressources par nom, topic, niveau ou tout autre critère. C\'est votre outil principal pour trouver du contenu.',
         attachTo: {
-          element: '#tuto-resources-searchbar',
+          element: '#tuto-search-bar',//'#tuto-resources-searchbar',
           on: 'bottom'
         }
       },
@@ -90,7 +90,7 @@ export class ResourcesTutorialService {
         title: 'Faisons une recherche !',
         text: 'Pour continuer le tutoriel, essayez de rechercher une ressource. Par exemple, tapez "python", "math", ou tout autre sujet qui vous intéresse.',
         attachTo: {
-          element: '#tuto-resources-searchbar',
+          element:  '#tuto-search-bar',//'#tuto-resources-searchbar',
           on: 'bottom'
         },
         buttons: [
