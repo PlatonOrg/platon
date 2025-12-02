@@ -63,7 +63,7 @@ export class ResourceCreationTutorialService {
           }
         ]
       },
-      {
+      /*{
         id: 'locate-create-button',
         title: 'Trouvez le bouton de création',
         text: `Pour créer une ressource, vous devez d'abord cliquer sur le bouton <strong>+</strong> (plus) dans la barre d'outils.<br><br>
@@ -81,7 +81,7 @@ export class ResourceCreationTutorialService {
         when: {
           show: () => this.highlightCreateButton()
         }
-      },
+      },*/
       {
         id: 'click-create-button',
         title: 'Cliquez sur le bouton +',

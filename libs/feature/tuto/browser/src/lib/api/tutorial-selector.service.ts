@@ -7,9 +7,11 @@ import { ToolbarTutorialService } from './toolbar-tutorial.service'
 import { IdeTutorialService } from './ide-tutorial.service'
 import { SharedResourceTutorialService } from './shared-resource-tutorial.service'
 import { ResourceCreationTutorialService } from './resource-creation-tutorial.service'
+import { CircleSubscriptionTutorialService } from "./circle-subscription-tutorial.service";
 import { TutorialSelectorModalComponent } from '../components/tutorial-selector-modal/tutorial-selector-modal.component'
 import { User } from '@platon/core/common'
 import { AuthService } from '@platon/core/browser'
+
 
 export interface TutorialOption {
   id: string
@@ -32,7 +34,8 @@ export class TutorialSelectorService {
     private readonly resourcesTutorialService: ResourcesTutorialService,
     private readonly resourceCreationTutorialService: ResourceCreationTutorialService,
     private readonly ideTutorialService: IdeTutorialService,
-    private readonly sharedResourceTutorailService: SharedResourceTutorialService
+    private readonly sharedResourceTutorailService: SharedResourceTutorialService,
+    private readonly circleSubscriptionTutorialService: CircleSubscriptionTutorialService
   ) {
     this.initUser()
   }
@@ -147,5 +150,10 @@ export class TutorialSelectorService {
   startPlatformTutorial(): void {
     if (!this.user) return
     this.toolbarTutorialService.startToolbarTutorial(this.user as User)
+  }
+
+  startCircleSubscriptionTutorial(): void {
+    if (!this.user) return
+    this.circleSubscriptionTutorialService.startCircleSubscriptionTutorial(this.user)
   }
 }

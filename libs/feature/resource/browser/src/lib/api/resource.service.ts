@@ -120,6 +120,10 @@ export class ResourceService {
     return this.resourceMemberProvider.join(resource)
   }
 
+  autoJoin(resource: Resource | string): Observable<ResourceMember> {
+    return this.resourceMemberProvider.autoJoin(resource)
+  }
+
   acceptJoin(resource: Resource | string, userId: string): Observable<ResourceMember> {
     return this.resourceMemberProvider.update(resource, userId, {
       waiting: false,

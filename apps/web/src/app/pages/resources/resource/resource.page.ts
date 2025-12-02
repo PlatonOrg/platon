@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule, ActivatedRoute } from '@angular/router'
-import { firstValueFrom, Subscription } from 'rxjs'
+import { Subscription } from 'rxjs'
 import { Title } from '@angular/platform-browser'
 
 import { MatChipsModule } from '@angular/material/chips'
@@ -82,7 +82,7 @@ export class ResourcePage implements OnInit, OnDestroy {
   protected certifiedTemplate = false
 
   // for the tab name
-  constructor(private titleService: Title){}
+  constructor(private titleService: Title) {}
 
   get isOtherPersonal(): boolean {
     return this.context.resource!.personal && this.context.resource!.ownerId !== this.context.user!.id
@@ -106,7 +106,6 @@ export class ResourcePage implements OnInit, OnDestroy {
         }
       })
     )
-    //this.checkFirstVisit()
     this.checkForTutorialContinuation()
   }
 
@@ -182,15 +181,6 @@ export class ResourcePage implements OnInit, OnDestroy {
     return this.context.resource?.statistic?.exercise?.references?.total || 0
   }
 
-  /**
-   * Vérifie si c'est la première visite de l'utilisateur
-
-  private checkFirstVisit(): void {
-    setTimeout(() => {
-      this.startResourcesTutorial()
-    }, 1000)
-  }*/
-
   private checkForTutorialContinuation(): void {
     this.activatedRoute.queryParams.subscribe((params) => {
       const fromTutorial = params['fromTutorial']
@@ -201,22 +191,13 @@ export class ResourcePage implements OnInit, OnDestroy {
         setTimeout(() => {
           this.startResourcePageTutorial()
         }, 1000)
-        //this.startResourcePageTutorial()
-
         // Nettoyer les paramètres d'URL
         this.cleanTutorialParams()
-
-        // Réinitialiser le flag du service
         this.resourcesTutorialService.resetTutorialFlag()
-      } else {
-        console.log('NOTHING')
       }
     })
   }
 
-  /**
-   * Démarre le tutoriel complet de l'espace de travail
-   */
   startResourcePageTutorial(): void {
     if (this.context.resource) {
       this.resourcePageTutorialService.startResourcePageTutorial(this.context.resource, false, false, false)
@@ -224,7 +205,6 @@ export class ResourcePage implements OnInit, OnDestroy {
   }
 
   private cleanTutorialParams(): void {
-    // Supprimer le paramètre fromTutorial de l'URL sans recharger la page
     const url = new URL(window.location.href)
     url.searchParams.delete('fromTutorial')
     window.history.replaceState(null, '', url.toString())
