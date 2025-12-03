@@ -22,6 +22,7 @@ import { PleInput, Variables } from '@platon/feature/compiler'
 import { ResourceFileService, ResourceService, getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
 import { Resource } from '@platon/feature/resource/common'
 import { DialogModule, DialogService, StorageService } from '@platon/core/browser'
+import { Title } from '@angular/platform-browser'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { firstValueFrom } from 'rxjs'
@@ -79,6 +80,7 @@ export class BuilderPage implements OnInit {
   private readonly resourceFileService = inject(ResourceFileService)
   private readonly dialogService = inject(DialogService)
   private readonly storageService = inject(StorageService)
+  private readonly title = inject(Title)
   private readonly http = inject(HttpClient)
 
   private readonly dialog = inject(MatDialog)
@@ -136,9 +138,8 @@ export class BuilderPage implements OnInit {
   protected toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen
 
-    // Ajuster la largeur selon l'état
     if (this.sidebarOpen) {
-      this.sidebarWidth = 200 // Largeur complète
+      this.sidebarWidth = 200
     } else {
       this.sidebarWidth = this.sidebarMinWidth // Mode icône uniquement
     }
@@ -234,6 +235,7 @@ export class BuilderPage implements OnInit {
   async ngOnInit(): Promise<void> {
     try {
       const resourceId = this.activatedRoute.snapshot.paramMap.get('id')
+      const version = this.activatedRoute.snapshot.queryParamMap.get('version') || 'latest'
       if (!resourceId) {
         this.error = 'ID de ressource manquant'
         this.loading = false
@@ -242,7 +244,7 @@ export class BuilderPage implements OnInit {
       }
 
       this.resource = await firstValueFrom(this.resourceService.find({ id: resourceId }))
-
+      this.title.setTitle(`${this.resource.name}`)
       if (!this.resource.templateId || !this.resource.templateVersion) {
         this.error = "Cette ressource n'utilise pas de template"
         this.loading = false
@@ -262,11 +264,8 @@ export class BuilderPage implements OnInit {
 
       const config = JSON.parse(configContent)
       this.inputs = config.inputs || []
-      console.log(configContent)
       try {
-        const overridesFile = await firstValueFrom(
-          this.resourceFileService.read(this.resource.id, 'main.plo', 'latest')
-        )
+        const overridesFile = await firstValueFrom(this.resourceFileService.read(this.resource.id, 'main.plo', version))
 
         const overridesContent = await firstValueFrom(
           this.http.get<string>(overridesFile.url, { responseType: 'text' as 'json' })
@@ -275,7 +274,6 @@ export class BuilderPage implements OnInit {
         const loadedOverrides = JSON.parse(overridesContent)
         this.overrides = loadedOverrides
       } catch (error) {
-        console.log("Aucun fichier d'overrides trouvé")
         this.overrides = {}
       }
 
@@ -290,6 +288,7 @@ export class BuilderPage implements OnInit {
     } catch (error) {
       console.error(error)
       this.error = 'Erreur lors du chargement de la configuration'
+      this.dialogService.error(this.error)
       this.loading = false
       this.changeDetectorRef.markForCheck()
     }
@@ -335,9 +334,6 @@ export class BuilderPage implements OnInit {
     try {
       this.saving = true
       this.changeDetectorRef.markForCheck()
-
-      console.log('Sauvegarde des overrides :', this.overrides)
-
       try {
         const overridesFile = await firstValueFrom(
           this.resourceFileService.read(this.resource.id, 'main.plo', 'latest')
@@ -349,10 +345,7 @@ export class BuilderPage implements OnInit {
             { content: JSON.stringify(this.overrides, null, 2) }
           )
         )
-
-        console.log('Fichier overrides.plo mis à jour avec succès')
       } catch (readError) {
-        console.log("Le fichier n'existe pas, création...")
         await firstValueFrom(
           this.resourceFileService.create(this.resource.id, [
             {
@@ -361,15 +354,12 @@ export class BuilderPage implements OnInit {
             },
           ])
         )
-
-        console.log('Fichier main.plo créé avec succès')
       }
 
       this.hasUnsavedChanges.set(false)
 
       this.dialogService.success('Configuration sauvegardée avec succès')
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde :', error)
       this.dialogService.error('Erreur lors de la sauvegarde')
     } finally {
       this.saving = false
@@ -402,6 +392,12 @@ export class BuilderPage implements OnInit {
       this.changeDetectorRef.detectChanges()
     } catch (error) {
       console.error('Erreur lors du rechargement de la prévisualisation:', error)
+    }
+  }
+
+  protected async openInEditor(): Promise<void> {
+    if (this.resource) {
+      window.open(`/editor/${this.resource.id}?version=latest`, '_blank')
     }
   }
 
@@ -467,8 +463,6 @@ export class BuilderPage implements OnInit {
 
       this.dialogService.success(`Configuration transformée avec succès !${usageText}`)
     } catch (error: unknown) {
-      console.error('Erreur lors de la transformation IA:', error)
-
       let errorMessage = 'Erreur lors de la transformation IA'
 
       if (error && typeof error === 'object') {
@@ -568,11 +562,9 @@ export class BuilderPage implements OnInit {
         return
       }
     }
-    console.log('Navigation vers la liste des ressources')
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout)
     }
-    console.log('Nettoyage des données de prévisualisation')
 
     if (this.previewSessionId) {
       firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(this.previewSessionId))).catch(
