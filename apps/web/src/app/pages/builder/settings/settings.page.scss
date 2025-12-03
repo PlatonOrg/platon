@@ -93,6 +93,26 @@
     p {
       color: var(--brand-text-secondary);
       font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .developer-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--brand-color-primary);
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
     }
   }
 

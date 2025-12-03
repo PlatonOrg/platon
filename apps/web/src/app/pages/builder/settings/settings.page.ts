@@ -16,20 +16,12 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { DialogService, ThemeService, TagService } from '@platon/core/browser'
-import { ResourceService } from '@platon/feature/resource/browser'
+import { ResourceService, RESOURCE_STATUS_NAMES } from '@platon/feature/resource/browser'
 import { Resource, UpdateResource, ResourceStatus } from '@platon/feature/resource/common'
 import { Level, Topic } from '@platon/core/common'
 import { firstValueFrom } from 'rxjs'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
-
-const RESOURCE_STATUS_NAMES: Record<ResourceStatus, string> = {
-  [ResourceStatus.DRAFT]: 'Brouillon',
-  [ResourceStatus.READY]: "Prêt à l'utilisation",
-  [ResourceStatus.BUGGED]: 'Contient des bugs',
-  [ResourceStatus.NOT_TESTED]: "Besoin d'être testé",
-  [ResourceStatus.DEPRECATED]: 'Ne pas utiliser',
-}
 
 export interface SettingItem {
   id: string
@@ -63,7 +55,7 @@ export class SettingsPage implements OnInit {
   private readonly resourceService = inject(ResourceService)
 
   selectedSetting = input<SettingItem | null>(null)
-  resource = input<Resource | undefined>()
+  resource = input.required<Resource>()
 
   protected currentTheme = signal<string | null>('light')
   protected topics = signal<Topic[]>([])
@@ -106,9 +98,7 @@ export class SettingsPage implements OnInit {
       this.currentTheme.set('system')
     }
 
-    if (this.selectedSetting()?.type === 'save') {
-      await this.loadTagsAndInitForm()
-    }
+    await this.loadTagsAndInitForm()
   }
 
   private async loadTagsAndInitForm(): Promise<void> {
@@ -175,6 +165,12 @@ export class SettingsPage implements OnInit {
 
   protected getStatusLabel(status: ResourceStatus): string {
     return RESOURCE_STATUS_NAMES[status]
+  }
+
+  protected async openInEditor(): Promise<void> {
+    if (this.resource) {
+      window.open(`/editor/${this.resource().id}?version=latest`, '_blank')
+    }
   }
 
   applyTheme(theme: 'light' | 'dark' | 'system'): void {

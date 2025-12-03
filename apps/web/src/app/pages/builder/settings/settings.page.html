@@ -40,7 +40,14 @@
   @if (selectedSetting()!.type === 'developer') {
   <div class="developer-settings">
     <h3>Mode développeur</h3>
-    <p>Options de développement à venir...</p>
+    <p>Accédez aux fonctionnalités avancées de développement pour cette ressource.</p>
+
+    <div class="developer-actions">
+      <button mat-raised-button color="primary" (click)="openInEditor()">
+        <mat-icon>code</mat-icon>
+        <span>Ouvrir dans l'éditeur</span>
+      </button>
+    </div>
   </div>
   }
 

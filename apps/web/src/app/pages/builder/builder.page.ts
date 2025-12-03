@@ -416,12 +416,6 @@ export class BuilderPage implements OnInit {
     return `/player/preview/${this.resource.id}?version=latest&sessionId=${this.previewSessionId}`
   }
 
-  protected async openInEditor(): Promise<void> {
-    if (this.resource) {
-      window.open(`/editor/${this.resource.id}?version=latest`, '_blank')
-    }
-  }
-
   protected async openAITransform(): Promise<void> {
     const dialogRef = this.dialog.open(AIPromptModalComponent, {
       width: '700px',
