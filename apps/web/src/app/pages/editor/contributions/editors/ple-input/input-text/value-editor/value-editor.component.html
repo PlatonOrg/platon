@@ -1,5 +1,5 @@
-<nz-form-item nzRequired>
-  <nz-form-control>
+<nz-form-item nzRequired style="display: flex; flex-direction: column; height: 100%">
+  <nz-form-control style="flex: 1; display: flex; flex-direction: column">
     <textarea nz-input [disabled]="disabled" [(ngModel)]="value" (ngModelChange)="notifyValueChange?.($event)">
     </textarea>
   </nz-form-control>
