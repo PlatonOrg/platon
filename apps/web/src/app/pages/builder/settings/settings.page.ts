@@ -79,7 +79,7 @@ export class SettingsPage implements OnInit {
   protected form = new FormGroup({
     name: new FormControl('', [Validators.required]),
     desc: new FormControl('', [Validators.required]),
-    status: new FormControl<ResourceStatus | null>(null, [Validators.required]),
+    status: new FormControl<ResourceStatus | null>(ResourceStatus.DRAFT, [Validators.required]),
     topics: new FormControl<string[]>([]),
     levels: new FormControl<string[]>([]),
   })
@@ -117,7 +117,7 @@ export class SettingsPage implements OnInit {
         this.form.patchValue({
           name: currentResource.name,
           desc: currentResource.desc || '',
-          status: currentResource.status,
+          status: currentResource.status || ResourceStatus.DRAFT,
           topics: currentResource.topics?.map((t) => t.id) || [],
           levels: currentResource.levels?.map((l) => l.id) || [],
         })

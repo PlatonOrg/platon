@@ -236,6 +236,7 @@ export class ResourceCreatePage implements OnInit {
           templateVersion: LATEST,
           name: defaultName,
           desc: 'Exercice créé en mode configuration rapide avec le template : ' + this.template?.name,
+          status: ResourceStatus.DRAFT,
           code: undefined,
           levels: [],
           topics: [],
