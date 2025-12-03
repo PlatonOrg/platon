@@ -42,7 +42,10 @@ export class ResourceService {
       : user.role === UserRoles.admin || user.role === UserRoles.teacher
   }
 
-  editorUrl(resourceId: string, version?: string): string {
+  editorUrl(resourceId: string, version?: string, templateId?: string): string {
+    if (templateId) {
+      return `builder/${resourceId}?version=${version || 'latest'}`
+    }
     return `/editor/${resourceId}?version=${version || 'latest'}`
   }
 

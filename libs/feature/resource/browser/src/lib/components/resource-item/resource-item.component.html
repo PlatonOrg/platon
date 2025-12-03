@@ -7,9 +7,15 @@
     [articleDescription]="descriptionTemplate"
     (didClickTagItem)="handleTagClick($event)"
   >
+    @if(item.templateId) {
+    <ui-list-item-article-action *ngIf="editable" (click)="openTab(builderUrl)" class="action" actionTitle="Éditer">
+      <i nz-icon nzType="edit" nzTheme="outline"></i>
+    </ui-list-item-article-action>
+    } @else {
     <ui-list-item-article-action *ngIf="editable" (click)="openTab(editorUrl)" class="action" actionTitle="Éditer">
       <i nz-icon nzType="edit" nzTheme="outline"></i>
     </ui-list-item-article-action>
+    }
 
     <ng-container *ngIf="item.type !== 'CIRCLE'">
       <ui-list-item-article-action

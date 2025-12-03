@@ -408,7 +408,7 @@ export class ResourcePresenter implements OnDestroy {
       ...newContext,
       version: newContext?.version || 'latest',
       editorUrl: newContext.resource
-        ? this.resourceService.editorUrl(newContext.resource.id, newContext.version)
+        ? this.resourceService.editorUrl(newContext.resource.id, newContext.version, newContext.resource.templateId)
         : undefined,
       previewUrl: newContext.resource
         ? this.resourceService.previewUrl(newContext.resource.id, newContext.version)

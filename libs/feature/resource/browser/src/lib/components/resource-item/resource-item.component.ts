@@ -95,6 +95,10 @@ export class ResourceItemComponent implements OnChanges {
     return `/editor/${this.item.id}?version=latest`
   }
 
+  get builderUrl(): string {
+    return `/builder/${this.item.id}?version=latest`
+  }
+
   get previewUrl(): string {
     const sessionId = uuidv4()
     if (this.previewOverrides) {
