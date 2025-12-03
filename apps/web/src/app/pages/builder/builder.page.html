@@ -21,7 +21,7 @@
     </h1>
     <div class="header-actions">
       <div class="preview-toolbar">
-        <button
+        <!-- <button
           mat-stroked-button
           class="label"
           (click)="openAITransform()"
@@ -29,6 +29,10 @@
         >
           <mat-icon>auto_awesome</mat-icon>
           <span>Transformer avec l'IA</span>
+        </button> -->
+        <button mat-stroked-button class="label" (click)="openInEditor()" title="Mode développeur">
+          <mat-icon>code</mat-icon>
+          <span>Ouvrir dans l'éditeur</span>
         </button>
         <button
           class="label"

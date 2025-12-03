@@ -12,7 +12,7 @@ export class BuilderAiService {
   constructor(private readonly httpService: HttpService) {}
 
   async transformInputsWithAI(input: AITransformInput, apiKey: string): Promise<AITransformOutput> {
-    this.logger.log(`Transformation AI demandée avec ${input.provider}`)
+    //this.logger.log(`Transformation AI demandée avec ${input.provider}`)
 
     switch (input.provider) {
       case 'openai':
