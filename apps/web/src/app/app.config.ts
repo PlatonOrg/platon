@@ -19,6 +19,7 @@ import { PEER_PROVIDERS } from '@platon/feature/peer/browser'
 import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
 import { DISCORD_PROVIDERS } from '@platon/feature/discord/browser'
 import { ANNOUNCEMENT_PROVIDERS } from '@platon/feature/announcement/browser'
+import { TUTO_PROVIDERS } from '@platon/feature/tuto/browser'
 import { BUILDER_PROVIDERS } from '@platon/feature/builder/browser'
 import { appRoutes } from './app.routes'
 import { TESTS_PROVIDERS } from '@platon/feature/tests/browser'
@@ -45,6 +46,7 @@ export const appConfig: ApplicationConfig = {
     DISCORD_PROVIDERS,
     TESTS_PROVIDERS,
     ANNOUNCEMENT_PROVIDERS,
+    TUTO_PROVIDERS,
     BUILDER_PROVIDERS,
   ],
 }

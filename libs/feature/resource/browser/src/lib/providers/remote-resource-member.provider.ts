@@ -16,6 +16,12 @@ export class RemoteResourceMemberProvider extends ResourceMemberProvider {
     super()
   }
 
+  autoJoin(resource: Resource | string): Observable<ResourceMember> {
+    return this.http
+      .post<ItemResponse<ResourceMember>>(`/api/v1/resources/${getId(resource)}/members/auto-join`, {})
+      .pipe(map((response) => response.resource))
+  }
+
   join(resource: Resource | string): Observable<ResourceMember> {
     return this.http
       .post<ItemResponse<ResourceMember>>(`/api/v1/resources/${getId(resource)}/members`, {})

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 
 import { Subscription, firstValueFrom } from 'rxjs'
 import { ResourcePresenter } from '../../resource.presenter'
@@ -27,6 +28,7 @@ import { RouterModule } from '@angular/router'
     RouterModule,
     UiFilePreviewComponent,
     NzSelectModule,
+    NzPopconfirmModule,
     FormsModule,
     ResourceVersionComponent,
     NzInputModule,
@@ -55,6 +57,8 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
   protected invalidTemplateId = false
   protected errorMessage = ''
 
+  protected isCreating = false
+
   protected get canEdit(): boolean {
     return !!this.context.resource?.permissions?.write
   }
@@ -63,7 +67,6 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe((context) => {
         this.context = context
-        console.log(this.context)
         this.changeDetectorRef.markForCheck()
       })
     )
@@ -128,13 +131,24 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
       return
     }
     if (this.context.resource) {
-      await firstValueFrom(
-        this.resourceService.updateTemplate(this.context.resource.id, this.templateId, this.templateVersion)
-      )
+      this.isCreating = false
+      await this.presenter.updateTemplate(this.templateId, this.templateVersion)
     }
   }
 
   protected openTemplate(): void {
     window.open('/resources/' + this.templateId, '_blank')
+  }
+
+  protected async removeTemplate(): Promise<void> {
+    if (this.context.resource) {
+      await this.presenter.removeTemplate()
+      this.template = undefined
+      this.templateId = ''
+      this.templateVersion = ''
+      this.versions = { all: [] }
+      this.versionInfo = undefined
+      this.changeDetectorRef.markForCheck()
+    }
   }
 }

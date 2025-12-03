@@ -219,6 +219,59 @@ export class PlayerCorrectionComponent implements OnInit {
     }
   }
 
+  protected get uploadedFiles(): boolean {
+    return this.currentGroup?.users.some((exercise) => exercise.hasUploads) ?? false
+  }
+
+  protected downloadAllSubmissions(): void {
+    // Récupère le session ID de l'exercice courant
+    const exerciseSessionId = this.currentExercise?.exerciseSessionId
+
+    if (!this.activityId || !this.currentGroup?.exerciseId || !exerciseSessionId) {
+      console.warn('Missing required parameters', {
+        activityId: this.activityId,
+        exerciseId: this.currentGroup?.exerciseId,
+        exerciseSessionId,
+      })
+      return
+    }
+
+    this.resultService
+      .downloadAllSubmissions(this.activityId, this.currentGroup.exerciseId, exerciseSessionId)
+      .subscribe({
+        next: (response: { blob: Blob; fileName: string }) => {
+          // Crée un URL blob et déclenche le téléchargement
+          const url = window.URL.createObjectURL(response.blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = response.fileName
+          link.click()
+
+          // Nettoie
+          window.URL.revokeObjectURL(url)
+          this.dialogService.success('Téléchargement démarré')
+        },
+        error: (error) => {
+          console.error('Download error:', error)
+          this.dialogService.error('Erreur lors du téléchargement')
+          console.error(error)
+        },
+      })
+  }
+
+  protected getDownloadAllSubmissionsUrl(): string | null {
+    if (!this.currentActivityId) {
+      return null
+    }
+    // Récupère l'ID de l'exercice du groupe courant
+    const exerciseId = this.currentGroup?.exerciseId
+    if (!exerciseId) {
+      return null
+    }
+    // Construit l'URL de l'API
+    return `/api/v1/sessions/${this.sessionId}/submissions/${this.currentActivityId}/${exerciseId}/download-all`
+  }
+
   // === GROUP BUILDING ===
   private buildGroups(): void {
     const activityExercisesMap = new Map<string, { name: string; map: Map<string, ExerciseGroup> }>()

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, OnInit, Output } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Injector, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { BindedBubblesComponentDefinition, BindedBubblesState, BubbleItem, PairBubbleItem } from './binded-bubbles'
 import { WebComponentService } from '../../web-component.service'
@@ -11,6 +11,7 @@ import { WebComponentService } from '../../web-component.service'
 })
 @WebComponent(BindedBubblesComponentDefinition)
 export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesState>, OnInit {
+
   @Input() state!: BindedBubblesState
   @Output() stateChange = new EventEmitter<BindedBubblesState>()
 
@@ -25,7 +26,7 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   achieveList: PairBubbleItem[] = []
   timeoutID: NodeJS.Timeout | undefined
 
-  constructor(readonly injector: Injector) {
+  constructor(readonly injector: Injector, private cd: ChangeDetectorRef) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
   }
@@ -288,5 +289,45 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
 
   protected trackById(index: number, item: BubbleItem): string {
     return item.id
+  }
+
+  // scroll indicator
+  @ViewChildren('scrollableDiv') scrollableSpans!: QueryList<ElementRef>;
+  needsHorizontalScroll: Map<any, boolean> = new Map();
+
+  ngAfterViewInit() {
+    this.scrollableSpans.changes.subscribe(() => {
+      this.checkAllHorizontalOverflows();
+    });
+
+    this.checkAllHorizontalOverflows();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    this.checkAllHorizontalOverflows();
+  }
+
+  /** check if we need the scrollbar indicator or not for each item */
+  checkAllHorizontalOverflows(): void {
+    this.needsHorizontalScroll.clear();
+    if (!this.scrollableSpans || this.scrollableSpans.length === 0) {
+      return;
+    }
+    this.scrollableSpans.forEach((elementRef: ElementRef) => {
+      const spanElement = elementRef.nativeElement as HTMLElement;
+      const availableContainer = spanElement.parentNode as HTMLElement;
+      if (!availableContainer) {
+          return;
+      }
+      const itemId = spanElement.getAttribute('data-item-id');
+      if (!itemId) {
+          console.error("Erreur: ID de l'item manquant sur l'élément span.");
+          return;
+      }
+      const isOverflowing = spanElement.scrollWidth > availableContainer.clientWidth;
+      this.needsHorizontalScroll.set(itemId, isOverflowing);
+    });
+    this.cd.detectChanges();
   }
 }

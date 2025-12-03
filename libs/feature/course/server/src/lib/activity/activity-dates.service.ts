@@ -30,13 +30,14 @@ export class ActivityDatesService {
     }
 
     for (const activity of activities) {
-      const dateRange = await this.getActivityDatesForUser(activity, this.request.user)
-
-      if (dateRange) {
-        activity.openAt = dateRange.start
-        activity.closeAt = dateRange.end
-        globalDateRange.start = dateRange.start
-        globalDateRange.end = dateRange.end
+      if (!activity.ignoreRestrictions) {
+        const dateRange = await this.getActivityDatesForUser(activity, this.request.user)
+        if (dateRange) {
+          activity.openAt = dateRange.start
+          activity.closeAt = dateRange.end
+          globalDateRange.start = dateRange.start
+          globalDateRange.end = dateRange.end
+        }
       }
     }
 
@@ -291,6 +292,9 @@ export class ActivityDatesService {
             config.end = undefined
           } else {
             config.end = new Date()
+            if (config.start && new Date(config.start).getTime() > new Date(config.end).getTime()) {
+              config.start = undefined
+            }
           }
         }
       })

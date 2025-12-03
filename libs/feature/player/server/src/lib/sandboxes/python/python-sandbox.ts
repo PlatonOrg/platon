@@ -59,13 +59,17 @@ export class PythonSandbox implements Sandbox {
     try {
       const response = await withTempFile(
         async (path) => {
-          const isEnvSaved: boolean = await firstValueFrom(
-            this.http
-              .head(`${this.config.get('sandbox.url', { infer: true })}/environments/${input.envid}/`)
-              .pipe(rxjsTimeout(timeout))
-          )
-            .then((response) => (response.status === 200 ? true : false))
-            .catch(() => false)
+          let baseUrl = this.config.get('sandbox.url', { infer: true }) as string
+          if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1)
+          }
+
+          const isEnvSaved: boolean = input.envid
+            ? await firstValueFrom(this.http.head(`${baseUrl}/environments/${input.envid}/`).pipe(rxjsTimeout(timeout)))
+                .then((response) => (response.status === 200 ? true : false))
+                .catch(() => false)
+            : false
+
           await this.withEnvFiles(script, input, path, isEnvSaved)
 
           const data = new FormData()
@@ -82,14 +86,10 @@ export class PythonSandbox implements Sandbox {
 
           data.append('environment', await fs.promises.readFile(path), { filename: 'environment' })
 
-          let url = this.config.get('sandbox.url', { infer: true }) as string
-          if (!url.endsWith('/')) {
-            url += '/'
-          }
           const result = await firstValueFrom(
             this.http
-              .post<ExecutionResult>(`${url}execute/`, data, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+              .post<ExecutionResult>(`${baseUrl}/execute/`, data, {
+                headers: data.getHeaders(),
                 timeout,
               })
               .pipe(rxjsTimeout(timeout))
@@ -162,8 +162,12 @@ export class PythonSandbox implements Sandbox {
    * @returns A Promise that resolves to a string containing the environment files.
    */
   async downloadEnvironment(envid: string): Promise<SandboxEnvironment> {
+    let baseUrl = this.config.get('sandbox.url', { infer: true }) as string
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1)
+    }
     const response = await firstValueFrom(
-      this.http.get(`${this.config.get('sandbox.url', { infer: true })}/environments/${envid}/`, {
+      this.http.get(`${baseUrl}/environments/${envid}/`, {
         responseType: 'arraybuffer',
       })
     ).catch((_error: AxiosError) => {
@@ -206,6 +210,11 @@ export class PythonSandbox implements Sandbox {
           }
         }
       }
+    }
+
+    // Always add submission files if present
+    for (const file of input.submissionFiles || []) {
+      pack.entry({ name: file.path }, file.content || '')
     }
 
     pack.finalize()

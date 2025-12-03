@@ -81,7 +81,7 @@ export class ResourcesTutorialService {
         title: 'Barre de recherche',
         text: 'Utilisez cette barre pour rechercher des ressources par nom, topic, niveau ou tout autre critère. C\'est votre outil principal pour trouver du contenu.',
         attachTo: {
-          element: '#tuto-resources-searchbar',
+          element: '#tuto-search-bar',//'#tuto-resources-searchbar',
           on: 'bottom'
         }
       },
@@ -90,7 +90,7 @@ export class ResourcesTutorialService {
         title: 'Faisons une recherche !',
         text: 'Pour continuer le tutoriel, essayez de rechercher une ressource. Par exemple, tapez "python", "math", ou tout autre sujet qui vous intéresse.',
         attachTo: {
-          element: '#tuto-resources-searchbar',
+          element:  '#tuto-search-bar',//'#tuto-resources-searchbar',
           on: 'bottom'
         },
         buttons: [
@@ -102,7 +102,7 @@ export class ResourcesTutorialService {
                 this.shepherdService.next();
               } else {
                 this.shepherdService.enableEnterNavigation();
-                performSearch('Demo tutoriel');
+                performSearch('Python');
                 setTimeout(() => this.shepherdService.next(), 100);
               }
             }
@@ -219,7 +219,7 @@ export class ResourcesTutorialService {
         },
         buttons: [
           {
-            text: 'Précédent',//'Cliquer sur le bouton filtre',
+            text: 'Précédent',
             secondary: true,
             action: () => {
               this.shepherdService.previous()
@@ -263,7 +263,7 @@ export class ResourcesTutorialService {
         id: 'filter-drawer-open',
         title: 'Panneau de recherche avancée',
         text: `<div style="text-align: center; padding: 10px;">
-                <h4>🎯 Filtres avancés ouverts !</h4>
+                <h4>Filtres avancés ouverts !</h4>
                 <p>Le panneau de recherche avancée est maintenant ouvert sur la droite de votre écran.</p>
                 <p><strong>Prochaine étape :</strong> Nous allons apprendre à filtrer par type de ressource dans la section mise en évidence.</p>
               </div>`,
@@ -303,7 +303,6 @@ export class ResourcesTutorialService {
               setTimeout(() => {
                 const typeSection = document.querySelector('#tuto-types-recourses');
                 if (!typeSection) {
-                  console.error('Section types non trouvée');
                   alert('Erreur: Section non trouvée. Veuillez réessayer.');
                   return;
                 }
@@ -426,8 +425,9 @@ export class ResourcesTutorialService {
       },
       buttons: [
         {
+          secondary: true,
           text: 'Cliquer sur le premier cercle',
-          action: () => this.clickFirstCircle()
+          //action: () => this.clickFirstCircle()
         }
       ],
       when: {
@@ -482,7 +482,7 @@ export class ResourcesTutorialService {
   private buildResourceActionsHTML(): string {
     return `
       <div style="padding: 20px; max-width: 400px;">
-      <h3 style="margin-bottom: 16px; font-weight: 600;">Actions disponibles sur chaque ressource :</h3>
+      <h3 style="margin-bottom: 16px; font-weight: 600;">Actions disponibles sur chaque ressource:</h3>
 
       <div style="margin-bottom: 16px;">
 
@@ -630,7 +630,6 @@ export class ResourcesTutorialService {
       checkElement();
 
       setTimeout(() => {
-        console.warn(`Timeout waiting for element: ${selector}`);
         resolve(document.querySelector(selector) as HTMLElement);
       }, 5000);
     });

@@ -22,9 +22,24 @@ nz-list {
   }
 }
 
-nz-list-item {
-  padding: 0.5rem 1rem !important;
-  cursor: pointer;
+::ng-deep nz-list-item {
+  padding: 3px 0 3px 5px !important;
+  cursor: move;
+
+  > b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ant-list-item-action > li {
+    padding: 0 !important;
+  }
+
+  ul[nz-list-item-actions] {
+    margin: 0;
+
+  }
+
   &.selected {
     border-left: 2px solid var(--brand-color-primary);
   }

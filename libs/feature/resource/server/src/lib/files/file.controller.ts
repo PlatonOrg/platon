@@ -19,7 +19,7 @@ import { ConfigService } from '@nestjs/config'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { BadRequestResponse, SuccessResponse, UnauthorizedResponse } from '@platon/core/common'
-import { Configuration, EventService, IRequest, Public } from '@platon/core/server'
+import { Configuration, EventService, IRequest, Public, getContentDisposition } from '@platon/core/server'
 import { PLSourceFile } from '@platon/feature/compiler'
 import { ExerciseTransformInput, FileTypes, LATEST, ResourceFile, ResourceTypes } from '@platon/feature/resource/common'
 import { Response } from 'express'
@@ -116,8 +116,9 @@ export class ResourceFileController {
     }
 
     await repo.release(input.name, input.message)
-
-    await this.dependencyService.createDependencyForNewVersion(resourceId, input.name)
+    if (resource.template) { // ignore this if you didn't inherit from a template
+      await this.dependencyService.createDependencyForNewVersion(resourceId, input.name)
+    }
 
     this.eventService.emit<OnReleaseRepoEventPayload>(ON_RELEASE_REPO_EVENT, {
       repo,
@@ -196,8 +197,7 @@ export class ResourceFileController {
       res.set('Content-Type', mimeType || 'application/octet-stream')
 
       if (node.type === 'file') {
-        const encodedFilename = encodeURIComponent(basename(node.path))
-        res.set('Content-Disposition', `attachment; filename=${encodedFilename}`)
+        res.set('Content-Disposition', getContentDisposition(basename(node.path)))
         const buffer = (await content) as Uint8Array
 
         const extension = node.path.split('.').pop()
@@ -207,8 +207,8 @@ export class ResourceFileController {
 
         file = new StreamableFile(buffer)
       } else {
-        const encodedFilename = encodeURIComponent(`platon-${resource.name.trim().replace(/\s/g, '-')}.zip`)
-        res.set('Content-Disposition', `attachment; filename=${encodedFilename}`)
+        const fileName = `platon-${resource.name.trim().replace(/\s/g, '-')}.zip`
+        res.set('Content-Disposition', getContentDisposition(fileName))
 
         const archive = await repo.archive(path, version)
         const stream = fs.createReadStream(archive)

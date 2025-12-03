@@ -48,6 +48,7 @@ export class CorrectionService {
       correctedGrade?: number
       grade?: number
       exerciseName: string
+      hasUploads: boolean
     }
 
     // Construct SQL query and parameters
@@ -65,7 +66,12 @@ export class CorrectionService {
       correction.author_id as "correctedBy",
       COALESCE(correction.updated_at, correction.created_at) as "correctedAt",
       correction.grade as "correctedGrade",
-      exercise_session.grade as "grade"
+      exercise_session.grade as "grade",
+      CASE WHEN EXISTS (
+        SELECT 1 FROM "StudentSubmissions"
+        WHERE session_id = exercise_session.id
+        LIMIT 1
+      ) THEN true ELSE false END as "hasUploads"
     FROM "Sessions" exercise_session
     INNER JOIN "Resources" resources on resources.id = (exercise_session.source->>'resource')::uuid
     INNER JOIN "Sessions" activity_session ON activity_session.id=exercise_session.parent_id
@@ -117,6 +123,7 @@ export class CorrectionService {
         grade: projection.grade,
         exerciseId: navItem.id,
         exerciseName: projection.exerciseName,
+        hasUploads: projection.hasUploads,
         labels: [],
       }
 

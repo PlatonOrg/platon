@@ -16,7 +16,7 @@ export class TutorialSelectorModalComponent {
   @Input() tutorials: TutorialOption[] = [];
 
   constructor(
-    public tutorialService: TutorialSelectorService,
+    protected tutorialService: TutorialSelectorService,
     private authService: AuthService
   ) {
     this.tutorials = this.tutorialService.tutorials;

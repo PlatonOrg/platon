@@ -1,0 +1,291 @@
+---
+title: FileUpload
+description: Composant d'upload de fichiers avec validation (extensions, taille, format du nom). Support du drag-drop et de l'upload multiple. Idéal pour les exercices nécessitant une soumission de fichiers (devoirs, projets, ressources, documents à analyser).
+---
+
+import { Tabs, Tab } from 'nextra/components'
+import { ComponentProperties, Playground } from '../../../components'
+import { useAbsoluteUrl } from '../../../hooks'
+
+# FileUpload
+
+`wc-file-upload`
+
+Composant d'upload de fichiers avec validation (extensions, taille, format du nom). Support du drag-drop et de l'upload multiple. Idéal pour les exercices nécessitant une soumission de fichiers (devoirs, projets, ressources, documents à analyser).
+
+## Documentation
+
+# FileUpload - Guide d'utilisation
+
+## Configuration simple
+
+```json
+{
+  "maxFiles": 1,
+  "allowedExtensions": ["pdf"],
+  "maxFileSize": 10485760,
+  "acceptedFormats": ".pdf"
+}
+```
+
+## Exemples de configurations
+
+**Plusieurs fichiers:**
+
+```json
+{
+  "maxFiles": 5,
+  "allowedExtensions": ["pdf", "docx", "xlsx"],
+  "maxFileSize": 52428800
+}
+```
+
+**Images uniquement:**
+
+```json
+{
+  "maxFiles": 10,
+  "allowedExtensions": ["jpg", "png", "gif"],
+  "maxFileSize": 5242880,
+  "acceptedFormats": "image/*"
+}
+```
+
+**Avec validation du nom:**
+
+```json
+{
+  "maxFiles": 1,
+  "allowedExtensions": ["pdf"],
+  "fileNameRegex": "^[a-zA-Z0-9_-]+$"
+}
+```
+
+## Propriétés
+
+- `maxFiles`: Nombre max de fichiers (défaut: 1)
+- `allowedExtensions`: Extensions autorisées (défaut: [])
+- `maxFileSize`: Taille max en bytes (défaut: 10 MB)
+- `fileNameRegex`: Regex pour le nom du fichier
+- `uploadedFiles`: Fichiers uploadés
+- `disabled`: Désactiver l'upload
+- `multiple`: Upload multiple
+
+## Backend
+
+Endpoint `/api/upload`:
+
+```typescript
+@Post('upload')
+@UseInterceptors(FileInterceptor('file'))
+uploadFile(@UploadedFile() file: Express.Multer.File) {
+  return {
+    success: true,
+    url: `/files/${file.filename}`,
+    fileName: file.originalname,
+    fileSize: file.size
+  }
+}
+```
+
+## Exemple interactif
+
+<Playground
+  width="100%"
+  items={[
+    {
+      name: 'Visualisation',
+      url: 'playground/components/wc-file-upload',
+    },
+    ...[],
+  ]}
+/>
+
+## API
+
+<Tabs items={['Graphique', 'JSON']}>
+  <Tab>
+    <ComponentProperties schema={{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "FileUpload",
+  "properties": {
+    "maxFiles": {
+      "type": "number",
+      "default": 1,
+      "description": "Le nombre maximum de fichiers autorisés à télécharger."
+    },
+    "allowedExtensions": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "description": "Les extensions de fichiers autorisées (ex: [\"pdf\", \"docx\", \"txt\"]). Si vide, tous les types sont acceptés."
+    },
+    "maxFileSize": {
+      "type": "number",
+      "default": 10485760,
+      "description": "La taille maximale autorisée par fichier en bytes (par défaut 10 MB)."
+    },
+    "fileNameRegex": {
+      "type": "string",
+      "default": "",
+      "description": "Une regex que le nom du fichier doit respecter. Si vide, aucune validation spéciale sur le nom."
+    },
+    "uploadedFiles": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nom du fichier"
+          },
+          "size": {
+            "type": "number",
+            "description": "Taille du fichier en bytes"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type MIME du fichier"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL de téléchargement du fichier"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "description": "Date d'upload ISO"
+          },
+          "progress": {
+            "type": "number",
+            "description": "Progression de l'upload (0-100)"
+          }
+        }
+      },
+      "description": "Liste des fichiers téléchargés."
+    },
+    "dragActive": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indique si une opération drag-drop est en cours."
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver l'upload de fichiers?"
+    },
+    "multiple": {
+      "type": "boolean",
+      "default": true,
+      "description": "Permettre l'upload de plusieurs fichiers à la fois?"
+    },
+    "acceptedFormats": {
+      "type": "string",
+      "default": "",
+      "description": "Format accepté pour l'attribut HTML accept (ex: \".pdf,.docx,.txt\" ou \"image/*\")."
+    },
+    "css": {
+      "type": "string",
+      "default": "",
+      "description": "Les classes CSS à appliquer au composant."
+    }
+  }
+}} />
+  </Tab>
+  <Tab>
+    ```json
+    {
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "FileUpload",
+  "properties": {
+    "maxFiles": {
+      "type": "number",
+      "default": 1,
+      "description": "Le nombre maximum de fichiers autorisés à télécharger."
+    },
+    "allowedExtensions": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "description": "Les extensions de fichiers autorisées (ex: [\"pdf\", \"docx\", \"txt\"]). Si vide, tous les types sont acceptés."
+    },
+    "maxFileSize": {
+      "type": "number",
+      "default": 10485760,
+      "description": "La taille maximale autorisée par fichier en bytes (par défaut 10 MB)."
+    },
+    "fileNameRegex": {
+      "type": "string",
+      "default": "",
+      "description": "Une regex que le nom du fichier doit respecter. Si vide, aucune validation spéciale sur le nom."
+    },
+    "uploadedFiles": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nom du fichier"
+          },
+          "size": {
+            "type": "number",
+            "description": "Taille du fichier en bytes"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type MIME du fichier"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL de téléchargement du fichier"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "description": "Date d'upload ISO"
+          },
+          "progress": {
+            "type": "number",
+            "description": "Progression de l'upload (0-100)"
+          }
+        }
+      },
+      "description": "Liste des fichiers téléchargés."
+    },
+    "dragActive": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indique si une opération drag-drop est en cours."
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver l'upload de fichiers?"
+    },
+    "multiple": {
+      "type": "boolean",
+      "default": true,
+      "description": "Permettre l'upload de plusieurs fichiers à la fois?"
+    },
+    "acceptedFormats": {
+      "type": "string",
+      "default": "",
+      "description": "Format accepté pour l'attribut HTML accept (ex: \".pdf,.docx,.txt\" ou \"image/*\")."
+    },
+    "css": {
+      "type": "string",
+      "default": "",
+      "description": "Les classes CSS à appliquer au composant."
+    }
+  }
+}
+    ```
+  </Tab>
+</Tabs>

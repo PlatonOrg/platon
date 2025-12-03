@@ -512,7 +512,7 @@ export class PlayerService extends PlayerManager {
   }
 
   protected findExerciseSessionById(id: string): Promise<ExerciseSession | null | undefined> {
-    return this.sessionService.findExerciseSessionById(id, { parent: true, activity: true })
+    return this.sessionService.findExerciseSessionById(id, { parent: true, activity: true, submissions: true })
   }
 
   protected override onChallengeSucceeded(_activity: Activity): void {

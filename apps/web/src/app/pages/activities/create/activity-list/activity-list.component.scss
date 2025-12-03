@@ -1,0 +1,28 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 1rem;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
+
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  }
+}
+
+.activity-grid-item {
+  height: 150px;
+  min-height: 150px;
+}

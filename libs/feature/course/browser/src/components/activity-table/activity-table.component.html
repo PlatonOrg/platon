@@ -19,7 +19,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let model of nzTable.data">
+    <tr *ngFor="let model of nzTable.data; trackBy: trackByFn">
       <td
         *ngIf="selectable && !disabled"
         [nzChecked]="selection.has(model.activity.id)"

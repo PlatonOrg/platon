@@ -412,6 +412,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     if (this.container.nativeElement.offsetWidth < 900) {
       this.showLabelIfEnoughSpace = false
     }
+
+    this.webComponentService.setContext({
+      sessionId: this.player?.sessionId,
+    })
   }
 
   ngOnDestroy(): void {
@@ -646,14 +650,14 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
 
     const body = encodeURIComponent(`
     Bonjour,
-  
+
     J'ai rencontré un problème avec l'exercice "${this.player?.title || 'Exercice'}" dans PLaTon.
-  
+
     Détails de l'erreur:
     ${this.errorServerSignal()}
-  
+
     Pourriez-vous m'aider à résoudre ce problème ?
-  
+
     Merci,
     Nom Prenom
     `)

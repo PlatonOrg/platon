@@ -1,0 +1,141 @@
+<div class="file-upload-container" [ngClass]="state.css | css : 'class'" [ngStyle]="state.css | css : 'style'">
+  <!-- Drag and Drop Zone -->
+  <div
+    #uploadZone
+    class="upload-zone"
+    [class.drag-active]="state.dragActive"
+    [class.disabled]="state.disabled || isMaxFilesReached()"
+    (dragover)="state.disabled || isMaxFilesReached() ? null : onDragOver($event)"
+    (dragleave)="state.disabled || isMaxFilesReached() ? null : onDragLeave($event)"
+    (drop)="state.disabled || isMaxFilesReached() ? null : onDrop($event)"
+  >
+    <div class="upload-content">
+      <mat-icon class="upload-icon">cloud_upload</mat-icon>
+      <h3 class="upload-title">Déposer vos fichiers ici</h3>
+      <p class="upload-subtitle">ou cliquez pour sélectionner</p>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="fileInput.click()"
+        [disabled]="state.disabled || isMaxFilesReached()"
+        class="select-button"
+      >
+        <mat-icon>attach_file</mat-icon>
+        Sélectionner des fichiers
+      </button>
+
+      <input
+        hidden
+        type="file"
+        #fileInput
+        [multiple]="state.multiple && state.maxFiles > 1"
+        [disabled]="state.disabled"
+        [accept]="state.acceptedFormats"
+        (change)="onFileSelected($event)"
+      />
+
+      <!-- Upload Constraints Info -->
+      <div class="constraints-info">
+        @if (isMaxFilesReached()) {
+        <p class="constraint warning">
+          <mat-icon>check_circle</mat-icon>
+          Limite de <strong>{{ state.maxFiles }}</strong> fichier(s) atteinte
+        </p>
+        } @else if (state.maxFiles > 0) {
+        <p class="constraint">
+          <mat-icon>info</mat-icon>
+          Maximum <strong>{{ state.maxFiles }}</strong> fichier(s)
+        </p>
+        } @if (state.allowedExtensions && state.allowedExtensions.length > 0) {
+        <p class="constraint">
+          <mat-icon>info</mat-icon>
+          Formats acceptés: <strong>{{ state.allowedExtensions.join(', ').toUpperCase() }}</strong>
+        </p>
+        } @if (state.maxFileSize > 0) {
+        <p class="constraint">
+          <mat-icon>info</mat-icon>
+          Taille max: <strong>{{ formatFileSize(state.maxFileSize) }}</strong>
+        </p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Uploaded Files List -->
+  @if (state.uploadedFiles && state.uploadedFiles.length > 0) {
+  <div class="uploaded-files-section">
+    <h4>Fichiers ({{ state.uploadedFiles.length }}/{{ state.maxFiles }})</h4>
+    <div class="uploaded-files-list">
+      @for (file of state.uploadedFiles; track $index) {
+      <div
+        class="file-item"
+        [class.error]="getFileError(file)"
+        [class.success]="!getFileError(file) && file.progress === 100"
+      >
+        <div class="file-info">
+          <mat-icon class="file-icon">{{ getFileIcon(file.type) }}</mat-icon>
+          <div class="file-details">
+            <p class="file-name" [title]="file.name">{{ file.name }}</p>
+            <p class="file-meta">{{ formatFileSize(file.size) }} • {{ formatDate(file.uploadedAt) }}</p>
+            @if (getFileError(file)) {
+            <p class="file-error">{{ getFileError(file) }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Upload Progress -->
+        <div class="progress-section">
+          @if (file.progress === undefined) {
+          <span class="progress-text" style="color: #999; text-align: center; width: 100%">En attente...</span>
+          } @else if (file.progress < 100) {
+          <mat-progress-bar [value]="file.progress" class="progress-bar"></mat-progress-bar>
+          <span class="progress-text">{{ file.progress }}%</span>
+          } @else if (file.progress === 100 && !getFileError(file)) {
+          <mat-icon style="color: #4caf50; font-size: 20px; width: 20px; height: 20px">check_circle</mat-icon>
+          <span class="progress-text" style="color: #4caf50">100%</span>
+          }
+        </div>
+
+        <!-- File Actions -->
+        <div class="file-actions">
+          @if (file.url) {
+          <button
+            mat-icon-button
+            (click)="downloadFile(file)"
+            [title]="'Télécharger: ' + file.name"
+            class="download-btn"
+          >
+            <mat-icon>download</mat-icon>
+          </button>
+          }
+          <button
+            mat-icon-button
+            (click)="removeFile($index)"
+            [disabled]="state.disabled || (file.progress !== undefined && file.progress < 100)"
+            [title]="'Supprimer: ' + file.name"
+            class="delete-btn"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Error Messages -->
+  @if (errors && errors.length > 0) {
+  <div class="errors-section">
+    @for (error of errors; track $index) {
+    <div class="error-message">
+      <mat-icon>error</mat-icon>
+      {{ error }}
+    </div>
+    }
+  </div>
+  }
+</div>
+
+<wc-base [(state)]="state" />

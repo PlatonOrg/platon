@@ -50,13 +50,10 @@ export class TemplateSelectionComponent implements OnInit {
       )
     ).resources
 
-    console.log(this.templates)
-
     this.changeDetector.markForCheck()
   }
 
   protected async selectTemplate(templateId: string): Promise<void> {
-    // TODO : Use the new resource creation flow
     await this.router.navigate(['/resources/create'], {
       queryParams: {
         type: ResourceTypes.EXERCISE,

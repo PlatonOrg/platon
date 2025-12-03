@@ -359,6 +359,34 @@ export class ResourcePresenter implements OnDestroy {
     }
   }
 
+  // Template
+
+  async updateTemplate(templateId: string, templateVersion: string): Promise<boolean> {
+    const { resource } = this.context.value as Required<Context>
+    try {
+      await firstValueFrom(this.resourceService.updateTemplate(resource.id, templateId, templateVersion))
+      this.dialogService.success('Le template a bien été mis à jour.')
+      await this.refresh(resource.id)
+      return true
+    } catch {
+      this.alertError()
+      return false
+    }
+  }
+
+  async removeTemplate(): Promise<boolean> {
+    const { resource } = this.context.value as Required<Context>
+    try {
+      await firstValueFrom(this.resourceService.deleteTemplate(resource.id))
+      this.dialogService.success('Le template a bien été supprimé.')
+      await this.refresh(resource.id)
+      return true
+    } catch {
+      this.alertError()
+      return false
+    }
+  }
+
   // Private
 
   private async refresh(id: string): Promise<void> {

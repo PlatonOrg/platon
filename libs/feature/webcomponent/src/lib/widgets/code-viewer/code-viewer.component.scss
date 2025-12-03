@@ -1,3 +1,30 @@
-:host {
+/* Style du conteneur principal - OK */
+.code-container {
+  display: flex;
+  font-family: monospace;
+  overflow-x: auto;
+}
+
+.line-numbers {
+  border: 1px solid #0090f1;
+  border-radius: 2px 0px 0px 2px;
+  border-right: none;
+
+  padding-left: 5px;
+  padding-right: 0px;
+
+  text-align: right;
+  user-select: none;
+
+  font-size: 14px;
+  padding-top: 16px;
+  margin-right: -5px;
+  background-color: #f6f8fa;
+  color: #3c88a0;
+  z-index: 1;
+}
+
+.line-numbers-item {
   display: block;
+  line-height: 18px;
 }

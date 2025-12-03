@@ -41,6 +41,7 @@ export interface TutorialOptions {
   tourName?: string;
   classPrefix?: string;
   enableEnterNavigation?: boolean;
+  showCancelIcon?: boolean;
 }
 
 @Injectable({
@@ -51,7 +52,6 @@ export class ShepherdService {
   private keyboardListener: ((event: KeyboardEvent) => void) | null = null;
 
   private tourEndedSubject = new Subject<void>();
-  public tourEnded$ = this.tourEndedSubject.asObservable();
 
   private defaultOptions: TutorialOptions = {
     useModalOverlay: true,
@@ -61,7 +61,8 @@ export class ShepherdService {
     confirmCancelMessage: 'Êtes-vous sûr de vouloir quitter le tutoriel ?',
     tourName: 'tutorial',
     classPrefix: 'shepherd',
-    enableEnterNavigation: true // Activé par défaut
+    enableEnterNavigation: true, // Activé par défaut
+    showCancelIcon: true // Activé par défaut
   };
 
   constructor() {}
@@ -83,7 +84,7 @@ export class ShepherdService {
       confirmCancelMessage: mergedOptions.confirmCancelMessage,
       defaultStepOptions: {
         cancelIcon: {
-          enabled: true
+          enabled: mergedOptions.showCancelIcon ?? true
         },
         scrollTo: {
           behavior: 'smooth',
@@ -326,5 +327,12 @@ export class ShepherdService {
     if (this.currentTour && !this.keyboardListener) {
       this.setupEnterNavigation();
     }
+  }
+
+  /**
+   * Observable émettant un événement lorsque le tutoriel se termine
+   */
+  get tourEnded$() {
+    return this.tourEndedSubject.asObservable();
   }
 }

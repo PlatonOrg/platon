@@ -227,4 +227,12 @@ export class ResultService {
   deleteComment(comment: SessionComment): Observable<void> {
     return this.commentProvider.delete(comment)
   }
+
+  downloadAllSubmissions(
+    activityId: string,
+    exerciseId: string,
+    sessionId: string
+  ): Observable<{ blob: Blob; fileName: string }> {
+    return this.resultProvider.downloadAllSubmissions(activityId, exerciseId, sessionId)
+  }
 }

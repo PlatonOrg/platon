@@ -12,6 +12,7 @@ import { resolveFileReference } from '@platon/core/common'
 import { ResourceFileService } from '@platon/feature/resource/server'
 import { OnEvent } from '@nestjs/event-emitter'
 import {
+  ActivityService,
   ON_CLOSE_ACTIVITY_EVENT,
   ON_REOPEN_ACTIVITY_EVENT,
   OnReopenActivityEventPayload,
@@ -24,17 +25,26 @@ export class SessionService {
     private readonly repository: Repository<SessionEntity>,
     @InjectRepository(SessionDataEntity)
     private readonly repositoryData: Repository<SessionDataEntity>,
-    private readonly ressourceFileService: ResourceFileService
+    private readonly ressourceFileService: ResourceFileService,
+    private readonly activityService: ActivityService
   ) {}
 
-  findById<T extends object>(
+  private async updateSessionActivityDates(session: SessionEntity): Promise<void> {
+    if (session?.activity) {
+      await this.activityService.updateActivitiesDates([session.activity])
+    }
+  }
+
+  async findById<T extends object>(
     id: string,
     relations: FindOptionsRelations<SessionEntity>
   ): Promise<SessionEntity<T> | null> {
-    return this.repository.findOne({
+    const session = await this.repository.findOne({
       where: { id },
       relations,
     })
+    await this.updateSessionActivityDates(session as unknown as SessionEntity)
+    return session
   }
 
   findAllWithParent(parentId: string): Promise<SessionEntity[]> {
@@ -43,34 +53,46 @@ export class SessionService {
     })
   }
 
-  findUserActivity(activityId: string, userId: string): Promise<SessionEntity | null> {
-    return this.repository.findOne({
+  async findUserActivity(activityId: string, userId: string): Promise<SessionEntity | null> {
+    const session = this.repository.findOne({
       where: { parentId: IsNull(), activityId, userId },
       relations: {
         activity: true,
       },
     })
+    await this.updateSessionActivityDates(session as unknown as SessionEntity)
+    return session
   }
 
-  findExerciseSessionById(
+  async findExerciseSessionById(
     id: string,
     relations?: FindOptionsRelations<SessionEntity>
   ): Promise<ExerciseSessionEntity | null> {
-    return this.repository.findOne({
+    const session = await this.repository.findOne({
       where: { id },
       relations,
     })
+    if (session?.activity) {
+      await this.activityService.updateActivitiesDates([session.activity])
+    }
+    return session as ExerciseSessionEntity | null
+    // return this.repository.findOne({
+    //   where: { id },
+    //   relations,
+    // })
   }
 
-  findExerciseSessionByActivityId(
+  async findExerciseSessionByActivityId(
     parentId: string,
     sessionId: string,
     relations?: FindOptionsRelations<SessionEntity>
   ): Promise<ExerciseSessionEntity | null> {
-    return this.repository.findOne({
+    const session = await this.repository.findOne({
       where: { parentId, id: sessionId },
       relations,
     })
+    await this.updateSessionActivityDates(session as unknown as SessionEntity)
+    return session
   }
 
   async create<TVariables>(

@@ -121,6 +121,12 @@ export class RemoteResourceProvider extends ResourceProvider {
       .pipe(map((response) => response.resource))
   }
 
+  deleteTemplate(resourceId: string): Observable<Resource> {
+    return this.http
+      .delete<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/template`)
+      .pipe(map((response) => response.resource))
+  }
+
   updateCertification(resourceId: string, certified: boolean): Observable<Resource> {
     return this.http
       .patch<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/certification`, {
