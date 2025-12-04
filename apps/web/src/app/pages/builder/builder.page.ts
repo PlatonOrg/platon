@@ -370,6 +370,7 @@ export class BuilderPage implements OnInit {
   protected async onResourceUpdated(updatedResource: Resource): Promise<void> {
     this.resource = updatedResource
     this.hasUnsavedChanges.set(true)
+    this.title.setTitle(`${this.resource.name}`)
     await this.save()
     this.changeDetectorRef.markForCheck()
   }
