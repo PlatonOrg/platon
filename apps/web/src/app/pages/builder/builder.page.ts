@@ -99,6 +99,7 @@ export class BuilderPage implements OnInit {
 
   protected readonly hasUnsavedChanges = signal(false)
   protected currentVersion = 'latest'
+  protected isEditingTitle = false
 
   protected selection: PleInput | undefined
   protected selectionIndex = -1
@@ -399,6 +400,49 @@ export class BuilderPage implements OnInit {
   protected async openInEditor(): Promise<void> {
     if (this.resource) {
       window.open(`/editor/${this.resource.id}?version=latest`, '_blank')
+    }
+  }
+
+  protected startEditingTitle(): void {
+    this.isEditingTitle = true
+    this.changeDetectorRef.markForCheck()
+
+    setTimeout(() => {
+      const input = document.querySelector('.title-input') as HTMLInputElement
+      if (input) {
+        input.focus()
+        input.select()
+      }
+    }, 0)
+  }
+
+  protected cancelEditingTitle(): void {
+    this.isEditingTitle = false
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected async saveTitle(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement
+    const newName = input.value.trim()
+
+    if (!newName || !this.resource || newName === this.resource.name) {
+      this.isEditingTitle = false
+      this.changeDetectorRef.markForCheck()
+      return
+    }
+
+    try {
+      const updatedResource = await firstValueFrom(this.resourceService.update(this.resource.id, { name: newName }))
+
+      this.resource = updatedResource
+      this.title.setTitle(newName)
+      this.isEditingTitle = false
+      this.dialogService.success('Nom mis à jour avec succès')
+      this.changeDetectorRef.markForCheck()
+    } catch (error) {
+      this.dialogService.error('Erreur lors de la mise à jour du nom')
+      this.isEditingTitle = false
+      this.changeDetectorRef.markForCheck()
     }
   }
 

@@ -11,8 +11,21 @@
       <mat-icon>arrow_back</mat-icon>
     </button>
     <h1 class="builder-title">
-      {{ resource.name }}
-      @if (hasUnsavedChanges()) {
+      @if (!isEditingTitle) {
+      <span class="title-text" (click)="startEditingTitle()">{{ resource.name }}</span>
+      <button (click)="startEditingTitle()" class="edit-title-btn">
+        <mat-icon>edit</mat-icon>
+      </button>
+      } @else {
+      <input
+        #titleInput
+        class="title-input"
+        [value]="resource.name"
+        (blur)="saveTitle($event)"
+        (keydown.enter)="saveTitle($event)"
+        (keydown.escape)="cancelEditingTitle()"
+      />
+      } @if (hasUnsavedChanges()) {
       <span class="unsaved-indicator" title="Modifications non sauvegardées">
         <mat-icon>edit</mat-icon>
         <span>Non sauvegardé</span>
