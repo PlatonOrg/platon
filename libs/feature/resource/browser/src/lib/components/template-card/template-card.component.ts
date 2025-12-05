@@ -32,7 +32,7 @@ import { Variables } from '@platon/feature/compiler'
 })
 export class TemplateCardComponent {
   @Input({ required: true }) template!: Resource
-  @Output() templateSelected = new EventEmitter<string>()
+  @Output() templateSelected = new EventEmitter<Resource>()
 
   private readonly storageService = inject(StorageService)
   protected previewOverrides: Variables = { name: 'Student', class: '1A' }
@@ -40,7 +40,7 @@ export class TemplateCardComponent {
   @ViewChild('previewIframe') private readonly previewModal!: UiModalIFrameComponent
 
   protected onSelectTemplate(): void {
-    this.templateSelected.emit(this.template.id)
+    this.templateSelected.emit(this.template)
   }
 
   protected templateReferences(): number {
