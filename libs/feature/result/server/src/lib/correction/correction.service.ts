@@ -86,7 +86,7 @@ export class CorrectionService {
     LEFT JOIN "Corrections" correction ON correction.id=exercise_session.correction_id
     WHERE
       ${activityId ? 'activity.id=$2 AND' : ''}
-      exercise_session.user_id<>$1 AND
+      (exercise_session.user_id IS NULL OR exercise_session.user_id <> $1) AND
       answer.variables IS NOT NULL AND
       (activity_session.variables->'navigation'->>'terminated')::boolean = TRUE AND
       EXISTS (
