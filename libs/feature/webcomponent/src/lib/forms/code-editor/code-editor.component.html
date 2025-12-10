@@ -1,4 +1,4 @@
-<div id="resizable" [style.height]="state.height + 'px'">
+<div id="resizable" [style.height]="state.height + 'px'" translate="no">
   <nge-monaco-editor (ready)="onCreateEditor($event)"> </nge-monaco-editor>
   <footer #footer>
     <span class="footer-item" aria-label="Raccourcies" nz-tooltip="Raccourcies" (click)="quickCommand()">
