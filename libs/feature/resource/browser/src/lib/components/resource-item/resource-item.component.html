@@ -34,6 +34,14 @@
       >
         <i nz-icon nzType="node-expand" nzTheme="outline"></i>
       </ui-list-item-article-action>
+      <ui-list-item-article-action
+        *ngIf="!configurable && !shorten"
+        class="action"
+        (click)="duplicateResource()"
+        actionTitle="Dupliquer"
+      >
+        <i nz-icon nzType="copy" nzTheme="outline"></i>
+      </ui-list-item-article-action>
     </ng-container>
     <div class="spacer"></div>
 
@@ -109,7 +117,7 @@
     [nzPopoverTrigger]="configurable ? 'hover' : null"
     (mouseenter)="configurable ? getReadmeContent() : null"
   >
-    @if( clickable) {
+    @if(clickable) {
     <a [routerLink]="detailsUrl" class="resource-item-title">{{ name }}</a>
     } @else {
     <span class="resource-item-title">{{ name }}</span>

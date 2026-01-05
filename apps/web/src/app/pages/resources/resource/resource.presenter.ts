@@ -318,6 +318,20 @@ export class ResourcePresenter implements OnDestroy {
     }
   }
 
+  // Duplicate
+
+  async duplicate(): Promise<string | false> {
+    const { resource } = this.context.value as Required<Context>
+    try {
+      const duplicatedResource = await firstValueFrom(this.resourceService.duplicate(resource.id))
+      this.dialogService.success('La ressource a bien été dupliquée.')
+      return duplicatedResource.id
+    } catch {
+      this.dialogService.error("Une erreur s'est produite lors de la duplication de la ressource.")
+      return false
+    }
+  }
+
   // Certification
 
   async updateCertification(certified: boolean): Promise<boolean> {

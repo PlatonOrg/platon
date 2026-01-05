@@ -159,6 +159,13 @@ export class ResourcePage implements OnInit, OnDestroy {
     window.open(url, '_blank')
   }
 
+  protected async duplicate(): Promise<void> {
+    const duplicatedResourceId = await this.presenter.duplicate()
+    if (duplicatedResourceId) {
+      await this.router.navigate(['/resources', duplicatedResourceId])
+    }
+  }
+
   protected isAdmin(): boolean {
     return this.context.user?.role === 'admin'
   }

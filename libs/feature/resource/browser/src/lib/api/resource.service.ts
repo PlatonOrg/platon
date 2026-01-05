@@ -84,6 +84,10 @@ export class ResourceService {
     return this.resourceProvider.create(input)
   }
 
+  duplicate(resourceId: string): Observable<Resource> {
+    return this.resourceProvider.duplicate(resourceId)
+  }
+
   createPreview(input: CreatePreviewResource): Observable<Resource> {
     return this.resourceProvider.createPreview(input)
   }

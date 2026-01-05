@@ -162,8 +162,13 @@
           [routerLink]="['/resources/move']"
           [queryParams]="{ type: context.resource.type, id: context.resource.id, parent: context.resource.parentId }"
         >
-          <i nz-icon nzType="copy" nzTheme="outline"></i>
+          <i nz-icon nzType="export" nzTheme="outline"></i>
           <span class="hide-on-mobile">Déplacer</span>
+        </button>
+        <!-- TODO: add tutorial for duplication -->
+        <button id="tuto-duplicate-button" *ngIf="context.resource.type !== 'CIRCLE'" nz-button (click)="duplicate()">
+          <i nz-icon nzType="copy" nzTheme="outline"></i>
+          <span class="hide-on-mobile">Dupliquer</span>
         </button>
         <button id="tuto-editor-button" nz-button (click)="openTab(context.editorUrl!)">
           <i nz-icon nzType="edit" nzTheme="outline"></i>

@@ -86,19 +86,26 @@ export class ResourceFileService {
               email: user.email,
             }
           : undefined,
-        defaultFiles: resource.templateId
-          ? {
-              [EXERCISE_MAIN_FILE]: commentedExtendsExpr(resource.templateId, resource.templateVersion || LATEST),
-              [TEMPLATE_OVERRIDE_FILE]: '{}',
-              'readme.md': README_PLE,
-            }
-          : defaultFiles,
+        defaultFiles:
+          resource.templateId && !defaultFiles
+            ? {
+                [EXERCISE_MAIN_FILE]: commentedExtendsExpr(resource.templateId, resource.templateVersion || LATEST),
+                [TEMPLATE_OVERRIDE_FILE]: '{}',
+                'readme.md': README_PLE,
+              }
+            : defaultFiles,
         parentCircle: resource.parentId,
         userCircle: user ? (await this.resourceService.getPersonal(user)).id : undefined,
       }),
       resource,
       permissions,
     }
+  }
+
+  async copy(srcResourceId: string, dstResourceId: string, req?: IRequest): Promise<void> {
+    const { repo: srcRepo } = await this.repo(srcResourceId, req)
+    const { repo: dstRepo } = await this.repo(dstResourceId, req, {})
+    await srcRepo.copy(dstRepo)
   }
 
   async getFileContent(resourceId: string, path: string, version?: string, req?: IRequest): Promise<Uint8Array> {

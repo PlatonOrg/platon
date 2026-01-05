@@ -75,6 +75,12 @@ export class RemoteResourceProvider extends ResourceProvider {
       .pipe(map((response) => response.resource))
   }
 
+  duplicate(resourceId: string): Observable<Resource> {
+    return this.http
+      .post<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/duplicate`, {})
+      .pipe(map((response) => response.resource))
+  }
+
   createPreview(input: CreatePreviewResource): Observable<Resource> {
     const params = buildExpandableHttpParams(input)
 
