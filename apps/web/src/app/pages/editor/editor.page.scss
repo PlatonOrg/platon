@@ -42,6 +42,14 @@ nz-spin {
   transform: translate(-50%, -50%);
 }
 
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 2rem;
+}
+
 ide-root {
   opacity: 1;
   transition: opacity 1.2s ease-in-out;
