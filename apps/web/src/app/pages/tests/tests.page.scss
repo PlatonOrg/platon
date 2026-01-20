@@ -142,6 +142,14 @@ header {
   100% { transform: translateX(0); }
 }
 
+.spinner-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+
 .test-card-link:hover .voir-icon {
   animation: iconShake 0.4s ease-in-out;
 }
