@@ -172,7 +172,10 @@
         </button>
         <button id="tuto-editor-button" nz-button (click)="openTab(context.editorUrl!)">
           <i nz-icon nzType="edit" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Éditer</span>
+          @if (context?.resource?.templateId) {
+          <span class="hide-on-mobile">Paramétrer</span>
+          } @else {<span class="hide-on-mobile">Éditer</span>
+          }
         </button>
         <button
           id="tuto-share-button"
