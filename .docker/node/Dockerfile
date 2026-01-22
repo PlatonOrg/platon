@@ -21,11 +21,10 @@ COPY --chown=node:node package.json yarn.lock ./
 COPY --chown=node:node shared ./shared
 
 # Install dependencies
-RUN yarn install --frozen-lockfile --non-interactive
+RUN yarn install --frozen-lockfile --non-interactive --network-timeout 600000
 
 COPY --chown=node:node apps/docs/package.json apps/docs/yarn.lock ./apps/docs/
-RUN cd apps/docs && yarn install --frozen-lockfile --non-interactive
-
+RUN cd apps/docs && yarn install --frozen-lockfile --non-interactive --network-timeout 600000
 # Bundle app source
 COPY --chown=node:node .graphql ./.graphql
 COPY --chown=node:node apps ./apps
@@ -42,7 +41,7 @@ RUN yarn graphql:generate
 
 # Build NestJS API, Angular web app and docs
 RUN yarn build:web
-RUN yarn build:api
+RUN NX_VERBOSE_LOGGING=true yarn build:api --verbose
 RUN yarn build:docs
 
 # Rebuild node_modules with only production dependencies
@@ -51,8 +50,12 @@ RUN yarn install --frozen-lockfile --non-interactive --production
 
 USER node
 
-### STAGE 2: Production ###
+### STAGE 2: Frontend Extractor (pour extraction externe) ###
+FROM node:22-alpine AS frontend-extractor
+WORKDIR /src
+COPY --chown=node:node --from=build /src/dist ./dist
 
+### STAGE 3: Production API Only ###
 FROM node:22-alpine AS production
 RUN apk add --no-cache --update \
   bash \
@@ -64,7 +67,7 @@ RUN apk add --no-cache --update \
 WORKDIR /src
 
 COPY --chown=node:node --from=build /src/node_modules ./node_modules
-COPY --chown=node:node --from=build /src/dist ./dist
+COPY --chown=node:node --from=build /src/dist/apps/api ./dist/apps/api
 COPY --chown=node:node --from=build /src/schema.gql ./schema.gql
 COPY --chown=node:node templates ./templates
 
