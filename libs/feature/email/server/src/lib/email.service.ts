@@ -69,9 +69,9 @@ export class EmailService {
         },
         tls: { rejectUnauthorized },
       })
-      this.logger.log('Service d\'e-mail configuré avec succès')
+      this.logger.log("Service d'e-mail configuré avec succès")
     } else {
-      this.logger.warn('Configuration du service d\'e-mail absente ou incomplète. Les e-mails ne seront pas envoyés.')
+      this.logger.warn("Configuration du service d'e-mail absente ou incomplète. Les e-mails ne seront pas envoyés.")
     }
 
     this.fromEmail = this.configService.get<string>('mail.from', 'ne-pas-repondre@platon.univ-eiffel.fr')
@@ -117,7 +117,7 @@ export class EmailService {
     if (!this.isConfigured || !this.technicalTeamEmail.length) {
       this.logger.error(
         `Impossible d'envoyer l'alerte technique "${options.subject}" : service non configuré`,
-        options.error || 'Pas de détails d\'erreur'
+        options.error || "Pas de détails d'erreur"
       )
       return false
     }
@@ -127,47 +127,45 @@ export class EmailService {
       options.subject,
       options.error,
       60 // throttle de 60 minutes
-    );
+    )
 
     if (!shouldSend) {
-      this.logger.log(`Alerte "${options.subject}" ignorée (déjà notifiée récemment)`);
-      return true; // Considéré comme un succès car l'alerte n'avait pas besoin d'être envoyée
+      this.logger.log(`Alerte "${options.subject}" ignorée (déjà notifiée récemment)`)
+      return true // Considéré comme un succès car l'alerte n'avait pas besoin d'être envoyée
     }
 
     // Récupérer le nombre d'occurrences pour inclure dans le mail
-    const occurrenceCount = await this.errorTrackingService.getErrorOccurrenceCount(
-      options.subject,
-      options.error
-    );
+    const occurrenceCount = await this.errorTrackingService.getErrorOccurrenceCount(options.subject, options.error)
 
-    let content = options.content;
+    let content = options.content
     if (occurrenceCount > 1) {
-      content = `Cette erreur s'est produite ${occurrenceCount} fois.\n\n${content}`;
+      content = `Cette erreur s'est produite ${occurrenceCount} fois.\n\n${content}`
     }
 
     if (options.error) {
-      const errorDetails = typeof options.error === 'object'
-        ? JSON.stringify(options.error, Object.getOwnPropertyNames(options.error), 2)
-        : String(options.error)
-      content += `\n\nDétails de l'erreur:\n${errorDetails}`;
+      const errorDetails =
+        typeof options.error === 'object'
+          ? JSON.stringify(options.error, Object.getOwnPropertyNames(options.error), 2)
+          : String(options.error)
+      content += `\n\nDétails de l'erreur:\n${errorDetails}`
     }
 
     const emailSent = await this.send({
       to: this.technicalTeamEmail,
       subject: `[PLATON_ERROR] ${options.subject}`,
       text: content,
-    });
+    })
 
     if (emailSent) {
       // Marquer l'alerte comme envoyée avec succès
-      await this.errorTrackingService.markAlertAsSent(options.subject, options.error);
-      this.logger.log(`Alerte technique "${options.subject}" envoyée avec succès`);
+      await this.errorTrackingService.markAlertAsSent(options.subject, options.error)
+      this.logger.log(`Alerte technique "${options.subject}" envoyée avec succès`)
     } else {
       // En cas d'échec, on peut réinitialiser le timestamp pour permettre un nouvel essai
-      await this.errorTrackingService.resetLastNotificationTimestamp(options.subject, options.error);
-      this.logger.error(`Échec de l'envoi de l'alerte technique "${options.subject}"`);
+      await this.errorTrackingService.resetLastNotificationTimestamp(options.subject, options.error)
+      this.logger.error(`Échec de l'envoi de l'alerte technique "${options.subject}"`)
     }
 
-    return emailSent;
+    return emailSent
   }
 }

@@ -1,51 +1,49 @@
-import { UserRoles } from '@platon/core/common';
+import { UserRoles } from '@platon/core/common'
 import { BaseEntity, UserEntity } from '@platon/core/server'
 import { Announcement, AnnouncementAction, EditorOutputData } from '@platon/feature/announcement/common'
 import { IsBoolean, IsOptional, IsString } from 'class-validator'
-import { Column, ManyToOne, Entity } from "typeorm";
-
+import { Column, ManyToOne, Entity } from 'typeorm'
 
 @Entity('Announcements')
 export class AnnouncementEntity extends BaseEntity implements Announcement {
-
-  @Column({name: 'title'})
+  @Column({ name: 'title' })
   @IsString()
-  title!: string;
+  title!: string
 
   @Column()
   @IsString()
-  description!: string;
+  description!: string
 
   @Column({ default: true })
   @IsBoolean()
-  active!: boolean;
+  active!: boolean
 
   @Column({ type: 'jsonb', nullable: true })
-  data?: EditorOutputData;
+  data?: EditorOutputData
 
   @Column({ nullable: true })
   @IsString()
   @IsOptional()
-  icon?: string;
+  icon?: string
 
   @Column({ nullable: true })
   @IsString()
   @IsOptional()
-  version?: string;
+  version?: string
 
-  @Column({ name:'display_until', type: 'timestamp with time zone', nullable: true })
-  displayUntil?: Date;
+  @Column({ name: 'display_until', type: 'timestamp with time zone', nullable: true })
+  displayUntil?: Date
 
-  @Column({ name:'display_duration_in_days', type: 'int', nullable: true })
-  displayDurationInDays?: number;
+  @Column({ name: 'display_duration_in_days', type: 'int', nullable: true })
+  displayDurationInDays?: number
 
   @Column({ type: 'enum', enum: UserRoles, array: true, nullable: true })
   @IsOptional()
-  targetedRoles?: UserRoles[];
+  targetedRoles?: UserRoles[]
 
   @ManyToOne(() => UserEntity, { onDelete: 'SET NULL', nullable: true })
-  publisher?: UserEntity;
+  publisher?: UserEntity
 
   @Column({ type: 'jsonb', nullable: true })
-  actions?: AnnouncementAction[];
+  actions?: AnnouncementAction[]
 }

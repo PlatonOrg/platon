@@ -1,1 +1,1 @@
-export * from './lib/models/builder-ai.model';
+export * from './lib/models/builder-ai.model'

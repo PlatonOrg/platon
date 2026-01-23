@@ -9,11 +9,9 @@ import {
   UpdateAnnouncementInput,
 } from '@platon/feature/announcement/common'
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AnnouncementService {
-
-  constructor(private readonly announcementProvider: AnnouncementProvider) {
-  }
+  constructor(private readonly announcementProvider: AnnouncementProvider) {}
 
   /**
    * Recherche des annonces avec filtres (admin uniquement)
@@ -43,8 +41,6 @@ export class AnnouncementService {
     return this.announcementProvider.delete(id)
   }
 
-
-
   /**
    * Récupère les annonces visibles pour l'utilisateur connecté
    */
@@ -59,6 +55,4 @@ export class AnnouncementService {
   getActiveAnnouncements(): Observable<ListResponse<Announcement>> {
     return this.getVisibleForUser({ active: true })
   }
-
-
 }

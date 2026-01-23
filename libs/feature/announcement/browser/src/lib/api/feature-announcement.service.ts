@@ -254,9 +254,13 @@ export class FeatureAnnouncementService implements OnDestroy {
    * Navigue vers la page d'annonces avec l'annonce sélectionnée
    */
   navigateToAnnouncement(announcementId: string): void {
-    this.router.navigate(['/announcements'], {
-      queryParams: { highlight: announcementId },
-    })
+    this.router
+      .navigate(['/announcements'], {
+        queryParams: { highlight: announcementId },
+      })
+      .catch((error) => {
+        console.error('Erreur lors de la navigation vers les annonces:', error)
+      })
   }
 
   /**

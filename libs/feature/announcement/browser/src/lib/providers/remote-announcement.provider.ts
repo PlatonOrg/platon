@@ -23,37 +23,34 @@ export class RemoteAnnouncementProvider extends AnnouncementProvider {
 
   search(filters: AnnouncementFilters = {}): Observable<ListResponse<Announcement>> {
     const params = buildHttpParams(filters)
-    return this.http
-      .get<ListResponse<Announcement>>(`${this.API_BASE_PATH}`, { params })
+    return this.http.get<ListResponse<Announcement>>(`${this.API_BASE_PATH}`, { params })
   }
 
   create(input: CreateAnnouncementInput): Observable<Announcement> {
     return this.http
       .post<CreatedResponse<Announcement>>(this.API_BASE_PATH, input)
-      .pipe(map(response => response.resource))
+      .pipe(map((response) => response.resource))
   }
 
   update(id: string, input: UpdateAnnouncementInput): Observable<Announcement> {
     const params = buildHttpParams(input)
     return this.http
       .patch<ItemResponse<Announcement>>(`${this.API_BASE_PATH}/${id}`, input, { params })
-      .pipe(map(response => response.resource))
+      .pipe(map((response) => response.resource))
   }
 
   delete(id: string): Observable<void> {
-    return this.http
-      .delete<void>(`${this.API_BASE_PATH}/${id}`)
+    return this.http.delete<void>(`${this.API_BASE_PATH}/${id}`)
   }
 
   getVisibleForUser(filters: AnnouncementFilters = {}): Observable<ListResponse<Announcement>> {
     const params = buildHttpParams(filters)
-    return this.http
-      .get<ListResponse<Announcement>>(`${this.API_BASE_PATH}/visible`, { params })
+    return this.http.get<ListResponse<Announcement>>(`${this.API_BASE_PATH}/visible`, { params })
   }
 
   findById(id: string): Observable<Announcement> {
     return this.http
       .get<ItemResponse<Announcement>>(`${this.API_BASE_PATH}/${id}`)
-      .pipe(map(response => response.resource))
+      .pipe(map((response) => response.resource))
   }
 }

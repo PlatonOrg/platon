@@ -11,7 +11,7 @@ import { Course } from '@platon/feature/course/common'
 export class CourseManagementTutorialService {
   private selectedCourse: Course | null = null
   private availableCourses: Course[] = []
-  private isResearchActivity: boolean = true
+  private isResearchActivity = true
 
   constructor(
     private shepherdService: ShepherdService,

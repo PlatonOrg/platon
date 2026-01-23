@@ -8,16 +8,17 @@ import {
   ValidateNested,
   IsEnum,
   IsUrl,
-  IsNumber, Min
-} from "class-validator";
+  IsNumber,
+  Min,
+} from 'class-validator'
 import { Type, Transform } from 'class-transformer'
-import { BaseDTO, UserDTO } from "@platon/core/server";
+import { BaseDTO, UserDTO } from '@platon/core/server'
 import {
   Announcement,
   AnnouncementAction,
   AnnouncementFilters,
-  EditorOutputData
-} from "@platon/feature/announcement/common";
+  EditorOutputData,
+} from '@platon/feature/announcement/common'
 import { UserRoles, User } from '@platon/core/common'
 
 export class AnnouncementActionDTO implements AnnouncementAction {
@@ -75,7 +76,7 @@ export class AnnouncementDTO extends BaseDTO implements Announcement {
   @IsOptional()
   @IsArray()
   @IsEnum(UserRoles, { each: true })
-  @ApiProperty({enum: UserRoles })
+  @ApiProperty({ enum: UserRoles })
   readonly targetedRoles?: UserRoles[]
 
   @IsOptional()
@@ -91,29 +92,27 @@ export class AnnouncementDTO extends BaseDTO implements Announcement {
   readonly actions?: AnnouncementAction[]
 }
 
-
-export class CreateAnnouncementDTO  {
+export class CreateAnnouncementDTO {
+  @IsString()
+  @ApiProperty()
+  title!: string
 
   @IsString()
   @ApiProperty()
-  title!: string;
-
-  @IsString()
-  @ApiProperty()
-  description!: string;
+  description!: string
 
   @IsBoolean()
   @ApiProperty()
-  active!: boolean;
+  active!: boolean
 
   @IsOptional()
   @ApiProperty({ type: Object })
-  data?: EditorOutputData;
+  data?: EditorOutputData
 
   @IsOptional()
   @IsString()
   @ApiProperty()
-  icon?: string;
+  icon?: string
 
   @IsOptional()
   @IsDate()
@@ -124,7 +123,6 @@ export class CreateAnnouncementDTO  {
   @ApiProperty()
   readonly displayDurationInDays?: number
 
-
   @IsOptional()
   @IsString()
   @ApiProperty()
@@ -133,7 +131,7 @@ export class CreateAnnouncementDTO  {
   @IsOptional()
   @IsArray()
   @IsEnum(UserRoles, { each: true })
-  @ApiProperty({enum: UserRoles })
+  @ApiProperty({ enum: UserRoles })
   readonly targetedRoles?: UserRoles[]
 
   @IsOptional()
@@ -142,7 +140,6 @@ export class CreateAnnouncementDTO  {
   @Type(() => AnnouncementActionDTO)
   @ApiProperty({ required: false, type: [AnnouncementActionDTO] })
   readonly actions?: AnnouncementAction[]
-
 }
 
 export class UpdateAnnouncementDTO extends CreateAnnouncementDTO {}
@@ -150,33 +147,31 @@ export class UpdateAnnouncementDTO extends CreateAnnouncementDTO {}
 export class AnnouncementFiltersDTO implements AnnouncementFilters {
   @IsString()
   @IsOptional()
-  search?: string;
+  search?: string
 
   @IsBoolean()
   @IsOptional()
   @Transform(({ value }) => {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    return value;
+    if (value === 'true') return true
+    if (value === 'false') return false
+    return value
   })
-  active?: boolean;
-
+  active?: boolean
 
   @IsOptional()
   @IsArray()
   @IsEnum(UserRoles, { each: true })
-  @ApiProperty({enum: UserRoles })
-  roles?: UserRoles[];
+  @ApiProperty({ enum: UserRoles })
+  roles?: UserRoles[]
 
   @IsNumber()
   @Type(() => Number)
   @IsOptional()
-  limit?: number;
+  limit?: number
 
   @IsNumber()
   @Type(() => Number)
   @Min(0)
   @IsOptional()
-  offset?: number;
-
+  offset?: number
 }

@@ -59,7 +59,7 @@ export class CoursePage implements OnInit, OnDestroy {
   protected context = this.presenter.defaultContext()
 
   // for the tab name
-  constructor(private titleService: Title){}
+  constructor(private titleService: Title) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

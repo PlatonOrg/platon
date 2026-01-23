@@ -116,7 +116,8 @@ export class ResourceFileController {
     }
 
     await repo.release(input.name, input.message)
-    if (resource.template) { // ignore this if you didn't inherit from a template
+    if (resource.template) {
+      // ignore this if you didn't inherit from a template
       await this.dependencyService.createDependencyForNewVersion(resourceId, input.name)
     }
 

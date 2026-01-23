@@ -1,5 +1,5 @@
 export interface Coordonate {
-    x: number;
-    y : number;
-    status : boolean;
+  x: number
+  y: number
+  status: boolean
 }

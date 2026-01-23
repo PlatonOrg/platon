@@ -1,6 +1,5 @@
 import { PleInput } from '@platon/feature/compiler'
 
-
 export interface AITransformInput {
   inputs: PleInput[]
   prompt: string

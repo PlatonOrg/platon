@@ -1,1 +1,1 @@
-export * from './lib/models/announcement.model';
+export * from './lib/models/announcement.model'

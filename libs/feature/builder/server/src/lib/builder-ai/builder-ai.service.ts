@@ -62,7 +62,7 @@ export class BuilderAiService {
         },
       }
     } catch (error) {
-      this.logger.error('Erreur lors de l\'appel à OpenAI:', error)
+      this.logger.error("Erreur lors de l'appel à OpenAI:", error)
       throw new Error('Erreur lors de la transformation avec OpenAI')
     }
   }
@@ -112,7 +112,7 @@ export class BuilderAiService {
         },
       }
     } catch (error) {
-      this.logger.error('Erreur lors de l\'appel à Anthropic:', error)
+      this.logger.error("Erreur lors de l'appel à Anthropic:", error)
       throw new Error('Erreur lors de la transformation avec Claude')
     }
   }
@@ -153,7 +153,7 @@ export class BuilderAiService {
         },
       }
     } catch (error) {
-      this.logger.error('Erreur lors de l\'appel à Mistral:', error)
+      this.logger.error("Erreur lors de l'appel à Mistral:", error)
       throw new Error('Erreur lors de la transformation avec Mistral')
     }
   }

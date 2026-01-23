@@ -1,66 +1,63 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { ShepherdService } from './shepherd/shepherd.service';
-import { TutorialStep } from './shepherd/shepherd.service';
-import { User, UserRoles } from '@platon/core/common';
-import { ToolbarTutorialService } from './toolbar-tutorial.service';
-import {
-  CircleTree,
-  flattenCircleTree,
-} from '@platon/feature/resource/common'
+import { Injectable, inject, signal } from '@angular/core'
+import { Router } from '@angular/router'
+import { ShepherdService } from './shepherd/shepherd.service'
+import { TutorialStep } from './shepherd/shepherd.service'
+import { User, UserRoles } from '@platon/core/common'
+import { ToolbarTutorialService } from './toolbar-tutorial.service'
+import { CircleTree, flattenCircleTree } from '@platon/feature/resource/common'
 
-import { ResourceService } from '@platon/feature/resource/browser';
-import { firstValueFrom } from 'rxjs';
-import { DialogService, DialogModule } from '@platon/core/browser';
+import { ResourceService } from '@platon/feature/resource/browser'
+import { firstValueFrom } from 'rxjs'
+import { DialogService, DialogModule } from '@platon/core/browser'
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CircleSubscriptionTutorialService {
-  private readonly shepherdService = inject(ShepherdService);
-  private readonly router = inject(Router);
-  private readonly resourceService = inject(ResourceService);
-  private readonly dialogService = inject(DialogService);
-  private readonly circleSubscriptionCompletedKey = 'tutoSeen';
-  private user?: User;
+  private readonly shepherdService = inject(ShepherdService)
+  private readonly router = inject(Router)
+  private readonly resourceService = inject(ResourceService)
+  private readonly dialogService = inject(DialogService)
+  private readonly circleSubscriptionCompletedKey = 'tutoSeen'
+  private user?: User
 
+  private selectedCircles = signal<string>('')
+  private readonly availableCircles = signal<CircleTree[]>([])
+  private circleChoise = signal<string>('')
 
-  private selectedCircles = signal<string>('');
-  private readonly availableCircles = signal<CircleTree[]>([]);
-  private circleChoise = signal<string>('');
-
-  constructor(private readonly toolbarTutorialService: ToolbarTutorialService) { }
-
+  constructor(private readonly toolbarTutorialService: ToolbarTutorialService) {}
 
   private async loadCircles(): Promise<void> {
-    this.selectedCircles.set('');
-    const tree = await firstValueFrom(this.resourceService.tree());
-    this.availableCircles.set(flattenCircleTree(tree).filter(c => c.code !== this.user?.username && c.code !== 'platon'));
+    this.selectedCircles.set('')
+    const tree = await firstValueFrom(this.resourceService.tree())
+    this.availableCircles.set(
+      flattenCircleTree(tree).filter((c) => c.code !== this.user?.username && c.code !== 'platon')
+    )
   }
 
   private isMemberOfAnyCircle(): boolean {
-    for(const circle of this.availableCircles()) {
-      if(circle.permissions?.write ) {
-        return true;
+    for (const circle of this.availableCircles()) {
+      if (circle.permissions?.write) {
+        return true
       }
     }
-    return false;
+    return false
   }
 
   async startCircleSubscriptionTutorial(user: User): Promise<void> {
-    this.user = user;
+    this.user = user
 
     if (this.hasCompletedCircleSubscription() || user.role !== UserRoles.teacher) {
-      return;
+      return
     }
 
-    await this.loadCircles();
+    await this.loadCircles()
 
     if (this.isMemberOfAnyCircle()) {
-      this.completeAndStartMainTutorial();
-      return;
+      this.completeAndStartMainTutorial()
+      return
     }
-    const steps = this.buildCircleSubscriptionSteps(user);
+    const steps = this.buildCircleSubscriptionSteps(user)
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'circle-subscription-tutorial',
@@ -68,8 +65,8 @@ export class CircleSubscriptionTutorialService {
       confirmCancel: false,
       exitOnEsc: false,
       keyboardNavigation: false,
-      showCancelIcon: false // Désactiver l'icône de fermeture pour forcer l'inscription
-    });
+      showCancelIcon: false, // Désactiver l'icône de fermeture pour forcer l'inscription
+    })
   }
 
   /**
@@ -78,9 +75,9 @@ export class CircleSubscriptionTutorialService {
   private buildCircleSubscriptionSteps(user: User): TutorialStep[] {
     return [
       {
-      id: 'welcome-circles',
-      title: 'Bienvenue sur PLaTon !',
-      text: `
+        id: 'welcome-circles',
+        title: 'Bienvenue sur PLaTon !',
+        text: `
         <div style="text-align: center; padding: 20px;">
         <h3 style="margin-bottom: 16px; color: var(--brand-text-primary);">
           Rejoignez la communauté PLaTon
@@ -122,47 +119,47 @@ export class CircleSubscriptionTutorialService {
         </p>
         </div>
       `,
-      buttons: [
-        {
-        text: 'Découvrir les cercles disponibles',
-        action: () => this.shepherdService.next()
-        }
-      ]
+        buttons: [
+          {
+            text: 'Découvrir les cercles disponibles',
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
       {
-      id: 'select-circles',
-      title: '📂 Choisissez votre cercle',
-      text: this.buildCirclesSelectionHTML(),
-      buttons: [
-        {
-        text: 'Précédent',
-        secondary: true,
-        action: () => this.shepherdService.previous()
+        id: 'select-circles',
+        title: '📂 Choisissez votre cercle',
+        text: this.buildCirclesSelectionHTML(),
+        buttons: [
+          {
+            text: 'Précédent',
+            secondary: true,
+            action: () => this.shepherdService.previous(),
+          },
+          {
+            text: 'Valider ma sélection',
+            action: () => this.validateSelection(),
+          },
+        ],
+        when: {
+          show: () => this.setupCircleSelectionListeners(),
         },
-        {
-        text: 'Valider ma sélection',
-        action: () => this.validateSelection()
-        }
-      ],
-      when: {
-        show: () => this.setupCircleSelectionListeners()
-      }
       },
       {
-      id: 'subscription-complete',
-      title: 'Inscription réussie !',
-      text: '<div id="completion-text"></div>',
-      buttons: [
-        {
-        text: 'Commencer le tutoriel de découverte',
-        action: () => this.completeAndStartMainTutorial()
-        }
-      ],
-      when: {
-        show: () => this.displayCompletionMessage()
-      }
-      }
-    ];
+        id: 'subscription-complete',
+        title: 'Inscription réussie !',
+        text: '<div id="completion-text"></div>',
+        buttons: [
+          {
+            text: 'Commencer le tutoriel de découverte',
+            action: () => this.completeAndStartMainTutorial(),
+          },
+        ],
+        when: {
+          show: () => this.displayCompletionMessage(),
+        },
+      },
+    ]
   }
 
   /**
@@ -176,9 +173,9 @@ export class CircleSubscriptionTutorialService {
           Cliquez sur le cercle qui vous intéresse :
         </p>
         <div id="circles-selection-container" style="max-height: 400px; overflow-y: auto;">
-    `;
+    `
 
-    this.availableCircles().forEach(circle => {
+    this.availableCircles().forEach((circle) => {
       html += `
         <div class="circle-selection-item"
              data-circle-id="${circle.id}"
@@ -210,8 +207,8 @@ export class CircleSubscriptionTutorialService {
             </div>
           </div>
         </div>
-      `;
-    });
+      `
+    })
 
     html += `
         </div>
@@ -224,9 +221,9 @@ export class CircleSubscriptionTutorialService {
           Aucun cercle sélectionné
         </div>
       </div>
-    `;
+    `
 
-    return html;
+    return html
   }
 
   /**
@@ -234,65 +231,64 @@ export class CircleSubscriptionTutorialService {
    */
   private setupCircleSelectionListeners(): void {
     setTimeout(() => {
-      const items = document.querySelectorAll('.circle-selection-item');
+      const items = document.querySelectorAll('.circle-selection-item')
 
-      items.forEach(item => {
+      items.forEach((item) => {
         item.addEventListener('click', () => {
-          const circleId = item.getAttribute('data-circle-id');
-          if (!circleId) return;
+          const circleId = item.getAttribute('data-circle-id')
+          if (!circleId) return
 
-          const checkbox = item.querySelector('.circle-checkbox') as HTMLElement;
-          const isSelected = this.selectedCircles().includes(circleId);
+          const checkbox = item.querySelector('.circle-checkbox') as HTMLElement
+          const isSelected = this.selectedCircles().includes(circleId)
 
           if (isSelected) {
             // Désélectionner
-            this.selectedCircles.set('');
-            checkbox.innerHTML = '';
-            checkbox.style.color = 'var(--brand-text-secondary)';
-            checkbox.style.background = 'var(--brand-background-components)';
-            checkbox.style.borderColor = 'var(--brand-border-color-light)';
-            (item as HTMLElement).style.background = 'var(--brand-background-components)';
-            (item as HTMLElement).style.borderColor = 'var(--brand-border-color-light)';
+            this.selectedCircles.set('')
+            checkbox.innerHTML = ''
+            checkbox.style.color = 'var(--brand-text-secondary)'
+            checkbox.style.background = 'var(--brand-background-components)'
+            checkbox.style.borderColor = 'var(--brand-border-color-light)'
+            ;(item as HTMLElement).style.background = 'var(--brand-background-components)'
+            ;(item as HTMLElement).style.borderColor = 'var(--brand-border-color-light)'
           } else {
-            items.forEach(otherItem => {
-              const otherCheckbox = otherItem.querySelector('.circle-checkbox') as HTMLElement;
-              otherCheckbox.innerHTML = '';
-              otherCheckbox.style.color = 'var(--brand-text-secondary)';
-              otherCheckbox.style.background = 'var(--brand-background-components)';
-              otherCheckbox.style.borderColor = 'var(--brand-border-color-light)';
-              (otherItem as HTMLElement).style.borderColor = 'var(--brand-border-color-light)';
-              (otherItem as HTMLElement).style.background = 'var(--brand-background-components)';
-            });
+            items.forEach((otherItem) => {
+              const otherCheckbox = otherItem.querySelector('.circle-checkbox') as HTMLElement
+              otherCheckbox.innerHTML = ''
+              otherCheckbox.style.color = 'var(--brand-text-secondary)'
+              otherCheckbox.style.background = 'var(--brand-background-components)'
+              otherCheckbox.style.borderColor = 'var(--brand-border-color-light)'
+              ;(otherItem as HTMLElement).style.borderColor = 'var(--brand-border-color-light)'
+              ;(otherItem as HTMLElement).style.background = 'var(--brand-background-components)'
+            })
 
             // Sélectionner le cercle cliqué
-            this.selectedCircles.set(circleId);
-            this.circleChoise.set(this.availableCircles().find(c => c.id === circleId)?.name || '');
-            checkbox.innerHTML = '✓';
-            checkbox.style.color = 'white';
-            checkbox.style.background = 'rgba(var(--brand-color-primary-rgb), 1)';
-            checkbox.style.borderColor = 'rgba(var(--brand-color-primary-rgb), 1)';
-            (item as HTMLElement).style.borderColor = 'rgba(var(--brand-color-primary-rgb), 0.5)';
-            (item as HTMLElement).style.background = 'rgba(var(--brand-color-primary-rgb), 0.05)';
+            this.selectedCircles.set(circleId)
+            this.circleChoise.set(this.availableCircles().find((c) => c.id === circleId)?.name || '')
+            checkbox.innerHTML = '✓'
+            checkbox.style.color = 'white'
+            checkbox.style.background = 'rgba(var(--brand-color-primary-rgb), 1)'
+            checkbox.style.borderColor = 'rgba(var(--brand-color-primary-rgb), 1)'
+            ;(item as HTMLElement).style.borderColor = 'rgba(var(--brand-color-primary-rgb), 0.5)'
+            ;(item as HTMLElement).style.background = 'rgba(var(--brand-color-primary-rgb), 0.05)'
           }
 
-          this.updateSelectionCounter();
-        });
-      });
-    }, 100);
+          this.updateSelectionCounter()
+        })
+      })
+    }, 100)
   }
 
-
   private updateSelectionCounter(): void {
-    const counter = document.getElementById('selection-counter');
+    const counter = document.getElementById('selection-counter')
     if (counter) {
-      const count = this.selectedCircles().length;
+      const count = this.selectedCircles().length
 
       if (count === 0) {
-        counter.innerHTML = 'Aucun cercle sélectionné';
-        counter.style.color = 'var(--brand-color-error)';
+        counter.innerHTML = 'Aucun cercle sélectionné'
+        counter.style.color = 'var(--brand-color-error)'
       } else {
-        counter.innerHTML = '✓ Cercle sélectionné';
-        counter.style.color = 'var(--brand-color-success)';
+        counter.innerHTML = '✓ Cercle sélectionné'
+        counter.style.color = 'var(--brand-color-success)'
       }
     }
   }
@@ -302,9 +298,9 @@ export class CircleSubscriptionTutorialService {
    */
   private displayCompletionMessage(): void {
     setTimeout(() => {
-      const container = document.getElementById('completion-text');
+      const container = document.getElementById('completion-text')
       if (container) {
-        const circleName = this.circleChoise() || 'votre cercle';
+        const circleName = this.circleChoise() || 'votre cercle'
         container.innerHTML = `
           <div style="text-align: center; padding: 20px;">
             <h3 style="margin-bottom: 16px; color: var(--brand-text-primary);">
@@ -337,9 +333,9 @@ export class CircleSubscriptionTutorialService {
               </div>
             </div>
           </div>
-        `;
+        `
       }
-    }, 50);
+    }, 50)
   }
 
   /**
@@ -347,42 +343,45 @@ export class CircleSubscriptionTutorialService {
    */
   private validateSelection(): void {
     if (this.selectedCircles().length === 0) {
-      alert('Veuillez sélectionner un cercle pour continuer.');
-      return;
+      alert('Veuillez sélectionner un cercle pour continuer.')
+      return
     }
 
-    this.subscribeUserToCircles().then(() => {
-      this.shepherdService.next();
-    });
+    this.subscribeUserToCircles()
+      .then(() => {
+        this.shepherdService.next()
+      })
+      .catch(() => {
+        console.error("Erreur lors de l'inscription aux cercles.")
+      })
   }
 
   /**
    * Inscrit l'utilisateur aux cercles sélectionnés
    */
   private async subscribeUserToCircles(): Promise<void> {
-    try{
-        await firstValueFrom(this.resourceService.autoJoin(this.selectedCircles()))
-        this.dialogService.success(`Vous avez été inscrit au cercle "${this.circleChoise()}" avec succès !`);
+    try {
+      await firstValueFrom(this.resourceService.autoJoin(this.selectedCircles()))
+      this.dialogService.success(`Vous avez été inscrit au cercle "${this.circleChoise()}" avec succès !`)
     } catch (error) {
-      this.dialogService.error('Une erreur est survenue lors de votre inscription au cercle. Veuillez réessayer plus tard.');
-      this.completeAndStartMainTutorial();
+      this.dialogService.error(
+        'Une erreur est survenue lors de votre inscription au cercle. Veuillez réessayer plus tard.'
+      )
+      this.completeAndStartMainTutorial()
       //throw error;
     }
   }
 
-
   private completeAndStartMainTutorial(): void {
-    this.shepherdService.complete();
+    this.shepherdService.complete()
     // Marquer que l'inscription aux cercles est terminée
-    localStorage.setItem(this.circleSubscriptionCompletedKey, 'true');
-    this.launchToolbarTutorial();
+    localStorage.setItem(this.circleSubscriptionCompletedKey, 'true')
+    this.launchToolbarTutorial()
   }
-
 
   hasCompletedCircleSubscription(): boolean {
-    return localStorage.getItem(this.circleSubscriptionCompletedKey) === 'true';
+    return localStorage.getItem(this.circleSubscriptionCompletedKey) === 'true'
   }
-
 
   private launchToolbarTutorial(): void {
     setTimeout(() => {
@@ -391,6 +390,4 @@ export class CircleSubscriptionTutorialService {
       }
     }, 200)
   }
-
-
 }

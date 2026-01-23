@@ -4,7 +4,7 @@ import { SafePipe } from '@cisstech/nge/pipes'
 
 @Component({
   standalone: true,
-  selector: 'app-builder-iframe',
+  selector: 'lib-builder-iframe',
   templateUrl: './builder-iframe.component.html',
   styleUrls: ['./builder-iframe.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

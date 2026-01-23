@@ -1,4 +1,18 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Injector, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Injector,
+  Input,
+  OnInit,
+  Output,
+  QueryList,
+  ViewChildren,
+  AfterViewInit,
+} from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { BindedBubblesComponentDefinition, BindedBubblesState, BubbleItem, PairBubbleItem } from './binded-bubbles'
 import { WebComponentService } from '../../web-component.service'
@@ -10,8 +24,7 @@ import { WebComponentService } from '../../web-component.service'
   changeDetection: ChangeDetectionStrategy.Default,
 })
 @WebComponent(BindedBubblesComponentDefinition)
-export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesState>, OnInit {
-
+export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesState>, OnInit, AfterViewInit {
   @Input() state!: BindedBubblesState
   @Output() stateChange = new EventEmitter<BindedBubblesState>()
 
@@ -292,42 +305,42 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   }
 
   // scroll indicator
-  @ViewChildren('scrollableDiv') scrollableSpans!: QueryList<ElementRef>;
-  needsHorizontalScroll: Map<any, boolean> = new Map();
+  @ViewChildren('scrollableDiv') scrollableSpans!: QueryList<ElementRef>
+  needsHorizontalScroll: Map<any, boolean> = new Map()
 
   ngAfterViewInit() {
     this.scrollableSpans.changes.subscribe(() => {
-      this.checkAllHorizontalOverflows();
-    });
+      this.checkAllHorizontalOverflows()
+    })
 
-    this.checkAllHorizontalOverflows();
+    this.checkAllHorizontalOverflows()
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
-    this.checkAllHorizontalOverflows();
+    this.checkAllHorizontalOverflows()
   }
 
   /** check if we need the scrollbar indicator or not for each item */
   checkAllHorizontalOverflows(): void {
-    this.needsHorizontalScroll.clear();
+    this.needsHorizontalScroll.clear()
     if (!this.scrollableSpans || this.scrollableSpans.length === 0) {
-      return;
+      return
     }
     this.scrollableSpans.forEach((elementRef: ElementRef) => {
-      const spanElement = elementRef.nativeElement as HTMLElement;
-      const availableContainer = spanElement.parentNode as HTMLElement;
+      const spanElement = elementRef.nativeElement as HTMLElement
+      const availableContainer = spanElement.parentNode as HTMLElement
       if (!availableContainer) {
-          return;
+        return
       }
-      const itemId = spanElement.getAttribute('data-item-id');
+      const itemId = spanElement.getAttribute('data-item-id')
       if (!itemId) {
-          console.error("Erreur: ID de l'item manquant sur l'élément span.");
-          return;
+        console.error("Erreur: ID de l'item manquant sur l'élément span.")
+        return
       }
-      const isOverflowing = spanElement.scrollWidth > availableContainer.clientWidth;
-      this.needsHorizontalScroll.set(itemId, isOverflowing);
-    });
-    this.cd.detectChanges();
+      const isOverflowing = spanElement.scrollWidth > availableContainer.clientWidth
+      this.needsHorizontalScroll.set(itemId, isOverflowing)
+    })
+    this.cd.detectChanges()
   }
 }

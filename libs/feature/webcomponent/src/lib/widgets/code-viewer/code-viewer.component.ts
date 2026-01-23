@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, OnInit } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { CodeViewerComponentDefinition, CodeViewerState } from './code-viewer'
 import { generate } from 'ng-zorro-antd/core/color'
@@ -11,34 +11,31 @@ import { number } from 'echarts'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(CodeViewerComponentDefinition)
-export class CodeViewerComponent implements WebComponentHooks<CodeViewerState> {
+export class CodeViewerComponent implements WebComponentHooks<CodeViewerState>, OnInit {
   @Input() state!: CodeViewerState
 
   show: Set<number> = new Set()
 
   constructor(readonly injector: Injector) {}
 
-  data = "```"
-  lineNumbers : number[] = []
+  data = '```'
+  lineNumbers: number[] = []
 
   ngOnInit() {
-
-    this.data += this.state.language + " highlights="+ "\""+ this.state.highlights +"\"\n"
+    this.data += this.state.language + ' highlights=' + '"' + this.state.highlights + '"\n'
     this.data += this.state.code
-    this.data += "\n```\n"
-
+    this.data += '\n```\n'
 
     /* line number */
     const lineCount = this.state.code.split('\n').length
     this.lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1)
-    if (this.state.lines != "") {
-      let pas = Number(this.state.lines)
+    if (this.state.lines != '') {
+      const pas = Number(this.state.lines)
       if (!Number.isNaN(pas) && pas > 0) {
-        for(let i = 0; i <= lineCount; i += pas){
-          this.show.add(i);
+        for (let i = 0; i <= lineCount; i += pas) {
+          this.show.add(i)
         }
       }
     }
-
   }
 }

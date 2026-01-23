@@ -2,9 +2,7 @@ import { Body, Controller, Headers, Post, UnauthorizedException } from '@nestjs/
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger'
 import { AITransformInput, AITransformOutput } from '@platon/feature/builder/common'
 import { BuilderAiService } from './builder-ai.service'
-import {
-  ForbiddenResponse,
-} from '@platon/core/common'
+import { ForbiddenResponse } from '@platon/core/common'
 
 @Controller('builder')
 @ApiTags('Builder')

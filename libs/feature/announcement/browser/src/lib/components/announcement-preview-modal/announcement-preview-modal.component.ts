@@ -1,17 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { UiEditorJsModule, EditorjsViewerComponent } from '@platon/shared/ui';
-import { Announcement } from '@platon/feature/announcement/common';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-
+import { CommonModule } from '@angular/common'
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core'
+import { MatButtonModule } from '@angular/material/button'
+import { MatIconModule } from '@angular/material/icon'
+import { MatChipsModule } from '@angular/material/chips'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzCardModule } from 'ng-zorro-antd/card'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
+import { NzTagModule } from 'ng-zorro-antd/tag'
+import { UiEditorJsModule, EditorjsViewerComponent } from '@platon/shared/ui'
+import { Announcement } from '@platon/feature/announcement/common'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 
 @Component({
   selector: 'lib-announcement-preview-modal',
@@ -34,18 +33,17 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   styleUrl: './announcement-preview-modal.component.scss',
 })
 export class AnnouncementPreviewModalComponent {
+  private readonly dialogRef = inject(MatDialogRef<AnnouncementPreviewModalComponent>)
+  private readonly data = inject(MAT_DIALOG_DATA)
 
-  private readonly dialogRef = inject(MatDialogRef<AnnouncementPreviewModalComponent>);
-  private readonly data = inject(MAT_DIALOG_DATA);
-
-  announcement = input<Announcement>(this.data.announcement);
+  announcement = input<Announcement>(this.data.announcement)
 
   close(): void {
-    this.dialogRef.close();
+    this.dialogRef.close()
   }
 
   backToEdit(): void {
-    this.dialogRef.close({ action: 'edit' });
+    this.dialogRef.close({ action: 'edit' })
   }
 
   getRoleColor(role: string): string {
@@ -53,8 +51,8 @@ export class AnnouncementPreviewModalComponent {
       admin: 'red',
       teacher: 'blue',
       student: 'green',
-    };
-    return colorMap[role] || 'default';
+    }
+    return colorMap[role] || 'default'
   }
 
   formatRoleName(role: string): string {
@@ -62,7 +60,7 @@ export class AnnouncementPreviewModalComponent {
       admin: 'Administrateur',
       teacher: 'Enseignant',
       student: 'Étudiant',
-    };
-    return nameMap[role] || role;
+    }
+    return nameMap[role] || role
   }
 }

@@ -1,17 +1,13 @@
 import { Injectable, signal } from '@angular/core'
 import { Router } from '@angular/router'
 import { ShepherdService } from './shepherd/shepherd.service'
-import { ResourcesTutorialService } from './resources-tutorial.service'
-import { SidebarTutorialService } from './sidebar-tutorial.service'
 import { ToolbarTutorialService } from './toolbar-tutorial.service'
 import { IdeTutorialService } from './ide-tutorial.service'
 import { SharedResourceTutorialService } from './shared-resource-tutorial.service'
 import { ResourceCreationTutorialService } from './resource-creation-tutorial.service'
-import { CircleSubscriptionTutorialService } from "./circle-subscription-tutorial.service";
-import { TutorialSelectorModalComponent } from '../components/tutorial-selector-modal/tutorial-selector-modal.component'
+import { CircleSubscriptionTutorialService } from './circle-subscription-tutorial.service'
 import { User } from '@platon/core/common'
 import { AuthService } from '@platon/core/browser'
-
 
 export interface TutorialOption {
   id: string
@@ -31,13 +27,14 @@ export class TutorialSelectorService {
     private readonly router: Router,
     private readonly shepherdService: ShepherdService,
     private readonly toolbarTutorialService: ToolbarTutorialService,
-    private readonly resourcesTutorialService: ResourcesTutorialService,
     private readonly resourceCreationTutorialService: ResourceCreationTutorialService,
     private readonly ideTutorialService: IdeTutorialService,
-    private readonly sharedResourceTutorailService: SharedResourceTutorialService,
+    private readonly sharedResourceTutorialService: SharedResourceTutorialService,
     private readonly circleSubscriptionTutorialService: CircleSubscriptionTutorialService
   ) {
-    this.initUser()
+    this.initUser().catch(() => {
+      console.error("Erreur lors de l'initialisation de l'utilisateur dans le service de sélection de tutoriel.")
+    })
   }
 
   async initUser(): Promise<void> {
@@ -139,7 +136,7 @@ export class TutorialSelectorService {
 
   private sharedResourceTutorial() {
     if (!this.user) return
-    this.sharedResourceTutorailService.startIdeTutorial()
+    this.sharedResourceTutorialService.startIdeTutorial()
   }
 
   /**
@@ -154,6 +151,8 @@ export class TutorialSelectorService {
 
   startCircleSubscriptionTutorial(): void {
     if (!this.user) return
-    this.circleSubscriptionTutorialService.startCircleSubscriptionTutorial(this.user)
+    this.circleSubscriptionTutorialService.startCircleSubscriptionTutorial(this.user).catch(() => {
+      console.error("Erreur lors du démarrage du tutoriel d'inscription aux cercles.")
+    })
   }
 }

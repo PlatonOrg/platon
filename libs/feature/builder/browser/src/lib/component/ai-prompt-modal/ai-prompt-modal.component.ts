@@ -25,7 +25,7 @@ export interface AIPromptModalData {
 }
 
 @Component({
-  selector: 'app-ai-prompt-modal',
+  selector: 'lib-ai-prompt-modal',
   standalone: true,
   imports: [
     CommonModule,
