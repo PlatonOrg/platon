@@ -49,7 +49,7 @@ export class AIPromptModalComponent implements OnInit {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
 
   protected prompt = ''
-  protected apiKey = 'XYZ' // Pré-rempli pour faciliter les tests
+  protected apiKey = ''
   protected provider: 'openai' | 'anthropic' | 'mistral' = 'openai'
   protected model = 'gpt-4o-mini'
 
@@ -84,12 +84,9 @@ export class AIPromptModalComponent implements OnInit {
   ]
 
   ngOnInit(): void {
-    // Charger les préférences du localStorage
-    const savedApiKey = localStorage.getItem('ai_api_key')
     const savedProvider = localStorage.getItem('ai_provider') as 'openai' | 'anthropic' | 'mistral'
     const savedModel = localStorage.getItem('ai_model')
 
-    if (savedApiKey) this.apiKey = savedApiKey
     if (savedProvider) {
       this.provider = savedProvider
       this.onProviderChange()
@@ -125,8 +122,6 @@ export class AIPromptModalComponent implements OnInit {
       return
     }
 
-    // Sauvegarder les préférences
-    localStorage.setItem('ai_api_key', this.apiKey)
     localStorage.setItem('ai_provider', this.provider)
     localStorage.setItem('ai_model', this.model)
 
