@@ -1,3 +1,173 @@
+// === TABS STRUCTURE ===
+.activity-settings-tabs {
+  height: 100%;
+
+  ::ng-deep {
+    .ant-tabs-nav {
+      margin-bottom: 0;
+      background: var(--brand-background-components);
+      padding: 8px 16px 0;
+
+      .ant-tabs-tab {
+        background: transparent;
+        border: none;
+        color: var(--brand-text-secondary);
+        transition: all 0.3s;
+        font-size: 13px;
+        padding: 8px 16px;
+
+        &:hover {
+          color: var(--brand-color-primary);
+        }
+
+        &.ant-tabs-tab-active {
+          background: var(--brand-background-card);
+          color: var(--brand-color-primary);
+          border-radius: 8px 8px 0 0;
+
+          .ant-tabs-tab-btn {
+            color: var(--brand-color-primary);
+            font-weight: 600;
+          }
+        }
+
+        span[nz-icon] {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .ant-tabs-content {
+      height: calc(100vh - 200px);
+      overflow-y: auto;
+      background: var(--brand-background-card);
+    }
+  }
+}
+
+.tab-content {
+  padding: 24px;
+
+  h3 {
+    color: var(--brand-text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .section-description {
+    color: var(--brand-text-secondary);
+    font-size: 13px;
+    margin-bottom: 24px;
+    padding: 12px;
+    background: var(--brand-background-hover);
+    border-left: 3px solid var(--brand-color-primary);
+    border-radius: 4px;
+  }
+}
+
+// === FORMULAIRES ===
+::ng-deep {
+  nz-form-item {
+    margin-bottom: 20px;
+
+    nz-form-label {
+      color: var(--brand-text-primary);
+      font-weight: 500;
+      font-size: 13px;
+
+      &::before {
+        display: none;
+      }
+    }
+
+    nz-form-control {
+      nz-input-number,
+      nz-select,
+      input[nz-input] {
+        width: 100%;
+      }
+
+      .ant-input-number {
+        border-radius: 6px;
+        border: 1px solid var(--brand-border-color-light);
+
+        &:hover {
+          border-color: var(--brand-color-primary);
+        }
+
+        &:focus-within {
+          border-color: var(--brand-color-primary);
+          box-shadow: 0 0 0 2px rgba(23, 28, 143, 0.1);
+        }
+      }
+
+      .ant-select-selector {
+        border-radius: 6px !important;
+      }
+
+      label[nz-checkbox] {
+        .ant-checkbox {
+          .ant-checkbox-inner {
+            border-radius: 4px;
+          }
+
+          &.ant-checkbox-checked .ant-checkbox-inner {
+            background-color: var(--brand-color-primary);
+            border-color: var(--brand-color-primary);
+          }
+        }
+      }
+    }
+  }
+}
+
+// === COLLAPSE PERSONNALISÉ ===
+::ng-deep {
+  .ant-collapse {
+    background: transparent;
+    border: none;
+
+    .ant-collapse-item {
+      border: 1px solid var(--brand-border-color-light);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: var(--brand-background-components);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .ant-collapse-header {
+      padding: 14px 16px;
+      color: var(--brand-text-primary);
+      font-weight: 500;
+      font-size: 14px;
+
+      .ant-collapse-arrow {
+        color: var(--brand-color-primary);
+      }
+
+      span[nz-icon] {
+        margin-right: 8px;
+        color: var(--brand-color-primary);
+        font-size: 16px;
+      }
+    }
+
+    .ant-collapse-content-box {
+      padding: 16px;
+    }
+  }
+}
+
+// === ALERT ===
+.beta-warning {
+  margin-top: 12px;
+  font-size: 12px;
+}
+
 .activity-settings-container {
   padding: 4px;
   background: var(--brand-background-primary);
@@ -120,6 +290,44 @@
 
     .ant-picker-suffix {
       color: var(--brand-text-tertiary);
+    }
+  }
+
+  // Assurer que l'overlay du time-picker est au-dessus
+  .ant-picker-dropdown {
+    z-index: 9999 !important;
+  }
+
+  // Style pour les inputs de temps séparés
+  .time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .time-input-field {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      
+      .time-input {
+        width: 60px;
+        
+        ::ng-deep .ant-input-number-input {
+          text-align: center;
+        }
+      }
+      
+      .time-label {
+        font-size: 12px;
+        color: var(--brand-text-secondary);
+        font-weight: 500;
+      }
+    }
+
+    .time-separator {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--brand-text-secondary);
     }
   }
 

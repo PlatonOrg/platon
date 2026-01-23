@@ -121,7 +121,7 @@ export class PlayerService extends PlayerManager {
     if (resource.type === 'EXERCISE') {
       session = await this.buildExercise(session)
     }
-
+    await this.updateSettingsSession(session)
     return {
       exercise: resource.type === 'EXERCISE' ? withExercisePlayer(session) : undefined,
       activity: resource.type === 'ACTIVITY' ? withActivityPlayer(session) : undefined,
@@ -146,24 +146,20 @@ export class PlayerService extends PlayerManager {
       return
     }
     await this.activityService.updateActivitiesDates([activity])
-    //const dateRange =
-    /*if (dateRange && dateRange.start) {
-      const startTime = new Date(dateRange.start).getTime()
-      const nowTime = new Date().getTime()
+  }
 
-      if (startTime > nowTime) {
-        throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
-      }
+  private async updateSettingsSession(session: SessionEntity): Promise<void> {
+    if (
+      session?.activity &&
+      session?.variables &&
+      typeof session.variables === 'object' &&
+      'settings' in session.variables
+    ) {
+      // eslint-disable-next-line prettier/prettier
+      (session.variables as ActivityVariables).settings = session.activity.source.variables.settings
+    } else if (session?.parent) {
+      await this.updateSettingsSession(session.parent)
     }
-
-    if (dateRange && dateRange.end) {
-      const endTime = new Date(dateRange.end).getTime()
-      const nowTime = new Date().getTime()
-
-      if (endTime < nowTime) {
-        throw new ForbiddenResponse("L'activité est fermée.")
-      }
-    }*/
   }
 
   async playActivity(activityId: string, user: User): Promise<PlayActivityOuput> {
@@ -181,7 +177,7 @@ export class PlayerService extends PlayerManager {
     if (activitySession.activity) {
       await this.checkActivityDateRestrictions(activitySession.activity)
     }
-
+    await this.updateSettingsSession(activitySession)
     return { activity: withActivityPlayer(activitySession) }
   }
 
@@ -197,14 +193,11 @@ export class PlayerService extends PlayerManager {
     if (!activitySession) {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
     }
-    // Les modifs commencent ici : restrictions
-
     if (!activitySession.activity) {
       throw new NotFoundResponse(`Activity not found: ${activitySessionId}`)
     }
-
     await this.checkActivityDateRestrictions(activitySession.activity)
-    // Fin des modifs
+    await this.updateSettingsSession(activitySession)
 
     // CREATE PLAYERS
     const exercisePlayers = await Promise.all(
@@ -238,7 +231,6 @@ export class PlayerService extends PlayerManager {
         exerciseSession.startedAt = exerciseSession.startedAt || new Date()
 
         await this.sessionService.update(exerciseSession.id, { startedAt: exerciseSession.startedAt })
-
         return withExercisePlayer(exerciseSession)
       })
     )

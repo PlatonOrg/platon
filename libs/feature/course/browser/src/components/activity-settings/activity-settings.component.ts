@@ -28,6 +28,16 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
+import { NzTabsModule } from 'ng-zorro-antd/tabs'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
+import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
 
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import {
@@ -46,6 +56,7 @@ import { RestrictionManagerComponent } from './restriction-manager/restriction-m
 import { CourseColorPickerComponent } from '../color-picker/color-picker.component'
 import { User } from '@platon/core/common'
 import { ActivityRestrictionsValidatorService } from '../../services/activity-restrictions-validator.service'
+import { ActivitySettings } from '@platon/feature/compiler'
 
 @Component({
   standalone: true,
@@ -68,9 +79,19 @@ import { ActivityRestrictionsValidatorService } from '../../services/activity-re
     NzPopconfirmModule,
     NzCardModule,
     NzDividerModule,
+    NzTabsModule,
+    NzIconModule,
+    NzCollapseModule,
+    NzFormModule,
+    NzInputModule,
+    NzInputNumberModule,
+    NzSelectModule,
+    NzCheckboxModule,
+    NzAlertModule,
     DialogModule,
     RestrictionManagerComponent,
     CourseColorPickerComponent,
+    NzTimePickerModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -79,6 +100,72 @@ export class CourseActivitySettingsComponent implements OnInit {
   @Output() activityChange = new EventEmitter<Activity>()
   @Output() saveRequested = new EventEmitter<void>()
   protected accessPeriods = signal<RestrictionList[]>([])
+
+  protected activitySettings: ActivitySettings = {
+    duration: 0,
+    seedPerExercise: false,
+    navigation: {
+      mode: 'manual',
+    },
+    actions: {
+      retry: 0,
+      hints: true,
+      reroll: true,
+      theories: true,
+      solution: true,
+    },
+    feedback: {
+      validation: true,
+      review: true,
+    },
+    security: {
+      noCopyPaste: false,
+      terminateOnLeavePage: false,
+      terminateOnLoseFocus: false,
+    },
+  }
+
+  // Getters pour garantir que les objets ne sont jamais undefined
+  get navigation() {
+    if (!this.activitySettings.navigation) {
+      this.activitySettings.navigation = { mode: 'manual' }
+    }
+    return this.activitySettings.navigation
+  }
+
+  get actions() {
+    if (!this.activitySettings.actions) {
+      this.activitySettings.actions = {
+        retry: 0,
+        hints: true,
+        reroll: true,
+        theories: true,
+        solution: true,
+      }
+    }
+    return this.activitySettings.actions
+  }
+
+  get feedback() {
+    if (!this.activitySettings.feedback) {
+      this.activitySettings.feedback = {
+        validation: true,
+        review: true,
+      }
+    }
+    return this.activitySettings.feedback
+  }
+
+  get security() {
+    if (!this.activitySettings.security) {
+      this.activitySettings.security = {
+        noCopyPaste: false,
+        terminateOnLeavePage: false,
+        terminateOnLoseFocus: false,
+      }
+    }
+    return this.activitySettings.security
+  }
 
   currentHue = 210
 
@@ -125,7 +212,7 @@ export class CourseActivitySettingsComponent implements OnInit {
       })
     )
 
-    const [courseMembers, _activityMembers, _activityCorrectors, courseGroups, activityGroups] = await Promise.all([
+    const [courseMembers, _activityMembers, _activityCorrectors, courseGroups, _activityGroups] = await Promise.all([
       firstValueFrom(this.courseService.searchMembers(course)),
       firstValueFrom(this.courseService.searchActivityMembers(this.activity)),
       firstValueFrom(this.courseService.searchActivityCorrector(this.activity)),
@@ -142,6 +229,11 @@ export class CourseActivitySettingsComponent implements OnInit {
 
     this.tempOpenDate = this.activity.openAt ? new Date(this.activity.openAt) : undefined
     this.tempCloseDate = this.activity.closeAt ? new Date(this.activity.closeAt) : undefined
+
+    // Initialiser les paramètres de l'activité
+    if (this.activity.activitySettings) {
+      this.activitySettings = { ...this.activitySettings, ...this.activity.activitySettings }
+    }
 
     this.loadingSignal.set(false)
     this.changeDetectorRef.markForCheck()
@@ -233,7 +325,6 @@ export class CourseActivitySettingsComponent implements OnInit {
         return true
       }
       if (closeDate !== undefined) {
-        console.log(closeDate, openDate)
         this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
         return false
       }
@@ -311,22 +402,25 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
     this.updatingSignal.set(true)
     try {
+      const settingsToSend = JSON.parse(JSON.stringify(this.activitySettings))
+
       const periods = this.accessPeriods()
       if (this.activity.ignoreRestrictions && periods.length > 0) {
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
             ignoreRestrictions: false,
+            activitySettings: settingsToSend,
           })
         )
       } else if (!this.activity.ignoreRestrictions && periods.length === 0) {
-        console.log('Updating activity with ignoreRestrictions false and no periods')
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
             ignoreRestrictions: true,
+            activitySettings: settingsToSend,
           })
         )
       } else if (this.activity.ignoreRestrictions) {
@@ -338,6 +432,16 @@ export class CourseActivitySettingsComponent implements OnInit {
             colorHue: this.currentHue,
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
+            activitySettings: settingsToSend,
+          })
+        )
+      } else {
+        // Cas où il y a des restrictions et ignoreRestrictions est false
+        // Il faut quand même mettre à jour les settings
+        await firstValueFrom(
+          this.courseService.updateActivity(this.activity, {
+            colorHue: this.currentHue,
+            activitySettings: settingsToSend,
           })
         )
       }
@@ -348,6 +452,7 @@ export class CourseActivitySettingsComponent implements OnInit {
           : []),
       ])
       this.activity = result[0]
+      // Là egalement le if et else peuvent être optimisés
       if (periods.length > 0) {
         const userSpecificDate = await this.getUserSpecificDate()
         this.activityChange.emit(
@@ -388,7 +493,6 @@ export class CourseActivitySettingsComponent implements OnInit {
       this.dialogService.success('Activité mise à jour !')
       this.saveRequested.emit()
     } catch (error) {
-      console.error("Échec à l'étape:", error)
       this.dialogService.error(
         "Une erreur est survenue lors de la mise à jour de l'activité, veuillez réessayer un peu plus tard !"
       )
@@ -396,6 +500,66 @@ export class CourseActivitySettingsComponent implements OnInit {
       this.updatingSignal.set(false)
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  // Getter pour obtenir la durée sous forme de Date (pour le time-picker)
+  get durationAsDate(): Date {
+    const duration = this.activitySettings.duration || 0
+    const hours = Math.floor(duration / 3600)
+    const minutes = Math.floor((duration % 3600) / 60)
+    const seconds = duration % 60
+    const date = new Date(0)
+    date.setHours(hours, minutes, seconds, 0)
+    return date
+  }
+
+  // Setter pour mettre à jour la durée à partir d'un objet Date (depuis le time-picker)
+  set durationAsDate(date: Date) {
+    if (date) {
+      const hours = date.getHours()
+      const minutes = date.getMinutes()
+      const seconds = date.getSeconds()
+      this.activitySettings.duration = hours * 3600 + minutes * 60 + seconds
+    } else {
+      this.activitySettings.duration = 0
+    }
+  }
+
+  // Getters et Setters pour les inputs séparés heures, minutes, secondes
+  get durationHours(): number {
+    const duration = this.activitySettings.duration || 0
+    return Math.floor(duration / 3600)
+  }
+
+  set durationHours(hours: number) {
+    const duration = this.activitySettings.duration || 0
+    const currentMinutes = Math.floor((duration % 3600) / 60)
+    const currentSeconds = duration % 60
+    this.activitySettings.duration = (hours || 0) * 3600 + currentMinutes * 60 + currentSeconds
+  }
+
+  get durationMinutes(): number {
+    const duration = this.activitySettings.duration || 0
+    return Math.floor((duration % 3600) / 60)
+  }
+
+  set durationMinutes(minutes: number) {
+    const duration = this.activitySettings.duration || 0
+    const currentHours = Math.floor(duration / 3600)
+    const currentSeconds = duration % 60
+    this.activitySettings.duration = currentHours * 3600 + (minutes || 0) * 60 + currentSeconds
+  }
+
+  get durationSeconds(): number {
+    const duration = this.activitySettings.duration || 0
+    return duration % 60
+  }
+
+  set durationSeconds(seconds: number) {
+    const duration = this.activitySettings.duration || 0
+    const currentHours = Math.floor(duration / 3600)
+    const currentMinutes = Math.floor((duration % 3600) / 60)
+    this.activitySettings.duration = currentHours * 3600 + currentMinutes * 60 + (seconds || 0)
   }
 
   private getCorrectors(): string[] {

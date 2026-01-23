@@ -17,6 +17,7 @@ import {
   ON_REOPEN_ACTIVITY_EVENT,
   OnReopenActivityEventPayload,
 } from '@platon/feature/course/server'
+import { ActivityVariables } from '@platon/feature/compiler'
 
 @Injectable()
 export class SessionService {
@@ -35,6 +36,20 @@ export class SessionService {
     }
   }
 
+  private async updateSettingsSession(session: SessionEntity): Promise<void> {
+    if (
+      session?.activity &&
+      session?.variables &&
+      typeof session.variables === 'object' &&
+      'settings' in session.variables
+    ) {
+      // eslint-disable-next-line prettier/prettier
+      (session.variables as ActivityVariables).settings = session.activity.source.variables.settings
+    } else if (session?.parent) {
+      await this.updateSettingsSession(session.parent)
+    }
+  }
+
   async findById<T extends object>(
     id: string,
     relations: FindOptionsRelations<SessionEntity>
@@ -44,6 +59,7 @@ export class SessionService {
       relations,
     })
     await this.updateSessionActivityDates(session as unknown as SessionEntity)
+    await this.updateSettingsSession(session as unknown as SessionEntity)
     return session
   }
 
@@ -61,6 +77,7 @@ export class SessionService {
       },
     })
     await this.updateSessionActivityDates(session as unknown as SessionEntity)
+    await this.updateSettingsSession(session as unknown as SessionEntity)
     return session
   }
 
@@ -72,14 +89,9 @@ export class SessionService {
       where: { id },
       relations,
     })
-    if (session?.activity) {
-      await this.activityService.updateActivitiesDates([session.activity])
-    }
+    await this.updateSessionActivityDates(session as unknown as SessionEntity)
+    await this.updateSettingsSession(session as unknown as SessionEntity)
     return session as ExerciseSessionEntity | null
-    // return this.repository.findOne({
-    //   where: { id },
-    //   relations,
-    // })
   }
 
   async findExerciseSessionByActivityId(
@@ -92,6 +104,7 @@ export class SessionService {
       relations,
     })
     await this.updateSessionActivityDates(session as unknown as SessionEntity)
+    await this.updateSettingsSession(session as unknown as SessionEntity)
     return session
   }
 

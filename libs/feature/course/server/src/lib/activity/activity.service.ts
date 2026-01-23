@@ -3,7 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
 import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@platon/core/server'
-import { ActivityExerciseGroup, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
+import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
   ActivityFilters,
   CreateActivity,
@@ -185,6 +185,13 @@ export class ActivityService {
       await guard(activity)
     }
 
+    if (changes.activitySettings !== undefined) {
+      if (!activity.source.variables) {
+        activity.source.variables = {} as ActivityVariables
+      }
+      activity.source.variables.settings = changes.activitySettings
+    }
+
     Object.assign(activity, {
       ...changes,
 
@@ -196,6 +203,7 @@ export class ActivityService {
       exerciseCount: undefined,
       progression: undefined,
       permissions: undefined,
+      activitySettings: undefined,
     } as Partial<ActivityEntity>)
 
     const result = await this.repository.save(activity)
@@ -233,11 +241,13 @@ export class ActivityService {
       await guard(activity)
     }
 
+    const activitySettings = activity.source.variables.settings as ActivitySettings
     const { source } = await this.fileService.compile({
       resourceId: activity.source.resource,
       version: input.version,
     })
     activity.source = source as PLSourceFile<ActivityVariables>
+    activity.source.variables.settings = activitySettings
 
     activity = await this.repository.save(activity)
 
@@ -254,7 +264,6 @@ export class ActivityService {
       this.logger.error('Failed to send notification', error)
     })
 
-    // Des changements ici
     const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
     if (!activity) {
       throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
@@ -263,7 +272,6 @@ export class ActivityService {
       await guard(activity)
     }
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, false)
-    // Fin de changement
     this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: new Date(), restrictions: activity.restrictions }, guard)
   }
@@ -276,9 +284,7 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
-    // Des changements ici
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, true)
-    // Fin de changement
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: null, restrictions: activity.restrictions })
   }
@@ -384,6 +390,7 @@ export class ActivityService {
             viewStats: hasWritePermission,
             viewResource: hasWritePermission,
           },
+          activitySettings: activity.source.variables.settings as ActivitySettings,
         } as Partial<ActivityEntity>)
       })
     )

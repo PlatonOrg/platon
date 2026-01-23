@@ -23,7 +23,7 @@ export interface Restriction {
   type: RestrictionType
   config: RestrictionConfig[keyof RestrictionConfig]
 }
-
+// ActivityRestrictions
 export interface RestrictionList {
   restriction: Restriction[]
 }

@@ -210,9 +210,7 @@ export class ActivityDatesService {
    * Retourne les dates pour un utilisateur sans accès
    */
   private getNoAccessDates(activity: ActivityEntity): { start: Date | undefined; end: Date | undefined } {
-    const now = new Date()
-    const pastDate = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Hier
-
+    const pastDate = new Date('Invalid Date')
     return {
       start: pastDate,
       end: pastDate,
