@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as fs from 'fs-extra'
 import * as crypto from 'crypto'
-import { join } from 'path'
+import { join, resolve, sep } from 'path'
 import { createReadStream } from 'fs'
 import { PassThrough, Readable } from 'stream'
 import * as tar from 'tar-stream'
@@ -15,7 +15,7 @@ export class SubmissionStorageService {
 
   constructor(private configService: ConfigService) {
     const baseDir = this.configService.get<string>('SUBMISSIONS_DIR') || './resources/uploads/submissions'
-    this.submissionsDir = baseDir
+    this.submissionsDir = resolve(baseDir)
     this.initializeDirectories()
   }
 
@@ -33,16 +33,14 @@ export class SubmissionStorageService {
    * Génère le chemin de stockage pour une soumission
    */
   private getSubmissionPath(sessionId: string, userId: string, version: number, fileName: string): string {
-    const dirPath = join(this.submissionsDir, sessionId, userId)
-    const filePath = join(dirPath, `v${version}_${this.sanitizeFileName(fileName)}`)
-    return filePath
+    return this.resolveSafePath(sessionId, userId, `v${version}_${this.sanitizeFileName(fileName)}`)
   }
 
   /**
    * Récupère le répertoire de soumission pour une session/utilisateur
    */
   private getSessionUserDir(sessionId: string, userId: string): string {
-    return join(this.submissionsDir, sessionId, userId)
+    return this.resolveSafePath(sessionId, userId)
   }
 
   /**
@@ -50,6 +48,21 @@ export class SubmissionStorageService {
    */
   protected sanitizeFileName(fileName: string): string {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+  }
+
+  /**
+   * Sanitize and confine path segments under submissionsDir to prevent traversal.
+   */
+  private resolveSafePath(...segments: string[]): string {
+    const base = this.submissionsDir
+    const cleaned = segments.map((segment) => segment.replace(/[^a-zA-Z0-9._-]/g, '_'))
+    const target = resolve(base, ...cleaned)
+
+    if (target !== base && !target.startsWith(base + sep)) {
+      throw new Error('Invalid path segment')
+    }
+
+    return target
   }
 
   /**
@@ -64,7 +77,7 @@ export class SubmissionStorageService {
   ): Promise<{ filePath: string; checksum: string; fileSize: number }> {
     try {
       const filePath = this.getSubmissionPath(sessionId, userId, version, fileName)
-      const dirPath = join(this.submissionsDir, sessionId, userId)
+      const dirPath = this.getSessionUserDir(sessionId, userId)
 
       await fs.ensureDir(dirPath)
       await fs.writeFile(filePath, buffer)
@@ -142,8 +155,10 @@ export class SubmissionStorageService {
               )
 
               const stat = fs.statSync(filePath)
+              const safeUser = this.sanitizeFileName(submission.user.username)
+              const safeName = this.sanitizeFileName(submission.fileName)
               const header = {
-                name: `${exerciseTitle}-submissions/${submission.user.username}/${submission.fileName}`,
+                name: `${exerciseTitle}-submissions/${safeUser}/${safeName}`,
                 size: stat.size,
               }
               const entry = pack.entry(header, (err?: Error | null) => {
@@ -254,20 +269,6 @@ export class SubmissionStorageService {
   }
 
   /**
-   * Vérifie l'intégrité d'un fichier
-   */
-  async verifyIntegrity(filePath: string, expectedChecksum: string): Promise<boolean> {
-    try {
-      const buffer = await fs.readFile(filePath)
-      const actualChecksum = this.calculateChecksum(buffer)
-      return actualChecksum === expectedChecksum
-    } catch (error) {
-      this.logger.error(`Failed to verify integrity: ${error}`)
-      return false
-    }
-  }
-
-  /**
    * Obtient des statistiques sur les fichiers stockés
    */
   async getStorageStats(sessionId?: string, userId?: string): Promise<{ totalSize: number; fileCount: number }> {
@@ -277,7 +278,7 @@ export class SubmissionStorageService {
       if (sessionId && userId) {
         searchDir = this.getSessionUserDir(sessionId, userId)
       } else if (sessionId) {
-        searchDir = join(this.submissionsDir, sessionId)
+        searchDir = this.resolveSafePath(sessionId)
       }
 
       if (!fs.existsSync(searchDir)) {
