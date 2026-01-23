@@ -43,10 +43,16 @@ export class EmailService {
     private readonly configService: ConfigService,
     private readonly errorTrackingService: ErrorTrackingService
   ) {
-    const host = this.configService.get<string>('EMAIL_HOST')
-    const port = this.configService.get<number>('EMAIL_PORT')
-    const user = this.configService.get<string>('EMAIL_USER')
-    const password = this.configService.get<string>('EMAIL_PASSWORD')
+    const host = this.configService.get<string>('mail.host')
+    const port = this.configService.get<number>('mail.port')
+    const user = this.configService.get<string>('mail.user')
+    const password = this.configService.get<string>('mail.password')
+    const rejectUnauthorized = this.configService.get<boolean>('mail.tlsRejectUnauthorized', true)
+    if (!rejectUnauthorized) {
+      this.logger.warn('La vérification TLS pour les e-mails est désactivée. Cela peut poser des risques de sécurité.')
+    } else {
+      this.logger.log('La vérification TLS pour les e-mails est activée.')
+    }
 
     // Vérifier si la configuration email est disponible
     this.isConfigured = Boolean(host && port)
@@ -56,19 +62,20 @@ export class EmailService {
       this.transporter = nodemailer.createTransport({
         host,
         port,
-        secure: this.configService.get<boolean>('EMAIL_SECURE', false),
+        secure: this.configService.get<boolean>('mail.secure', false),
         auth: {
           user,
           pass: password,
         },
+        tls: { rejectUnauthorized },
       })
       this.logger.log('Service d\'e-mail configuré avec succès')
     } else {
       this.logger.warn('Configuration du service d\'e-mail absente ou incomplète. Les e-mails ne seront pas envoyés.')
     }
 
-    this.fromEmail = this.configService.get<string>('EMAIL_FROM', 'ne-pas-repondre@platon.univ-eiffel.fr')
-    this.technicalTeamEmail = this.configService.get<string[]>('EMAIL_TECHNICAL_TEAM', [])
+    this.fromEmail = this.configService.get<string>('mail.from', 'ne-pas-repondre@platon.univ-eiffel.fr')
+    this.technicalTeamEmail = this.configService.get<string[]>('mail.technicalTeam', [])
   }
 
   /**

@@ -4,7 +4,9 @@
     <nz-spin nzSimple [nzSize]="'large'" nzTip="Chargement de la configuration..."></nz-spin>
   </div>
   } @if (error) {
-  <nz-alert nzType="error" [nzMessage]="error" nzShowIcon [nzCloseable]="true" (nzOnClose)="goBack()"> </nz-alert>
+  <div class="error-container">
+    <ui-error [error]="error" [showMessage]="true" [showButtons]="true" />
+  </div>
   } @if (!loading && !error && resource) {
   <div class="builder-header">
     <button mat-icon-button (click)="goBack()" class="back-btn" title="Retour au tableau de bord">

@@ -202,15 +202,14 @@ export class ResourceController {
   @Expandable(ResourceDTO, { rootField: 'resource' })
   @Selectable({ rootField: 'resource' })
   async duplicateResource(@Req() req: IRequest, @UUIDParam('id') id: string): Promise<CreatedResponse<ResourceDTO>> {
-    const existing = await this.resourceService.findByIdOrCode(id)
-    if (!existing.isPresent()) {
-      throw new NotFoundResponse(`Resource not found: ${id}`)
-    }
-    if (![ResourceTypes.EXERCISE, ResourceTypes.ACTIVITY].includes(existing.get().type)) {
+    const existing = (await this.resourceService.findByIdOrCode(id)).orElseThrow(
+      () => new NotFoundResponse(`Resource not found: ${id}`)
+    )
+    if (![ResourceTypes.EXERCISE, ResourceTypes.ACTIVITY].includes(existing.type)) {
       throw new BadRequestResponse(`Only exercises and activities can be duplicated: ${id}`)
     }
     // All teachers and admins can duplicate resources that they have read access to
-    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: existing.get() })
+    const permissions = await this.permissionService.userPermissionsOnResource({ req, resource: existing })
     if (!permissions.read) {
       throw new ForbiddenResponse(`Operation not allowed on resource: ${id}`)
     }
@@ -220,14 +219,14 @@ export class ResourceController {
     let duplicatedResourceEntity
     try {
       duplicatedResourceEntity = await this.resourceService.create({
-        ...existing.get(),
+        ...existing,
         id: undefined,
         ownerId: req.user.id,
         parentId: userCircle.id,
-        name: `${existing.get().name} (Copie)`,
+        name: `${existing.name} (Copie)`,
         status: ResourceStatus.DRAFT,
       })
-      await this.fileService.copy(existing.get().id, duplicatedResourceEntity.id, req)
+      await this.fileService.copy(existing.id, duplicatedResourceEntity.id, req)
     } catch (error) {
       // Cleanup the newly created resource if file copy fails
       if (duplicatedResourceEntity?.id) {

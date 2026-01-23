@@ -425,7 +425,7 @@ export class Repo {
   }
 
   async mergeBundle(name: string) {
-    await simpleGit(this.repo.dir).raw('pull', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`))
+    await simpleGit(this.repo.dir).pull(['--rebase', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`)])
   }
 
   async copy(to: Repo) {

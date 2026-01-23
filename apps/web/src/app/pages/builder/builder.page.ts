@@ -9,7 +9,7 @@ import {
   HostListener,
   signal,
 } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute, Router } from '@angular/router'
 import { MatCardModule } from '@angular/material/card'
 import { MatButtonModule } from '@angular/material/button'
@@ -24,7 +24,6 @@ import { Resource } from '@platon/feature/resource/common'
 import { DialogModule, DialogService, StorageService } from '@platon/core/browser'
 import { Title } from '@angular/platform-browser'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
-import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { firstValueFrom } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
 import { PleInputEditorModule } from '../editor/contributions/editors/ple-input/ple-input.module'
@@ -34,7 +33,7 @@ import {
   BuilderIFrameComponent,
   BuilderService,
 } from '@platon/feature/builder/browser'
-import { UiModalIFrameComponent } from '@platon/shared/ui'
+import { UiErrorComponent, UiModalIFrameComponent } from '@platon/shared/ui'
 
 import { type SettingItem, SettingsPage } from './settings/settings.page'
 import { VersionHistoryComponent } from './version-history'
@@ -63,12 +62,12 @@ type MainViewMode = 'input' | 'setting' | 'history'
     MatToolbarModule,
     DialogModule,
     NzSpinModule,
-    NzAlertModule,
     BuilderIFrameComponent,
     PleInputEditorModule,
     SettingsPage,
     UiModalIFrameComponent,
     VersionHistoryComponent,
+    UiErrorComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -95,7 +94,7 @@ export class BuilderPage implements OnInit {
   protected loading = true
   protected saving = false
   protected aiTransforming = false
-  protected error?: string
+  protected error?: HttpErrorResponse | null = null
 
   protected readonly hasUnsavedChanges = signal(false)
   protected currentVersion = 'latest'
@@ -238,19 +237,21 @@ export class BuilderPage implements OnInit {
       const resourceId = this.activatedRoute.snapshot.paramMap.get('id')
       const version = this.activatedRoute.snapshot.queryParamMap.get('version') || 'latest'
       if (!resourceId) {
-        this.error = 'ID de ressource manquant'
-        this.loading = false
-        this.changeDetectorRef.markForCheck()
-        return
+        throw new HttpErrorResponse({
+          error: { message: 'ID de ressource manquant' },
+          status: 400,
+          statusText: 'Bad Request',
+        })
       }
 
       this.resource = await firstValueFrom(this.resourceService.find({ id: resourceId }))
       this.title.setTitle(`${this.resource.name}`)
       if (!this.resource.templateId || !this.resource.templateVersion) {
-        this.error = "Cette ressource n'utilise pas de template"
-        this.loading = false
-        this.changeDetectorRef.markForCheck()
-        return
+        throw new HttpErrorResponse({
+          error: { message: "Cette ressource n'utilise pas de template" },
+          status: 400,
+          statusText: 'Bad Request',
+        })
       }
 
       this.template = await firstValueFrom(this.resourceService.find({ id: this.resource.templateId }))
@@ -287,11 +288,13 @@ export class BuilderPage implements OnInit {
       await this.reloadPreview()
       this.changeDetectorRef.markForCheck()
     } catch (error) {
-      console.error(error)
-      this.error = 'Erreur lors du chargement de la configuration'
-      this.dialogService.error(this.error)
       this.loading = false
-      this.changeDetectorRef.markForCheck()
+      if (error instanceof HttpErrorResponse) {
+        this.error = error
+        this.changeDetectorRef.markForCheck()
+      } else {
+        throw error
+      }
     }
   }
 

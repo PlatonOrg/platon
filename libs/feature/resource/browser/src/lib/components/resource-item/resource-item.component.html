@@ -8,7 +8,7 @@
     (didClickTagItem)="handleTagClick($event)"
   >
     @if(item.templateId) {
-    <ui-list-item-article-action *ngIf="editable" (click)="openTab(builderUrl)" class="action" actionTitle="Éditer">
+    <ui-list-item-article-action *ngIf="editable" (click)="openTab(builderUrl)" class="action" actionTitle="Paramétrer">
       <i nz-icon nzType="edit" nzTheme="outline"></i>
     </ui-list-item-article-action>
     } @else {

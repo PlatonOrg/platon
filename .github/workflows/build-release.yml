@@ -1,0 +1,332 @@
+name: Build Release
+
+on:
+  # Déclenché à la validation d'une PR sur main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+  # Exécution les jours de semaine à 6h UTC (7h/8h heure française)
+  schedule:
+    - cron: '0 6 * * 1-5'
+
+  # Permet le déclenchement manuel
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branche à builder'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - main
+
+env:
+  NODE_VERSION: 22
+  REGISTRY: ghcr.io
+
+jobs:
+  # ============================================================================
+  # Vérification des conditions de build
+  # ============================================================================
+  check-conditions:
+    name: Vérification des conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      branch: ${{ steps.check.outputs.branch }}
+      short_sha: ${{ steps.check.outputs.short_sha }}
+      full_sha: ${{ steps.check.outputs.full_sha }}
+      image_name: ${{ steps.check.outputs.image_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Déterminer si un build est nécessaire
+        id: check
+        run: |
+          should_build="false"
+          branch=""
+
+          # Cas 1: PR mergée sur main
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+            should_build="true"
+            branch="main"
+            echo "PR mergée sur main - Build déclenché"
+          fi
+
+          # Cas 2: Cron schedule - vérifier si nouveau commit sur develop
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            git fetch origin develop
+            branch="develop"
+
+            # Récupérer le dernier commit sur develop
+            LATEST_COMMIT=$(git rev-parse origin/develop)
+            COMMIT_DATE=$(git log -1 --format=%ci origin/develop)
+
+            # Vérifier si le commit date de moins de 24h
+            COMMIT_TIMESTAMP=$(date -d "$COMMIT_DATE" +%s 2>/dev/null || date -j -f "%Y-%m-%d %H:%M:%S %z" "$COMMIT_DATE" +%s)
+            YESTERDAY_TIMESTAMP=$(($(date +%s) - 86400))
+
+            if [[ $COMMIT_TIMESTAMP -gt $YESTERDAY_TIMESTAMP ]]; then
+              should_build="true"
+              echo "Nouveau commit sur develop - Build déclenché"
+            else
+              echo "Pas de nouveau commit sur develop - Skip"
+            fi
+          fi
+
+          # Cas 3: Déclenchement manuel
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            should_build="true"
+            branch="${{ github.event.inputs.branch }}"
+            echo "Build manuel déclenché pour $branch"
+          fi
+
+          # Récupérer les infos du commit
+          if [[ "$branch" != "" ]]; then
+            git checkout $branch 2>/dev/null || git checkout origin/$branch
+            short_sha=$(git rev-parse --short HEAD)
+            full_sha=$(git rev-parse HEAD)
+          else
+            short_sha=""
+            full_sha=""
+          fi
+
+          echo "should_build=$should_build" >> $GITHUB_OUTPUT
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+          echo "short_sha=$short_sha" >> $GITHUB_OUTPUT
+          echo "full_sha=$full_sha" >> $GITHUB_OUTPUT
+
+          # Convertir le nom du repository en minuscules (requis par Docker)
+          image_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "image_name=$image_name" >> $GITHUB_OUTPUT
+
+          echo "Résumé:"
+          echo "   - Should build: $should_build"
+          echo "   - Branch: $branch"
+          echo "   - Short SHA: $short_sha"
+          echo "   - Image name: $image_name"
+
+  # ============================================================================
+  # Build de l'image Docker (Backend + Frontend)
+  # ============================================================================
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: check-conditions
+    if: needs.check-conditions.outputs.should_build == 'true'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      short_sha: ${{ needs.check-conditions.outputs.short_sha }}
+    steps:
+      - name: Free disk space
+        run: |
+          # Supprimer les outils préinstallés non nécessaires
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+
+          # Nettoyer le cache apt
+          sudo apt-get clean
+
+          # Supprimer les images Docker préinstallées
+          docker system prune -af --volumes || true
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-conditions.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend-extractor image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/node/Dockerfile
+          target: frontend-extractor
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ needs.check-conditions.outputs.image_name }}:${{ needs.check-conditions.outputs.short_sha }}-fe
+            ${{ env.REGISTRY }}/${{ needs.check-conditions.outputs.image_name }}:${{ needs.check-conditions.outputs.branch }}-fe-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ needs.check-conditions.outputs.image_name }}
+          tags: |
+            type=raw,value=${{ needs.check-conditions.outputs.short_sha }}
+            type=raw,value=${{ needs.check-conditions.outputs.branch }}-latest
+            type=raw,value=latest,enable=${{ needs.check-conditions.outputs.branch == 'main' }}
+
+      - name: Build and push Docker image (production)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/node/Dockerfile
+          target: production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=${{ env.NODE_VERSION }}
+
+  # ============================================================================
+  # Extraction du Frontend
+  # ============================================================================
+  extract-frontend:
+    name: Extract Frontend Assets
+    runs-on: ubuntu-latest
+    needs: [check-conditions, build]
+    if: needs.check-conditions.outputs.should_build == 'true'
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and extract frontend from Docker image
+        run: |
+          SHORT_SHA="${{ needs.check-conditions.outputs.short_sha }}"
+          BRANCH="${{ needs.check-conditions.outputs.branch }}"
+          IMAGE_NAME="${{ needs.check-conditions.outputs.image_name }}"
+
+          # Créer un conteneur temporaire pour extraire les fichiers
+          docker create --name frontend-extractor ${{ env.REGISTRY }}/$IMAGE_NAME:$SHORT_SHA-fe
+
+          # Extraire le frontend (web app)
+          mkdir -p frontend-dist
+          docker cp frontend-extractor:/src/dist/apps/web ./frontend-dist/web || echo "Web app not found"
+          docker cp frontend-extractor:/src/dist/apps/docs ./frontend-dist/docs || echo "Docs not found"
+
+          # Nettoyer
+          docker rm frontend-extractor
+
+          # Créer l'archive
+          tar -czvf frontend-$SHORT_SHA.tar.gz -C frontend-dist .
+
+          echo "Frontend extrait et compressé: frontend-$SHORT_SHA.tar.gz"
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ needs.check-conditions.outputs.short_sha }}
+          path: frontend-${{ needs.check-conditions.outputs.short_sha }}.tar.gz
+          retention-days: 30
+
+  # ============================================================================
+  # Création de la release metadata
+  # ============================================================================
+  create-release-metadata:
+    name: Create Release Metadata
+    runs-on: ubuntu-latest
+    needs: [check-conditions, build, extract-frontend]
+    if: needs.check-conditions.outputs.should_build == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-conditions.outputs.branch }}
+
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "message=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
+          echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+          echo "date=$(git log -1 --pretty=%ci)" >> $GITHUB_OUTPUT
+
+      - name: Create release metadata
+        run: |
+          SHORT_SHA="${{ needs.check-conditions.outputs.short_sha }}"
+          FULL_SHA="${{ needs.check-conditions.outputs.full_sha }}"
+          BRANCH="${{ needs.check-conditions.outputs.branch }}"
+
+          cat > release-$SHORT_SHA.json << EOF
+          {
+            "version": "$SHORT_SHA",
+            "commit": {
+              "hash": "$FULL_SHA",
+              "short": "$SHORT_SHA",
+              "message": "${{ steps.commit.outputs.message }}",
+              "author": "${{ steps.commit.outputs.author }}",
+              "date": "${{ steps.commit.outputs.date }}"
+            },
+            "branch": "$BRANCH",
+            "build": {
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "runner": "${{ runner.os }}",
+              "workflow": "${{ github.workflow }}",
+              "run_id": "${{ github.run_id }}"
+            },
+            "images": {
+              "api": "${{ env.REGISTRY }}/${{ needs.check-conditions.outputs.image_name }}:$SHORT_SHA"
+            },
+            "artifacts": {
+              "frontend": "frontend-$SHORT_SHA.tar.gz"
+            }
+          }
+          EOF
+
+          cat release-$SHORT_SHA.json
+
+      - name: Upload release metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-metadata-${{ needs.check-conditions.outputs.short_sha }}
+          path: release-${{ needs.check-conditions.outputs.short_sha }}.json
+          retention-days: 60
+
+  # ============================================================================
+  # Notification (optionnel)
+  # ============================================================================
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [check-conditions, build, extract-frontend, create-release-metadata]
+    if: always() && needs.check-conditions.outputs.should_build == 'true'
+    steps:
+      - name: Build Summary
+        run: |
+          SHORT_SHA="${{ needs.check-conditions.outputs.short_sha }}"
+          BRANCH="${{ needs.check-conditions.outputs.branch }}"
+
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "## ✅ Build Successful" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Build Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | \`$BRANCH\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`$SHORT_SHA\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`${{ env.REGISTRY }}/${{ needs.check-conditions.outputs.image_name }}:$SHORT_SHA\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | \`frontend-$SHORT_SHA.tar.gz\` |" >> $GITHUB_STEP_SUMMARY

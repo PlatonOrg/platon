@@ -12,7 +12,7 @@ import {
   Output,
 } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
-import { NzTableColumn, UserAvatarComponent, UserGroupDrawerComponent } from '@platon/core/browser'
+import { DialogService, NzTableColumn, UserAvatarComponent, UserGroupDrawerComponent } from '@platon/core/browser'
 import { CourseMember, CourseMemberFilters } from '@platon/feature/course/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -22,10 +22,11 @@ import { CoursePipesModule } from '@platon/feature/course/browser'
 import { MatIconModule } from '@angular/material/icon'
 import { TestsService } from '../../api/tests.service'
 import { firstValueFrom } from 'rxjs'
+import { HttpErrorResponse } from '@angular/common/http'
 
 type Value = string[] | undefined
 
-type overtime = 'none' | 'quarter' | 'third' | 'half'
+// type overtime = 'none' | 'quarter' | 'third' | 'half'
 
 @Component({
   standalone: true,
@@ -83,7 +84,11 @@ export class TestsCandidatesTableComponent implements OnInit, OnChanges, Control
     return this.filtersChange.observed
   }
 
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef, private readonly testService: TestsService) {}
+  constructor(
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly testService: TestsService,
+    private readonly dialogService: DialogService
+  ) {}
 
   // ControlValueAccessor methods
 
@@ -239,6 +244,11 @@ export class TestsCandidatesTableComponent implements OnInit, OnChanges, Control
       await firstValueFrom(this.testService.sendMailToCandidate(this.testId, courseMemberId))
     } catch (error) {
       console.error('Failed to send email:', error)
+      if (error instanceof HttpErrorResponse && error.error && error.error.message) {
+        this.dialogService.error(`L'envoi du mail a échoué : ${error.error.message}`)
+        return
+      }
+      this.dialogService.error("L'envoi du mail a échoué. Veuillez réessayer plus tard.")
     }
   }
 }
