@@ -237,4 +237,8 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
     this.item = activity
     this.cdr.markForCheck()
   }
+
+  protected isValidDate(date: Date | null | undefined): boolean {
+    return date !== new Date('Invalid Date') && date !== null && date !== undefined
+  }
 }

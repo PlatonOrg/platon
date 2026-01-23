@@ -39,16 +39,20 @@
         <div class="dates-container">
           <div class="date-item">
             <span>
-              {{ item.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-              <ng-container *ngIf="!item.openAt"> - </ng-container>
+              <ng-container *ngIf="isValidDate(item.openAt); else noDate">
+                {{ item.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              </ng-container>
+              <ng-template #noDate>-</ng-template>
             </span>
             <span class="date-label"> Ouverture </span>
           </div>
           <div class="separator"></div>
           <div class="date-item">
             <span>
-              {{ item.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-              <ng-container *ngIf="!item.closeAt"> - </ng-container>
+              <ng-container *ngIf="isValidDate(item.closeAt); else noDate">
+                {{ item.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              </ng-container>
+              <ng-template #noDate>-</ng-template>
             </span>
             <span class="date-label"> Fermeture </span>
           </div>
