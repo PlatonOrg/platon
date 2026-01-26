@@ -47,6 +47,10 @@ export class UserService {
   }
 
   /**
+   * to create an user use signUp from AuthService
+   */
+
+  /**
    * Finds the user identified by `username`.
    *
    * Note:
