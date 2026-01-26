@@ -177,6 +177,37 @@ export class ResourceService {
   }
 
   /**
+   * Finds all parent circles of a given circle.
+   * @remarks
+   * - The resource itself is not included in the result.
+   * - Personal circles are always excluded.
+   * - Passing the id of an personal circle will return an empty array.
+   * @param circleId - The ID of the circle to find parent circles for.
+   * @returns A promise that resolves to an array of parent circles.
+   */
+  async getParents(circleId: string): Promise<ResourceEntity[]> {
+    const circles = await this.repository.find({
+      where: { type: ResourceTypes.CIRCLE, personal: false },
+    })
+
+    const root = circles.find((c) => c.id === circleId)
+    if (!root) {
+      return []
+    }
+    const parents: ResourceEntity[] = []
+
+    const traverse = (node: ResourceEntity) => {
+      const previous = circles.filter((c) => c.id === node.parentId)
+      previous.forEach((parent) => {
+        parents.push(parent)
+        traverse(parent)
+      })
+    }
+    traverse(root)
+    return parents
+  }
+
+  /**
    * Search resources to display
    * @param filters filters to apply to the search
    * @param userId user id to check permissions on resources - if not provided, no permissions are checked
