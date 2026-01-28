@@ -21,7 +21,7 @@ export class EditorjsViewerComponent implements OnChanges {
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.data && this.data) {
+    if (changes['data'] && this.data) {
       const newData = this.editorjsViewerService.editorJStoHtml(this.data)
       this.sanitizedHtml = this.sanitizer.sanitize(SecurityContext.HTML, newData) || ''
     }

@@ -334,5 +334,9 @@
       "@commitlint/config-conventional"
     ]
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "yarn@1.22.22",
+  "resolutions": {
+    "punycode": "^2.3.1",
+    "tr46": "^6.0.0"
+  }
 }

@@ -1,4 +1,3 @@
-export * from './lib/tuto'
 export * from './lib/api/shepherd/shepherd.service'
 export * from './lib/api/toolbar-tutorial.service'
 export * from './lib/api/sidebar-tutorial.service'

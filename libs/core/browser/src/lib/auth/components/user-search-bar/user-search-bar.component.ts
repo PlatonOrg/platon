@@ -130,7 +130,7 @@ export class UserSearchBarComponent implements OnInit, OnChanges, ControlValueAc
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.filters && !changes.filters.firstChange) {
+    if (changes['filters'] && !changes['filters'].firstChange) {
       firstValueFrom(this.search(this.searchbar.value || '')).catch(console.error)
     }
   }

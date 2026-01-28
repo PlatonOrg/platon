@@ -2,10 +2,10 @@ import Header from '@editorjs/header'
 import Paragraph from '@editorjs/paragraph'
 import TextVariant from '@editorjs/text-variant-tune'
 import Underline from '@editorjs/underline'
-import { StyleInlineTool } from 'editorjs-style'
 import TextAlignment from 'editorjs-text-alignment-blocktune'
 import ColorPlugin from 'editorjs-text-color-plugin'
 import { EditorJsExtension, EDITOR_JS_EXTENSION } from '../editorjs'
+import { StyleInlineTool } from 'editorjs-style'
 
 const Extension: EditorJsExtension = {
   tools: {

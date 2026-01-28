@@ -3,360 +3,351 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
 
-  .upload-zone {
-    border: 2px dashed #ccc;
-    border-radius: 12px;
-    padding: 40px 20px;
-    text-align: center;
-    background-color: #f9f9f9;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.upload-title,
+.upload-subtitle,
+.file-name,
+.file-meta,
+.file-error,
+.error-message,
+.constraints-info .constraint {
+  margin: 0;
+}
 
-    &:hover:not(.disabled) {
-      border-color: #1976d2;
-      background-color: #f3f9ff;
-    }
+.upload-icon,
+.constraints-info .constraint mat-icon,
+.file-info .file-icon,
+.file-actions .download-btn {
+  color: #1976d2;
+}
 
-    &.drag-active {
-      border-color: #1976d2;
-      background-color: #e3f2fd;
-      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
-    }
+.file-item.error .file-icon,
+.file-error,
+.error-message,
+.file-actions .delete-btn {
+  color: #d32f2f;
+}
 
-    &.disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background-color: #f5f5f5;
-      border-color: #ddd;
-    }
+.upload-subtitle,
+.constraints-info,
+.progress-text {
+  color: #666;
+}
 
-    .upload-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      width: 100%;
+.file-meta,
+.file-error,
+.progress-text {
+  font-size: 12px;
+}
 
-      .upload-icon {
-        font-size: 64px;
-        width: 64px;
-        height: 64px;
-        color: #1976d2;
-        opacity: 0.8;
-      }
+.constraints-info .constraint,
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-      .upload-title {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-      }
+.constraints-info .constraint mat-icon,
+.error-message mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
 
-      .upload-subtitle {
-        margin: 0;
-        font-size: 14px;
-        color: #666;
-      }
+.upload-zone {
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  transition: .3s;
+  cursor: pointer;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-      .select-button {
-        margin-top: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+.upload-zone:hover:not(.disabled),
+.upload-zone.drag-active {
+  border-color: #1976d2;
+}
 
-        mat-icon {
-          margin-right: 8px;
-        }
-      }
+.upload-zone:hover:not(.disabled) {
+  background-color: #f3f9ff;
+}
 
-      .constraints-info {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-top: 16px;
-        text-align: left;
-        font-size: 12px;
-        color: #666;
+.upload-zone.drag-active {
+  background-color: #e3f2fd;
+  box-shadow: 0 4px 12px rgba(25,118,210,.15);
+}
 
-        .constraint {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin: 0;
+.upload-zone.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  border-color: #ddd;
+}
 
-          mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
-            color: #1976d2;
-          }
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
 
-          strong {
-            color: #333;
-          }
+.upload-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  opacity: 0.8;
+}
 
-          &.warning {
-            color: #f57c00;
+.upload-title {
+  font-size: 18px;
+}
 
-            mat-icon {
-              color: #f57c00;
-            }
+.upload-subtitle {
+  font-size: 14px;
+}
 
-            strong {
-              color: #e65100;
-            }
-          }
-        }
-      }
-    }
-  }
+.select-button {
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-  .uploaded-files-section {
-    background-color: #fafafa;
-    border-radius: 8px;
-    padding: 20px;
+.select-button mat-icon {
+  margin-right: 8px;
+}
 
-    h4 {
-      margin: 0 0 16px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+.constraints-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  text-align: left;
+  font-size: 12px;
+}
 
-    .uploaded-files-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+.constraints-info .constraint.warning {
+  color: #f57c00;
+}
 
-      .file-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px 16px;
-        background-color: white;
-        border-radius: 8px;
-        border-left: 4px solid #1976d2;
-        transition: all 0.2s ease;
+.constraints-info .constraint.warning mat-icon {
+  color: #f57c00;
+}
 
-        &:hover {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
+.constraints-info .constraint.warning strong {
+  color: #e65100;
+}
 
-        &.error {
-          border-left-color: #d32f2f;
-          background-color: #ffebee;
+.uploaded-files-section {
+  background-color: #fafafa;
+  border-radius: 8px;
+  padding: 20px;
+}
 
-          .file-icon {
-            color: #d32f2f;
-          }
-        }
+.uploaded-files-section h4 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-        &.success {
-          border-left-color: #4caf50;
+.uploaded-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-          .file-icon {
-            color: #4caf50;
-          }
-        }
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
+  transition: .2s;
+}
 
-        .file-info {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          flex: 1;
-          min-width: 0;
+.file-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
-          .file-icon {
-            font-size: 24px;
-            width: 24px;
-            height: 24px;
-            color: #1976d2;
-            flex-shrink: 0;
-            margin-top: 2px;
-          }
+.file-item.error {
+  border-left-color: #d32f2f;
+  background-color: #ffebee;
+}
 
-          .file-details {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 0;
+.file-item.success {
+  border-left-color: #4caf50;
+}
 
-            .file-name {
-              margin: 0;
-              font-size: 14px;
-              font-weight: 500;
-              color: #333;
-              word-break: break-word;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
+.file-item.success .file-icon {
+  color: #4caf50;
+}
 
-            .file-meta {
-              margin: 0;
-              font-size: 12px;
-              color: #999;
-            }
+.file-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
 
-            .file-error {
-              margin: 0;
-              font-size: 12px;
-              color: #d32f2f;
-              font-weight: 500;
-            }
-          }
-        }
+.file-info .file-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
 
-        .progress-section {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          width: 150px;
-          flex-shrink: 0;
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
 
-          .progress-bar {
-            flex: 1;
-            height: 4px;
-            border-radius: 2px;
-          }
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-          .progress-text {
-            font-size: 12px;
-            color: #666;
-            min-width: 35px;
-            text-align: right;
-          }
-        }
+.file-meta {
+  color: #999;
+}
 
-        .file-actions {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          flex-shrink: 0;
+.file-error {
+  font-weight: 500;
+}
 
-          button,
-          a {
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            background: none;
-            cursor: pointer;
+.progress-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 150px;
+  flex-shrink: 0;
+}
 
-            mat-icon {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+}
 
-            &.download-btn {
-              color: #1976d2;
+.progress-text {
+  min-width: 35px;
+  text-align: right;
+}
 
-              &:hover:not(:disabled) {
-                color: #1565c0;
-                background-color: rgba(25, 118, 210, 0.08);
-              }
-            }
+.file-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
 
-            &.delete-btn {
-              color: #d32f2f;
+.file-actions button,
+.file-actions a {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
 
-              &:hover:not(:disabled) {
-                color: #c62828;
-                background-color: rgba(211, 47, 47, 0.08);
-              }
+.file-actions mat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-              &:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+.file-actions .download-btn:hover:not(:disabled) {
+  color: #1565c0;
+  background-color: rgba(25,118,210,.08);
+}
 
-  .errors-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px 16px;
-    background-color: #ffebee;
-    border-radius: 8px;
-    border-left: 4px solid #d32f2f;
+.file-actions .delete-btn:hover:not(:disabled) {
+  color: #c62828;
+  background-color: rgba(211,47,47,.08);
+}
 
-    .error-message {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0;
-      color: #d32f2f;
-      font-size: 13px;
+.file-actions .delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-      mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
-      }
-    }
-  }
+.errors-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  border-left: 4px solid #d32f2f;
+}
+
+.error-message {
+  font-size: 13px;
+}
+
+.error-message mat-icon {
+  flex-shrink: 0;
 }
 
 @media (max-width: 600px) {
   .file-upload-container {
     gap: 16px;
+  }
 
-    .upload-zone {
-      padding: 24px 16px;
-      min-height: 160px;
+  .upload-zone {
+    padding: 24px 16px;
+    min-height: 160px;
+  }
 
-      .upload-content {
-        .upload-icon {
-          font-size: 48px;
-          width: 48px;
-          height: 48px;
-        }
+  .upload-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
 
-        .upload-title {
-          font-size: 16px;
-        }
+  .upload-title {
+    font-size: 16px;
+  }
 
-        .constraints-info {
-          font-size: 11px;
-        }
-      }
-    }
+  .constraints-info {
+    font-size: 11px;
+  }
 
-    .uploaded-files-section {
-      .uploaded-files-list {
-        .file-item {
-          flex-direction: column;
-          align-items: flex-start;
+  .file-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-          .progress-section {
-            width: 100%;
-            min-width: auto;
-          }
+  .progress-section {
+    width: 100%;
+    min-width: auto;
+  }
 
-          .file-actions {
-            width: 100%;
-            justify-content: flex-end;
-          }
-        }
-      }
-    }
+  .file-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }

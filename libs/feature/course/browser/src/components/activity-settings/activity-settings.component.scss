@@ -12,7 +12,7 @@
         background: transparent;
         border: none;
         color: var(--brand-text-secondary);
-        transition: all 0.3s;
+        transition: .3s;
         font-size: 13px;
         padding: 8px 16px;
 
@@ -98,7 +98,7 @@
 
         &:focus-within {
           border-color: var(--brand-color-primary);
-          box-shadow: 0 0 0 2px rgba(23, 28, 143, 0.1);
+          box-shadow: 0 0 0 2px rgba(23,28,143,.1);
         }
       }
 
@@ -182,11 +182,11 @@
   padding: 4px;
   margin-bottom: 12px;
   border: 1px solid var(--brand-border-color-light);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  transition: .3s;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
   }
 }
 
@@ -234,17 +234,17 @@
   border-radius: 4px;
   margin-bottom: 8px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: .3s;
   position: relative;
   box-sizing: border-box;
 
   &:hover {
     border-color: var(--brand-color-primary);
-    box-shadow: 0 2px 6px rgba(23, 28, 143, 0.1);
+    box-shadow: 0 2px 6px rgba(23,28,143,.1);
   }
 
   &.cdk-drag-dragging {
-    box-shadow: 0 4px 12px rgba(23, 28, 143, 0.2);
+    box-shadow: 0 4px 12px rgba(23,28,143,.2);
     transform: rotate(2deg);
     z-index: 1000;
     border-color: var(--brand-color-primary);
@@ -258,11 +258,7 @@
 }
 
 :host ::ng-deep {
-  course-restriction-manager {
-    width: 100%;
-    display: block;
-  }
-
+  course-restriction-manager,
   course-restriction {
     width: 100%;
     display: block;
@@ -281,7 +277,7 @@
 
     &:focus {
       border-color: var(--brand-color-primary);
-      box-shadow: 0 0 0 2px rgba(23, 28, 143, 0.1);
+      box-shadow: 0 0 0 2px rgba(23,28,143,.1);
     }
 
     input {
@@ -293,12 +289,10 @@
     }
   }
 
-  // Assurer que l'overlay du time-picker est au-dessus
   .ant-picker-dropdown {
     z-index: 9999 !important;
   }
 
-  // Style pour les inputs de temps séparés
   .time-input-group {
     display: flex;
     align-items: center;
@@ -308,15 +302,15 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      
+
       .time-input {
         width: 60px;
-        
+
         ::ng-deep .ant-input-number-input {
           text-align: center;
         }
       }
-      
+
       .time-label {
         font-size: 12px;
         color: var(--brand-text-secondary);
@@ -348,21 +342,20 @@
         height: 30px;
       }
 
-      .ant-select-selection-placeholder {
-        line-height: 30px;
-        color: var(--brand-text-tertiary);
-        font-size: 12px;
-      }
-
+      .ant-select-selection-placeholder,
       .ant-select-selection-item {
         line-height: 30px;
         font-size: 12px;
+      }
+
+      .ant-select-selection-placeholder {
+        color: var(--brand-text-tertiary);
       }
     }
 
     &.ant-select-focused .ant-select-selector {
       border-color: var(--brand-color-primary);
-      box-shadow: 0 0 0 2px rgba(23, 28, 143, 0.1);
+      box-shadow: 0 0 0 2px rgba(23,28,143,.1);
     }
   }
 }
@@ -375,7 +368,7 @@
   background: var(--brand-color-primary);
   color: white;
   cursor: grab;
-  transition: background-color 0.3s ease;
+  transition: .3s;
 
   &:hover {
     background: var(--brand-color-primary-shade);
@@ -437,7 +430,7 @@
   font-weight: 500;
   height: 32px;
   font-size: 12px;
-  transition: all 0.3s ease;
+  transition: .3s;
 
   &:hover {
     background: var(--brand-background-hover);
@@ -470,18 +463,16 @@
   height: 32px;
   padding: 0 8px;
   font-size: 12px;
-  box-shadow: 0 2px 6px rgba(23, 28, 143, 0.2);
+  box-shadow: 0 2px 6px rgba(23,28,143,.2);
 
   &:hover:not(:disabled) {
     background: var(--brand-color-primary-shade);
     border-color: var(--brand-color-primary-shade);
     transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(23, 28, 143, 0.3);
+    box-shadow: 0 3px 8px rgba(23,28,143,.3);
   }
 }
 
-
-// Styles pour l'état vide
 .empty-state {
   text-align: center;
   padding: 24px;
@@ -569,7 +560,7 @@
 
 .clickable-date {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: .2s;
 
   &:hover {
     background: var(--brand-background-hover);
@@ -585,7 +576,7 @@
 
     .edit-icon {
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: .2s;
       font-size: 12px;
       color: var(--brand-text-secondary);
     }
@@ -614,7 +605,6 @@
   }
 }
 
-// Styles pour la modal d'avertissement
 :host ::ng-deep {
   .warning-content {
     text-align: left;
@@ -671,7 +661,7 @@
   border-radius: 6px;
   padding: 4px;
   border: 1px solid var(--brand-border-color-light);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
 
 .secondary-actions {
@@ -717,7 +707,7 @@
   gap: 4px;
   font-weight: 500;
   font-size: 12px;
-  transition: all 0.3s ease;
+  transition: .3s;
 
   &:hover {
     transform: translateY(-1px);
