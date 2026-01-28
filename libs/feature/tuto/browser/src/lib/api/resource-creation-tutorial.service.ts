@@ -1,41 +1,41 @@
-import { Injectable, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { ShepherdService, TutorialStep } from './shepherd/shepherd.service';
-import { User, UserRoles } from '@platon/core/common';
+import { Injectable, inject } from '@angular/core'
+import { Router } from '@angular/router'
+import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
+import { User, UserRoles } from '@platon/core/common'
 
 export interface ResourceCreationChoice {
-  type: 'COURSE' | 'CIRCLE' | 'ACTIVITY' | 'EXERCISE';
-  name: string;
-  icon: string;
-  description: string;
-  route: string;
-  queryParams?: any;
-  elementId: string;
+  type: 'COURSE' | 'CIRCLE' | 'ACTIVITY' | 'EXERCISE'
+  name: string
+  icon: string
+  description: string
+  route: string
+  queryParams?: any
+  elementId: string
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ResourceCreationTutorialService {
-  private readonly shepherdService = inject(ShepherdService);
-  private readonly router = inject(Router);
+  private readonly shepherdService = inject(ShepherdService)
+  private readonly router = inject(Router)
 
-  private selectedResourceType: string | null = null;
-  private createResourceParentParam?: string;
+  private selectedResourceType: string | null = null
+  private createResourceParentParam?: string
 
   /**
    * Démarre le tutoriel complet de création de ressource
    */
   startResourceCreationTutorial(user: User, createResourceParentParam?: string): void {
-    this.createResourceParentParam = createResourceParentParam;
-    const steps = this.buildTutorialSteps(user);
+    this.createResourceParentParam = createResourceParentParam
+    const steps = this.buildTutorialSteps(user)
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'resource-creation-tutorial',
       useModalOverlay: true,
       confirmCancel: true,
-      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de création de ressource ?'
-    });
+      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de création de ressource ?',
+    })
   }
 
   /**
@@ -55,15 +55,15 @@ export class ResourceCreationTutorialService {
           {
             text: 'Annuler',
             secondary: true,
-            action: () => this.shepherdService.cancel()
+            action: () => this.shepherdService.cancel(),
           },
           {
             text: 'Commencer le tutoriel',
-            action: () => this.shepherdService.next()
-          }
-        ]
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
-      {
+      /*{
         id: 'locate-create-button',
         title: 'Trouvez le bouton de création',
         text: `Pour créer une ressource, vous devez d'abord cliquer sur le bouton <strong>+</strong> (plus) dans la barre d'outils.<br><br>
@@ -81,7 +81,7 @@ export class ResourceCreationTutorialService {
         when: {
           show: () => this.highlightCreateButton()
         }
-      },
+      },*/
       {
         id: 'click-create-button',
         title: 'Cliquez sur le bouton +',
@@ -89,23 +89,23 @@ export class ResourceCreationTutorialService {
                <em>💡 Astuce : Ce menu vous permettra de créer différents types de ressources selon vos besoins pédagogiques.</em>`,
         attachTo: {
           element: '#tuto-create-menu-container',
-          on: 'bottom'
+          on: 'bottom',
         },
         advanceOn: {
           selector: '#tuto-create-menu-container',
-          event: 'click'
+          event: 'click',
         },
         buttons: [
           {
             text: 'Précédent',
             secondary: true,
-            action: () => this.shepherdService.previous()
+            action: () => this.shepherdService.previous(),
           },
         ],
         when: {
           show: () => this.highlightCreateButton(),
-          hide: () => this.removeHighlight('#tuto-create-menu-container')
-        }
+          hide: () => this.removeHighlight('#tuto-create-menu-container'),
+        },
       },
       {
         id: 'menu-opened',
@@ -115,12 +115,12 @@ export class ResourceCreationTutorialService {
         buttons: [
           {
             text: 'Découvrir les ressources',
-            action: () => this.shepherdService.next()
-          }
+            action: () => this.shepherdService.next(),
+          },
         ],
         when: {
-          show: () => this.waitForMenuToOpen()
-        }
+          show: () => this.waitForMenuToOpen(),
+        },
       },
       {
         id: 'resource-types-explanation',
@@ -129,9 +129,9 @@ export class ResourceCreationTutorialService {
         buttons: [
           {
             text: 'Suivant (Entrée)',
-            action: () => this.shepherdService.next()
-          }
-        ]
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
       {
         id: 'choose-resource-type',
@@ -141,8 +141,8 @@ export class ResourceCreationTutorialService {
         buttons: [
           {
             text: 'Je vais choisir moi-même',
-            action: () => this.shepherdService.next()
-          }
+            action: () => this.shepherdService.next(),
+          },
         ],
       },
       {
@@ -154,12 +154,12 @@ export class ResourceCreationTutorialService {
           {
             text: 'Terminer le tutoriel',
             secondary: true,
-            action: () => this.shepherdService.next()
-          }
+            action: () => this.shepherdService.next(),
+          },
         ],
         when: {
-          show: () => this.waitForResourceSelection(user)
-        }
+          show: () => this.waitForResourceSelection(user),
+        },
       },
       {
         id: 'tutorial-complete',
@@ -187,27 +187,27 @@ export class ResourceCreationTutorialService {
         buttons: [
           {
             text: 'Parfait !',
-            action: () => this.shepherdService.complete()
-          }
-        ]
-      }
-    ];
+            action: () => this.shepherdService.complete(),
+          },
+        ],
+      },
+    ]
 
-    return steps;
+    return steps
   }
 
   /**
    * Met en évidence le bouton de création
    */
   private highlightCreateButton(): void {
-    const createButton = document.querySelector('#tuto-create-menu-container') as HTMLElement;
+    const createButton = document.querySelector('#tuto-create-menu-container') as HTMLElement
     if (createButton) {
-      createButton.style.transition = 'all 0.3s ease';
-      createButton.style.boxShadow = '0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.5)';
-      createButton.style.borderRadius = '8px';
-      createButton.style.animation = 'pulseCreateButton 2s ease-in-out infinite';
+      createButton.style.transition = 'all 0.3s ease'
+      createButton.style.boxShadow = '0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.5)'
+      createButton.style.borderRadius = '8px'
+      createButton.style.animation = 'pulseCreateButton 2s ease-in-out infinite'
 
-      this.addCreateButtonAnimation();
+      this.addCreateButtonAnimation()
     }
   }
 
@@ -215,11 +215,11 @@ export class ResourceCreationTutorialService {
    * Supprime la mise en évidence d'un élément
    */
   private removeHighlight(selector: string): void {
-    const element = document.querySelector(selector) as HTMLElement;
+    const element = document.querySelector(selector) as HTMLElement
     if (element) {
-      element.style.boxShadow = '';
-      element.style.borderRadius = '';
-      element.style.animation = '';
+      element.style.boxShadow = ''
+      element.style.borderRadius = ''
+      element.style.animation = ''
     }
   }
 
@@ -227,10 +227,10 @@ export class ResourceCreationTutorialService {
    * Ajoute l'animation CSS pour le bouton de création
    */
   private addCreateButtonAnimation(): void {
-    const styleId = 'tutorial-create-button-animation';
+    const styleId = 'tutorial-create-button-animation'
     if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
+      const style = document.createElement('style')
+      style.id = styleId
       style.textContent = `
         @keyframes pulseCreateButton {
           0%, 100% {
@@ -240,24 +240,22 @@ export class ResourceCreationTutorialService {
             box-shadow: 0 0 0 6px rgba(var(--brand-color-primary-rgb), 0.3);
           }
         }
-      `;
-      document.head.appendChild(style);
+      `
+      document.head.appendChild(style)
     }
   }
-
-
 
   /**
    * Vérifie que le menu est ouvert et passe à l'étape suivante
    */
   private verifyMenuOpenedAndAdvance(): void {
-    const menu = document.querySelector('#tuto-action-menu');
-    const menuPanel = document.querySelector('.mat-menu-panel');
+    const menu = document.querySelector('#tuto-action-menu')
+    const menuPanel = document.querySelector('.mat-menu-panel')
 
     if ((menu && this.isElementVisible(menu)) || (menuPanel && this.isElementVisible(menuPanel))) {
-      this.shepherdService.next();
+      this.shepherdService.next()
     } else {
-      this.shepherdService.next();
+      this.shepherdService.next()
     }
   }
 
@@ -265,7 +263,7 @@ export class ResourceCreationTutorialService {
    * Vérifie si un élément est visible
    */
   private isElementVisible(element: Element): boolean {
-    const rect = element.getBoundingClientRect();
+    const rect = element.getBoundingClientRect()
     return (
       rect.width > 0 &&
       rect.height > 0 &&
@@ -273,7 +271,7 @@ export class ResourceCreationTutorialService {
       rect.left >= 0 &&
       rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
       rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
+    )
   }
 
   /**
@@ -281,15 +279,14 @@ export class ResourceCreationTutorialService {
    */
   private waitForMenuToOpen(): void {
     const checkMenu = () => {
-      const menu = document.querySelector('#tuto-action-menu');
+      const menu = document.querySelector('#tuto-action-menu')
       if (menu && menu.classList.contains('mat-menu-panel')) {
-        return;
+        return
       }
-      setTimeout(checkMenu, 100);
-    };
-    checkMenu();
+      setTimeout(checkMenu, 100)
+    }
+    checkMenu()
   }
-
 
   /**
    * Attend la sélection d'une ressource
@@ -299,17 +296,13 @@ export class ResourceCreationTutorialService {
     // Les listeners sont déjà configurés dans l'étape précédente
   }
 
-
-
-
-
   /**
    * Génère l'explication des types de ressources avec les variables CSS de PLaTon
    */
   private getResourceTypesExplanation(user: User): string {
     let explanation = `<div style="text-align: left; color: var(--brand-text-primary);">
       <p style="margin-bottom: 16px;"><strong>Voici les types de ressources que vous pouvez créer :</strong></p>
-      <div style="margin: 15px 0;">`;
+      <div style="margin: 15px 0;">`
 
     if (user.role === UserRoles.admin || user.role === UserRoles.teacher) {
       explanation += `
@@ -321,7 +314,7 @@ export class ResourceCreationTutorialService {
                     transition: all 0.2s ease;">
           <strong style="color: var(--brand-text-primary);">📚 Cours</strong><br>
           <small style="color: var(--brand-text-secondary);">Un parcours d'apprentissage complet avec des leçons structurées</small>
-        </div>`;
+        </div>`
     }
 
     explanation += `
@@ -370,8 +363,8 @@ export class ResourceCreationTutorialService {
           Commencez par un exercice pour vous familiariser avec l'interface de création.
         </p>
       </div>
-    </div>`;
+    </div>`
 
-    return explanation;
+    return explanation
   }
 }

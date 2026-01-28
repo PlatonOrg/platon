@@ -425,7 +425,24 @@ export class Repo {
   }
 
   async mergeBundle(name: string) {
-    await simpleGit(this.repo.dir).raw('pull', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`))
+    await simpleGit(this.repo.dir).pull(['--rebase', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`)])
+  }
+
+  async copy(to: Repo) {
+    try {
+      await simpleGit(this.root).raw(
+        'bundle',
+        'create',
+        Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`),
+        'HEAD',
+        'main'
+      )
+      await to.mergeBundle(this.resource)
+      await fs.promises.rm(Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`))
+    } catch (error) {
+      console.error('Failed to merge bundle', error)
+      throw error
+    }
   }
 
   async archive(path = ROOT, version = LATEST) {

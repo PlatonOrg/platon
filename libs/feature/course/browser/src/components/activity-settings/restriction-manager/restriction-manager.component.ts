@@ -40,6 +40,7 @@ export class RestrictionManagerComponent implements OnInit {
   @Input() courseGroups: CourseGroup[] = []
 
   constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
+
   ngOnInit(): void {
     this.changeDetectorRef.markForCheck()
   }
@@ -50,6 +51,19 @@ export class RestrictionManagerComponent implements OnInit {
 
   protected CantAddRestriction(type: string): boolean {
     return this.restrictions.some((restriction) => restriction.type === type)
+  }
+
+  private removeGroupsAndUsers(): void {
+    this.restrictions = this.restrictions.filter(
+      (restriction) => restriction.type !== 'Groups' && restriction.type !== 'Members'
+    )
+  }
+
+  protected containsCorrectorsAndOthers(): boolean {
+    return (
+      this.restrictions.some((restriction) => restriction.type === 'Correctors') &&
+      this.restrictions.some((restriction) => restriction.type === 'Others')
+    )
   }
 
   private addRestriction(type: string): void {
@@ -82,17 +96,26 @@ export class RestrictionManagerComponent implements OnInit {
           config: { members: [] },
         }
         break
+      case 'Others':
+        newRestriction = {
+          type: 'Others',
+          config: { enabled: true },
+        }
+        this.removeGroupsAndUsers()
+        break
       default:
         console.error(`Type de restriction non supporté: ${type}`)
         return
     }
 
     this.restrictions.push(newRestriction)
+    this.emitRestrictions()
     this.changeDetectorRef.markForCheck()
   }
 
   protected removeRestriction(index: number) {
     this.restrictions.splice(index, 1)
+    this.emitRestrictions()
     this.changeDetectorRef.markForCheck()
   }
 
@@ -101,6 +124,7 @@ export class RestrictionManagerComponent implements OnInit {
     this.emitRestrictions()
     this.changeDetectorRef.markForCheck()
   }
+
   protected openBottomSheet() {
     this.isOpenProposition = true
     this.changeDetectorRef.markForCheck()
@@ -117,5 +141,9 @@ export class RestrictionManagerComponent implements OnInit {
       this.addRestriction(type)
     }
     this.changeDetectorRef.markForCheck()
+  }
+
+  get typesRestrictionPresent(): string[] {
+    return this.restrictions.map((restriction) => restriction.type)
   }
 }

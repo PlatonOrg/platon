@@ -23,8 +23,8 @@
       <tbody>
         @for(item of announcementTable.data; track item) {
         <tr>
-          <td class="truncate-description">{{ item.title }}</td>
-          <td>{{ limitedDescription(item.description) }}</td>
+          <td class="truncate-description">{{ limitedDescription(item.title, 35) }}</td>
+          <td>{{ limitedDescription(item.description, 200) }}</td>
           <td>
             <nz-tag [nzColor]="item.active ? 'green' : 'red'">
               {{ item.active ? 'Actif' : 'Inactif' }}

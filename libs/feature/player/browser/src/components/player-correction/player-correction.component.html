@@ -50,6 +50,12 @@
         </button>
 
         <div class="setting-button">
+          @if (uploadedFiles) {
+          <button mat-fab id="downloadFilesButton" extended (click)="downloadAllSubmissions()">
+            <mat-icon>download</mat-icon>
+            Tout télécharger
+          </button>
+          }
           <button
             mat-fab
             id="summarizeButton"

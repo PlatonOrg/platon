@@ -68,6 +68,41 @@ export class ResourceMemberController {
     return new ItemResponse({ resource })
   }
 
+  @Roles(UserRoles.teacher)
+  @Post('/auto-join')
+  async autoJoin(
+    @Req() req: IRequest,
+    @UUIDParam('resourceId') resourceId: string
+  ): Promise<ItemResponse<ResourceMemberDTO>> {
+    const user = req.user
+
+    const existingMember = await this.service.findAllByUserId(user.id)
+    const isNewTeacher =
+      user.role === 'teacher' &&
+      user.lastLogin != null &&
+      user.firstLogin != null &&
+      user.lastLogin <= user.firstLogin &&
+      existingMember.length === 0
+
+    if (!isNewTeacher) {
+      throw new ForbiddenResponse('Only new teachers can auto-join as members')
+    }
+
+    const resource = Mapper.map(
+      await this.service.create({
+        resourceId,
+        userId: req.user.id,
+        waiting: false,
+        permissions: {
+          read: true,
+          write: true,
+        },
+      }),
+      ResourceMemberDTO
+    )
+    return new ItemResponse({ resource })
+  }
+
   @Roles(UserRoles.admin)
   @Patch('/:userId')
   async update(

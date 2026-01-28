@@ -1,115 +1,535 @@
-<div class="page-container">
-  <div>
-    <div>
-      <section>
-        <div class="color-section">
-          <course-color-picker
-            [hue]="currentHue"
-            [activityColors]="activityColors"
-            (hueChange)="onHueChange($event)"
-          ></course-color-picker>
+<nz-tabset nzType="card" class="activity-settings-tabs">
+  <!-- Onglet 1: Apparence & Restrictions -->
+  <nz-tab nzTitle="Restrictions">
+    <div class="tab-content">
+      <!-- Section Périodes d'accès -->
+      <div class="access-periods-section" (click)="$event.stopPropagation()">
+        <div class="section-header">
+          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+          <h3>Périodes d'accès</h3>
+          <span class="section-subtitle">Définissez quand et pour qui cette activité est accessible</span>
         </div>
-        <div class="example-button-row">
-          <div class="data-form">
-            @for(restriction of restrictions; track restriction; let i = $index) {
+
+        <!-- Zone de drag & drop -->
+        <div
+          class="access-periods-container"
+          cdkDropList
+          (cdkDropListDropped)="onDropAccessPeriod($event)"
+          [cdkDropListData]="accessPeriods()"
+        >
+          @if (accessPeriods().length === 0) {
+          <div class="empty-state">
+            <!-- Affichage des dates actuelles de l'activité -->
+            <div class="current-activity-dates">
+              <div class="dates-info">
+                <div class="date-item clickable-date" (click)="editOpenDate = !editOpenDate">
+                  <i nz-icon nzType="calendar" nzTheme="outline"></i>
+                  <div class="date-content">
+                    <span class="date-label">Ouverture</span>
+
+                    <!-- Mode affichage -->
+                    <span class="date-value" *ngIf="!editOpenDate">
+                      {{ tempOpenDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+                      <ng-container *ngIf="!tempOpenDate">Aucune date définie</ng-container>
+                      <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
+                    </span>
+
+                    <!-- Mode édition -->
+                    <div class="date-edit" *ngIf="editOpenDate">
+                      <nz-date-picker
+                        [nzShowTime]="true"
+                        [(ngModel)]="tempOpenDate"
+                        [nzDisabledDate]="disabledOpenDate"
+                        nzPlaceHolder="Date d'ouverture"
+                        nzFormat="dd/MM/yyyy HH:mm"
+                        nzSize="small"
+                        #openDatePicker
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="date-separator">→</div>
+
+                <div class="date-item clickable-date" (click)="editCloseDate = !editCloseDate">
+                  <i nz-icon nzType="calendar" nzTheme="outline"></i>
+                  <div class="date-content">
+                    <span class="date-label">Fermeture</span>
+
+                    <!-- Mode affichage -->
+                    <span class="date-value" *ngIf="!editCloseDate">
+                      {{ tempCloseDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+                      <ng-container *ngIf="!tempCloseDate">Aucune date définie</ng-container>
+                      <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
+                    </span>
+
+                    <!-- Mode édition -->
+                    <div class="date-edit" *ngIf="editCloseDate">
+                      <nz-date-picker
+                        [nzShowTime]="true"
+                        [(ngModel)]="tempCloseDate"
+                        [nzDisabledDate]="disabledCloseDate"
+                        nzPlaceHolder="Date de fermeture"
+                        nzFormat="dd/MM/yyyy HH:mm"
+                        nzSize="small"
+                        #closeDatePicker
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="access-info">
+                <i nz-icon nzType="team" nzTheme="outline"></i>
+                <span
+                  >Tous les membres du cours ont accès à cette activité aux dates indiquées ci-dessus.<br />
+                  Cliquez sur une date si vous souhaitez la changer.
+                  <b>N'oubliez pas d'enregister vos changement.</b></span
+                >
+              </div>
+            </div>
+
+            <!-- Bouton pour créer la première période -->
+            <button
+              nz-button
+              nzType="primary"
+              nz-popconfirm
+              [nzPopconfirmTitle]="confirmFirstPeriod"
+              nzPopconfirmPlacement="top"
+              (nzOnConfirm)="newAccessPeriod()"
+              class="empty-action-btn"
+            >
+              <i nz-icon nzType="plus"></i>
+              Créer la première période d'accès
+            </button>
+          </div>
+          } @else { @for (period of accessPeriods(); track period; let i = $index) {
+          <div class="access-period-item" cdkDrag [cdkDragData]="period">
             <course-restriction-manager
               [activity]="activity"
               [courseGroups]="courseGroups"
               [courseMembers]="courseMembers"
-              [restrictions]="restriction.restriction"
+              [restrictions]="period.restriction"
               [index]="i"
               (sendRestrictions)="updateRestriction(i, $event)"
+            ></course-restriction-manager>
+          </div>
+          } }
+        </div>
+
+        <!-- Bouton d'ajout -->
+        @if (accessPeriods().length > 0) {
+        <div class="add-period-section">
+          <button nz-button nzType="dashed" nzBlock (click)="newAccessPeriod()" class="add-period-btn">
+            <i nz-icon nzType="plus"></i>
+            Ajouter une nouvelle période d'accès
+          </button>
+          <div class="add-period-hint">
+            <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+            <span>Les périodes peuvent se chevaucher. Glissez-déposez pour réorganiser.</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </nz-tab>
+
+  <!-- Onglet 2: Paramètres de l'activité -->
+  <nz-tab nzTitle="Paramètres">
+    <div class="tab-content">
+      <p class="section-description">Configurez les paramètres d'affichage et de fonctionnement de l'activité</p>
+
+      <nz-collapse [nzBordered]="false">
+        <!-- Temps -->
+        <nz-collapse-panel nzHeader="Temps" nzActive [nzExpandedIcon]="timeIcon">
+          <ng-template #timeIcon>
+            <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+          </ng-template>
+
+          <nz-form-item>
+            <nz-form-label
+              nzFor="duration"
+              nzTooltipTitle="Durée maximale de l'activité. Laissez vide pour une durée illimitée."
             >
-            </course-restriction-manager>
-            }
+              Durée maximale
+            </nz-form-label>
+            <nz-form-control>
+              <div class="time-input-group">
+                <div class="time-input-field">
+                  <nz-input-number
+                    [(ngModel)]="durationHours"
+                    [nzMin]="0"
+                    [nzMax]="23"
+                    [nzStep]="1"
+                    nzPlaceHolder="HH"
+                    class="time-input"
+                  ></nz-input-number>
+                  <span class="time-label">h</span>
+                </div>
+                <span class="time-separator">:</span>
+                <div class="time-input-field">
+                  <nz-input-number
+                    [(ngModel)]="durationMinutes"
+                    [nzMin]="0"
+                    [nzMax]="59"
+                    [nzStep]="1"
+                    nzPlaceHolder="MM"
+                    class="time-input"
+                  ></nz-input-number>
+                  <span class="time-label">m</span>
+                </div>
+                <span class="time-separator">:</span>
+                <div class="time-input-field">
+                  <nz-input-number
+                    [(ngModel)]="durationSeconds"
+                    [nzMin]="0"
+                    [nzMax]="59"
+                    [nzStep]="1"
+                    nzPlaceHolder="SS"
+                    class="time-input"
+                  ></nz-input-number>
+                  <span class="time-label">s</span>
+                </div>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-collapse-panel>
+
+        <!-- Aléatoire -->
+        <nz-collapse-panel nzHeader="Aléatoire" [nzExpandedIcon]="randomIcon">
+          <ng-template #randomIcon>
+            <span nz-icon nzType="question-circle" nzTheme="outline"></span>
+          </ng-template>
+
+          <nz-form-item>
+            <nz-form-label
+              nzFor="seedPerExercise"
+              nzTooltipTitle="Génère une version différente de chaque exercice à chaque tentative"
+            >
+              Seed aléatoire par exercice
+            </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="activitySettings.seedPerExercise" id="seedPerExercise"></label>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-collapse-panel>
+
+        <!-- Navigation -->
+        <nz-collapse-panel nzHeader="Navigation" [nzExpandedIcon]="navigationIcon">
+          <ng-template #navigationIcon>
+            <span nz-icon nzType="compass" nzTheme="outline"></span>
+          </ng-template>
+
+          <nz-form-item>
+            <nz-form-label
+              nzFor="navigationMode"
+              nzTooltipTitle="Détermine comment les exercices sont présentés aux étudiants"
+            >
+              Mode de navigation
+            </nz-form-label>
+            <nz-form-control>
+              <nz-select [(ngModel)]="navigation.mode" id="navigationMode">
+                <nz-option nzValue="manual" nzLabel="Progressive"></nz-option>
+                <nz-option nzValue="composed" nzLabel="Composée"></nz-option>
+                <nz-option nzValue="next" nzLabel="Intelligente (Bêta)"></nz-option>
+                <nz-option nzValue="peer" nzLabel="Comparaison par les pairs (Bêta)"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          @if (navigation.mode === 'peer' || navigation.mode === 'next') {
+          <nz-alert
+            nzType="warning"
+            nzMessage="Cette fonctionnalité est en cours de développement."
+            nzShowIcon
+            class="beta-warning"
+          />
+          }
+        </nz-collapse-panel>
+
+        <!-- Actions -->
+        <nz-collapse-panel nzHeader="Actions" [nzExpandedIcon]="actionsIcon">
+          <ng-template #actionsIcon>
+            <span nz-icon nzType="play-circle" nzTheme="outline"></span>
+          </ng-template>
+
+          <nz-form-item>
+            <nz-form-label nzFor="retry" nzTooltipTitle="Nombre maximum de tentatives par exercice. 0 = illimité">
+              Tentatives maximales
+            </nz-form-label>
+            <nz-form-control>
+              <nz-input-number [(ngModel)]="actions.retry" [nzMin]="0" [nzStep]="1" id="retry" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzFor="hints"> Afficher le bouton "Aides" </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="actions.hints" id="hints"></label>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzFor="reroll"> Afficher le bouton "Autre question" </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="actions.reroll" id="reroll"></label>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzFor="theories"> Afficher le bouton "Théories" </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="actions.theories" id="theories"></label>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzFor="solution"> Afficher le bouton "Solution" </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="actions.solution" id="solution"></label>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-collapse-panel>
+
+        <!-- Feedback -->
+        <nz-collapse-panel nzHeader="Feedback" [nzExpandedIcon]="feedbackIcon">
+          <ng-template #feedbackIcon>
+            <span nz-icon nzType="message" nzTheme="outline"></span>
+          </ng-template>
+
+          <nz-form-item>
+            <nz-form-label nzFor="validation" nzTooltipTitle="Affiche un feedback après chaque validation">
+              Feedback de validation
+            </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="feedback.validation" id="validation"></label>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzFor="review" nzTooltipTitle="Permet de revoir les exercices après correction">
+              Révision des exercices
+            </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="feedback.review" id="review"></label>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-collapse-panel>
+
+        <!-- Sécurité -->
+        <nz-collapse-panel nzHeader="Sécurité" [nzExpandedIcon]="securityIcon">
+          <ng-template #securityIcon>
+            <span nz-icon nzType="safety" nzTheme="outline"></span>
+          </ng-template>
+
+          <nz-form-item>
+            <nz-form-label nzFor="noCopyPaste"> Désactiver copier-coller </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="security.noCopyPaste" id="noCopyPaste"></label>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label
+              nzFor="terminateOnLeavePage"
+              nzTooltipTitle="Termine l'activité si l'étudiant change d'onglet"
+            >
+              Terminer si changement d'onglet
+            </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="security.terminateOnLeavePage" id="terminateOnLeavePage"></label>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label
+              nzFor="terminateOnLoseFocus"
+              nzTooltipTitle="Termine l'activité si l'étudiant clique en dehors de la page"
+            >
+              Terminer si perte de focus
+            </nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox [(ngModel)]="security.terminateOnLoseFocus" id="terminateOnLoseFocus"></label>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-collapse-panel>
+      </nz-collapse>
+    </div>
+  </nz-tab>
+
+  <!-- Onglet 3: Gestion de l'activité -->
+  <nz-tab nzTitle="Gestion">
+    <div class="tab-content">
+      <div class="color-section">
+        <div class="section-header">
+          <i nz-icon nzType="bg-colors" nzTheme="outline"></i>
+          <h3>Apparence de l'activité</h3>
+        </div>
+        <course-color-picker
+          [hue]="currentHue"
+          [activityColors]="activityColors"
+          (hueChange)="onHueChange($event)"
+        ></course-color-picker>
+      </div>
+      <div class="section-header">
+        <i nz-icon nzType="control" nzTheme="outline"></i>
+        <h3>Gestion de l'activité</h3>
+        <span class="section-subtitle">Actions globales sur l'activité</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-section">
+        <div class="secondary-actions">
+          <div class="action-group">
+            <h4>Gestion de l'activité</h4>
+            <div class="action-buttons">
+              <button
+                nz-button
+                nzDanger
+                nz-popconfirm
+                [nzPopconfirmTitle]="confirmClose"
+                nzPopconfirmPlacement="top"
+                (nzOnConfirm)="close()"
+                class="action-btn"
+              >
+                <i nz-icon nzType="stop" nzTheme="outline"></i>
+                Fermer l'activité
+              </button>
+
+              <button
+                nz-button
+                nz-popconfirm
+                [nzPopconfirmTitle]="confirmReopen"
+                nzPopconfirmPlacement="top"
+                (nzOnConfirm)="reopenForAll()"
+                class="action-btn"
+              >
+                <i nz-icon nzType="play-circle" nzTheme="outline"></i>
+                Rouvrir pour tous
+              </button>
+            </div>
           </div>
 
-          <nz-button-group>
-            <button nz-button [nzType]="'primary'" (click)="newRestriction()">
-              <span nz-icon nzType="plus"></span>
-              Ajouter une restriction
-            </button>
-          </nz-button-group>
+          <div class="action-group">
+            <h4>Actions avancées</h4>
+            <div class="action-buttons">
+              <button
+                nz-button
+                nzDanger
+                nz-popconfirm
+                [nzPopconfirmTitle]="confirmReload"
+                nzPopconfirmPlacement="top"
+                (nzOnConfirm)="reload()"
+                class="action-btn"
+              >
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Recharger
+              </button>
+
+              <button
+                nz-button
+                nzDanger
+                nzType="primary"
+                nz-popconfirm
+                [nzPopconfirmTitle]="confirmDelete"
+                nzPopconfirmPlacement="top"
+                (nzOnConfirm)="delete()"
+                class="action-btn danger"
+              >
+                <i nz-icon nzType="delete" nzTheme="outline"></i>
+                Supprimer
+              </button>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
+  </nz-tab>
+</nz-tabset>
 
-    <nz-spin *ngIf="updating" nzTip="Modification de l'activité..."></nz-spin>
-    <div class="actions">
-      <button nz-button [disabled]="!form.valid" nzType="primary" (click)="update()">
-        Appliquer les modifications
-      </button>
-      <div class="spacer"></div>
-      <button
-        nz-button
-        nzDanger
-        nz-popconfirm
-        [nzPopconfirmTitle]="confirmReload"
-        nzPopconfirmPlacement="top"
-        (nzOnConfirm)="reload()"
-      >
-        Recharger
-      </button>
-      <button
-        nz-button
-        nzDanger
-        nzType="primary"
-        nz-popconfirm
-        [nzPopconfirmTitle]="confirmDelete"
-        nzPopconfirmPlacement="top"
-        (nzOnConfirm)="delete()"
-      >
-        Supprimer
-      </button>
-    </div>
-    <button
-      nz-button
-      nzDanger
-      nzType="primary"
-      nz-popconfirm
-      [nzPopconfirmTitle]="confirmClose"
-      nzPopconfirmPlacement="right"
-      (nzOnConfirm)="close()"
-    >
-      Fermer l'activité
-    </button>
-    <button
-      nz-button
-      nzDanger
-      nzType="primary"
-      nz-popconfirm
-      [nzPopconfirmTitle]="confirmReopen"
-      nzPopconfirmPlacement="right"
-      (nzOnConfirm)="reopenForAll()"
-    >
-      Rouvrir l'activité pour tous
-    </button>
+<!-- Templates de confirmation -->
+<ng-template #confirmClose>
+  <div class="confirm-content">
+    <h4>Fermer l'activité</h4>
+    <p>Les étudiants ne pourront plus accéder à cette activité.</p>
   </div>
+</ng-template>
 
-  <ng-template #confirmReload>
-    <p>Êtes-vous sûr de vouloir recharger cette activité ?</p>
-    <ul>
-      <li>L'activité sera remplacée par sa dernière version publiée.</li>
-      <li>Après avoir supprimé l'activité, toutes ses réponses seront effacées.</li>
-    </ul>
-  </ng-template>
+<ng-template #confirmReopen>
+  <div class="confirm-content">
+    <h4>Rouvrir pour tous</h4>
+    <p>La date de fin sera automatiquement supprimée.</p>
+  </div>
+</ng-template>
 
-  <ng-template #confirmDelete>
-    <p>Êtes-vous sûr de vouloir supprimer cette activité ?</p>
-    <p>Après avoir supprimé l'activité, toutes ses réponses seront effacées.</p>
-  </ng-template>
+<ng-template #confirmReload>
+  <div class="confirm-content">
+    <h4>Recharger l'activité</h4>
+    <p>L'activité sera remplacée par sa dernière version publiée.</p>
+  </div>
+</ng-template>
 
-  <ng-template #confirmClose>
-    <p>Êtes-vous sûr de vouloir fermer cette activité ?</p>
-  </ng-template>
+<ng-template #confirmDelete>
+  <div class="confirm-content">
+    <h4>Supprimer l'activité</h4>
+    <p><strong>Cette action est irréversible.</strong></p>
+  </div>
+</ng-template>
 
-  <ng-template #confirmReopen>
-    <div>
-      <p>Êtes-vous sûr de vouloir rouvrir cette activité pour tous?</p>
-      <p>
-        La date de fin de l'activité sera automatiquement supprimée, si vous souhaiter la remettre en place, vous devrez
-        le faire manuellement.
-      </p>
+<ng-template #confirmFirstPeriod>
+  <div class="confirm-content">
+    <div class="warning-header">
+      <i nz-icon nzType="exclamation-circle" nzTheme="fill" style="color: #faad14; margin-right: 8px"></i>
+      <h4 style="margin: 0; color: #faad14">Attention - Première période d'accès</h4>
     </div>
-  </ng-template>
-</div>
+
+    <div class="warning-body" style="margin-top: 12px">
+      <p><strong>Actuellement :</strong> Tous les membres du cours ont accès à cette activité aux dates suivantes :</p>
+      <div class="date-item">
+        <i nz-icon nzType="calendar" nzTheme="outline"></i>
+        <div class="date-content">
+          <span class="date-label">Ouverture : </span>
+          <span class="date-value">
+            {{ activity.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+            <ng-container *ngIf="!activity.openAt">Aucune date définie</ng-container>
+          </span>
+        </div>
+      </div>
+
+      <div class="date-item">
+        <i nz-icon nzType="calendar" nzTheme="outline"></i>
+        <div class="date-content">
+          <span class="date-label">Fermeture : </span>
+          <span class="date-value">
+            {{ activity.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+            <ng-container *ngIf="!activity.closeAt">Aucune date définie</ng-container>
+          </span>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <p><strong>En ajoutant cette période :</strong></p>
+      <ul style="margin: 8px 0; padding-left: 20px">
+        <li style="margin-bottom: 4px">Seuls les utilisateurs/groupes spécifiés auront accès</li>
+        <li style="margin-bottom: 4px">Les autres membres perdront l'accès à l'activité</li>
+        <li style="margin-bottom: 4px">Vous pourrez modifier ces restrictions plus tard</li>
+      </ul>
+
+      <div
+        class="tip"
+        style="
+          background: var(--brand-background-components);
+          border: 1px solid #b7eb8f;
+          border-radius: 6px;
+          padding: 8px;
+          margin-top: 12px;
+          font-size: 12px;
+        "
+      >
+        <strong style="color: var(--brand-text-primary)">💡 Conseil :</strong> Pour que les membres non spécifiés
+        gardent l'accès, créez une période supplémentaire avec le type "Tous les autres".
+      </div>
+    </div>
+  </div>
+</ng-template>

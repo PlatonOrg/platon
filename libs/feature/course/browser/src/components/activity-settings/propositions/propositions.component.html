@@ -7,8 +7,8 @@
   (nzOnCancel)="close()"
 >
   <ng-container *nzModalContent>
-    @for(item of menuItems; track item.title){
-    <div class="menu-item" (click)="sendAndClose(item.title)">
+    @for (item of propositions; track item.title) {
+    <div class="menu-item" (click)="sendAndClose(item.type)">
       <h3 nz-typography>{{ item.title }}</h3>
       <p nz-typography nzType="secondary">{{ item.description }}</p>
     </div>

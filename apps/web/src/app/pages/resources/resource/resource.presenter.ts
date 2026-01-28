@@ -17,6 +17,7 @@ import {
   ResourceInvitation,
   ResourceMember,
   ResourceMemberFilters,
+  ResourceMeta,
   ResourceStatistic,
   UpdateResource,
 } from '@platon/feature/resource/common'
@@ -317,6 +318,47 @@ export class ResourcePresenter implements OnDestroy {
     }
   }
 
+  // Duplicate
+
+  async duplicate(): Promise<string | false> {
+    const { resource } = this.context.value as Required<Context>
+    try {
+      const duplicatedResource = await firstValueFrom(this.resourceService.duplicate(resource.id))
+      this.dialogService.success('La ressource a bien été dupliquée.')
+      return duplicatedResource.id
+    } catch {
+      this.dialogService.error("Une erreur s'est produite lors de la duplication de la ressource.")
+      return false
+    }
+  }
+
+  // Certification
+
+  async updateCertification(certified: boolean): Promise<boolean> {
+    const { resource } = this.context.value as Required<Context>
+    if (resource.type !== 'EXERCISE') {
+      this.dialogService.error('Seules les ressources de type exercice peuvent être certifiées.')
+      return false
+    }
+    try {
+      await firstValueFrom(this.resourceService.updateCertification(resource.id, certified))
+      if (certified) {
+        this.dialogService.success(
+          "L'exercice a bien été certifié. Il sera désormais accessible aux utilisateurs externes."
+        )
+      } else {
+        this.dialogService.success(
+          "La certification de l'exercice a bien été retirée. Il ne sera plus accessible aux utilisateurs externes."
+        )
+      }
+      await this.refresh(resource.id)
+      return true
+    } catch {
+      this.alertError()
+      return false
+    }
+  }
+
   // Deleting
 
   async delete(): Promise<boolean> {
@@ -324,6 +366,34 @@ export class ResourcePresenter implements OnDestroy {
     try {
       await firstValueFrom(this.resourceService.delete(resource))
       this.dialogService.success('La ressource a bien été supprimée.')
+      return true
+    } catch {
+      this.alertError()
+      return false
+    }
+  }
+
+  // Template
+
+  async updateTemplate(templateId: string, templateVersion: string): Promise<boolean> {
+    const { resource } = this.context.value as Required<Context>
+    try {
+      await firstValueFrom(this.resourceService.updateTemplate(resource.id, templateId, templateVersion))
+      this.dialogService.success('Le template a bien été mis à jour.')
+      await this.refresh(resource.id)
+      return true
+    } catch {
+      this.alertError()
+      return false
+    }
+  }
+
+  async removeTemplate(): Promise<boolean> {
+    const { resource } = this.context.value as Required<Context>
+    try {
+      await firstValueFrom(this.resourceService.deleteTemplate(resource.id))
+      this.dialogService.success('Le template a bien été supprimé.')
+      await this.refresh(resource.id)
       return true
     } catch {
       this.alertError()
@@ -340,7 +410,7 @@ export class ResourcePresenter implements OnDestroy {
         this.resourceService.find({
           id,
           markAsViewed: this.isInitialLoading,
-          expands: ['parent', 'statistic'],
+          expands: ['parent', 'statistic', 'metadata'],
         })
       ),
       firstValueFrom(this.resourceService.tree()),
@@ -352,6 +422,7 @@ export class ResourcePresenter implements OnDestroy {
       parent: resource.parent,
       resource,
       statistic: resource.statistic,
+      metadata: resource.metadata,
       circles,
     })
   }
@@ -379,7 +450,7 @@ export class ResourcePresenter implements OnDestroy {
       ...newContext,
       version: newContext?.version || 'latest',
       editorUrl: newContext.resource
-        ? this.resourceService.editorUrl(newContext.resource.id, newContext.version)
+        ? this.resourceService.editorUrl(newContext.resource.id, newContext.version, newContext.resource.templateId)
         : undefined,
       previewUrl: newContext.resource
         ? this.resourceService.previewUrl(newContext.resource.id, newContext.version)
@@ -407,4 +478,5 @@ export interface Context {
 
   circles?: CircleTree
   statistic?: ResourceStatistic
+  metadata?: ResourceMeta
 }

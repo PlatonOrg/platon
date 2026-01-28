@@ -4,6 +4,26 @@
     .ant-modal-footer {
       display: none;
     }
+
+    .ant-modal-close {
+      width: 64px;
+      height: 64px;
+      top: 0;
+      right: 0;
+
+      .ant-modal-close-x {
+        width: 64px;
+        height: 64px;
+        line-height: 64px;
+        font-size: 30px;
+        color: rgba(0, 0, 0, 0.85);
+
+        &:hover {
+          color: #000;
+          background-color: rgba(0, 0, 0, 0.06);
+        }
+      }
+    }
   }
 }
 

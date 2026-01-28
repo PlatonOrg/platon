@@ -3,6 +3,7 @@
 import { ActivityVariables, ExerciseVariables, PLSourceFile } from '@platon/feature/compiler'
 import { Activity } from '@platon/feature/course/common'
 import { Correction } from './correction.model'
+import { StudentSubmission } from './submission.model'
 
 export interface Session<TVariables = any> {
   id: string
@@ -17,6 +18,7 @@ export interface Session<TVariables = any> {
   activityId?: string | null
   correction?: Correction | null
   correctionId?: string | null
+  submissions?: StudentSubmission[] | null
 
   variables: TVariables
   grade: number

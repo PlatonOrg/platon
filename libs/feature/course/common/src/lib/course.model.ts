@@ -17,6 +17,7 @@ export interface Course {
   readonly name: string
   readonly desc?: string
   readonly ownerId: string
+  readonly isTest: boolean
 
   readonly statistic?: CourseStatistic
   readonly permissions?: CoursePermissions
@@ -30,6 +31,7 @@ export interface CreateCourse extends ExpandableModel<CourseExpandableFields> {
   readonly name: string
   readonly code?: string
   readonly desc?: string
+  readonly isTest?: boolean
 }
 
 export interface UpdateCourse extends ExpandableModel<CourseExpandableFields> {
@@ -46,6 +48,7 @@ export interface CourseFilters extends ExpandableModel<CourseExpandableFields> {
   readonly order?: CourseOrderings
   readonly direction?: OrderingDirections
   readonly showAll?: boolean
+  readonly isTest?: boolean
 }
 
 export const COURSE_ORDERING_DIRECTIONS: Readonly<Record<CourseOrderings, keyof typeof OrderingDirections>> = {

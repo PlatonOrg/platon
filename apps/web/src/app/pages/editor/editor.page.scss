@@ -12,6 +12,7 @@
       list-style: none;
     }
   }
+
   .ant-spin-text {
     padding-top: 2rem !important;
   }
@@ -39,6 +40,14 @@ nz-spin {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 2rem;
 }
 
 ide-root {

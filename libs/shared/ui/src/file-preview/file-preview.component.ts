@@ -61,7 +61,7 @@ export class UiFilePreviewComponent implements OnChanges {
   protected scale = 1.0
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.src) {
+    if (changes['src']) {
       this.updateDisplayType()
       if (this.isPdf) {
         setTimeout(() => this.loadPDF(), 0) // wait for pdfCanvas to be defined

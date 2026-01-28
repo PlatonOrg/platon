@@ -2,3 +2,24 @@ user-search-bar {
   display: block;
   margin: 1rem 0;
 }
+
+.Add-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border-radius: 50px;
+  color: black
+}
+
+input::placeholder {
+  color: black;
+  opacity: 1;
+}
+
+.Add-password {
+  color: black;
+  margin-right: 2px;
+}

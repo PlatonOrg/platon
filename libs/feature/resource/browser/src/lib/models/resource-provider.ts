@@ -25,6 +25,7 @@ export abstract class ResourceProvider {
   abstract find(input: FindResource): Observable<Resource>
   abstract update(id: string, input: UpdateResource): Observable<Resource>
   abstract create(input: CreateResource): Observable<Resource>
+  abstract duplicate(resourceId: string): Observable<Resource>
   abstract createPreview(input: CreatePreviewResource): Observable<Resource>
   abstract move(id: string, parentId: string): Observable<Resource>
   abstract moveToOwnerCircle(resource: Resource): Observable<Resource>
@@ -32,4 +33,6 @@ export abstract class ResourceProvider {
   abstract listOwners(): Observable<User[]>
   abstract isConfigurableExercise(resourceId: string): Observable<boolean>
   abstract updateTemplate(resourceId: string, templateId: string, templateVersion: string): Observable<Resource>
+  abstract deleteTemplate(resourceId: string): Observable<Resource>
+  abstract updateCertification(resourceId: string, certified: boolean): Observable<Resource>
 }

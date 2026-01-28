@@ -107,6 +107,10 @@ export class CourseActivityTableComponent implements OnChanges, ControlValueAcce
     this.disabled = isDisabled
   }
 
+  trackByFn(_: number, item: Model): string {
+    return item.activity.id
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['activities']) {
       this.loading = false

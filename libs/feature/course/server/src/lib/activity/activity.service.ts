@@ -3,7 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
 import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@platon/core/server'
-import { ActivityExerciseGroup, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
+import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
   ActivityFilters,
   CreateActivity,
@@ -36,10 +36,7 @@ import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
 
-// -------------------------------------------------------------------------------
-import { Activity, RestrictionConfig } from '@platon/feature/course/common'
 import { CourseGroupService } from '../course-group/course-group.service'
-import { UserRoles } from '@platon/core/common'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
@@ -58,17 +55,13 @@ export class ActivityService {
     private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
     private readonly courseGroup: CourseGroupService,
-    private readonly activityDatesService: ActivityDatesService, // Nouveau service injecté
-
+    private readonly activityDatesService: ActivityDatesService,
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
-
     @InjectRepository(ResourceEntity)
     private readonly resourceRepository: Repository<ResourceEntity>,
-
     @InjectRepository(CourseGroupMemberEntity)
     private readonly courseGroupMemberRepository: Repository<CourseGroupMemberEntity>,
-
     private readonly activityGroupService: ActivityGroupService
   ) {}
 
@@ -143,8 +136,6 @@ export class ActivityService {
     return Optional.of(activities)
   }
 
-  //------------------------------------------------------
-
   async findByCourseId(courseId: string, activityId: string): Promise<Optional<ActivityEntity>> {
     const qb = this.createQueryBuilder(courseId)
     qb.andWhere(`activity.id = :id`, { id: activityId })
@@ -194,6 +185,13 @@ export class ActivityService {
       await guard(activity)
     }
 
+    if (changes.activitySettings !== undefined) {
+      if (!activity.source.variables) {
+        activity.source.variables = {} as ActivityVariables
+      }
+      activity.source.variables.settings = changes.activitySettings
+    }
+
     Object.assign(activity, {
       ...changes,
 
@@ -205,6 +203,7 @@ export class ActivityService {
       exerciseCount: undefined,
       progression: undefined,
       permissions: undefined,
+      activitySettings: undefined,
     } as Partial<ActivityEntity>)
 
     const result = await this.repository.save(activity)
@@ -242,11 +241,13 @@ export class ActivityService {
       await guard(activity)
     }
 
+    const activitySettings = activity.source.variables.settings as ActivitySettings
     const { source } = await this.fileService.compile({
       resourceId: activity.source.resource,
       version: input.version,
     })
     activity.source = source as PLSourceFile<ActivityVariables>
+    activity.source.variables.settings = activitySettings
 
     activity = await this.repository.save(activity)
 
@@ -263,7 +264,6 @@ export class ActivityService {
       this.logger.error('Failed to send notification', error)
     })
 
-    // Des changements ici
     const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
     if (!activity) {
       throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
@@ -272,7 +272,6 @@ export class ActivityService {
       await guard(activity)
     }
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, false)
-    // Fin de changement
     this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: new Date(), restrictions: activity.restrictions }, guard)
   }
@@ -285,9 +284,7 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
-    // Des changements ici
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, true)
-    // Fin de changement
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: null, restrictions: activity.restrictions })
   }
@@ -322,6 +319,7 @@ export class ActivityService {
     })
     await consumer(activity)
   }
+
   async fromInput(input: CreateActivity | UpdateActivity): Promise<ActivityEntity> {
     const activity = new ActivityEntity()
 
@@ -392,6 +390,7 @@ export class ActivityService {
             viewStats: hasWritePermission,
             viewResource: hasWritePermission,
           },
+          activitySettings: activity.source.variables.settings as ActivitySettings,
         } as Partial<ActivityEntity>)
       })
     )

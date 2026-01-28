@@ -79,6 +79,15 @@ export class SidebarComponent implements OnInit {
             },
           ]
         : []),
+      ...(isTeacherRole(this.user.role)
+        ? [
+            {
+              url: '/tests',
+              icon: 'assignment',
+              title: "Tests d'entrée",
+            },
+          ]
+        : []),
       ...(this.user.role === UserRoles.admin
         ? [
             {

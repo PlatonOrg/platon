@@ -115,6 +115,7 @@
     "@types/crypto-js": "^4.2.2",
     "@types/d3": "^7.4.0",
     "@types/echarts": "^4.9.22",
+    "@types/fs-extra": "^11.0.4",
     "@types/graphql-iso-date": "^3.4.0",
     "@types/graphql-relay": "^0.7.0",
     "@types/intro.js": "^5.1.0",
@@ -125,6 +126,7 @@
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^6.4.17",
     "@types/nunjucks": "^3.2.2",
+    "@types/papaparse": "^5.3.16",
     "@types/passport-anonymous": "^1.0.3",
     "@types/passport-jwt": "^3.0.8",
     "@types/passport-local": "^1.0.35",
@@ -238,6 +240,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "common-tags": "^1.8.2",
+    "crossword-layout-generator": "^0.1.1",
     "crypto-js": "^4.2.0",
     "d3": "^7.8.5",
     "d3-graphviz": "^5.0.2",
@@ -255,6 +258,7 @@
     "editorjs-toggle-block": "0.3.16",
     "editorjs-undo": "2.0.28",
     "emoji-toolkit": "^7.0.0",
+    "fs-extra": "^11.3.2",
     "fuse.js": "^7.0.0",
     "genkit": "^1.0.5",
     "graphql": "^16.6.0",
@@ -285,6 +289,7 @@
     "ngx-pipes": "^3.2.0",
     "nodemailer": "^7.0.3",
     "nunjucks": "^3.2.3",
+    "papaparse": "^5.5.2",
     "passport": "^0.6.0",
     "passport-anonymous": "^1.0.1",
     "passport-custom": "^1.1.1",
@@ -329,5 +334,9 @@
       "@commitlint/config-conventional"
     ]
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "yarn@1.22.22",
+  "resolutions": {
+    "punycode": "^2.3.1",
+    "tr46": "^6.0.0"
+  }
 }

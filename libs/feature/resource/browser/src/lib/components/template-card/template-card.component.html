@@ -1,0 +1,57 @@
+<div class="template-card" (click)="onSelectTemplate()">
+  <div class="template-image">
+    <img
+      class="static-image"
+      [src]="'/api/v1/files/' + template.id + '/logo.jpg?download&version=latest'"
+      [alt]="'Aperçu ' + template.name"
+      loading="lazy"
+    />
+    <img
+      class="animated-image"
+      [src]="'/api/v1/files/' + template.id + '/demo.gif?download&version=latest'"
+      [alt]="'Démonstration ' + template.name"
+      loading="lazy"
+    />
+  </div>
+  <div class="template-content">
+    <h3 class="template-title">{{ template.name }}</h3>
+    <p class="template-description">
+      {{ template.desc }}
+    </p>
+    <div class="template-stats">
+      <span
+        class="stat-item"
+        matTooltip="Nombre d'exercices créés à partir de ce modèle."
+        matTooltipPosition="above"
+        matTooltipClass="custom-tooltip"
+      >
+        <mat-icon>inventory</mat-icon>
+        <span>{{ templateReferences() }} exercices</span>
+      </span>
+      <span
+        class="stat-item"
+        matTooltip="Nombre de fois où les exercices créés à partir de ce modèle ont été joués."
+        matTooltipPosition="above"
+        matTooltipClass="custom-tooltip"
+      >
+        <mat-icon>trending_up</mat-icon>
+        <span>{{ templateUtilizations() }} sessions</span>
+      </span>
+      <span
+        (click)="$event.stopPropagation(); openPreview($event)"
+        class="stat-item stat-item-action"
+        matTooltip="Prévisualiser le modèle"
+        matTooltipPosition="above"
+        matTooltipClass="custom-tooltip"
+      >
+        <mat-icon>play_circle</mat-icon>
+        <span>Aperçu</span>
+      </span>
+    </div>
+  </div>
+  <div class="template-overlay">
+    <mat-icon>arrow_forward</mat-icon>
+  </div>
+</div>
+
+<ui-modal-iframe width="45vw" height="50vh" #previewIframe [closable]="true" />

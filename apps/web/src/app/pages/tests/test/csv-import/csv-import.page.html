@@ -1,0 +1,6 @@
+<ui-csv-import
+  [headersOptions]="headersOptions"
+  confirmButtonText="Valider et importer les candidats"
+  (confirmed)="onCsvImportConfirmed($event)"
+  (csvError)="onCsvImportError($event)"
+></ui-csv-import>

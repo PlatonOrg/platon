@@ -26,6 +26,7 @@ import {
   ActivityGroup,
   CourseMemberRoles,
   RestrictionList,
+  CreateTestMember,
 } from '@platon/feature/course/common'
 import { Observable, Subject, tap } from 'rxjs'
 import { ActivityCorrectorProvider } from '../models/activity-corrector.provider'
@@ -55,7 +56,6 @@ export class CourseService {
     private readonly courseSectionProvider: CourseSectionProvider,
     private readonly courseDemoProvider: CourseDemoProvider,
     private readonly courseGroupProvider: CourseGroupProvider,
-
     private readonly activityProvider: ActivityProvider,
     private readonly activityMemberProvider: ActivityMemberProvider,
     private readonly activityCorrectorProvider: ActivityCorrectorProvider,
@@ -82,6 +82,7 @@ export class CourseService {
   create(input: CreateCourse): Observable<Course> {
     return this.courseProvider.create(input)
   }
+
   //#endregion
 
   //#region Courses Demo
@@ -100,11 +101,20 @@ export class CourseService {
   deleteDemo(courseId: string): Observable<void> {
     return this.courseDemoProvider.delete(courseId)
   }
+
   //#endregion
 
   //#region Members
   createMember(course: Course, input: CreateCourseMember): Observable<CourseMember> {
     return this.courseMemberProvider.create(course, input).pipe(tap((member) => this.addMemberEvent.next(member)))
+  }
+
+  createTestMembers(course: Course, input: CreateTestMember[]): Observable<ListResponse<CourseMember>> {
+    return this.courseMemberProvider.createTestMembers(course, input).pipe(
+      tap((members) => {
+        members.resources.forEach((member) => this.addMemberEvent.next(member))
+      })
+    )
   }
 
   updateMemberRole(member: CourseMember, role: CourseMemberRoles): Observable<CourseMember> {
@@ -118,6 +128,7 @@ export class CourseService {
   deleteMember(member: CourseMember): Observable<void> {
     return this.courseMemberProvider.delete(member).pipe(tap(() => this.deleteMemberEvent.next(member)))
   }
+
   //#endregion
 
   //#region Sections
@@ -140,6 +151,7 @@ export class CourseService {
   deleteSection(section: CourseSection): Observable<void> {
     return this.courseSectionProvider.delete(section)
   }
+
   //#endregion
 
   //#region Activities
@@ -209,6 +221,7 @@ export class CourseService {
   deleteActivityMember(member: ActivityMember): Observable<void> {
     return this.activityMemberProvider.delete(member)
   }
+
   //#endregion
 
   //#region Activity Correctors
@@ -230,6 +243,7 @@ export class CourseService {
   deleteActivityCorrector(corrector: ActivityCorrector): Observable<void> {
     return this.activityCorrectorProvider.delete(corrector)
   }
+
   //#endregion
 
   //#region Groups
@@ -263,6 +277,10 @@ export class CourseService {
 
   deleteGroup(courseId: string, groupId: string): Observable<void> {
     return this.courseGroupProvider.deleteGroup(courseId, groupId)
+  }
+
+  isMemberOfGroup(courseId: string, groupId: string): Observable<boolean> {
+    return this.courseGroupProvider.isMemberOfGroup(courseId, groupId)
   }
 
   //#endregion

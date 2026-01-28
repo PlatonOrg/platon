@@ -43,7 +43,7 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
     this.logger.log(`[LTI COURSE INTERCEPTOR] URL actuelle: ${args.nextUrl}`)
 
     const courseMatch = args.nextUrl.match(/\/courses\/(?<courseId>[^\\/]+)/)
-    let courseId = courseMatch?.groups?.['courseId']
+    let courseId = courseMatch?.groups?.['courseId'] || payload['custom_course']
 
     this.logger.log(`[LTI COURSE INTERCEPTOR] CourseId extrait de l'URL: ${courseId || 'NON TROUVÉ'}`)
     this.logger.log(`[LTI COURSE INTERCEPTOR] Payload complet:`, payload)
@@ -63,6 +63,7 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
           name: payload['context_title'],
           desc: `Cours PLaTOn rattaché à : ${payload['context_title']}`,
           ownerId: user.id,
+          isTest: false,
         })
 
         courseId = course.id

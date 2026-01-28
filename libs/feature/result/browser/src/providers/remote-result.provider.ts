@@ -98,4 +98,32 @@ export class RemoteResultProvider extends ResultProvider {
       `/api/v1/results/dashboard/activities/${activityId}/${startDate}/${endDate}`
     )
   }
+
+  downloadAllSubmissions(
+    activityId: string,
+    exerciseId: string,
+    sessionId: string
+  ): Observable<{ blob: Blob; fileName: string }> {
+    return this.http
+      .get<Blob>(`/api/v1/sessions/${sessionId}/submissions/${activityId}/${exerciseId}/download-all`, {
+        responseType: 'blob' as any,
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          const contentDisposition = response.headers.get('content-disposition') || ''
+          let fileName = 'submissions.tar'
+
+          const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
+          if (fileNameMatch && fileNameMatch[1]) {
+            fileName = fileNameMatch[1]
+          }
+
+          return {
+            blob: response.body as Blob,
+            fileName,
+          }
+        })
+      )
+  }
 }

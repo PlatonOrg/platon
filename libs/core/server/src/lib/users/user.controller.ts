@@ -12,6 +12,10 @@ import { UserService } from './user.service'
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /**
+   * to create an user use signUp from AuthService
+   */
+
   @Get()
   async search(@Query() filters: UserFiltersDTO): Promise<ListResponse<UserDTO>> {
     const [users, total] = await this.userService.search(filters)

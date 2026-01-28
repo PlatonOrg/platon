@@ -1,34 +1,115 @@
 .restrictions-container {
-  margin: 24px;
+  width: 100% !important;
+  background: transparent;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.period-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--brand-background-card);
+  border-bottom: 1px solid var(--brand-border-color-light);
+  border-radius: 8px 8px 0 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+
+  .period-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brand-text-primary);
+    margin: 0;
+
+    .period-badge {
+      background: var(--brand-color-primary);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+  }
+
+  .delete-period-btn {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--brand-text-tertiary);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+
+    &:hover {
+      background: #ff4d4f;
+      color: white;
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    i {
+      font-size: 12px;
+    }
+  }
+}
+
+.restrictions-content {
+  background: var(--brand-background-card);
+  border-radius: 0 0 8px 8px;
+  padding: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .restriction-item {
   margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .add-restriction-button {
-  margin-top: 16px;
-}
+  margin-top: 12px;
+  padding: 0 12px 8px 12px;
+  text-align: center;
+  box-sizing: border-box;
 
-:host ::ng-deep {
-  .ant-card-head {
-    min-height: auto;
-    border-bottom: 1px solid var(--brand-border-color-light);
-  }
+  .add-rule-btn {
+    height: 32px;
+    font-size: 12px;
+    width: 35%;
+    border: 1px dashed var(--brand-color-primary);
+    color: var(--brand-color-primary);
+    background: transparent;
 
-  .ant-card-body {
-    padding-top: 6px;
-  }
+    &:hover {
+      background: var(--brand-background-hover);
+      border-color: var(--brand-color-primary-shade);
+      color: var(--brand-color-primary-shade);
+    }
 
-  .ant-card {
-    box-shadow: var(--brand-shadow-sm);
-  }
-
-  .ant-btn-dashed {
-    border-style: dashed;
-  }
-
-  .ant-drawer-content-wrapper {
-    box-shadow: var(--brand-shadow-md);
+    i {
+      font-size: 12px;
+      margin-right: 6px;
+    }
   }
 }

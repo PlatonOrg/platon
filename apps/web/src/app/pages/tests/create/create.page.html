@@ -1,0 +1,44 @@
+<header>
+  <nz-page-header [nzTitle]="header" nzBackIcon>
+    <ng-template #header> Créer un test d'entrée </ng-template>
+  </nz-page-header>
+</header>
+<main>
+  <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
+    <ui-stepper #stepper (finished)="create()">
+      <ng-template uiStepperStep stepTitle="Informations" stepIcon="info-circle" [stepValidator]="!!infos.valid">
+        <section>
+          <h4>Entrez les informations de base pour votre test d'entrée.</h4>
+          <form [formGroup]="infos">
+            <mat-form-field appearance="fill">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Description</mat-label>
+              <textarea cdkTextareaAutosize matInput formControlName="desc"></textarea>
+            </mat-form-field>
+          </form>
+        </section>
+      </ng-template>
+    </ui-stepper>
+  </nz-skeleton>
+</main>
+<footer>
+  <ng-container *ngIf="creating; else showControls">
+    <nz-spin nzTip="Création du test d'entrée..."></nz-spin>
+  </ng-container>
+  <ng-template #showControls>
+    <button *ngIf="!stepper.isFirst" nz-button [disabled]="stepper.isFirst" (click)="stepper.prevStep()">
+      Précedent
+    </button>
+    <button
+      nz-button
+      nzType="primary"
+      [disabled]="!stepper.isValid"
+      (click)="infos.markAllAsTouched(); stepper.nextStep()"
+    >
+      {{ stepper.isLast ? 'Créer' : 'Suivant' }}
+    </button>
+  </ng-template>
+</footer>

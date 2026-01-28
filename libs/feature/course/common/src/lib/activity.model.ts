@@ -1,5 +1,6 @@
 import { RestrictionList } from './activity-restriction.model'
 import { ActivityPermissions } from './permissions.model'
+import { ActivitySettings } from '@platon/feature/compiler'
 
 export interface Activity {
   readonly id: string
@@ -22,9 +23,13 @@ export interface Activity {
   readonly timeSpent: number
   readonly progression: number
   readonly permissions: ActivityPermissions
+
+  readonly ignoreRestrictions?: boolean // checkActivityDateRestrictions
   readonly restrictions?: RestrictionList[] | null
 
   readonly colorHue?: number
+
+  readonly activitySettings?: ActivitySettings
 }
 
 export interface ActivityFilters {
@@ -47,6 +52,8 @@ export interface UpdateActivity {
   readonly openAt?: Date | null
   readonly closeAt?: Date | null
   readonly colorHue?: number | null
+  readonly ignoreRestrictions?: boolean
+  readonly activitySettings?: ActivitySettings
 }
 
 export interface ReloadActivity {

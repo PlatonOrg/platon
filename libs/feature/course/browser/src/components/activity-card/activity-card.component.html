@@ -39,16 +39,20 @@
         <div class="dates-container">
           <div class="date-item">
             <span>
-              {{ item.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-              <ng-container *ngIf="!item.openAt"> - </ng-container>
+              <ng-container *ngIf="isValidDate(item.openAt); else noDate">
+                {{ item.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              </ng-container>
+              <ng-template #noDate>-</ng-template>
             </span>
             <span class="date-label"> Ouverture </span>
           </div>
           <div class="separator"></div>
           <div class="date-item">
             <span>
-              {{ item.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-              <ng-container *ngIf="!item.closeAt"> - </ng-container>
+              <ng-container *ngIf="isValidDate(item.closeAt); else noDate">
+                {{ item.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+              </ng-container>
+              <ng-template #noDate>-</ng-template>
             </span>
             <span class="date-label"> Fermeture </span>
           </div>
@@ -111,6 +115,9 @@
                 [courseId]="item.courseId"
               />
             </li>
+            <li nz-menu-item *ngIf="item.permissions.viewResource" [routerLink]="['/resources', item.resourceId]">
+              Ouvrir la ressource associée
+            </li>
             <li nz-menu-item *ngIf="item.permissions.update" (click)="modal.open()">Paramètres</li>
           </ul>
         </nz-dropdown-menu>
@@ -118,11 +125,23 @@
     </mat-card-actions>
   </mat-card>
 </ng-container>
-<ui-modal-drawer size="large" [title]="item.title" #modal>
+<ui-modal-drawer size="large" [title]="item.title" [nzExtra]="drawerAction" #modal>
   <ng-template>
-    <course-activity-settings [(activity)]="item" />
+    <course-activity-settings
+      #settingsComponent
+      [(activity)]="item"
+      (activityChange)="onActivityChange($event)"
+      (saveRequested)="onSaveRequested()"
+    />
   </ng-template>
 </ui-modal-drawer>
+
+<ng-template #drawerAction>
+  <button nz-button nzType="primary" nzSize="default" (click)="saveSettings()" class="save-btn">
+    <i nz-icon nzType="save" nzTheme="outline"></i>
+    Enregistrer les modifications
+  </button>
+</ng-template>
 <ng-template #progressionTemplate>
   <div class="progression">
     <span class="progression-value">{{ item.progression }}</span>

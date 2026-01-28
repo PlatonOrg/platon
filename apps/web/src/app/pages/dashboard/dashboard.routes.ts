@@ -23,7 +23,6 @@ export default [
         loadChildren: () => import('../announcements/announcements.routes'),
       },
       {
-        title: 'PLaTon - Espace de travail',
         path: 'resources',
         loadChildren: () =>
           import(
@@ -50,7 +49,6 @@ export default [
           ),
       },
       {
-        title: 'PLaTon - Cours',
         path: 'courses',
         loadChildren: () =>
           import(
@@ -73,6 +71,15 @@ export default [
           import(
             /* webpackChunkName: "corrections" */
             '../corrections/corrections.routes'
+          ),
+      },
+      {
+        title: "PLaTon - Tests d'entrée",
+        path: 'tests',
+        loadChildren: () =>
+          import(
+            /* webpackChunkName: "tests" */
+            '../tests/tests.routes'
           ),
       },
       {

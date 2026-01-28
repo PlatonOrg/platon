@@ -7,9 +7,15 @@
     [articleDescription]="descriptionTemplate"
     (didClickTagItem)="handleTagClick($event)"
   >
+    @if(item.templateId) {
+    <ui-list-item-article-action *ngIf="editable" (click)="openTab(builderUrl)" class="action" actionTitle="Paramétrer">
+      <i nz-icon nzType="edit" nzTheme="outline"></i>
+    </ui-list-item-article-action>
+    } @else {
     <ui-list-item-article-action *ngIf="editable" (click)="openTab(editorUrl)" class="action" actionTitle="Éditer">
       <i nz-icon nzType="edit" nzTheme="outline"></i>
     </ui-list-item-article-action>
+    }
 
     <ng-container *ngIf="item.type !== 'CIRCLE'">
       <ui-list-item-article-action
@@ -27,6 +33,14 @@
         actionTitle="Créer à partir"
       >
         <i nz-icon nzType="node-expand" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+      <ui-list-item-article-action
+        *ngIf="!configurable && !shorten"
+        class="action"
+        (click)="duplicateResource()"
+        actionTitle="Dupliquer"
+      >
+        <i nz-icon nzType="copy" nzTheme="outline"></i>
       </ui-list-item-article-action>
     </ng-container>
     <div class="spacer"></div>
@@ -103,7 +117,7 @@
     [nzPopoverTrigger]="configurable ? 'hover' : null"
     (mouseenter)="configurable ? getReadmeContent() : null"
   >
-    @if( clickable) {
+    @if(clickable) {
     <a [routerLink]="detailsUrl" class="resource-item-title">{{ name }}</a>
     } @else {
     <span class="resource-item-title">{{ name }}</span>

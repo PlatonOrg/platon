@@ -177,6 +177,37 @@ export class ResourceService {
   }
 
   /**
+   * Finds all parent circles of a given circle.
+   * @remarks
+   * - The resource itself is not included in the result.
+   * - Personal circles are always excluded.
+   * - Passing the id of an personal circle will return an empty array.
+   * @param circleId - The ID of the circle to find parent circles for.
+   * @returns A promise that resolves to an array of parent circles.
+   */
+  async getParents(circleId: string): Promise<ResourceEntity[]> {
+    const circles = await this.repository.find({
+      where: { type: ResourceTypes.CIRCLE, personal: false },
+    })
+
+    const root = circles.find((c) => c.id === circleId)
+    if (!root) {
+      return []
+    }
+    const parents: ResourceEntity[] = []
+
+    const traverse = (node: ResourceEntity) => {
+      const previous = circles.filter((c) => c.id === node.parentId)
+      previous.forEach((parent) => {
+        parents.push(parent)
+        traverse(parent)
+      })
+    }
+    traverse(root)
+    return parents
+  }
+
+  /**
    * Search resources to display
    * @param filters filters to apply to the search
    * @param userId user id to check permissions on resources - if not provided, no permissions are checked
@@ -217,7 +248,7 @@ export class ResourceService {
     query.leftJoinAndSelect('resource.topics', 'topic')
     query.leftJoinAndSelect('resource.levels', 'level')
 
-    if (filters.configurable != null || filters.navigation != null) {
+    if (filters.configurable != null || filters.navigation != null || filters.certifiedTemplate != null) {
       query.leftJoin('ResourceMeta', 'metadata', 'metadata.resource_id = resource.id')
     }
 
@@ -324,6 +355,12 @@ export class ResourceService {
       })
     }
 
+    if (filters.certifiedTemplate != null) {
+      query.andWhere(`(type <> 'EXERCISE' OR metadata.meta->'certifiedTemplate' = :certifiedTemplate)`, {
+        certifiedTemplate: filters.certifiedTemplate,
+      })
+    }
+
     if (filters.personal != null) {
       query.andWhere('personal = :personal', { personal: filters.personal })
     }
@@ -425,9 +462,29 @@ export class ResourceService {
     return this.repository.save(resource)
   }
 
+  async deleteTemplate(resourceId: string): Promise<ResourceEntity> {
+    const resource: any = await this.repository.findOneOrFail({ where: { id: resourceId } })
+    resource.template = null
+    resource.templateId = null
+    resource.templateVersion = null
+    return this.repository.save(resource)
+  }
+
   async move(id: string, parentId: string): Promise<ResourceEntity> {
     const resource = await this.repository.findOneOrFail({ where: { id } })
     const parent = await this.repository.findOneOrFail({ where: { id: parentId } })
+
+    if (resource.type == ResourceTypes.ACTIVITY) {
+      const exercises = (
+        await this.search({
+          usedBy: [resource.id],
+          types: [ResourceTypes.EXERCISE],
+          personal: true,
+        })
+      )[0]
+
+      await Promise.all(exercises.map((e) => this.move(e.id, parentId)))
+    }
 
     resource.parentId = parent.id
     resource.personal = parent.personal
@@ -583,5 +640,24 @@ export class ResourceService {
       })
     )
     Logger.log(`Merging levels ${oldLevel.name} into ${newLevel.name}`, 'ResourceService')
+  }
+
+  async updateCertification(resourceId: string, certified: boolean): Promise<ResourceEntity> {
+    const resource = await this.repository.findOne({ where: { id: resourceId } })
+    if (!resource || resource.type !== ResourceTypes.EXERCISE) {
+      throw new NotFoundResponse(`Resource not found or not an exercise: ${resourceId}`)
+    }
+
+    let metadata = await this.metadataRepo.findOne({ where: { resourceId } })
+    if (!metadata) {
+      metadata = this.metadataRepo.create({ resourceId, meta: {} })
+    }
+
+    const meta = metadata.meta as ExerciseResourceMeta
+    meta.certifiedTemplate = certified
+    metadata.meta = meta
+
+    await this.metadataRepo.save(metadata)
+    return this.repository.save(resource)
   }
 }

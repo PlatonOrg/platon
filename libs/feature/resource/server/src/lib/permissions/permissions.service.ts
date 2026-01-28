@@ -74,11 +74,43 @@ export class ResourcePermissionService {
       write:
         circle.ownerId === user.id || // user is owner of the circle
         (user.role === UserRoles.admin && !circle.personal) || // user is admin and circle is not personal
-        (memberships.includes(circle.id) && !isWaitingForBeingMember), // user is member of the circle and not in waiting state
+        (memberships.includes(circle.id) && !isWaitingForBeingMember) || // user is member of the circle and not in waiting state
+        (await this.parentPermissionOnResources(circle, user, userMemberships)), // user is member of one of the parent circle of the circle
       watcher: userWatchings.some((w) => w.resourceId === resource.id),
       member: memberships.includes(resource.id),
       waiting: isWaitingForBeingMember,
     }
+  }
+
+  /** Check if you are the owner or member of one of the parent circle of 'circleId'
+   *
+   * @remarks
+   * - This function must influence the write permission only.
+   *   Indeed you can read a circle if it's not personnal or it's personnal but you'r a member of this circle. So parent's permission wont change anything.
+   *
+   *
+   * @param circle  circle that you want to know the permission
+   * @param user      user that try to use the circleId
+   * @param userMemberships list of resource where the user is member
+   * @returns true if user is one member or owner of one of the parent circle of circleId and circle is not personnal
+   */
+  private async parentPermissionOnResources(
+    circle: ResourceEntity | ResourceDTO,
+    user: UserEntity,
+    userMemberships: ResourceMember[]
+  ): Promise<boolean> {
+    if (circle.personal && circle.ownerId != user.id) {
+      return false
+    }
+    const parents = await this.resourceService.getParents(circle.id)
+    return parents.some((parent) => {
+      const memberships = userMemberships.map((m) => m.resourceId)
+      const isWaitingForBeingMember = userMemberships.some((m) => m.resourceId === parent.id && m.waiting)
+      return (
+        parent.ownerId === user.id || // user is owner of one parent of the circle
+        (memberships.includes(parent.id) && !isWaitingForBeingMember)
+      ) // user is member of one parent of the circle and not in waiting state
+    })
   }
 
   async userPermissionsOnResources<T extends Resource>(

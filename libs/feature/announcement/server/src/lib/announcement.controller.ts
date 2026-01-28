@@ -1,29 +1,20 @@
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import {
-  Body,
-  Controller,
-  Post,
-  Get,
-  Delete,
-  Req,
-  Query,
-  Patch,
-  UnauthorizedException,
-} from '@nestjs/common'
-import { AnnouncementService } from "./announcement.service";
-import { IRequest, Mapper, Roles, UUIDParam } from "@platon/core/server";
+import { Body, Controller, Post, Get, Delete, Req, Query, Patch, UnauthorizedException } from '@nestjs/common'
+import { AnnouncementService } from './announcement.service'
+import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import { CreatedResponse, ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
-import { CreateAnnouncementDTO, UpdateAnnouncementDTO, AnnouncementDTO, AnnouncementFiltersDTO } from "./announcement.dto";
+import {
+  CreateAnnouncementDTO,
+  UpdateAnnouncementDTO,
+  AnnouncementDTO,
+  AnnouncementFiltersDTO,
+} from './announcement.dto'
 
 @ApiBearerAuth()
 @ApiTags('Announcements')
 @Controller('announcements')
 export class AnnouncementController {
-
-  constructor(private readonly service: AnnouncementService) {
-  }
-
-
+  constructor(private readonly service: AnnouncementService) {}
 
   @Roles(UserRoles.admin)
   @Get()
@@ -31,35 +22,36 @@ export class AnnouncementController {
     const [items, count] = await this.service.search(filters)
     return new ListResponse({
       resources: Mapper.mapAll(items, AnnouncementDTO),
-      total: count
+      total: count,
     })
   }
 
   @Roles(UserRoles.admin)
   @Post()
-  async create(@Req() req: IRequest, @Body() announcement: CreateAnnouncementDTO): Promise<CreatedResponse<AnnouncementDTO>> {
-    const newAnnouncement = await this.service.create({...announcement, publisher: req.user})
+  async create(
+    @Req() req: IRequest,
+    @Body() announcement: CreateAnnouncementDTO
+  ): Promise<CreatedResponse<AnnouncementDTO>> {
+    const newAnnouncement = await this.service.create({ ...announcement, publisher: req.user })
     return new CreatedResponse({ resource: Mapper.map(newAnnouncement, AnnouncementDTO) })
   }
 
-@Roles(UserRoles.admin, UserRoles.teacher, UserRoles.student)
-@Get('visible')
-async getVisibleForUser(
-  @Req() req: IRequest,
-  @Query() filters: AnnouncementFiltersDTO
-): Promise<ListResponse<AnnouncementDTO>> {
-  if (!req.user || !req.user.id || !req.user.role) {
-    throw new UnauthorizedException('Utilisateur non authentifié ou informations manquantes');
+  @Roles(UserRoles.admin, UserRoles.teacher, UserRoles.student)
+  @Get('visible')
+  async getVisibleForUser(
+    @Req() req: IRequest,
+    @Query() filters: AnnouncementFiltersDTO
+  ): Promise<ListResponse<AnnouncementDTO>> {
+    if (!req.user || !req.user.id || !req.user.role) {
+      throw new UnauthorizedException('Utilisateur non authentifié ou informations manquantes')
+    }
+
+    const [items, count] = await this.service.getVisibleForUser(req.user.id, req.user.role, filters)
+    return new ListResponse({
+      resources: Mapper.mapAll(items, AnnouncementDTO),
+      total: count,
+    })
   }
-
-  const [items, count] = await this.service.getVisibleForUser(req.user.id, req.user.role, filters);
-  return new ListResponse({
-    resources: Mapper.mapAll(items, AnnouncementDTO),
-    total: count
-  });
-}
-
-
 
   @Roles(UserRoles.admin)
   @Get(':id')
@@ -83,6 +75,4 @@ async getVisibleForUser(
   async delete(@UUIDParam('id') id: string): Promise<void> {
     await this.service.delete(id)
   }
-
-
 }

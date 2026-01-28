@@ -94,6 +94,11 @@ export interface ExerciseCorrection {
    * List of labels put on this student copy
    */
   labels: Label[]
+
+  /**
+   * Indicates if the exercise has any upload from the student
+   * */
+  hasUploads?: boolean
 }
 
 export interface UpsertCorrection {

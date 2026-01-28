@@ -53,6 +53,7 @@ import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { HttpErrorResponse } from '@angular/common/http'
+import { UI_MODAL_IFRAME_CLOSE } from '@platon/shared/ui'
 
 @Component({
   standalone: true,
@@ -645,5 +646,15 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   private stopWatchingVisibilityChange(): void {
     window.removeEventListener('blur', this.onLoseTabFocusFn)
     document.removeEventListener('visibilitychange', this.onVisibilityChangeFn)
+  }
+
+  protected back() {
+    if (window.self !== window.top) {
+      window.parent.postMessage(UI_MODAL_IFRAME_CLOSE, '*')
+    } else if (window.history.length > 1) {
+      window.history.back()
+    } else {
+      close()
+    }
   }
 }

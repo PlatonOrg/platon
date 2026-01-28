@@ -13,7 +13,7 @@ import {
   NgeMarkdownThemeProvider,
 } from '@cisstech/nge/markdown'
 
-import { NgeMonacoColorizerService } from '@cisstech/nge/monaco'
+import { ThomasColorizerService } from './thomas-colorizer.service'
 
 export const NgeMarkdownProviders = [
   NgeMarkdownKatexProvider,
@@ -26,7 +26,7 @@ export const NgeMarkdownProviders = [
   NgeMarkdownConfigProvider({
     darkThemeClassName: 'dark-theme',
   }),
-  NgeMarkdownHighlighterMonacoProvider(NgeMonacoColorizerService),
+  NgeMarkdownHighlighterMonacoProvider(ThomasColorizerService),
   NgeMarkdownThemeProvider({
     name: 'github',
     styleUrl: 'assets/vendors/nge/markdown/themes/github.css',

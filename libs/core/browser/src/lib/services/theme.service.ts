@@ -189,7 +189,7 @@ export class ThemeService implements OnDestroy {
     const wasNoTheme = this.noTheme
     this.noTheme = false
     this.checkRouteData((data) => {
-      if (data.noTheme) {
+      if (data['noTheme']) {
         this.noTheme = true
         return true
       }
@@ -204,7 +204,7 @@ export class ThemeService implements OnDestroy {
   private checkAlwaysLightThemeInRouteData(): void {
     this.alwaysLightTheme = false
     this.checkRouteData((data) => {
-      if (data.lightTheme) {
+      if (data['lightTheme']) {
         this.alwaysLightTheme = true
         return true
       }

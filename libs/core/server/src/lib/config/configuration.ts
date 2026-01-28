@@ -32,6 +32,16 @@ export interface Configuration {
   discord: {
     token: string
   }
+  mail: {
+    host: string
+    port: number
+    secure: boolean
+    user: string
+    password: string
+    tlsRejectUnauthorized: boolean
+    from: string
+    technicalTeam: string[]
+  }
 }
 
 export const configuration = (): Configuration => ({
@@ -57,7 +67,7 @@ export const configuration = (): Configuration => ({
     refreshLifetime: process.env['JWT_REFRESH_TOKEN_LIFETIME'] || '7d',
   },
   graphql: {
-    playground: Boolean(process.env['GRAPHQL_PLAYGROUND']),
+    playground: process.env['GRAPHQL_PLAYGROUND'] ? process.env['GRAPHQL_PLAYGROUND'].toLowerCase() === 'true' : false,
   },
   sandbox: {
     url: process.env['SANDBOX_URL'] as string,
@@ -66,5 +76,19 @@ export const configuration = (): Configuration => ({
   },
   discord: {
     token: process.env['DISCORD_BOT_TOKEN'] as string,
+  },
+  mail: {
+    host: process.env['EMAIL_HOST'] as string,
+    port: Number.parseInt(process.env['EMAIL_PORT'] || ''),
+    secure: process.env['EMAIL_SECURE'] ? process.env['EMAIL_SECURE'].toLowerCase() === 'true' : false,
+    user: process.env['EMAIL_USER'] as string,
+    password: process.env['EMAIL_PASSWORD'] as string,
+    tlsRejectUnauthorized: process.env['EMAIL_TLS_REJECT_UNAUTHORIZED']
+      ? process.env['EMAIL_TLS_REJECT_UNAUTHORIZED'].toLowerCase() === 'true'
+      : true,
+    from: process.env['EMAIL_FROM'] as string,
+    technicalTeam: process.env['EMAIL_TECHNICAL_TEAM']
+      ? process.env['EMAIL_TECHNICAL_TEAM'].split(',').map((email) => email.trim())
+      : [],
   },
 })

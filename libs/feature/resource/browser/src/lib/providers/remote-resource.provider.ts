@@ -75,6 +75,12 @@ export class RemoteResourceProvider extends ResourceProvider {
       .pipe(map((response) => response.resource))
   }
 
+  duplicate(resourceId: string): Observable<Resource> {
+    return this.http
+      .post<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/duplicate`, {})
+      .pipe(map((response) => response.resource))
+  }
+
   createPreview(input: CreatePreviewResource): Observable<Resource> {
     const params = buildExpandableHttpParams(input)
 
@@ -117,6 +123,20 @@ export class RemoteResourceProvider extends ResourceProvider {
       .patch<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/template`, {
         templateId,
         templateVersion,
+      })
+      .pipe(map((response) => response.resource))
+  }
+
+  deleteTemplate(resourceId: string): Observable<Resource> {
+    return this.http
+      .delete<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/template`)
+      .pipe(map((response) => response.resource))
+  }
+
+  updateCertification(resourceId: string, certified: boolean): Observable<Resource> {
+    return this.http
+      .patch<ItemResponse<Resource>>(`/api/v1/resources/${resourceId}/certification`, {
+        certified,
       })
       .pipe(map((response) => response.resource))
   }

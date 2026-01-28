@@ -1,10 +1,10 @@
 .menu-item {
   padding: 12px;
   border-bottom: 1px solid var(--brand-border-color-light);
-  cursor: pointer;
 }
 
 .menu-item:hover {
+  cursor: pointer;
   background-color: var(--brand-background-hover);
 }
 
@@ -15,11 +15,12 @@
 .cancel-btn {
   display: block;
   margin: 20px auto 0;
+  cursor: pointer;
   width: 100%;
   border: none;
   background-color: var(--brand-color-primary);
   color: var(--brand-color-primary-contrast);
-  transition: all 0.3s ease;
+
 
   &:hover {
     background-color: var(--brand-color-primary-tint);

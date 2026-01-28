@@ -1,51 +1,39 @@
-import { Injectable } from '@angular/core';
-
-
-
-
-import { Router } from '@angular/router';
-import { ShepherdService, TutorialStep } from './shepherd/shepherd.service';
-import { User, UserRoles } from '@platon/core/common';
-
-export interface ResourceChoice {
-  type: 'COURSE' | 'CIRCLE' | 'ACTIVITY' | 'EXERCISE';
-  name: string;
-  icon: string;
-  description: string;
-  route: string;
-  queryParams?: any;
-}
+import { Injectable } from '@angular/core'
+import { Router } from '@angular/router'
+import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
+import { User, UserRoles } from '@platon/core/common'
+import { SidebarTutorialService } from './sidebar-tutorial.service'
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ToolbarTutorialService {
-  private selectedResourceType: string | null = null;
+  private user: User | null = null
+
   constructor(
     private shepherdService: ShepherdService,
-    private router: Router
+    private router: Router,
+    private sidebarTutorialService: SidebarTutorialService
   ) {}
 
-
-
   /**
-  * Démarre le tutoriel complet du toolbar
-  */
-  startToolbarTutorial(user: User): void{
-    const steps = this.buildTutorialSteps(user);
+   * Démarre le tutoriel complet du toolbar
+   */
+  startToolbarTutorial(user: User): void {
+    this.user = user
+    const steps = this.buildTutorialSteps(user)
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'toolbar-tutorial',
       useModalOverlay: true,
       confirmCancel: true,
-      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de la barre d\'outils ?'
-    });
-
+      confirmCancelMessage: "Voulez-vous vraiment quitter le tutoriel de la barre d'outils ?",
+    })
   }
 
   /**
-  * Construit les étapes du tutoriel en fonction de l'utilisateur
-  */
+   * Construit les étapes du tutoriel en fonction de l'utilisateur
+   */
   private buildTutorialSteps(user: User): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
@@ -86,24 +74,24 @@ export class ToolbarTutorialService {
           {
             text: 'Passer',
             secondary: true,
-            action: () => this.shepherdService.cancel()
+            action: () => this.shepherdService.cancel(),
           },
           {
             text: 'Commencer',
-            action: () => this.shepherdService.next()
-          }
-        ]
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
       {
         id: 'menu-button',
         title: 'Menu de navigation',
-        text: 'Ce bouton permet d\'ouvrir et fermer le menu de navigation latéral pour accéder aux différentes sections de PLaTon.',
+        text: "Ce bouton permet d'ouvrir et fermer le menu de navigation latéral pour accéder aux différentes sections de PLaTon.",
         attachTo: {
           element: '#tuto-toolbar-menu-button',
-          on: 'bottom'
-        }
-      }
-    ];
+          on: 'bottom',
+        },
+      },
+    ]
 
     // Ajouter les étapes selon les permissions de l'utilisateur
     if (this.canUserCreate(user)) {
@@ -114,29 +102,30 @@ export class ToolbarTutorialService {
           text: 'Ce bouton permet de regarder les tutoriels disponibles.',
           attachTo: {
             element: '#tuto-help-button',
-            on: 'bottom'
-          }
+            on: 'bottom',
+          },
         },
         {
-        id: 'create-button',
-        title: 'Bouton de création',
-        text: 'Ce bouton vous permet de créer de nouvelles ressources : cours, cercles, activités ou exercices.',
-        attachTo: {
-          element: '#tuto-create-menu-container',
-          on: 'bottom'
+          id: 'create-button',
+          title: 'Bouton de création',
+          text: 'Ce bouton vous permet de créer de nouvelles ressources : cours, cercles, activités ou exercices.',
+          attachTo: {
+            element: '#tuto-create-menu-container',
+            on: 'bottom',
+          },
         }
-      });
+      )
     }
 
     steps.push(
       {
         id: 'theme-button',
         title: 'Sélecteur de thème',
-        text: 'Personnalisez l\'apparence de PLaTon en choisissant entre le thème clair, sombre ou automatique.',
+        text: "Personnalisez l'apparence de PLaTon en choisissant entre le thème clair, sombre ou automatique.",
         attachTo: {
           element: '#tuto-toolbar-theme-button',
-          on: 'bottom'
-        }
+          on: 'bottom',
+        },
       },
       {
         id: 'notifications',
@@ -144,8 +133,8 @@ export class ToolbarTutorialService {
         text: 'Consultez vos notifications et restez informé des dernières activités sur PLaTon.',
         attachTo: {
           element: '#tuto-toolbar-notifications-button',
-          on: 'bottom'
-        }
+          on: 'bottom',
+        },
       },
       {
         id: 'user-avatar',
@@ -153,31 +142,42 @@ export class ToolbarTutorialService {
         text: 'Accédez à votre profil, vos paramètres de compte et déconnectez-vous depuis ce menu.',
         attachTo: {
           element: 'user-avatar',
-          on: 'bottom'
-        }
+          on: 'bottom',
+        },
       }
-    );
+    )
 
     steps.push({
       id: 'tutorial-complete',
       title: 'Tutoriel toolbar terminé !',
-      text: 'Vous connaissez maintenant les principales fonctionnalités de la barre d\'outils PLaTon. Bonne exploration !',
+      text: "Vous connaissez maintenant les principales fonctionnalités de la barre d'outils PLaTon. Bonne exploration !",
       buttons: [
         {
           text: 'Découvrir le sidebar',
-          action: () => this.shepherdService.complete()
-        }
-      ]
-    });
+          action: () => {
+            this.launchSidebarTutorial()
+          },
+        },
+      ],
+    })
 
-    return steps;
+    return steps
+  }
+
+  private launchSidebarTutorial(): void {
+    this.shepherdService.complete()
+
+    setTimeout(() => {
+      if (this.user) {
+        this.sidebarTutorialService.startSidebarTutorial(this.user)
+      }
+    }, 200)
   }
 
   /**
    * Vérifie si l'utilisateur peut créer des ressources
    */
   private canUserCreate(user: User): boolean {
-    return user.role === UserRoles.admin || user.role === UserRoles.teacher;
+    return user.role === UserRoles.admin || user.role === UserRoles.teacher
   }
-
 }

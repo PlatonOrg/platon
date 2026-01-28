@@ -121,7 +121,7 @@ export class PlayerService extends PlayerManager {
     if (resource.type === 'EXERCISE') {
       session = await this.buildExercise(session)
     }
-
+    await this.updateSettingsSession(session)
     return {
       exercise: resource.type === 'EXERCISE' ? withExercisePlayer(session) : undefined,
       activity: resource.type === 'ACTIVITY' ? withActivityPlayer(session) : undefined,
@@ -136,6 +136,32 @@ export class PlayerService extends PlayerManager {
     return this.sandboxService.downloadEnvironment(session.source as PLSourceFile<ExerciseVariables>, session.envid)
   }
 
+  /**
+   * Vérifie si une activité est accessible en fonction de ses dates d'ouverture et de fermeture
+   * @param activity L'activité à vérifier
+   * @throws ForbiddenResponse si l'activité n'est pas encore ouverte ou est fermée
+   */
+  private async checkActivityDateRestrictions(activity: ActivityEntity): Promise<void> {
+    if (activity.ignoreRestrictions) {
+      return
+    }
+    await this.activityService.updateActivitiesDates([activity])
+  }
+
+  private async updateSettingsSession(session: SessionEntity): Promise<void> {
+    if (
+      session?.activity &&
+      session?.variables &&
+      typeof session.variables === 'object' &&
+      'settings' in session.variables
+    ) {
+      // eslint-disable-next-line prettier/prettier
+      (session.variables as ActivityVariables).settings = session.activity.source.variables.settings
+    } else if (session?.parent) {
+      await this.updateSettingsSession(session.parent)
+    }
+  }
+
   async playActivity(activityId: string, user: User): Promise<PlayActivityOuput> {
     let activitySession = await this.sessionService.findUserActivity(activityId, user.id)
     if (!activitySession) {
@@ -148,6 +174,10 @@ export class PlayerService extends PlayerManager {
         isBuilt: true,
       })
     }
+    if (activitySession.activity) {
+      await this.checkActivityDateRestrictions(activitySession.activity)
+    }
+    await this.updateSettingsSession(activitySession)
     return { activity: withActivityPlayer(activitySession) }
   }
 
@@ -163,32 +193,11 @@ export class PlayerService extends PlayerManager {
     if (!activitySession) {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
     }
-    // Les modifs commencent ici : restrictions
-
     if (!activitySession.activity) {
       throw new NotFoundResponse(`Activity not found: ${activitySessionId}`)
     }
-
-    const dateRange = await this.activityService.updateActivitiesDates([activitySession.activity])
-
-    if (dateRange && dateRange.start) {
-      const startTime = new Date(dateRange.start).getTime()
-      const nowTime = new Date().getTime()
-
-      if (startTime > nowTime) {
-        throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
-      }
-    }
-
-    if (dateRange && dateRange.end) {
-      const endTime = new Date(dateRange.end).getTime()
-      const nowTime = new Date().getTime()
-
-      if (endTime < nowTime) {
-        throw new ForbiddenResponse("L'activité est fermée.")
-      }
-    }
-    // Fin des modifs
+    await this.checkActivityDateRestrictions(activitySession.activity)
+    await this.updateSettingsSession(activitySession)
 
     // CREATE PLAYERS
     const exercisePlayers = await Promise.all(
@@ -222,7 +231,6 @@ export class PlayerService extends PlayerManager {
         exerciseSession.startedAt = exerciseSession.startedAt || new Date()
 
         await this.sessionService.update(exerciseSession.id, { startedAt: exerciseSession.startedAt })
-
         return withExercisePlayer(exerciseSession)
       })
     )
@@ -496,7 +504,7 @@ export class PlayerService extends PlayerManager {
   }
 
   protected findExerciseSessionById(id: string): Promise<ExerciseSession | null | undefined> {
-    return this.sessionService.findExerciseSessionById(id, { parent: true, activity: true })
+    return this.sessionService.findExerciseSessionById(id, { parent: true, activity: true, submissions: true })
   }
 
   protected override onChallengeSucceeded(_activity: Activity): void {

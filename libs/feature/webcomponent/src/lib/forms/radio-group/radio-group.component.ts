@@ -13,6 +13,7 @@ import {
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { RadioGroupComponentDefinition, RadioGroupItem, RadioGroupState } from './radio-group'
+import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 
 @Component({
   selector: 'wc-radio-group',
@@ -39,13 +40,33 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, 
     [
       'ArrowDown',
       () => {
-        this.state.selectedIndex = Math.min(this.state.selectedIndex + 1, this.state.items.length - 1)
+        if (!this.state.horizontal) {
+          this.state.selectedIndex = Math.min(this.state.selectedIndex + 1, this.state.items.length - 1)
+        }
       },
     ],
     [
       'ArrowUp',
       () => {
-        this.state.selectedIndex = Math.max(this.state.selectedIndex - 1, -1)
+        if (!this.state.horizontal) {
+          this.state.selectedIndex = Math.max(this.state.selectedIndex - 1, -1)
+        }
+      },
+    ],
+    [
+      'ArrowRight',
+      () => {
+        if (this.state.horizontal) {
+          this.state.selectedIndex = Math.min(this.state.selectedIndex + 1, this.state.items.length - 1)
+        }
+      },
+    ],
+    [
+      'ArrowLeft',
+      () => {
+        if (this.state.horizontal && this.state.selectedIndex > 0) {
+          this.state.selectedIndex = this.state.selectedIndex - 1
+        }
       },
     ],
     [
@@ -56,7 +77,7 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, 
     ],
   ])
 
-  constructor(readonly injector: Injector) {
+  constructor(readonly injector: Injector, private readonly changeDetector: WebComponentChangeDetectorService) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
   }
@@ -93,12 +114,13 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, 
     }
   }
 
-  protected onClick(event: Event, item: RadioGroupItem, i: number) {
-    this.state.selection = item.content
-    event.stopPropagation()
+  onClick(item: RadioGroupItem, i: number) {
+    this.changeDetector.batch(this, () => {
+      this.state.selection = item.content
+      this.state.isFilled = true
+      this.state.selectedIndex = i
+    })
     this.autoValidate()
-    this.state.isFilled = true
-    this.state.selectedIndex = i
   }
 
   private onKeydown(event: KeyboardEvent) {

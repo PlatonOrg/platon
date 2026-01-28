@@ -4,9 +4,21 @@
       <mat-card-title> Configuration du Template </mat-card-title>
     </mat-card-header>
     <mat-card-content>
+      @if (templateId === '' && !isCreating) {
+        <div class="empty-state">
+          <div class="empty-message">
+            Aucun template n'est actuellement configuré pour cette ressource.
+          </div>
+          <button nz-button nzType="primary" class="add-template-btn" (click)="isCreating = true">
+            <span>Ajouter un template</span>
+          </button>
+        </div>
+      } @else {
       <div>
         @if (invalidTemplateId) {
         <nz-alert nzType="error" [nzMessage]="errorMessage" nzShowIcon></nz-alert>
+        } @if (template) {
+        <div class="selected-template-title"><strong>Template sélectionné :</strong> {{ template.name }}</div>
         }
         <nz-input-group nzCompact>
           <input
@@ -36,9 +48,28 @@
         </nz-input-group>
       </div>
       <resource-version *ngIf="versionInfo" [version]="versionInfo" />
-      <button nz-button nzType="primary" (click)="save()" class="save-button" [disabled]="invalidTemplateId">
-        <span>Sauvegarder</span>
-      </button>
+      <div class="button-group">
+        <button nz-button nzType="primary" (click)="save()" [disabled]="invalidTemplateId">
+          <span>Sauvegarder</span>
+        </button>
+        <button nz-button (click)="openTemplate()" [disabled]="template === undefined">
+          <span>Voir le template</span>
+        </button>
+        <button
+          nz-button
+          nzDanger
+          nz-popconfirm
+          nzPopconfirmTitle="Êtes-vous sûr de vouloir supprimer ce template ?"
+          nzPopconfirmPlacement="top"
+          nzOkText="Supprimer"
+          nzCancelText="Annuler"
+          (nzOnConfirm)="removeTemplate()"
+          nzOkDanger
+          [disabled]="template === undefined">
+          <span>Supprimer</span>
+        </button>
+      </div>
+    }
     </mat-card-content>
   </mat-card>
 </div>

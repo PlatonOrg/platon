@@ -1,0 +1,161 @@
+.version-history {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+  }
+
+  .version-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--brand-border-color);
+    margin-bottom: 1.5rem;
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--brand-text-primary);
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .version-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-right: 0.5rem;
+
+    .version-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1.25rem;
+      border-radius: 8px;
+      border: 0.5px solid var(--brand-border-color-light);
+      background: var(--brand-background-card);
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: var(--brand-border-color);
+        box-shadow: 0 4px 12px var(--brand-background-alpha-12);
+        //transform: translateY(-1px);
+      }
+
+      //&.current {
+        //background: var(--brand-pastel-blue);
+        //border-color: var(--brand-color-primary); //var(--brand-color-secondary);
+        //box-shadow: 0 2px 8px rgba(var(--brand-color-secondary-rgb), 0.15);
+      //}
+
+      .version-info {
+        flex: 1;
+        min-width: 0;
+
+        .version-header-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
+
+          .version-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: var(--brand-color-secondary);
+          }
+
+          .version-tag {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--brand-text-primary);
+          }
+
+          .current-badge {
+            padding: 0.125rem 0.5rem;
+            border-radius: 12px;
+            background: var(--brand-pastel-green);
+            color: var(--brand-text-primary);
+            font-size: 0.75rem;
+            font-weight: 500;
+          }
+        }
+
+        .version-message {
+          margin: 0 0 0.5rem 0;
+          font-size: 0.813rem;
+          color: var(--brand-text-secondary);
+          line-height: 1.4;
+          word-break: break-word;
+        }
+
+        .version-meta {
+          display: flex;
+          gap: 1rem;
+          font-size: 0.75rem;
+          color: var(--brand-text-tertiary);
+
+          span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+
+            mat-icon {
+              font-size: 14px;
+              width: 14px;
+              height: 14px;
+            }
+          }
+        }
+      }
+
+      .version-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-left: 1rem;
+
+        button {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+        }
+      }
+    }
+  }
+
+  nz-empty {
+    padding: 2rem 0;
+  }
+}
+
+resource-versioning {
+  display: none;
+}

@@ -7,6 +7,7 @@ export enum UserRoles {
   teacher = 'teacher',
   student = 'student',
   demo = 'demo',
+  candidate = 'candidate',
 }
 
 export enum UserOrderings {

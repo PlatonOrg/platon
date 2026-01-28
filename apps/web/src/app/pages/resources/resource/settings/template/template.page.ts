@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 
 import { Subscription, firstValueFrom } from 'rxjs'
 import { ResourcePresenter } from '../../resource.presenter'
@@ -13,7 +14,8 @@ import { ResourceFileService, ResourceService, ResourceVersionComponent } from '
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { MatCardModule } from '@angular/material/card'
-import { FileVersion, FileVersions, LATEST } from '@platon/feature/resource/common'
+import { FileVersion, FileVersions, LATEST, Resource } from '@platon/feature/resource/common'
+import { RouterModule } from '@angular/router'
 
 @Component({
   standalone: true,
@@ -23,8 +25,10 @@ import { FileVersion, FileVersions, LATEST } from '@platon/feature/resource/comm
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    RouterModule,
     UiFilePreviewComponent,
     NzSelectModule,
+    NzPopconfirmModule,
     FormsModule,
     ResourceVersionComponent,
     NzInputModule,
@@ -48,8 +52,12 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
   protected versions!: FileVersions
   protected versionInfo?: FileVersion
 
+  protected template?: Resource
+
   protected invalidTemplateId = false
   protected errorMessage = ''
+
+  protected isCreating = false
 
   protected get canEdit(): boolean {
     return !!this.context.resource?.permissions?.write
@@ -68,6 +76,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
 
     if (this.templateId) {
       await this.updateVersions(this.templateId)
+      this.template = await firstValueFrom(this.resourceService.find({ id: this.templateId }))
     }
 
     this.changeDetectorRef.markForCheck()
@@ -86,6 +95,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
   }
 
   protected async onChangeTemplate(templateId: string) {
+    this.template = undefined
     if (!this.isUUID4(templateId)) {
       this.invalidTemplateId = true
       this.errorMessage = "Cet ID n'est pas valide"
@@ -104,6 +114,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
         this.changeDetectorRef.markForCheck()
         return
       }
+      this.template = await firstValueFrom(this.resourceService.find({ id: templateId }))
       await this.updateVersions(templateId)
       this.templateVersion = LATEST
       this.invalidTemplateId = false
@@ -120,9 +131,24 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
       return
     }
     if (this.context.resource) {
-      await firstValueFrom(
-        this.resourceService.updateTemplate(this.context.resource.id, this.templateId, this.templateVersion)
-      )
+      this.isCreating = false
+      await this.presenter.updateTemplate(this.templateId, this.templateVersion)
+    }
+  }
+
+  protected openTemplate(): void {
+    window.open('/resources/' + this.templateId, '_blank')
+  }
+
+  protected async removeTemplate(): Promise<void> {
+    if (this.context.resource) {
+      await this.presenter.removeTemplate()
+      this.template = undefined
+      this.templateId = ''
+      this.templateVersion = ''
+      this.versions = { all: [] }
+      this.versionInfo = undefined
+      this.changeDetectorRef.markForCheck()
     }
   }
 }

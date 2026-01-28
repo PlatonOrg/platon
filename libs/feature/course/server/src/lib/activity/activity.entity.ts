@@ -1,5 +1,5 @@
 import { BaseEntity, UserEntity } from '@platon/core/server'
-import { ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
+import { ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import { Activity, ActivityOpenStates, ActivityPermissions, RestrictionList } from '@platon/feature/course/common'
 import { Column, Entity, Index, JoinColumn, ManyToOne, VirtualColumn } from 'typeorm'
 import { CourseEntity } from '../entites/course.entity'
@@ -34,6 +34,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
 
   @Column({ type: 'jsonb', default: {} })
   source!: PLSourceFile<ActivityVariables>
+
+  @Column({ name: 'ignore_restrictions', nullable: true, default: true })
+  ignoreRestrictions?: boolean
 
   @Column({ type: 'jsonb', default: {} })
   restrictions?: RestrictionList[] | null
@@ -84,4 +87,7 @@ export class ActivityEntity extends BaseEntity implements Activity {
     query: (alias) => `SELECT (${alias}.source->'variables'->'settings'->'navigation'->>'mode' = 'peer')::boolean`,
   })
   readonly isPeerComparison!: boolean
+
+  @VirtualColumn({ query: () => `SELECT '{}'::jsonb` })
+  readonly activitySettings!: ActivitySettings
 }

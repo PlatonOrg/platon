@@ -36,6 +36,7 @@ import {
   CircleTree,
   LATEST,
   Resource,
+  ResourceStatus,
   ResourceTypes,
   branchFromCircleTree,
   circleAncestors,
@@ -99,6 +100,7 @@ export class ResourceCreatePage implements OnInit {
   protected loading = true
   protected creating = false
   protected editionMode?: 'scratch' | 'template'
+  protected mode?: string
   protected loadingTemplates = false
   protected isFinished = false
   protected user?: User
@@ -148,12 +150,15 @@ export class ResourceCreatePage implements OnInit {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes
     this.parentId = this.activatedRoute.snapshot.queryParamMap.get('parent') || undefined
     const templateId = this.activatedRoute.snapshot.queryParamMap.get('template') || undefined
+    this.mode = this.activatedRoute.snapshot.queryParamMap.get('mode') || undefined
+
     if (templateId) {
       this.template = await firstValueFrom(this.resourceService.find({ id: templateId }))
       this.editionMode = 'template'
     }
 
     const user = (await this.authService.ready()) as User
+
     const [tree, topics, levels, userCharter] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.tagService.listTopics()),
@@ -190,6 +195,7 @@ export class ResourceCreatePage implements OnInit {
     this.userCharterAccepted = userCharter?.acceptedUserCharter ?? false
 
     this.loading = false
+
     this.changeDetectorRef.markForCheck()
   }
 
@@ -209,6 +215,7 @@ export class ResourceCreatePage implements OnInit {
         this.resourceService.create({
           type: this.type,
           parentId: this.parentId as string,
+          status: ResourceStatus.DRAFT,
           templateId: this.editionMode === 'template' ? this.template?.id : undefined,
           templateVersion: this.editionMode === 'template' ? LATEST : undefined,
           name: infos.name as string,

@@ -29,9 +29,11 @@ import { ChartViewerRadarComponentDefinition } from './widgets/chart-viewer-rada
 import { FoldableFeedbackComponentDefinition } from './widgets/foldable-feedback/foldable-feedback'
 import { WordSelectorComponentDefinition } from './forms/word-selector/word-selector'
 import { EvaluatorComponentDefinition } from './forms/evaluator/evaluator'
+import { FileUploadComponentDefinition } from './forms/file-upload/file-upload'
 import { TimerComponentDefinition } from './widgets/timer/timer'
 import { ConfettiComponentDefinition } from './widgets/confetti/confetti'
 import { ImageClickerComponentDefinition } from './forms/image-clicker/image-clicker'
+import { CrosswordComponentDefinition } from './forms/crossword/crossword'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
@@ -81,6 +83,13 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     module: () =>
       import(/* webpackChunkName: "wc-evaluator" */ './forms/evaluator/evaluator.module').then(
         (m) => m.EvaluatorModule
+      ),
+  },
+  {
+    selector: 'wc-file-upload',
+    module: () =>
+      import(/* webpackChunkName: "wc-file-upload" */ './forms/file-upload/file-upload.module').then(
+        (m) => m.FileUploadModule
       ),
   },
   {
@@ -163,6 +172,13 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     selector: 'wc-drag-drop',
     module: () =>
       import(/* webpackChunkName: "wc-drag-drop" */ './forms/drag-drop/drag-drop.module').then((m) => m.DragDropModule),
+  },
+  {
+    selector: 'wc-crossword',
+    module: () =>
+      import(/* webpackChunkName: "wc-crossword" */ './forms/crossword/crossword.module').then(
+        (m) => m.CrosswordModule
+      ),
   },
   {
     selector: 'wc-feedback',
@@ -253,12 +269,22 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
   {
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
+    useValue: CrosswordComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
     useValue: GraphViewerComponentDefinition,
   },
   {
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: EvaluatorComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: FileUploadComponentDefinition,
   },
   {
     provide: WEB_COMPONENT_DEFINITIONS,

@@ -1,6 +1,6 @@
 import { Injectable, Injector } from '@angular/core'
 import { Router } from '@angular/router'
-import { AuthToken, ResetPasswordInput, User } from '@platon/core/common'
+import { AuthToken, CreatedResponse, ResetPasswordInput, SignUpInput, User } from '@platon/core/common'
 import { firstValueFrom, Observable, of } from 'rxjs'
 import { shareReplay, take } from 'rxjs/operators'
 import { AuthObserver, AUTH_OBSERVER } from '../models/auth'
@@ -25,6 +25,10 @@ export class AuthService {
     private readonly injector: Injector,
     private readonly authProvider: AuthProvider
   ) {}
+
+  signUp(newUser: SignUpInput): Promise<CreatedResponse<AuthToken>> {
+    return this.authProvider.signUp(newUser)
+  }
 
   token(): Promise<AuthToken | undefined> {
     return this.authProvider.token()

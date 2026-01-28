@@ -9,8 +9,8 @@ Le composant CodeViewer permet d'afficher du code source avec une mise en forme 
 - **lines**: Option pour contrôler l'affichage des numéros de ligne. Valeurs possibles :
 
   - Vide : pas de numérotation
-  - "1" : numérotation commençant à 1
-  - "5" : numérotation commençant à 5
+  - "1" : numérotation de chaque ligne
+  - "5" : numérotation toutes les 5 lignes
   - etc.
 
 - **highlights**: Lignes à mettre en évidence. Format de spécification :

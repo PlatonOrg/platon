@@ -1,0 +1,16 @@
+<div class="template-selection-container">
+  <div class="header">
+    <h2>Choisir un modèle d'exercice</h2>
+    <p class="subtitle">Personnalisez votre exercice après avoir sélectionné un modèle.</p>
+  </div>
+
+  <div class="templates-grid">
+    @for (template of templates; track template.id; let index = $index) {
+    <resource-template-card
+      [template]="template"
+      [style.animation-delay]="index * 0.1 + 0.1 + 's'"
+      (templateSelected)="selectTemplate($event)"
+    />
+    }
+  </div>
+</div>

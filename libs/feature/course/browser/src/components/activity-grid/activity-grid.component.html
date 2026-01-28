@@ -9,7 +9,7 @@
     (cdkDropListDropped)="drop($event)"
     cdkDropListOrientation="mixed"
   >
-    @for (item of tabs[0].items; track item){
+    @for (item of tabs[0].items; track item) {
     <course-activity-card cdkDrag [cdkDragPreviewContainer]="previewContainer" class="flex-item" [item]="item">
       <course-activity-card *cdkDragPreview matchSize="true" [item]="item" />
     </course-activity-card>
@@ -19,9 +19,9 @@
   <ng-container *ngIf="tabs[selectedIndex] as tab">
     <ng-container *ngIf="tab.items.length; else emptyState">
       <nz-row [nzGutter]="[24, 24]" nzAlign="top">
-        <ng-container *ngFor="let item of tab.items; trackBy: trackActivity">
+        <ng-container *ngFor="let item of tab.items; trackBy: trackActivity; let i = index">
           <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12" nzXXl="8">
-            <course-activity-card [item]="item" />
+            <course-activity-card [item]="item" [id]="i === 0 ? 'tuto-first-activity-card' : null" />
           </nz-col>
         </ng-container>
       </nz-row>

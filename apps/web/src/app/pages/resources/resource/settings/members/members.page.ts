@@ -53,12 +53,7 @@ export class ResourceMembersPage implements OnInit, OnDestroy {
         if (context.resource) {
           await Promise.all([this.loadMembers(), this.loadJoinRequests(), this.loadInvitations()])
 
-          this.excludes = [
-            ...this.members.map((m) => m.userId),
-            ...this.invitations.map((i) => i.inviteeId),
-            context.resource.ownerId,
-            context.user?.id as string,
-          ]
+          this.excludes = [...this.members.map((m) => m.userId), ...this.invitations.map((i) => i.inviteeId)]
         }
 
         this.changeDetectorRef.markForCheck()

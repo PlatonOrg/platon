@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { IRequest } from '@platon/core/server'
 import { ResourceStatistic, ResourceTypes } from '@platon/feature/resource/common'
 import { ResourceDTO, ResourceDependencyEntity, ResourceStatisticEntity } from '@platon/feature/resource/server'
-import { IsNull, Not, Repository } from 'typeorm'
+import { In, IsNull, Not, Repository } from 'typeorm'
 import { ActivityTotalAttempts } from '../dashboard/aggregators/activity.aggregator'
 import { ExerciseUniqueAttempts } from '../dashboard/aggregators/exercise.aggregator'
 import { SessionAverageScore } from '../dashboard/aggregators/session.aggregator'
@@ -62,16 +62,37 @@ export class ResourceExpander {
     let refCount = 0
     let activityRefCount = 0
     let templateRefCount = 0
+    let referencesAttemptCount = 0
     const uniqueResourceIds = new Set<string>()
+    const uniqueExerciseIds = new Set<string>()
+
     references.forEach((ref) => {
       if (!uniqueResourceIds.has(ref.resourceId)) {
         uniqueResourceIds.add(ref.resourceId)
         activityRefCount += ref.resource.type === ResourceTypes.ACTIVITY ? 1 : 0
         templateRefCount += ref.resource.type === ResourceTypes.EXERCISE ? 1 : 0
+
+        if (ref.resource.type === ResourceTypes.EXERCISE) {
+          uniqueExerciseIds.add(ref.resourceId)
+        }
       }
     })
 
     refCount = activityRefCount + templateRefCount
+
+    if (refCount > 0) {
+      const exerciseResourceIds = Array.from(uniqueExerciseIds)
+      exerciseResourceIds.push(parent.id)
+
+      const referenceSessions = await this.sessionData.find({
+        where: {
+          resourceId: In(exerciseResourceIds),
+          userId: Not(IsNull()),
+        },
+      })
+
+      referencesAttemptCount = referenceSessions.reduce((total, session) => total + (session.attempts || 0), 0)
+    }
 
     return {
       score: statistic.score,
@@ -109,6 +130,7 @@ export class ResourceExpander {
                     total: refCount,
                     activity: activityRefCount,
                     template: templateRefCount,
+                    referencesAttemptCount: referencesAttemptCount,
                   }
                 : undefined,
             }

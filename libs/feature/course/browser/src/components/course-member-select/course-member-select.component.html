@@ -1,15 +1,25 @@
 <nz-tree-select
-  [(ngModel)]="selection"
+  [ngModel]="selection"
   [nzNodes]="nodes"
   (ngModelChange)="onChangeSelection($event)"
-  [nzShowSearch]="true"
+  nzShowSearch
+  [nzHideUnMatched]="true"
   [nzCheckable]="true"
   [nzDisabled]="disabled"
   [nzPlaceHolder]="placeholder || ''"
   [nzTreeTemplate]="template"
   [nzVirtualHeight]="nodes.length <= 15 ? '' : '300px'"
+  [nzMultiple]="true"
 />
 
 <ng-template #template let-node>
-  <user-avatar [size]="24" [user]="node.origin.value.user" [group]="node.origin.value.group" />
+  @if(node.origin.key === '__SELECT_ALL__'){
+  <span>{{ node.origin.title }}</span>
+  }
+  <user-avatar
+    *ngIf="node.origin.key !== '__SELECT_ALL__'"
+    [size]="24"
+    [user]="node.origin.value.user"
+    [group]="node.origin.value.group"
+  />
 </ng-template>

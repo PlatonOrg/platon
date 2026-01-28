@@ -33,4 +33,9 @@ export abstract class ResultProvider {
   abstract findCorrection(activityId: string): Observable<ActivityCorrection>
   abstract listCorrections(): Observable<ListResponse<ActivityCorrection>>
   abstract upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction>
+  abstract downloadAllSubmissions(
+    activityId: string,
+    exerciseId: string,
+    sessionId: string
+  ): Observable<{ blob: Blob; fileName: string }>
 }

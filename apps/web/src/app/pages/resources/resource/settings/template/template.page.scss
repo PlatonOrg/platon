@@ -42,12 +42,48 @@ nz-select {
   width: 30%;
 }
 
-.save-button {
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
   margin-top: 16px;
+}
+
+button {
   width: 128px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 24px;
+
+  .empty-message {
+    font-size: 16px;
+    color: var(--brand-text-secondary, #666);
+    line-height: 1.5;
+    max-width: 300px;
+  }
+
+  .add-template-btn {
+    min-width: 160px !important;
+    height: 44px;
+  }
 }
 
 resource-version {
   width: 100%;
   margin-top: 16px;
+}
+
+.selected-template-title {
+  max-height: 1.5em;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

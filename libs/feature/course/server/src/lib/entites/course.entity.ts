@@ -18,4 +18,7 @@ export class CourseEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'owner_id' })
   owner!: UserEntity
+
+  @Column({ name: 'is_test', default: false })
+  isTest!: boolean
 }
