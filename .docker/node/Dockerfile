@@ -41,7 +41,8 @@ RUN yarn graphql:generate
 
 # Build NestJS API, Angular web app and docs
 RUN yarn build:web
-RUN NX_VERBOSE_LOGGING=true yarn build:api --verbose
+# Increase memory limit and disable daemon for API build
+RUN NODE_OPTIONS="--max-old-space-size=4096" NX_DAEMON=false yarn build:api --verbose
 RUN yarn build:docs
 
 # Rebuild node_modules with only production dependencies
