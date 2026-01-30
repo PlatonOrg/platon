@@ -38,7 +38,7 @@ export class SessionService {
 
   private async updateSettingsSession(session: SessionEntity): Promise<void> {
     if (
-      session?.activity &&
+      session?.activity?.source &&
       session?.variables &&
       typeof session.variables === 'object' &&
       'settings' in session.variables
