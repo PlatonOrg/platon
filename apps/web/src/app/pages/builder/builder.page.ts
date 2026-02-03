@@ -70,6 +70,12 @@ type MainViewMode = 'input' | 'setting' | 'history'
     UiErrorComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  host: {
+    '(window:keydown)': 'onKeyDown($event)',
+    '(window:beforeunload)': 'onBeforeUnload($event)',
+    '(document:mousemove)': 'onMouseMove($event)',
+    '(document:mouseup)': 'onMouseUp()',
+  },
 })
 export class BuilderPage implements OnInit {
   private readonly router = inject(Router)
@@ -96,6 +102,8 @@ export class BuilderPage implements OnInit {
   protected aiTransforming = false
   protected error?: HttpErrorResponse | null = null
 
+  private isFirstSave = true
+
   protected readonly hasUnsavedChanges = signal(false)
   protected currentVersion = 'latest'
   protected isEditingTitle = false
@@ -107,10 +115,9 @@ export class BuilderPage implements OnInit {
   protected selectedSetting: SettingItem | null = null
 
   protected readonly settingItems: SettingItem[] = [
-    { id: 'theme', label: 'Thème', icon: 'palette', type: 'theme' },
-    { id: 'preview', label: 'Mode prévisualisation', icon: 'preview', type: 'preview' },
-    { id: 'developer', label: 'Mode développeur', icon: 'code', type: 'developer' },
     { id: 'save', label: 'Option sauvegarde', icon: 'save', type: 'save' },
+    { id: 'developer', label: 'Mode développeur', icon: 'code', type: 'developer' },
+    { id: 'theme', label: 'Thème', icon: 'palette', type: 'theme' },
   ]
 
   protected previewSessionId = uuidv4()
@@ -124,8 +131,8 @@ export class BuilderPage implements OnInit {
   protected sidebarMinWidth = 60 // Largeur mode icône uniquement
 
   protected sidebarSections: SidebarSection[] = [
-    { id: 'content', label: 'Contenu', icon: 'list', collapsed: false },
     { id: 'settings', label: 'Paramètres', icon: 'settings', collapsed: true },
+    { id: 'content', label: 'Contenu', icon: 'list', collapsed: false },
     { id: 'history', label: 'Historique', icon: 'history', collapsed: true },
   ]
 
@@ -168,13 +175,6 @@ export class BuilderPage implements OnInit {
     }
   }
 
-  redirectToSaveOptions(): void {
-    const setting = this.settingItems.find((item) => item.id === 'save')
-    if (setting) {
-      this.selectSetting(setting)
-    }
-  }
-
   protected selectSetting(setting: SettingItem): void {
     this.selectedSetting = setting
     this.mainViewMode = 'setting'
@@ -196,7 +196,6 @@ export class BuilderPage implements OnInit {
     }
   }
 
-  @HostListener('document:mousemove', ['$event'])
   protected onMouseMove(e: MouseEvent): void {
     if (!this.isResizing || !this.resizingColumn) return
 
@@ -226,7 +225,6 @@ export class BuilderPage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  @HostListener('document:mouseup')
   protected onMouseUp(): void {
     this.isResizing = false
     this.resizingColumn = null
@@ -362,7 +360,13 @@ export class BuilderPage implements OnInit {
 
       this.hasUnsavedChanges.set(false)
 
-      this.dialogService.success('Configuration sauvegardée avec succès')
+      this.dialogService.success('Sauvegardé avec succès')
+
+      // Afficher un message informatif lors de la première sauvegarde
+      if (this.isFirstSave) {
+        this.isFirstSave = false
+        this.showFirstSaveInfo()
+      }
     } catch (error) {
       this.dialogService.error('Erreur lors de la sauvegarde')
     } finally {
@@ -371,9 +375,56 @@ export class BuilderPage implements OnInit {
     }
   }
 
+  /**
+   * Vérifie si le nom de l'exercice correspond au format par défaut généré lors de la création.
+   * Format attendu: "Exercice - DD/MM/YYYY HH:MM" (ex: "Exercice - 03/02/2026 14:30")
+   *
+   * IMPORTANT: Ce format doit rester synchronisé avec celui défini dans
+   * template-selection.component.ts (méthode createQuickResource).
+   * Si le format de génération du nom change, mettre à jour ce regex en conséquence.
+   */
+  private hasDefaultResourceName(name: string): boolean {
+    const defaultNamePattern = /^Exercice - \d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/
+    return defaultNamePattern.test(name)
+  }
+
+  private showFirstSaveInfo(): void {
+    if (!this.resource) return
+
+    const hasDefaultName = this.hasDefaultResourceName(this.resource.name)
+    const isDraft = this.resource.status === 'DRAFT'
+
+    if (!hasDefaultName && !isDraft) return
+
+    let content = '<div style="line-height: 1.8; padding: 8px 0;">'
+
+    if (hasDefaultName) {
+      content +=
+        '<p><strong>Conseil :</strong> Votre exercice garde actuellement le nom par défaut "<em>' +
+        this.resource.name +
+        '</em>". '
+      content += "Vous pouvez le personnaliser en cliquant sur l'icône d'édition à côté du titre.</p>"
+    }
+
+    if (isDraft) {
+      if (hasDefaultName) content += '<br>'
+      content += '<p><strong>Statut :</strong> Votre exercice est actuellement en <strong>brouillon</strong>. '
+      content += 'Pour changer le statut, rendez-vous dans <strong>Paramètres → Option sauvegarde</strong>.</p>'
+    }
+
+    content += '</div>'
+
+    this.modal.info({
+      nzTitle: 'Exercice sauvegardé !',
+      nzContent: content,
+      nzWidth: 550,
+      nzOkText: 'Compris',
+      nzCentered: true,
+    })
+  }
+
   protected async onResourceUpdated(updatedResource: Resource): Promise<void> {
     this.resource = updatedResource
-    this.hasUnsavedChanges.set(true)
     this.title.setTitle(`${this.resource.name}`)
     await this.save()
     this.changeDetectorRef.markForCheck()
@@ -534,7 +585,6 @@ export class BuilderPage implements OnInit {
     }
   }
 
-  // ICI J'IMPORTE LA NOUVELLE VERSION
   protected async onVersionChanged(data: { version: string; overrides: Variables }): Promise<void> {
     try {
       this.overrides = data.overrides
@@ -606,7 +656,7 @@ export class BuilderPage implements OnInit {
       }
 
       if (action === 'save') {
-        this.redirectToSaveOptions()
+        await this.save()
         return
       }
     }
@@ -631,7 +681,15 @@ export class BuilderPage implements OnInit {
     return input.name
   }
 
-  @HostListener('window:beforeunload', ['$event'])
+  protected onKeyDown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault()
+      if (!this.saving) {
+        this.save().catch(console.error)
+      }
+    }
+  }
+
   protected onBeforeUnload(event: BeforeUnloadEvent): void {
     if (this.hasUnsavedChanges()) {
       event.preventDefault()

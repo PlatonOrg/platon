@@ -73,7 +73,12 @@ export class TemplateSelectionComponent implements OnInit {
         hour: '2-digit',
         minute: '2-digit',
       })
-      const templateName = 'Exercice'
+      const templateName = 'Exercice' // Les noms des templates sont trop longs donc on met un nom générique
+
+      /* IMPORTANT: Ce format est synchronisé avec le regex défini dans
+       * builder.page.ts (méthode hasDefaultResourceName).
+       * Si le format de génération du nom change, mettre à jour le regex en conséquence.
+       */
       const defaultName = `${templateName} - ${timestamp}`
 
       const resource = await firstValueFrom(

@@ -63,15 +63,8 @@ export class SettingsPage implements OnInit {
   protected loading = signal(false)
   protected saving = signal(false)
 
-  close = output<void>()
-  resourceUpdated = output<Resource>()
-
-  readonly settingItems = signal<SettingItem[]>([
-    { id: 'theme', label: 'Thème', icon: 'palette', type: 'theme' },
-    { id: 'preview', label: 'Mode prévisualisation', icon: 'preview', type: 'preview' },
-    { id: 'developer', label: 'Mode développeur', icon: 'code', type: 'developer' },
-    { id: 'save', label: 'Informations', icon: 'info', type: 'save' },
-  ])
+  protected close = output<void>()
+  protected resourceUpdated = output<Resource>()
 
   readonly isDarkTheme = computed(() => this.themeService.isDark)
   readonly isLightTheme = computed(() => this.themeService.isLight)
@@ -149,8 +142,6 @@ export class SettingsPage implements OnInit {
       }
 
       const updatedResource = await firstValueFrom(this.resourceService.update(currentResource.id, update))
-
-      this.dialogService.success('Informations mises à jour avec succès')
       this.resourceUpdated.emit(updatedResource)
     } catch (error) {
       this.dialogService.error('Erreur lors de la sauvegarde des informations')
