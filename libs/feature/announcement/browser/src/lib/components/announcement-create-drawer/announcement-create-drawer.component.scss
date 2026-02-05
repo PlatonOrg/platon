@@ -87,9 +87,12 @@ nz-radio-group {
 
 
 .action-buttons {
+  position: absolute;
   display: flex;
   align-items: center;
   gap: 8px;
+  right: 3px;
+  top: 6px;
 }
 
 .save-state, .preview-button {

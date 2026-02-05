@@ -1,9 +1,5 @@
 <div class="container">
   <div class="header">
-    <button nz-button class="close-button" nzType="primary" (click)="close()">
-      <span>Fermer</span>
-    </button>
-
     <div class="action-buttons">
       <div class="save-state">
         @if (hasUnsavedChanges) {
@@ -23,6 +19,12 @@
       >
         <span nz-icon nzType="play-circle" nzTheme="twotone"></span>
       </button>
+      <div class="button-container">
+        <button nz-button nzType="primary" type="submit" [disabled]="loading" (click)="save()">
+          {{ submitButtonText }}
+        </button>
+        <button nz-button type="button" (click)="close()">Annuler</button>
+      </div>
     </div>
   </div>
 
@@ -144,11 +146,4 @@
   </form>
   <h2>Contenu de l'annonce</h2>
   <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)" class="ui-editorjs"></ui-editorjs>
-
-  <div class="button-container">
-    <button nz-button nzType="primary" type="submit" [disabled]="loading" (click)="save()">
-      {{ submitButtonText }}
-    </button>
-    <button nz-button type="button" (click)="close()">Annuler</button>
-  </div>
 </div>
