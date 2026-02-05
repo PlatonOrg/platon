@@ -22,6 +22,7 @@ import { Level, Topic } from '@platon/core/common'
 import { firstValueFrom } from 'rxjs'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 
 export interface SettingItem {
   id: string
@@ -42,11 +43,15 @@ export interface SettingItem {
     MatInputModule,
     NzSelectModule,
     NzSpinModule,
+    NzButtonModule,
   ],
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  host: {
+    '(window:keydown)': 'onKeyDown($event)',
+  },
 })
 export class SettingsPage implements OnInit {
   private readonly themeService = inject(ThemeService)
@@ -62,6 +67,7 @@ export class SettingsPage implements OnInit {
   protected levels = signal<Level[]>([])
   protected loading = signal(false)
   protected saving = signal(false)
+  protected hasFormChanges = signal(false)
 
   protected close = output<void>()
   protected resourceUpdated = output<Resource>()
@@ -92,6 +98,10 @@ export class SettingsPage implements OnInit {
     }
 
     await this.loadTagsAndInitForm()
+
+    this.form.valueChanges.subscribe(() => {
+      this.hasFormChanges.set(true)
+    })
   }
 
   private async loadTagsAndInitForm(): Promise<void> {
@@ -114,6 +124,7 @@ export class SettingsPage implements OnInit {
           topics: currentResource.topics?.map((t) => t.id) || [],
           levels: currentResource.levels?.map((l) => l.id) || [],
         })
+        setTimeout(() => this.hasFormChanges.set(false), 0)
       }
     } catch (error) {
       this.dialogService.error('Erreur lors du chargement des données')
@@ -143,6 +154,7 @@ export class SettingsPage implements OnInit {
 
       const updatedResource = await firstValueFrom(this.resourceService.update(currentResource.id, update))
       this.resourceUpdated.emit(updatedResource)
+      this.hasFormChanges.set(false)
     } catch (error) {
       this.dialogService.error('Erreur lors de la sauvegarde des informations')
     } finally {
@@ -160,7 +172,7 @@ export class SettingsPage implements OnInit {
 
   protected async openInEditor(): Promise<void> {
     if (this.resource) {
-      window.open(`/editor/${this.resource().id}?version=latest`, '_blank')
+      window.location.href = `/editor/${this.resource().id}?version=latest`
     }
   }
 
@@ -186,5 +198,15 @@ export class SettingsPage implements OnInit {
       document.body.style.transition = 'none'
       this.dialogService.success(`Thème ${theme} appliqué`)
     }, 500)
+  }
+
+  protected async onKeyDown(event: KeyboardEvent): Promise<void> {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault()
+      if (this.selectedSetting()?.type === 'save' && this.canSubmit) {
+        event.stopPropagation()
+        await this.saveResourceInfo()
+      }
+    }
   }
 }

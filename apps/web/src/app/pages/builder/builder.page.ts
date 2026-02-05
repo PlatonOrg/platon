@@ -333,6 +333,19 @@ export class BuilderPage implements OnInit {
   protected async save(): Promise<void> {
     if (!this.resource) return
 
+    // Si c'est la première sauvegarde ET (titre par défaut OU brouillon)
+    // alors rediriger vers l'option sauvegarde
+    if (this.isFirstSave) {
+      const hasDefaultName = this.hasDefaultResourceName(this.resource.name)
+      const isDraft = this.resource.status === 'DRAFT'
+
+      if (hasDefaultName && isDraft) {
+        this.isFirstSave = false
+        this.redirectToSaveOptions()
+        return
+      }
+    }
+
     try {
       this.saving = true
       this.changeDetectorRef.markForCheck()
@@ -361,12 +374,7 @@ export class BuilderPage implements OnInit {
       this.hasUnsavedChanges.set(false)
 
       this.dialogService.success('Sauvegardé avec succès')
-
-      // Afficher un message informatif lors de la première sauvegarde
-      if (this.isFirstSave) {
-        this.isFirstSave = false
-        this.showFirstSaveInfo()
-      }
+      this.showFirstSaveInfo()
     } catch (error) {
       this.dialogService.error('Erreur lors de la sauvegarde')
     } finally {
@@ -407,6 +415,7 @@ export class BuilderPage implements OnInit {
     }
 
     if (isDraft) {
+      // On ne veut pas spammer si le nom est personnalisé mais que le statut est en brouillon
       if (hasDefaultName) content += '<br>'
       content += '<p><strong>Statut :</strong> Votre exercice est actuellement en <strong>brouillon</strong>. '
       content += 'Pour changer le statut, rendez-vous dans <strong>Paramètres → Option sauvegarde</strong>.</p>'
@@ -423,9 +432,17 @@ export class BuilderPage implements OnInit {
     })
   }
 
+  protected redirectToSaveOptions(): void {
+    const setting = this.settingItems.find((item) => item.id === 'save')
+    if (setting) {
+      this.selectSetting(setting)
+    }
+  }
+
   protected async onResourceUpdated(updatedResource: Resource): Promise<void> {
     this.resource = updatedResource
     this.title.setTitle(`${this.resource.name}`)
+    this.isFirstSave = false
     await this.save()
     this.changeDetectorRef.markForCheck()
   }
@@ -453,7 +470,7 @@ export class BuilderPage implements OnInit {
 
   protected async openInEditor(): Promise<void> {
     if (this.resource) {
-      window.open(`/editor/${this.resource.id}?version=latest`, '_blank')
+      window.location.href = `/editor/${this.resource.id}?version=latest`
     }
   }
 
@@ -684,7 +701,8 @@ export class BuilderPage implements OnInit {
   protected onKeyDown(event: KeyboardEvent): void {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault()
-      if (!this.saving) {
+      // Ne pas sauvegarder si on est en mode settings (save) (le save gère lui-même le Ctrl+S)
+      if (!this.saving && this.selectedSetting !== null && this.selectedSetting?.type !== 'save') {
         this.save().catch(console.error)
       }
     }

@@ -1,8 +1,28 @@
 @if (selectedSetting()) {
 <div class="settings-panel">
   <div class="settings-header">
-    <mat-icon>{{ selectedSetting()!.icon }}</mat-icon>
-    <h2>{{ selectedSetting()!.label }}</h2>
+    <div class="header-left">
+      <mat-icon>{{ selectedSetting()!.icon }}</mat-icon>
+      <h2>{{ selectedSetting()!.label }}</h2>
+    </div>
+    @if (selectedSetting()!.type === 'save') {
+    <button
+      nz-button
+      nzType="primary"
+      nzSize="large"
+      [disabled]="!canSubmit"
+      (click)="saveResourceInfo()"
+      class="save-button"
+    >
+      @if (saving()) {
+      <span>Enregistrement...</span>
+      } @else {
+      <span>Enregistrer</span>
+      @if (hasFormChanges()) {
+      <span class="unsaved-dot" title="Modifications non sauvegardées"></span>
+      } }
+    </button>
+    }
   </div>
 
   <!-- Panneau de sélection de thème -->
@@ -50,14 +70,14 @@
     <nz-spin nzTip="Chargement..."></nz-spin>
     } @else {
     <h3>Informations de la ressource</h3>
-    <form [formGroup]="form" (ngSubmit)="saveResourceInfo()">
-      <mat-form-field appearance="outline" class="full-width">
+    <form id="resource-info-form" [formGroup]="form" (ngSubmit)="saveResourceInfo()">
+      <mat-form-field appearance="outline" class="full-width form-field-wrapper">
         <mat-label>Nom</mat-label>
         <input matInput formControlName="name" />
         <mat-error>Le nom est requis</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width form-field-wrapper">
         <mat-label>Description</mat-label>
         <textarea matInput formControlName="desc" rows="4"></textarea>
         <mat-error>La description est requise</mat-error>
@@ -110,16 +130,6 @@
           <nz-option [nzLabel]="level.name" [nzValue]="level.id" />
           }
         </nz-select>
-      </div>
-
-      <div class="form-actions">
-        <button mat-raised-button color="primary" class="button" type="submit" [disabled]="!canSubmit">
-          @if (saving()) {
-          <span>Sauvegarde...</span>
-          } @else {
-          <span>Enregistrer</span>
-          }
-        </button>
       </div>
     </form>
     }
