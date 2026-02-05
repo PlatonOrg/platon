@@ -27,6 +27,7 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog'
 import { FormsModule } from '@angular/forms'
@@ -66,6 +67,7 @@ import { AnnouncementService } from '../../api/announcement.service'
     NzInputNumberModule,
     NzCheckboxModule,
     NzTagModule,
+    NzAlertModule,
     MatDialogModule,
     MatIconModule,
     MatTooltipModule,
@@ -88,6 +90,7 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
   protected form!: FormGroup
   loading = false
   protected hasUnsavedChanges = false
+  protected errorMessage: string | null = null
 
   terms: OutputData = emptyEditorJsData()
 
@@ -250,6 +253,13 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
 
     try {
+      if (!this.form.valid) {
+        this.errorMessage = 'Veuillez remplir tous les champs requis'
+        this.changeDetectorRef.markForCheck()
+        return
+      }
+
+      this.errorMessage = null
       this.updateTargetedRoles()
 
       const formData = {

@@ -32,6 +32,10 @@ ui-editorjs {
   margin-bottom: 70px;
 }
 
+.error-alert {
+  margin-bottom: 16px;
+}
+
 .header {
   position: sticky;
   top: 0;
@@ -42,6 +46,12 @@ ui-editorjs {
   padding: 6px;
   z-index: 10;
   margin-bottom: 16px;
+  
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+  }
 }
 
 .role {
@@ -87,12 +97,9 @@ nz-radio-group {
 
 
 .action-buttons {
-  position: absolute;
   display: flex;
   align-items: center;
   gap: 8px;
-  right: 3px;
-  top: 6px;
 }
 
 .save-state, .preview-button {

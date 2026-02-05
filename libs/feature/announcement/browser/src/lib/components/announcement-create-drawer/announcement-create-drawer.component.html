@@ -1,5 +1,17 @@
 <div class="container">
+  @if (errorMessage) {
+  <nz-alert
+    nzType="error"
+    [nzMessage]="errorMessage"
+    nzShowIcon
+    nzCloseable
+    (nzOnClose)="errorMessage = null"
+    class="error-alert"
+  ></nz-alert>
+  }
+
   <div class="header">
+    <h1>{{ dialogTitle }}</h1>
     <div class="action-buttons">
       <div class="save-state">
         @if (hasUnsavedChanges) {
@@ -27,8 +39,6 @@
       </div>
     </div>
   </div>
-
-  <h1>{{ dialogTitle }}</h1>
 
   <form nz-form [formGroup]="form" (ngSubmit)="save()">
     <nz-spin [nzSpinning]="loading">
