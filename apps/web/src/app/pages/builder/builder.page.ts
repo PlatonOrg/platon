@@ -702,7 +702,7 @@ export class BuilderPage implements OnInit {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault()
       // Ne pas sauvegarder si on est en mode settings (save) (le save gère lui-même le Ctrl+S)
-      if (!this.saving && this.selectedSetting !== null && this.selectedSetting?.type !== 'save') {
+      if (!this.saving && this.selectedSetting?.type !== 'save') {
         this.save().catch(console.error)
       }
     }
