@@ -197,6 +197,8 @@ export abstract class PlayerManager {
       variables.grader
     )
 
+    exerciseSession.envid = output.envid
+
     let grade = Number.parseInt(output.variables.grade) ?? -1
     if (Number.isNaN(grade)) {
       grade = -1
@@ -230,6 +232,7 @@ export abstract class PlayerManager {
 
     const promises: Promise<unknown>[] = [
       this.updateSession(exerciseSession.id, {
+        envid: exerciseSession.envid,
         grade: exerciseSession.grade,
         attempts: exerciseSession.attempts,
         variables: exerciseSession.variables,
