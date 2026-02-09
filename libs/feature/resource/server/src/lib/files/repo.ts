@@ -49,6 +49,17 @@ export class Repo {
 
   private constructor(private readonly root: string, private readonly user: User) {}
 
+  private async gitClient(dir: string) {
+    const client = simpleGit(dir)
+    if (this.user.name) {
+      await client.addConfig('user.name', this.user.name, false, 'local')
+    }
+    if (this.user.email) {
+      await client.addConfig('user.email', this.user.email, false, 'local')
+    }
+    return client
+  }
+
   static async get(
     name: string,
     options?: {
@@ -417,7 +428,8 @@ export class Repo {
   async bundle(version = LATEST) {
     return await withTempFile(
       async (path) => {
-        await simpleGit(this.root).raw('bundle', 'create', path, 'HEAD', version === LATEST ? DEFAULT_BRANCH : 'latest')
+        const client = await this.gitClient(this.root)
+        await client.raw('bundle', 'create', path, 'HEAD', version === LATEST ? DEFAULT_BRANCH : 'latest')
         return path
       },
       { prefix: 'bundles', suffix: '.git', cleanup: false }
@@ -425,18 +437,14 @@ export class Repo {
   }
 
   async mergeBundle(name: string) {
-    await simpleGit(this.repo.dir).pull(['--rebase', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`)])
+    const client = await this.gitClient(this.repo.dir)
+    await client.pull(['--rebase', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`)])
   }
 
   async copy(to: Repo) {
     try {
-      await simpleGit(this.root).raw(
-        'bundle',
-        'create',
-        Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`),
-        'HEAD',
-        'main'
-      )
+      const client = await this.gitClient(this.root)
+      await client.raw('bundle', 'create', Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`), 'HEAD', 'main')
       await to.mergeBundle(this.resource)
       await fs.promises.rm(Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`))
     } catch (error) {
@@ -449,7 +457,8 @@ export class Repo {
     version = version === LATEST ? 'HEAD' : version
     return withTempFile(
       async (tmppath) => {
-        await simpleGit(this.repo.dir).raw(['archive', '-o', tmppath, `${version}:${path}`])
+        const client = await this.gitClient(this.repo.dir)
+        await client.raw(['archive', '-o', tmppath, `${version}:${path}`])
         return tmppath
       },
       { prefix: 'archives', suffix: '.zip', cleanup: false }
@@ -479,11 +488,13 @@ export class Repo {
       args.push('-i')
     }
 
-    return simpleGit(this.root).grep(query, args)
+    const client = await this.gitClient(this.root)
+    return client.grep(query, args)
   }
 
   async versions(): Promise<FileVersions> {
-    const tags = await simpleGit(this.repo.dir).tags({
+    const client = await this.gitClient(this.repo.dir)
+    const tags = await client.tags({
       '--format': '%(refname:lstrip=2) %(taggername) %(taggeremail) %(creatordate:iso-strict) %(subject)',
     })
 
@@ -516,7 +527,8 @@ export class Repo {
   }
 
   async describe(): Promise<string> {
-    return simpleGit(this.root).raw('describe', '--always')
+    const client = await this.gitClient(this.root)
+    return client.raw('describe', '--always')
   }
 
   async withNoCommit<T = unknown>(consumer: () => Promise<T>): Promise<T> {
@@ -576,26 +588,32 @@ export class Repo {
   }
 
   async getCurrentBranch() {
-    return (await simpleGit(this.root).branch()).current
+    const client = await this.gitClient(this.root)
+    return (await client.branch()).current
   }
 
   async checkout(branch: string) {
-    await simpleGit(this.root).checkout(branch)
+    const client = await this.gitClient(this.root)
+    await client.checkout(branch)
   }
 
   async checkoutTag(tag: string) {
-    await simpleGit(this.root).checkout('tags/' + tag, ['-f'])
+    const client = await this.gitClient(this.root)
+    await client.checkout('tags/' + tag, ['-f'])
   }
 
   async moveTag(tag: string) {
-    await simpleGit(this.root).raw('tag', '-f', tag, 'HEAD')
+    const client = await this.gitClient(this.root)
+    await client.raw('tag', '-f', tag, 'HEAD')
   }
 
   async checkoutLocalBranch(branch: string) {
-    await simpleGit(this.root).checkoutLocalBranch(branch)
+    const client = await this.gitClient(this.root)
+    await client.checkoutLocalBranch(branch)
   }
 
   async deleteLocalBranch(branch: string) {
-    await simpleGit(this.root).deleteLocalBranch(branch, true)
+    const client = await this.gitClient(this.root)
+    await client.deleteLocalBranch(branch, true)
   }
 }
