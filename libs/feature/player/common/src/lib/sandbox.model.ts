@@ -13,7 +13,7 @@ export interface SandboxInput {
   submissionFiles?:
     | {
         path: string
-        content: string
+        content: Buffer
       }[]
     | null
   variables: ExerciseVariables | ActivityVariables

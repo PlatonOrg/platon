@@ -178,7 +178,7 @@ export abstract class PlayerManager {
     const submissionFiles = await Promise.all(
       exerciseSession?.submissions?.map(async (file) => ({
         path: 'submission/' + basename(file.fileName),
-        content: (await file.getContent()).toString(),
+        content: await file.getContent(),
         hash: '',
       })) || []
     )
