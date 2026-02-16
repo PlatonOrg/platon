@@ -8,7 +8,9 @@ import {
   Input,
   OnInit,
   Output,
+  SimpleChanges,
   inject,
+  OnChanges,
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { MatCardModule } from '@angular/material/card'
@@ -52,7 +54,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
     UserAvatarComponent,
   ],
 })
-export class ResourceFilesComponent implements OnInit {
+export class ResourceFilesComponent implements OnInit, OnChanges {
   private readonly fileService = inject(ResourceFileService)
   private readonly pickerService = inject(PickerBrowserService)
   private readonly dialogService = inject(DialogService)
@@ -106,6 +108,12 @@ export class ResourceFilesComponent implements OnInit {
 
   ngOnInit(): void {
     this.refreshGitLog()
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['gitLog']) {
+      this.refreshGitLog()
+    }
   }
 
   openUrl(url: string): void {
