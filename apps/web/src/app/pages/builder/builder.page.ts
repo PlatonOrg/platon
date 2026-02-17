@@ -308,7 +308,7 @@ export class BuilderPage implements OnInit {
       // init and register component for InputFileService with dialogue message
       this.inputFileService.init(this.resource.id, version, true, true)
       this.inputs.forEach((input) => {
-        if (input.type == 'file') {
+        if (input.type === 'file') {
           const fileReference = (input.value?.replace(/@copycontent|@copyurl/g, '') || '').trim()
           this.inputFileService.register(input.name, fileReference)
         }

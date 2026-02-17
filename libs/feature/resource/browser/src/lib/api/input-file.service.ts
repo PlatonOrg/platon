@@ -52,7 +52,7 @@ export class InputFileService {
         reference = reference.replace('/', '')
       }
       const [resourceId, versionAndName] = reference.split(':') // resource id, version/file name
-      const url = reference == '' ? '' : path + resourceId + '/' + versionAndName.split('/')[1]
+      const url = reference === '' ? '' : path + resourceId + '/' + versionAndName.split('/')[1]
       this.files.set(name, new Info(url))
     }
   }
@@ -122,7 +122,7 @@ export class InputFileService {
     const url = path + this.resourceId + '/?version=latest'
     const name = await this.uploadFile(url, file)
     info.currentUrl = path + this.resourceId + '/' + name
-    if (name == '') {
+    if (name === '') {
       this.openDialogue("N'a pas pu extraire le nom du fichier ajouté.")
     } else {
       this.openDialogue('Fichier ' + name + ' ajouté.')
@@ -137,7 +137,7 @@ export class InputFileService {
   /** ignore if url is '', remove only if the url as the same id that the one save on the service*/
   private async deleteFile(url: string) {
     try {
-      if (url == '') {
+      if (url === '') {
         return
       }
       if (!this.isDeletable(url)) {
@@ -161,7 +161,7 @@ export class InputFileService {
       return false
     }
     const splitName = name.split('.')
-    if (splitName[0] == 'main') {
+    if (splitName[0] === 'main') {
       const extension = ['ple', 'plo', 'plc']
       if (extension.includes(splitName[1])) {
         this.openDialogue('Le fichier ' + name + " n'est pas supprimable.", true)
@@ -169,7 +169,7 @@ export class InputFileService {
       }
     }
 
-    if (splitName[0] == 'readme' && splitName[1] == 'md') {
+    if (splitName[0] === 'readme' && splitName[1] === 'md') {
       this.openDialogue('Le fichier ' + name + " n'est pas supprimable.", true)
       return false
     }
@@ -190,7 +190,7 @@ export class InputFileService {
 
   urlFile(InputValue: string): string {
     let reference = (InputValue.replace(/@copycontent|@copyurl/g, '') || '').trim() // current file
-    if (reference == '') {
+    if (reference === '') {
       return ''
     }
     reference = reference.replace('/', '')
