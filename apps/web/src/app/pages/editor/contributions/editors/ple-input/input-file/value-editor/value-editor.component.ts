@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, Pipe, PipeTransform, inject } from '@angular/core'
-import { DndData, EditorService, NotificationService } from '@cisstech/nge-ide/core'
+import { ChangeDetectionStrategy, Component, Input, Pipe, PipeTransform, inject } from '@angular/core'
+import { DndData, EditorService, NotificationService, FileService } from '@cisstech/nge-ide/core'
 import { EditorPresenter } from '../../../../../editor.presenter'
 import { ResourceFileSystemProvider } from '../../../../file-system'
 import { BaseValueEditor } from '../../ple-input'
+import { ActivatedRoute } from '@angular/router'
+import { InputFileService } from '@platon/feature/resource/browser'
 
 @Pipe({ name: 'hideResourceId' })
 export class HideResourceIdPipe implements PipeTransform {
@@ -25,6 +27,21 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
   private readonly editorPresenter = inject(EditorPresenter)
   private readonly fileSystemProvider = inject(ResourceFileSystemProvider)
   private readonly notificationService = inject(NotificationService)
+  private readonly inputFileService = inject(InputFileService) // file gestion
+  private readonly fileService = inject(FileService) // to refresh file explorer for ple
+
+  modeBuilder = false // true if is the builder editor false otherwise
+  @Input() inputId = '' // name of the component in the list of component
+
+  id = this.route.snapshot.paramMap.get('id') // ressource id
+  version = 'latest'
+  watchContent = false // display file content for plo
+
+  constructor(private route: ActivatedRoute) {
+    super()
+    this.modeBuilder = this.inputFileService.isModeBuilder()
+    this.version = this.inputFileService.resourceVersion()
+  }
 
   protected get isUrl(): boolean {
     return !!this.value?.startsWith('@copyurl')
@@ -34,62 +51,108 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
     return !!this.value?.startsWith('@copycontent')
   }
 
-  constructor() {
-    super()
-  }
-
   override setValue(value: string): void {
     super.setValue(typeof value === 'string' && value.match(/^@copycontent\s|@copyurl\s/) ? value : '')
   }
 
-  protected onDrop(data: DndData) {
+  onDragLeave(event: DragEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  private async uploadFile(data: DndData) {
+    if (data.file === undefined) {
+      return // should never append
+    }
+    let name = data.file.name
+    const newName = await this.inputFileService.change(this.inputId, data.file)
+    if (newName != '') {
+      name = newName // new file name (can change if a file with the same name is already there)
+    }
+    let type = this.value?.split('/')[0].trim() // keep the type
+    if (type === '') {
+      type = '@copycontent'
+    }
+    const newValue = type + ' /' + this.id + ':latest/' + name
+    this.setValue((this.value = newValue))
+    this.notifyValueChange?.(this.value)
+    await this.fileService.refresh()
+  }
+
+  protected async onDrop(data: DndData) {
     if (this.disabled) {
       return
     }
+    if (data.file) {
+      await this.uploadFile(data) // add from outside platon
+    } else {
+      const { activeResource } = this.editorService // file already in platon
 
-    const { activeResource } = this.editorService
-    if (!activeResource || !data.src) {
-      return
-    }
-
-    const uri = monaco.Uri.parse(data.src)
-
-    let path = ''
-    try {
-      path = this.editorPresenter.resolvePath(uri, activeResource, true)
-      if (path) {
-        this.changeValue((this.value = `@copycontent ${path}`))
+      if (!activeResource || !data.src) {
+        return
       }
-    } catch (error) {
-      this.notificationService.publishError(error)
+
+      const uri = monaco.Uri.parse(data.src)
+
+      let path = ''
+      try {
+        path = this.editorPresenter.resolvePath(uri, activeResource, true)
+        if (path) {
+          void this.changeValue((this.value = `@copycontent ${path}`))
+        }
+      } catch (error) {
+        this.notificationService.publishError(error)
+      }
     }
   }
 
-  protected changeValue(value: string) {
+  protected async changeValue(value: string) {
+    if (this.modeBuilder && value == '') {
+      void this.inputFileService.remove(this.inputId) // clic on cross icon on builder page
+    }
     this.notifyValueChange?.((this.value = value))
   }
 
   protected switchToUrl() {
-    this.changeValue(this.value?.replace('@copycontent', '@copyurl') || '')
+    void this.changeValue(this.value?.replace('@copycontent', '@copyurl') || '')
   }
 
   protected switchToContent() {
-    this.changeValue(this.value?.replace('@copyurl', '@copycontent') || '')
+    void this.changeValue(this.value?.replace('@copyurl', '@copycontent') || '')
+  }
+
+  /** give the download url of the file */
+  protected getUrl(): string {
+    return this.value ? this.inputFileService.urlFile(this.value) : ''
+  }
+
+  /** distinct ple case (open the file) from plo case (preview)*/
+  protected eyeButton() {
+    if (this.modeBuilder) {
+      this.watchContent = !this.watchContent
+    } else {
+      this.openFile()
+    }
   }
 
   protected openFile() {
     const reference = (this.value?.replace(/@copycontent|@copyurl/g, '') || '').trim()
     if (!reference.startsWith('/')) {
-      const [resource, version] = (this.editorService.activeResource as monaco.Uri).authority.split(':')
-      const uri = this.fileSystemProvider.buildUri(resource, version, reference)
+      const [resource, _] = (this.editorService.activeResource as monaco.Uri).authority.split(':')
+      const uri = this.fileSystemProvider.buildUri(resource, this.version, reference)
       this.editorService.open(uri).catch(console.error)
       return
     }
 
     // first element is empty string since the string starts with a slash
     const [, authority, path] = reference.split('/')
-    const [resource, version] = authority.split(':')
-    const uri = this.fileSystemProvider.buildUri(resource, version, path)
+    const [resource, _] = authority.split(':') // version is alway latest so doesn't work for other version
+    const uri = this.fileSystemProvider.buildUri(resource, this.version, path)
     this.editorService.open(uri).catch(console.error)
   }
 }

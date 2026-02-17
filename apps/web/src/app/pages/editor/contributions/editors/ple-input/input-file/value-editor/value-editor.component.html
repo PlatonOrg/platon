@@ -1,10 +1,17 @@
-<div id="drop-zone" class="drop-zone" dnd (dropped)="onDrop($event)">
+<div
+  id="drop-zone"
+  class="drop-zone"
+  dnd
+  (dropped)="onDrop($event)"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+>
   <span>
     {{ (value | hideResourceId) || "Déposez un fichier ici depuis l'explorateur..." }}
   </span>
 </div>
 <ng-container *ngIf="value">
-  <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="openFile()">
+  <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="eyeButton()">
     <span nz-icon nzType="eye" nzTheme="outline"></span>
   </button>
   <button *ngIf="isContent" nz-button nzType="text" nz-tooltip="Changer en url" (click)="switchToUrl()">
@@ -17,3 +24,22 @@
     <span nz-icon nzType="close" nzTheme="outline"></span>
   </button>
 </ng-container>
+@if (this.modeBuilder && watchContent) {
+<ui-modal-template closable height="70vh" width="80vw" (closed)="watchContent = false" [visible]="watchContent">
+  <ng-template>
+    <ng-container *ngIf="watchContent">
+      @defer (on viewport) {
+      <ui-file-preview [src]="getUrl()" />
+      } @placeholder {
+      <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 5 }"></nz-skeleton>
+      }
+    </ng-container>
+  </ng-template>
+  <ng-template>
+    <a mat-button [href]="getUrl()" target="_blank">
+      <mat-icon>download</mat-icon>
+      Télécharger</a
+    >
+  </ng-template>
+</ui-modal-template>
+}
