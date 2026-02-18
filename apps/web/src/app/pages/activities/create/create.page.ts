@@ -421,17 +421,6 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       const { resources } = this.resourceInfo.value
       const { openAt, closeAt, members, correctors, groups, isChallenge } = this.settingsInfo.value
 
-      // Création de toutes les activités sélectionnées
-
-      console.log('Création des activités avec les données suivantes :')
-      console.log('Course date :' + course)
-      console.log('Section :', section)
-      console.log('Ressources :', resources)
-      console.log('Accès :', { openAt, closeAt })
-      const testOpenAt = (openAt || null) as Date
-      const testCloseAt = (closeAt || null) as Date
-      console.log('Acces après parsing :', { testOpenAt, testCloseAt })
-      const startTime = Date.now()
       const createdActivities = await firstValueFrom(
         this.courseService.createActivities(
           course as Course,
@@ -439,47 +428,12 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
             sectionId: section?.id as string,
             resourceId: resource.id,
             resourceVersion: 'latest',
-            openAt: (openAt || null) as Date,
-            closeAt: (closeAt || null) as Date,
+            openAt: openAt as Date,
+            closeAt: closeAt as Date,
             isChallenge: !!isChallenge,
           }))
         )
       )
-      console.log(`Created ${createdActivities.resources.length} activities in ${Date.now() - startTime}ms`)
-
-      /*if (!isChallenge) {
-        await Promise.all(
-          createdActivities.resources.map((activity) =>
-            Promise.all([
-              firstValueFrom(
-                this.courseService.updateActivityMembers(
-                  activity,
-                  members?.map((m) => {
-                    const [memberId, userId] = m.split(':')
-                    return {
-                      userId,
-                      memberId,
-                    }
-                  }) || []
-                )
-              ),
-              firstValueFrom(
-                this.courseService.updateActivityCorrectors(
-                  activity,
-                  correctors?.map((m) => {
-                    const [memberId, userId] = m.split(':')
-                    return {
-                      userId,
-                      memberId,
-                    }
-                  }) || []
-                )
-              ),
-              firstValueFrom(this.courseService.updateActivityGroups(activity.id, groups || [])),
-            ])
-          )
-        )
-      }*/
 
       if (this.isTest) {
         await this.router.navigateByUrl(`/tests/${course?.id}`, { replaceUrl: true })
@@ -502,7 +456,6 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
         'Une erreur est survenue lors de la création des activités, veuillez réessayer un peu plus tard !'
       )
       this.dialogService.error(`${errorMessage}`)
-      console.error('Erreur lors de la création des activités', error)
     } finally {
       this.creating = false
       this.changeDetectorRef.markForCheck()

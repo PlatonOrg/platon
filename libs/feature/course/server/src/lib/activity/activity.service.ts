@@ -16,7 +16,6 @@ import { ResourceEntity, ResourceFileService, ResourceService } from '@platon/fe
 import { CLS_REQ } from 'nestjs-cls'
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm'
 import { Optional } from 'typescript-optional'
-import { ActivityCorrectorService } from '../activity-corrector/activity-corrector.service'
 import { ActivityMemberService } from '../activity-member/activity-member.service'
 import { ActivityMemberView } from '../activity-member/activity-member.view'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
@@ -157,7 +156,6 @@ export class ActivityService {
   }
 
   async createActivities(activities: Partial<ActivityEntity>[]): Promise<ActivityEntity[]> {
-    const startTime = Date.now()
     const maxOrder =
       (await this.repository.maximum('order', {
         courseId: activities[0].courseId,
@@ -166,7 +164,6 @@ export class ActivityService {
     const activitiesWithOrder = activities.map((activity, index) => ({ ...activity, order: maxOrder + index + 1 }))
     const result = await this.repository.save(activitiesWithOrder)
     await this.addVirtualColumns(...result)
-    this.logger.debug(`Created ${result.length} activities in ${Date.now() - startTime}ms`)
     return result
   }
 
@@ -348,9 +345,6 @@ export class ActivityService {
       if ('resourceId' in input) {
         const activityFailure = await this.findByActivityId(input.resourceId)
         activityFailure.ifPresent((activity) => {
-          this.logger.error(
-            `Activity ${activity.id} is using the resource ${input.resourceId} which failed to compile. Marking activity as failed.`
-          )
           throw new NotFoundResponse(`Resource not found: ${activity.title} version ${input.resourceVersion}`)
         })
 
@@ -362,13 +356,7 @@ export class ActivityService {
       throw error
     }
 
-    this.logger.debug(
-      'Acces Activity before assign : ' + JSON.stringify({ openAt: input.openAt, closeAt: input.closeAt })
-    )
     Object.assign(activity, input)
-    this.logger.debug(
-      'Acces Activity after assign : ' + JSON.stringify({ openAt: activity.openAt, closeAt: activity.closeAt })
-    )
     return activity
   }
 

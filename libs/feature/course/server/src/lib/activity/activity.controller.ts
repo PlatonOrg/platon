@@ -7,6 +7,7 @@ import {
   ActivityDTO,
   ActivityFiltersDTO,
   CreateCourseActivityDTO,
+  CreateCourseActivitiesBatchDTO,
   ReloadCourseActivityDTO,
   UpdateCourseActivityDTO,
 } from './activity.dto'
@@ -17,7 +18,6 @@ import { RestrictionListDTO } from './activity-restriction.dto'
 @Controller('courses/:courseId/activities')
 @ApiTags('Courses')
 export class ActivityController {
-  private readonly logger = new Logger(ActivityController.name)
   constructor(
     private readonly activityService: ActivityService,
     private readonly permissionsService: CoursePermissionsService
@@ -83,12 +83,10 @@ export class ActivityController {
   async createActivities(
     @Req() req: IRequest,
     @UUIDParam('courseId') courseId: string,
-    @Body() inputs: CreateCourseActivityDTO[]
+    @Body() body: CreateCourseActivitiesBatchDTO
   ): Promise<ListResponse<ActivityDTO>> {
     await this.permissionsService.ensureCourseWritePermission(courseId, req)
-    this.logger.debug(
-      'Creating activities with inputs :' + JSON.stringify({ openAt: inputs[0].openAt, closeAt: inputs[0].closeAt })
-    )
+    const inputs = body.activities
     const activities = await this.activityService.createActivities(
       await Promise.all(
         inputs.map(async (input) => ({

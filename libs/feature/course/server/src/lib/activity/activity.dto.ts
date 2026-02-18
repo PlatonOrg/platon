@@ -175,3 +175,9 @@ export class ReloadCourseActivityDTO implements ReloadActivity {
   @ApiProperty()
   readonly version?: string
 }
+
+export class CreateCourseActivitiesBatchDTO {
+  @Type(() => CreateCourseActivityDTO)
+  @ApiProperty({ type: [CreateCourseActivityDTO] })
+  readonly activities!: CreateCourseActivityDTO[]
+}
