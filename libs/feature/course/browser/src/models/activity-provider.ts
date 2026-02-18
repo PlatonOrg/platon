@@ -13,6 +13,7 @@ export abstract class ActivityProvider {
   abstract find(courseId: string, activityId: string): Observable<Activity>
   abstract search(course: Course, filters?: ActivityFilters): Observable<ListResponse<Activity>>
   abstract create(course: Course, input: CreateActivity): Observable<Activity>
+  abstract createActivities(course: Course, inputs: CreateActivity[]): Observable<ListResponse<Activity>>
   abstract update(activity: Activity, input: UpdateActivity): Observable<Activity>
   abstract updateOrder(course: Course, sortedActivityIds: string[]): Observable<void>
   abstract reload(activity: Activity, version?: string): Observable<Activity>

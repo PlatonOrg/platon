@@ -63,28 +63,43 @@
               />
             </div>
 
-            <!-- Activité sélectionnée -->
-            @if (resourceInfo.value.resource) {
+            <!-- Activités sélectionnées -->
+            @if (resourceInfo.value.resources && resourceInfo.value.resources.length > 0) {
             <div class="selected-activity-banner">
               <div class="banner-content">
                 <div class="banner-info">
                   <mat-icon class="check-icon">check_circle</mat-icon>
                   <div class="activity-details">
-                    <span class="activity-name">{{ resourceInfo.value.resource.name }}</span>
-                    @if (resourceInfo.value.resource.topics.length > 0 || resourceInfo.value.resource.levels.length > 0)
-                    {
+                    @if(resourceInfo.value.resources.length === 1){
+                    <span class="activity-name">{{ resourceInfo.value.resources[0].name }}</span>
+                    @if (resourceInfo.value.resources[0].topics.length > 0 ||
+                    resourceInfo.value.resources[0].levels.length > 0) {
                     <div class="activity-tags">
-                      @for (topic of resourceInfo.value.resource.topics; track topic.id) {
+                      @for (topic of resourceInfo.value.resources[0].topics; track topic.id) {
                       <nz-tag [nzColor]="'blue'">{{ topic.name }}</nz-tag>
-                      } @for (level of resourceInfo.value.resource.levels; track level.id) {
+                      } @for (level of resourceInfo.value.resources[0].levels; track level.id) {
                       <nz-tag [nzColor]="'orange'">{{ level.name }}</nz-tag>
+                      }
+                    </div>
+                    } } @else{
+
+                    <span class="activity-name">
+                      {{ resourceInfo.value.resources.length }}
+                      @if (resourceInfo.value.resources.length === 1) { activité sélectionnée } @else { activités
+                      sélectionnées }
+                    </span>
+                    <div class="activity-tags">
+                      @for (resource of resourceInfo.value.resources; track resource.id) {
+                      <nz-tag [nzColor]="'blue'">{{ resource.name }}</nz-tag>
                       }
                     </div>
                     }
                   </div>
                 </div>
                 <div class="banner-actions">
-                  <button nz-button nzSize="small" nzType="default" (click)="deselectActivity()">Changer</button>
+                  <button nz-button nzSize="small" nzType="default" (click)="deselectActivity()">
+                    Tout désélectionner
+                  </button>
                   <button nz-button nzSize="small" nzType="primary" (click)="stepper.nextStep()">Suivant</button>
                 </div>
               </div>
@@ -105,7 +120,7 @@
 
               <app-activity-list
                 [items]="items()"
-                [selectedId]="resourceInfo.value.resource?.id"
+                [selectedIds]="getSelectedResourceIds"
                 (activityClicked)="selectActivity($event)"
               >
                 <h2>Aucune activité ne correspond à votre recherche</h2>
@@ -128,6 +143,13 @@
               <nz-spin class="spinner-main" nzSimple nzSize="large" />
             </ng-template>
           </form>
+
+          <!-- Bouton flottant pour scroller en haut -->
+          @if (showScrollButton()) {
+          <button class="scroll-to-top" nz-button nzType="primary" nzShape="circle" (click)="scrollToTop()">
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          }
         </section>
       </ng-template>
       <ng-container *ngIf="!isTest">

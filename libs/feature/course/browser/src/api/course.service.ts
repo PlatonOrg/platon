@@ -167,6 +167,10 @@ export class CourseService {
     return this.activityProvider.create(course, input)
   }
 
+  createActivities(course: Course, inputs: CreateActivity[]): Observable<ListResponse<Activity>> {
+    return this.activityProvider.createActivities(course, inputs)
+  }
+
   updateActivity(activity: Activity, input: UpdateActivity): Observable<Activity> {
     return this.activityProvider.update(activity, input)
   }

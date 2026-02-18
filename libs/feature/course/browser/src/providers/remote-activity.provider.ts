@@ -41,6 +41,12 @@ export class RemoteActivityProvider extends ActivityProvider {
       .pipe(map((response) => response.resource))
   }
 
+  createActivities(course: Course, inputs: CreateActivity[]): Observable<ListResponse<Activity>> {
+    return this.http
+      .post<ListResponse<Activity>>(`/api/v1/courses/${course.id}/activities/batch`, inputs)
+      .pipe(map((response) => response))
+  }
+
   update(activity: Activity, input: UpdateActivity): Observable<Activity> {
     return this.http
       .patch<ItemResponse<Activity>>(`/api/v1/courses/${activity.courseId}/activities/${activity.id}`, input)

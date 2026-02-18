@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Patch, Post, Put, Query, Req } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Logger, Patch, Post, Put, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse, ListResponse, NoContentResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
@@ -17,6 +17,7 @@ import { RestrictionListDTO } from './activity-restriction.dto'
 @Controller('courses/:courseId/activities')
 @ApiTags('Courses')
 export class ActivityController {
+  private readonly logger = new Logger(ActivityController.name)
   constructor(
     private readonly activityService: ActivityService,
     private readonly permissionsService: CoursePermissionsService
@@ -74,6 +75,32 @@ export class ActivityController {
     })
     return new ItemResponse({
       resource: Mapper.map(activity, ActivityDTO),
+    })
+  }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Post('/batch')
+  async createActivities(
+    @Req() req: IRequest,
+    @UUIDParam('courseId') courseId: string,
+    @Body() inputs: CreateCourseActivityDTO[]
+  ): Promise<ListResponse<ActivityDTO>> {
+    await this.permissionsService.ensureCourseWritePermission(courseId, req)
+    this.logger.debug(
+      'Creating activities with inputs :' + JSON.stringify({ openAt: inputs[0].openAt, closeAt: inputs[0].closeAt })
+    )
+    const activities = await this.activityService.createActivities(
+      await Promise.all(
+        inputs.map(async (input) => ({
+          ...(await this.activityService.fromInput(input)),
+          courseId,
+          creatorId: req.user.id,
+        }))
+      )
+    )
+    return new ListResponse({
+      total: activities.length,
+      resources: Mapper.mapAll(activities, ActivityDTO),
     })
   }
 

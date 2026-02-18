@@ -15,6 +15,6 @@ import { ActivityCardComponent } from '../activity-card/activity-card.component'
 })
 export class ActivityListComponent {
   readonly items = input<Resource[]>([])
-  readonly selectedId = input<string | undefined>(undefined)
+  readonly selectedIds = input<string[]>([])
   readonly activityClicked = output<Resource>()
 }

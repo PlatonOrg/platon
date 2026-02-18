@@ -73,6 +73,7 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { catchError, firstValueFrom, of, map, shareReplay, Subscription } from 'rxjs'
 import { ActivityListComponent } from './activity-list/activity-list.component'
 import { ViewportIntersectionDirective } from '@cisstech/nge/directives'
+import { HttpErrorResponse } from '@angular/common/http'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
@@ -161,6 +162,7 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   protected readonly completion = this.resourceService.completion().pipe(shareReplay(1))
 
   protected readonly filterIndicators = signal<FilterIndicator<ResourceFilters>[]>([])
+  protected readonly showScrollButton = signal(true)
 
   protected readonly activitySearchBar: SearchBar<string> = {
     placeholder: 'Essayez un nom, un topic, un niveau...',
@@ -212,7 +214,7 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   })
 
   protected resourceInfo = new FormGroup({
-    resource: new FormControl<Resource | undefined>(undefined, [Validators.required]),
+    resources: new FormControl<Resource[]>([], [Validators.required, Validators.minLength(1)]),
   })
 
   protected settingsInfo = new FormGroup({
@@ -374,36 +376,41 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     this.search(filters, this.activitySearchBar.value)
   }
 
-  protected selectActivity(activity: Resource): void {
-    console.log('Activité sélectionnée:', activity)
-    this.resourceInfo.patchValue({ resource: activity })
-    this.changeDetectorRef.markForCheck()
-
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        this.scrollToTop()
-      }, 50)
-    })
+  protected get getSelectedResourceIds(): string[] {
+    return this.resourceInfo.value.resources?.map((r) => r.id) || []
   }
 
-  private scrollToTop(): void {
+  protected selectActivity(activity: Resource): void {
+    const currentResources = this.resourceInfo.value.resources || []
+    const index = currentResources.findIndex((r) => r.id === activity.id)
+
+    let updatedResources: Resource[]
+    if (index > -1) {
+      updatedResources = currentResources.filter((_, i) => i !== index)
+    } else {
+      updatedResources = [...currentResources, activity]
+    }
+
+    this.resourceInfo.patchValue({ resources: updatedResources })
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected onScroll(event: Event): void {
+    const section = event.target as HTMLElement
+    this.showScrollButton.set(section.scrollTop > 10)
+  }
+
+  protected scrollToTop(): void {
     const section = this.activitySection?.nativeElement
     if (!section) {
       console.warn('Section introuvable pour le scroll')
       return
     }
-
-    // const banner = section.querySelector('.selected-activity-banner')
-    // if (banner) {
-    //   banner.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
-    // } else {
-    //   section.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
-    // }
     section.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
   }
 
   protected deselectActivity(): void {
-    this.resourceInfo.patchValue({ resource: undefined })
+    this.resourceInfo.patchValue({ resources: [] })
     this.changeDetectorRef.markForCheck()
   }
 
@@ -411,59 +418,91 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     try {
       this.creating = true
       const { course, section } = this.courseInfo.value
-      const { resource } = this.resourceInfo.value
+      const { resources } = this.resourceInfo.value
       const { openAt, closeAt, members, correctors, groups, isChallenge } = this.settingsInfo.value
 
-      const activity = await firstValueFrom(
-        this.courseService.createActivity(course as Course, {
-          sectionId: section?.id as string,
-          resourceId: resource?.id as string,
-          resourceVersion: 'latest',
-          openAt: (openAt || null) as Date,
-          closeAt: (closeAt || null) as Date,
-          isChallenge: !!isChallenge,
-        })
-      )
+      // Création de toutes les activités sélectionnées
 
-      if (!isChallenge) {
-        await Promise.all([
-          firstValueFrom(
-            this.courseService.updateActivityMembers(
-              activity,
-              members?.map((m) => {
-                const [memberId, userId] = m.split(':')
-                return {
-                  userId,
-                  memberId,
-                }
-              }) || []
-            )
-          ),
-          firstValueFrom(
-            this.courseService.updateActivityCorrectors(
-              activity,
-              correctors?.map((m) => {
-                const [memberId, userId] = m.split(':')
-                return {
-                  userId,
-                  memberId,
-                }
-              }) || []
-            )
-          ),
-          firstValueFrom(this.courseService.updateActivityGroups(activity.id, groups || [])),
-        ])
-      }
+      console.log('Création des activités avec les données suivantes :')
+      console.log('Course date :' + course)
+      console.log('Section :', section)
+      console.log('Ressources :', resources)
+      console.log('Accès :', { openAt, closeAt })
+      const testOpenAt = (openAt || null) as Date
+      const testCloseAt = (closeAt || null) as Date
+      console.log('Acces après parsing :', { testOpenAt, testCloseAt })
+      const startTime = Date.now()
+      const createdActivities = await firstValueFrom(
+        this.courseService.createActivities(
+          course as Course,
+          (resources || []).map((resource) => ({
+            sectionId: section?.id as string,
+            resourceId: resource.id,
+            resourceVersion: 'latest',
+            openAt: (openAt || null) as Date,
+            closeAt: (closeAt || null) as Date,
+            isChallenge: !!isChallenge,
+          }))
+        )
+      )
+      console.log(`Created ${createdActivities.resources.length} activities in ${Date.now() - startTime}ms`)
+
+      /*if (!isChallenge) {
+        await Promise.all(
+          createdActivities.resources.map((activity) =>
+            Promise.all([
+              firstValueFrom(
+                this.courseService.updateActivityMembers(
+                  activity,
+                  members?.map((m) => {
+                    const [memberId, userId] = m.split(':')
+                    return {
+                      userId,
+                      memberId,
+                    }
+                  }) || []
+                )
+              ),
+              firstValueFrom(
+                this.courseService.updateActivityCorrectors(
+                  activity,
+                  correctors?.map((m) => {
+                    const [memberId, userId] = m.split(':')
+                    return {
+                      userId,
+                      memberId,
+                    }
+                  }) || []
+                )
+              ),
+              firstValueFrom(this.courseService.updateActivityGroups(activity.id, groups || [])),
+            ])
+          )
+        )
+      }*/
 
       if (this.isTest) {
         await this.router.navigateByUrl(`/tests/${course?.id}`, { replaceUrl: true })
       } else {
         await this.router.navigateByUrl(`/courses/${course?.id}`, { replaceUrl: true })
       }
-    } catch {
+    } catch (error) {
+      let errorMessage = 'Une erreur inconnue est survenue'
+
+      if (error && typeof error === 'object' && 'error' in error) {
+        const httpError = error as HttpErrorResponse
+        errorMessage = httpError.error?.message || httpError.message || errorMessage
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      } else {
+        errorMessage = String(error || errorMessage)
+      }
+
       this.dialogService.error(
-        "Une erreur est survenue lors de la création de l'activité, veuillez réessayer un peu plus tard !"
+        'Une erreur est survenue lors de la création des activités, veuillez réessayer un peu plus tard !'
       )
+      this.dialogService.error(`${errorMessage}`)
+      console.error('Erreur lors de la création des activités', error)
     } finally {
       this.creating = false
       this.changeDetectorRef.markForCheck()

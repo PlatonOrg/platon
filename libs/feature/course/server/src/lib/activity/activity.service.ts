@@ -12,7 +12,7 @@ import {
   UpdateActivity,
   calculateActivityOpenState,
 } from '@platon/feature/course/common'
-import { ResourceEntity, ResourceFileService } from '@platon/feature/resource/server'
+import { ResourceEntity, ResourceFileService, ResourceService } from '@platon/feature/resource/server'
 import { CLS_REQ } from 'nestjs-cls'
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm'
 import { Optional } from 'typescript-optional'
@@ -36,8 +36,6 @@ import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
 
-import { CourseGroupService } from '../course-group/course-group.service'
-
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
 @Injectable()
@@ -52,9 +50,7 @@ export class ActivityService {
     private readonly databaseService: DatabaseService,
     private readonly notificationService: CourseNotificationService,
     private readonly activityMemberService: ActivityMemberService,
-    private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
-    private readonly courseGroup: CourseGroupService,
     private readonly activityDatesService: ActivityDatesService,
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -62,7 +58,8 @@ export class ActivityService {
     private readonly resourceRepository: Repository<ResourceEntity>,
     @InjectRepository(CourseGroupMemberEntity)
     private readonly courseGroupMemberRepository: Repository<CourseGroupMemberEntity>,
-    private readonly activityGroupService: ActivityGroupService
+    private readonly activityGroupService: ActivityGroupService,
+    private readonly resourceService: ResourceService
   ) {}
 
   async search(courseId: string, filters?: ActivityFilters): Promise<[ActivityEntity[], number]> {
@@ -156,6 +153,20 @@ export class ActivityService {
       1
     const result = await this.repository.save({ ...activity, order })
     await this.addVirtualColumns(result)
+    return result
+  }
+
+  async createActivities(activities: Partial<ActivityEntity>[]): Promise<ActivityEntity[]> {
+    const startTime = Date.now()
+    const maxOrder =
+      (await this.repository.maximum('order', {
+        courseId: activities[0].courseId,
+        sectionId: activities[0].sectionId,
+      })) ?? 0
+    const activitiesWithOrder = activities.map((activity, index) => ({ ...activity, order: maxOrder + index + 1 }))
+    const result = await this.repository.save(activitiesWithOrder)
+    await this.addVirtualColumns(...result)
+    this.logger.debug(`Created ${result.length} activities in ${Date.now() - startTime}ms`)
     return result
   }
 
@@ -323,18 +334,41 @@ export class ActivityService {
   async fromInput(input: CreateActivity | UpdateActivity): Promise<ActivityEntity> {
     const activity = new ActivityEntity()
 
-    if ('resourceId' in input) {
-      const { source } = await this.fileService.compile({
-        resourceId: input.resourceId,
-        version: input.resourceVersion,
-      })
-      activity.source = source as PLSourceFile<ActivityVariables>
-      delete (input as any).resourceId
-      delete (input as any).resourceVersion
+    try {
+      if ('resourceId' in input) {
+        const { source } = await this.fileService.compile({
+          resourceId: input.resourceId,
+          version: input.resourceVersion,
+        })
+        activity.source = source as PLSourceFile<ActivityVariables>
+        delete (input as any).resourceId
+        delete (input as any).resourceVersion
+      }
+    } catch (error) {
+      if ('resourceId' in input) {
+        const activityFailure = await this.findByActivityId(input.resourceId)
+        activityFailure.ifPresent((activity) => {
+          this.logger.error(
+            `Activity ${activity.id} is using the resource ${input.resourceId} which failed to compile. Marking activity as failed.`
+          )
+          throw new NotFoundResponse(`Resource not found: ${activity.title} version ${input.resourceVersion}`)
+        })
+
+        const resource = await this.resourceService.findByIdOrCode(input.resourceId)
+        resource.ifPresent((resource) => {
+          throw new NotFoundResponse(`Erreur lord du chargement de l'activité: ${resource.name}`)
+        })
+      }
+      throw error
     }
 
+    this.logger.debug(
+      'Acces Activity before assign : ' + JSON.stringify({ openAt: input.openAt, closeAt: input.closeAt })
+    )
     Object.assign(activity, input)
-
+    this.logger.debug(
+      'Acces Activity after assign : ' + JSON.stringify({ openAt: activity.openAt, closeAt: activity.closeAt })
+    )
     return activity
   }
 
