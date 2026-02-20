@@ -230,7 +230,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.tempOpenDate = this.activity.openAt ? new Date(this.activity.openAt) : undefined
     this.tempCloseDate = this.activity.closeAt ? new Date(this.activity.closeAt) : undefined
 
-    // Initialiser les paramètres de l'activité
     if (this.activity.activitySettings) {
       this.activitySettings = { ...this.activitySettings, ...this.activity.activitySettings }
     }
@@ -502,7 +501,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
-  // Getter pour obtenir la durée sous forme de Date (pour le time-picker)
   get durationAsDate(): Date {
     const duration = this.activitySettings.duration || 0
     const hours = Math.floor(duration / 3600)
@@ -513,7 +511,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     return date
   }
 
-  // Setter pour mettre à jour la durée à partir d'un objet Date (depuis le time-picker)
   set durationAsDate(date: Date) {
     if (date) {
       const hours = date.getHours()
@@ -525,7 +522,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
-  // Getters et Setters pour les inputs séparés heures, minutes, secondes
   get durationHours(): number {
     const duration = this.activitySettings.duration || 0
     return Math.floor(duration / 3600)
