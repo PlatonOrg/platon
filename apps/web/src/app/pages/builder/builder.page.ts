@@ -85,7 +85,6 @@ type MainViewMode = 'input' | 'setting' | 'history'
     '(document:mousemove)': 'onMouseMove($event)',
     '(document:mouseup)': 'onMouseUp()',
   },
-  providers: [EditorService, EditorPresenter, ResourceFileSystemProvider, NotificationService],
 })
 export class BuilderPage implements OnInit {
   private readonly router = inject(Router)
