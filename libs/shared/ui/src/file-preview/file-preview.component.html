@@ -35,7 +35,35 @@
 <div class="pdf-viewer">
   <canvas #pdfCanvas id="pdfCanvas"></canvas>
 </div>
-
+} @else if (isJson) {
+<div style="overflow-x: scroll">
+  @if(dataValid) {
+  <pre><code [innerHTML]="data | jsonSyntaxHighlight"></code></pre>
+  } @else {
+  {{ data }}
+  }
+</div>
+} @else if (isCsv){ @if (dataValid) {
+<div style="overflow-x: scroll">
+  <table class="csv-table">
+    <tr>
+      @for (header of csvHeaders; track header) {
+      <th>{{ header }}</th>
+      }
+    </tr>
+    <tbody>
+      @for (row of csvRows; track $index) {
+      <tr>
+        @for (cell of row; track $index) {
+        <td>{{ cell }}</td>
+        }
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
 } @else {
+{{ data }}
+} } @else {
 <div>Unsupported file format</div>
 }

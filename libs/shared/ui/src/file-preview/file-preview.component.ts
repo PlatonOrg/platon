@@ -28,6 +28,7 @@ import {
   extractSupportedExtension,
 } from './file-preview'
 import { NzInputModule } from 'ng-zorro-antd/input'
+import { JsonSyntaxHighlightPipe } from './file-preview-Json-Highlight.pipe'
 
 @Component({
   standalone: true,
@@ -43,6 +44,7 @@ import { NzInputModule } from 'ng-zorro-antd/input'
     NzIconModule,
     NzInputNumberModule,
     NgeMarkdownModule,
+    JsonSyntaxHighlightPipe,
   ],
 })
 export class UiFilePreviewComponent implements OnChanges {
@@ -54,17 +56,32 @@ export class UiFilePreviewComponent implements OnChanges {
   protected isVideo = false
   protected isText = false
   protected isPdf = false
+  protected isCsv = false
+  protected isJson = false
   protected unsupported = false
   protected pdfDocument: any
   protected currentPage = 1
   protected totalPages = 0
   protected scale = 1.0
 
+  // JSON and CSV
+  protected dataValid = true // false when extracting value from file fail (JSON, CVS, ...)
+  protected data = 'Chargement ... ' // store the json or error information
+  // CSV
+  protected csvHeaders: string[] = []
+  protected csvRows: any[] = []
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['src']) {
       this.updateDisplayType()
       if (this.isPdf) {
         setTimeout(() => this.loadPDF(), 0) // wait for pdfCanvas to be defined
+      }
+      if (this.isCsv) {
+        this.extractCsv().catch((err) => console.error('Error extracting csv :', err))
+      }
+      if (this.isJson) {
+        this.extractJson().catch((err) => console.error('Error extracting json :', err))
       }
     }
   }
@@ -101,19 +118,22 @@ export class UiFilePreviewComponent implements OnChanges {
       this.renderPage(this.currentPage)
     }
   }
+
   private updateDisplayType(): void {
     const extension = extractSupportedExtension(this.src)
     if (!extension) {
       this.unsupported = true
       return
     }
-
     this.isImage = SUPPORTED_IMAGE_EXTENSIONS.includes(extension)
     this.isVideo = SUPPORTED_VIDEO_EXTENSIONS.includes(extension)
     this.isText = SUPPORTED_TEXT_EXTENSIONS.includes(extension)
     this.isPdf = extension === 'pdf'
+    this.isCsv = extension === 'csv'
+    this.isJson = extension === 'json'
   }
 
+  // PDF
   private loadPDF(): void {
     pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
     const loadingTask = pdfjsLib.getDocument(this.src)
@@ -139,5 +159,52 @@ export class UiFilePreviewComponent implements OnChanges {
       }
       page.render(renderContext)
     })
+  }
+
+  // CSV
+  private async extractCsv() {
+    try {
+      this.dataValid = true
+      const response = await fetch(this.src)
+      if (!response.ok) {
+        this.dataValid = false
+        this.data = 'Erreur HTTP : ' + response.status
+        console.error(response.statusText)
+        return
+      }
+      const data = await response.text()
+      const lines = data.trim().split('\n')
+      if (lines.length > 0) {
+        const delimiter = lines[0].includes(';') ? ';' : ','
+        this.csvHeaders = lines[0].split(delimiter).map((h) => h.trim())
+        this.csvRows = lines.slice(1).map((line) => {
+          const values = line.split(delimiter)
+          return values.map((v) => v.trim())
+        })
+      }
+    } catch (error: any) {
+      this.dataValid = false
+      this.data = 'Erreur : Impossible de charger ou de lire le fichier CSV ' + error.message
+    }
+    this.changeDetectorRef.detectChanges()
+  }
+  // JSON
+  private async extractJson() {
+    try {
+      const response = await fetch(this.src)
+      if (!response.ok) {
+        this.dataValid = false
+        this.data = 'Erreur HTTP : ' + response.status
+        console.error(response.statusText)
+        return
+      }
+      const data = await response.json()
+      this.data = JSON.stringify(data, null, 4).trim()
+    } catch (error: any) {
+      this.dataValid = false
+      console.error("Erreur lors de l'extraction JSON :", error)
+      this.data = 'Erreur : Impossible de charger ou de lire le fichier JSON.\n' + error.message
+    }
+    this.changeDetectorRef.detectChanges()
   }
 }

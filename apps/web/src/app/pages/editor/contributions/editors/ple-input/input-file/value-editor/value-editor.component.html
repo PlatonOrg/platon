@@ -1,14 +1,20 @@
-<div
-  id="drop-zone"
-  class="drop-zone"
-  dnd
-  (dropped)="onDrop($event)"
-  (dragover)="onDragOver($event)"
-  (dragleave)="onDragLeave($event)"
->
-  <span>
-    {{ (value | hideResourceId) || "Déposez un fichier ici depuis l'explorateur..." }}
-  </span>
+<div class="drop-wrapper">
+  <div
+    id="drop-zone"
+    class="drop-zone"
+    [class.drag-active]="isDragging"
+    dnd
+    (dropped)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+  >
+    <span>
+      {{ (value | hideResourceId) || 'Déposez un fichier ici' }}
+    </span>
+  </div>
+  @if (value !== '') {
+  <div class="droptip">Déposez un fichier ici pour le remplacer</div>
+  }
 </div>
 <ng-container *ngIf="value">
   <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="eyeButton()">

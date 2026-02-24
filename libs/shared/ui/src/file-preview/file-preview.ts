@@ -7,6 +7,8 @@ export const SUPPORTED_EXTENSIONS = [
   ...SUPPORTED_VIDEO_EXTENSIONS,
   ...SUPPORTED_TEXT_EXTENSIONS,
   'pdf',
+  'csv',
+  'json',
 ] as readonly string[]
 
 export const FILE_PREVIEW_REGEX = /\/api\/v[0-9]+\/files\/[^.]+\.([^?]+)/
