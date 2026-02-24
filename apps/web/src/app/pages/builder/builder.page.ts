@@ -44,13 +44,6 @@ import { type SettingItem, SettingsPage } from './settings/settings.page'
 import { VersionHistoryComponent } from './version-history'
 
 import { NgeIdeModule } from '@cisstech/nge-ide'
-import { NgeIdeExplorerModule } from '@cisstech/nge-ide/explorer'
-import { NgeIdeProblemsModule } from '@cisstech/nge-ide/problems'
-import { NgeIdeSearchModule } from '@cisstech/nge-ide/search'
-import { NgeIdeSettingsModule } from '@cisstech/nge-ide/settings'
-import { EditorService, NotificationService } from '@cisstech/nge-ide/core'
-import { ResourceFileSystemProvider } from '../editor/contributions/file-system'
-import { EditorPresenter } from '../editor/editor.presenter'
 
 interface SidebarSection {
   id: string
@@ -84,11 +77,6 @@ type MainViewMode = 'input' | 'setting' | 'history'
     UiErrorComponent,
 
     NgeIdeModule,
-    NgeIdeExplorerModule,
-    NgeIdeSearchModule,
-    NgeIdeSettingsModule,
-
-    NgeIdeProblemsModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: {
@@ -97,7 +85,6 @@ type MainViewMode = 'input' | 'setting' | 'history'
     '(document:mousemove)': 'onMouseMove($event)',
     '(document:mouseup)': 'onMouseUp()',
   },
-  providers: [EditorService, EditorPresenter, ResourceFileSystemProvider, NotificationService],
 })
 export class BuilderPage implements OnInit {
   private readonly router = inject(Router)

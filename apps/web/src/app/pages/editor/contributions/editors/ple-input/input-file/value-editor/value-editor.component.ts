@@ -23,10 +23,10 @@ export class HideResourceIdPipe implements PipeTransform {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValueEditorComponent extends BaseValueEditor<string> {
-  private readonly editorService = inject(EditorService)
-  private readonly editorPresenter = inject(EditorPresenter)
-  private readonly fileSystemProvider = inject(ResourceFileSystemProvider)
-  private readonly notificationService = inject(NotificationService)
+  private readonly editorService = inject(EditorService, { optional: true })
+  private readonly editorPresenter = inject(EditorPresenter, { optional: true })
+  private readonly fileSystemProvider = inject(ResourceFileSystemProvider, { optional: true })
+  private readonly notificationService = inject(NotificationService, { optional: true })
   private readonly inputFileService = inject(InputFileService) // file gestion
   private readonly fileService = inject(FileService) // to refresh file explorer for ple
 
@@ -36,6 +36,7 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
   id = this.route.snapshot.paramMap.get('id') // ressource id
   version = 'latest'
   watchContent = false // display file content for plo
+  isDragging = false
 
   constructor(private route: ActivatedRoute) {
     super()
@@ -58,11 +59,13 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
   onDragLeave(event: DragEvent) {
     event.preventDefault()
     event.stopPropagation()
+    this.isDragging = false
   }
 
   onDragOver(event: DragEvent) {
     event.preventDefault()
     event.stopPropagation()
+    this.isDragging = true
   }
 
   private async uploadFile(data: DndData) {
@@ -81,19 +84,25 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
     const newValue = type + ' /' + this.id + ':latest/' + name
     this.setValue((this.value = newValue))
     this.notifyValueChange?.(this.value)
-    await this.fileService.refresh()
+    if (!this.modeBuilder) {
+      await this.fileService.refresh()
+    }
   }
 
   protected async onDrop(data: DndData) {
+    this.isDragging = false
     if (this.disabled) {
       return
     }
     if (data.file) {
       await this.uploadFile(data) // add from outside platon
     } else {
+      if (!this.editorService) {
+        return
+      }
       const { activeResource } = this.editorService // file already in platon
 
-      if (!activeResource || !data.src) {
+      if (!activeResource || !data.src || !this.editorPresenter || !this.editorService) {
         return
       }
 
@@ -106,7 +115,9 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
           void this.changeValue((this.value = `@copycontent ${path}`))
         }
       } catch (error) {
-        this.notificationService.publishError(error)
+        if (this.notificationService) {
+          this.notificationService.publishError(error)
+        }
       }
     }
   }
@@ -142,6 +153,9 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
 
   protected openFile() {
     const reference = (this.value?.replace(/@copycontent|@copyurl/g, '') || '').trim()
+    if (!this.fileSystemProvider || !this.editorService) {
+      return
+    }
     if (!reference.startsWith('/')) {
       const [resource, _] = (this.editorService.activeResource as monaco.Uri).authority.split(':')
       const uri = this.fileSystemProvider.buildUri(resource, this.version, reference)
