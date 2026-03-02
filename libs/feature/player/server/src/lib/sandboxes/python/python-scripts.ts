@@ -177,8 +177,7 @@ if __name__ == "__main__":
         if is_timeout_error(e):
             raise e
 
-        exception_message = platon_log_exception(e)
-        platon_log(exception_message)
+        platon_log_exception(e)
     finally:
         variables['platon_logs'] = get_logs()
 
