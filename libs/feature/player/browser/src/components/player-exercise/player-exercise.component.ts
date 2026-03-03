@@ -34,7 +34,7 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
 import { DialogModule, DialogService, UserAvatarComponent, AuthService } from '@platon/core/browser'
-import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
+import { ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
@@ -621,28 +621,55 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     }
   }
 
-  protected isErrorLog(log: string): boolean {
-    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
-    return errorPattern.test(log)
+  protected isErrorLog(log: PlatonLog): boolean {
+    return log.type === LogType.ERROR
+  }
+
+  protected getLogClass(log: PlatonLog): string {
+    switch (log.type) {
+      case LogType.ERROR:
+        return 'terminal-line error-line'
+      case LogType.WARNING:
+        return 'terminal-line warning-line'
+      case LogType.DEBUG:
+        return 'terminal-line debug-line'
+      case LogType.INFO:
+      default:
+        return 'terminal-line info-line'
+    }
+  }
+
+  protected getLogIcon(log: PlatonLog): string {
+    switch (log.type) {
+      case LogType.ERROR:
+        return 'error'
+      case LogType.WARNING:
+        return 'warning'
+      case LogType.DEBUG:
+        return 'bug_report'
+      case LogType.INFO:
+      default:
+        return 'info'
+    }
   }
 
   protected readonly errorServerSignal = computed(() => {
     const player = this.playerSignal()
     if (!player) return ''
-    return this.getErrorLogsFromPlayer(player).join('')
+    return this.getErrorLogsFromPlayer(player)
+      .map((log) => log.message)
+      .join('\n')
   })
 
   readonly hasErrors = computed(() => {
     const player = this.playerSignal()
     if (!player) return false
-
     const errorLogs = this.getErrorLogsFromPlayer(player)
     return !this.editorPreview && errorLogs.length > 0
   })
 
-  private getErrorLogsFromPlayer(player: ExercisePlayer): string[] {
-    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
-    return player.platon_logs?.filter((log) => errorPattern.test(log)) || []
+  private getErrorLogsFromPlayer(player: ExercisePlayer): PlatonLog[] {
+    return player.platon_logs?.filter((log) => log.type === LogType.ERROR) || []
   }
 
   get mailtoLink(): string {
@@ -683,5 +710,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     } catch (err) {
       this.dialogService.error('Impossible de copier le contenu')
     }
+  }
+
+  protected getLogsAsText(logs: PlatonLog[] | undefined): string {
+    return logs?.map((log) => `[${log.type.toUpperCase()}] ${log.message}`).join('\n') ?? ''
   }
 }
