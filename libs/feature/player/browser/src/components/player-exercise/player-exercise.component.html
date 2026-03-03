@@ -133,7 +133,7 @@
               <button
                 mat-icon-button
                 class="copy-button"
-                (click)="copyToClipboard(player?.platon_logs?.join('\n'))"
+                (click)="copyToClipboard(getLogsAsText(player?.platon_logs))"
                 nz-tooltip="Copier le contenu"
               >
                 <mat-icon>content_copy</mat-icon>
@@ -141,7 +141,10 @@
             </div>
             <div class="terminal-body" #terminalBody>
               @for (log of player?.platon_logs; track $index) {
-              <div [class]="'terminal-line ' + (isErrorLog(log) ? 'error-line' : 'normal-line')">{{ log }}</div>
+              <div [class]="getLogClass(log)">
+                <mat-icon class="log-icon">{{ getLogIcon(log) }}</mat-icon>
+                <span class="log-message">{{ log.message }}</span>
+              </div>
               }
             </div>
           </div>

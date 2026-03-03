@@ -12,6 +12,18 @@ export enum PlayerActions {
   SAVE_ANSWER = 'SAVE_ANSWER',
 }
 
+export enum LogType {
+  INFO = 'info',
+  ERROR = 'error',
+  WARNING = 'warn',
+  DEBUG = 'debug',
+}
+
+export interface PlatonLog {
+  type: LogType
+  message: string
+}
+
 export interface PlayerExercise {
   id: string
   sessionId: string
@@ -130,7 +142,7 @@ export interface ExercisePlayer {
   solution?: string | null
   settings?: ActivitySettings | null
   feedbacks?: ExerciseFeedback[] | null
-  platon_logs: string[] | null
+  platon_logs?: PlatonLog[] | null
   theories?:
     | {
         url: string
