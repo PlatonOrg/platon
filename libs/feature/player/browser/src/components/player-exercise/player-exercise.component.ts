@@ -712,7 +712,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     }
   }
 
-  protected getLogsAsText(logs: PlatonLog[] | undefined): string {
+  protected getLogsAsText(logs: PlatonLog[] | undefined | null): string {
     return logs?.map((log) => `[${log.type.toUpperCase()}] ${log.message}`).join('\n') ?? ''
   }
 }
