@@ -1,5 +1,5 @@
 {
-  "name": "browserB",
+  "name": "feature-builder-browser",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/feature/builder/browser/src",
   "prefix": "lib",

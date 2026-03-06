@@ -1,5 +1,5 @@
 {
-  "name": "commonT",
+  "name": "feature-builder-common",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/feature/builder/common/src",
   "prefix": "lib",

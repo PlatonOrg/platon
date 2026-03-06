@@ -1,5 +1,5 @@
 {
-  "name": "common",
+  "name": "feature-announcement-common",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/feature/announcement/common/src",
   "prefix": "lib",

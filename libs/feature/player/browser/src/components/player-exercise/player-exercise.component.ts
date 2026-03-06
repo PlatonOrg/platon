@@ -701,7 +701,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     return ''
   }
 
-  protected async copyToClipboard(text: string | undefined): Promise<void> {
+  protected async copyToClipboard(text: string | undefined | null): Promise<void> {
     if (!text) return
 
     try {
