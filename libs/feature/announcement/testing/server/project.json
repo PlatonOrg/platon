@@ -1,20 +1,10 @@
 {
-  "name": "server",
+  "name": "feature-announcement-testing-server",
   "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/feature/announcement/testing/server/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["type:lib", "scope:feature", "target:server", "purpose:testing"],
   "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/feature/announcement/testing/server",
-        "main": "libs/feature/announcement/testing/server/src/index.ts",
-        "tsConfig": "libs/feature/announcement/testing/server/tsconfig.lib.json",
-        "assets": ["libs/feature/announcement/testing/server/*.md"]
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },
