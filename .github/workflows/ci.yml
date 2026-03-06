@@ -4,6 +4,10 @@ on:
   pull_request:
     branches:
       - 'main'
+      - 'develop'
+  push:
+    branches:
+      - 'develop'
   workflow_dispatch:
 
 env:
@@ -40,7 +44,7 @@ jobs:
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3
         with:
-          main-branch-name: 'main'
+          main-branch-name: ${{ github.base_ref || github.ref_name }}
 
       - name: Generate Graphql Types
         shell: bash
@@ -65,7 +69,7 @@ jobs:
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3
         with:
-          main-branch-name: 'main'
+          main-branch-name: ${{ github.base_ref || github.ref_name }}
 
       - run: yarn affected:lint --parallel --base=${{ env.NX_BASE }}
 
@@ -86,7 +90,7 @@ jobs:
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3
         with:
-          main-branch-name: 'main'
+          main-branch-name: ${{ github.base_ref || github.ref_name }}
 
       - run: yarn affected:test --parallel --base=${{ env.NX_BASE }}
 
