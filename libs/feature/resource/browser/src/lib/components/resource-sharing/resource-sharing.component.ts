@@ -73,6 +73,10 @@ export class ResourceSharingComponent implements OnInit {
       })
   }
 
+  protected onResourceVersionChange(): void {
+    this.url = `${location.origin}${this.resourceService.previewUrl(this.resourceId, this.resourceVersion)}`
+  }
+
   protected async changeVisibility(): Promise<void> {
     try {
       await firstValueFrom(

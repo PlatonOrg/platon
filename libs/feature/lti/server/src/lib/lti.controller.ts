@@ -4,8 +4,10 @@ import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse, NotFoun
 import { Mapper, UUIDParam } from '@platon/core/server'
 import { CreateLmsDTO, LmsDTO, LmsFiltersDTO, UpdateLmsDTO } from './lti.dto'
 import { LTIService } from './lti.service'
+import { Roles } from '@platon/core/server'
 
 @ApiBearerAuth()
+@Roles('admin')
 @Controller('lti')
 @ApiTags('LTI')
 export class LTIController {

@@ -15,7 +15,12 @@
   <ui-qrcode [value]="url"></ui-qrcode>
 
   <div class="row">
-    <nz-select class="version-select" [(ngModel)]="resourceVersion" [nzCustomTemplate]="versionTpt">
+    <nz-select
+      class="version-select"
+      [(ngModel)]="resourceVersion"
+      (ngModelChange)="onResourceVersionChange()"
+      [nzCustomTemplate]="versionTpt"
+    >
       <ng-template #versionTpt>
         <i nz-icon nzType="branches" nzTheme="outline"></i>
         {{ resourceVersion }}

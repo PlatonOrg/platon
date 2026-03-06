@@ -12,10 +12,10 @@ La fonction `platon_log` permet d'afficher des messages typés dans un terminal 
 #### Syntaxe
 
 ```pl-py
-platon_log(message, log_type=LogType.INFO)
+platon_log(message, level=LogType.INFO)
 ```
 
-Le paramètre `log_type` est optionnel et accepte l'une des valeurs suivantes :
+Le paramètre `level` est optionnel et accepte l'une des valeurs suivantes :
 
 | Valeur | Utilisation |
 |---|---|
@@ -44,9 +44,9 @@ platon_log(f"""État des variables :
 - résultat = {resultat}""")
 
 if resultat > 15:
-    platon_log("La somme dépasse 15, vérifiez les bornes.", log_type=LogType.WARNING)
+    platon_log("La somme dépasse 15, vérifiez les bornes.", level=LogType.WARNING)
 
-platon_log(f"Type de 'resultat' : {type(resultat)}", log_type="debug")
+platon_log(f"Type de 'resultat' : {type(resultat)}", level="debug")
 ==
 ```
 
