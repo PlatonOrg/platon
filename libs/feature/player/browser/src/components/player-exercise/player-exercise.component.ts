@@ -701,7 +701,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     return ''
   }
 
-  protected async copyToClipboard(text: string | undefined): Promise<void> {
+  protected async copyToClipboard(text: string | undefined | null): Promise<void> {
     if (!text) return
 
     try {
@@ -712,7 +712,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     }
   }
 
-  protected getLogsAsText(logs: PlatonLog[] | undefined): string {
+  protected getLogsAsText(logs: PlatonLog[] | undefined | null): string {
     return logs?.map((log) => `[${log.type.toUpperCase()}] ${log.message}`).join('\n') ?? ''
   }
 }
