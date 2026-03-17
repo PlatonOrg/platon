@@ -100,3 +100,47 @@ jobs:
         with:
           files: ./coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-integration:
+    name: Test Integration
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 'NX: SHAs for affected'
+        uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: ${{ github.base_ref || github.ref_name }}
+
+      - name: Run integration tests on affected projects
+        run: yarn affected:test:integration --base=${{ env.NX_BASE }}
+
+  test-e2e:
+    name: Test E2E
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 'NX: SHAs for affected'
+        uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: ${{ github.base_ref || github.ref_name }}
+
+      - name: Run e2e tests on affected projects
+        run: yarn affected:test:e2e --base=${{ env.NX_BASE }}

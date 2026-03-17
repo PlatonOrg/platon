@@ -5,7 +5,7 @@ import { AnnouncementService } from './announcement.service'
 import { AnnouncementFiltersDTO } from './announcement.dto'
 import { IRequest } from '@platon/core/server'
 import { UserRoles } from '@platon/core/common'
-import { createAnnouncementEntity } from '@platon/feature/announcement/testing/server'
+import { createAnnouncementEntity } from './factories/announcement.factory'
 import { createUserEntity } from '@platon/core/testing/server'
 
 describe('AnnouncementController', () => {
