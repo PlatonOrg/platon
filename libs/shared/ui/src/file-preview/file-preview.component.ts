@@ -9,7 +9,11 @@ import {
   OnChanges,
   SimpleChanges,
   ViewChild,
+  effect,
   inject,
+  OnDestroy,
+  Output,
+  EventEmitter,
 } from '@angular/core'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
@@ -30,6 +34,19 @@ import {
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { JsonSyntaxHighlightPipe } from './file-preview-Json-Highlight.pipe'
 
+import { EditFilePreviewService } from './file-preview-edition-service'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
+import { NzTableModule } from 'ng-zorro-antd/table'
+
+if (typeof window !== 'undefined') {
+  // for nge-editor lang, add coloration for the editor
+  window.MonacoEnvironment = {
+    getWorkerUrl: function () {
+      return '/assets/vendors/nge/monaco/min/vs/base/worker/workerMain.js'
+    },
+  }
+}
+
 @Component({
   standalone: true,
   selector: 'ui-file-preview',
@@ -45,11 +62,17 @@ import { JsonSyntaxHighlightPipe } from './file-preview-Json-Highlight.pipe'
     NzInputNumberModule,
     NgeMarkdownModule,
     JsonSyntaxHighlightPipe,
+    NgeMonacoModule,
+    NzTableModule,
   ],
 })
-export class UiFilePreviewComponent implements OnChanges {
+export class UiFilePreviewComponent implements OnChanges, OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input({ required: true }) src!: string
+
+  public readonly editService = inject(EditFilePreviewService)
+
   @ViewChild('pdfCanvas', { static: false, read: ElementRef })
   pdfCanvas?: ElementRef<HTMLCanvasElement> | undefined
   protected isImage = false
@@ -58,6 +81,7 @@ export class UiFilePreviewComponent implements OnChanges {
   protected isPdf = false
   protected isCsv = false
   protected isJson = false
+  protected isMd = false // separate .md from txt in order to don't have the md interpretation
   protected unsupported = false
   protected pdfDocument: any
   protected currentPage = 1
@@ -66,25 +90,130 @@ export class UiFilePreviewComponent implements OnChanges {
 
   // JSON and CSV
   protected dataValid = true // false when extracting value from file fail (JSON, CVS, ...)
-  protected data = 'Chargement ... ' // store the json or error information
+  protected message = '' // store error information
   // CSV
   protected csvHeaders: string[] = []
   protected csvRows: any[] = []
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['src']) {
+  protected isLoading = false
+  private updated = false
+  private localEditor?: monaco.editor.IStandaloneCodeEditor // help refresh the vue
+  @Output() saveCmd = new EventEmitter<void>() // ctrl-s on the editor
+
+  constructor() {
+    effect(
+      () => {
+        // update for when go from editor to vue
+        if (!this.src || this.editService.isEditing()) {
+          return
+        }
+        const currentData = this.editService.getCurrentFileContent(this.src)
+        const _ = this.editService.refreshRequest()
+        if (this.isCsv) {
+          this.parseCsvForPreview(currentData)
+        }
+        this.changeDetectorRef.markForCheck()
+      },
+      { allowSignalWrites: true }
+    )
+  }
+
+  async ngOnChanges(changes: SimpleChanges): Promise<void> {
+    console.log('here')
+    if (changes['src'] || this.updated) {
       this.updateDisplayType()
       if (this.isPdf) {
         setTimeout(() => this.loadPDF(), 0) // wait for pdfCanvas to be defined
       }
-      if (this.isCsv) {
-        this.extractCsv().catch((err) => console.error('Error extracting csv :', err))
+      if (this.isText || this.isCsv || this.isJson) {
+        await this.loadTextContent()
       }
-      if (this.isJson) {
-        this.extractJson().catch((err) => console.error('Error extracting json :', err))
+      if (this.isCsv && !this.editService.isEditing()) {
+        this.parseCsvForPreview(this.editService.data(this.src))
       }
+      this.updated = false
     }
   }
+
+  /** clear the local editor when clossing the preview */
+  ngOnDestroy() {
+    if (this.localEditor) {
+      this.localEditor.setModel(null)
+      this.localEditor.dispose()
+      this.localEditor = undefined
+    }
+  }
+
+  /** create the editor or use the existing one */
+  onCreateEditor(editor: monaco.editor.IStandaloneCodeEditor) {
+    this.updated = true
+    this.localEditor = editor
+    const model = this.editService.getModel(this.src)
+    if (!model) {
+      const lang = this.isJson ? 'json' : this.isCsv ? 'csv' : 'plaintext'
+      this.editService.createModel(this.src, lang)
+    }
+    this.localEditor.updateOptions({
+      scrollBeyondLastLine: false, // no empty space at the end
+      automaticLayout: true, // check container size change
+      minimap: { enabled: false },
+      // reduce working load in order to close more easily
+      occurrencesHighlight: 'off',
+      selectionHighlight: false,
+      renderLineHighlight: 'none',
+    })
+    this.localEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      this.saveCmd.emit()
+    })
+    this.syncModel()
+  }
+
+  /** synchronized the local editor and the service one */
+  private syncModel() {
+    const model = this.editService.getModel(this.src)
+    if (!this.localEditor || !model) {
+      console.warn('Erreur Synchronisation éditeur ou Modèle non prêt')
+      return
+    }
+    this.localEditor.setModel(model)
+    setTimeout(() => {
+      if (this.localEditor) {
+        this.localEditor.layout()
+        this.localEditor.revealLine(1)
+      }
+    }, 100) // delay to insure the models are synch before refresch
+  }
+
+  /** load text (txt, json, csv,) document */
+  private async loadTextContent() {
+    this.isLoading = true
+    this.dataValid = true
+    if (this.editService.isEditing()) {
+      if (this.isCsv) {
+        this.parseCsvForPreview(this.editService.data(this.src))
+      }
+      return // not in editing
+    }
+    const model = this.editService.getModel(this.src)
+    if (!model) {
+      // editor model already created, so use it's value
+      const response = await fetch(this.src, { cache: 'no-store' })
+      if (!response.ok) {
+        this.dataValid = false
+        this.message = response.statusText
+        this.changeDetectorRef.markForCheck()
+        this.isLoading = false
+        return
+      }
+      const content = await response.text()
+      this.editService.setCurrentContent(this.src, content)
+    }
+    if (this.isCsv) {
+      this.parseCsvForPreview(this.editService.data(this.src))
+    }
+    this.changeDetectorRef.detectChanges()
+  }
+
   protected onNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++
@@ -127,6 +256,7 @@ export class UiFilePreviewComponent implements OnChanges {
     }
     this.isImage = SUPPORTED_IMAGE_EXTENSIONS.includes(extension)
     this.isVideo = SUPPORTED_VIDEO_EXTENSIONS.includes(extension)
+    this.isMd = extension === 'md'
     this.isText = SUPPORTED_TEXT_EXTENSIONS.includes(extension)
     this.isPdf = extension === 'pdf'
     this.isCsv = extension === 'csv'
@@ -161,49 +291,26 @@ export class UiFilePreviewComponent implements OnChanges {
     })
   }
 
-  // CSV
-  private async extractCsv() {
-    try {
-      this.dataValid = true
-      const response = await fetch(this.src)
-      if (!response.ok) {
-        this.dataValid = false
-        this.data = 'Erreur HTTP : ' + response.status
-        console.error(response.statusText)
-        return
+  /** separate cell for the csv.  */
+  private parseCsvForPreview(rawContent: string) {
+    if (!rawContent) return
+    const lines = rawContent.trim().split(/\r?\n/)
+    if (lines.length > 0) {
+      const delimiter = lines[0].includes(';') ? ';' : ','
+      this.csvHeaders = lines[0].split(delimiter).map((h) => h.trim().replace(/^"(.*)"$/, '$1'))
+      let maxSize = this.csvHeaders.length
+      let numberRow = 1
+      this.csvRows = lines.slice(1).map((line) => {
+        const result = line.split(delimiter).map((v) => v.trim().replace(/^"(.*)"$/, '$1'))
+        if (maxSize < result.length) {
+          maxSize = result.length
+        }
+        numberRow = numberRow + 1
+        return result
+      })
+      for (let i = this.csvHeaders.length; i < maxSize; i++) {
+        this.csvHeaders.push(' ')
       }
-      const data = await response.text()
-      const lines = data.trim().split('\n')
-      if (lines.length > 0) {
-        const delimiter = lines[0].includes(';') ? ';' : ','
-        this.csvHeaders = lines[0].split(delimiter).map((h) => h.trim())
-        this.csvRows = lines.slice(1).map((line) => {
-          const values = line.split(delimiter)
-          return values.map((v) => v.trim())
-        })
-      }
-    } catch (error: any) {
-      this.dataValid = false
-      this.data = 'Erreur : Impossible de charger ou de lire le fichier CSV ' + error.message
-    }
-    this.changeDetectorRef.detectChanges()
-  }
-  // JSON
-  private async extractJson() {
-    try {
-      const response = await fetch(this.src)
-      if (!response.ok) {
-        this.dataValid = false
-        this.data = 'Erreur HTTP : ' + response.status
-        console.error(response.statusText)
-        return
-      }
-      const data = await response.json()
-      this.data = JSON.stringify(data, null, 4).trim()
-    } catch (error: any) {
-      this.dataValid = false
-      console.error("Erreur lors de l'extraction JSON :", error)
-      this.data = 'Erreur : Impossible de charger ou de lire le fichier JSON.\n' + error.message
     }
     this.changeDetectorRef.detectChanges()
   }

@@ -33,40 +33,6 @@
 button {
   margin-left: 4px;
 }
-
- #drop-zone:hover, .drag-active {
-  border: 2px  solid #108ee9;
-}
-
-#drop-zone:hover + .droptip{
-  display: block;
-}
-
-.droptip {
-  display: none;
-  position: absolute;
-  bottom: 100%;
-  margin-bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  padding: 6px 8px;
-  border-radius: 2px;
-  font-size: 14px;
-  text-align: center;
-  z-index: 10;
-  min-width: 144px;
-  pointer-events: none;
-}
-
-.droptip::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: rgba(0, 0, 0, 0.75) transparent transparent transparent;
+#modalFooter {
+  margin-left: 10px;
 }

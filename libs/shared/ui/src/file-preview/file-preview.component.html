@@ -1,12 +1,17 @@
-@if (isImage) {
+@if(editService.isEditing()){
+<div style="height: 500px; width: 95%">
+  <nge-monaco-editor (ready)="onCreateEditor($any($event))" [attr.key]="src"></nge-monaco-editor>
+</div>
+} @else {@if (isImage) {
 <img [src]="src" alt="Image Preview" class="image-viewer" />
 } @else if (isVideo) {
 <video controls class="video-player">
   <source [src]="src" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
-} @else if (isText) {
-<nge-markdown [file]="src" />
+} @else if (isText){
+<nge-markdown *ngIf="this.isMd" [data]="editService.getCurrentFileContent(this.src)" />
+<pre *ngIf="!this.isMd">{{ editService.getCurrentFileContent(this.src) }}</pre>
 } @else if (isPdf) {
 <div class="pdf-navigation">
   <button nz-button (click)="onPrevPage()" [disabled]="currentPage <= 1">
@@ -38,32 +43,38 @@
 } @else if (isJson) {
 <div style="overflow-x: scroll">
   @if(dataValid) {
-  <pre><code [innerHTML]="data | jsonSyntaxHighlight"></code></pre>
+  <pre><code [innerHTML]="this.editService.getCurrentFileContent(this.src)| jsonSyntaxHighlight"></code></pre>
   } @else {
-  {{ data }}
+  {{ message }}
   }
 </div>
 } @else if (isCsv){ @if (dataValid) {
-<div style="overflow-x: scroll">
-  <table class="csv-table">
-    <tr>
-      @for (header of csvHeaders; track header) {
-      <th>{{ header }}</th>
-      }
-    </tr>
-    <tbody>
-      @for (row of csvRows; track $index) {
+<div class="csv-container" *ngIf="isCsv">
+  <nz-table
+    #csvTable
+    [nzData]="csvRows"
+    [nzFrontPagination]="true"
+    [nzPageSize]="15"
+    nzSize="small"
+    nzBordered
+    [nzScroll]="{ x: '100%', y: '100%' }"
+  >
+    <thead>
       <tr>
-        @for (cell of row; track $index) {
-        <td>{{ cell }}</td>
-        }
+        <th *ngFor="let header of csvHeaders">{{ header }}</th>
       </tr>
-      }
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of csvTable.data">
+        <td *ngFor="let cell of row">{{ cell }}</td>
+      </tr>
     </tbody>
-  </table>
+  </nz-table>
 </div>
 } @else {
-{{ data }}
+<div class="error-message">
+  {{ message }}
+</div>
 } } @else {
-<div>Unsupported file format</div>
-}
+<div class="error-message">Unsupported file format</div>
+} }

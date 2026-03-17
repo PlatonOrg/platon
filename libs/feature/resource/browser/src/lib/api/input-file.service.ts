@@ -1,10 +1,11 @@
-import { inject, Injectable } from '@angular/core'
+import { inject, Injectable, OnDestroy } from '@angular/core'
 import { ResourceFileService } from './file.service'
 import { lastValueFrom } from 'rxjs'
 import { DialogService } from '@platon/core/browser'
 
-const path = '/api/v1/files/'
+const path = '/api/v1/files/' // prefix of the path to store file
 
+/** store for each component the current file url and the last saved file url */
 class Info {
   lastSaveUrl: string
   currentUrl: string
@@ -16,10 +17,10 @@ class Info {
 }
 
 /**
- * file service for upload file for the input-file
+ * file service for upload/update file for the input-file
  */
 @Injectable({ providedIn: 'root' })
-export class InputFileService {
+export class InputFileService implements OnDestroy {
   private resourceId = ''
   private version = ''
   private isBuilder = false
@@ -28,6 +29,11 @@ export class InputFileService {
 
   private readonly resourcefileService = inject(ResourceFileService) // to upload file, because Monaco.Uri doesn't work
   private readonly dialogService = inject(DialogService)
+
+  constructor() {
+    // try to remove the files that were uploaded and are not used anymore
+    window.addEventListener('beforeunload', () => this.cleanupSync())
+  }
 
   /** initialize the service
    * @param resourceId id of the resource
@@ -62,6 +68,7 @@ export class InputFileService {
     return this.isBuilder
   }
 
+  /** give the resource version */
   resourceVersion(): string {
     return this.version
   }
@@ -116,8 +123,6 @@ export class InputFileService {
     }
     if (info.currentUrl != info.lastSaveUrl && info.currentUrl != '') {
       await this.deleteFile(info.currentUrl)
-    } else {
-      // this.openDialogue('Veuillez sauvegarder pour supprimer le fichier.')
     }
     const url = path + this.resourceId + '/?version=latest'
     const name = await this.uploadFile(url, file)
@@ -130,6 +135,7 @@ export class InputFileService {
     return name
   }
 
+  /** call the service that upload file */
   private async uploadFile(url: string, file: File): Promise<string> {
     return (await lastValueFrom(this.resourcefileService.upload({ url: url }, file))).resource
   }
@@ -151,6 +157,7 @@ export class InputFileService {
     }
   }
 
+  /** indicate if you are allow to delete the file or not*/
   private isDeletable(url: string): boolean {
     const splitUrl = url.split('/')
     const oldResourceId = splitUrl[4].split(':')[0]
@@ -168,7 +175,6 @@ export class InputFileService {
         return false
       }
     }
-
     if (splitName[0] === 'readme' && splitName[1] === 'md') {
       this.openDialogue('Le fichier ' + name + " n'est pas supprimable.", true)
       return false
@@ -188,8 +194,12 @@ export class InputFileService {
     return true
   }
 
-  urlFile(InputValue: string): string {
-    let reference = (InputValue.replace(/@copycontent|@copyurl/g, '') || '').trim() // current file
+  /** give the url of the file indicate in the value of the component
+   * @param InputValue the component's value
+   * @return the url of the file in the database
+   */
+  urlFile(inputValue: string): string {
+    let reference = (inputValue.replace(/@copycontent|@copyurl/g, '') || '').trim() // current file
     if (reference === '') {
       return ''
     }
@@ -199,12 +209,62 @@ export class InputFileService {
     return uri
   }
 
+  /** update the file saved in the component 'name'
+   * @param name the component name in the list of component
+   * @param content the new content
+   * @param onSuccess optional, function to execute on success
+   */
+  update(name: string, content: string, onSuccess?: () => void) {
+    const info = this.files.get(name)
+    if (!info) {
+      console.error("N'as pas réussi à trouver le fichier.")
+      this.openDialogue('Une erreur est survenue.', true)
+      return // should never append
+    }
+    this.resourcefileService.update({ url: info.currentUrl }, { content: content }).subscribe({
+      next: () => {
+        this.dialogService.success('Fichier mis à jour.')
+        if (onSuccess) {
+          onSuccess()
+        }
+      },
+      error: (err) => {
+        console.error('Erreur lors du de la mise à jour du fichier ', err)
+      },
+    })
+  }
+
   /** remove the last save file to keep the one added */
   async save() {
     this.files.forEach((info, _) => {
       if (info.currentUrl != info.lastSaveUrl) {
         void this.deleteFile(info.lastSaveUrl)
         info.lastSaveUrl = info.currentUrl
+      }
+    })
+  }
+
+  /** try to remove that are not use when closing the page*/
+  private cleanupSync() {
+    this.files.forEach((info) => {
+      if (info.currentUrl && info.currentUrl !== info.lastSaveUrl) {
+        if (this.isDeletable(info.currentUrl)) {
+          void fetch(info.currentUrl, { method: 'DELETE', keepalive: true })
+        }
+      }
+    })
+  }
+
+  /** remove file that are not use when closing the service */
+  ngOnDestroy() {
+    this.cleanupTemporaryFiles()
+  }
+
+  /** remove file that are not use when closing the component*/
+  private cleanupTemporaryFiles() {
+    this.files.forEach((info) => {
+      if (info.currentUrl && info.currentUrl !== info.lastSaveUrl) {
+        this.deleteFile(info.currentUrl).catch((err) => console.error('Cleanup failed', err))
       }
     })
   }

@@ -3,6 +3,9 @@
     id="drop-zone"
     class="drop-zone"
     [class.drag-active]="isDragging"
+    nz-tooltip
+    style="text-align: center"
+    nzTooltipTitle="Déposez un fichier ici pour le remplacer"
     dnd
     (dropped)="onDrop($event)"
     (dragover)="onDragOver($event)"
@@ -12,10 +15,8 @@
       {{ (value | hideResourceId) || 'Déposez un fichier ici' }}
     </span>
   </div>
-  @if (value !== '') {
-  <div class="droptip">Déposez un fichier ici pour le remplacer</div>
-  }
 </div>
+
 <ng-container *ngIf="value">
   <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="eyeButton()">
     <span nz-icon nzType="eye" nzTheme="outline"></span>
@@ -31,21 +32,32 @@
   </button>
 </ng-container>
 @if (this.modeBuilder && watchContent) {
-<ui-modal-template closable height="70vh" width="80vw" (closed)="watchContent = false" [visible]="watchContent">
+<ui-modal-template
+  closable
+  height="70vh"
+  width="80vw"
+  (closed)="closePreview()"
+  [visible]="watchContent"
+  [footer]="modalFooter"
+>
   <ng-template>
     <ng-container *ngIf="watchContent">
-      @defer (on viewport) {
-      <ui-file-preview [src]="getUrl()" />
-      } @placeholder {
-      <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 5 }"></nz-skeleton>
-      }
+      <ui-file-preview #editorPreview [src]="getUrl()" (saveCmd)="saveChange(true)"></ui-file-preview>
     </ng-container>
+    <div></div>
   </ng-template>
-  <ng-template>
-    <a mat-button [href]="getUrl()" target="_blank">
+  <ng-template #modalFooter>
+    @if(editService.isEditing()) {
+    <a mat-button (click)="closelEdit()"> <mat-icon>close</mat-icon>Annuler</a>
+    <a mat-button (click)="saveChange(false)" style="margin-left: 10px"> <mat-icon>save</mat-icon>sauvegarder </a>
+    } @else { @if(editService.isEditable(this.url)) {
+    <a mat-button (mousedown)="changeMode()"><mat-icon>edit</mat-icon>Modifier le fichier</a>
+    }
+    <a mat-button [href]="getUrl()" target="_blank" style="margin-left: 10px">
       <mat-icon>download</mat-icon>
-      Télécharger</a
-    >
+      Télécharger
+    </a>
+    }
   </ng-template>
 </ui-modal-template>
 }

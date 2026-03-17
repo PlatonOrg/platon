@@ -316,6 +316,7 @@ export class BuilderPage implements OnInit {
   }
 
   protected onInputChange(input: PleInput): void {
+    const isReallyChanged = this.overrides[input.name] !== input.value
     this.overrides = {
       ...this.overrides,
       [input.name]: input.value,
@@ -325,8 +326,10 @@ export class BuilderPage implements OnInit {
     if (index !== -1) {
       this.inputs = [...this.inputs.slice(0, index), { ...input }, ...this.inputs.slice(index + 1)]
     }
-
-    this.hasUnsavedChanges.set(true)
+    if (isReallyChanged) {
+      // show unsave indicateur (not for in file modification)
+      this.hasUnsavedChanges.set(true)
+    }
 
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout)

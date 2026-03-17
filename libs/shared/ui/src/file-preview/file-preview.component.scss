@@ -76,31 +76,40 @@
 :host ::ng-deep .number { color: #098658; }
 
 // CSV
-.csv-table {
-  width: 100%;
-  margin-top: 20px;// cross is upper the header
-  border-collapse: collapse;
-  font-family: sans-serif;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  border-collapse: collapse;
-  border: none;
+:host ::ng-deep {
+  .ant-table-thead > tr > th {
+    background-color:  #171c8f !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-align: center;
+  }
+  .ant-table-tbody > tr > td {
+    text-align: center;
+  }
+  .ant-table-header {
+    color: #ffffff !important;
+    font-weight: bold !important;
+    background-color: #171c8f !important;
+    text-align: center;
+  }
+  nz-table table {
+    table-layout: fixed !important;
+    width: 100% !important;
+  }
 }
 
-.csv-table th {
-  background-color: #171c8f;
-  color: #ffffff;
-  text-align: left;
-  font-weight: bold;
-  padding: 12px 15px;
-  border: 1px solid #5f5f8f;
+.csv-container {
+  display: flex;
+  width: 95%;
+  height: 100%;
 }
 
-.csv-table td {
-  padding: 12px 15px;
-  border: 1px solid #dddddd;
-
-}
-
-.csv-table tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3;
+.error-message {
+  white-space: pre-wrap;
+  color: #ff4d4f;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
 }

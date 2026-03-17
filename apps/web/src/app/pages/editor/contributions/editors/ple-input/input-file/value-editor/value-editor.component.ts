@@ -1,10 +1,20 @@
-import { ChangeDetectionStrategy, Component, Input, Pipe, PipeTransform, inject } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  Pipe,
+  PipeTransform,
+  ViewChild,
+  inject,
+  OnDestroy,
+} from '@angular/core'
 import { DndData, EditorService, NotificationService, FileService } from '@cisstech/nge-ide/core'
 import { EditorPresenter } from '../../../../../editor.presenter'
 import { ResourceFileSystemProvider } from '../../../../file-system'
 import { BaseValueEditor } from '../../ple-input'
 import { ActivatedRoute } from '@angular/router'
 import { InputFileService } from '@platon/feature/resource/browser'
+import { UiFilePreviewComponent, EditFilePreviewService, UiModalTemplateComponent } from '@platon/shared/ui'
 
 @Pipe({ name: 'hideResourceId' })
 export class HideResourceIdPipe implements PipeTransform {
@@ -22,13 +32,14 @@ export class HideResourceIdPipe implements PipeTransform {
   styleUrls: ['value-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ValueEditorComponent extends BaseValueEditor<string> {
+export class ValueEditorComponent extends BaseValueEditor<string> implements OnDestroy {
   private readonly editorService = inject(EditorService, { optional: true })
   private readonly editorPresenter = inject(EditorPresenter, { optional: true })
   private readonly fileSystemProvider = inject(ResourceFileSystemProvider, { optional: true })
   private readonly notificationService = inject(NotificationService, { optional: true })
   private readonly inputFileService = inject(InputFileService) // file gestion
   private readonly fileService = inject(FileService) // to refresh file explorer for ple
+  public readonly editService = inject(EditFilePreviewService) // to update file when editing
 
   modeBuilder = false // true if is the builder editor false otherwise
   @Input() inputId = '' // name of the component in the list of component
@@ -37,11 +48,46 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
   version = 'latest'
   watchContent = false // display file content for plo
   isDragging = false
+  url = ''
+  fileContent = ''
 
+  @ViewChild(UiModalTemplateComponent) modalComponent!: UiModalTemplateComponent
+
+  /**  */
   constructor(private route: ActivatedRoute) {
     super()
     this.modeBuilder = this.inputFileService.isModeBuilder()
     this.version = this.inputFileService.resourceVersion()
+    this.editService.isEditing.set(false)
+    this.url = this.getUrl()
+  }
+
+  /** close the editor */
+  closelEdit() {
+    const model = this.editService.getModel(this.url)
+    const savedContent = this.editService.getCurrentFileContent(this.url)
+
+    if (model && model.getValue() !== savedContent) {
+      // change the content and keep the ctrl-z
+      model.pushEditOperations(
+        [],
+        [
+          {
+            range: model.getFullModelRange(),
+            text: savedContent,
+          },
+        ],
+        () => null
+      )
+    }
+    this.editService.isEditing.set(false)
+    this.changeDetectorRef.detectChanges()
+  }
+
+  /** swap between editing and view mode */
+  async changeMode() {
+    this.editService.isEditing.set(true)
+    this.changeDetectorRef.detectChanges()
   }
 
   protected get isUrl(): boolean {
@@ -87,6 +133,11 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
     if (!this.modeBuilder) {
       await this.fileService.refresh()
     }
+    const newUrl = this.getUrl()
+    if (this.url != newUrl) {
+      this.editService.clearModel(this.url)
+      this.url = newUrl
+    }
   }
 
   protected async onDrop(data: DndData) {
@@ -125,6 +176,8 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
   protected async changeValue(value: string) {
     if (this.modeBuilder && value == '') {
       void this.inputFileService.remove(this.inputId) // clic on cross icon on builder page
+      this.editService.clearModel(this.url)
+      this.url = ''
     }
     this.notifyValueChange?.((this.value = value))
   }
@@ -139,7 +192,12 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
 
   /** give the download url of the file */
   protected getUrl(): string {
-    return this.value ? this.inputFileService.urlFile(this.value) : ''
+    if (this.editService.isEditing()) {
+      return this.url
+    }
+    const url = this.value ? this.inputFileService.urlFile(this.value) : ''
+    this.url = url
+    return url
   }
 
   /** distinct ple case (open the file) from plo case (preview)*/
@@ -168,5 +226,50 @@ export class ValueEditorComponent extends BaseValueEditor<string> {
     const [resource, _] = authority.split(':') // version is alway latest so doesn't work for other version
     const uri = this.fileSystemProvider.buildUri(resource, this.version, path)
     this.editorService.open(uri).catch(console.error)
+  }
+
+  @ViewChild('editorPreview') editeur!: UiFilePreviewComponent
+  /** save the file after edition
+   * @param
+   * keepEdit  true to stay in the editor, false otherwise
+   */
+  saveChange(keepEdit: boolean) {
+    const data = this.editService.data(this.url)
+    this.inputFileService.update(this.inputId, data, () => {
+      this.editService.isEditing.set(keepEdit)
+      this.editService.requestRefresh()
+      this.editService.setCurrentContent(this.url, this.editService.data(this.url))
+      this.changeDetectorRef.detectChanges()
+      if (this.value) {
+        this.notifyValueChange?.(this.value)
+      }
+    })
+  }
+
+  /** remove the editor from the service */
+  ngOnDestroy() {
+    this.editService.clearModel(this.url)
+  }
+
+  /** close the preview, change the editor content for the saved content*/
+  closePreview() {
+    const model = this.editService.getModel(this.url)
+    const savedContent = this.editService.getCurrentFileContent(this.url)
+    if (model && model.getValue() !== savedContent) {
+      //  keep the ctrl-z
+      model.pushEditOperations(
+        [],
+        [
+          {
+            range: model.getFullModelRange(),
+            text: savedContent,
+          },
+        ],
+        () => null
+      )
+    }
+    this.watchContent = false
+    this.editService.isEditing.set(false)
+    this.changeDetectorRef.detectChanges()
   }
 }
