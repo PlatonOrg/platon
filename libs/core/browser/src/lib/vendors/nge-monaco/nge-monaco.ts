@@ -2,12 +2,14 @@ import { Provider } from '@angular/core'
 import { NgeMonacoModule, NGE_MONACO_CONTRIBUTION, NGE_MONACO_THEMES } from '@cisstech/nge/monaco'
 import { PlLanguageContribution } from './contributions/pl-lang.contribution'
 
+const monacoAssetsUrl = new URL('/assets/vendors/nge/monaco/', window.location.origin).toString()
+
 export const NgeMonacoImports = [
   NgeMonacoModule.forRoot({
     locale: 'fr',
-    assets: 'assets/vendors/nge/monaco/',
+    assets: monacoAssetsUrl,
     theming: {
-      themes: NGE_MONACO_THEMES.map((theme) => 'assets/vendors/nge/monaco/themes/' + theme),
+      themes: NGE_MONACO_THEMES.map((theme) => monacoAssetsUrl + 'themes/' + theme),
       default: 'github',
     },
     options: {
