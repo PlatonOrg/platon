@@ -53,7 +53,7 @@ beforeAll(async () => {
         synchronize: true,
       }),
       TypeOrmModule.forFeature([AnnouncementEntity]),
-      TestAuthModule.register(),
+      await TestAuthModule.register(),
     ],
     controllers: [AnnouncementController],
     providers: [AnnouncementService],

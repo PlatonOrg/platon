@@ -4,20 +4,21 @@ import { APP_GUARD } from '@nestjs/core'
 import { JwtModule, JwtService } from '@nestjs/jwt'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import type { AuthGuard, JwtStrategy, RolesGuard, UserService, UserEntity } from '@platon/core/server'
+import type { UserEntity as UserEntityType } from '@platon/core/server'
 import { UserRoles } from '@platon/core/common'
 import { Repository } from 'typeorm'
 
 const JWT_SECRET = 'e2e-test-secret'
+
+const coreServer = () => import('@platon/core/server')
 
 /**
  * Entités requises pour l'authentification dans les tests E2E.
  * À inclure dans le `TypeOrmModule.forRoot({ entities: [...AUTH_ENTITIES, ...vosEntités] })`.
  */
 export const getAuthEntities = async () => {
-  const { UserPrefsEntity, UserGroupEntity, UserCharterEntity, LevelEntity, TopicEntity } = await import(
-    '@platon/core/server'
-  )
+  const { UserEntity, UserPrefsEntity, UserGroupEntity, UserCharterEntity, LevelEntity, TopicEntity } =
+    await coreServer()
   return [UserEntity, UserPrefsEntity, UserGroupEntity, UserCharterEntity, LevelEntity, TopicEntity]
 }
 
@@ -35,7 +36,7 @@ export const getAuthEntities = async () => {
  *   imports: [
  *     TypeOrmModule.forRoot({ ...dbConfig, entities, synchronize: true }),
  *     TypeOrmModule.forFeature([AnnouncementEntity]),
- *     TestAuthModule.register(),
+ *     await TestAuthModule.register(),
  *   ],
  *   controllers: [AnnouncementController],
  *   providers: [AnnouncementService],
@@ -44,7 +45,9 @@ export const getAuthEntities = async () => {
  */
 @Module({})
 export class TestAuthModule {
-  static register(): DynamicModule {
+  static async register(): Promise<DynamicModule> {
+    const { AuthGuard, RolesGuard, JwtStrategy, UserService, UserEntity } = await coreServer()
+
     return {
       module: TestAuthModule,
       imports: [
@@ -73,7 +76,7 @@ export class TestAuthModule {
 }
 
 export interface TestUser {
-  user: UserEntity
+  user: UserEntityType
   token: string
 }
 
@@ -94,8 +97,8 @@ export interface TestUser {
  */
 export const createAuthenticatedUser = async (
   jwtService: JwtService,
-  userRepo: Repository<UserEntity>,
-  overrides: Partial<UserEntity> & { username: string; role: UserRoles }
+  userRepo: Repository<UserEntityType>,
+  overrides: Partial<UserEntityType> & { username: string; role: UserRoles }
 ): Promise<TestUser> => {
   const user = await userRepo.save(
     userRepo.create({
