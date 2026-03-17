@@ -1,35 +1,44 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { IRequest } from '@platon/core/server'
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const request = require('supertest')
 import { Repository } from 'typeorm'
 import { UserRoles } from '@platon/core/common'
 import { UserEntity } from '@platon/core/server'
-import { createTestDatabase, TestDatabase } from '@platon/core/testing/server'
+import {
+  createTestDatabase,
+  TestDatabase,
+  TestAuthModule,
+  TestUser,
+  createAuthenticatedUser,
+  getAuthEntities,
+} from '@platon/core/testing/server'
 import { AnnouncementEntity } from './announcement.entity'
 import { AnnouncementService } from './announcement.service'
 import { AnnouncementController } from './announcement.controller'
 
 /**
- * Tests E2E du module Announcement.
+ * Tests E2E du module Announcement avec authentification réelle.
  *
- * On monte un vrai serveur NestJS avec une vraie base PostgreSQL (testcontainers).
- * Les guards auth/roles sont bypassés : on injecte l'utilisateur directement
- * via un middleware, ce qui permet de tester les routes HTTP de bout en bout
- * sans dépendre du module auth.
+ * Pipeline complet : HTTP → JWT Bearer → AuthGuard → RolesGuard → Controller → Service → PostgreSQL
  */
 
 let app: INestApplication
 let db: TestDatabase
-let userRepo: Repository<UserEntity>
 let announcementRepo: Repository<AnnouncementEntity>
-let adminUser: UserEntity
-let studentUser: UserEntity
+let admin: TestUser
+let teacher: TestUser
+let student: TestUser
+
+const http = () => request(app.getHttpServer())
 
 beforeAll(async () => {
-  db = await createTestDatabase([UserEntity, AnnouncementEntity])
+  const authEntities = await getAuthEntities()
+  const entities = [...authEntities, AnnouncementEntity]
+
+  db = await createTestDatabase(entities)
 
   const moduleRef = await Test.createTestingModule({
     imports: [
@@ -40,10 +49,11 @@ beforeAll(async () => {
         database: db.container.getDatabase(),
         username: db.container.getUsername(),
         password: db.container.getPassword(),
-        entities: [UserEntity, AnnouncementEntity],
+        entities,
         synchronize: true,
       }),
-      TypeOrmModule.forFeature([AnnouncementEntity, UserEntity]),
+      TypeOrmModule.forFeature([AnnouncementEntity]),
+      TestAuthModule.register(),
     ],
     controllers: [AnnouncementController],
     providers: [AnnouncementService],
@@ -51,27 +61,16 @@ beforeAll(async () => {
 
   app = moduleRef.createNestApplication()
   app.useGlobalPipes(new ValidationPipe({ transform: true, forbidUnknownValues: false }))
-
-  // Middleware qui simule l'authentification.
-  // Par défaut, l'utilisateur est admin. On peut changer via le header `x-test-role`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  app.use((req: IRequest, _res: any, next: () => void) => {
-    const role = req.headers['x-test-role']
-    req.user = role === 'student' ? studentUser : adminUser
-    next()
-  })
-
   await app.init()
 
-  userRepo = db.dataSource.getRepository(UserEntity)
-  announcementRepo = db.dataSource.getRepository(AnnouncementEntity)
+  const jwtService = moduleRef.get(JwtService)
+  const userRepo = db.dataSource.getRepository(UserEntity)
 
-  adminUser = await userRepo.save(
-    userRepo.create({ username: 'admin-e2e', role: UserRoles.admin, firstName: 'Admin', lastName: 'Test' })
-  )
-  studentUser = await userRepo.save(
-    userRepo.create({ username: 'student-e2e', role: UserRoles.student, firstName: 'Student', lastName: 'Test' })
-  )
+  admin = await createAuthenticatedUser(jwtService, userRepo, { username: 'admin-e2e', role: UserRoles.admin })
+  teacher = await createAuthenticatedUser(jwtService, userRepo, { username: 'teacher-e2e', role: UserRoles.teacher })
+  student = await createAuthenticatedUser(jwtService, userRepo, { username: 'student-e2e', role: UserRoles.student })
+
+  announcementRepo = db.dataSource.getRepository(AnnouncementEntity)
 }, 60_000)
 
 afterAll(async () => {
@@ -83,12 +82,52 @@ afterEach(async () => {
   await announcementRepo.query('TRUNCATE "Announcements" CASCADE')
 })
 
-const server = () => request(app.getHttpServer())
+const auth = (token: string) => ({ Authorization: `Bearer ${token}` })
+
+describe('Authentication & Authorization', () => {
+  it('should return 401 when no token is provided', async () => {
+    await http().get('/announcements').expect(401)
+  })
+
+  it('should return 403 when teacher tries to list announcements (admin-only)', async () => {
+    await http().get('/announcements').set(auth(teacher.token)).expect(403)
+  })
+
+  it('should return 403 when student tries to list announcements (admin-only)', async () => {
+    await http().get('/announcements').set(auth(student.token)).expect(403)
+  })
+
+  it('should return 403 when teacher tries to get announcement by id (admin-only)', async () => {
+    const created = await announcementRepo.save(
+      announcementRepo.create({ title: 'Test', description: 'Desc', active: true })
+    )
+    await http().get(`/announcements/${created.id}`).set(auth(teacher.token)).expect(403)
+  })
+
+  it('should return 403 when student tries to update an announcement (admin-only)', async () => {
+    const created = await announcementRepo.save(
+      announcementRepo.create({ title: 'Test', description: 'Desc', active: true })
+    )
+    await http()
+      .patch(`/announcements/${created.id}`)
+      .set(auth(student.token))
+      .send({ title: 'Hacked', description: 'Desc', active: true })
+      .expect(403)
+  })
+
+  it('should return 403 when teacher tries to delete an announcement (admin-only)', async () => {
+    const created = await announcementRepo.save(
+      announcementRepo.create({ title: 'Test', description: 'Desc', active: true })
+    )
+    await http().delete(`/announcements/${created.id}`).set(auth(teacher.token)).expect(403)
+  })
+})
 
 describe('POST /announcements', () => {
   it('should create an announcement and return 201', async () => {
-    const res = await server()
+    const res = await http()
       .post('/announcements')
+      .set(auth(admin.token))
       .send({ title: 'Hello', description: 'World', active: true })
       .expect(201)
 
@@ -101,7 +140,23 @@ describe('POST /announcements', () => {
   })
 
   it('should return 400 when required fields are missing', async () => {
-    await server().post('/announcements').send({ title: 'No description' }).expect(400)
+    await http().post('/announcements').set(auth(admin.token)).send({ title: 'No description' }).expect(400)
+  })
+
+  it('should return 403 when student tries to create', async () => {
+    await http()
+      .post('/announcements')
+      .set(auth(student.token))
+      .send({ title: 'Hello', description: 'World', active: true })
+      .expect(403)
+  })
+
+  it('should return 403 when teacher tries to create', async () => {
+    await http()
+      .post('/announcements')
+      .set(auth(teacher.token))
+      .send({ title: 'Hello', description: 'World', active: true })
+      .expect(403)
   })
 })
 
@@ -112,7 +167,7 @@ describe('GET /announcements', () => {
       announcementRepo.create({ title: 'A2', description: 'Desc2', active: false }),
     ])
 
-    const res = await server().get('/announcements').expect(200)
+    const res = await http().get('/announcements').set(auth(admin.token)).expect(200)
 
     expect(res.body.total).toBe(2)
     expect(res.body.resources).toHaveLength(2)
@@ -124,7 +179,7 @@ describe('GET /announcements', () => {
       announcementRepo.create({ title: 'Autre annonce', description: 'Desc', active: true }),
     ])
 
-    const res = await server().get('/announcements').query({ search: 'maintenance' }).expect(200)
+    const res = await http().get('/announcements').set(auth(admin.token)).query({ search: 'maintenance' }).expect(200)
 
     expect(res.body.total).toBe(1)
     expect(res.body.resources[0].title).toBe('Maintenance prévue')
@@ -136,7 +191,7 @@ describe('GET /announcements', () => {
       announcementRepo.create({ title: 'Inactive', description: 'Desc', active: false }),
     ])
 
-    const res = await server().get('/announcements').query({ active: 'true' }).expect(200)
+    const res = await http().get('/announcements').set(auth(admin.token)).query({ active: 'true' }).expect(200)
 
     expect(res.body.total).toBe(1)
     expect(res.body.resources[0].title).toBe('Active')
@@ -146,17 +201,17 @@ describe('GET /announcements', () => {
 describe('GET /announcements/:id', () => {
   it('should return an announcement by id', async () => {
     const created = await announcementRepo.save(
-      announcementRepo.create({ title: 'FindMe', description: 'Desc', active: true, publisher: adminUser })
+      announcementRepo.create({ title: 'FindMe', description: 'Desc', active: true, publisher: admin.user })
     )
 
-    const res = await server().get(`/announcements/${created.id}`).expect(200)
+    const res = await http().get(`/announcements/${created.id}`).set(auth(admin.token)).expect(200)
 
     expect(res.body.resource.title).toBe('FindMe')
     expect(res.body.resource.publisher).toBeDefined()
   })
 
   it('should return 404 for non-existent id', async () => {
-    await server().get('/announcements/00000000-0000-0000-0000-000000000000').expect(404)
+    await http().get('/announcements/00000000-0000-0000-0000-000000000000').set(auth(admin.token)).expect(404)
   })
 })
 
@@ -166,12 +221,24 @@ describe('PATCH /announcements/:id', () => {
       announcementRepo.create({ title: 'Old', description: 'Desc', active: true })
     )
 
-    const res = await server()
+    const res = await http()
       .patch(`/announcements/${created.id}`)
+      .set(auth(admin.token))
       .send({ title: 'New', description: 'Desc', active: true })
       .expect(200)
 
     expect(res.body.resource.title).toBe('New')
+  })
+
+  it('should return 403 when teacher tries to update', async () => {
+    const created = await announcementRepo.save(
+      announcementRepo.create({ title: 'Old', description: 'Desc', active: true })
+    )
+    await http()
+      .patch(`/announcements/${created.id}`)
+      .set(auth(teacher.token))
+      .send({ title: 'Hacked', description: 'Desc', active: true })
+      .expect(403)
   })
 })
 
@@ -181,14 +248,21 @@ describe('DELETE /announcements/:id', () => {
       announcementRepo.create({ title: 'ToDelete', description: 'Desc', active: true })
     )
 
-    await server().delete(`/announcements/${created.id}`).expect(200)
+    await http().delete(`/announcements/${created.id}`).set(auth(admin.token)).expect(200)
 
     const found = await announcementRepo.findOneBy({ id: created.id })
     expect(found).toBeNull()
   })
 
   it('should return 404 when deleting non-existent announcement', async () => {
-    await server().delete('/announcements/00000000-0000-0000-0000-000000000000').expect(404)
+    await http().delete('/announcements/00000000-0000-0000-0000-000000000000').set(auth(admin.token)).expect(404)
+  })
+
+  it('should return 403 when student tries to delete', async () => {
+    const created = await announcementRepo.save(
+      announcementRepo.create({ title: 'Protected', description: 'Desc', active: true })
+    )
+    await http().delete(`/announcements/${created.id}`).set(auth(student.token)).expect(403)
   })
 })
 
@@ -211,15 +285,20 @@ describe('GET /announcements/visible', () => {
       announcementRepo.create({ title: 'Inactive', description: 'Desc', active: false }),
     ])
 
-    // En tant qu'admin
-    const adminRes = await server().get('/announcements/visible').expect(200)
+    const adminRes = await http().get('/announcements/visible').set(auth(admin.token)).expect(200)
     const adminTitles = adminRes.body.resources.map((r: { title: string }) => r.title)
     expect(adminTitles).toContain('ForAll')
     expect(adminTitles).toContain('ForAdmin')
     expect(adminTitles).not.toContain('Inactive')
 
-    // En tant qu'étudiant
-    const studentRes = await server().get('/announcements/visible').set('x-test-role', 'student').expect(200)
+    const teacherRes = await http().get('/announcements/visible').set(auth(teacher.token)).expect(200)
+    const teacherTitles = teacherRes.body.resources.map((r: { title: string }) => r.title)
+    expect(teacherTitles).toContain('ForAll')
+    expect(teacherTitles).not.toContain('ForAdmin')
+    expect(teacherTitles).not.toContain('ForStudent')
+    expect(teacherTitles).not.toContain('Inactive')
+
+    const studentRes = await http().get('/announcements/visible').set(auth(student.token)).expect(200)
     const studentTitles = studentRes.body.resources.map((r: { title: string }) => r.title)
     expect(studentTitles).toContain('ForAll')
     expect(studentTitles).toContain('ForStudent')
