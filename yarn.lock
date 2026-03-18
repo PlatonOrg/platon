@@ -2277,10 +2277,10 @@
   dependencies:
     tslib "^2.0.0"
 
-"@cisstech/nge@^18.1.0":
-  version "18.1.0"
-  resolved "https://registry.yarnpkg.com/@cisstech/nge/-/nge-18.1.0.tgz#61e2699d7c81b6a740dae6ca810584b92684b9f2"
-  integrity sha512-X8qbHJu403+NKLAv/rXGe/CHiUvHakd2KoZwKMhDFGhIcjziCb5Dh/zOZP9VTmeHFSxDOCFdSwXg7B+xeYWFAA==
+"@cisstech/nge@18.3.0":
+  version "18.3.0"
+  resolved "https://registry.yarnpkg.com/@cisstech/nge/-/nge-18.3.0.tgz#8f92504a36373b5726b2ee65e80d3bcc153ccf83"
+  integrity sha512-alP9xV1ulW3V1x/lgq3m1V/sag5+7J/xdK/l6qd0K7Ql03EtppcqooKEC5mpYRJ0yn0h9zP5n/vcpzbOp6/WnQ==
   dependencies:
     tslib "^2.3.0"
 
