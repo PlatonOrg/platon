@@ -26,13 +26,16 @@ runs:
       run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
       shell: bash
 
-    - name: Cache ~/.cache
+    - name: Cache dependencies
       id: cache
       uses: actions/cache@v4
       with:
-        path: ~/.cache
-        key: ${{ runner.os }}-cache-${{ hashFiles('./yarn.lock') }}
+        path: |
+          ~/.cache
+          node_modules
+        key: ${{ runner.os }}-node${{ inputs.node-version }}-${{ hashFiles('./yarn.lock') }}
 
     - name: Install
+      if: steps.cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
       shell: bash
