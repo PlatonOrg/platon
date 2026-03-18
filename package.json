@@ -182,7 +182,7 @@
     "@apollo/server": "^4.9.5",
     "@auth0/angular-jwt": "^5.2.0",
     "@cisstech/nestjs-expand": "^1.6.0",
-    "@cisstech/nge": "^18.1.0",
+    "@cisstech/nge": "18.3.0",
     "@cisstech/nge-ide": "^18.1.0",
     "@ctrl/tinycolor": "^4.1.0",
     "@discord-nestjs/common": "^5.2.12",
