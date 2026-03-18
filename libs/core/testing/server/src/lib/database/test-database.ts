@@ -21,12 +21,13 @@ export const createTestDatabase = async (entities: EntityTarget<ObjectLiteral>[]
     .withDatabase('platon_test')
     .withUsername('test')
     .withPassword('test')
+    .withExposedPorts(5432)
     .start()
 
   const dataSource = new DataSource({
     type: 'postgres',
     host: container.getHost(),
-    port: container.getMappedPort(5432),
+    port: container.getFirstMappedPort(), // getMappedPort(5432),
     database: container.getDatabase(),
     username: container.getUsername(),
     password: container.getPassword(),

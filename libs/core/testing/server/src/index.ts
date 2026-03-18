@@ -1,5 +1,6 @@
 export * from './lib/database/test-database'
 export * from './lib/e2e/test-auth.module'
+export * from './lib/e2e/create-e2e-app'
 export * from './lib/factories/user.factory'
 export * from './lib/mocks/query-builder.mock'
 export * from './lib/mocks/repository.mock'

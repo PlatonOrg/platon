@@ -1,81 +1,41 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
-import { Test } from '@nestjs/testing'
-import { TypeOrmModule } from '@nestjs/typeorm'
+import { UserRoles } from '@platon/core/common'
+import { createE2EApp, E2EContext, TestUser } from '@platon/core/testing/server'
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const request = require('supertest')
 import { Repository } from 'typeorm'
-import { UserRoles } from '@platon/core/common'
-import { UserEntity } from '@platon/core/server'
-import {
-  createTestDatabase,
-  TestDatabase,
-  TestAuthModule,
-  TestUser,
-  createAuthenticatedUser,
-  getAuthEntities,
-} from '@platon/core/testing/server'
 import { AnnouncementEntity } from './announcement.entity'
 import { AnnouncementService } from './announcement.service'
 import { AnnouncementController } from './announcement.controller'
 
 /**
  * Tests E2E du module Announcement avec authentification réelle.
- *
- * Pipeline complet : HTTP → JWT Bearer → AuthGuard → RolesGuard → Controller → Service → PostgreSQL
  */
 
-let app: INestApplication
-let db: TestDatabase
+let ctx: E2EContext
 let announcementRepo: Repository<AnnouncementEntity>
 let admin: TestUser
 let teacher: TestUser
 let student: TestUser
 
-const http = () => request(app.getHttpServer())
+const http = () => request(ctx.app.getHttpServer())
 
 beforeAll(async () => {
-  const authEntities = await getAuthEntities()
-  const entities = [...authEntities, AnnouncementEntity]
-
-  db = await createTestDatabase(entities)
-
-  const moduleRef = await Test.createTestingModule({
-    imports: [
-      TypeOrmModule.forRoot({
-        type: 'postgres',
-        host: db.container.getHost(),
-        port: db.container.getMappedPort(5432),
-        database: db.container.getDatabase(),
-        username: db.container.getUsername(),
-        password: db.container.getPassword(),
-        entities,
-        synchronize: true,
-      }),
-      TypeOrmModule.forFeature([AnnouncementEntity]),
-      await TestAuthModule.register(),
-    ],
+  ctx = await createE2EApp({
+    entities: [AnnouncementEntity],
     controllers: [AnnouncementController],
     providers: [AnnouncementService],
-  }).compile()
+  })
 
-  app = moduleRef.createNestApplication()
-  app.useGlobalPipes(new ValidationPipe({ transform: true, forbidUnknownValues: false }))
-  await app.init()
+  admin = await ctx.createUser({ username: 'admin-e2e', role: UserRoles.admin })
+  teacher = await ctx.createUser({ username: 'teacher-e2e', role: UserRoles.teacher })
+  student = await ctx.createUser({ username: 'student-e2e', role: UserRoles.student })
 
-  const jwtService = moduleRef.get(JwtService)
-  const userRepo = db.dataSource.getRepository(UserEntity)
-
-  admin = await createAuthenticatedUser(jwtService, userRepo, { username: 'admin-e2e', role: UserRoles.admin })
-  teacher = await createAuthenticatedUser(jwtService, userRepo, { username: 'teacher-e2e', role: UserRoles.teacher })
-  student = await createAuthenticatedUser(jwtService, userRepo, { username: 'student-e2e', role: UserRoles.student })
-
-  announcementRepo = db.dataSource.getRepository(AnnouncementEntity)
+  announcementRepo = ctx.getRepository(AnnouncementEntity)
 }, 60_000)
 
 afterAll(async () => {
-  await app.close()
-  await db.teardown()
+  await ctx.app.close()
+  await ctx.db.teardown()
 })
 
 afterEach(async () => {

@@ -10,7 +10,7 @@ import { AnnouncementService } from './announcement.service'
 /**
  * Tests d'intégration — AnnouncementService
  *
- * Contrairement aux tests unitaires qui mockent le repository, ici on utilise
+ * Ici on utilise
  * un vrai container PostgreSQL (via testcontainers) pour valider que :
  *   - Les requêtes SQL réelles fonctionnent (ILIKE, ANY(), array_length...)
  *   - Les relations TypeORM sont correctement chargées
@@ -28,13 +28,11 @@ describe('AnnouncementService (integration)', () => {
   let userRepository: Repository<UserEntity>
   let service: AnnouncementService
 
-  // 60s pour laisser le temps au container de démarrer au premier lancement
   beforeAll(async () => {
     testDb = await createTestDatabase([UserEntity, AnnouncementEntity])
     dataSource = testDb.dataSource
     announcementRepository = dataSource.getRepository(AnnouncementEntity)
     userRepository = dataSource.getRepository(UserEntity)
-    // On instancie le service directement avec le vrai repository — pas de mocks
     service = new AnnouncementService(announcementRepository)
   }, 60_000)
 
@@ -43,15 +41,10 @@ describe('AnnouncementService (integration)', () => {
   })
 
   afterEach(async () => {
-    // TRUNCATE CASCADE pour respecter les FK (Announcements → Users)
     await dataSource.query('TRUNCATE TABLE "Announcements" CASCADE')
     await dataSource.query('TRUNCATE TABLE "Users" CASCADE')
   })
 
-  /**
-   * Crée un utilisateur en base et retourne l'entité persistée.
-   * On en a besoin pour tester la relation publisher.
-   */
   const seedUser = (overrides: Partial<UserEntity> = {}): Promise<UserEntity> => {
     const user = userRepository.create({
       username: 'testuser',
@@ -102,7 +95,6 @@ describe('AnnouncementService (integration)', () => {
         publisher: user,
       })
 
-      // On vérifie en rechargeant depuis la base pour confirmer la persistance
       const persisted = await announcementRepository.findOne({
         where: { id: result.id },
         relations: ['publisher'],
