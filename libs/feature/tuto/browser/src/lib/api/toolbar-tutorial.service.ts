@@ -16,9 +16,6 @@ export class ToolbarTutorialService {
     private sidebarTutorialService: SidebarTutorialService
   ) {}
 
-  /**
-   * Démarre le tutoriel complet du toolbar
-   */
   startToolbarTutorial(user: User): void {
     this.user = user
     const steps = this.buildTutorialSteps(user)
@@ -31,14 +28,11 @@ export class ToolbarTutorialService {
     })
   }
 
-  /**
-   * Construit les étapes du tutoriel en fonction de l'utilisateur
-   */
   private buildTutorialSteps(user: User): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
         id: 'welcome',
-        title: 'Bienvenue dans PLaTon ! 🎉',
+        title: 'Bienvenue dans PLaTon !',
         text: `<div style="text-align: center; padding: 20px;">
                 <h3 style="color: var(--brand-text-primary);
                             margin: 0 0 12px 0;
@@ -141,7 +135,7 @@ export class ToolbarTutorialService {
         title: 'Menu utilisateur',
         text: 'Accédez à votre profil, vos paramètres de compte et déconnectez-vous depuis ce menu.',
         attachTo: {
-          element: 'user-avatar',
+          element: '#tuto-user-avatar',
           on: 'bottom',
         },
       }

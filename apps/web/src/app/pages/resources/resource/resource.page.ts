@@ -190,16 +190,19 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   private checkForTutorialContinuation(): void {
     this.activatedRoute.queryParams.subscribe((params) => {
-      const fromTutorial = params['fromTutorial']
+      const fromTutorial = params['fromTutorial'] as string
       const isFromTutorialService = this.resourcesTutorialService.getIsFromTutorial()
-
       if (fromTutorial === 'true' || isFromTutorialService) {
-        setTimeout(() => {
-          this.startResourcePageTutorial()
-        }, 1000)
-
-        this.cleanTutorialParams()
-        this.resourcesTutorialService.resetTutorialFlag()
+        // Attendre que le contexte soit chargé avant de lancer le tuto
+        const sub = this.presenter.contextChange.subscribe((ctx) => {
+          if (ctx.resource) {
+            sub.unsubscribe()
+            setTimeout(() => this.startResourcePageTutorial(), 500)
+            this.cleanTutorialParams()
+            this.resourcesTutorialService.resetTutorialFlag()
+          }
+        })
+        this.subscriptions.push(sub)
       }
     })
   }

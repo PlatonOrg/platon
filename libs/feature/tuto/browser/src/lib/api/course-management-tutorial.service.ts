@@ -1,17 +1,28 @@
 import { Injectable } from '@angular/core'
-import { Router } from '@angular/router'
+import { NavigationStart, Router } from '@angular/router'
+import { Subscription } from 'rxjs'
+import { filter, take } from 'rxjs/operators'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 import { ResourceCreationTutorialService } from './resource-creation-tutorial.service'
-import { User, UserRoles } from '@platon/core/common'
+import { User } from '@platon/core/common'
 import { Course } from '@platon/feature/course/common'
 
 @Injectable({
   providedIn: 'root',
 })
 export class CourseManagementTutorialService {
-  private selectedCourse: Course | null = null
-  private availableCourses: Course[] = []
   private isResearchActivity = true
+  private navigationSub: Subscription | null = null
+
+  private _isFromTutorial = false
+
+  getIsFromTutorial(): boolean {
+    return this._isFromTutorial
+  }
+
+  resetTutorialFlag(): void {
+    this._isFromTutorial = false
+  }
 
   constructor(
     private shepherdService: ShepherdService,
@@ -19,13 +30,7 @@ export class CourseManagementTutorialService {
     private resourceCreationTutorialService: ResourceCreationTutorialService
   ) {}
 
-  /**
-   * Démarre le tutoriel de gestion de cours
-   */
   startCourseManagementTutorial(user: User, courses: Course[] = []): void {
-    this.selectedCourse = null
-    this.availableCourses = courses
-
     // Vérifier s'il y a des cours disponibles
     if (!courses.length) {
       this.startNoCoursesTutorial(user)
@@ -42,9 +47,6 @@ export class CourseManagementTutorialService {
     })
   }
 
-  /**
-   * Tutoriel quand aucun cours n'est disponible
-   */
   private startNoCoursesTutorial(user: User): void {
     const steps: TutorialStep[] = [
       {
@@ -52,10 +54,10 @@ export class CourseManagementTutorialService {
         title: 'Aucun cours disponible',
         text: `Pour apprendre à gérer un cours, vous devez d'abord en créer un !<br><br>
                <strong>Que vais-je apprendre ?</strong><br>
-               • Comment créer un cours<br>
-               • Comment organiser le contenu avec des sections<br>
-               • Comment ajouter des activités<br>
-               • Comment gérer la structure d'un cours`,
+               - Comment créer un cours<br>
+               - Comment organiser le contenu avec des sections<br>
+               - Comment ajouter des activités<br>
+               - Comment gérer la structure d'un cours`,
         buttons: [
           {
             text: 'Apprendre à créer un cours',
@@ -86,21 +88,18 @@ export class CourseManagementTutorialService {
     }, 500)
   }
 
-  /**
-   * Construit les étapes du tutoriel pour la liste des cours
-   */
-  private buildCoursesListTutorialSteps(user: User): TutorialStep[] {
+  private buildCoursesListTutorialSteps(_user: User): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
         id: 'courses-welcome',
         title: 'Bienvenue dans la gestion de cours !',
         text: `Ce tutoriel va vous apprendre à organiser et gérer efficacement un cours sur PLaTon.<br><br>
                <strong>Programme du tutoriel :</strong><br>
-               • Navigation dans un cours<br>
-               • Création et gestion des sections<br>
-               • Ajout d'activités<br>
-               • Organisation du contenu<br>
-               • Conseils de bonnes pratiques`,
+               - Navigation dans un cours<br>
+               - Création et gestion des sections<br>
+               - Ajout d'activités<br>
+               - Organisation du contenu<br>
+               - Conseils de bonnes pratiques`,
         buttons: [
           {
             text: 'Annuler',
@@ -124,13 +123,29 @@ export class CourseManagementTutorialService {
         },
         buttons: [
           {
-            text: 'Precedent',
+            text: 'Précédent',
             secondary: true,
             action: () => this.shepherdService.previous(),
           },
         ],
         when: {
-          show: () => this.setupCourseSelectionListeners(),
+          show: () => {
+            this._isFromTutorial = true
+
+            this.navigationSub?.unsubscribe()
+            this.navigationSub = this.router.events
+              .pipe(
+                filter((event) => event instanceof NavigationStart),
+                take(1)
+              )
+              .subscribe(() => {
+                this.shepherdService.complete()
+              })
+          },
+          hide: () => {
+            this.navigationSub?.unsubscribe()
+            this.navigationSub = null
+          },
         },
       },
     ]
@@ -138,65 +153,6 @@ export class CourseManagementTutorialService {
     return steps
   }
 
-  /**
-   * Configure les listeners pour la sélection de cours
-   */
-  private setupCourseSelectionListeners(): void {
-    setTimeout(() => {
-      const courseItems = document.querySelectorAll('.tuto-course-item-container, ui-list-item-article')
-
-      courseItems.forEach((item, index) => {
-        const courseContainer = item.closest('[data-course-id]') || item
-
-        item.addEventListener('click', (event) => {
-          // Récupérer l'ID du cours depuis l'attribut data
-          const courseId = courseContainer.getAttribute('data-course-id')
-
-          if (courseId) {
-            this.selectedCourse = this.availableCourses.find((c) => c.id === courseId) || null
-          } else {
-            this.selectedCourse = this.availableCourses[index] || null
-          }
-
-          if (this.selectedCourse) {
-            this.shepherdService.complete()
-
-            // Démarrer le tutoriel de gestion après redirection
-            setTimeout(() => {
-              this.startCourseDetailsTutorial(this.selectedCourse!)
-            }, 0)
-          } else {
-            /* Empty */
-          }
-        })
-      })
-      if (courseItems.length === 0) {
-        const broadItems = document.querySelectorAll('nz-ribbon, course-item, [data-course-id]')
-
-        broadItems.forEach((item, index) => {
-          item.addEventListener('click', (event) => {
-            const courseId = item.getAttribute('data-course-id')
-            if (courseId) {
-              this.selectedCourse = this.availableCourses.find((c) => c.id === courseId) || null
-            } else {
-              this.selectedCourse = this.availableCourses[index] || null
-            }
-
-            if (this.selectedCourse) {
-              this.shepherdService.complete()
-              setTimeout(() => {
-                this.startCourseDetailsTutorial(this.selectedCourse!)
-              }, 200)
-            }
-          })
-        })
-      }
-    }, 800)
-  }
-
-  /**
-   * Démarre le tutoriel détaillé de gestion de cours
-   */
   startCourseDetailsTutorial(course: Course): void {
     const steps = this.buildCourseDetailsTutorialSteps(course)
 
@@ -208,9 +164,6 @@ export class CourseManagementTutorialService {
     })
   }
 
-  /**
-   * Construit les étapes du tutoriel détaillé
-   */
   private buildCourseDetailsTutorialSteps(course: Course): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
@@ -308,7 +261,7 @@ export class CourseManagementTutorialService {
                • <strong>Réorganiser</strong> l'ordre des sections<br>
                • <strong>Ajouter des activités</strong> dans cette section`,
         attachTo: {
-          element: 'tuto-course-no-activities',
+          element: '#tuto-course-no-activities',
           on: 'right',
         },
       },
@@ -375,9 +328,6 @@ export class CourseManagementTutorialService {
     })
   }
 
-  /**
-   * Construit les étapes pour le flux avec activité existante
-   */
   private buildExistingActivitySteps(course: Course): TutorialStep[] {
     return [
       {
@@ -484,18 +434,18 @@ export class CourseManagementTutorialService {
   /**
    * Étapes communes qui concluent le tutoriel
    */
-  private buildCommonFinalSteps(course: Course): TutorialStep[] {
+  private buildCommonFinalSteps(_course: Course): TutorialStep[] {
     return [
       {
         id: 'tutorial-complete',
         title: 'Félicitations ! 🎉',
         text: `Excellent travail ! Vous maîtrisez maintenant la gestion de cours sur PLaTon.<br><br>
               <strong>Ce que vous avez appris :</strong><br>
-              ✅ Navigation dans l'interface de cours<br>
-              ✅ Création et gestion des sections<br>
-              ✅ Ajout d'activités<br>
-              ✅ Fonctionnalités de recherche<br>
-              ✅ Bonnes pratiques d'organisation<br><br>
+              - Navigation dans l'interface de cours<br>
+              - Création et gestion des sections<br>
+              - Ajout d'activités<br>
+              - Fonctionnalités de recherche<br>
+              - Bonnes pratiques d'organisation<br><br>
               Vous êtes maintenant prêt à créer des cours bien structurés !`,
         buttons: [
           {
