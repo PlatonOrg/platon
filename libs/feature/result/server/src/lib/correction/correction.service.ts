@@ -29,16 +29,19 @@ export class CorrectionService {
    * @remarks
    * - If `activityId` is provided, only the activity with the given id is returned.
    * - Only activities that have been terminated are returned.
+   * - If `viewerMode` is true, the corrector assignment constraint is ignored.
    * @param correctorUserId The id of the user who will correct the activities.
    * @param activityId An optional activity id to filter the results.
+   * @param viewerMode Whether this is a read-only visualization request.
    * @returns A list of activities to correct.
    */
-  async list(correctorUserId: string, activityId?: string): Promise<ActivityCorrection[]> {
+  async list(correctorUserId: string, activityId?: string, viewerMode = false): Promise<ActivityCorrection[]> {
     type Projection = {
       userId: string
       activityId: string
       activityName: string
       activityNavigation: any
+      exerciseId: string
       activitySessionId: string
       exerciseSessionId: string
       courseId: string
@@ -51,11 +54,50 @@ export class CorrectionService {
       hasUploads: boolean
     }
 
+    // In viewer mode, list exercise sessions directly from the activity without requiring answers.
+    const answerJoin = viewerMode
+      ? ''
+      : `INNER JOIN LATERAL (
+      SELECT * FROM "Answers" a
+      WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
+      ORDER BY a.created_at DESC
+      LIMIT 1
+    ) answer ON true`
+
+    const queryParams: string[] = []
+    const userParam = viewerMode ? undefined : '$1'
+    const activityParam = viewerMode ? '$1' : '$2'
+
+    if (viewerMode) {
+      if (activityId) {
+        queryParams.push(activityId)
+      }
+    } else {
+      queryParams.push(correctorUserId)
+      if (activityId) {
+        queryParams.push(activityId)
+      }
+    }
+
+    const whereConditions = [
+      activityId ? `activity.id=${activityParam}` : undefined,
+      userParam ? `(exercise_session.user_id IS NULL OR exercise_session.user_id <> ${userParam})` : undefined,
+      viewerMode ? undefined : 'answer.variables IS NOT NULL',
+      viewerMode ? undefined : "(activity_session.variables->'navigation'->>'terminated')::boolean = TRUE",
+      userParam
+        ? `EXISTS (
+        SELECT 1 FROM "ActivityCorrectorView" corrector
+        WHERE corrector.activity_id=activity.id AND corrector.id=${userParam}
+      )`
+        : undefined,
+    ].filter((condition): condition is string => !!condition)
+
     // Construct SQL query and parameters
     const queryText = `
     SELECT
       activity.id as "activityId",
       activity.source->'variables'->>'title' as "activityName",
+      resources.id as "exerciseId",
       resources."name" as "exerciseName",
       (activity_session.variables->>'navigation')::jsonb as "activityNavigation",
       activity_session.id as "activitySessionId",
@@ -77,22 +119,10 @@ export class CorrectionService {
     INNER JOIN "Sessions" activity_session ON activity_session.id=exercise_session.parent_id
     INNER JOIN "Activities" activity ON activity.id=exercise_session.activity_id
     INNER JOIN "Courses" course ON course.id=activity.course_id
-    INNER JOIN LATERAL (
-      SELECT * FROM "Answers" a
-      WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
-      ORDER BY a.created_at DESC
-      LIMIT 1
-    ) answer ON true
+    ${answerJoin}
     LEFT JOIN "Corrections" correction ON correction.id=exercise_session.correction_id
     WHERE
-      ${activityId ? 'activity.id=$2 AND' : ''}
-      (exercise_session.user_id IS NULL OR exercise_session.user_id <> $1) AND
-      answer.variables IS NOT NULL AND
-      (activity_session.variables->'navigation'->>'terminated')::boolean = TRUE AND
-      EXISTS (
-        SELECT 1 FROM "ActivityCorrectorView" corrector
-        WHERE corrector.activity_id=activity.id AND corrector.id=$1
-      )
+      ${whereConditions.join(' AND\n      ')}
   `
 
     const subQuery = `
@@ -102,14 +132,12 @@ export class CorrectionService {
       left join "Labels" l on cl.label_id = l.id
       where cl.session_id = $1
     `
-    const queryParams = activityId ? [correctorUserId, activityId] : [correctorUserId]
-
     const projections = (await this.sessionRepository.query(queryText, queryParams)) as Projection[]
 
     const activityMap = new Map<string, ActivityCorrection>()
 
-    projections.forEach(async (projection) => {
-      const navItem = projection.activityNavigation.exercises.find(
+    for (const projection of projections) {
+      const navItem = projection.activityNavigation?.exercises?.find(
         (item: any) => item.sessionId === projection.exerciseSessionId
       )
 
@@ -121,7 +149,7 @@ export class CorrectionService {
         correctedAt: projection.correctedAt,
         correctedGrade: projection.correctedGrade,
         grade: projection.grade,
-        exerciseId: navItem.id,
+        exerciseId: navItem?.id ?? projection.exerciseId,
         exerciseName: projection.exerciseName,
         hasUploads: projection.hasUploads,
         labels: [],
@@ -150,7 +178,7 @@ export class CorrectionService {
       } else {
         activityMap.get(projection.activityId)?.exercises.push(exercise)
       }
-    })
+    }
 
     return Array.from(activityMap.values())
   }

@@ -30,7 +30,7 @@ export abstract class ResultProvider {
   abstract courseLeaderboard(input: FindCourseLeaderboard): Observable<CourseLeaderboardEntry[]>
   abstract activityLeaderboard(input: FindActivityLeaderboard): Observable<ActivityLeaderboardEntry[]>
 
-  abstract findCorrection(activityId: string): Observable<ActivityCorrection>
+  abstract findCorrection(activityId: string, viewerMode?: boolean): Observable<ActivityCorrection>
   abstract listCorrections(): Observable<ListResponse<ActivityCorrection>>
   abstract upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction>
   abstract downloadAllSubmissions(

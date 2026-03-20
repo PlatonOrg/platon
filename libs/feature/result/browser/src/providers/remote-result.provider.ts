@@ -68,15 +68,22 @@ export class RemoteResultProvider extends ResultProvider {
     return this.http.get<ActivityResults>(`/api/v1/results/activity/${activityId}`)
   }
 
-  findCorrection(activityId: string): Observable<ActivityCorrection> {
-    return this.http.get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections/${activityId}`).pipe(
-      map((response) => {
-        if (!response.total) {
-          throw new Error(`Correction not found for activity ${activityId}`)
-        }
-        return response.resources[0]
-      })
-    )
+  findCorrection(activityId: string, viewerMode = false): Observable<ActivityCorrection> {
+    let params = new HttpParams()
+    if (viewerMode) {
+      params = params.set('viewer', 'true')
+    }
+
+    return this.http
+      .get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections/${activityId}`, { params })
+      .pipe(
+        map((response) => {
+          if (!response.total) {
+            throw new Error(`Correction not found for activity ${activityId}`)
+          }
+          return response.resources[0]
+        })
+      )
   }
 
   listCorrections(): Observable<ListResponse<ActivityCorrection>> {
@@ -105,8 +112,8 @@ export class RemoteResultProvider extends ResultProvider {
     sessionId: string
   ): Observable<{ blob: Blob; fileName: string }> {
     return this.http
-      .get<Blob>(`/api/v1/sessions/${sessionId}/submissions/${activityId}/${exerciseId}/download-all`, {
-        responseType: 'blob' as any,
+      .get(`/api/v1/sessions/${sessionId}/submissions/${activityId}/${exerciseId}/download-all`, {
+        responseType: 'blob',
         observe: 'response',
       })
       .pipe(

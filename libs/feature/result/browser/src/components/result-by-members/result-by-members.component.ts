@@ -44,6 +44,7 @@ export class ResultByMembersComponent implements OnInit {
   protected answerStates = Object.values(AnswerStates)
   private activityId: string | null = null
   private courseId: string | null = null
+  protected copyUrl = ''
 
   constructor(private route: ActivatedRoute) {}
 
@@ -64,9 +65,10 @@ export class ResultByMembersComponent implements OnInit {
     return indexA - indexB
   }
 
-  protected openSession(sessionId: string | undefined): void {
-    if (sessionId) {
-      window.open(`/player/correction/${this.courseId}?activityId=${this.activityId}&sessionId=${sessionId}`)
+  protected buildSessionUrl(sessionId: string): string {
+    if (!this.courseId || !this.activityId || !sessionId) {
+      return '#'
     }
+    return `/player/correction/${this.courseId}?activityId=${this.activityId}&sessionId=${sessionId}&mode=view`
   }
 }

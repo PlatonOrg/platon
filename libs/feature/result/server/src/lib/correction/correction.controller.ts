@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common'
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
+import { ForbiddenResponse, ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import { ActivityCorrection, UpsertCorrection } from '@platon/feature/result/common'
 import { ActivityCorrectionDTO, CorrectionDTO } from './correction.dto'
@@ -26,9 +26,14 @@ export class CorrectionController {
   @Get('/:activityId')
   async find(
     @Req() req: IRequest,
-    @UUIDParam('activityId') activityId: string
+    @UUIDParam('activityId') activityId: string,
+    @Query('viewer') viewer?: string
   ): Promise<ListResponse<ActivityCorrection>> {
-    const items = await this.service.list(req.user.id, activityId)
+    const viewerMode = viewer === 'true'
+    if (viewerMode && ![UserRoles.teacher, UserRoles.admin].includes(req.user.role)) {
+      throw new ForbiddenResponse('You are not allowed to access viewer mode for corrections')
+    }
+    const items = await this.service.list(req.user.id, activityId, viewerMode)
     const resources = Mapper.mapAll(items, ActivityCorrectionDTO)
     return new ListResponse({ total: resources.length, resources })
   }

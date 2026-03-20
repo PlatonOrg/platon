@@ -24,6 +24,8 @@ export class PlayerCorrectionPage implements OnInit {
   protected loading = true
   protected error: unknown
   protected correction?: CourseCorrection
+  protected mode: 'correction' | 'review' = 'correction'
+  private selectedActivityId?: string
 
   constructor(
     private readonly resultService: ResultService,
@@ -34,6 +36,8 @@ export class PlayerCorrectionPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.loading = true
+    this.mode = this.resolveMode()
+    this.selectedActivityId = this.activatedRoute.snapshot.queryParamMap.get('activityId') ?? undefined
 
     try {
       const courseId = this.getCourseId()
@@ -52,6 +56,11 @@ export class PlayerCorrectionPage implements OnInit {
     }
   }
 
+  private resolveMode(): 'correction' | 'review' {
+    const mode = this.activatedRoute.snapshot.queryParamMap.get('mode')
+    return mode === 'review' || mode === 'view' ? 'review' : 'correction'
+  }
+
   private getCourseId(): FindCourse {
     const params = this.activatedRoute.snapshot.paramMap
     return { id: params.get('id') } as FindCourse
@@ -60,15 +69,28 @@ export class PlayerCorrectionPage implements OnInit {
   private async getActivities(courseId: FindCourse): Promise<Activity[]> {
     const course = await firstValueFrom(this.courseService.find(courseId))
     const activities = await firstValueFrom(this.courseService.listActivities(course))
-    return activities.resources
+    if (!this.selectedActivityId) {
+      return activities.resources
+    }
+    return activities.resources.filter((activity) => activity.id === this.selectedActivityId)
+  }
+
+  private isExpectedMissingCorrection(error: unknown): boolean {
+    return error instanceof Error && error.message.includes('Correction not found for activity')
   }
 
   private async getCorrections(activities: Activity[]): Promise<(ActivityCorrection | undefined)[]> {
     return Promise.all(
       activities.map(async (activity) => {
         try {
-          return await firstValueFrom(this.resultService.findCorrection(activity.id))
+          const correction = await firstValueFrom(
+            this.resultService.findCorrection(activity.id, this.mode === 'review')
+          )
+          return correction
         } catch (error) {
+          if (!this.isExpectedMissingCorrection(error)) {
+            console.error(`Error fetching correction for activity ${activity.id}:`, error)
+          }
           return undefined
         }
       })

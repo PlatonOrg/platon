@@ -66,7 +66,13 @@
                 shouldBePositive
               />
             </div>
-            <a *ngIf="pair.value?.sessionId" class="spacing" (click)="openSession(pair.value.sessionId)">
+            <a
+              *ngIf="pair.value?.sessionId as sessionId"
+              class="spacing"
+              [href]="buildSessionUrl(sessionId)"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Voir la copie <br />
             </a>
           </ng-template>
