@@ -119,7 +119,6 @@ export class UiFilePreviewComponent implements OnChanges, OnDestroy {
   }
 
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
-    console.log('here')
     if (changes['src'] || this.updated) {
       this.updateDisplayType()
       if (this.isPdf) {

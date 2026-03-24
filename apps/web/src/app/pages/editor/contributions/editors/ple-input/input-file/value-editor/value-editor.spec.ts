@@ -1,21 +1,13 @@
 import { ActivatedRoute } from '@angular/router'
 import { EditFilePreviewService } from '@platon/shared/ui'
-import { Pipe, PipeTransform, signal } from '@angular/core'
+import { signal, NO_ERRORS_SCHEMA } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { InputFileService } from '@platon/feature/resource/browser'
 import { FileService, EditorService, NotificationService } from '@cisstech/nge-ide/core'
 import { VALUE_EDITOR_TOKEN } from '../../ple-input'
 import { ValueEditorComponent } from './value-editor.component'
+import { HideResourceIdPipe } from './value-editor.component'
 
-@Pipe({
-  name: 'hideResourceId',
-  standalone: true,
-})
-class MockHideResourceIdPipe implements PipeTransform {
-  transform(value?: string | null): any {
-    return value
-  }
-}
 describe('ValueEditorComponent', () => {
   let component: ValueEditorComponent
   let fixture: ComponentFixture<ValueEditorComponent>
@@ -34,6 +26,7 @@ describe('ValueEditorComponent', () => {
     resourceVersion: jest.fn().mockReturnValue('latest'),
     urlFile: jest.fn().mockReturnValue('https://localhost/resources'),
     update: jest.fn((id, data, success) => success()),
+    change: jest.fn().mockResolvedValue('test-file.txt'),
   }
 
   const mockFileService = {
@@ -50,9 +43,19 @@ describe('ValueEditorComponent', () => {
   }
 
   beforeEach(async () => {
+    // eslint-disable-next-line prettier/prettier
+    (global as any).monaco = {
+      Uri: {
+        parse: jest.fn().mockReturnValue({
+          authority: 'test:latest',
+          path: '/file',
+          toString: () => 'test:latest/file',
+        }),
+      },
+    }
+
     await TestBed.configureTestingModule({
-      declarations: [ValueEditorComponent],
-      imports: [MockHideResourceIdPipe],
+      declarations: [ValueEditorComponent, HideResourceIdPipe],
       providers: [
         { provide: EditFilePreviewService, useValue: mockEditService },
         { provide: InputFileService, useValue: mockInputFileService },
@@ -72,14 +75,19 @@ describe('ValueEditorComponent', () => {
           },
         },
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents()
+
     fixture = TestBed.createComponent(ValueEditorComponent)
     component = fixture.componentInstance
+    component.setValue('@copycontent /test/path')
     fixture.detectChanges()
   })
+
   it('should create', () => {
     expect(component).toBeTruthy()
   })
+
   describe('Change mode', () => {
     it('should set isEditing to true', async () => {
       await component.changeMode()
@@ -121,6 +129,37 @@ describe('ValueEditorComponent', () => {
       component.closelEdit()
       expect(mockModel.pushEditOperations).toHaveBeenCalled()
       expect(mockEditService.isEditing()).toBe(false)
+    })
+  })
+
+  describe('onDrop', () => {
+    it('should upload a new file when a file is dropped from outside', async () => {
+      const mockFile = new File(['content'], 'test-file.txt', { type: 'text/plain' })
+      const dndData = { file: mockFile } as any
+      mockInputFileService.change.mockResolvedValue('test-file.txt')
+      component.setValue('')
+      component.inputId = 'input-1'
+      component.id = 'res-123'
+      await (component as any).onDrop(dndData)
+
+      expect(mockInputFileService.change).toHaveBeenCalledWith('input-1', mockFile)
+      expect((component as any).value).toContain('@copycontent /res-123:latest/test-file.txt')
+    })
+
+    it('should update the path when an internal resource is dropped', async () => {
+      const dndData = {
+        file: undefined,
+        src: 'file:///path/to/resource.txt',
+      } as any
+      const mockPresenter = {
+        resolvePath: jest.fn().mockReturnValue('/internal/path/resource.txt'),
+      }
+      ;(component as any).editorPresenter = mockPresenter
+      ;(component as any).editorService = mockEditorService
+      await (component as any).onDrop(dndData)
+
+      expect(mockPresenter.resolvePath).toHaveBeenCalled()
+      expect((component as any).value).toBe('@copycontent /internal/path/resource.txt')
     })
   })
 })

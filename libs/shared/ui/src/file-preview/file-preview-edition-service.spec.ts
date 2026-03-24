@@ -1,6 +1,16 @@
 import * as FileUtils from './file-preview'
 import { EditFilePreviewService } from './file-preview-edition-service'
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace monaco.editor {
+    interface ITextModel {
+      getValue(): string
+      dispose(): void
+      onDidChangeContent(callback: () => any): { dispose(): void }
+    }
+  }
+}
 describe('EditFilePreviewService', () => {
   let service: EditFilePreviewService
   const contentModel = 'content from monaco editor'
@@ -10,14 +20,18 @@ describe('EditFilePreviewService', () => {
     dispose: jest.fn(),
   }
   beforeEach(() => {
-    service = new EditFilePreviewService()
-    ;(global as any).monaco = {
-      editor: { createModel: jest.fn().mockReturnValue(mockEditor) },
+    // eslint-disable-next-line prettier/prettier
+    (global as any).monaco = {// disable prettier otherwise ask to add ';' before "(global ..." but not happy to start the function with ';'
+      editor: {
+        createModel: jest.fn().mockReturnValue(mockEditor),
+      },
     }
+    service = new EditFilePreviewService()
   })
 
   afterEach(() => {
     delete (global as any).monaco
+    jest.restoreAllMocks()
   })
 
   describe('Extension support', () => {
