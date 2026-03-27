@@ -62,7 +62,9 @@
 </ng-template>
 
 <ng-template #title>
-  {{ name }}
+  <span nz-tooltip [nzTooltipTitle]="isTitleTruncated ? name : null" (mouseenter)="checkTitleTruncation($event)">{{
+    name
+  }}</span>
   <a *ngIf="item.statistic?.challengeCount" nz-button nzType="link" [routerLink]="['/courses', item.id, 'challenges']">
     <span nz-tooltip="Afficher les challenges du cours" nz-icon nzType="trophy" nzTheme="twotone"></span>
   </a>
