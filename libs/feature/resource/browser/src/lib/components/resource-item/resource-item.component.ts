@@ -90,6 +90,7 @@ export class ResourceItemComponent implements OnChanges {
   @Input() shorten = false
   @Output() levelClicked = new EventEmitter<string>()
   @Output() topicClicked = new EventEmitter<string>()
+  @Output() itemClicked = new EventEmitter<void>()
 
   get detailsUrl(): string {
     return `/resources/${this.item.id}`

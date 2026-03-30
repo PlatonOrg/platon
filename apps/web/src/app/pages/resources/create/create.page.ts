@@ -18,6 +18,7 @@ import { MatInputModule } from '@angular/material/input'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
@@ -79,6 +80,7 @@ type TemplateSource = {
     NzCollapseModule,
     NzSkeletonModule,
     NzPageHeaderModule,
+    NzPopoverModule,
 
     UiStepDirective,
     UiStepperComponent,
@@ -115,6 +117,8 @@ export class ResourceCreatePage implements OnInit {
   protected levels: Level[] = []
   protected templateSources: TemplateSource[] = []
   protected selectedTemplateSources = new SelectionModel<TemplateSource>(true, [])
+  protected circlePickerVisible = false
+  protected loadingAdditionalTemplates = false
   protected infos = new FormGroup({
     name: new FormControl('', [Validators.required]),
     code: new FormControl(''),
@@ -285,6 +289,52 @@ export class ResourceCreatePage implements OnInit {
     this.loadingTemplates = false
 
     this.changeDetectorRef.markForCheck()
+  }
+
+  protected async addTemplateSourceFromCircle(circleId: string): Promise<void> {
+    this.circlePickerVisible = false
+    if (this.templateSources.some((s) => s.circle.id === circleId)) {
+      return
+    }
+
+    this.loadingAdditionalTemplates = true
+    this.changeDetectorRef.markForCheck()
+
+    try {
+      const response = await firstValueFrom(
+        this.resourceService.search({
+          types: ['EXERCISE'],
+          configurable: true,
+          parents: [circleId],
+          expands: ['metadata', 'statistic'],
+        })
+      )
+
+      response.resources = response.resources
+        .map((r) => ({
+          ...r,
+          exerciseLength: r.statistic?.exercise?.references?.total ?? 0,
+        }))
+        .sort((a, b) => b.exerciseLength - a.exerciseLength)
+
+      const circleNode = branchFromCircleTree(this.tree, circleId)
+      if (!circleNode) return
+
+      const templates = response.resources
+      if (!templates.length) {
+        this.dialogService.error('Aucun template trouvé dans ce cercle.')
+        return
+      }
+
+      const newSource: TemplateSource = { circle: circleNode, count: templates.length, templates }
+      this.templateSources = [...this.templateSources, newSource]
+      this.selectedTemplateSources.select(newSource)
+    } catch {
+      this.dialogService.error('Une erreur est survenue lors du chargement des templates.')
+    } finally {
+      this.loadingAdditionalTemplates = false
+      this.changeDetectorRef.markForCheck()
+    }
   }
 
   private codeValidator(codes: string[]): ValidatorFn {

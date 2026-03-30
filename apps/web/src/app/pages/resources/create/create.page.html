@@ -151,10 +151,11 @@
         <section class="section-template">
           @if (loadingTemplates) {
           <nz-spin *ngIf="loadingTemplates" nzTip="Chargement des templates..." />
-          } @else { @if (templateSources.length > 1) {
+          } @else { @if (templateSources.length > 0) {
           <h4>Sélectionnez un template puis cliquez sur créer.</h4>
+          }
           <div class="template-circle-filter">
-            @for (source of templateSources; track source.circle.id) {
+            @if (templateSources.length > 1) { @for (source of templateSources; track source.circle.id) {
             <nz-tag
               *ngIf="source.count > 0"
               nzMode="checkable"
@@ -169,7 +170,31 @@
               </ng-container>
             </nz-tag>
             }
+            <button
+              nz-button
+              nzShape="circle"
+              nzSize="small"
+              nz-tooltip="Ajouter un cercle source"
+              [nz-popover]
+              nzPopoverTrigger="click"
+              [nzPopoverContent]="circlePickerTemplate"
+              [(nzPopoverVisible)]="circlePickerVisible"
+            >
+              <i nz-icon nzType="plus"></i>
+            </button>
+            <ng-template #circlePickerTemplate>
+              <div class="circle-picker-popover">
+                <resource-circle-tree
+                  [tree]="tree"
+                  [disableFromPermissions]="false"
+                  (nodeClick)="addTemplateSourceFromCircle($event)"
+                />
+              </div>
+            </ng-template>
+            }
           </div>
+          @if (loadingAdditionalTemplates) {
+          <nz-spin nzTip="Chargement des templates..." />
           }
           <nz-collapse [nzBordered]="false" *ngIf="!loadingTemplates">
             @for (source of selectedTemplateSources.selected; track source.circle.id) {
@@ -177,9 +202,13 @@
               <div class="template-grid">
                 @for (item of source.templates; track item.id) {
                 <div>
-                  <div class="template-item" (click)="template = item; infos.markAllAsTouched(); stepper.nextStep()">
-                    <resource-item [item]="item" editable="false" clickable="false" [shorten]="true" />
-                  </div>
+                  <resource-item
+                    [item]="item"
+                    editable="false"
+                    clickable="false"
+                    [shorten]="true"
+                    (itemClicked)="template = item; infos.markAllAsTouched(); stepper.nextStep()"
+                  />
                   <button
                     [nzType]="item.id === template?.id ? 'primary' : 'default'"
                     nz-button
@@ -196,7 +225,7 @@
           }
           <div *ngIf="!this.template">
             <span> Vous ne trouvez pas un template ? </span>
-            <span> Pensez à <b>suivre</b> les cercles qui vous intéresse ! </span>
+            <span> Cliquez sur <b>+</b> pour explorer les cercles et ajouter des sources de templates.</span>
           </div>
           <ng-container *ngIf="template">
             <br />

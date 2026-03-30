@@ -9,7 +9,7 @@
     </nz-tree-node-checkbox>
     <nz-tree-node-option
       [nzDisabled]="node.disabled"
-      [routerLink]="node.disabled || selectable ? undefined : ['/resources', node.id]"
+      [routerLink]="node.disabled || selectable || clickable ? undefined : ['/resources', node.id]"
       (nzClick)="selectionToggle(node)"
       >{{ node.name }}</nz-tree-node-option
     >
@@ -27,7 +27,7 @@
     </nz-tree-node-checkbox>
     <nz-tree-node-option
       [nzDisabled]="node.disabled"
-      [routerLink]="node.disabled || selectable ? undefined : ['/resources', node.id, 'overview']"
+      [routerLink]="node.disabled || selectable || clickable ? undefined : ['/resources', node.id, 'overview']"
       (nzClick)="selectionToggle(node)"
       >{{ node.name }}
     </nz-tree-node-option>

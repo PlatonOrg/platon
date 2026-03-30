@@ -6,6 +6,8 @@
     [articleIconTemplate]="imageTemplate"
     [articleDescription]="descriptionTemplate"
     (didClickTagItem)="handleTagClick($event)"
+    (didClick)="itemClicked.emit()"
+    (didClickTitle)="itemClicked.emit()"
   >
     @if(item.templateId) {
     <ui-list-item-article-action *ngIf="editable" (click)="openTab(builderUrl)" class="action" actionTitle="Paramétrer">
