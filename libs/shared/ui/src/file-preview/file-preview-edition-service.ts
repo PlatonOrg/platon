@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core'
 import { extractSupportedExtension } from './file-preview'
 
+declare const monaco: any
+
 /** service for file editing for the build page */
 @Injectable({ providedIn: 'root' })
 export class EditFilePreviewService {
