@@ -124,32 +124,12 @@
           <nge-markdown [data]="player?.form" (render)="onRender()" />
         </div>
       </section>
-      <!-- L'AJOUT DU TERMINAL LOGS -->
+      <!-- TERMINAL LOGS -->
+      @if (player?.platon_logs?.length && !editorPreview) {
       <section>
-        <ng-container *ngIf="player?.platon_logs?.length && editorPreview">
-          <div class="terminal-container">
-            <div class="terminal-header">
-              <span>Terminal PlaTon</span>
-              <button
-                mat-icon-button
-                class="copy-button"
-                (click)="copyToClipboard(getLogsAsText(player?.platon_logs))"
-                nz-tooltip="Copier le contenu"
-              >
-                <mat-icon>content_copy</mat-icon>
-              </button>
-            </div>
-            <div class="terminal-body" #terminalBody>
-              @for (log of player?.platon_logs; track $index) {
-              <div [class]="getLogClass(log)">
-                <mat-icon class="log-icon">{{ getLogIcon(log) }}</mat-icon>
-                <span class="log-message">{{ log.message }}</span>
-              </div>
-              }
-            </div>
-          </div>
-        </ng-container>
+        <player-terminal-logs [logs]="player?.platon_logs || []" />
       </section>
+      }
 
       <section #containerSolution>
         <ng-container *ngIf="player?.solution">

@@ -268,7 +268,11 @@ export class PlayerService extends PlayerManager {
 
     const session = await this.buildNext(activitySession)
 
-    return { nextExerciseId: session.variables.nextExerciseId, navigation: session.variables.navigation }
+    return {
+      nextExerciseId: session.variables.nextExerciseId,
+      navigation: session.variables.navigation,
+      logs: session.variables.platon_logs,
+    }
   }
 
   async compareTrainOrWait(
@@ -626,13 +630,6 @@ export class PlayerService extends PlayerManager {
       sessions = await this.sessionService.findAllWithParent(activitySession.id)
     }
 
-    // If the next as logs, add them to nextParams to be passed to the next exercise
-    if (variables.platon_logs && variables.platon_logs.length > 0) {
-      variables.nextParams = variables.nextParams || {}
-      variables.platon_logs = ['\n#####   LOGS DU NEXT   #####\n', ...variables.platon_logs]
-      variables.nextParams.platon_next_logs = variables.platon_logs
-    }
-
     // If the next exercise has parameters, update the exercise session variables
     if (variables.nextParams) {
       const nextExerciseSessionId = variables.navigation.exercises.find(
@@ -686,7 +683,7 @@ export class PlayerService extends PlayerManager {
       grade: variables.activityGrade,
     })
 
-    return activitySession
+    return { ...activitySession, variables } as SessionEntity
   }
 
   /**

@@ -31,6 +31,7 @@ import {
   Player,
   PlayerExercise,
   PlayerNavigation,
+  PlatonLog,
 } from '@platon/feature/player/common'
 
 import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
@@ -48,6 +49,7 @@ import { PlayerExerciseComponent } from '../player-exercise/player-exercise.comp
 import { PlayerNavigationComponent } from '../player-navigation/player-navigation.component'
 import { PlayerResultsComponent } from '../player-results/player-results.component'
 import { PlayerSettingsComponent } from '../player-settings/player-settings.component'
+import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
 import { NotificationService } from '@platon/feature/notification/browser'
 import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -85,6 +87,7 @@ import { UI_MODAL_IFRAME_CLOSE } from '@platon/shared/ui'
     PlayerExerciseComponent,
     PlayerSettingsComponent,
     PlayerNavigationComponent,
+    PlayerTerminalLogsComponent,
   ],
 })
 export class PlayerActivityComponent implements OnInit, OnDestroy {
@@ -117,6 +120,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected onKeydownFn = this.onKeydown.bind(this)
   protected onContextMenuFn = this.onContextMenu.bind(this)
   protected loadingNext = false
+  protected activityLogs: PlatonLog[] = []
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
   protected errorTemplate!: TemplateRef<object>
@@ -371,6 +375,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
               exerciseSessionIds: [],
             })
           )
+          this.activityLogs = nextExercise.logs ?? []
           const nextExerciseId = nextExercise.nextExerciseId
           this.navigation.exercises = nextExercise.navigation.exercises
           if (nextExercise.navigation.terminated) {
@@ -380,6 +385,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
           exercise = this.navigation.exercises.find((item) => item.id === nextExerciseId) as PlayerExercise
           if (!exercise) {
             this.dialogService.error("L'exercice suivant n'a pas été trouvé.")
+            this.changeDetectorRef.markForCheck()
             return
           }
         } catch (error) {
@@ -656,5 +662,9 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     } else {
       close()
     }
+  }
+
+  protected get editorPreview(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
   }
 }

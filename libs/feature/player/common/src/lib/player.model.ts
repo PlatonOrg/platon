@@ -114,6 +114,7 @@ export interface PlayActivityOuput {
 export interface NextOutput {
   nextExerciseId: string
   navigation: PlayerNavigation
+  logs?: PlatonLog[]
 }
 
 export interface EvalExerciseOutput {

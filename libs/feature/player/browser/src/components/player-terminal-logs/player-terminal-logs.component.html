@@ -1,0 +1,16 @@
+<div class="terminal-container">
+  <div class="terminal-header">
+    <span>{{ title }}</span>
+    <button mat-icon-button class="copy-button" (click)="copyToClipboard()" nz-tooltip="Copier le contenu">
+      <mat-icon>content_copy</mat-icon>
+    </button>
+  </div>
+  <div class="terminal-body">
+    @for (log of logs; track $index) {
+    <div [class]="getLogClass(log)">
+      <mat-icon class="log-icon">{{ getLogIcon(log) }}</mat-icon>
+      <span class="log-message">{{ log.message }}</span>
+    </div>
+    }
+  </div>
+</div>

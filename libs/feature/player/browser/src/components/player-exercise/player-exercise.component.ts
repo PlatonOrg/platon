@@ -55,6 +55,8 @@ import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
+import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
+import { User } from '@platon/core/common'
 
 type Action = {
   id?: string
@@ -113,6 +115,7 @@ type FullscreenElement = HTMLElement & {
     FilePreviewSupportedPipe,
     AnswerStatePipesModule,
     PlayerCommentsComponent,
+    PlayerTerminalLogsComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -127,6 +130,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   private readonly webComponentService = inject(WebComponentService)
 
   protected readonly playerSignal = signal<ExercisePlayer | undefined>(undefined)
+  private user: User | undefined = undefined
 
   @Input() state?: AnswerStates
   @Input() player?: ExercisePlayer
@@ -387,6 +391,13 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       this.player = this.players[this.index]
     }
 
+    this.authService
+      .ready()
+      .then((user) => {
+        this.user = user
+      })
+      .catch(console.error)
+
     this.playerSignal.set(this.player)
 
     this.subscriptions.push(
@@ -621,38 +632,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     }
   }
 
-  protected isErrorLog(log: PlatonLog): boolean {
-    return log.type === LogType.ERROR
-  }
-
-  protected getLogClass(log: PlatonLog): string {
-    switch (log.type) {
-      case LogType.ERROR:
-        return 'terminal-line error-line'
-      case LogType.WARNING:
-        return 'terminal-line warning-line'
-      case LogType.DEBUG:
-        return 'terminal-line debug-line'
-      case LogType.INFO:
-      default:
-        return 'terminal-line info-line'
-    }
-  }
-
-  protected getLogIcon(log: PlatonLog): string {
-    switch (log.type) {
-      case LogType.ERROR:
-        return 'error'
-      case LogType.WARNING:
-        return 'warning'
-      case LogType.DEBUG:
-        return 'bug_report'
-      case LogType.INFO:
-      default:
-        return 'info'
-    }
-  }
-
   protected readonly errorServerSignal = computed(() => {
     const player = this.playerSignal()
     if (!player) return ''
@@ -675,6 +654,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   get mailtoLink(): string {
     const subject = encodeURIComponent(`Problème avec l'exercice: ${this.player?.title || 'Exercice'}`)
 
+    const name =
+      this.user?.firstName && this.user?.lastName ? `${this.user.firstName} ${this.user.lastName}` : '[PRENOM] [NOM]'
+
     const body = encodeURIComponent(`
     Bonjour,
 
@@ -686,33 +668,18 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     Pourriez-vous m'aider à résoudre ce problème ?
 
     Merci,
-    Nom Prenom
+    ${name}
     `)
 
-    const teacherEmail = this.getTeacherEmail()
-    return `mailto:${teacherEmail}?subject=${subject}&body=${body}`
+    return `mailto:${this.getTeacherEmail()}?subject=${subject}&body=${body}`
   }
 
   protected retryExercise(): void {
     window.location.reload()
   }
 
+  // TODO: implement this method to return the teacher's email based on the context (exercise, player, user, etc.)
   private getTeacherEmail(): string {
     return ''
-  }
-
-  protected async copyToClipboard(text: string | undefined | null): Promise<void> {
-    if (!text) return
-
-    try {
-      await navigator.clipboard.writeText(text)
-      this.dialogService.success('Contenu copié dans le presse-papier')
-    } catch (err) {
-      this.dialogService.error('Impossible de copier le contenu')
-    }
-  }
-
-  protected getLogsAsText(logs: PlatonLog[] | undefined | null): string {
-    return logs?.map((log) => `[${log.type.toUpperCase()}] ${log.message}`).join('\n') ?? ''
   }
 }

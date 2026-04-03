@@ -114,6 +114,13 @@
           <player-settings [player]="player" />
         </ng-container>
       </div>
+
+      <!-- TERMINAL PLATON : visible en preview next quand le next ne renvoie pas d'exercice -->
+      <player-terminal-logs
+        *ngIf="editorPreview && nextNavigation && activityLogs.length"
+        [logs]="activityLogs"
+        title="Terminal Next"
+      />
     </mat-card-content>
   </mat-card>
   <ng-template #showExercices>
@@ -140,6 +147,12 @@
         </nz-ribbon>
       </ng-container>
     </section>
+
+    <player-terminal-logs
+      *ngIf="editorPreview && nextNavigation && activityLogs.length"
+      [logs]="activityLogs"
+      title="Terminal Next"
+    />
   </ng-template>
 </main>
 <footer [class.glass]="countdown" *ngIf="exercises">
