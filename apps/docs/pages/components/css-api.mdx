@@ -1,0 +1,271 @@
+---
+title: API CSS
+description: Documentation complète de l'API CSS du framework de composants PLaTon. Apprenez à utiliser les classes CSS de personnalisation d'apparence et d'animation disponibles pour tous les composants.
+---
+
+import { Callout } from 'nextra/components'
+import { CssAppearanceShowcase, CssAnimationShowcase } from '../../components'
+import 'animate.css'
+
+
+# API CSS
+
+Le framework de composants intègre une API CSS complète vous permettant de personnaliser l'apparence de tous les composants sans écrire de CSS personnalisé.
+
+## Principe de fonctionnement
+
+Chaque fois qu'un composant expose une propriété **`css`**, sa valeur doit être une **liste de classes CSS séparées par des espaces**.
+
+```js
+// Exemple : appliquer des classes à l'item d'index 0 d'une SortList
+sortlist.items[0]["css"] = "success-state animated pulse infinite"
+```
+
+<Callout type="info">
+  La propriété `css` est disponible sur la plupart des éléments des composants. Consultez la documentation de chaque composant pour connaître les propriétés `css` exposées.
+</Callout>
+
+---
+
+## Classes d'apparence
+
+Ces classes modifient la couleur de fond et la bordure d'un élément pour signaler un état particulier à l'apprenant.
+
+| Classe | Effet |
+|---|---|
+| `success-state` | Fond vert + texte vert foncé (état de succès) |
+| `warning-state` | Fond jaune + texte ambre (état d'avertissement) |
+| `error-state` | Fond rouge + texte rouge foncé (état d'erreur) |
+| `success-border` | Bordure verte uniquement |
+| `warning-border` | Bordure jaune uniquement |
+| `error-border` | Bordure rouge uniquement |
+
+**Exemple d'utilisation :**
+
+```js
+// Marquer un item correct
+sortlist.items[0]["css"] = "success-state"
+
+// Marquer un item incorrect
+sortlist.items[1]["css"] = "error-state"
+
+// Ajouter uniquement une bordure d'avertissement
+sortlist.items[2]["css"] = "warning-border"
+```
+
+Cliquez sur une apparence ci-dessous pour copier sa classe CSS :
+
+<CssAppearanceShowcase />
+
+---
+
+## Classes d'animation
+
+Le framework utilise la bibliothèque [Animate.css](https://animate.style/). Les classes d'animation s'utilisent **toujours avec la classe de base `animated`**.
+
+```js
+// Syntaxe générale
+element["css"] = "animated <nomAnimation>"
+```
+
+### Attentions / Emphases
+
+| Classe | Effet |
+|---|---|
+| `bounce` | Rebond |
+| `flash` | Clignotement |
+| `pulse` | Pulsation |
+| `rubberBand` | Effet élastique |
+| `headShake` | Secousse de tête |
+| `swing` | Balancement |
+| `tada` | Effet tada (zoom + rotation) |
+| `wobble` | Oscillation |
+| `jello` | Effet gelée |
+| `jackInTheBox` | Apparition surprenante |
+| `heartBeat` | Battement de cœur |
+
+### Entrées (Bounce)
+
+| Classe |
+|---|
+| `bounceIn` |
+| `bounceInDown` |
+| `bounceInLeft` |
+| `bounceInRight` |
+| `bounceInUp` |
+
+### Sorties (Bounce)
+
+| Classe |
+|---|
+| `bounceOut` |
+| `bounceOutDown` |
+| `bounceOutLeft` |
+| `bounceOutRight` |
+| `bounceOutUp` |
+
+### Entrées (Fade)
+
+| Classe |
+|---|
+| `fadeIn` |
+| `fadeInDown` |
+| `fadeInDownBig` |
+| `fadeInLeft` |
+| `fadeInLeftBig` |
+| `fadeInRight` |
+| `fadeInRightBig` |
+| `fadeInUp` |
+| `fadeInUpBig` |
+
+### Sorties (Fade)
+
+| Classe |
+|---|
+| `fadeOut` |
+| `fadeOutDown` |
+| `fadeOutDownBig` |
+| `fadeOutLeft` |
+| `fadeOutLeftBig` |
+| `fadeOutRight` |
+| `fadeOutRightBig` |
+| `fadeOutUp` |
+| `fadeOutUpBig` |
+
+### Flip
+
+| Classe |
+|---|
+| `flipInX` |
+| `flipInY` |
+| `flipOutX` |
+| `flipOutY` |
+
+### LightSpeed
+
+| Classe |
+|---|
+| `lightSpeedIn` |
+| `lightSpeedOut` |
+
+### Rotations (Entrées)
+
+| Classe |
+|---|
+| `rotateIn` |
+| `rotateInDownLeft` |
+| `rotateInDownRight` |
+| `rotateInUpLeft` |
+| `rotateInUpRight` |
+
+### Rotations (Sorties)
+
+| Classe |
+|---|
+| `rotateOut` |
+| `rotateOutDownLeft` |
+| `rotateOutDownRight` |
+| `rotateOutUpLeft` |
+| `rotateOutUpRight` |
+
+### Spéciales
+
+| Classe | Effet |
+|---|---|
+| `hinge` | Chute d'une charnière |
+| `rollIn` | Roulé vers l'intérieur |
+| `rollOut` | Roulé vers l'extérieur |
+
+### Zoom (Entrées)
+
+| Classe |
+|---|
+| `zoomIn` |
+| `zoomInDown` |
+| `zoomInLeft` |
+| `zoomInRight` |
+| `zoomInUp` |
+
+### Zoom (Sorties)
+
+| Classe |
+|---|
+| `zoomOut` |
+| `zoomOutDown` |
+| `zoomOutLeft` |
+| `zoomOutRight` |
+| `zoomOutUp` |
+
+### Slides (Entrées)
+
+| Classe |
+|---|
+| `slideInDown` |
+| `slideInLeft` |
+| `slideInRight` |
+| `slideInUp` |
+
+### Slides (Sorties)
+
+| Classe |
+|---|
+| `slideOutDown` |
+| `slideOutLeft` |
+| `slideOutRight` |
+| `slideOutUp` |
+
+Cliquez sur une animation pour la prévisualiser, double-cliquez pour copier sa classe CSS :
+
+<CssAnimationShowcase />
+
+---
+
+## Options d'animation
+
+Ces classes s'appliquent en complément d'une animation pour en contrôler la vitesse ou le délai.
+
+### Vitesse
+
+| Classe | Durée |
+|---|---|
+| `fast` | 800ms |
+| `faster` | 500ms |
+| `slow` | 2s |
+| `slower` | 3s |
+
+### Délai de déclenchement
+
+| Classe | Délai |
+|---|---|
+| `delay-1s` | 1 seconde |
+| `delay-2s` | 2 secondes |
+| `delay-3s` | 3 secondes |
+| `delay-4s` | 4 secondes |
+| `delay-5s` | 5 secondes |
+
+### Répétition
+
+| Classe | Effet |
+|---|---|
+| `infinite` | Répète l'animation indéfiniment |
+
+---
+
+## Combiner apparences et animations
+
+Vous pouvez combiner des classes d'apparence et d'animation pour un retour visuel riche :
+
+```js
+// Élément correct avec une animation de pulsation infinie
+element["css"] = "success-state animated pulse infinite"
+
+// Élément incorrect avec une secousse rapide
+element["css"] = "error-state animated headShake faster"
+
+// Bordure d'avertissement avec animation lente en boucle
+element["css"] = "warning-border animated heartBeat slow infinite"
+```
+
+<Callout type="warning">
+  L'animation `infinite` est à utiliser avec modération. Une animation perpétuelle peut distraire l'apprenant. Privilégiez-la pour les feedbacks importants ou les états actifs.
+</Callout>
