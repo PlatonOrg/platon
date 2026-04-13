@@ -70,12 +70,14 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
   generateGrid() {
     // remove the log of layout_generator.js who show answer
     const originConsoleLog = console.log
-
+    console.log = () => {
+      // please don't remove this otherwise, it's show all the words to write during the creation of the component
+    }
     this.crossWordService.generateGridService(this.words)
 
     console.log = originConsoleLog // don't remove, it put the original console.log where it was
 
-    const firstInit = this.state.grid.length == 0 // user can change results or grid but must not to it
+    const firstInit = this.state.grid.length == 0 // user can change results or grid but must not do it
 
     this.results = this.crossWordService.getResults()
     this.userAnswers = this.crossWordService.generateUserAnswers()
@@ -103,8 +105,6 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
       )
       this.color = true
     }
-    //    this.nbCaracterToFill = 0;
-    //    this.state.grid.forEach(line => this.nbCaracterToFill += line.filter(cell => cell.charAt(0) != '-').length)
   }
 
   getCharAt(x: number, y: number): string {

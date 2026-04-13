@@ -254,3 +254,14 @@ mat-toolbar {
   display: flex;
   gap: 0.2rem;
 }
+
+.review-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  h3,
+  p {
+    margin: 0;
+  }
+}

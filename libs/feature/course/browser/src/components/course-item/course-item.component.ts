@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, Input, OnChanges } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges } from '@angular/core'
 
 import { MatIconModule } from '@angular/material/icon'
 
@@ -41,6 +41,9 @@ export class CourseItemComponent implements OnChanges {
   protected name = ''
   protected desc = ''
   protected progressColor = 'primary'
+  protected isTitleTruncated = false
+
+  constructor(private readonly cdr: ChangeDetectorRef) {}
 
   ngOnChanges(): void {
     this.name = this.item.name
@@ -50,5 +53,12 @@ export class CourseItemComponent implements OnChanges {
     }
 
     this.progressColor = antTagColorFromPercentage(this.item.statistic?.progression ?? 0)
+  }
+
+  protected checkTitleTruncation(event: MouseEvent): void {
+    const el = event.currentTarget as HTMLElement
+    const titleEl = el.closest('.article-title') ?? el.parentElement
+    this.isTitleTruncated = titleEl ? titleEl.scrollHeight > titleEl.clientHeight : false
+    this.cdr.detectChanges()
   }
 }

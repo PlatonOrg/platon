@@ -2,16 +2,19 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { NotFoundResponse, OrderingDirections } from '@platon/core/common'
 import { CourseFilters, CourseOrderings, COURSE_ORDERING_DIRECTIONS } from '@platon/feature/course/common'
-import { Repository } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 import { Optional } from 'typescript-optional'
 import { CourseMemberView } from '../course-member/course-member.view'
 import { CourseEntity } from '../entites/course.entity'
+import { CourseSectionEntity } from '../section/section.entity'
 
 type CourseGuard = (course: CourseEntity) => void | Promise<void>
 
 @Injectable()
 export class CourseService {
   constructor(
+    private readonly dataSource: DataSource,
+
     @InjectRepository(CourseEntity)
     private readonly courseRepository: Repository<CourseEntity>
   ) {}
@@ -80,7 +83,15 @@ export class CourseService {
   }
 
   async create(input: Partial<CourseEntity>): Promise<CourseEntity> {
-    return this.courseRepository.save(input)
+    return this.dataSource.transaction(async (manager) => {
+      const course = await manager.save(CourseEntity, input)
+      await manager.save(CourseSectionEntity, {
+        courseId: course.id,
+        name: 'Section 1',
+        order: 0,
+      })
+      return course
+    })
   }
 
   async update(id: string, changes: Partial<CourseEntity>, guard?: CourseGuard): Promise<CourseEntity> {

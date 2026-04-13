@@ -1,6 +1,6 @@
 <ng-container *ngIf="!loading; else spinner">
   <ng-container *ngIf="correction">
-    <player-correction [courseCorrection]="correction" />
+    <player-correction [courseCorrection]="correction" [mode]="mode" />
   </ng-container>
   <ng-container *ngIf="error">
     <ui-error [error]="error" />

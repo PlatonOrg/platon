@@ -148,8 +148,8 @@ export class ResultService {
     return this.resultProvider.activityLeaderboard(input)
   }
 
-  findCorrection(activityId: string): Observable<ActivityCorrection> {
-    return this.resultProvider.findCorrection(activityId)
+  findCorrection(activityId: string, viewerMode = false): Observable<ActivityCorrection> {
+    return this.resultProvider.findCorrection(activityId, viewerMode)
   }
 
   listPendingCorrections(): Observable<ListResponse<ActivityCorrection>> {
