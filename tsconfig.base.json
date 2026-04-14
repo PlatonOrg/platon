@@ -38,7 +38,6 @@
       "@platon/feature/announcement/browser": ["libs/feature/announcement/browser/src/index.ts"],
       "@platon/feature/announcement/common": ["libs/feature/announcement/common/src/index.ts"],
       "@platon/feature/announcement/server": ["libs/feature/announcement/server/src/index.ts"],
-      "@platon/feature/announcement/testing/server": ["libs/feature/announcement/testing/server/src/index.ts"],
       "@platon/feature/builder/browser": ["libs/feature/builder/browser/src/index.ts"],
       "@platon/feature/builder/common": ["libs/feature/builder/common/src/index.ts"],
       "@platon/feature/builder/server": ["libs/feature/builder/server/src/index.ts"],

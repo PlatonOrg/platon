@@ -33,10 +33,10 @@
       <td nzAlign="center">
         <nz-tag>{{ model.activity.createdAt | date }}</nz-tag>
       </td>
-      <td nzAlign="center" class="clickable" (click)="settingsSelectedActivity = model.activity; modal.open()">
+      <td nzAlign="center" class="clickable" (click)="openSettings(model.activity)">
         <nz-tag>{{ (model.activity.openAt | date) || 'Non définie' }}</nz-tag>
       </td>
-      <td nzAlign="center" class="clickable" (click)="settingsSelectedActivity = model.activity; modal.open()">
+      <td nzAlign="center" class="clickable" (click)="openSettings(model.activity)">
         <nz-tag>{{ (model.activity.closeAt | date) || 'Non définie' }}</nz-tag>
       </td>
 
@@ -107,7 +107,7 @@
           nz-button
           nzShape="round"
           nzType="default"
-          (click)="settingsSelectedActivity = model.activity; modal.open()"
+          (click)="openSettings(model.activity)"
         >
           <i nz-icon nzType="setting" nzTheme="outline"></i>
         </a>
@@ -115,13 +115,8 @@
     </tr>
   </tbody>
 </nz-table>
-<ui-modal-drawer
-  size="large"
-  [title]="settingsSelectedActivity?.title || ''"
-  (closed)="settingsSelectedActivity = undefined"
-  #modal
->
-  <ng-template>
-    <course-activity-settings [(activity)]="settingsSelectedActivity!" />
-  </ng-template>
-</ui-modal-drawer>
+<course-activity-settings-drawer
+  [activity]="settingsSelectedActivity"
+  (activityChange)="onActivityChange($event)"
+  #settingsDrawer
+/>

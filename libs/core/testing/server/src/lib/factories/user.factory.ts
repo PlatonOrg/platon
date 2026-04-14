@@ -1,5 +1,5 @@
 import { UserRoles } from '@platon/core/common'
-import { UserEntity } from '@platon/core/server'
+import type { UserEntity } from '@platon/core/server'
 
 export const createUserEntity = (overrides: Partial<UserEntity> = {}): UserEntity =>
   ({

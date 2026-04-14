@@ -131,9 +131,11 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
 
   private checkForCourseTutorial(): void {
     const urlParams = new URLSearchParams(window.location.search)
-    const startTutorial = urlParams.get('tutorial') === 'course-details'
+    const fromQueryParam = urlParams.get('tutorial') === 'course-details'
+    const fromServiceFlag = this.courseManagementTutorialService.getIsFromTutorial()
 
-    if (startTutorial && this.context.course) {
+    if ((fromQueryParam || fromServiceFlag) && this.context.course) {
+      this.courseManagementTutorialService.resetTutorialFlag()
       setTimeout(() => {
         this.startCourseDetailsTutorial()
       }, 1000)

@@ -40,9 +40,6 @@ export class ResourcesTutorialService {
     })
   }
 
-  /**
-   * Construit les étapes du tutoriel
-   */
   private buildTutorialSteps(
     user: User,
     items: Resource[],
@@ -280,7 +277,7 @@ export class ResourcesTutorialService {
             await this.waitForFilterDrawer()
             await this.waitForElement('#tuto-recherche-avancee')
 
-            const searchInput = document.querySelector('ui-search-bar input[type="search"]') as HTMLInputElement
+            const searchInput = document.querySelector('#tuto-search-bar') as HTMLInputElement
             if (searchInput) {
               searchInput.value = ''
               searchInput.dispatchEvent(new Event('input', { bubbles: true }))
@@ -309,33 +306,13 @@ export class ResourcesTutorialService {
                   return
                 }
 
-                const allCheckboxes = typeSection.querySelectorAll('mat-checkbox')
-                let circleChecked = false
-                let caseChecked = 0
-                allCheckboxes.forEach((cb) => {
-                  if (this.isCheckboxChecked(cb as HTMLElement)) {
-                    caseChecked++
-                  }
-                })
-                if (caseChecked !== 1) {
-                  alert('Veuillez cocher seulement la case "Cercle" pour continuer.')
-                } else {
-                  allCheckboxes.forEach((cb) => {
-                    const formControlName =
-                      (cb as HTMLElement).getAttribute('formcontrolname') ||
-                      (cb as HTMLElement).getAttribute('formControlName') ||
-                      (cb as HTMLElement).getAttribute('ng-reflect-name')
-                    const isChecked = this.isCheckboxChecked(cb as HTMLElement)
-                    if (formControlName === 'CIRCLE' && isChecked) {
-                      circleChecked = true
-                    }
-                  })
+                const checkboxes = typeSection.querySelectorAll('mat-checkbox')
+                const { checkedLabels, totalChecked } = this.getCheckedCheckboxLabels(checkboxes)
 
-                  if (circleChecked) {
-                    this.shepherdService.next()
-                  } else {
-                    alert('Veuillez cocher la case "Cercle" pour continuer.')
-                  }
+                if (totalChecked === 1 && checkedLabels.some((label) => label.toLowerCase().includes('cercle'))) {
+                  this.shepherdService.next()
+                } else {
+                  alert('Veuillez cocher seulement la case "Cercle" pour continuer.')
                 }
               }, 100)
             },
@@ -369,11 +346,11 @@ export class ResourcesTutorialService {
         title: 'Appliquez les filtres',
         text: 'Parfait ! Maintenant cliquez sur le bouton "Appliquer" pour voir uniquement les cercles.',
         attachTo: {
-          element: 'button[color="primary"]',
+          element: '#tuto-apply-filters',
           on: 'top',
         },
         advanceOn: {
-          selector: 'button[color="primary"]',
+          selector: '#tuto-apply-filters',
           event: 'click',
         },
         buttons: [
@@ -387,13 +364,13 @@ export class ResourcesTutorialService {
         ],
         when: {
           show: () => {
-            const applyButton = document.querySelector('button[color="primary"]') as HTMLElement
+            const applyButton = document.querySelector('#tuto-apply-filters') as HTMLElement
             if (applyButton) {
               applyButton.style.animation = 'pulseButton 2s ease-in-out infinite'
             }
           },
           hide: () => {
-            const applyButton = document.querySelector('button[color="primary"]') as HTMLElement
+            const applyButton = document.querySelector('#tuto-apply-filters') as HTMLElement
             if (applyButton) {
               applyButton.style.animation = ''
             }
@@ -430,15 +407,11 @@ export class ResourcesTutorialService {
         {
           secondary: true,
           text: 'Cliquer sur le premier cercle',
-          //action: () => this.clickFirstCircle()
         },
       ],
       when: {
         show: () => {
           this.addTutorialParamToFirstCircleLinks()
-        },
-        hide: () => {
-          // TODO: Ajouter la logique de masquage si nécessaire
         },
       },
     }
@@ -448,9 +421,6 @@ export class ResourcesTutorialService {
     return steps
   }
 
-  /**
-   * Attend que les résultats soient chargés
-   */
   private waitForResults(items: Resource[], hasSearched: () => boolean): void {
     let attempts = 0
     const checkInterval = setInterval(() => {
@@ -461,12 +431,9 @@ export class ResourcesTutorialService {
     }, 500)
   }
 
-  /**
-   * Met en évidence la première ressource
-   */
   private highlightFirstResource(): void {
     setTimeout(() => {
-      const firstResource = document.querySelector('resource-item:first-child') as HTMLElement
+      const firstResource = document.querySelector('resource-item') as HTMLElement
       if (firstResource) {
         firstResource.style.transition = 'all 0.3s ease'
         firstResource.style.boxShadow = '0 0 0 3px rgba(var(--brand-color-primary-rgb), 0.3)'
@@ -480,9 +447,6 @@ export class ResourcesTutorialService {
     }, 500)
   }
 
-  /**
-   * Construit le HTML pour les actions sur les ressources
-   */
   private buildResourceActionsHTML(): string {
     return `
       <div style="padding: 20px; max-width: 400px;">
@@ -520,59 +484,48 @@ export class ResourcesTutorialService {
     `
   }
 
-  /**
-   * Attend que le drawer de filtres soit ouvert et visible
-   */
   private waitForFilterDrawer(): Promise<void> {
     return new Promise<void>((resolve) => {
       const checkDrawer = () => {
-        const drawer = document.querySelector('.ant-drawer-content-wrapper')
+        const drawer = document.querySelector('#tuto-recherche-avancee')
         if (drawer && (drawer as HTMLElement).offsetWidth > 0) {
-          setTimeout(() => {
-            resolve()
-          }, 300)
+          setTimeout(resolve, 300)
         } else {
           setTimeout(checkDrawer, 100)
         }
       }
       checkDrawer()
-      setTimeout(() => {
-        resolve()
-      }, 1000)
+      setTimeout(resolve, 3000)
     })
   }
 
   /**
-   * Vérifie si une checkbox est cochée
+   * Vérifie si une checkbox est cochée.
    */
   private isCheckboxChecked(checkbox: HTMLElement): boolean {
-    const input = checkbox.querySelector('input[type="checkbox"]')
-    if (input && (input as HTMLInputElement).checked) {
-      return true
+    // Standard HTML : l'input natif
+    const input = checkbox.querySelector('input[type="checkbox"]') as HTMLInputElement | null
+    if (input) {
+      return input.checked
     }
 
-    const isCheckedClass =
-      checkbox.classList.contains('mat-checkbox-checked') || checkbox.classList.contains('mat-mdc-checkbox-checked')
-    if (isCheckedClass) {
-      return true
-    }
-
-    const antChecked = checkbox.classList.contains('ant-checkbox-checked')
-    if (antChecked) {
-      return true
-    }
-
-    const ariaChecked = checkbox.getAttribute('aria-checked')
-    if (ariaChecked === 'true') {
-      return true
-    }
-
-    return false
+    return checkbox.getAttribute('aria-checked') === 'true'
   }
 
   /**
-   * Met en évidence les cercles dans la liste
+   * Retourne les labels des checkboxes cochées en se basant sur le contenu textuel.
    */
+  private getCheckedCheckboxLabels(checkboxes: NodeListOf<Element>): { checkedLabels: string[]; totalChecked: number } {
+    const checkedLabels: string[] = []
+    checkboxes.forEach((cb) => {
+      if (this.isCheckboxChecked(cb as HTMLElement)) {
+        const label = (cb as HTMLElement).textContent?.trim() ?? ''
+        checkedLabels.push(label)
+      }
+    })
+    return { checkedLabels, totalChecked: checkedLabels.length }
+  }
+
   private highlightCircles(): void {
     const circles = document.querySelectorAll('resource-item')
     circles.forEach((circle, index) => {
@@ -644,37 +597,15 @@ export class ResourcesTutorialService {
   }
 
   /**
-   * Force le clic sur le premier cercle
-   */
-  private clickFirstCircle(): void {
-    const firstCircle = document.querySelector('resource-item:first-child') as HTMLElement
-    if (firstCircle) {
-      this.isFromTutorial = true
-
-      const resourceId = this.getResourceIdFromElement(firstCircle)
-
-      if (resourceId) {
-        void this.router
-          .navigate(['/resources', resourceId], {
-            queryParams: { fromTutorial: 'true' },
-          })
-          .then(() => {
-            this.shepherdService.complete()
-          })
-      } else {
-        firstCircle.click()
-      }
-    }
-  }
-
-  /**
-   * Ajoute le paramètre fromTutorial aux liens du premier cercle
+   * Ajoute le paramètre fromTutorial aux liens du premier cercle via #tuto-title-resource.
+   * On utilise le sélecteur #tuto-title-resource plutôt que resource-item:first-child
+   * car Angular insère des view containers qui cassent le :first-child.
    */
   private addTutorialParamToFirstCircleLinks(): void {
-    const firstCircle = document.querySelector('resource-item:first-child') as HTMLElement
-    if (!firstCircle) return
+    const titleResource = document.querySelector('#tuto-title-resource') as HTMLElement
+    if (!titleResource) return
 
-    const links = firstCircle.querySelectorAll('a[href*="/resources/"]') as NodeListOf<HTMLAnchorElement>
+    const links = titleResource.querySelectorAll('a[href*="/resources/"]') as NodeListOf<HTMLAnchorElement>
 
     links.forEach((link) => {
       if (!link.dataset.originalHref) {
@@ -686,43 +617,13 @@ export class ResourcesTutorialService {
       link.href = url.toString()
     })
 
-    firstCircle.addEventListener('click', this.handleFirstCircleClick.bind(this), { once: false })
-  }
-
-  /**
-   * Gère le clic sur le premier cercle
-   */
-  private handleFirstCircleClick = (event: Event): void => {
-    const target = event.target as HTMLElement
-    const link = target.closest('a[href*="/resources/"]') as HTMLAnchorElement
-
-    if (!link) {
-      event.preventDefault()
-      this.clickFirstCircle()
-    } else {
-      this.clickFirstCircle()
-    }
-  }
-
-  /**
-   * Récupère l'ID de la ressource depuis l'élément DOM
-   */
-  private getResourceIdFromElement(element: HTMLElement): string | null {
-    const resourceId =
-      element.getAttribute('data-resource-id') ||
-      element.getAttribute('data-id') ||
-      element.querySelector('[data-resource-id]')?.getAttribute('data-resource-id')
-
-    if (resourceId) {
-      return resourceId
-    }
-
-    const link = element.querySelector('a[href*="/resources/"]') as HTMLAnchorElement
-    if (link) {
-      const matches = link.href.match(/\/resources\/([^/?]+)/)
-      return matches ? matches[1] : null
-    }
-
-    return null
+    // On utilise le flag isFromTutorial pour la navigation au lieu de preventDefault
+    titleResource.addEventListener(
+      'click',
+      () => {
+        this.isFromTutorial = true
+      },
+      { once: true }
+    )
   }
 }

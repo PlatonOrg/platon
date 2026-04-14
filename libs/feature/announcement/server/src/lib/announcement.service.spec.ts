@@ -3,7 +3,7 @@ import { AnnouncementService } from './announcement.service'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { AnnouncementEntity } from './announcement.entity'
 import { mockRepository, mockSelectQueryBuilder, MockRepository } from '@platon/core/testing/server'
-import { createAnnouncementEntity } from '@platon/feature/announcement/testing/server'
+import { createAnnouncementEntity } from './factories/announcement.factory'
 import { NotFoundResponse } from '@platon/core/common'
 import { UserRoles } from '@platon/core/common'
 

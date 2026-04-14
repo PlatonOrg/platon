@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 import { User, UserRoles, isTeacherRole } from '@platon/core/common'
-import { Router, RouterModule } from '@angular/router'
+import { Router } from '@angular/router'
 
 export interface NavigationChoice {
   title: string
@@ -20,9 +20,6 @@ export class SidebarTutorialService {
 
   constructor(private shepherdService: ShepherdService, private router: Router) {}
 
-  /**
-   * Démarre le tutoriel complet de la sidebar
-   */
   startSidebarTutorial(user: User): void {
     this.user = user
     const steps = this.buildTutorialSteps(user)
@@ -35,10 +32,6 @@ export class SidebarTutorialService {
     })
   }
 
-  /**
-   * Construit les étapes du tutoriel en fonction de l'utilisateur
-   * Texte adapté pour les enseignants et administrateurs
-   */
   private buildTutorialSteps(user: User): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
@@ -99,20 +92,29 @@ export class SidebarTutorialService {
       },
     ]
 
-    // Ajouter l'espace de travail pour les enseignants
     if (isTeacherRole(user.role) || user.role === UserRoles.admin) {
-      steps.push({
-        id: 'workspace',
-        title: 'Espace de travail',
-        text: "Votre atelier de création pédagogique. Créez et organisez vos ressources : exercices interactifs, activités d'apprentissage, et cercles thématiques. C'est le cœur créatif de PLaTon pour les enseignants.",
-        attachTo: {
-          element: '#tuto-sidebar-espace-de-travail',
-          on: 'right',
+      steps.push(
+        {
+          id: 'workspace',
+          title: 'Espace de travail',
+          text: "Votre atelier de création pédagogique. Créez et organisez vos ressources : exercices interactifs, activités d'apprentissage, et cercles thématiques. C'est le cœur créatif de PLaTon pour les enseignants.",
+          attachTo: {
+            element: '#tuto-sidebar-espace-de-travail',
+            on: 'right',
+          },
         },
-      })
+        {
+          id: 'tests',
+          title: "Tests d'entrée",
+          text: "Configurez et gérez les tests d'entrée pour évaluer les compétences de vos étudiants avant le début des cours. Personnalisez les questions, les critères d'évaluation et suivez les résultats pour adapter votre enseignement.",
+          attachTo: {
+            element: '#tuto-sidebar-tests-d-entree',
+            on: 'right',
+          },
+        }
+      )
     }
 
-    // Ajouter l'administration pour les admins
     if (user.role === UserRoles.admin) {
       steps.push({
         id: 'admin',
@@ -125,7 +127,6 @@ export class SidebarTutorialService {
       })
     }
 
-    // Documentation pour les enseignants
     if (isTeacherRole(user.role)) {
       steps.push({
         id: 'documentation',
@@ -138,7 +139,6 @@ export class SidebarTutorialService {
       })
     }
 
-    // Étape finale avec choix de navigation
     steps.push({
       id: 'navigation-choice',
       title: 'Où souhaitez-vous commencer votre parcours ?',
@@ -162,9 +162,6 @@ export class SidebarTutorialService {
     return steps
   }
 
-  /**
-   * Construit le HTML pour le choix de navigation
-   */
   private buildNavigationChoiceHTML(user: User): string {
     const choices = this.getNavigationChoices(user)
 
@@ -229,9 +226,6 @@ export class SidebarTutorialService {
     return html
   }
 
-  /**
-   * Retourne les choix de navigation disponibles
-   */
   private getNavigationChoices(user: User): NavigationChoice[] {
     const choices: NavigationChoice[] = [
       {
@@ -259,7 +253,7 @@ export class SidebarTutorialService {
   /**
    * Configure la sélection de navigation
    */
-  private setupNavigationSelection(user: User): void {
+  private setupNavigationSelection(_user: User): void {
     setTimeout(() => {
       const options = document.querySelectorAll('.navigation-option')
       options.forEach((option) => {
@@ -274,7 +268,6 @@ export class SidebarTutorialService {
         })
       })
 
-      // Sélectionner "Cours" par défaut
       const coursesOption = Array.from(options).find((opt) => opt.getAttribute('data-navigation-url') === '/courses')
       if (coursesOption) {
         coursesOption.classList.add('selected')
@@ -283,9 +276,6 @@ export class SidebarTutorialService {
     }, 100)
   }
 
-  /**
-   * Gère la navigation vers la section choisie
-   */
   private handleNavigationChoice(): void {
     if (!this.selectedNavigation) {
       alert('Veuillez sélectionner une section avant de continuer.')

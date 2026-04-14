@@ -9,9 +9,6 @@ import { Resource, ResourceStatus, ResourceTypes } from '@platon/feature/resourc
 export class ResourcePageTutorialService {
   constructor(private shepherdService: ShepherdService) {}
 
-  /**
-   * Démarre le tutoriel pour la page d'une ressource
-   */
   startResourcePageTutorial(resource: Resource, isOwner: boolean, isMember: boolean, isWatcher: boolean): void {
     const steps = this.buildTutorialSteps(resource, isOwner, isMember, isWatcher)
 
@@ -23,9 +20,6 @@ export class ResourcePageTutorialService {
     })
   }
 
-  /**
-   * Construit les étapes du tutoriel
-   */
   private buildTutorialSteps(
     //user: User,
     resource: Resource,
@@ -57,7 +51,7 @@ export class ResourcePageTutorialService {
         title: 'Navigation',
         text: "Le fil d'Ariane vous montre où vous êtes dans la hiérarchie. Vous pouvez cliquer sur le parent pour remonter d'un niveau ou sur l'icône d'arbre pour voir la structure complète.",
         attachTo: {
-          element: 'nz-breadcrumb',
+          element: '#tuto-breadcrumb',
           on: 'bottom',
         },
       },
@@ -68,7 +62,7 @@ export class ResourcePageTutorialService {
           ? 'En tant que propriétaire, vous pouvez modifier le nom en cliquant dessus.'
           : 'Voici le nom de la ressource. Seul le propriétaire peut le modifier.',
         attachTo: {
-          element: 'nz-breadcrumb-item:last-child',
+          element: '#tuto-resource-name-item',
           on: 'bottom',
         },
       },
@@ -79,7 +73,7 @@ export class ResourcePageTutorialService {
           ? 'Cliquez sur la description pour la modifier et donner plus de contexte sur votre ressource.'
           : "La description vous donne des informations sur le contenu et l'objectif de cette ressource.",
         attachTo: {
-          element: 'p[nz-typography]',
+          element: '#tuto-resource-description',
           on: 'bottom',
         },
       },
@@ -94,7 +88,6 @@ export class ResourcePageTutorialService {
       },
     ]
 
-    // Ajouter l'étape pour suivre/ne plus suivre
     steps.push({
       id: 'watch-button',
       title: isWatcher ? 'Ne plus suivre' : 'Suivre la ressource',
@@ -107,7 +100,6 @@ export class ResourcePageTutorialService {
       },
     })
 
-    // Pour les cercles : ajouter l'étape rejoindre
     if (resource.type === 'CIRCLE' && !isOwner && !isMember) {
       steps.push({
         id: 'join-button',
@@ -120,13 +112,12 @@ export class ResourcePageTutorialService {
       })
     }
 
-    // Boutons d'actions
     steps.push({
       id: 'action-buttons',
       title: 'Actions disponibles',
       text: this.buildActionsText(resource, isOwner),
       attachTo: {
-        element: '.container-toolbar > nz-button-group:last-child',
+        element: '#tuto-resource-actions',
         on: 'top',
       },
     })
@@ -161,7 +152,7 @@ export class ResourcePageTutorialService {
         id: 'tabs',
         title: 'Navigation par onglets',
         text: `<div style="text-align: center; padding: 20px;">
-           <h4>🗂️ Navigation par onglets</h4>
+           <h4>Navigation par onglets</h4>
            <p>Cette ressource est organisée en plusieurs sections accessibles via les onglets ci-dessous :</p>
 
            <div style="text-align: left; margin: 20px 0;">
@@ -178,7 +169,7 @@ export class ResourcePageTutorialService {
            </p>
          </div>`,
         attachTo: {
-          element: '.ant-tabs',
+          element: '#tuto-resource-tabs',
           on: 'bottom',
         },
         when: {},
@@ -199,9 +190,6 @@ export class ResourcePageTutorialService {
     return steps
   }
 
-  /**
-   * Retourne le texte approprié selon le type de ressource
-   */
   private getResourceTypeText(type: ResourceTypes): string {
     switch (type) {
       case 'CIRCLE':
@@ -210,8 +198,6 @@ export class ResourcePageTutorialService {
         return 'cet exercice'
       case 'ACTIVITY':
         return 'cette activité'
-      //case 'COURSE':
-      //  return 'ce cours';
       default:
         return 'cette ressource'
     }
@@ -238,27 +224,24 @@ export class ResourcePageTutorialService {
     return text
   }
 
-  /**
-   * Construit le texte des actions disponibles
-   */
   private buildActionsText(resource: Resource, isOwner: boolean): string {
     let text = '<strong>Actions disponibles :</strong><br><br>'
 
     const actions = []
 
     if (isOwner && resource.type !== 'CIRCLE') {
-      actions.push('🗑️ <strong>Supprimer</strong> : Retirer définitivement la ressource')
+      actions.push('<strong>Supprimer</strong> : Retirer définitivement la ressource')
     }
 
     if (resource.type === 'EXERCISE' && isOwner) {
-      actions.push("📦 <strong>Déplacer</strong> : Changer l'emplacement de l'exercice")
+      actions.push("<strong>Déplacer</strong> : Changer l'emplacement de l'exercice")
     }
 
-    actions.push("✏️ <strong>Ouvrir dans l'éditeur</strong> : Modifier le contenu de la ressource")
+    actions.push("<strong>Ouvrir dans l'éditeur</strong> : Modifier le contenu de la ressource")
 
     if (resource.type !== 'CIRCLE') {
-      actions.push("🔗 <strong>Partager</strong> : Donner accès à d'autres utilisateurs")
-      actions.push('▶️ <strong>Prévisualiser</strong> : Tester la ressource')
+      actions.push("<strong>Partager</strong> : Donner accès à d'autres utilisateurs")
+      actions.push('<strong>Prévisualiser</strong> : Tester la ressource')
     }
 
     text += actions.join('<br>')
@@ -278,12 +261,12 @@ export class ResourcePageTutorialService {
         <div style="text-align: left; max-width: 400px; margin: 0 auto;">
           <p style="margin-bottom: 16px;">Vous savez maintenant :</p>
           <ul style="list-style: none; padding: 0;">
-            <li style="margin-bottom: 8px;">✅ Naviguer dans la hiérarchie des ressources</li>
-            <li style="margin-bottom: 8px;">✅ Comprendre et modifier le statut</li>
-            <li style="margin-bottom: 8px;">✅ Suivre les ressources pour recevoir des notifications</li>
-            ${resource.type === 'CIRCLE' ? '<li style="margin-bottom: 8px;">✅ Rejoindre des cercles</li>' : ''}
-            <li style="margin-bottom: 8px;">✅ Utiliser les actions disponibles</li>
-            <li style="margin-bottom: 8px;">✅ Explorer les différents onglets</li>
+            <li style="margin-bottom: 8px;">- Naviguer dans la hiérarchie des ressources</li>
+            <li style="margin-bottom: 8px;">- Comprendre et modifier le statut</li>
+            <li style="margin-bottom: 8px;">- Suivre les ressources pour recevoir des notifications</li>
+            ${resource.type === 'CIRCLE' ? '<li style="margin-bottom: 8px;">- Rejoindre des cercles</li>' : ''}
+            <li style="margin-bottom: 8px;">- Utiliser les actions disponibles</li>
+            <li style="margin-bottom: 8px;">- Explorer les différents onglets</li>
           </ul>
         </div>
 

@@ -136,7 +136,7 @@ export class TutorialSelectorService {
 
   private sharedResourceTutorial() {
     if (!this.user) return
-    this.sharedResourceTutorialService.startIdeTutorial()
+    this.sharedResourceTutorialService.startSharedResourceTutorial()
   }
 
   /**

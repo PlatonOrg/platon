@@ -5,10 +5,10 @@ import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 export class SharedResourceTutorialService {
   constructor(private readonly shepherd: ShepherdService) {}
 
-  startIdeTutorial(): void {
+  startSharedResourceTutorial(): void {
     const steps = this.buildSteps()
     this.shepherd.startTutorial(steps, {
-      tourName: 'ide-basics',
+      tourName: 'shared-resources',
       useModalOverlay: false,
     })
   }
