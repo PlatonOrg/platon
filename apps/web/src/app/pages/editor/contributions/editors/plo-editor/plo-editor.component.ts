@@ -3,6 +3,8 @@ import { Editor, FileService, NotificationService, OpenRequest } from '@cisstech
 import { EXERCISE_CONFIG_FILE, EXERCISE_MAIN_FILE, PleInput, Variables } from '@platon/feature/compiler'
 import { Subscription } from 'rxjs'
 import { EditorPresenter } from '../../../editor.presenter'
+import { ActivatedRoute } from '@angular/router'
+import { InputFileService } from '@platon/feature/resource/browser'
 
 @Component({
   selector: 'app-plo-editor',
@@ -15,6 +17,8 @@ export class PloEditorComponent implements OnInit, OnDestroy {
   private readonly presenter = inject(EditorPresenter)
   private readonly notificationService = inject(NotificationService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
+  private readonly inputFileService = inject(InputFileService)
 
   private readonly subscriptions: Subscription[] = []
   private request!: OpenRequest
@@ -29,6 +33,10 @@ export class PloEditorComponent implements OnInit, OnDestroy {
   protected overrides: Variables = {}
   protected selection: PleInput | undefined
   protected selectionIndex = -1
+
+  resourceId = this.route.snapshot.paramMap.get('id')
+  version = this.route.snapshot.queryParamMap.get('version')
+  constructor(private route: ActivatedRoute) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(
@@ -81,7 +89,10 @@ export class PloEditorComponent implements OnInit, OnDestroy {
         this.notificationService.publishError(`No config file found in the template ${template}:${version}`)
         return
       }
-
+      if (this.resourceId && this.version) {
+        //should always work
+        this.inputFileService.init(this.resourceId, this.version, false)
+      }
       const config = JSON.parse(configContent)
       this.inputs = config.inputs
       this.inputs.forEach((input) => {

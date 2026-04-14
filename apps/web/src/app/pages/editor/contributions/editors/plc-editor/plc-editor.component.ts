@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { Editor, FileService, NotificationService, OpenRequest } from '@cisstech/nge-ide/core'
 import { PleInput } from '@platon/feature/compiler'
 import { Subscription } from 'rxjs'
+import { ActivatedRoute } from '@angular/router'
+import { InputFileService } from '@platon/feature/resource/browser'
 
 @Component({
   selector: 'app-plc-editor',
@@ -14,6 +16,8 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
   private readonly fileService = inject(FileService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly notificationService = inject(NotificationService)
+
+  private readonly inputFileService = inject(InputFileService)
 
   private readonly subscriptions: Subscription[] = []
   private request!: OpenRequest
@@ -27,6 +31,10 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
   protected inputs: PleInput[] = []
   protected selection: PleInput | undefined
   protected selectionIndex = -1
+
+  resourceId = this.route.snapshot.paramMap.get('id')
+  version = this.route.snapshot.queryParamMap.get('version')
+  constructor(private route: ActivatedRoute) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(
@@ -95,7 +103,9 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
   private async createEditor(): Promise<void> {
     const file = this.request.file!
     this.readOnly = file?.readOnly
-
+    if (this.resourceId && this.version) {
+      this.inputFileService.init(this.resourceId, this.version, false) // should always work
+    }
     try {
       const content = await this.fileService.open(this.request.uri)
       const data = JSON.parse(content.current ?? '{ "input": [] }')

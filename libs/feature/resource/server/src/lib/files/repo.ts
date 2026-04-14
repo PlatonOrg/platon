@@ -391,12 +391,16 @@ export class Repo {
     return zip.getEntries().map((entry) => entry.entryName)
   }
 
-  async upload(src: string, dst: string) {
+  async upload(src: string, dst: string): Promise<string> {
     const abspath = this.abspath(dst)
     const dirname = Path.dirname(abspath)
     const basename = Path.basename(abspath)
-    await fs.promises.rename(src, uniquifyFileName(dirname, basename))
+    const pathWithNewName = uniquifyFileName(dirname, basename)
+    await fs.promises.rename(src, pathWithNewName)
     await this.commit(`upload ${dst}`)
+    const parts = pathWithNewName.split(/[/\\]/)
+    const fileName = parts.pop()
+    return fileName === undefined ? '' : fileName // return '' if cannot parse the new name should not append
   }
 
   // Git

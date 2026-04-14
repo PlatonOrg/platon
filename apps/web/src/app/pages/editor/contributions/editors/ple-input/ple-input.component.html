@@ -48,5 +48,15 @@
   <h3 *ngIf="mode === 'config'">Valeur par défaut</h3>
 </ng-container>
 <ng-container *ngIf="selectedProvider?.valueEditor">
+  @if(selectedProvider?.type === 'file') {
+  <ng-container
+    *ngComponentOutlet="
+      $any(selectedProvider!.valueEditor!);
+      injector: valueEditorInjector;
+      inputs: { inputId: input.name }
+    "
+  />
+  } @else {
   <ng-container *ngComponentOutlet="$any(selectedProvider!.valueEditor!); injector: valueEditorInjector" />
+  }
 </ng-container>

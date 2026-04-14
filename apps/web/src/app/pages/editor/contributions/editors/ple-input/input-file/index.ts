@@ -6,9 +6,22 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { PLE_INPUT_PROVIDERS, PleInputProvider } from '../ple-input'
 import { HideResourceIdPipe, ValueEditorComponent } from './value-editor/value-editor.component'
+import { UiFilePreviewComponent, UiModalTemplateComponent } from '@platon/shared/ui'
+import { MatIconModule } from '@angular/material/icon'
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 
 @NgModule({
-  imports: [CommonModule, NzButtonModule, NzIconModule, NzToolTipModule, EditorDirectivesModule],
+  imports: [
+    CommonModule,
+    NzButtonModule,
+    NzIconModule,
+    NzToolTipModule,
+    EditorDirectivesModule,
+    UiFilePreviewComponent,
+    UiModalTemplateComponent,
+    MatIconModule,
+    NzSkeletonModule,
+  ],
   exports: [ValueEditorComponent],
   declarations: [ValueEditorComponent, HideResourceIdPipe],
 })
