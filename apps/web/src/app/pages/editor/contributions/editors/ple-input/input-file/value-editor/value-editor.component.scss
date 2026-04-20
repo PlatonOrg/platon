@@ -2,6 +2,11 @@
   display: flex;
   align-items: center;
 }
+.drop-wrapper {
+  position: relative;
+  flex: 1;
+  height: 36px;
+}
 
 .drop-zone {
   flex: 1;
@@ -15,6 +20,10 @@
   font-size: 16px;
   color: #555;
 }
+.drop-zone * {
+  pointer-events: none;
+
+}
 
 .drop-zone span {
   font-weight: bold;
@@ -23,4 +32,7 @@
 
 button {
   margin-left: 4px;
+}
+#modalFooter {
+  margin-left: 10px;
 }

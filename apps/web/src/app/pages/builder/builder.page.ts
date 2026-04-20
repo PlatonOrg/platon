@@ -19,7 +19,12 @@ import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatDialog } from '@angular/material/dialog'
 import { NzModalService } from 'ng-zorro-antd/modal'
 import { PleInput, Variables } from '@platon/feature/compiler'
-import { ResourceFileService, ResourceService, getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
+import {
+  InputFileService,
+  ResourceFileService,
+  ResourceService,
+  getPreviewOverridesStorageKey,
+} from '@platon/feature/resource/browser'
 import { Resource } from '@platon/feature/resource/common'
 import { DialogModule, DialogService, StorageService } from '@platon/core/browser'
 import { Title } from '@angular/platform-browser'
@@ -37,6 +42,8 @@ import { UiErrorComponent, UiModalIFrameComponent } from '@platon/shared/ui'
 
 import { type SettingItem, SettingsPage } from './settings/settings.page'
 import { VersionHistoryComponent } from './version-history'
+
+import { NgeIdeModule } from '@cisstech/nge-ide'
 
 interface SidebarSection {
   id: string
@@ -68,6 +75,8 @@ type MainViewMode = 'input' | 'setting' | 'history'
     UiModalIFrameComponent,
     VersionHistoryComponent,
     UiErrorComponent,
+
+    NgeIdeModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: {
@@ -91,6 +100,8 @@ export class BuilderPage implements OnInit {
   private readonly dialog = inject(MatDialog)
   private readonly builderService = inject(BuilderService)
   private readonly modal = inject(NzModalService)
+
+  private readonly inputFileService = inject(InputFileService)
 
   protected resource?: Resource
   protected template?: Resource
@@ -281,6 +292,14 @@ export class BuilderPage implements OnInit {
         ...input,
         value: this.overrides[input.name] ?? input.value,
       }))
+      // init and register component for InputFileService with dialogue message
+      this.inputFileService.init(this.resource.id, version, true, true)
+      this.inputs.forEach((input) => {
+        if (input.type === 'file') {
+          const fileReference = (input.value?.replace(/@copycontent|@copyurl/g, '') || '').trim()
+          this.inputFileService.register(input.name, fileReference)
+        }
+      })
 
       this.loading = false
       await this.reloadPreview()
@@ -297,6 +316,7 @@ export class BuilderPage implements OnInit {
   }
 
   protected onInputChange(input: PleInput): void {
+    const isReallyChanged = this.overrides[input.name] !== input.value
     this.overrides = {
       ...this.overrides,
       [input.name]: input.value,
@@ -306,8 +326,10 @@ export class BuilderPage implements OnInit {
     if (index !== -1) {
       this.inputs = [...this.inputs.slice(0, index), { ...input }, ...this.inputs.slice(index + 1)]
     }
-
-    this.hasUnsavedChanges.set(true)
+    if (isReallyChanged) {
+      // show unsave indicateur (not for in file modification)
+      this.hasUnsavedChanges.set(true)
+    }
 
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout)
@@ -372,6 +394,7 @@ export class BuilderPage implements OnInit {
       }
 
       this.hasUnsavedChanges.set(false)
+      await this.inputFileService.save()
 
       this.dialogService.success('Sauvegardé avec succès')
       this.showFirstSaveInfo()

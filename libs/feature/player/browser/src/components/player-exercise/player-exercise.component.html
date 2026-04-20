@@ -125,7 +125,7 @@
         </div>
       </section>
       <!-- TERMINAL LOGS -->
-      @if (player?.platon_logs?.length && !editorPreview) {
+      @if (player?.platon_logs?.length && editorPreview) {
       <section>
         <player-terminal-logs [logs]="player?.platon_logs || []" />
       </section>

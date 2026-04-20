@@ -67,4 +67,49 @@
   nge-markdown {
     width: 100%;
   }
+
+}
+// JSON
+:host ::ng-deep .key { color: #a31515; }
+:host ::ng-deep .string { color: #0451a5; }
+:host ::ng-deep .boolean { color: #0451a5;font-weight: bold; }
+:host ::ng-deep .number { color: #098658; }
+
+// CSV
+:host ::ng-deep {
+  .ant-table-thead > tr > th {
+    background-color:  #171c8f !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-align: center;
+  }
+  .ant-table-tbody > tr > td {
+    text-align: center;
+  }
+  .ant-table-header {
+    color: #ffffff !important;
+    font-weight: bold !important;
+    background-color: #171c8f !important;
+    text-align: center;
+  }
+  nz-table table {
+    table-layout: fixed !important;
+    width: 100% !important;
+  }
+}
+
+.csv-container {
+  display: flex;
+  width: 95%;
+  height: 100%;
+}
+
+.error-message {
+  white-space: pre-wrap;
+  color: #ff4d4f;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
 }

@@ -18,7 +18,7 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { BadRequestResponse, SuccessResponse, UnauthorizedResponse } from '@platon/core/common'
+import { BadRequestResponse, CreatedResponse, SuccessResponse, UnauthorizedResponse } from '@platon/core/common'
 import { Configuration, EventService, IRequest, Public, getContentDisposition } from '@platon/core/server'
 import { PLSourceFile } from '@platon/feature/compiler'
 import { ExerciseTransformInput, FileTypes, LATEST, ResourceFile, ResourceTypes } from '@platon/feature/resource/common'
@@ -363,14 +363,14 @@ export class ResourceFileController {
 
     if (file) {
       const dstpath = join(path || '', basename(file.originalname))
-      await repo.upload(file.path, dstpath)
+      const newName = await repo.upload(file.path, dstpath)
       this.eventService.emit<OnChangeFileEventPayload>(ON_CHANGE_FILE_EVENT, {
         repo,
         resource,
         path: dstpath,
         operation: 'create',
       })
-      return new SuccessResponse()
+      return new CreatedResponse({ resource: newName })
     }
 
     if (input?.length) {
