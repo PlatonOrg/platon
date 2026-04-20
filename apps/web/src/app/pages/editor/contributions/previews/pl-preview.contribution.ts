@@ -127,6 +127,20 @@ export class ResourceCommand implements ICommand {
   }
 }
 
+class BackToResourcesCommand implements ICommand {
+  readonly id = 'platon.contrib.toolbar.commands.back-to-resources'
+  readonly label = 'Retour aux ressources'
+  readonly icon = new CodIcon('arrow-left')
+
+  get enabled(): boolean {
+    return true
+  }
+
+  async execute(): Promise<void> {
+    window.location.href = '/resources'
+  }
+}
+
 @Injectable()
 export class Contribution implements IContribution {
   private readonly subscriptions: Subscription[] = []
@@ -160,6 +174,7 @@ export class Contribution implements IContribution {
 
     const previewFromToolbar = new ToolbarPreviewCommand(presenter, fileService, editorService)
     const resourceCommand = new ResourceCommand(presenter)
+    const backToResourcesCommand = new BackToResourcesCommand()
 
     commandService.register(previewFromToolbar)
     toolbarService.registerButton({
@@ -172,6 +187,15 @@ export class Contribution implements IContribution {
 
     toolbarService.registerButton({
       command: resourceCommand,
+      buttonType: 'text',
+      colors: {
+        foreground: 'white',
+        background: 'transparent',
+      },
+    })
+
+    toolbarService.registerButton({
+      command: backToResourcesCommand,
       buttonType: 'text',
       colors: {
         foreground: 'white',
