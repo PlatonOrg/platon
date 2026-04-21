@@ -210,6 +210,7 @@ export class Contribution implements IContribution {
   }
 
   deactivate(): void | Promise<void> {
+    this.activated = false
     this.subscriptions.forEach((s) => s.unsubscribe())
   }
 }

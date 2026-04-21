@@ -160,7 +160,7 @@ export class ResourcePage implements OnInit, OnDestroy {
   }
 
   protected urlPath(url: string): string {
-    return url.split('?')[0]
+    return new URL(url, window.location.origin).pathname
   }
 
   protected async duplicate(): Promise<void> {
