@@ -201,23 +201,20 @@ export class PythonSandbox implements Sandbox {
             pack.entry({ name: file.path }, file.content || '')
           } else {
             const filePath = path.join('resources/media', file.hash[0], file.hash)
-            const fileContent = await fs.promises.readFile(filePath).catch((error: NodeJS.ErrnoException) => {
-              if (error.code !== 'ENOENT') {
-                console.error(`Error reading file ${filePath}:`, error)
-                this.emailService
-                  .sendTechnicalAlert({
-                    subject: 'Python Sandbox File Read Error',
-                    content: `Failed to read file at ${filePath} for sandbox execution.`,
-                    error,
-                  })
-                  .catch((emailError) => {
-                    console.error('Failed to send technical alert email:', emailError)
-                  })
-              }
-              console.warn(`File not found: ${filePath}. Getting default content.`)
-              return Buffer.from(file.content || '')
-            })
-            pack.entry({ name: file.path }, fileContent)
+            try {
+              const fileContent = await fs.promises.readFile(filePath)
+              pack.entry({ name: file.path }, fileContent)
+            } catch (error) {
+              this.emailService
+                .sendTechnicalAlert({
+                  subject: 'Python Sandbox File Read Error',
+                  content: `Failed to read file at ${filePath} for sandbox execution.`,
+                  error,
+                })
+                .catch((emailError) => {
+                  console.error('Failed to send technical alert email:', emailError)
+                })
+            }
           }
         }
       }
