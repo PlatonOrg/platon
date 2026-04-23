@@ -10,13 +10,27 @@
     (didClickTitle)="itemClicked.emit()"
   >
     @if(item.templateId) {
-    <ui-list-item-article-action *ngIf="editable" (click)="openTab(builderUrl)" class="action" actionTitle="Paramétrer">
-      <i nz-icon nzType="edit" nzTheme="outline"></i>
-    </ui-list-item-article-action>
+    <a
+      *ngIf="editable"
+      [routerLink]="['/builder', item.id]"
+      [queryParams]="{ version: 'latest' }"
+      style="display: contents; color: inherit; text-decoration: none"
+    >
+      <ui-list-item-article-action class="action" actionTitle="Paramétrer">
+        <i nz-icon nzType="edit" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+    </a>
     } @else {
-    <ui-list-item-article-action *ngIf="editable" (click)="openTab(editorUrl)" class="action" actionTitle="Éditer">
-      <i nz-icon nzType="edit" nzTheme="outline"></i>
-    </ui-list-item-article-action>
+    <a
+      *ngIf="editable"
+      [routerLink]="['/editor', item.id]"
+      [queryParams]="{ version: 'latest' }"
+      style="display: contents; color: inherit; text-decoration: none"
+    >
+      <ui-list-item-article-action class="action" actionTitle="Éditer">
+        <i nz-icon nzType="edit" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+    </a>
     }
 
     <ng-container *ngIf="item.type !== 'CIRCLE'">

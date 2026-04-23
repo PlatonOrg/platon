@@ -112,22 +112,29 @@ export class SessionService {
     input: Partial<SessionEntity<TVariables>>,
     entityManager?: EntityManager
   ): Promise<SessionEntity<TVariables>> {
-    input.source?.dependencies?.forEach(async (dependency) => {
-      const hash = dependency.hash
-      const { resource, relpath, version } = resolveFileReference('/' + dependency.abspath, {
-        resource: input.source?.resource || '',
-      })
-      const newPath = path.join('resources/media', dependency.hash[0], hash)
+    await Promise.all(
+      (input.source?.dependencies ?? []).map(async (dependency) => {
+        const hash = dependency.hash
+        const newPath = path.join('resources/media', dependency.hash[0], hash)
 
-      try {
-        await fs.mkdir(path.dirname(newPath), { recursive: true })
-        await fs.writeFile(newPath, await this.ressourceFileService.getFileContent(resource, relpath, version))
-      } catch (error: unknown) {
-        if (!(error instanceof Error && (error as NodeJS.ErrnoException).code === 'EEXIST')) {
+        const alreadyExists = await fs
+          .access(newPath)
+          .then(() => true)
+          .catch(() => false)
+        if (alreadyExists) return
+
+        const { resource, relpath, version } = resolveFileReference('/' + dependency.abspath, {
+          resource: input.source?.resource || '',
+        })
+
+        try {
+          await fs.mkdir(path.dirname(newPath), { recursive: true })
+          await fs.writeFile(newPath, await this.ressourceFileService.getFileContent(resource, relpath, version))
+        } catch (error: unknown) {
           console.error('Link creation error: ', error)
         }
-      }
-    })
+      })
+    )
 
     if (entityManager) {
       return entityManager.save(entityManager.create(this.repository.target, input as SessionEntity<TVariables>))

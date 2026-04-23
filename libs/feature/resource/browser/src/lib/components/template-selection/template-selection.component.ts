@@ -44,17 +44,20 @@ export class TemplateSelectionComponent implements OnInit {
   protected templates: Resource[] = []
 
   async ngOnInit(): Promise<void> {
-    this.templates = (
-      await firstValueFrom(
+    const [user, templates] = await Promise.all([
+      this.authService.ready(),
+      firstValueFrom(
         this.resourceService.search({
           types: [ResourceTypes.EXERCISE],
           configurable: true,
           certifiedTemplate: true,
           expands: ['metadata', 'statistic', 'permissions'],
         })
-      )
-    ).resources
-    this.user = (await this.authService.ready()) as User
+      ),
+    ])
+
+    this.templates = templates.resources
+    this.user = user || undefined
 
     this.changeDetector.markForCheck()
   }
@@ -95,8 +98,7 @@ export class TemplateSelectionComponent implements OnInit {
           topics: [],
         })
       )
-
-      await this.router.navigate(['/builder', resource.id], { replaceUrl: true })
+      await this.router.navigate(['/builder', resource.id])
     } catch (error) {
       this.dialogService.error('Une erreur est survenue lors de la création de la ressource')
 
