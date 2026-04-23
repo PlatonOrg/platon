@@ -241,10 +241,23 @@ button.primary {
 
 
 .custom-error-page {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  .dismiss-error-button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
   min-height: 400px;
   padding: 2rem;
   text-align: center;
