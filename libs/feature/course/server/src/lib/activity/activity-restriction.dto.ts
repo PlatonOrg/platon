@@ -54,7 +54,7 @@ export class OtherConfigDTO {
   @IsBoolean()
   @IsOptional()
   @ApiProperty()
-  readonly enable?: boolean
+  readonly enabled?: boolean
 }
 
 export class RestrictionDTO implements Restriction {
