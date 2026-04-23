@@ -1,35 +1,34 @@
+import { makeUser } from '@platon/core/testing/common'
 import { CourseMember, CourseGroup } from '@platon/feature/course/common'
-import { Restriction, RestrictionList } from '@platon/feature/course/common'
+import { Restriction, RestrictionList, RestrictionType } from '@platon/feature/course/common'
 import { ActivityRestrictionsValidatorService } from './activity-restrictions-validator.service'
-
-// --- Helpers de construction de fixtures ---
 
 const period = (...restrictions: Restriction[]): RestrictionList => ({ restriction: restrictions })
 
 const dateRange = (start?: Date, end?: Date): Restriction => ({
-  type: 'DateRange',
+  type: RestrictionType.DateRange,
   config: { start, end },
 })
 
 const members = (...ids: string[]): Restriction => ({
-  type: 'Members',
+  type: RestrictionType.Members,
   config: { members: ids },
 })
 
 const groups = (...ids: string[]): Restriction => ({
-  type: 'Groups',
+  type: RestrictionType.Groups,
   config: { groups: ids },
 })
 
 const others = (): Restriction => ({
-  type: 'Others',
+  type: RestrictionType.Others,
   config: { enabled: true },
 })
 
 const makeMember = (id: string, firstName?: string, lastName?: string): CourseMember => ({
   id,
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01'),
+  createdAt: new Date('2026-23-04'),
+  updatedAt: new Date('2026-23-04'),
   courseId: 'course-1',
   user:
     firstName != null && lastName != null
@@ -43,14 +42,14 @@ const makeGroupMember = (
   groupUsers: { id: string; firstName: string; lastName: string }[] = []
 ): CourseMember => ({
   id,
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01'),
+  createdAt: new Date('2026-23-04'),
+  updatedAt: new Date('2026-23-04'),
   courseId: 'course-1',
   group: {
     id: `group-${id}`,
     name: groupName,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
+    createdAt: new Date('2026-23-04'),
+    updatedAt: new Date('2026-23-04'),
     users: groupUsers.map((u) => ({
       ...u,
       username: u.id,
@@ -72,8 +71,6 @@ const makeCourseGroup = (id: string, name: string): CourseGroup => ({
   updatedAt: new Date('2024-01-01'),
 })
 
-// --- Tests ---
-
 describe('ActivityRestrictionsValidatorService', () => {
   let service: ActivityRestrictionsValidatorService
 
@@ -81,7 +78,6 @@ describe('ActivityRestrictionsValidatorService', () => {
     service = new ActivityRestrictionsValidatorService()
   })
 
-  // ===================================================================
   describe('hasOthersRule()', () => {
     it('retourne false pour un tableau vide', () => {
       expect(service.hasOthersRule([])).toBe(false)
@@ -103,7 +99,6 @@ describe('ActivityRestrictionsValidatorService', () => {
     })
   })
 
-  // ===================================================================
   describe('checkGroupConflicts()', () => {
     it('retourne hasConflicts: false pour un tableau vide', () => {
       const result = service.checkGroupConflicts([])
@@ -249,17 +244,7 @@ describe('ActivityRestrictionsValidatorService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         courseId: 'course-1',
-        user: {
-          id: 'user-m2',
-          username: 'alice.d',
-          firstName: '',
-          lastName: '',
-          email: '',
-          role: 'student' as any,
-          active: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        } as any,
+        user: makeUser({ username: 'alice.d', firstName: '', lastName: '' }),
       }
       const periods = [period(members('m2')), period(members('m2'))]
       const result = service.validateRestrictions(periods, [memberWithUsername], [])
