@@ -1,6 +1,14 @@
 <mat-card #container>
   @if (hasErrors()) {
   <div class="custom-error-page">
+    <button
+      mat-icon-button
+      class="dismiss-error-button"
+      (click)="dismissErrors()"
+      nz-tooltip="Afficher l'exercice quand même"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
     <div class="error-illustration">
       <mat-icon class="error-icon">bug_report</mat-icon>
     </div>

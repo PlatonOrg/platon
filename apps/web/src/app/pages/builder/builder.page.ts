@@ -709,12 +709,7 @@ export class BuilderPage implements OnInit {
         console.error
       )
     }
-
-    if (this.resource) {
-      this.router.navigate(['/resources', this.resource.id]).catch(console.error)
-    } else {
-      this.router.navigate(['/resources']).catch(console.error)
-    }
+    window.history.back()
   }
 
   protected trackInput(_: number, input: PleInput): string {

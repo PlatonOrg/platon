@@ -356,7 +356,7 @@ export class ResourceService {
     }
 
     if (filters.certifiedTemplate != null) {
-      query.andWhere(`(type <> 'EXERCISE' OR metadata.meta->'certifiedTemplate' = :certifiedTemplate)`, {
+      query.andWhere(`(metadata.meta->'certifiedTemplate' = :certifiedTemplate)`, {
         certifiedTemplate: filters.certifiedTemplate,
       })
     }
@@ -404,6 +404,11 @@ export class ResourceService {
     if (filters.limit) {
       query.take(filters.limit)
     }
+
+    const [sql, params] = query.getQueryAndParameters()
+    console.log('Executing search query:', sql, 'with parameters:', params)
+    const explainResult = await this.dataSource.query(`EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) ${sql}`, params)
+    console.log(explainResult.map((r: any) => Object.values(r)[0]).join('\n'))
 
     return query.getManyAndCount()
   }
