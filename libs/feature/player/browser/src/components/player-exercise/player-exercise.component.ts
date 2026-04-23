@@ -130,6 +130,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   private readonly webComponentService = inject(WebComponentService)
 
   protected readonly playerSignal = signal<ExercisePlayer | undefined>(undefined)
+  protected readonly errorsDismissed = signal(false)
   private user: User | undefined = undefined
 
   @Input() state?: AnswerStates
@@ -203,6 +204,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
           if (this.player?.feedbacks && this.player.feedbacks.some((feedback) => feedback.content)) {
             this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
           }
+          this.errorsDismissed.set(false)
         },
       },
       {
@@ -439,7 +441,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       this.player = this.players[this.index]
 
       this.playerSignal.set(this.player)
-
       this.clearNotification?.()
       this.clearNotification = undefined
     }
@@ -641,11 +642,16 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   })
 
   readonly hasErrors = computed(() => {
+    if (this.errorsDismissed()) return false
     const player = this.playerSignal()
     if (!player) return false
     const errorLogs = this.getErrorLogsFromPlayer(player)
     return !this.editorPreview && errorLogs.length > 0
   })
+
+  protected dismissErrors(): void {
+    this.errorsDismissed.set(true)
+  }
 
   private getErrorLogsFromPlayer(player: ExercisePlayer): PlatonLog[] {
     return player.platon_logs?.filter((log) => log.type === LogType.ERROR) || []

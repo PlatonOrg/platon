@@ -127,12 +127,30 @@ export class ResourceCommand implements ICommand {
   }
 }
 
+class BackToResourcesCommand implements ICommand {
+  readonly id = 'platon.contrib.toolbar.commands.back-to-resources'
+  readonly label = ''
+  readonly icon = new CodIcon('arrow-left')
+
+  get enabled(): boolean {
+    return window.history.length > 1
+  }
+
+  async execute(): Promise<void> {
+    window.history.back()
+  }
+}
+
 @Injectable()
 export class Contribution implements IContribution {
   private readonly subscriptions: Subscription[] = []
+  private activated = false
   readonly id = 'platon.contrib.preview'
 
   activate(injector: Injector) {
+    if (this.activated) return
+    this.activated = true
+
     const presenter = injector.get(EditorPresenter)
     const fileService = injector.get(FileService)
     const editorService = injector.get(EditorService)
@@ -158,10 +176,21 @@ export class Contribution implements IContribution {
 
     editorService.registerCommands(new PreviewInNewTabCommand(presenter, editorService))
 
+    const backToResourcesCommand = new BackToResourcesCommand()
     const previewFromToolbar = new ToolbarPreviewCommand(presenter, fileService, editorService)
     const resourceCommand = new ResourceCommand(presenter)
 
     commandService.register(previewFromToolbar)
+
+    toolbarService.registerButton({
+      command: backToResourcesCommand,
+      buttonType: 'text',
+      colors: {
+        foreground: 'white',
+        background: 'transparent',
+      },
+    })
+
     toolbarService.registerButton({
       command: previewFromToolbar,
       colors: {
@@ -181,6 +210,7 @@ export class Contribution implements IContribution {
   }
 
   deactivate(): void | Promise<void> {
+    this.activated = false
     this.subscriptions.forEach((s) => s.unsubscribe())
   }
 }

@@ -159,6 +159,10 @@ export class ResourcePage implements OnInit, OnDestroy {
     window.open(url, '_blank')
   }
 
+  protected urlPath(url: string): string {
+    return new URL(url, window.location.origin).pathname
+  }
+
   protected async duplicate(): Promise<void> {
     const duplicatedResourceId = await this.presenter.duplicate()
     if (duplicatedResourceId) {

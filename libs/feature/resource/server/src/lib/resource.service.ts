@@ -356,7 +356,7 @@ export class ResourceService {
     }
 
     if (filters.certifiedTemplate != null) {
-      query.andWhere(`(type <> 'EXERCISE' OR metadata.meta->'certifiedTemplate' = :certifiedTemplate)`, {
+      query.andWhere(`(metadata.meta->'certifiedTemplate' = :certifiedTemplate)`, {
         certifiedTemplate: filters.certifiedTemplate,
       })
     }
