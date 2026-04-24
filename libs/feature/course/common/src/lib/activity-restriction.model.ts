@@ -1,5 +1,3 @@
-//export type RestrictionType = 'DateRange' | 'Correctors' | 'Groups' | 'Members' | 'Others'
-
 export const RestrictionType = {
   DateRange: 'DateRange',
   Correctors: 'Correctors',
