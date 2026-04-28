@@ -243,7 +243,9 @@ export class ResourceService {
         })
       )
     }
-    if (userId) await userHasPermissions(userId)
+    if (userId) {
+      await userHasPermissions(userId)
+    }
 
     query.leftJoinAndSelect('resource.topics', 'topic')
     query.leftJoinAndSelect('resource.levels', 'level')
@@ -405,7 +407,7 @@ export class ResourceService {
       query.take(filters.limit)
     }
 
-    return query.getManyAndCount()
+    return await query.getManyAndCount()
   }
 
   /**

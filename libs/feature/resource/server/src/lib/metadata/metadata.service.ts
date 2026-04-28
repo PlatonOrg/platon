@@ -9,7 +9,7 @@ import {
   LATEST,
   ResourceTypes,
 } from '@platon/feature/resource/common'
-import { EntityManager, Repository } from 'typeorm'
+import { EntityManager, In, Repository } from 'typeorm'
 import { ResourceDependencyService } from '../dependency'
 import {
   ON_CHANGE_FILE_EVENT,
@@ -49,6 +49,11 @@ export class ResourceMetadataService {
    * @param entityManager - Optional. The entity manager to use for database operations.
    * @returns A Promise that resolves to the metadata of the resource.
    */
+  async findByIds(ids: string[]): Promise<Map<string, ResourceMetaEntity>> {
+    const metas = await this.repository.findBy({ resourceId: In(ids) })
+    return new Map(metas.map((m) => [m.resourceId, m]))
+  }
+
   async of(resourceId: string, entityManager?: EntityManager): Promise<ResourceMetaEntity> {
     let metadata = entityManager
       ? await entityManager.findOne(ResourceMetaEntity, { where: { resourceId } })
