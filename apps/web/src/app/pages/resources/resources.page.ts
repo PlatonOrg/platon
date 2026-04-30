@@ -207,7 +207,7 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     const [tree, circle, views, topics, levels, owners] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.resourceService.circle(this.user.username)),
-      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS })),
+      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS.filter((f) => f !== 'statistic') })),
       firstValueFrom(this.tagService.listTopics()),
       firstValueFrom(this.tagService.listLevels()),
       firstValueFrom(this.resourceService.listOwners()),

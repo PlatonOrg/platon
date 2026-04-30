@@ -39,7 +39,12 @@ export class ResourceExpander {
       const schedule = () => {
         clearTimeout(timeout)
         timeout = setTimeout(async () => {
-          resolvePromise(await this.metadataService.findByIds(ids))
+          try {
+            resolvePromise(await this.metadataService.findByIds(ids))
+          } catch (error) {
+            this.logger.error('Failed to load resource metadata batch', { error, ids })
+            resolvePromise(new Map<string, ResourceMetaEntity>())
+          }
         }, 1)
       }
       return { ids, promise, schedule }

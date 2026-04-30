@@ -1,11 +1,11 @@
 import { ExpandContext, Expander } from '@cisstech/nestjs-expand'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { IRequest } from '@platon/core/server'
 import { ResourceStatistic, ResourceTypes } from '@platon/feature/resource/common'
 import { ResourceDTO, ResourceDependencyEntity, ResourceStatisticEntity } from '@platon/feature/resource/server'
 import { In, Repository } from 'typeorm'
-import { SessionDataEntity } from '../sessions/session-data.entity'
+import { ResourceSessionStatsView } from '../sessions/session-stats.view'
 
 const BATCH_DEBOUNCE_MS = 5
 
@@ -19,15 +19,17 @@ type StatisticBatchLoader = {
 @Expander(ResourceDTO)
 export class ResourceExpander {
   constructor(
-    @InjectRepository(SessionDataEntity)
-    private readonly sessionData: Repository<SessionDataEntity>,
-
     @InjectRepository(ResourceStatisticEntity)
     private readonly statisticView: Repository<ResourceStatisticEntity>,
+
+    @InjectRepository(ResourceSessionStatsView)
+    private readonly sessionStatsView: Repository<ResourceSessionStatsView>,
 
     @InjectRepository(ResourceDependencyEntity)
     private readonly dependencyRepo: Repository<ResourceDependencyEntity>
   ) {}
+
+  private readonly logger = new Logger(ResourceExpander.name)
 
   async statistic(context: ExpandContext<IRequest, ResourceDTO>): Promise<ResourceStatistic | undefined> {
     const { parent, request } = context
@@ -44,7 +46,12 @@ export class ResourceExpander {
       const scheduleFlush = () => {
         clearTimeout(flushTimeout)
         flushTimeout = setTimeout(async () => {
-          resolvePromise(await this.computeBatch(resources))
+          try {
+            resolvePromise(await this.computeBatch(resources))
+          } catch (e) {
+            this.logger.error('Failed to compute resource statistic batch', e)
+            resolvePromise(new Map())
+          }
         }, BATCH_DEBOUNCE_MS)
       }
 
@@ -64,49 +71,17 @@ export class ResourceExpander {
     const uniqueResources = [...new Map(resources.map((r) => [r.id, r])).values()]
     const ids = uniqueResources.map((r) => r.id)
 
-    type SessionsAggRow = {
-      resource_id: string
-      total_scores: string
-      scored_sessions: string
-      activity_attempts: string
-      exercise_unique_attempts: string
-    }
-
-    const [statistics, sessionsAggRows, allDependencies] = await Promise.all([
+    const [statistics, sessionStats, allDependencies] = await Promise.all([
       this.statisticView.find({ where: { id: In(ids) } }),
-      this.sessionData.query(
-        `SELECT
-           resource_id,
-           SUM(CASE WHEN attempts > 0 THEN GREATEST(COALESCE(correction_grade, grade), 0) ELSE 0 END) AS total_scores,
-           COUNT(CASE WHEN attempts > 0 THEN 1 ELSE NULL END) AS scored_sessions,
-           COUNT(CASE WHEN parent_id IS NULL AND attempts > 0 THEN 1 ELSE NULL END) AS activity_attempts,
-           COUNT(CASE WHEN parent_id IS NOT NULL AND attempts > 0 THEN 1 ELSE NULL END) AS exercise_unique_attempts
-         FROM "SessionData"
-         WHERE resource_id = ANY($1) AND user_id IS NOT NULL
-         GROUP BY resource_id`,
-        [ids]
-      ) as Promise<SessionsAggRow[]>,
+      this.sessionStatsView.find({ where: { resourceId: In(ids) } }),
       this.dependencyRepo.find({
         where: { dependOnId: In(ids) },
-        select: { resourceId: true, dependOnId: true, resource: { type: true } },
-        relations: { resource: true },
+        select: { resourceId: true, dependOnId: true, isTemplate: true },
       }),
     ])
 
     const statsById = new Map(statistics.map((s) => [s.id, s]))
-
-    const sessionsAggByResourceId = new Map<
-      string,
-      { avgScore: number; activityAttempts: number; exerciseUniqueAttempts: number }
-    >()
-    for (const row of sessionsAggRows) {
-      const scored = Number(row.scored_sessions)
-      sessionsAggByResourceId.set(row.resource_id, {
-        avgScore: scored > 0 ? Math.round(Number(row.total_scores) / scored) : 0,
-        activityAttempts: Number(row.activity_attempts),
-        exerciseUniqueAttempts: Number(row.exercise_unique_attempts),
-      })
-    }
+    const sessionStatsByResourceId = new Map(sessionStats.map((s) => [s.resourceId, s]))
 
     const depsByDependOnId = new Map<string, ResourceDependencyEntity[]>()
     for (const dep of allDependencies) {
@@ -126,7 +101,7 @@ export class ResourceExpander {
       for (const ref of refs) {
         if (!seen.has(ref.resourceId)) {
           seen.add(ref.resourceId)
-          if (ref.resource.type === ResourceTypes.EXERCISE) {
+          if (ref.isTemplate) {
             uniqueExerciseIds.add(ref.resourceId)
             allExerciseRefIds.add(ref.resourceId)
           }
@@ -140,18 +115,12 @@ export class ResourceExpander {
       }
     }
 
-    // 4th query: aggregate attempts per exercise reference ID
-    const attemptsByResourceId = new Map<string, number>()
-    if (allExerciseRefIds.size > 0) {
-      const rows: { resource_id: string; total_attempts: string }[] = await this.sessionData.query(
-        `SELECT resource_id, SUM(attempts) AS total_attempts
-         FROM "SessionData"
-         WHERE resource_id = ANY($1) AND user_id IS NOT NULL
-         GROUP BY resource_id`,
-        [Array.from(allExerciseRefIds)]
-      )
-      for (const row of rows) {
-        attemptsByResourceId.set(row.resource_id, Number(row.total_attempts))
+    // Fetch session stats for exercise ref IDs not already in the batch
+    const missingRefIds = [...allExerciseRefIds].filter((id) => !sessionStatsByResourceId.has(id))
+    if (missingRefIds.length > 0) {
+      const extraStats = await this.sessionStatsView.find({ where: { resourceId: In(missingRefIds) } })
+      for (const s of extraStats) {
+        sessionStatsByResourceId.set(s.resourceId, s)
       }
     }
 
@@ -165,11 +134,7 @@ export class ResourceExpander {
         continue
       }
 
-      const agg = sessionsAggByResourceId.get(resource.id) ?? {
-        avgScore: 0,
-        activityAttempts: 0,
-        exerciseUniqueAttempts: 0,
-      }
+      const agg = sessionStatsByResourceId.get(resource.id)
       const refs = depsByDependOnId.get(resource.id) ?? []
 
       let refCount = 0
@@ -181,8 +146,8 @@ export class ResourceExpander {
       refs.forEach((ref) => {
         if (!uniqueResourceIds.has(ref.resourceId)) {
           uniqueResourceIds.add(ref.resourceId)
-          activityRefCount += ref.resource.type === ResourceTypes.ACTIVITY ? 1 : 0
-          templateRefCount += ref.resource.type === ResourceTypes.EXERCISE ? 1 : 0
+          activityRefCount += ref.isTemplate ? 0 : 1
+          templateRefCount += ref.isTemplate ? 1 : 0
         }
       })
 
@@ -190,7 +155,10 @@ export class ResourceExpander {
 
       if (refCount > 0) {
         const exerciseIds = exerciseRefIdsByResourceId.get(resource.id) ?? [resource.id]
-        referencesAttemptCount = exerciseIds.reduce((total, eid) => total + (attemptsByResourceId.get(eid) ?? 0), 0)
+        referencesAttemptCount = exerciseIds.reduce(
+          (total, eid) => total + Number(sessionStatsByResourceId.get(eid)?.totalAttempts ?? 0),
+          0
+        )
       }
 
       results.set(resource.id, {
@@ -214,15 +182,15 @@ export class ResourceExpander {
         activity:
           resource.type === ResourceTypes.ACTIVITY
             ? {
-                attemptCount: agg.activityAttempts,
-                averageScore: agg.avgScore,
+                attemptCount: agg?.activityAttempts ?? 0,
+                averageScore: agg?.avgScore ?? 0,
               }
             : undefined,
         exercise:
           resource.type === ResourceTypes.EXERCISE
             ? {
-                attemptCount: agg.exerciseUniqueAttempts,
-                averageScore: agg.avgScore,
+                attemptCount: agg?.exerciseUniqueAttempts ?? 0,
+                averageScore: agg?.avgScore ?? 0,
                 references: refCount
                   ? {
                       total: refCount,

@@ -36,6 +36,9 @@ import { SubmissionController } from './submissions/submission.controller'
 import { SubmissionService } from './submissions/submission.service'
 import { SubmissionStorageService } from './submissions/storage.service'
 import { StudentSubmissionEntity } from './submissions/submission.entity'
+import { ResourceSessionStatsView } from './sessions/session-stats.view'
+import { SessionStatsScheduler } from './sessions/session-stats.scheduler'
+
 @Module({
   imports: [
     FeatureCourseServerModule,
@@ -54,6 +57,7 @@ import { StudentSubmissionEntity } from './submissions/submission.entity'
       ResourceLabelEntity,
       UserFavoriteLabel,
       StudentSubmissionEntity,
+      ResourceSessionStatsView,
     ]),
   ],
   controllers: [
@@ -76,6 +80,7 @@ import { StudentSubmissionEntity } from './submissions/submission.entity'
     ActivityResultsVirtualColumnsResolver,
     CourseExpander,
     ResourceExpander,
+    SessionStatsScheduler,
     ActivityService,
     LabelService,
     CorrectionLabelService,

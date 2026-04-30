@@ -50,8 +50,13 @@ export class ResourceMetadataService {
    * @returns A Promise that resolves to the metadata of the resource.
    */
   async findByIds(ids: string[]): Promise<Map<string, ResourceMetaEntity>> {
-    const metas = await this.repository.findBy({ resourceId: In(ids) })
-    return new Map(metas.map((m) => [m.resourceId, m]))
+    try {
+      const metas = await this.repository.findBy({ resourceId: In(ids) })
+      return new Map(metas.map((m) => [m.resourceId, m]))
+    } catch (error) {
+      this.logger.error(`Error fetching metadata for resource IDs: ${ids.join(', ')}`, error)
+      return new Map()
+    }
   }
 
   async of(resourceId: string, entityManager?: EntityManager): Promise<ResourceMetaEntity> {
