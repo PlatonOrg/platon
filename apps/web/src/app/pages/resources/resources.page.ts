@@ -60,6 +60,8 @@ import { ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
+// Just metadata is already quite expensive to fetch, dones't need statistic
+const EXPANDS_VIEW: ResourceExpandableFields[] = ['metadata']
 
 interface QueryParams {
   q?: string
@@ -207,7 +209,7 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     const [tree, circle, views, topics, levels, owners] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.resourceService.circle(this.user.username)),
-      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS.filter((f) => f !== 'statistic') })),
+      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS_VIEW })),
       firstValueFrom(this.tagService.listTopics()),
       firstValueFrom(this.tagService.listLevels()),
       firstValueFrom(this.resourceService.listOwners()),
