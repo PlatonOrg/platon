@@ -8,7 +8,7 @@ import { CircleTree, flattenCircleTree } from '@platon/feature/resource/common'
 
 import { ResourceService } from '@platon/feature/resource/browser'
 import { firstValueFrom } from 'rxjs'
-import { DialogService, DialogModule } from '@platon/core/browser'
+import { DialogService } from '@platon/core/browser'
 
 @Injectable({
   providedIn: 'root',
