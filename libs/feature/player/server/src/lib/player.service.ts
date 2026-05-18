@@ -34,6 +34,7 @@ import {
   PlayerNavigation,
   PreviewInput,
   SandboxEnvironment,
+  hasError,
   updateActivityNavigationState,
   withActivityFeedbacksGuard,
   withActivityPlayer,
@@ -553,6 +554,14 @@ export class PlayerService extends PlayerManager {
 
     exerciseSession.envid = envid
     exerciseSession.isBuilt = true
+
+    if (hasError(variables)) {
+      variables['.meta'] = {
+        ...variables['.meta'],
+        error: true,
+      }
+    }
+
     exerciseSession.variables = variables as ExerciseVariables
 
     await this.sessionService.update(exerciseSession.id, {

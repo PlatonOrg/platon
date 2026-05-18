@@ -32,6 +32,17 @@
           <mat-icon>refresh</mat-icon>
           Réessayer
         </button>
+
+        <button
+          mat-stroked-button
+          color="accent"
+          (click)="goToNextPlayer.emit()"
+          *ngIf="!editorPreview && hasNext"
+          aria-label="Passer à l'exercice suivant"
+        >
+          <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+          Passer l'exercice
+        </button>
       </div>
 
       <div class="error-tips">
