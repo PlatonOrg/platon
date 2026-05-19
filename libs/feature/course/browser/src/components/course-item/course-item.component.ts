@@ -10,7 +10,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 
-import { RouterModule } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 import { Course } from '@platon/feature/course/common'
 import { antTagColorFromPercentage } from '@platon/shared/ui'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -43,7 +43,7 @@ export class CourseItemComponent implements OnChanges {
   protected progressColor = 'primary'
   protected isTitleTruncated = false
 
-  constructor(private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly cdr: ChangeDetectorRef, private readonly router: Router) {}
 
   ngOnChanges(): void {
     this.name = this.item.name
@@ -53,6 +53,10 @@ export class CourseItemComponent implements OnChanges {
     }
 
     this.progressColor = antTagColorFromPercentage(this.item.statistic?.progression ?? 0)
+  }
+
+  protected async navigate(): Promise<void> {
+    await this.router.navigate(['/courses', this.item.id])
   }
 
   protected checkTitleTruncation(event: MouseEvent): void {
