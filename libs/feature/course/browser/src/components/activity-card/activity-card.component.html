@@ -42,7 +42,7 @@
               <ng-container *ngIf="isValidDate(item.openAt); else noDate">
                 {{ item.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
               </ng-container>
-              <ng-template #noDate>-</ng-template>
+              <ng-template #noDate>Non définie</ng-template>
             </span>
             <span class="date-label"> Ouverture </span>
           </div>
@@ -52,7 +52,7 @@
               <ng-container *ngIf="isValidDate(item.closeAt); else noDate">
                 {{ item.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
               </ng-container>
-              <ng-template #noDate>-</ng-template>
+              <ng-template #noDate>Non définie</ng-template>
             </span>
             <span class="date-label"> Fermeture </span>
           </div>
@@ -63,7 +63,7 @@
       <div>
         <a
           *ngIf="item.permissions.answer"
-          nz-tooltip="Lancer l'activité"
+          [nz-tooltip]="item.state === 'closed' ? 'Voir mes résultats' : 'Lancer l\'activité'"
           nz-button
           nzShape="round"
           nzType="primary"
@@ -71,8 +71,8 @@
           [routerLink]="['/player/activity', item.id]"
           class="action-button"
         >
-          <mat-icon fontSet="material-icons">play_arrow</mat-icon>
-          Lancer
+          <mat-icon fontSet="material-icons">{{ item.state === 'closed' ? 'bar_chart' : 'play_arrow' }}</mat-icon>
+          {{ item.state === 'closed' ? 'Voir mes résultats' : 'Lancer' }}
         </a>
         <button
           *ngIf="item.permissions.viewResource"
