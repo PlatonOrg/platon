@@ -212,12 +212,7 @@
 
 <ui-modal-drawer #commentDrawer title="Commentaires">
   <ng-template>
-    <player-comments
-      *ngIf="player"
-      [canComment]="canComment"
-      [answerId]="player.answerId!"
-      [sessionId]="player.sessionId"
-    />
+    <player-comments [canComment]="canComment" [answers]="players" [sessionId]="player?.sessionId" />
   </ng-template>
 </ui-modal-drawer>
 
