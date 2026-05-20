@@ -46,6 +46,10 @@ export class PlayerResultsComponent implements OnInit {
   protected answers: ExercisePlayer[] = []
   protected displayAll = false
 
+  protected get hasNonStartedExercises(): boolean {
+    return Object.values(this.results?.exercises ?? {}).some((exercise) => exercise.state === 'NOT_STARTED')
+  }
+
   protected get isMobile(): boolean {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small])
   }
