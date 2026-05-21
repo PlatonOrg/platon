@@ -16,6 +16,7 @@ import { CourseNotificationService } from '../course-notification/course-notific
 import { CourseMemberEntity } from './course-member.entity'
 import { CourseMemberRoles } from '@platon/feature/course/common'
 import { CourseMemberView } from './course-member.view'
+import { UserGroupService, UserService } from '@platon/core/server'
 
 @Injectable()
 export class CourseMemberService {
@@ -23,6 +24,8 @@ export class CourseMemberService {
 
   constructor(
     private readonly notificationService: CourseNotificationService,
+    private readonly userGroupService: UserGroupService,
+    private readonly userService: UserService,
 
     @InjectRepository(CourseMemberView)
     private readonly view: Repository<CourseMemberView>,
@@ -147,6 +150,12 @@ export class CourseMemberService {
   }
 
   async addUser(courseId: string, userId: string, role: CourseMemberRoles, notify = true): Promise<CourseMemberEntity> {
+    if (role === CourseMemberRoles.teacher) {
+      const user = (await this.userService.findById(userId)).orElseThrow(() => new NotFoundResponse('User not found'))
+      if (!isTeacherRole(user.role)) {
+        throw new ForbiddenResponse('Only users with a teacher role can be assigned the role of teacher')
+      }
+    }
     const member = await this.repository.save(this.repository.create({ courseId, userId, role }))
     if (notify) {
       this.notificationService
@@ -165,8 +174,20 @@ export class CourseMemberService {
     return member
   }
 
-  async addGroup(courseId: string, groupId: string, notify = true): Promise<CourseMemberEntity> {
-    const member = await this.repository.save(this.repository.create({ courseId, groupId }))
+  async addGroup(
+    courseId: string,
+    groupId: string,
+    options?: { notify?: boolean; role?: CourseMemberRoles }
+  ): Promise<CourseMemberEntity> {
+    const { notify = true, role = CourseMemberRoles.student } = options ?? {}
+    if (role === CourseMemberRoles.teacher) {
+      const groupMembers = await this.userGroupService.listMembers(groupId)
+      if (!groupMembers.every((member) => isTeacherRole(member.role))) {
+        throw new ForbiddenResponse('Only groups composed of teachers can be assigned the role of teacher')
+      }
+    }
+
+    const member = await this.repository.save(this.repository.create({ courseId, groupId, role }))
     if (notify) {
       this.notificationService
         .notifyCourseMemberBeingCreated(

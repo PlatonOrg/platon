@@ -32,17 +32,17 @@
   okTitle="Ajouter"
   [title]="searchModalTitle"
   [excludes]="excludes"
-  [filters]="{ roles: roles }"
+  [filters]="modalFilters"
   [allowGroup]="allowGroup"
   (closed)="addMembers($event)"
 >
   <p>
     Sélectionnez les
-    <nz-select [(ngModel)]="role" nzAllowClear nzPlaceHolder="Rôle" nzShowSearch>
+    <nz-select [(ngModel)]="role" (ngModelChange)="onRoleChange($event)" nzPlaceHolder="Rôle" nzShowSearch>
       <nz-option
-        *ngFor="let role of roles"
-        [nzLabel]="(role | displayCourseMemberRole) + 's'"
-        [nzValue]="role"
+        *ngFor="let memberRole of roles"
+        [nzLabel]="(memberRole | displayCourseMemberRole) + 's'"
+        [nzValue]="memberRole"
       ></nz-option>
     </nz-select>
     que vous souhaitez ajouter
