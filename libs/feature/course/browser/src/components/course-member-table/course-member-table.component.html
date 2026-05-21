@@ -47,6 +47,7 @@
           lastNameFirst
           (openGroupDetails)="groupDrawer.open($event)"
         />
+        <span *ngIf="isCurrentUser(member)" class="current-user-label">(vous)</span>
       </td>
       <td>{{ member.createdAt | date }}</td>
       <td>
