@@ -1,4 +1,4 @@
-<div id="resizable" [style.height]="state.height + 'px'" translate="no">
+<div #resizableEl id="resizable" [class.is-resizing]="isResizing" [style.height]="state.height + 'px'" translate="no">
   <nge-monaco-editor (ready)="onCreateEditor($event)"> </nge-monaco-editor>
   <footer #footer>
     <span class="footer-item" aria-label="Raccourcies" nz-tooltip="Raccourcies" (click)="quickCommand()">
@@ -33,6 +33,15 @@
     <span class="footer-item" [attr.aria-label]="state.language" nz-tooltip="Langage">
       {{ state.language }}
     </span>
+    <span
+      class="resize-grip"
+      [class.resizing]="isResizing"
+      (pointerdown)="onResizeStart($event)"
+      (pointermove)="onResizeMove($event)"
+      (pointerup)="onResizeEnd($event)"
+      (pointercancel)="onResizeEnd($event)"
+      title="Redimensionner l'éditeur"
+    ></span>
   </footer>
 </div>
 <wc-base [(state)]="state"></wc-base>
