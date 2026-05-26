@@ -23,14 +23,14 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor'
 
+const MIN_EDITOR_HEIGHT_PX = 400
+
 @Component({
   selector: 'wc-code-editor',
   templateUrl: 'code-editor.component.html',
   styleUrls: ['code-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-const MIN_EDITOR_HEIGHT_PX = 400
-
 @WebComponent(CodeEditorComponentDefinition)
 export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, WebComponentHooks<CodeEditorState> {
   private readonly disposables: monaco.IDisposable[] = []
