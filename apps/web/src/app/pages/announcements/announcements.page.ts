@@ -111,19 +111,23 @@ export class AnnouncementsPage implements OnInit {
       this.announcements = result.resources
       this.filteredAnnouncements = [...this.announcements]
 
-      this.route.queryParams.subscribe((params) => {
+      this.route.queryParams.subscribe(async (params) => {
         const highlightedId = params['highlight']
 
         if (highlightedId && this.announcements.length > 0) {
-          const foundAnnouncement = this.announcements.find((a) => a.id === highlightedId)
+          const foundAnnouncement = await firstValueFrom(this.announcementService.findByIdForUser(highlightedId)) //this.announcements.find((a) => a.id === highlightedId)
           if (foundAnnouncement) {
             this.selectedAnnouncement = foundAnnouncement
           } else {
             // Si l'annonce n'est pas trouvée, prendre la première par défaut
-            this.selectedAnnouncement = this.announcements[0]
+            this.selectedAnnouncement = await firstValueFrom(
+              this.announcementService.findByIdForUser(this.announcements[0].id)
+            )
           }
         } else if (this.announcements.length > 0) {
-          this.selectedAnnouncement = this.announcements[0]
+          this.selectedAnnouncement = await firstValueFrom(
+            this.announcementService.findByIdForUser(this.announcements[0].id)
+          )
         }
 
         this.changeDetectorRef.markForCheck()
@@ -152,8 +156,9 @@ export class AnnouncementsPage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  protected selectAnnouncement(announcement: Announcement): void {
-    this.selectedAnnouncement = announcement
+  protected async selectAnnouncement(announcement: Announcement): Promise<void> {
+    const selected = await firstValueFrom(this.announcementService.findByIdForUser(announcement.id))
+    this.selectedAnnouncement = selected
     this.changeDetectorRef.markForCheck()
   }
 
