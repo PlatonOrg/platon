@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Get, Post, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ForbiddenResponse, ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
@@ -26,6 +26,9 @@ export class CorrectionController {
     @Req() req: IRequest,
     @Query('status') status?: CorrectionStatus
   ): Promise<ListResponse<ActivityCorrection>> {
+    if (status !== undefined && !Object.values(CorrectionStatus).includes(status)) {
+      throw new BadRequestException(`Invalid status value: ${status}`)
+    }
     const items = await this.service.list(req.user.id, undefined, false, status)
     const resources = Mapper.mapAll(items, ActivityCorrectionDTO)
     return new ListResponse({ total: resources.length, resources })
@@ -36,6 +39,9 @@ export class CorrectionController {
     @Req() req: IRequest,
     @Query('status') status?: CorrectionStatus
   ): Promise<ListResponse<ActivityCorrectionSummary>> {
+    if (status !== undefined && !Object.values(CorrectionStatus).includes(status)) {
+      throw new BadRequestException(`Invalid status value: ${status}`)
+    }
     const items = await this.service.listSummary(req.user.id, status)
     const resources = Mapper.mapAll(items, ActivityCorrectionSummaryDTO)
     return new ListResponse({ total: resources.length, resources })

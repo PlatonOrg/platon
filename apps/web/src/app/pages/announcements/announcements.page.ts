@@ -112,25 +112,27 @@ export class AnnouncementsPage implements OnInit {
       this.filteredAnnouncements = [...this.announcements]
 
       this.route.queryParams.subscribe(async (params) => {
-        const highlightedId = params['highlight']
+        try {
+          const highlightedId = params['highlight']
 
-        if (highlightedId && this.announcements.length > 0) {
-          const foundAnnouncement = await firstValueFrom(this.announcementService.findByIdForUser(highlightedId)) //this.announcements.find((a) => a.id === highlightedId)
-          if (foundAnnouncement) {
-            this.selectedAnnouncement = foundAnnouncement
-          } else {
-            // Si l'annonce n'est pas trouvée, prendre la première par défaut
+          if (highlightedId && this.announcements.length > 0) {
+            try {
+              this.selectedAnnouncement = await firstValueFrom(this.announcementService.findByIdForUser(highlightedId))
+            } catch {
+              this.selectedAnnouncement = await firstValueFrom(
+                this.announcementService.findByIdForUser(this.announcements[0].id)
+              )
+            }
+          } else if (this.announcements.length > 0) {
             this.selectedAnnouncement = await firstValueFrom(
               this.announcementService.findByIdForUser(this.announcements[0].id)
             )
           }
-        } else if (this.announcements.length > 0) {
-          this.selectedAnnouncement = await firstValueFrom(
-            this.announcementService.findByIdForUser(this.announcements[0].id)
-          )
+        } catch (error) {
+          this.dialogService.error("Erreur lors du chargement de l'annonce")
+        } finally {
+          this.changeDetectorRef.markForCheck()
         }
-
-        this.changeDetectorRef.markForCheck()
       })
     } catch (error) {
       this.dialogService.error('Erreur lors du chargement des annonces')
