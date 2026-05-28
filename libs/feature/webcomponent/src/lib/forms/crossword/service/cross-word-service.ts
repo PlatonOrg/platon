@@ -20,6 +20,7 @@ export class CrossWordService {
     const layout = clg.generateLayout(words)
     this.grid = layout.table
     this.results = layout.result
+    this.results = layout.result.filter((word: Result) => word.orientation != 'none')
     this.userAnswers = this.generateUserAnswers()
     this.lastPosition = [-1, -1]
   }

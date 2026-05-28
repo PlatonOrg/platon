@@ -41,12 +41,18 @@
   width: 100%;
   box-sizing: border-box;
   padding-left: 5vw; // for the definition number
+  overflow-x: auto;
+    white-space: nowrap;
 }
 
 .crossword-grid.responsive-grid {
   display: grid;
   width: 100%;
+  padding-top: 3.0vw;
   gap: 1px;
+  width: fit-content;
+    max-width: 90%;
+    margin: 10 auto;
 }
 
 .crossword-grid {
@@ -57,7 +63,8 @@
 
 .cell-wrapper {
   position: relative;
-  padding-bottom: 100%;
+  width: 100%;
+    aspect-ratio: 1 / 1;
   max-width: 100px;
   max-height: 100px;
 }
@@ -69,6 +76,7 @@
   width: 100%;
   height: 100%;
   z-index: 5;
+  box-sizing: border-box;
 }
 
 .cell-wrapper span {
@@ -78,28 +86,29 @@
   transform: none;
   z-index: 10;
   font-size: min(2.0vw, 25px);
-  padding: 0;
-  margin: 0;
+    padding: 1px;
+      margin: 1px;
 }
 
 .cell-square {
   border: 2px solid #333;
   border-radius: 8px;
   box-shadow: inset 0 0 5px #00000033, 2px 2px 6px #00000088;
-  font-size: min(6.5vw, 65px);
+  font-size: min(4.5vw, 45px);
   font-weight: bold;
   color: #222;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  line-height: 100%;
 }
 
 /* style for the vertical number */
 .cell-wrapper span.isStartCellVertical {
-  top: -3.0vw;
-  left: 1.8vw;
-  transform: none;
+  top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
   color: #000000;
   font-weight: bold;
 }
@@ -107,10 +116,12 @@
 
 /* style for the horizontal number */
 .cell-wrapper span.isStartCellHorizental {
-  top: 1.3vw;
-  left: -2.4vw;
-  pointer-events: none;
+  top: 50%;
+    transform: translateY(-50%);
+    right: 100%;
+    margin-right: 2px;
   color: #000000;
+  text-align: right;
   font-weight: bold;
 }
 
