@@ -2,8 +2,13 @@ import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ForbiddenResponse, ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
-import { ActivityCorrection, UpsertCorrection } from '@platon/feature/result/common'
-import { ActivityCorrectionDTO, CorrectionDTO } from './correction.dto'
+import {
+  ActivityCorrection,
+  ActivityCorrectionSummary,
+  CorrectionStatus,
+  UpsertCorrection,
+} from '@platon/feature/result/common'
+import { ActivityCorrectionDTO, ActivityCorrectionSummaryDTO, CorrectionDTO } from './correction.dto'
 import { CorrectionService } from './correction.service'
 import { CorrectionLabelService } from '../label/correction-label/correction-label.service'
 
@@ -17,9 +22,22 @@ export class CorrectionController {
   ) {}
 
   @Get()
-  async list(@Req() req: IRequest): Promise<ListResponse<ActivityCorrection>> {
-    const items = await this.service.list(req.user.id)
+  async list(
+    @Req() req: IRequest,
+    @Query('status') status?: CorrectionStatus
+  ): Promise<ListResponse<ActivityCorrection>> {
+    const items = await this.service.list(req.user.id, undefined, false, status)
     const resources = Mapper.mapAll(items, ActivityCorrectionDTO)
+    return new ListResponse({ total: resources.length, resources })
+  }
+
+  @Get('/summary')
+  async listSummary(
+    @Req() req: IRequest,
+    @Query('status') status?: CorrectionStatus
+  ): Promise<ListResponse<ActivityCorrectionSummary>> {
+    const items = await this.service.listSummary(req.user.id, status)
+    const resources = Mapper.mapAll(items, ActivityCorrectionSummaryDTO)
     return new ListResponse({ total: resources.length, resources })
   }
 
