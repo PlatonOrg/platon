@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { NotFoundResponse } from '@platon/core/common'
 import { EventService } from '@platon/core/server'
@@ -35,8 +35,6 @@ type Projection = {
 
 @Injectable()
 export class CorrectionService {
-  private readonly logger = new Logger(CorrectionService.name)
-
   constructor(
     private readonly eventService: EventService,
 
@@ -154,14 +152,9 @@ export class CorrectionService {
       ${whereConditions.join(' AND\n      ')}
   `
 
-    const t0 = Date.now()
     const allProjections = (await this.sessionRepository.query(queryText, queryParams)) as Projection[]
-    this.logger.debug(
-      `[list] main query: ${Date.now() - t0}ms — ${allProjections.length} rows (status=${status ?? 'none'})`
-    )
 
     const projections = this.filterProjectionsByStatus(allProjections, status)
-    this.logger.debug(`[list] after status filter: ${projections.length} rows`)
 
     const activityMap = new Map<string, ActivityCorrection>()
 
