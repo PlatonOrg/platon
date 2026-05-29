@@ -1,3 +1,8 @@
+export enum CorrectionStatus {
+  pending = 'pending',
+  available = 'available',
+}
+
 export interface Correction {
   id: string
   createdAt: Date
@@ -6,6 +11,14 @@ export interface Correction {
   grade: number
 }
 
+export interface ActivityCorrectionSummary {
+  activityId: string
+  activityName: string
+  courseId: string
+  courseName: string
+  totalExercises: number
+  correctedExercises: number
+}
 /**
  * Represents a list of corrections assigned to a correctioner.
  */

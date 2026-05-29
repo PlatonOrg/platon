@@ -4,11 +4,34 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { NotFoundResponse } from '@platon/core/common'
 import { EventService } from '@platon/core/server'
 import { ON_CORRECT_ACTIVITY_EVENT, OnCorrectActivityEventPayload } from '@platon/feature/course/server'
-import { ActivityCorrection, ExerciseCorrection } from '@platon/feature/result/common'
+import {
+  ActivityCorrection,
+  ActivityCorrectionSummary,
+  CorrectionStatus,
+  ExerciseCorrection,
+  Label,
+} from '@platon/feature/result/common'
 import { Repository } from 'typeorm'
 import { SessionEntity } from '../sessions/session.entity'
 import { CorrectionEntity } from './correction.entity'
-import { CorrectionLabelEntity } from '../label/correction-label/correction-label.entity'
+
+type Projection = {
+  userId: string
+  activityId: string
+  activityName: string
+  exerciseId: string
+  activitySessionId: string
+  exerciseSessionId: string
+  courseId: string
+  courseName: string
+  correctedBy?: string
+  correctedAt?: Date
+  correctedGrade?: number
+  grade?: number
+  exerciseName: string
+  hasUploads: boolean
+  labels: Label[]
+}
 
 @Injectable()
 export class CorrectionService {
@@ -18,9 +41,7 @@ export class CorrectionService {
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(CorrectionEntity)
-    private readonly correctionRepository: Repository<CorrectionEntity>,
-    @InjectRepository(CorrectionLabelEntity)
-    private readonly correctionLabelRepository: Repository<CorrectionLabelEntity>
+    private readonly correctionRepository: Repository<CorrectionEntity>
   ) {}
 
   /**
@@ -35,25 +56,12 @@ export class CorrectionService {
    * @param viewerMode Whether this is a read-only visualization request.
    * @returns A list of activities to correct.
    */
-  async list(correctorUserId: string, activityId?: string, viewerMode = false): Promise<ActivityCorrection[]> {
-    type Projection = {
-      userId: string
-      activityId: string
-      activityName: string
-      activityNavigation: any
-      exerciseId: string
-      activitySessionId: string
-      exerciseSessionId: string
-      courseId: string
-      courseName: string
-      correctedBy?: string
-      correctedAt?: Date
-      correctedGrade?: number
-      grade?: number
-      exerciseName: string
-      hasUploads: boolean
-    }
-
+  async list(
+    correctorUserId: string,
+    activityId?: string,
+    viewerMode = false,
+    status?: CorrectionStatus
+  ): Promise<ActivityCorrection[]> {
     // In viewer mode, list exercise sessions directly from the activity without requiring answers.
     const answerJoin = viewerMode
       ? ''
@@ -97,9 +105,16 @@ export class CorrectionService {
     SELECT
       activity.id as "activityId",
       activity.source->'variables'->>'title' as "activityName",
-      resources.id as "exerciseId",
+      COALESCE(
+        (SELECT elem->>'id'
+         FROM jsonb_array_elements(
+           COALESCE(activity_session.variables->'navigation'->'exercises', '[]'::jsonb)
+         ) AS elem
+         WHERE elem->>'sessionId' = exercise_session.id::text
+         LIMIT 1),
+        resources.id::text
+      ) AS "exerciseId",
       resources."name" as "exerciseName",
-      (activity_session.variables->>'navigation')::jsonb as "activityNavigation",
       activity_session.id as "activitySessionId",
       exercise_session.user_id as "userId",
       exercise_session.id as "exerciseSessionId",
@@ -113,7 +128,8 @@ export class CorrectionService {
         SELECT 1 FROM "StudentSubmissions"
         WHERE session_id = exercise_session.id
         LIMIT 1
-      ) THEN true ELSE false END as "hasUploads"
+      ) THEN true ELSE false END as "hasUploads",
+      lbl.labels AS "labels"
     FROM "Sessions" exercise_session
     INNER JOIN "Resources" resources on resources.id = (exercise_session.source->>'resource')::uuid
     INNER JOIN "Sessions" activity_session ON activity_session.id=exercise_session.parent_id
@@ -121,26 +137,28 @@ export class CorrectionService {
     INNER JOIN "Courses" course ON course.id=activity.course_id
     ${answerJoin}
     LEFT JOIN "Corrections" correction ON correction.id=exercise_session.correction_id
+    LEFT JOIN LATERAL (
+      SELECT COALESCE(
+        jsonb_agg(
+          jsonb_build_object('id', l.id, 'name', l.name, 'color', l.color, 'description', l.description)
+        ),
+        '[]'::jsonb
+      ) AS "labels"
+      FROM "CorrectionLabels" cl
+      INNER JOIN "Labels" l ON cl.label_id = l.id
+      WHERE cl.session_id = exercise_session.id
+    ) lbl ON true
     WHERE
       ${whereConditions.join(' AND\n      ')}
   `
 
-    const subQuery = `
-      select
-        l.*
-      from "CorrectionLabels" cl
-      left join "Labels" l on cl.label_id = l.id
-      where cl.session_id = $1
-    `
-    const projections = (await this.sessionRepository.query(queryText, queryParams)) as Projection[]
+    const allProjections = (await this.sessionRepository.query(queryText, queryParams)) as Projection[]
+
+    const projections = this.filterProjectionsByStatus(allProjections, status)
 
     const activityMap = new Map<string, ActivityCorrection>()
 
     for (const projection of projections) {
-      const navItem = projection.activityNavigation?.exercises?.find(
-        (item: any) => item.sessionId === projection.exerciseSessionId
-      )
-
       const exercise: ExerciseCorrection = {
         userId: projection.userId,
         activitySessionId: projection.activitySessionId,
@@ -149,22 +167,10 @@ export class CorrectionService {
         correctedAt: projection.correctedAt,
         correctedGrade: projection.correctedGrade,
         grade: projection.grade,
-        exerciseId: navItem?.id ?? projection.exerciseId,
+        exerciseId: projection.exerciseId,
         exerciseName: projection.exerciseName,
         hasUploads: projection.hasUploads,
-        labels: [],
-      }
-
-      const alreadyCorrected = exercise.correctedBy ?? false
-      if (alreadyCorrected) {
-        const labels = await this.correctionLabelRepository.query(subQuery, [projection.exerciseSessionId])
-        exercise.labels = labels.map((label: any) => ({
-          id: label.id,
-          name: label.name,
-          color: label.color,
-          description: label.description,
-          gradeChange: label.grade_change,
-        }))
+        labels: projection.labels ?? [],
       }
 
       if (!activityMap.has(projection.activityId)) {
@@ -181,6 +187,63 @@ export class CorrectionService {
     }
 
     return Array.from(activityMap.values())
+  }
+
+  async listSummary(correctorUserId: string, status?: CorrectionStatus): Promise<ActivityCorrectionSummary[]> {
+    let havingClause = ''
+    if (status === CorrectionStatus.pending) {
+      havingClause = 'HAVING COUNT(exercise_session.id) > COUNT(correction.id)'
+    } else if (status === CorrectionStatus.available) {
+      havingClause = 'HAVING COUNT(exercise_session.id) = COUNT(correction.id)'
+    }
+
+    const queryText = `
+      WITH corrector_activities AS (
+        SELECT DISTINCT activity_id, activity_name, course_id, course_name
+        FROM "ActivityCorrectorView"
+        WHERE id = $1
+      ),
+      terminated_sessions AS (
+        SELECT id, activity_id
+        FROM "Sessions"
+        WHERE activity_id IN (SELECT activity_id FROM corrector_activities)
+          AND parent_id IS NULL
+          AND (variables->'navigation'->>'terminated')::boolean = TRUE
+      )
+      SELECT
+        ca.activity_id AS "activityId",
+        ca.activity_name AS "activityName",
+        ca.course_id AS "courseId",
+        ca.course_name AS "courseName",
+        COUNT(exercise_session.id)::int AS "totalExercises",
+        COUNT(correction.id)::int AS "correctedExercises"
+      FROM corrector_activities ca
+      INNER JOIN terminated_sessions ts ON ts.activity_id = ca.activity_id
+      INNER JOIN "Sessions" exercise_session
+        ON exercise_session.parent_id = ts.id
+        AND (exercise_session.user_id IS NULL OR exercise_session.user_id <> $1)
+      LEFT JOIN "Corrections" correction ON correction.id = exercise_session.correction_id
+      WHERE EXISTS (
+        SELECT 1 FROM "Answers" a
+        WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
+      )
+      GROUP BY ca.activity_id, ca.activity_name, ca.course_id, ca.course_name
+      ${havingClause}
+      ORDER BY ca.course_name, ca.activity_id
+    `
+
+    const results = await this.sessionRepository.query(queryText, [correctorUserId])
+    return results
+  }
+
+  private filterProjectionsByStatus(projections: Projection[], status?: CorrectionStatus): Projection[] {
+    if (!status) return projections
+
+    const pendingActivityIds = new Set(projections.filter((p) => p.correctedBy == null).map((p) => p.activityId))
+
+    return projections.filter((p) =>
+      status === CorrectionStatus.pending ? pendingActivityIds.has(p.activityId) : !pendingActivityIds.has(p.activityId)
+    )
   }
 
   async upsert(sessionId: string, input: Partial<CorrectionEntity>) {

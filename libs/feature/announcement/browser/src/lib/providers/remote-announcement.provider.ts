@@ -53,4 +53,10 @@ export class RemoteAnnouncementProvider extends AnnouncementProvider {
       .get<ItemResponse<Announcement>>(`${this.API_BASE_PATH}/${id}`)
       .pipe(map((response) => response.resource))
   }
+
+  findByIdForUser(id: string): Observable<Announcement> {
+    return this.http
+      .get<ItemResponse<Announcement>>(`${this.API_BASE_PATH}/visible/${id}`)
+      .pipe(map((response) => response.resource))
+  }
 }
