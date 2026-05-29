@@ -7,6 +7,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  inject,
   Inject,
   Injector,
   Input,
@@ -21,6 +22,7 @@ import { ACTION_GOTO_LINE, ACTION_INDENT_USING_SPACES, ACTION_QUICK_COMMAND } fr
 import { NO_COPY_PASTER_CLASS_NAME } from '@platon/feature/player/common'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
+import { WebComponentService } from '../../web-component.service'
 import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor'
 
 const MIN_EDITOR_HEIGHT_PX = 400
@@ -34,6 +36,7 @@ const MIN_EDITOR_HEIGHT_PX = 400
 @WebComponent(CodeEditorComponentDefinition)
 export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, WebComponentHooks<CodeEditorState> {
   private readonly disposables: monaco.IDisposable[] = []
+  private readonly webComponentService: WebComponentService = inject(WebComponentService)
   private model?: monaco.editor.ITextModel
   private editor?: monaco.editor.IStandaloneCodeEditor
   private resizeObserver?: ResizeObserver
@@ -170,9 +173,10 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
   }
 
   onCreateEditor(editor: monaco.editor.IEditor) {
-    this.editor = editor as monaco.editor.IStandaloneCodeEditor
+    const standaloneEditor = editor as monaco.editor.IStandaloneCodeEditor
+    this.editor = standaloneEditor
 
-    editor.setModel(
+    standaloneEditor.setModel(
       (this.model = this.model || monaco.editor.createModel(this.state.code || '', this.state.language || 'plaintext'))
     )
 
@@ -184,7 +188,7 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
       trimAutoWhitespace: true,
     })
 
-    this.editor.updateOptions({
+    standaloneEditor.updateOptions({
       autoIndent: 'advanced',
       lineNumbers: 'on',
       renderWhitespace: 'all',
@@ -203,7 +207,7 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
 
     // LISTENERS
     this.disposables.push(this.model)
-    this.disposables.push(this.editor)
+    this.disposables.push(standaloneEditor)
     this.disposables.push(
       this.model.onDidChangeContent(() => {
         this.changeDetector
@@ -215,7 +219,7 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
       })
     )
     this.disposables.push(
-      this.editor.onDidChangeCursorPosition((e) => {
+      standaloneEditor.onDidChangeCursorPosition((e) => {
         this.changeDetector
           .ignore(this, () => {
             this.cursor = e.position
@@ -225,13 +229,17 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
     )
 
     // COMMANDS
-    this.editor.addCommand(
+    standaloneEditor.addCommand(
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
       () => {
         //
       },
       ''
     )
+
+    standaloneEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      this.webComponentService.submit(this)
+    })
 
     this.initialCode = this.state.code
   }
