@@ -7,7 +7,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  inject,
   Inject,
   Injector,
   Input,
@@ -36,7 +35,6 @@ const MIN_EDITOR_HEIGHT_PX = 400
 @WebComponent(CodeEditorComponentDefinition)
 export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, WebComponentHooks<CodeEditorState> {
   private readonly disposables: monaco.IDisposable[] = []
-  private readonly webComponentService: WebComponentService = inject(WebComponentService)
   private model?: monaco.editor.ITextModel
   private editor?: monaco.editor.IStandaloneCodeEditor
   private resizeObserver?: ResizeObserver
@@ -71,7 +69,8 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
     readonly changeDetector: WebComponentChangeDetectorService,
     private readonly cdr: ChangeDetectorRef,
     private readonly renderer: Renderer2,
-    @Inject(DOCUMENT) private readonly document: Document
+    @Inject(DOCUMENT) private readonly document: Document,
+    private readonly webComponentService: WebComponentService
   ) {}
 
   ngAfterViewInit() {
