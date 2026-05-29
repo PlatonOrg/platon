@@ -341,6 +341,9 @@ export abstract class PlayerManager {
 
   async showSolution(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
     patchExerciseMeta(exerciseSession.variables, () => ({ showSolution: true }))
+    await this.updateSession(exerciseSession.id, {
+      variables: exerciseSession.variables,
+    })
     return withExercisePlayer(exerciseSession)
   }
 

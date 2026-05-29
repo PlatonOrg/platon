@@ -53,6 +53,17 @@ export class AnnouncementController {
     })
   }
 
+  @Roles(UserRoles.admin, UserRoles.teacher, UserRoles.student)
+  @Get('visible/:id')
+  async findVisibleById(@Req() req: IRequest, @UUIDParam('id') id: string): Promise<ItemResponse<AnnouncementDTO>> {
+    if (!req.user || !req.user.role) {
+      throw new UnauthorizedException('Utilisateur non authentifié ou informations manquantes')
+    }
+
+    const announcement = await this.service.findByIdForUser(id, req.user.role)
+    return new ItemResponse({ resource: Mapper.map(announcement, AnnouncementDTO) })
+  }
+
   @Roles(UserRoles.admin)
   @Get(':id')
   async findById(@UUIDParam('id') id: string): Promise<ItemResponse<AnnouncementDTO>> {

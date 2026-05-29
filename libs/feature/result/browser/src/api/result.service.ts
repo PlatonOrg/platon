@@ -9,10 +9,12 @@ import {
   ACTIVITY_TOTAL_ATTEMPTS,
   ACTIVITY_TOTAL_COMPLETIONS,
   ActivityCorrection,
+  ActivityCorrectionSummary,
   ActivityLeaderboardEntry,
   ActivityResults,
   AnswerStates,
   Correction,
+  CorrectionStatus,
   CourseLeaderboardEntry,
   CreateLabel,
   CreateSessionComment,
@@ -152,28 +154,12 @@ export class ResultService {
     return this.resultProvider.findCorrection(activityId, viewerMode)
   }
 
-  listPendingCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.resultProvider.listCorrections().pipe(
-      map((response) => {
-        response.resources = response.resources.filter((correction) => {
-          return correction.exercises.some((exercise) => exercise.correctedAt == null)
-        })
-        response.total = response.resources.length
-        return response
-      })
-    )
+  listPendingCorrections(): Observable<ListResponse<ActivityCorrectionSummary>> {
+    return this.resultProvider.listCorrectionsSummary(CorrectionStatus.pending)
   }
 
-  listAvailableCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.resultProvider.listCorrections().pipe(
-      map((response) => {
-        response.resources = response.resources.filter((correction) => {
-          return correction.exercises.every((exercise) => exercise.correctedAt !== null)
-        })
-        response.total = response.resources.length
-        return response
-      })
-    )
+  listAvailableCorrections(): Observable<ListResponse<ActivityCorrectionSummary>> {
+    return this.resultProvider.listCorrectionsSummary(CorrectionStatus.available)
   }
 
   getLabels(navigationExerciseId: string): Observable<Label[]> {

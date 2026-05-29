@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import {
   ActivityCorrection,
+  ActivityCorrectionSummary,
   ActivityLeaderboardEntry,
   ActivityResults,
   Correction,
+  CorrectionStatus,
   CourseLeaderboardEntry,
   DashboardOutput,
   FindActivityLeaderboard,
@@ -86,8 +88,20 @@ export class RemoteResultProvider extends ResultProvider {
       )
   }
 
-  listCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.http.get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections`)
+  listCorrections(status?: CorrectionStatus): Observable<ListResponse<ActivityCorrection>> {
+    let params = new HttpParams()
+    if (status) {
+      params = params.set('status', status)
+    }
+    return this.http.get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections`, { params })
+  }
+
+  listCorrectionsSummary(status?: CorrectionStatus): Observable<ListResponse<ActivityCorrectionSummary>> {
+    let params = new HttpParams()
+    if (status) {
+      params = params.set('status', status)
+    }
+    return this.http.get<ListResponse<ActivityCorrectionSummary>>(`/api/v1/results/corrections/summary`, { params })
   }
 
   upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction> {

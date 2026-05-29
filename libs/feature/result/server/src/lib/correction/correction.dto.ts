@@ -2,6 +2,7 @@ import { BaseDTO } from '@platon/core/server'
 import {
   Correction,
   ActivityCorrection,
+  ActivityCorrectionSummary,
   ExerciseCorrection,
   UpsertCorrection,
   Label,
@@ -74,6 +75,26 @@ export class ExerciseCorrectionDTO implements ExerciseCorrection {
   @IsOptional()
   @IsBoolean()
   hasUploads!: boolean
+}
+
+export class ActivityCorrectionSummaryDTO implements ActivityCorrectionSummary {
+  @IsUUID()
+  activityId!: string
+
+  @IsString()
+  activityName!: string
+
+  @IsUUID()
+  courseId!: string
+
+  @IsString()
+  courseName!: string
+
+  @IsNumber()
+  totalExercises!: number
+
+  @IsNumber()
+  correctedExercises!: number
 }
 
 export class UpsertCorrectionDTO implements UpsertCorrection {

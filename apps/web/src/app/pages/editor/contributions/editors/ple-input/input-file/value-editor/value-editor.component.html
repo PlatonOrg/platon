@@ -5,8 +5,9 @@
     [class.drag-active]="isDragging"
     nz-tooltip
     style="text-align: center"
-    nzTooltipTitle="Déposez un fichier ici pour le remplacer"
+    nzTooltipTitle="Cliquez ou déposez un fichier pour le remplacer"
     dnd
+    (click)="fileInput.click()"
     (dropped)="onDrop($event)"
     (dragover)="onDragOver($event)"
     (dragleave)="onDragLeave($event)"
@@ -16,6 +17,7 @@
     </span>
   </div>
 </div>
+<input type="file" #fileInput (change)="onFileSelected($event)" hidden />
 
 <ng-container *ngIf="value">
   <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="eyeButton()">

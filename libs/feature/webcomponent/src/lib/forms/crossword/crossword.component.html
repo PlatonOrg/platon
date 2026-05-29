@@ -14,7 +14,7 @@
   <!-- Partie droite : Grille si inline, sinon partie en bas-->
   <div class="grid-panel">
     <div
-      [style.gridTemplateColumns]="'repeat(' + grid[0].length + ', 1fr)'"
+      [style.gridTemplateColumns]="'repeat(' + grid[0].length + ', minmax(30px, 100px))'"
       [style.gridTemplateRows]="'repeat(' + grid.length + ', 1fr)'"
       class="crossword-grid responsive-grid"
     >

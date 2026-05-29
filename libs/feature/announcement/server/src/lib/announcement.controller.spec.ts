@@ -22,6 +22,7 @@ describe('AnnouncementController', () => {
             search: jest.fn(),
             create: jest.fn(),
             findById: jest.fn(),
+            findByIdForUser: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
             getVisibleForUser: jest.fn(),
@@ -84,6 +85,28 @@ describe('AnnouncementController', () => {
       const req = { user: null } as unknown as IRequest
 
       await expect(controller.getVisibleForUser(req, {} as AnnouncementFiltersDTO)).rejects.toBeInstanceOf(
+        UnauthorizedException
+      )
+    })
+  })
+
+  describe('findVisibleById', () => {
+    it('should return full announcement detail for authenticated user', async () => {
+      const user = createUserEntity({ role: UserRoles.teacher })
+      const req = { user } as unknown as IRequest
+      const announcement = createAnnouncementEntity()
+      service.findByIdForUser.mockResolvedValue(announcement)
+
+      const result = await controller.findVisibleById(req, 'announcement-test-id')
+
+      expect(service.findByIdForUser).toHaveBeenCalledWith('announcement-test-id', UserRoles.teacher)
+      expect(result.resource).toBeDefined()
+    })
+
+    it('should throw UnauthorizedException when user is not authenticated', async () => {
+      const req = { user: null } as unknown as IRequest
+
+      await expect(controller.findVisibleById(req, 'announcement-test-id')).rejects.toBeInstanceOf(
         UnauthorizedException
       )
     })

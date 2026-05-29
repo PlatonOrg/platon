@@ -131,6 +131,11 @@
             "glob": "**/*",
             "input": "./node_modules/d3-graphviz/build/",
             "output": "./assets/vendors/d3-graphviz/"
+          },
+          {
+            "glob": "*.css",
+            "input": "./node_modules/highlight.js/styles/",
+            "output": "./assets/vendors/highlight.js/styles/"
           }
         ],
         "styles": [

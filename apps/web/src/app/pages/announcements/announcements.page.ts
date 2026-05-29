@@ -111,22 +111,28 @@ export class AnnouncementsPage implements OnInit {
       this.announcements = result.resources
       this.filteredAnnouncements = [...this.announcements]
 
-      this.route.queryParams.subscribe((params) => {
-        const highlightedId = params['highlight']
+      this.route.queryParams.subscribe(async (params) => {
+        try {
+          const highlightedId = params['highlight']
 
-        if (highlightedId && this.announcements.length > 0) {
-          const foundAnnouncement = this.announcements.find((a) => a.id === highlightedId)
-          if (foundAnnouncement) {
-            this.selectedAnnouncement = foundAnnouncement
-          } else {
-            // Si l'annonce n'est pas trouvée, prendre la première par défaut
-            this.selectedAnnouncement = this.announcements[0]
+          if (highlightedId && this.announcements.length > 0) {
+            try {
+              this.selectedAnnouncement = await firstValueFrom(this.announcementService.findByIdForUser(highlightedId))
+            } catch {
+              this.selectedAnnouncement = await firstValueFrom(
+                this.announcementService.findByIdForUser(this.announcements[0].id)
+              )
+            }
+          } else if (this.announcements.length > 0) {
+            this.selectedAnnouncement = await firstValueFrom(
+              this.announcementService.findByIdForUser(this.announcements[0].id)
+            )
           }
-        } else if (this.announcements.length > 0) {
-          this.selectedAnnouncement = this.announcements[0]
+        } catch (error) {
+          this.dialogService.error("Erreur lors du chargement de l'annonce")
+        } finally {
+          this.changeDetectorRef.markForCheck()
         }
-
-        this.changeDetectorRef.markForCheck()
       })
     } catch (error) {
       this.dialogService.error('Erreur lors du chargement des annonces')
@@ -152,8 +158,9 @@ export class AnnouncementsPage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  protected selectAnnouncement(announcement: Announcement): void {
-    this.selectedAnnouncement = announcement
+  protected async selectAnnouncement(announcement: Announcement): Promise<void> {
+    const selected = await firstValueFrom(this.announcementService.findByIdForUser(announcement.id))
+    this.selectedAnnouncement = selected
     this.changeDetectorRef.markForCheck()
   }
 
