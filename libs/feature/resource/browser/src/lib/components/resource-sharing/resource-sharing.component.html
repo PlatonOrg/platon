@@ -1,6 +1,6 @@
 <ng-container *ngIf="versions">
   <h2>Partager</h2>
-  <div class="row">
+  <div id="tuto-sharing-visibility-select" class="row">
     <nz-select
       nzSuffixIcon="global"
       class="visibility-select"
@@ -12,9 +12,9 @@
       <nz-option nzLabel="Visible uniquement dans PLaTon" nzValue="private" />
     </nz-select>
   </div>
-  <ui-qrcode [value]="url"></ui-qrcode>
+  <ui-qrcode id="tuto-sharing-qrcode" [value]="url"></ui-qrcode>
 
-  <div class="row">
+  <div id="tuto-sharing-version-select" class="row">
     <nz-select
       class="version-select"
       [(ngModel)]="resourceVersion"
@@ -29,7 +29,7 @@
       <nz-option *ngFor="let item of versions" [nzLabel]="item.tag" [nzValue]="item.tag" />
     </nz-select>
     <nz-button-group>
-      <button nz-button (click)="share()">
+      <button id="tuto-sharing-copy-link-btn" nz-button (click)="share()">
         <i nz-icon nzType="link" nzTheme="outline"></i>
         Copier le lien
       </button>

@@ -31,7 +31,6 @@ export class CourseManagementTutorialService {
   ) {}
 
   startCourseManagementTutorial(user: User, courses: Course[] = []): void {
-    // Vérifier s'il y a des cours disponibles
     if (!courses.length) {
       this.startNoCoursesTutorial(user)
       return
@@ -52,21 +51,34 @@ export class CourseManagementTutorialService {
       {
         id: 'no-courses-welcome',
         title: 'Aucun cours disponible',
-        text: `Pour apprendre à gérer un cours, vous devez d'abord en créer un !<br><br>
-               <strong>Que vais-je apprendre ?</strong><br>
-               - Comment créer un cours<br>
-               - Comment organiser le contenu avec des sections<br>
-               - Comment ajouter des activités<br>
-               - Comment gérer la structure d'un cours`,
+        text: `<div style="text-align: center; padding: 20px;">
+                <h3 style="color: var(--brand-text-primary); margin: 0 0 12px 0; font-weight: 600;">
+                  Créez votre premier cours pour continuer
+                </h3>
+                <p style="color: var(--brand-text-secondary); margin: 0 0 16px 0; line-height: 1.5;">
+                  Le tutoriel de gestion de cours nécessite au moins un cours existant.
+                  Voulez-vous apprendre à en créer un ?
+                </p>
+                <div style="background: var(--brand-background-components);
+                            border-radius: 8px; padding: 16px; margin: 16px 0;
+                            border-left: 3px solid var(--brand-color-primary);">
+                  <div style="text-align: left; color: var(--brand-text-primary); font-size: 14px; line-height: 1.8;">
+                    Créer un cours<br>
+                    Organiser le contenu avec des sections<br>
+                    Ajouter des activités<br>
+                    Gérer la structure du cours
+                  </div>
+                </div>
+              </div>`,
         buttons: [
-          {
-            text: 'Apprendre à créer un cours',
-            action: () => this.redirectToResourceCreationTutorial(user),
-          },
           {
             text: 'Annuler',
             secondary: true,
             action: () => this.shepherdService.cancel(),
+          },
+          {
+            text: 'Apprendre à créer un cours',
+            action: () => this.redirectToResourceCreationTutorial(user),
           },
         ],
       },
@@ -78,9 +90,6 @@ export class CourseManagementTutorialService {
     })
   }
 
-  /**
-   * Redirige vers le tutoriel de création de ressource
-   */
   private redirectToResourceCreationTutorial(user: User): void {
     this.shepherdService.complete()
     setTimeout(() => {
@@ -92,14 +101,28 @@ export class CourseManagementTutorialService {
     const steps: TutorialStep[] = [
       {
         id: 'courses-welcome',
-        title: 'Bienvenue dans la gestion de cours !',
-        text: `Ce tutoriel va vous apprendre à organiser et gérer efficacement un cours sur PLaTon.<br><br>
-               <strong>Programme du tutoriel :</strong><br>
-               - Navigation dans un cours<br>
-               - Création et gestion des sections<br>
-               - Ajout d'activités<br>
-               - Organisation du contenu<br>
-               - Conseils de bonnes pratiques`,
+        title: 'Gestion de cours PLaTon',
+        text: `<div style="text-align: center; padding: 20px;">
+                <h3 style="color: var(--brand-text-primary); margin: 0 0 12px 0; font-weight: 600;">
+                  Qu'allez-vous apprendre ?
+                </h3>
+                <p style="color: var(--brand-text-secondary); margin: 0 0 20px 0; line-height: 1.5;">
+                  Ce tutoriel vous guide pour organiser et gérer efficacement un cours sur PLaTon.
+                </p>
+                <div style="background: var(--brand-background-components);
+                            border-radius: 8px; padding: 16px; margin: 16px 0;
+                            border-left: 3px solid var(--brand-color-primary);">
+                  <div style="text-align: left; color: var(--brand-text-primary); font-size: 14px; line-height: 1.8;">
+                    Naviguer dans l'interface d'un cours<br>
+                    Créer et gérer des sections<br>
+                    Ajouter et configurer des activités<br>
+                    Suivre la progression des étudiants
+                  </div>
+                </div>
+                <p style="color: var(--brand-text-secondary); font-size: 13px; margin: 16px 0 0 0;">
+                  Durée : ~5 minutes &nbsp;|&nbsp; Interruptible à tout moment
+                </p>
+              </div>`,
         buttons: [
           {
             text: 'Annuler',
@@ -107,16 +130,23 @@ export class CourseManagementTutorialService {
             action: () => this.shepherdService.cancel(),
           },
           {
-            text: 'Commencer le tutoriel',
+            text: 'Commencer',
             action: () => this.shepherdService.next(),
           },
         ],
       },
       {
         id: 'select-course',
-        title: 'Choisissez un cours',
-        text: `Pour apprendre à gérer un cours, nous devons d'abord en sélectionner un.<br><br>
-               <strong>Cliquez sur l'un des cours ci-dessous</strong> pour commencer le tutoriel de gestion.`,
+        title: 'Sélectionnez un cours',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Pour explorer la gestion d'un cours, cliquez sur l'un des cours disponibles dans la liste.
+               </p>
+               <div style="background: rgba(var(--brand-color-primary-rgb), 0.05); border-radius: 8px;
+                           padding: 12px; border: 2px solid rgba(var(--brand-color-primary-rgb), 0.3);">
+                 <p style="margin: 0; font-size: 13px; color: var(--brand-text-primary);">
+                   Cliquez maintenant sur un cours pour continuer le tutoriel.
+                 </p>
+               </div>`,
         attachTo: {
           element: '#tuto-courses-course-list',
           on: 'top',
@@ -168,9 +198,17 @@ export class CourseManagementTutorialService {
     const steps: TutorialStep[] = [
       {
         id: 'course-overview',
-        title: `Bienvenue !`,
-        text: `Parfait ! Nous sommes maintenant dans la page de gestion du cours : "${course.name}".<br><br>
-               Cette interface vous permet de gérer complètement votre cours : structure, contenu, paramètres et membres.`,
+        title: `Bienvenue dans la gestion du cours`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Vous êtes maintenant dans l'interface de gestion du cours
+                 <strong style="color: var(--brand-text-primary);">"${course.name}"</strong>.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;
+                           border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                 <small style="color: var(--brand-text-secondary);">
+                   Depuis cette interface, vous gérez la structure, le contenu, les paramètres et les membres du cours.
+                 </small>
+               </div>`,
         buttons: [
           {
             text: "Découvrir l'interface",
@@ -181,10 +219,17 @@ export class CourseManagementTutorialService {
       {
         id: 'course-header',
         title: 'En-tête du cours',
-        text: `L'en-tête contient les informations principales :<br><br>
-               • <strong>Nom du cours</strong> : modifiable en cliquant dessus<br>
-               • <strong>Description</strong> : également modifiable<br>
-               • <strong>Informations</strong> : date de création et créateur`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 L'en-tête regroupe les informations principales du cours.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Nom du cours</strong> — modifiable en cliquant dessus</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Description</strong> — également modifiable</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-course-header',
           on: 'bottom',
@@ -193,17 +238,32 @@ export class CourseManagementTutorialService {
       {
         id: 'tuto-course-tab-dashboard',
         title: 'Navigation par onglets',
-        text: `Les onglets vous permettent d'accéder aux différentes sections :<br><br>
-               • <strong>Vue d'ensemble</strong> : organisation du contenu<br>
-               • <strong>Membres</strong> : gestion des participants<br>
-               • <strong>Groupes</strong> : organisation en équipes<br>
-               • <strong>Paramètres</strong> : configuration avancée`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Les onglets donnent accès aux différentes sections du cours.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Vue d'ensemble</strong> — organisation du contenu</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Membres</strong> — gestion des participants</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Groupes</strong> — organisation en équipes</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Paramètres</strong> — configuration avancée</small>
+                 </div>
+               </div>`,
       },
       {
         id: 'dashboard-overview',
         title: "Vue d'ensemble du cours",
-        text: `Nous sommes dans l'onglet "Vue d'ensemble" qui est le cœur de la gestion de contenu.<br><br>
-               Ici vous pouvez créer des <strong>sections</strong> pour organiser vos <strong>activités</strong>.`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 L'onglet <strong style="color: var(--brand-text-primary);">Vue d'ensemble</strong> est le cœur
+                 de la gestion de contenu. Vous y créez des <strong style="color: var(--brand-text-primary);">sections</strong>
+                 pour organiser vos <strong style="color: var(--brand-text-primary);">activités</strong>.
+               </p>`,
         attachTo: {
           element: '#tuto-course-dashboard-content',
           on: 'right',
@@ -211,12 +271,24 @@ export class CourseManagementTutorialService {
       },
       {
         id: 'search-and-actions',
-        title: 'Barre de recherche et actions',
-        text: `Cette barre vous permet de :<br><br>
-               • <strong>Rechercher</strong> dans les activités et sections<br>
-               • <strong>Ajouter des sections</strong> pour organiser le contenu<br>
-               • <strong>Ajouter des activités</strong> directement<br>
-               • <strong>Exporter</strong> les données du cours`,
+        title: "Barre d'actions",
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Cette barre regroupe les principales actions de gestion du cours.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Rechercher</strong> — dans les sections et activités</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Ajouter une section</strong> — organiser le contenu</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Ajouter une activité</strong> — créer du contenu directement</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Exporter</strong> — télécharger les données du cours</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-course-dashboard-header',
           on: 'bottom',
@@ -224,18 +296,35 @@ export class CourseManagementTutorialService {
       },
       {
         id: 'sections-explanation',
-        title: 'Organisation avec les sections',
-        text: `Les <strong>sections</strong> sont comme des chapitres dans votre cours.<br><br>
-               <strong>Pourquoi utiliser des sections ?</strong><br>
-               • Organiser le contenu par thématiques<br>
-               • Faciliter la navigation pour les étudiants<br>
-               • Structurer la progression pédagogique`,
+        title: 'Organiser avec des sections',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Les <strong style="color: var(--brand-text-primary);">sections</strong> structurent votre cours
+                 comme des chapitres dans un manuel.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);">Organiser le contenu par thématiques ou séances</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);">Faciliter la navigation pour les étudiants</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);">Structurer la progression pédagogique</small>
+                 </div>
+               </div>`,
       },
       {
         id: 'add-first-section',
-        title: 'Créons votre première section !',
-        text: `Si ce cours n'a pas encore de sections, créons-en une maintenant.<br><br>
-               Cliquez sur <strong>"Ajouter une section"</strong> pour commencer.`,
+        title: 'Créer une section',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Si ce cours n'a pas encore de sections, créons-en une maintenant.
+               </p>
+               <div style="background: rgba(var(--brand-color-primary-rgb), 0.05); border-radius: 8px;
+                           padding: 12px; border: 2px solid rgba(var(--brand-color-primary-rgb), 0.3);">
+                 <p style="margin: 0; font-size: 13px; color: var(--brand-text-primary);">
+                   Cliquez sur <strong>Ajouter une section</strong> pour continuer.
+                 </p>
+               </div>`,
         attachTo: {
           element: '#tuto-course-add-section-button',
           on: 'bottom',
@@ -254,12 +343,21 @@ export class CourseManagementTutorialService {
       },
       {
         id: 'section-created',
-        title: 'Section créée !',
-        text: `Excellent ! Une nouvelle section a été créée.<br><br>
-               Vous pouvez maintenant :<br>
-               • <strong>Renommer</strong> la section en cliquant sur son nom<br>
-               • <strong>Réorganiser</strong> l'ordre des sections<br>
-               • <strong>Ajouter des activités</strong> dans cette section`,
+        title: 'Section créée',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Votre section est prête. Vous pouvez maintenant la personnaliser.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Renommer</strong> — cliquez sur le nom de la section</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Réorganiser</strong> — faites glisser les sections pour changer leur ordre</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Ajouter des activités</strong> — remplissez la section avec du contenu</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-course-no-activities',
           on: 'right',
@@ -267,11 +365,21 @@ export class CourseManagementTutorialService {
       },
       {
         id: 'section-management',
-        title: 'Gestion des sections',
-        text: `Chaque section dispose d'actions de gestion :<br><br>
-               • <strong>Menu "⋯"</strong> : actions avancées (déplacer, supprimer, etc.)<br>
-               • <strong>"Ajouter une activité"</strong> : créer du contenu<br>
-               • <strong>Modification du nom</strong> : clic direct sur le titre`,
+        title: 'Gérer une section',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Chaque section dispose d'actions de gestion accessibles depuis son en-tête.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Menu d'actions</strong> — déplacer, supprimer, et plus</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Ajouter une activité</strong> — créer du contenu dans cette section</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Modifier le nom</strong> — cliquez directement sur le titre</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-course-section-actions',
           on: 'left',
@@ -279,9 +387,17 @@ export class CourseManagementTutorialService {
       },
       {
         id: 'add-activity',
-        title: 'Ajoutons une activité !',
-        text: `Une section sans activité est comme un chapitre vide.<br><br>
-        Cliquez sur <strong>"Ajouter une activité"</strong> pour créer votre premier exercice.`,
+        title: 'Ajouter une activité',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Les <strong style="color: var(--brand-text-primary);">activités</strong> sont les exercices et
+                 évaluations que vos étudiants réaliseront dans ce cours.
+               </p>
+               <div style="background: rgba(var(--brand-color-primary-rgb), 0.05); border-radius: 8px;
+                           padding: 12px; border: 2px solid rgba(var(--brand-color-primary-rgb), 0.3);">
+                 <p style="margin: 0; font-size: 13px; color: var(--brand-text-primary);">
+                   Cliquez sur <strong>Ajouter une activité</strong> pour créer votre premier exercice.
+                 </p>
+               </div>`,
         attachTo: {
           element: '#tuto-course-add-activity-button',
           on: 'bottom',
@@ -292,7 +408,7 @@ export class CourseManagementTutorialService {
         },
         buttons: [
           {
-            text: 'Precedent',
+            text: 'Précédent',
             secondary: true,
             action: () => this.shepherdService.previous(),
           },
@@ -313,11 +429,7 @@ export class CourseManagementTutorialService {
     return steps
   }
 
-  /**
-   * Continue le tutoriel après le choix de l'utilisateur
-   */
   private continueWithDetailsTutorial(course: Course): void {
-    // Déterminer les prochaines étapes en fonction du choix de l'utilisateur
     const nextSteps = this.buildExistingActivitySteps(course)
 
     this.shepherdService.startTutorial(nextSteps, {
@@ -333,8 +445,10 @@ export class CourseManagementTutorialService {
       {
         id: 'existing-activity',
         title: 'Activité existante',
-        text: `Parfait ! Vous avez déjà ajouté une activité à ce cours.<br><br>
-              Vous pouvez gérer cette activité, modifier ses paramètres ou en ajouter d'autres selon vos besoins.`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Votre cours contient déjà des activités. Vous pouvez les gérer,
+                 modifier leurs paramètres ou en ajouter d'autres selon vos besoins.
+               </p>`,
         buttons: [
           {
             text: 'Continuer',
@@ -345,24 +459,40 @@ export class CourseManagementTutorialService {
       {
         id: 'view-modes',
         title: "Modes d'affichage",
-        text: `Vous pouvez changer la façon dont le contenu est affiché :<br><br>
-               • <strong>Mode cartes</strong> : affichage visuel par sections<br>
-               • <strong>Mode tableau</strong> : vue d'ensemble condensée<br><br>
-               Choisissez le mode qui convient le mieux à votre façon de travailler.`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Choisissez le mode d'affichage qui correspond à votre façon de travailler.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Mode cartes</strong> — affichage visuel par sections</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Mode tableau</strong> — vue d'ensemble condensée</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-course-view-mode',
           on: 'left',
         },
       },
-
       {
         id: 'statistics-sidebar',
         title: 'Statistiques du cours',
-        text: `La barre latérale affiche des statistiques utiles :<br><br>
-               • <strong>Progression</strong> : avancement moyen des étudiants<br>
-               • <strong>Temps passé</strong> : durée totale sur les activités<br>
-               • <strong>Nombre d'enseignants et d'étudiants</strong><br><br>
-               Ces données vous aident à suivre l'engagement de vos étudiants.`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 La barre latérale affiche des indicateurs clés pour
+                 <strong style="color: var(--brand-text-primary);">suivre l'engagement</strong> de vos étudiants.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Progression</strong> — avancement moyen des étudiants</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Temps passé</strong> — durée totale sur les activités</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Participants</strong> — nombre d'enseignants et d'étudiants</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-course-statistics',
           on: 'left',
@@ -371,13 +501,13 @@ export class CourseManagementTutorialService {
       {
         id: 'check-activities-exist',
         title: 'Activités disponibles',
-        text: `Parfait ! Vous avez des activités dans votre cours.<br><br>
-         Découvrons maintenant comment interpréter les informations d'une activité.`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Voyons comment lire les informations d'une activité dans votre cours.
+               </p>`,
         when: {
           show: () => {
             const activityCard = document.querySelector('.tuto-course-activities-grid course-activity-card')
             if (!activityCard) {
-              // Alors c'est simple, on saute toutes etapes suivantes et afficher la fin
               for (let i = 0; i < 5; i++) {
                 this.shepherdService.next()
               }
@@ -387,8 +517,11 @@ export class CourseManagementTutorialService {
       },
       {
         id: 'activity-card-overview',
-        title: "Découverte d'une activité",
-        text: `Voici une carte d'activité qui contient toutes les informations essentielles pour gérer l'activité.`,
+        title: "La carte d'activité",
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Chaque activité est représentée par une carte regroupant
+                 toutes les informations essentielles pour la gérer et la suivre.
+               </p>`,
         attachTo: {
           element: '#tuto-first-activity-card',
           on: 'left',
@@ -397,10 +530,20 @@ export class CourseManagementTutorialService {
       {
         id: 'activity-status',
         title: "Statut de l'activité",
-        text: `Le badge indique l'état actuel :<br><br>
-         • <strong>Ouvert</strong> : L'utilisateur peut acceder à l'activité<br>
-         • <strong>Fermé</strong> : accès restreint<br>
-         • <strong>Planifié</strong> : ouverture programmée`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Le badge indique l'état d'accès actuel de l'activité.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Ouvert</strong> — les étudiants peuvent accéder à l'activité</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Fermé</strong> — accès restreint</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Planifié</strong> — ouverture programmée à une date donnée</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-first-activity-card .ribbon-container',
           on: 'right',
@@ -409,7 +552,9 @@ export class CourseManagementTutorialService {
       {
         id: 'activity-progression',
         title: 'Suivi de la progression',
-        text: `Le cercle de progression montre votre avancement sur cette activité.<br><br>`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Le cercle de progression indique l'avancement moyen des étudiants sur cette activité.
+               </p>`,
         attachTo: {
           element: '#tuto-first-activity-card .circle-progression-container',
           on: 'right',
@@ -418,10 +563,21 @@ export class CourseManagementTutorialService {
       {
         id: 'activity-actions',
         title: "Actions sur l'activité",
-        text: `Les boutons d'action vous permettent de :<br><br>
-         <strong>Lancer</strong> : tester l'activité comme un étudiant<br>
-         <strong>Éditer</strong> : modifier le contenu<br>
-         <strong>⋮ Menu</strong> : paramètres (<b>important pour gérer les périodes d'accès aux utilisateurs</b>), statistiques, export`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Les boutons d'action permettent d'interagir avec l'activité.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Lancer</strong> — tester l'activité comme un étudiant</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Éditer</strong> — modifier le contenu de l'activité</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;
+                             border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                   <small style="color: var(--brand-text-secondary);"><strong>Menu</strong> — paramètres d'accès (dates d'ouverture/fermeture), statistiques, export</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-first-activity-card mat-card-actions',
           on: 'top',
@@ -431,25 +587,30 @@ export class CourseManagementTutorialService {
     ]
   }
 
-  /**
-   * Étapes communes qui concluent le tutoriel
-   */
   private buildCommonFinalSteps(_course: Course): TutorialStep[] {
     return [
       {
         id: 'tutorial-complete',
-        title: 'Félicitations ! 🎉',
-        text: `Excellent travail ! Vous maîtrisez maintenant la gestion de cours sur PLaTon.<br><br>
-              <strong>Ce que vous avez appris :</strong><br>
-              - Navigation dans l'interface de cours<br>
-              - Création et gestion des sections<br>
-              - Ajout d'activités<br>
-              - Fonctionnalités de recherche<br>
-              - Bonnes pratiques d'organisation<br><br>
-              Vous êtes maintenant prêt à créer des cours bien structurés !`,
+        title: 'Tutoriel terminé',
+        text: `<div style="text-align: center; padding: 20px;">
+                 <h3 style="color: var(--brand-text-primary); margin: 0 0 16px 0;">
+                   Vous maîtrisez la gestion de cours sur PLaTon !
+                 </h3>
+                 <div style="background: var(--brand-background-components); border-radius: 8px;
+                             padding: 16px; margin: 16px 0;
+                             border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                   <div style="text-align: left; color: var(--brand-text-secondary); line-height: 1.8;">
+                     Naviguer dans l'interface de cours<br>
+                     Créer et gérer des sections<br>
+                     Ajouter des activités<br>
+                     Utiliser la recherche et les filtres<br>
+                     Suivre la progression des étudiants
+                   </div>
+                 </div>
+               </div>`,
         buttons: [
           {
-            text: 'Terminer le tutoriel',
+            text: 'Terminer',
             action: () => this.shepherdService.complete(),
           },
         ],

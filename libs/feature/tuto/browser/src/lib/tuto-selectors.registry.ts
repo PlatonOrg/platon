@@ -121,6 +121,36 @@ export const COURSE_PAGE_SELECTORS = [
   'tuto-course-tab-settings',
 ] as const
 
+/** Sélecteurs utilisés par le tutoriel partage de ressource */
+export const SHARED_RESOURCE_SELECTORS = [
+  'tuto-sharing-visibility-select',
+  'tuto-sharing-qrcode',
+  'tuto-sharing-version-select',
+  'tuto-sharing-copy-link-btn',
+] as const
+
+/** Sélecteurs utilisés par le tutoriel sélection de modèle */
+export const TEMPLATE_SELECTION_SELECTORS = [
+  'tuto-template-selection-container',
+  'tuto-template-grid',
+  'tuto-template-card-first',
+] as const
+
+/** Sélecteurs utilisés par le tutoriel builder */
+export const BUILDER_SELECTORS = [
+  'tuto-builder-back-btn',
+  'tuto-builder-title',
+  'tuto-builder-editor-btn',
+  'tuto-builder-preview-btn',
+  'tuto-builder-save-btn',
+  'tuto-builder-sidebar',
+  'tuto-builder-content-section',
+  'tuto-builder-settings-section',
+  'tuto-builder-sidebar-toggle',
+  'tuto-builder-main',
+  'tuto-builder-preview',
+] as const
+
 /** Sélecteurs utilisés par le tutoriel gestion de cours (dashboard) */
 export const COURSE_MANAGEMENT_SELECTORS = [
   'tuto-course-dashboard-content',
@@ -158,4 +188,7 @@ export const ALL_TUTO_SELECTORS = [
   ...COURSES_PAGE_SELECTORS,
   ...COURSE_PAGE_SELECTORS,
   ...COURSE_MANAGEMENT_SELECTORS,
+  ...TEMPLATE_SELECTION_SELECTORS,
+  ...BUILDER_SELECTORS,
+  ...SHARED_RESOURCE_SELECTORS,
 ] as const

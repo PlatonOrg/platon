@@ -9,10 +9,16 @@
   </div>
   } @if (!loading && !error && resource) {
   <div class="builder-header">
-    <button mat-icon-button (click)="goBack()" class="back-btn" title="Retour au tableau de bord">
+    <button
+      id="tuto-builder-back-btn"
+      mat-icon-button
+      (click)="goBack()"
+      class="back-btn"
+      title="Retour au tableau de bord"
+    >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <h1 class="builder-title">
+    <h1 id="tuto-builder-title" class="builder-title">
       @if (!isEditingTitle) {
       <span class="title-text" (click)="startEditingTitle()">{{ resource.name }}</span>
       <button (click)="startEditingTitle()" class="edit-title-btn">
@@ -44,11 +50,18 @@
           <mat-icon>auto_awesome</mat-icon>
           <span>Transformer avec l'IA</span>
         </button> -->
-        <button mat-stroked-button class="label" (click)="openInEditor()" title="Mode développeur">
+        <button
+          id="tuto-builder-editor-btn"
+          mat-stroked-button
+          class="label"
+          (click)="openInEditor()"
+          title="Mode développeur"
+        >
           <mat-icon>code</mat-icon>
           <span>Ouvrir dans l'éditeur</span>
         </button>
         <button
+          id="tuto-builder-preview-btn"
           class="label"
           mat-stroked-button
           (click)="iframe.open(previewUrlFrame)"
@@ -57,7 +70,7 @@
           <mat-icon>play_circle</mat-icon>
           <span>Prévisualiser</span>
         </button>
-        <button class="label" mat-stroked-button (click)="save()" [disabled]="saving">
+        <button id="tuto-builder-save-btn" class="label" mat-stroked-button (click)="save()" [disabled]="saving">
           <mat-icon>save</mat-icon>
           <span>Sauvegarder</span>
         </button>
@@ -68,10 +81,25 @@
   <!-- Layout principal: 3 colonnes -->
   <div class="builder-layout">
     <!-- Colonne gauche: Sidebar avec sections -->
-    <div class="builder-sidebar" [class.collapsed]="!sidebarOpen" [style.width.px]="sidebarWidth">
+    <div
+      id="tuto-builder-sidebar"
+      class="builder-sidebar"
+      [class.collapsed]="!sidebarOpen"
+      [style.width.px]="sidebarWidth"
+    >
       <div class="sidebar-sections">
         @for (section of sidebarSections; track section.id) {
-        <div class="sidebar-section" [class.active]="!section.collapsed">
+        <div
+          class="sidebar-section"
+          [class.active]="!section.collapsed"
+          [id]="
+            section.id === 'content'
+              ? 'tuto-builder-content-section'
+              : section.id === 'settings'
+              ? 'tuto-builder-settings-section'
+              : null
+          "
+        >
           <div class="section-header" (click)="toggleSection(section.id)" [title]="section.label">
             <mat-icon class="section-icon">{{ section.icon }}</mat-icon>
             @if (sidebarOpen) {
@@ -127,6 +155,7 @@
 
       <div class="sidebar-footer">
         <button
+          id="tuto-builder-sidebar-toggle"
           mat-icon-button
           (click)="toggleSidebar()"
           [title]="sidebarOpen ? 'Réduire la barre latérale' : 'Étendre la barre latérale'"
@@ -141,7 +170,7 @@
     <div class="resizer resizer-sidebar" (mousedown)="onResizerMouseDown($event, 'sidebar')"></div>
 
     <!-- Colonne centrale: Configuration du contenu sélectionné -->
-    <div class="builder-main">
+    <div id="tuto-builder-main" class="builder-main">
       @if (mainViewMode === 'input' && selection) {
       <div class="config-panel">
         <app-ple-input mode="plo" [disabled]="saving" [(input)]="selection" (inputChange)="onInputChange($event)" />
@@ -168,7 +197,7 @@
     <div class="resizer resizer-preview" (mousedown)="onResizerMouseDown($event, 'preview')"></div>
 
     <!-- Colonne droite: Prévisualisation -->
-    <div class="builder-preview" [style.width.px]="previewWidth">
+    <div id="tuto-builder-preview" class="builder-preview" [style.width.px]="previewWidth">
       <div class="preview-content">
         <lib-builder-iframe [src]="previewUrl" />
       </div>

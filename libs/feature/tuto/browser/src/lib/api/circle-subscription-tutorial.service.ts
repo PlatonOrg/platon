@@ -9,6 +9,7 @@ import { CircleTree, flattenCircleTree } from '@platon/feature/resource/common'
 import { ResourceService } from '@platon/feature/resource/browser'
 import { firstValueFrom } from 'rxjs'
 import { DialogService } from '@platon/core/browser'
+import { NzMessageService } from 'ng-zorro-antd/message'
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +19,7 @@ export class CircleSubscriptionTutorialService {
   private readonly router = inject(Router)
   private readonly resourceService = inject(ResourceService)
   private readonly dialogService = inject(DialogService)
+  private readonly message = inject(NzMessageService)
   private readonly circleSubscriptionCompletedKey = 'tutoSeen'
   private user?: User
 
@@ -65,60 +67,46 @@ export class CircleSubscriptionTutorialService {
       confirmCancel: false,
       exitOnEsc: false,
       keyboardNavigation: false,
-      showCancelIcon: false, // Désactiver l'icône de fermeture pour forcer l'inscription
+      showCancelIcon: false,
     })
   }
 
-  /**
-   * Construit les étapes du tutoriel d'inscription aux cercles
-   */
   private buildCircleSubscriptionSteps(user: User): TutorialStep[] {
     return [
       {
         id: 'welcome-circles',
-        title: 'Bienvenue sur PLaTon !',
-        text: `
-        <div style="text-align: center; padding: 20px;">
-        <h3 style="margin-bottom: 16px; color: var(--brand-text-primary);">
-          Rejoignez la communauté PLaTon
-        </h3>
-
-        <p style="color: var(--brand-text-secondary); margin-bottom: 20px; line-height: 1.6;">
-          Avant de commencer, vous devez rejoindre un <strong>cercle</strong>
-          pour accéder aux ressources pédagogiques partagées par la communauté.
-        </p>
-
-        <div style="background: var(--brand-background-components);
-              border-radius: 8px;
-              padding: 16px;
-              margin: 16px 0;
-              border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
-          <strong style="color: var(--brand-text-primary);">Pourquoi rejoindre des cercles ?</strong>
-          <div style="text-align: left; margin-top: 12px; color: var(--brand-text-secondary);">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <span style="font-size: 20px; min-width: 24px;">📂</span>
-            <span><strong>Accès aux ressources</strong> : exercices, activités et templates prêts à l'emploi</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <span style="font-size: 20px; min-width: 24px;">🤝</span>
-            <span><strong>Collaboration</strong> : partagez et améliorez les ressources avec d'autres enseignants</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <span style="font-size: 20px; min-width: 24px;">📚</span>
-            <span><strong>Organisation</strong> : structurez votre contenu par thématique</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px; min-width: 24px;">🔔</span>
-            <span><strong>Notifications</strong> : restez informé des nouvelles ressources</span>
-          </div>
-          </div>
-        </div>
-
-        <p style="color: var(--brand-text-secondary); font-size: 14px; margin-top: 16px;">
-          <strong>Note :</strong> Vous pourrez toujours rejoindre ou quitter des cercles plus tard.
-        </p>
-        </div>
-      `,
+        title: 'Bienvenue sur PLaTon',
+        text: `<div style="text-align: center; padding: 20px;">
+                <h3 style="color: var(--brand-text-primary); margin: 0 0 12px 0; font-weight: 600;">
+                  Rejoignez la communauté PLaTon
+                </h3>
+                <p style="color: var(--brand-text-secondary); margin: 0 0 20px 0; line-height: 1.5;">
+                  Avant de commencer, rejoignez un <strong style="color: var(--brand-text-primary);">cercle</strong>
+                  pour accéder aux ressources pédagogiques partagées par la communauté.
+                </p>
+                <div style="background: var(--brand-background-components);
+                            border-radius: 8px; padding: 16px; margin: 16px 0;
+                            border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                  <strong style="color: var(--brand-text-primary);">Pourquoi rejoindre des cercles ?</strong>
+                  <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px; text-align: left;">
+                    <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                      <small style="color: var(--brand-text-secondary);"><strong>Accès aux ressources</strong> — exercices, activités et modèles prêts à l'emploi</small>
+                    </div>
+                    <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                      <small style="color: var(--brand-text-secondary);"><strong>Collaboration</strong> — partagez et améliorez les ressources avec d'autres enseignants</small>
+                    </div>
+                    <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                      <small style="color: var(--brand-text-secondary);"><strong>Organisation</strong> — structurez votre contenu par thématique</small>
+                    </div>
+                    <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                      <small style="color: var(--brand-text-secondary);"><strong>Notifications</strong> — restez informé des nouvelles ressources disponibles</small>
+                    </div>
+                  </div>
+                </div>
+                <p style="color: var(--brand-text-secondary); font-size: 13px; margin: 16px 0 0 0;">
+                  Vous pourrez toujours rejoindre ou quitter des cercles ultérieurement.
+                </p>
+              </div>`,
         buttons: [
           {
             text: 'Découvrir les cercles disponibles',
@@ -128,7 +116,7 @@ export class CircleSubscriptionTutorialService {
       },
       {
         id: 'select-circles',
-        title: '📂 Choisissez votre cercle',
+        title: 'Choisissez votre cercle',
         text: this.buildCirclesSelectionHTML(),
         buttons: [
           {
@@ -147,7 +135,7 @@ export class CircleSubscriptionTutorialService {
       },
       {
         id: 'subscription-complete',
-        title: 'Inscription réussie !',
+        title: 'Inscription réussie',
         text: '<div id="completion-text"></div>',
         buttons: [
           {
@@ -162,15 +150,11 @@ export class CircleSubscriptionTutorialService {
     ]
   }
 
-  /**
-   * Génère le HTML pour la sélection des cercles
-   */
   private buildCirclesSelectionHTML(): string {
     let html = `
       <div style="padding: 16px;">
-        <p style="margin-bottom: 20px; color: var(--brand-text-secondary);">
-          Sélectionnez un cercle pour continuer.
-          Cliquez sur le cercle qui vous intéresse :
+        <p style="margin-bottom: 16px; color: var(--brand-text-secondary); line-height: 1.5;">
+          Sélectionnez un cercle pour accéder aux ressources partagées par la communauté.
         </p>
         <div id="circles-selection-container" style="max-height: 400px; overflow-y: auto;">
     `
@@ -226,9 +210,6 @@ export class CircleSubscriptionTutorialService {
     return html
   }
 
-  /**
-   * Configure les listeners pour la sélection des cercles
-   */
   private setupCircleSelectionListeners(): void {
     setTimeout(() => {
       const items = document.querySelectorAll('.circle-selection-item')
@@ -242,7 +223,6 @@ export class CircleSubscriptionTutorialService {
           const isSelected = this.selectedCircles().includes(circleId)
 
           if (isSelected) {
-            // Désélectionner
             this.selectedCircles.set('')
             checkbox.innerHTML = ''
             checkbox.style.color = 'var(--brand-text-secondary)'
@@ -261,7 +241,6 @@ export class CircleSubscriptionTutorialService {
               ;(otherItem as HTMLElement).style.background = 'var(--brand-background-components)'
             })
 
-            // Sélectionner le cercle cliqué
             this.selectedCircles.set(circleId)
             this.circleChoise.set(this.availableCircles().find((c) => c.id === circleId)?.name || '')
             checkbox.innerHTML = '✓'
@@ -287,15 +266,12 @@ export class CircleSubscriptionTutorialService {
         counter.innerHTML = 'Aucun cercle sélectionné'
         counter.style.color = 'var(--brand-color-error)'
       } else {
-        counter.innerHTML = '✓ Cercle sélectionné'
+        counter.innerHTML = 'Cercle sélectionné'
         counter.style.color = 'var(--brand-color-success)'
       }
     }
   }
 
-  /**
-   * Affiche le message de complétion avec le nom du cercle
-   */
   private displayCompletionMessage(): void {
     setTimeout(() => {
       const container = document.getElementById('completion-text')
@@ -303,32 +279,27 @@ export class CircleSubscriptionTutorialService {
         const circleName = this.circleChoise() || 'votre cercle'
         container.innerHTML = `
           <div style="text-align: center; padding: 20px;">
-            <h3 style="margin-bottom: 16px; color: var(--brand-text-primary);">
-              Félicitations !
+            <h3 style="color: var(--brand-text-primary); margin: 0 0 16px 0;">
+              Inscription confirmée !
             </h3>
-
-            <p style="color: var(--brand-text-secondary); margin-bottom: 20px;">
-              Vous êtes maintenant membre du cercle <strong>${circleName}</strong>.
-              Vous pouvez accéder à ses ressources depuis votre espace de travail.
+            <p style="color: var(--brand-text-secondary); margin: 0 0 20px 0; line-height: 1.5;">
+              Vous êtes maintenant membre du cercle
+              <strong style="color: var(--brand-text-primary);">${circleName}</strong>.
+              Ses ressources sont accessibles depuis votre espace de travail.
             </p>
-
             <div style="background: var(--brand-background-components);
-                  border-radius: 8px;
-                  padding: 16px;
-                  margin: 16px 0;">
+                        border-radius: 8px; padding: 16px; margin: 16px 0;
+                        border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
               <strong style="color: var(--brand-text-primary);">Prochaines étapes :</strong>
-              <div style="text-align: left; margin-top: 12px; color: var(--brand-text-secondary);">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                  <span style="font-size: 20px; min-width: 24px;">🧭</span>
-                  <span>Découvrez l'interface de PLaTon avec le tutoriel guidé</span>
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px; text-align: left;">
+                <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                  <small style="color: var(--brand-text-secondary);">Découvrir l'interface de PLaTon avec le tutoriel guidé</small>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                  <span style="font-size: 20px; min-width: 24px;">🔍</span>
-                  <span>Explorez les ressources de vos cercles</span>
+                <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                  <small style="color: var(--brand-text-secondary);">Explorer les ressources disponibles dans vos cercles</small>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 20px; min-width: 24px;">➕</span>
-                  <span>Créez vos premières ressources pédagogiques</span>
+                <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                  <small style="color: var(--brand-text-secondary);">Créer vos premières ressources pédagogiques</small>
                 </div>
               </div>
             </div>
@@ -338,12 +309,9 @@ export class CircleSubscriptionTutorialService {
     }, 50)
   }
 
-  /**
-   * Valide la sélection et passe à l'étape suivante
-   */
   private validateSelection(): void {
     if (this.selectedCircles().length === 0) {
-      alert('Veuillez sélectionner un cercle pour continuer.')
+      this.message.warning('Veuillez sélectionner un cercle pour continuer.')
       return
     }
 
@@ -356,9 +324,6 @@ export class CircleSubscriptionTutorialService {
       })
   }
 
-  /**
-   * Inscrit l'utilisateur aux cercles sélectionnés
-   */
   private async subscribeUserToCircles(): Promise<void> {
     try {
       await firstValueFrom(this.resourceService.autoJoin(this.selectedCircles()))
@@ -368,13 +333,11 @@ export class CircleSubscriptionTutorialService {
         'Une erreur est survenue lors de votre inscription au cercle. Veuillez réessayer plus tard.'
       )
       this.completeAndStartMainTutorial()
-      //throw error;
     }
   }
 
   private completeAndStartMainTutorial(): void {
     this.shepherdService.complete()
-    // Marquer que l'inscription aux cercles est terminée
     localStorage.setItem(this.circleSubscriptionCompletedKey, 'true')
     this.launchToolbarTutorial()
   }
