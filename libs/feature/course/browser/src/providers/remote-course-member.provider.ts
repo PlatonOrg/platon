@@ -46,6 +46,12 @@ export class RemoteCourseMemberProvider extends CourseMemberProvider {
       .pipe(map((e) => e.resource))
   }
 
+  archive(courseId: string, archived: boolean): Observable<CourseMember> {
+    return this.http
+      .patch<ItemResponse<CourseMember>>(`/api/v1/courses/${courseId}/members/me`, { archived })
+      .pipe(map((e) => e.resource))
+  }
+
   search(course: Course | string, filters?: CourseMemberFilters): Observable<ListResponse<CourseMember>> {
     const params = buildHttpParams(filters)
     return this.http.get<ListResponse<CourseMember>>(`/api/v1/courses/${getId(course)}/members`, {

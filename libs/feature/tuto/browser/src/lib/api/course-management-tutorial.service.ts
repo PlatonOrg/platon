@@ -116,7 +116,8 @@ export class CourseManagementTutorialService {
                     Naviguer dans l'interface d'un cours<br>
                     Créer et gérer des sections<br>
                     Ajouter et configurer des activités<br>
-                    Suivre la progression des étudiants
+                    Suivre la progression des étudiants<br>
+                    Archiver les cours terminés
                   </div>
                 </div>
                 <p style="color: var(--brand-text-secondary); font-size: 13px; margin: 16px 0 0 0;">
@@ -131,6 +132,84 @@ export class CourseManagementTutorialService {
           },
           {
             text: 'Commencer',
+            action: () => this.shepherdService.next(),
+          },
+        ],
+      },
+      {
+        id: 'courses-tabs',
+        title: 'Cours actuels et archivés',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Vos cours sont organisés en deux onglets pour mieux distinguer ce que vous suivez
+                 de ce que vous avez terminé.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;
+                             border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                   <small style="color: var(--brand-text-secondary);">
+                     <strong>Cours actuels</strong> — les cours que vous suivez activement
+                   </small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);">
+                     <strong>Cours archivés</strong> — les cours que vous avez marqués comme terminés
+                   </small>
+                 </div>
+               </div>`,
+        attachTo: {
+          element: '#tuto-courses-tabs',
+          on: 'bottom',
+        },
+        buttons: [
+          {
+            text: 'Précédent',
+            secondary: true,
+            action: () => this.shepherdService.previous(),
+          },
+          {
+            text: 'Suivant',
+            action: () => this.shepherdService.next(),
+          },
+        ],
+      },
+      {
+        id: 'courses-archive-feature',
+        title: 'Archiver un cours',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Sur chaque cours, un bouton vous permet de l'archiver ou de le désarchiver
+                 en un clic.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);">
+                     <strong>Archiver</strong> — déplace le cours dans l'onglet « Cours archivés »
+                   </small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);">
+                     <strong>Désarchiver</strong> — le cours revient dans « Cours actuels »
+                   </small>
+                 </div>
+                 <div style="background: rgba(var(--brand-color-primary-rgb), 0.05); border-radius: 8px;
+                             padding: 10px; margin-top: 6px;
+                             border: 1px solid rgba(var(--brand-color-primary-rgb), 0.2);">
+                   <small style="color: var(--brand-text-primary); font-size: 12px;">
+                     L'archivage n'affecte que votre vue personnelle — le cours reste accessible aux autres membres.
+                   </small>
+                 </div>
+               </div>`,
+        attachTo: {
+          element: '#tuto-courses-course-list',
+          on: 'top',
+        },
+        buttons: [
+          {
+            text: 'Précédent',
+            secondary: true,
+            action: () => this.shepherdService.previous(),
+          },
+          {
+            text: 'Suivant',
             action: () => this.shepherdService.next(),
           },
         ],

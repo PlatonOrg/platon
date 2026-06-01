@@ -34,4 +34,7 @@ export class CourseMemberEntity extends BaseEntity {
 
   @Column({ name: 'role', type: 'enum', enum: ['student', 'teacher'], default: 'student' })
   role!: CourseMemberRoles
+
+  @Column({ name: 'archived', default: false })
+  archived!: boolean
 }

@@ -13,6 +13,7 @@ export abstract class CourseMemberProvider {
   abstract create(course: Course, input: CreateCourseMember): Observable<CourseMember>
   abstract createTestMembers(course: Course, input: CreateTestMember[]): Observable<ListResponse<CourseMember>>
   abstract updateRole(member: CourseMember, role: CourseMemberRoles): Observable<CourseMember>
+  abstract archive(courseId: string, archived: boolean): Observable<CourseMember>
   abstract search(course: Course | string, filters?: CourseMemberFilters): Observable<ListResponse<CourseMember>>
   abstract delete(member: CourseMember): Observable<void>
 }
