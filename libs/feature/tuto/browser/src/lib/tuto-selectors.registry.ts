@@ -101,6 +101,7 @@ export const RESOURCE_CREATION_SELECTORS = ['tuto-create-menu-container', 'tuto-
 
 /** Sélecteurs utilisés par la page liste des cours */
 export const COURSES_PAGE_SELECTORS = [
+  'tuto-courses-tabs',
   'tuto-courses-course-list',
   'tuto-courses-create-button',
   'tuto-courses-show-all-button',
