@@ -114,6 +114,7 @@ export class BuilderPage implements OnInit {
   protected error?: HttpErrorResponse | null = null
 
   private isFirstSave = true
+  private initialHistoryLength = 0
 
   protected readonly hasUnsavedChanges = signal(false)
   protected currentVersion = 'latest'
@@ -242,6 +243,7 @@ export class BuilderPage implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    this.initialHistoryLength = window.history.length
     try {
       const resourceId = this.activatedRoute.snapshot.paramMap.get('id')
       const version = this.activatedRoute.snapshot.queryParamMap.get('version') || 'latest'
@@ -697,19 +699,21 @@ export class BuilderPage implements OnInit {
 
       if (action === 'save') {
         await this.save()
-        return
       }
     }
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout)
     }
 
+    this.hasUnsavedChanges.set(false)
+
     if (this.previewSessionId) {
       firstValueFrom(this.storageService.remove(getPreviewOverridesStorageKey(this.previewSessionId))).catch(
         console.error
       )
     }
-    window.history.back()
+    const steps = window.history.length - this.initialHistoryLength + 1
+    window.history.go(-Math.max(1, steps))
   }
 
   protected trackInput(_: number, input: PleInput): string {
