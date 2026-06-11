@@ -14,20 +14,23 @@ export class CrossWordService {
   private userAnswers: Result[] = []
   private userGrid: string[][] = []
   private lastPosition = [-1, -1]
+  private emptyCellSymbol = '-' // use only for the grid (see crossword.component.ts). the student answer are at the start '----...'
   lastStatusPos = 'U' // 'U' unknown, user must choose by himself (crossing or end of a word), 'V' vertical, 'H' horizontal
 
   generateGridService(words: { clue: string; answer: string }[]) {
     const layout = clg.generateLayout(words)
     this.grid = layout.table
-    this.results = layout.result
     this.results = layout.result.filter((word: Result) => word.orientation != 'none')
+    this.results.forEach((word: any, index: number) => {
+      word.position = index + 1
+    })
     this.userAnswers = this.generateUserAnswers()
     this.lastPosition = [-1, -1]
   }
 
   directionTypeDelete(x: number, y: number): string {
-    const vertical = y - 1 >= 0 && this.grid[y - 1][x] != '-'
-    const horizontal = x - 1 >= 0 && this.grid[y][x - 1] != '-'
+    const vertical = y - 1 >= 0 && this.grid[y - 1][x] != this.emptyCellSymbol
+    const horizontal = x - 1 >= 0 && this.grid[y][x - 1] != this.emptyCellSymbol
 
     const isAdjacentY = y + 1 == this.lastPosition[1] && x == this.lastPosition[0]
     const isAdjacentX = x + 1 == this.lastPosition[0] && y == this.lastPosition[1]
@@ -68,8 +71,8 @@ export class CrossWordService {
      return 'H', 'U' or 'V'
   */
   directionType(x: number, y: number): string {
-    const vertical = y + 1 < this.grid.length && this.grid[y + 1][x] != '-'
-    const horizontal = x + 1 < this.grid[0].length && this.grid[y][x + 1] != '-'
+    const vertical = y + 1 < this.grid.length && this.grid[y + 1][x] != this.emptyCellSymbol
+    const horizontal = x + 1 < this.grid[0].length && this.grid[y][x + 1] != this.emptyCellSymbol
 
     const isAdjacentY = y - 1 == this.lastPosition[1] && x == this.lastPosition[0]
     const isAdjacentX = x - 1 == this.lastPosition[0] && y == this.lastPosition[1]
@@ -87,6 +90,10 @@ export class CrossWordService {
       }
       this.userGrid.push(array)
     }
+  }
+  // give the symbole use to indicate that a cell must not be use
+  getemptyCellSymbol() {
+    return this.emptyCellSymbol
   }
 
   /* generate user answers */

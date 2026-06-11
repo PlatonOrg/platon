@@ -28,19 +28,13 @@
               maxlength="1"
               [attr.data-x]="x"
               [attr.data-y]="y"
+              (input)="onInput($event, x, y)"
               (keydown)="onKeyDown($event, x, y)"
               placeholder="{{ getCharAt(x, y) }}"
               [disabled]="this.state.disabled"
             />
-
-            <span
-              [ngClass]="{
-                isStartCellVertical: isStartCellVertical(x, y),
-                isStartCellHorizental: isStartCellHorizental(x, y)
-              }"
-              *ngIf="isStartCellVertical(x, y) || isStartCellHorizental(x, y)"
-            >
-              {{ resultByCoordonateXY(x, y).position }}
+            <span *ngFor="let res of getResultsAtCoordinates(x, y)" [ngClass]="res.orientation">
+              {{ res.position }}
             </span>
           </div>
           } @else {

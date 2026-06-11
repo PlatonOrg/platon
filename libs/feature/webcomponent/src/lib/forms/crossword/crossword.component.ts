@@ -67,6 +67,11 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
     this.state.isFilled = false
   }
 
+  // give the number for starting cell, list because can go down or across
+  getResultsAtCoordinates(x: number, y: number): any[] {
+    return this.results.filter((word) => word.startx === x + 1 && word.starty === y + 1)
+  }
+
   generateGrid() {
     // remove the log of layout_generator.js who show answer
     const originConsoleLog = console.log
@@ -76,7 +81,6 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
     this.crossWordService.generateGridService(this.words)
 
     console.log = originConsoleLog // don't remove, it put the original console.log where it was
-
     const firstInit = this.state.grid.length == 0 // user can change results or grid but must not do it
 
     this.results = this.crossWordService.getResults()
@@ -90,10 +94,10 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
       for (let i = 0; i < this.grid.length; i++) {
         const array = []
         for (let j = 0; j < this.grid[0].length; j++) {
-          if (this.grid[i][j] != '-') {
+          if (this.grid[i][j] != this.crossWordService.getemptyCellSymbol()) {
             array.push('') // Keep this othewise it's show answer
           } else {
-            array.push('-')
+            array.push(this.crossWordService.getemptyCellSymbol())
           }
         }
         this.state.grid.push(array)
@@ -203,50 +207,72 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
       } else {
         gap = y + 1 - result.starty
       }
-      const answer = result.answer.split('')
-      answer[gap] = key
-      result.answer = answer.join('')
-      return result
+      // Unicode-safe
+      const answerChars = [...result.answer]
+      answerChars[gap] = key
+      result.answer = answerChars.join('')
     })
   }
 
+  // for user input
+  onInput(event: Event, x: number, y: number): void {
+    const inputEvent = event as InputEvent
+    if (inputEvent.isComposing) {
+      return // allow to enter thing like Ctrl + Maj + u + 3042
+    }
+    const input = event.target as HTMLInputElement
+    const value = input.value
+    if (!value) {
+      this.updateValueUserAnswer('', x, y)
+      return
+    }
+    const chars = [...value]
+    const lastChar = chars[chars.length - 1]
+    const isAlphaNumeric = /^[\p{L}\p{N}]$/u.test(lastChar)
+    if (!isAlphaNumeric) {
+      input.value = ''
+      this.updateValueUserAnswer('', x, y)
+      return
+    }
+    input.value = lastChar
+    this.color = false
+    this.updateValueUserAnswer(lastChar, x, y)
+    this.focusNextCell(x, y, -1)
+    this.syncStateWithAnswers()
+  }
+  // for the navigation
   onKeyDown(event: KeyboardEvent, x: number, y: number) {
     const key = event.key
-    const isLetter = /^[a-zA-Z0-9À-ÿ]$/.test(key)
-    event.preventDefault() /* désactiver le comportement par défaut du navigateur */
-
     if (key === 'Backspace') {
-      const input = event.target as HTMLInputElement
-      if (this.getCharAt(x, y) != '') {
-        input.value = ''
+      if (this.getCharAt(x, y) !== '') {
+        // eslint-disable-next-line prettier/prettier
+        (event.target as HTMLInputElement).value = '' // disable prettier was asking for a ; at the start of the line
         this.updateValueUserAnswer('', x, y)
         return
       }
       const direction = this.crossWordService.directionTypeDelete(x, y)
-      if (direction === 'H') {
-        this.focusNextCell(x, y, 1)
-      } else if (direction === 'V') {
-        this.focusNextCell(x, y, 3)
-      }
-    } else if (isLetter) {
-      this.color = false
-      const input = event.target as HTMLInputElement
-      input.value = key
-
-      this.updateValueUserAnswer(key, x, y)
-      this.focusNextCell(x, y, -1)
-    } else if (key === 'Tab' || key === 'ArrowRight') {
+      this.focusNextCell(x, y, direction === 'H' ? 1 : 3)
+      event.preventDefault()
+    } else if (key === 'ArrowRight' || key === 'Tab') {
       this.focusNextCell(x, y, 0)
+      event.preventDefault()
     } else if (key === 'ArrowLeft') {
       this.focusNextCell(x, y, 1)
+      event.preventDefault()
     } else if (key === 'ArrowDown') {
       this.focusNextCell(x, y, 2)
+      event.preventDefault()
     } else if (key === 'ArrowUp') {
       this.focusNextCell(x, y, 3)
+      event.preventDefault()
     }
-    this.state.results = []
-    this.userAnswers.forEach((res) => {
-      this.state.results.push({ answer: res.answer, number: res.position })
-    })
+  }
+
+  // update the student answer
+  private syncStateWithAnswers() {
+    this.state.results = this.userAnswers.map((res) => ({
+      answer: res.answer,
+      number: res.position,
+    }))
   }
 }
