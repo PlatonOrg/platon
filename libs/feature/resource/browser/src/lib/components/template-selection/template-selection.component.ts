@@ -13,6 +13,7 @@ import { firstValueFrom } from 'rxjs'
 import { ResourceService } from '../../api/resource.service'
 import { TemplateCardComponent } from '../template-card/template-card.component'
 import { User } from '@platon/core/common'
+import { createExerciseBuilderDefaultName } from '@platon/feature/builder/browser'
 
 @Component({
   standalone: true,
@@ -69,20 +70,7 @@ export class TemplateSelectionComponent implements OnInit {
     try {
       const personalCircle = await firstValueFrom(this.resourceService.circle(this.user.username))
 
-      const timestamp = new Date().toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-      const templateName = 'Exercice' // Les noms des templates sont trop longs donc on met un nom générique
-
-      /* IMPORTANT: Ce format est synchronisé avec le regex défini dans
-       * builder.page.ts (méthode hasDefaultResourceName).
-       * Si le format de génération du nom change, mettre à jour le regex en conséquence.
-       */
-      const defaultName = `${templateName} - ${timestamp}`
+      const defaultName = createExerciseBuilderDefaultName()
 
       const resource = await firstValueFrom(
         this.resourceService.create({

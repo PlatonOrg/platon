@@ -1,6 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core'
-import { SafePipe } from '@cisstech/nge/pipes'
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, Input, ViewChild } from '@angular/core'
 
 @Component({
   standalone: true,
@@ -8,23 +6,39 @@ import { SafePipe } from '@cisstech/nge/pipes'
   templateUrl: './builder-iframe.component.html',
   styleUrls: ['./builder-iframe.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, SafePipe],
+  imports: [],
 })
-export class BuilderIFrameComponent {
-  @Input() width?: string | null = '100%'
-  @Input() height?: string | null = '100%'
+export class BuilderIFrameComponent implements AfterViewInit {
+  @ViewChild('iframeEl') private iframeEl!: ElementRef<HTMLIFrameElement>
+
+  width = input<string>('100%')
+  height = input<string>('100%')
 
   private _src?: string
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
+  private viewInitialized = false
 
   @Input()
   set src(value: string | undefined) {
     this._src = value
-    this.changeDetectorRef.markForCheck()
+    if (this.viewInitialized) {
+      this.navigate(value)
+    }
   }
 
   get src(): string | undefined {
     return this._src
+  }
+
+  ngAfterViewInit(): void {
+    this.viewInitialized = true
+    if (this._src) {
+      this.navigate(this._src)
+    }
+  }
+
+  private navigate(url?: string): void {
+    const iframe = this.iframeEl?.nativeElement
+    if (!iframe || !url) return
+    iframe.contentWindow?.location.replace(url)
   }
 }
