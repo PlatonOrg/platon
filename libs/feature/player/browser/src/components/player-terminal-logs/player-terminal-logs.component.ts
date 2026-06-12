@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common'
-import { Component, Input } from '@angular/core'
+import { Component, input, OnInit } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
-import { DialogService } from '@platon/core/browser'
+import { AuthService, DialogService } from '@platon/core/browser'
 import { LogType, PlatonLog } from '@platon/feature/player/common'
+import { User, UserRoles } from '@platon/core/common'
 
 @Component({
   standalone: true,
@@ -13,11 +14,17 @@ import { LogType, PlatonLog } from '@platon/feature/player/common'
   styleUrls: ['./player-terminal-logs.component.scss'],
   imports: [CommonModule, MatIconModule, MatButtonModule, NzToolTipModule],
 })
-export class PlayerTerminalLogsComponent {
-  @Input() logs: PlatonLog[] = []
-  @Input() title = 'Terminal PlaTon'
+export class PlayerTerminalLogsComponent implements OnInit {
+  logs = input<PlatonLog[]>([])
+  title = input('Terminal PlaTon')
+  protected isTeacherOrAdmin = false
 
-  constructor(private readonly dialogService: DialogService) {}
+  constructor(private readonly dialogService: DialogService, private readonly authService: AuthService) {}
+
+  async ngOnInit(): Promise<void> {
+    const user = (await this.authService.ready()) as User
+    this.isTeacherOrAdmin = !!user && [UserRoles.admin, UserRoles.teacher].includes(user.role)
+  }
 
   protected getLogClass(log: PlatonLog): string {
     switch (log.type) {
@@ -48,7 +55,11 @@ export class PlayerTerminalLogsComponent {
   }
 
   protected getLogsAsText(): string {
-    return this.logs?.map((log) => `[${log.type.toUpperCase()}] ${log.message}`).join('\n') ?? ''
+    return (
+      this.logs()
+        ?.map((log) => `[${log.type.toUpperCase()}] ${log.message}`)
+        .join('\n') ?? ''
+    )
   }
 
   protected async copyToClipboard(): Promise<void> {
