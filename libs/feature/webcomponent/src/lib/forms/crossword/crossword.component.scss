@@ -5,7 +5,8 @@
   border-radius: 12px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
   font-family: 'Georgia', serif;
-  max-width: 350px;
+  flex: 0 0 35%;
+    max-width: 100%;
 }
 
 .clue-panel h3 {
@@ -34,6 +35,7 @@
 }
 
 .grid-panel {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -64,9 +66,11 @@
 .cell-wrapper {
   position: relative;
   width: 100%;
-    aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / 1;
   max-width: 100px;
   max-height: 100px;
+  container-type: size;
+    container-name: cell;
 }
 
 .cell-wrapper input.cell-square {
@@ -80,14 +84,14 @@
 }
 
 .cell-wrapper span {
-  font-weight: bold;
-  color: #000000;
   position: absolute;
-  transform: none;
   z-index: 10;
-  font-size: min(2.0vw, 25px);
-    padding: 1px;
-      margin: 1px;
+  pointer-events: none;
+    font-weight: bold;
+    font-size: 50cqw;
+    /* 50cqw = 50% of .cell-wrapper width*/
+    line-height: 1;
+    padding: 2px;
 }
 
 .cell-square {
@@ -104,31 +108,23 @@
   line-height: 100%;
 }
 
-/* style for the vertical number */
-.cell-wrapper span.isStartCellVertical {
-  top: -40%;
-    left: 50%;
-    transform: translateX(-50%);
-  color: #000000;
-  font-weight: bold;
+.across {
+  top: 0cqw;
+  right: 100cqw;
 }
 
-
-/* style for the horizontal number */
-.cell-wrapper span.isStartCellHorizental {
-  top: 50%;
-    transform: translateY(-50%);
-    right: 100%;
-    margin-right: 2px;
-  color: #000000;
-  text-align: right;
-  font-weight: bold;
+.down {
+  bottom: 95cqw;
+  left: 45cqw;
+  transform: translateX(-50%);
 }
 
 
 .inline {
   display: flex;
   gap: 40px;
+  align-items: flex-start;
+    width: 100%;
 }
 
 .correctColor {

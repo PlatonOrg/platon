@@ -16,11 +16,11 @@ const DB_HOST = process.env.DB_HOST
 const DB_USERNAME = process.env.DB_USERNAME
 const DB_PASSWORD = process.env.DB_PASSWORD
 const DB_NAME = process.env.DB_NAME
-const DATABASE_PORT = Number.parseInt(process.env.DATABASE_PORT)
+const DB_PORT = Number.parseInt(process.env.DB_PORT)
 
 const queryRunner = new Client({
   host: DB_HOST,
-  port: DATABASE_PORT,
+  port: DB_PORT,
   user: DB_USERNAME,
   password: DB_PASSWORD,
   database: DB_NAME,
