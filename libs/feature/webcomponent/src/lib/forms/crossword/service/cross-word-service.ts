@@ -20,10 +20,10 @@ export class CrossWordService {
   generateGridService(words: { clue: string; answer: string }[]) {
     const layout = clg.generateLayout(words)
     this.grid = layout.table
-    this.results = layout.result.filter((word: Result) => word.orientation != 'none')
-    this.results.forEach((word: any, index: number) => {
+    layout.result.forEach((word: any, index: number) => {
       word.position = index + 1
     })
+    this.results = layout.result.filter((word: Result) => word.orientation != 'none')
     this.userAnswers = this.generateUserAnswers()
     this.lastPosition = [-1, -1]
   }
@@ -156,46 +156,33 @@ export class CrossWordService {
     return this.results.filter((result) => this.lambda(result, x, y))
   }
 
-  coordonateRedirectionByTabulationService(
-    orientation: string,
-    size: number,
-    x: number,
-    y: number,
-    dir: number
-  ): Coordonate {
+  coordonateRedirectionByTabulationService(orientation: string, x: number, y: number, dir: number): Coordonate {
     let nextX = x
     let nextY = y
     let status = true
-    const direction = this.directionType(x, y)
-    switch (dir) {
-      case -1:
-        if (direction == 'V') {
-          nextY++
-          size - nextY <= 1 ? (status = false) : (status = true)
-        } else if (direction == 'H') {
-          nextX++
-          size - nextX <= 1 ? (status = false) : (status = true)
-        }
-        return new NextCoordonate(nextX, nextY, status)
-      case 0: // right
-        nextX++
-        size - nextX <= 1 ? (status = false) : (status = true)
-        return new NextCoordonate(nextX, nextY, status)
-      case 2: // down
-        nextY++
-        size - nextY <= 1 ? (status = false) : (status = true)
-        return new NextCoordonate(nextX, nextY, status)
-      case 3: // up
-        nextY--
-        nextY < 1 ? (status = false) : (status = true)
-        return new NextCoordonate(nextX, nextY, status)
-      case 1: // left
-        nextX--
-        nextX < 1 ? (status = false) : (status = true)
-        return new NextCoordonate(nextX, nextY, status)
-      default:
-        break
+
+    if (dir === -1) {
+      if (orientation === 'across') nextX++
+      if (orientation === 'down') nextY++
+    } else {
+      if (dir === 0) nextX++ // right / Tab
+      if (dir === 1) nextX-- // left
+      if (dir === 2) nextY++ // down
+      if (dir === 3) nextY-- // up
     }
-    return new NextCoordonate(nextX, nextY, status)
+    if (
+      nextY < 0 ||
+      nextY >= this.grid.length ||
+      nextX < 0 ||
+      nextX >= this.grid[0].length ||
+      this.grid[nextY][nextX] === this.emptyCellSymbol
+    ) {
+      status = false
+    }
+
+    if (!status) {
+      return new NextCoordonate(x, y, false)
+    }
+    return new NextCoordonate(nextX, nextY, true)
   }
 }

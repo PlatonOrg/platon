@@ -155,51 +155,67 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
 
   /** focus the cursor to the next  cell by the coordonate x y */
   focusNextCell(x: number, y: number, dir: number) {
-    let result
-    let nextX = x
-    let nextY = y
-    const results = this.crossWordService.nextResultByXYFocusService(x, y)
-    if (results.length > 1) {
-      if (this.inProgress) {
-        result = results.find((result) => result.orientation === this.cellActive.orientationWordActive)
+    const currentResults = this.crossWordService.nextResultByXYFocusService(x, y)
+    let orientationToUse = ''
+
+    if (dir === -1) {
+      // writing
+      if (currentResults.length > 1) {
+        if (this.inProgress) {
+          orientationToUse = this.cellActive.orientationWordActive // intersection keep orientation
+        } else {
+          return // start on intersection
+        }
+      } else if (currentResults.length === 1) {
+        orientationToUse = currentResults[0].orientation // no intersection
       } else {
-        /* prend la première position du tableau quoi se soit de l'orientation */
-        result = results[0]
+        return
       }
     } else {
-      result = results[0]
+      // navigation with arrow
+      if (dir === 0 || dir === 1) orientationToUse = 'across'
+      if (dir === 2 || dir === 3) orientationToUse = 'down'
     }
-
-    if (result) {
-      const nextCoordonate = this.crossWordService.coordonateRedirectionByTabulationService(
-        result.orientation,
-        result.answer.length,
-        x,
-        y,
-        dir
-      )
-      nextX = nextCoordonate.x
-      nextY = nextCoordonate.y
-
-      this.cellActive = new CellActive(result.answer.length, result.orientation, x, y)
-      this.inProgress = nextCoordonate.status
-
-      let nextCell = document.querySelector(`[data-x="${nextX}"][data-y="${nextY}"]`) as HTMLInputElement
-      if (nextCell == null) {
-        // security
-        nextCell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`) as HTMLInputElement
+    const nextCoordonate = this.crossWordService.coordonateRedirectionByTabulationService(orientationToUse, x, y, dir)
+    if (nextCoordonate.status) {
+      const nextX = nextCoordonate.x
+      const nextY = nextCoordonate.y
+      const nextResults = this.crossWordService.nextResultByXYFocusService(nextX, nextY)
+      let nextOrientation = orientationToUse
+      if (nextResults.length === 1) {
+        nextOrientation = nextResults[0].orientation
+        this.inProgress = true
+      } else if (nextResults.length > 1) {
+        // intersection
+        const hasSameOrientation = nextResults.some((r) => r.orientation === orientationToUse)
+        nextOrientation = hasSameOrientation ? orientationToUse : nextResults[0].orientation
+        this.inProgress = true
+      } else {
+        this.inProgress = false
       }
-      nextCell.focus()
+      const activeWord = nextResults.find((r) => r.orientation === nextOrientation) || nextResults[0]
+      const wordLength = activeWord ? activeWord.answer.length : 0
+      this.cellActive = new CellActive(wordLength, nextOrientation, nextX, nextY)
+      // html focus
+      const nextCell = document.querySelector(`[data-x="${nextX}"][data-y="${nextY}"]`) as HTMLInputElement
+      if (nextCell) {
+        nextCell.focus()
+      }
     }
   }
 
   updateValueUserAnswer(key: string, x: number, y: number) {
     this.state.grid[y][x] = key
-    const resultFilter = this.userAnswers.filter(
-      (result) =>
-        (result.startx === x + 1 && result.orientation === 'down') ||
-        (result.starty === y + 1 && result.orientation === 'across')
-    )
+    const resultFilter = this.userAnswers.filter((result) => {
+      const originalWord = this.results.find((r) => r.position === result.position)
+      const wordLength = originalWord ? originalWord.answer.length : result.answer.length
+      if (result.orientation === 'across') {
+        return result.starty === y + 1 && x + 1 >= result.startx && x + 1 < result.startx + wordLength
+      } else if (result.orientation === 'down') {
+        return result.startx === x + 1 && y + 1 >= result.starty && y + 1 < result.starty + wordLength
+      }
+      return false
+    })
     resultFilter.forEach((result) => {
       let gap = 0
       if (result.orientation === 'across') {
@@ -207,21 +223,31 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
       } else {
         gap = y + 1 - result.starty
       }
-      // Unicode-safe
-      const answerChars = [...result.answer]
-      answerChars[gap] = key
-      result.answer = answerChars.join('')
+      const originalWord = this.results.find((r) => r.position === result.position)
+      const wordLength = originalWord ? originalWord.answer.length : result.answer.length
+      const answerChars = result.answer ? [...result.answer] : []
+      while (answerChars.length < wordLength) {
+        answerChars.push('-')
+      }
+      answerChars[gap] = key === '' ? '-' : key
+      result.answer = answerChars.slice(0, wordLength).join('')
     })
+    this.syncStateWithAnswers()
   }
 
   // for user input
   onInput(event: Event, x: number, y: number): void {
+    this.color = false
     const inputEvent = event as InputEvent
     if (inputEvent.isComposing) {
       return // allow to enter thing like Ctrl + Maj + u + 3042
     }
     const input = event.target as HTMLInputElement
-    const value = input.value
+    let value = input.value
+    const oldChar = this.getCharAt(x, y)
+    if (value.length > 1 && oldChar && oldChar !== ' ') {
+      value = value.replace(oldChar, '')
+    }
     if (!value) {
       this.updateValueUserAnswer('', x, y)
       return
@@ -230,28 +256,50 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
     const lastChar = chars[chars.length - 1]
     const isAlphaNumeric = /^[\p{L}\p{N}]$/u.test(lastChar)
     if (!isAlphaNumeric) {
-      input.value = ''
-      this.updateValueUserAnswer('', x, y)
+      input.value = oldChar && oldChar !== ' ' ? oldChar : ''
+      this.updateValueUserAnswer(input.value, x, y)
       return
     }
     input.value = lastChar
-    this.color = false
     this.updateValueUserAnswer(lastChar, x, y)
     this.focusNextCell(x, y, -1)
-    this.syncStateWithAnswers()
   }
+
+  // use to override the content of a cell
+  onFocus(event: FocusEvent, x: number, y: number): void {
+    const input = event.target as HTMLInputElement
+    setTimeout(() => {
+      const len = input.value.length
+      input.setSelectionRange(len, len)
+    }, 0)
+    const currentResults = this.crossWordService.nextResultByXYFocusService(x, y)
+    if (currentResults.length === 1) {
+      this.cellActive = new CellActive(currentResults[0].answer.length, currentResults[0].orientation, x, y)
+      this.inProgress = true
+    } else if (currentResults.length > 1) {
+      // intersection try to keep the direction
+      const hasSameOrientation = currentResults.some((r) => r.orientation === this.cellActive.orientationWordActive)
+      const orientation = hasSameOrientation ? this.cellActive.orientationWordActive : currentResults[0].orientation
+      const activeWord = currentResults.find((r) => r.orientation === orientation) || currentResults[0]
+      this.cellActive = new CellActive(activeWord.answer.length, orientation, x, y)
+      this.inProgress = true
+    }
+  }
+
   // for the navigation
   onKeyDown(event: KeyboardEvent, x: number, y: number) {
     const key = event.key
+    this.color = false
     if (key === 'Backspace') {
       if (this.getCharAt(x, y) !== '') {
         // eslint-disable-next-line prettier/prettier
-        (event.target as HTMLInputElement).value = '' // disable prettier was asking for a ; at the start of the line
+        (event.target as HTMLInputElement).value = '' // prettier ask for ; at the start of the line, then ask to remove it
         this.updateValueUserAnswer('', x, y)
         return
       }
-      const direction = this.crossWordService.directionTypeDelete(x, y)
-      this.focusNextCell(x, y, direction === 'H' ? 1 : 3)
+      const currentOrientation = this.cellActive.orientationWordActive
+      const deleteDir = currentOrientation === 'across' ? 1 : 3 // 1 = left, 3 = top
+      this.focusNextCell(x, y, deleteDir)
       event.preventDefault()
     } else if (key === 'ArrowRight' || key === 'Tab') {
       this.focusNextCell(x, y, 0)

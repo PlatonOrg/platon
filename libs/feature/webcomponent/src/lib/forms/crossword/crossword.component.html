@@ -25,10 +25,10 @@
             <input
               class="cell-square"
               [ngClass]="getBackgroundColorClasses(x, y)"
-              maxlength="1"
               [attr.data-x]="x"
               [attr.data-y]="y"
               (input)="onInput($event, x, y)"
+              (focus)="onFocus($event, x, y)"
               (keydown)="onKeyDown($event, x, y)"
               placeholder="{{ getCharAt(x, y) }}"
               [disabled]="this.state.disabled"
