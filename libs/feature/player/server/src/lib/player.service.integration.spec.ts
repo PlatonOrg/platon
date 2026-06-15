@@ -1,15 +1,3 @@
-/**
- * Tests d'intégration — PlayerService
- *
- * On utilise un vrai container PostgreSQL (testcontainers) pour valider que :
- *   - `onReloadActivity` supprime effectivement les sessions en base via transaction
- *   - La transaction TypeORM opère correctement sur les vraies tables
- *
- * Architecture :
- *   - Les dépendances externes (SandboxService, SessionService, etc.) sont mockées
- *   - Seul le DataSource est réel — c'est lui l'objet de l'intégration
- *   - Les entités utilisées couvrent la chaîne de FK de Sessions
- */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataSource, Repository } from 'typeorm'
 import { UserEntity } from '@platon/core/server'
@@ -97,9 +85,9 @@ describe('PlayerService (integration)', () => {
   const seedUser = async (): Promise<UserEntity> => {
     const user = userRepo.create({
       username: 'player-integration-user',
-      firstName: 'Player',
-      lastName: 'Test',
-      email: 'player@integration.test',
+      firstName: 'Max',
+      lastName: 'Tekpa',
+      email: 'tekpa@integration.test',
       role: UserRoles.teacher,
       active: true,
       lastActivity: new Date(),
