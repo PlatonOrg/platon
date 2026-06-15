@@ -527,7 +527,7 @@ export class PlayerService extends PlayerManager {
   @OnEvent(ON_RELOAD_ACTIVITY_EVENT)
   protected async onReloadActivity(payload: OnReloadActivityEventPayload): Promise<void> {
     const { activity } = payload
-    this.dataSource
+    await this.dataSource
       .transaction(async (manager) => {
         this.logger.log(`Reload activity ${activity.id}`)
         const sessions = await manager.find(SessionEntity, {

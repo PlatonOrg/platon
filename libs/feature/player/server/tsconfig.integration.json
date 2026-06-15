@@ -5,7 +5,8 @@
     "module": "commonjs",
     "target": "es2018",
     "types": ["jest", "node"],
-    "declaration": true
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
-  "include": ["jest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
+  "include": ["jest.integration.config.ts", "src/**/*.integration.spec.ts", "src/**/*.d.ts"]
 }
