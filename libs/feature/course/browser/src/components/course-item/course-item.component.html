@@ -18,7 +18,9 @@
     [articleTitle]="title"
     [articleDescription]="desc"
     [articleIconTemplate]="image"
-    [articleUrl]="['/courses/', item.id]"
+    (didClick)="navigate()"
+    (didClickTitle)="navigate()"
+    (didClickTag)="navigate()"
     class="tuto-course-article"
   >
     <ui-list-item-article-action

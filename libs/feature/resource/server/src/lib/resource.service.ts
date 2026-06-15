@@ -243,7 +243,9 @@ export class ResourceService {
         })
       )
     }
-    if (userId) await userHasPermissions(userId)
+    if (userId) {
+      await userHasPermissions(userId)
+    }
 
     query.leftJoinAndSelect('resource.topics', 'topic')
     query.leftJoinAndSelect('resource.levels', 'level')
@@ -405,12 +407,7 @@ export class ResourceService {
       query.take(filters.limit)
     }
 
-    const [sql, params] = query.getQueryAndParameters()
-    console.log('Executing search query:', sql, 'with parameters:', params)
-    const explainResult = await this.dataSource.query(`EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) ${sql}`, params)
-    console.log(explainResult.map((r: any) => Object.values(r)[0]).join('\n'))
-
-    return query.getManyAndCount()
+    return await query.getManyAndCount()
   }
 
   /**

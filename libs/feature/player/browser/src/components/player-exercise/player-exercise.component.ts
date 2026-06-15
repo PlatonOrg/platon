@@ -204,6 +204,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
           if (this.player?.feedbacks && this.player.feedbacks.some((feedback) => feedback.content)) {
             this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
           }
+          this.errorsDismissed.set(false)
         },
       },
       {
@@ -440,7 +441,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       this.player = this.players[this.index]
 
       this.playerSignal.set(this.player)
-
       this.clearNotification?.()
       this.clearNotification = undefined
     }

@@ -168,6 +168,7 @@ describe('AnnouncementService', () => {
 
       const [items, count] = await service.getVisibleForUser('user-test-id', UserRoles.teacher)
 
+      expect(qb.leftJoin).toHaveBeenCalledWith('announcement.publisher', 'publisher')
       expect(qb.where).toHaveBeenCalledWith('announcement.active = :active', { active: true })
       expect(qb.andWhere).toHaveBeenCalledWith(
         expect.stringContaining('targetedRoles'),
@@ -175,6 +176,39 @@ describe('AnnouncementService', () => {
       )
       expect(items).toHaveLength(1)
       expect(count).toBe(1)
+    })
+
+    it('should select fields without the data field', async () => {
+      const qb = mockSelectQueryBuilder<AnnouncementEntity>()
+      repository.createQueryBuilder.mockReturnValue(qb as any)
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+
+      await service.getVisibleForUser('user-test-id', UserRoles.student)
+
+      const selectedFields: string[] = (qb.select as jest.Mock).mock.calls[0][0]
+      expect(selectedFields).not.toContain('announcement.data')
+      expect(selectedFields).toContain('announcement.title')
+      expect(selectedFields).toContain('announcement.description')
+    })
+
+    it('should apply default limit of 20 when no limit is provided', async () => {
+      const qb = mockSelectQueryBuilder<AnnouncementEntity>()
+      repository.createQueryBuilder.mockReturnValue(qb as any)
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+
+      await service.getVisibleForUser('user-test-id', UserRoles.student)
+
+      expect(qb.take).toHaveBeenCalledWith(20)
+    })
+
+    it('should apply provided limit', async () => {
+      const qb = mockSelectQueryBuilder<AnnouncementEntity>()
+      repository.createQueryBuilder.mockReturnValue(qb as any)
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+
+      await service.getVisibleForUser('user-test-id', UserRoles.student, { limit: 5 })
+
+      expect(qb.take).toHaveBeenCalledWith(5)
     })
 
     it('should apply search filter when provided', async () => {
@@ -196,6 +230,39 @@ describe('AnnouncementService', () => {
       qb.getManyAndCount.mockRejectedValue(new Error('DB error'))
 
       await expect(service.getVisibleForUser('user-test-id', UserRoles.teacher)).rejects.toThrow('DB error')
+    })
+  })
+
+  describe('findByIdForUser', () => {
+    it('should return the announcement when active and visible for the user role', async () => {
+      const announcement = createAnnouncementEntity()
+      const qb = mockSelectQueryBuilder<AnnouncementEntity>()
+      repository.createQueryBuilder.mockReturnValue(qb as any)
+      qb.getOne.mockResolvedValue(announcement)
+
+      const result = await service.findByIdForUser('announcement-test-id', UserRoles.student)
+
+      expect(qb.leftJoinAndSelect).toHaveBeenCalledWith('announcement.publisher', 'publisher')
+      expect(qb.where).toHaveBeenCalledWith('announcement.id = :id', { id: 'announcement-test-id' })
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('active'),
+        expect.objectContaining({ active: true })
+      )
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('targetedRoles'),
+        expect.objectContaining({ userRole: UserRoles.student })
+      )
+      expect(result).toEqual(announcement)
+    })
+
+    it('should throw NotFoundResponse when announcement does not exist or is not visible', async () => {
+      const qb = mockSelectQueryBuilder<AnnouncementEntity>()
+      repository.createQueryBuilder.mockReturnValue(qb as any)
+      qb.getOne.mockResolvedValue(null)
+
+      await expect(service.findByIdForUser('non-existent-id', UserRoles.student)).rejects.toBeInstanceOf(
+        NotFoundResponse
+      )
     })
   })
 })

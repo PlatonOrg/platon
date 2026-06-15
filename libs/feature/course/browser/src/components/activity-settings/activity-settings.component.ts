@@ -606,6 +606,10 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
+  private resetTempDates(): void {
+    this.tempOpenDate = undefined
+    this.tempCloseDate = undefined
+  }
   protected async close(): Promise<void> {
     this.updatingSignal.set(true)
     this.changeDetectorRef.markForCheck()
@@ -620,7 +624,6 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
-
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }
@@ -639,6 +642,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
+    this.resetTempDates()
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }

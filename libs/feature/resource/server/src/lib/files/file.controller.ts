@@ -181,12 +181,11 @@ export class ResourceFileController {
       const bundle = await repo.bundle(version)
       const stream = fs.createReadStream(bundle)
 
-      stream.on('end', () => {
+      stream.once('close', () => {
         fs.promises.rm(bundle, { force: true }).catch(() => {
           this.logger.error(`Failed to remove temporary bundle: ${bundle}`)
         })
       })
-
       return new StreamableFile(stream)
     }
 
@@ -215,7 +214,7 @@ export class ResourceFileController {
         const stream = fs.createReadStream(archive)
         file = new StreamableFile(stream)
 
-        stream.on('end', () => {
+        stream.once('close', () => {
           fs.promises.rm(archive, { force: true }).catch(() => {
             this.logger.error(`Failed to remove temporary archive: ${archive}`)
           })

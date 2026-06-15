@@ -667,4 +667,8 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected get editorPreview(): boolean {
     return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
   }
+
+  protected canShowTerminalLogs = (): boolean => {
+    return this.editorPreview && this.nextNavigation && this.activityLogs.length > 0
+  }
 }

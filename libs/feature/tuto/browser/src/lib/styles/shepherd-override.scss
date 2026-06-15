@@ -49,6 +49,36 @@
     a {
       color: var(--brand-color-primary);
     }
+
+    .shepherd-step-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--brand-border-color);
+
+      .shepherd-step-progress-track {
+        flex: 1;
+        height: 4px;
+        background-color: var(--brand-border-color);
+        border-radius: 2px;
+        overflow: hidden;
+
+        .shepherd-step-progress-fill {
+          height: 100%;
+          background-color: var(--brand-color-primary);
+          border-radius: 2px;
+        }
+      }
+
+      .shepherd-step-progress-label {
+        font-size: 12px;
+        color: var(--brand-text-secondary);
+        white-space: nowrap;
+        font-weight: 500;
+      }
+    }
   }
 
   // Boutons

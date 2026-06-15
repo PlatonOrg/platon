@@ -10,6 +10,7 @@ import { withActivityPlayer, withExercisePlayer } from './player-renderer.model'
 import {
   EvalExerciseInput,
   ExercisePlayer,
+  hasError,
   PlayActivityOuput,
   PlayerActions,
   PlayerActivityVariables,
@@ -208,7 +209,10 @@ export abstract class PlayerManager {
 
     variables = output.variables as ExerciseVariables
 
-    patchExerciseMeta(variables, (meta) => ({ attempts: meta.attempts + increment }))
+    patchExerciseMeta(variables, (meta) => ({
+      attempts: meta.attempts + increment,
+      error: hasError(variables),
+    }))
 
     exerciseSession.grade = Math.max(grade, exerciseSession.grade ?? -1)
     exerciseSession.attempts += increment
@@ -337,6 +341,9 @@ export abstract class PlayerManager {
 
   async showSolution(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
     patchExerciseMeta(exerciseSession.variables, () => ({ showSolution: true }))
+    await this.updateSession(exerciseSession.id, {
+      variables: exerciseSession.variables,
+    })
     return withExercisePlayer(exerciseSession)
   }
 

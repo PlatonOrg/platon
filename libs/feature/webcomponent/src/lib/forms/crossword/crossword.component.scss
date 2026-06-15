@@ -5,7 +5,8 @@
   border-radius: 12px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
   font-family: 'Georgia', serif;
-  max-width: 350px;
+  flex: 0 0 35%;
+    max-width: 100%;
 }
 
 .clue-panel h3 {
@@ -34,19 +35,27 @@
 }
 
 .grid-panel {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: auto;
   width: 100%;
   box-sizing: border-box;
+  padding-top: 3vw;
   padding-left: 5vw; // for the definition number
+  overflow-x: auto;
+    white-space: nowrap;
 }
 
 .crossword-grid.responsive-grid {
   display: grid;
   width: 100%;
+  padding-top: 3.0vw;
   gap: 1px;
+  width: fit-content;
+    max-width: 90%;
+    margin: 10 auto;
 }
 
 .crossword-grid {
@@ -57,9 +66,12 @@
 
 .cell-wrapper {
   position: relative;
-  padding-bottom: 100%;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   max-width: 100px;
   max-height: 100px;
+  container-type: size;
+    container-name: cell;
 }
 
 .cell-wrapper input.cell-square {
@@ -69,55 +81,51 @@
   width: 100%;
   height: 100%;
   z-index: 5;
+  box-sizing: border-box;
 }
 
 .cell-wrapper span {
-  font-weight: bold;
-  color: #000000;
   position: absolute;
-  transform: none;
   z-index: 10;
-  font-size: min(2.0vw, 25px);
-  padding: 0;
-  margin: 0;
+  pointer-events: none;
+    font-weight: bold;
+    font-size: 50cqw;
+    /* 50cqw = 50% of .cell-wrapper width*/
+    line-height: 1;
+    padding: 2px;
 }
 
 .cell-square {
   border: 2px solid #333;
   border-radius: 8px;
   box-shadow: inset 0 0 5px #00000033, 2px 2px 6px #00000088;
-  font-size: min(6.5vw, 65px);
+  font-size: 75cqw;
   font-weight: bold;
   color: #222;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  line-height: 100%;
 }
 
-/* style for the vertical number */
-.cell-wrapper span.isStartCellVertical {
-  top: -3.0vw;
-  left: 1.8vw;
-  transform: none;
-  color: #000000;
-  font-weight: bold;
+.across {
+  top: 0cqw;
+  right: 100cqw;
 }
 
-
-/* style for the horizontal number */
-.cell-wrapper span.isStartCellHorizental {
-  top: 1.3vw;
-  left: -2.4vw;
-  pointer-events: none;
-  color: #000000;
-  font-weight: bold;
+.down {
+  bottom: 95cqw;
+  left: 45cqw;
+  transform: translateX(-50%);
 }
 
 
 .inline {
   display: flex;
   gap: 40px;
+  align-items: flex-start;
+    width: 100%;
 }
 
 .correctColor {

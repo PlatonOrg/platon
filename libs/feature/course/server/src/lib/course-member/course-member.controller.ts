@@ -41,7 +41,7 @@ export class CourseMemberController {
     }
 
     const member = input.isGroup
-      ? await this.courseMemberService.addGroup(courseId, input.id)
+      ? await this.courseMemberService.addGroup(courseId, input.id, { notify: true, role: input.role })
       : await this.courseMemberService.addUser(courseId, input.id, input.role)
 
     return new ItemResponse({

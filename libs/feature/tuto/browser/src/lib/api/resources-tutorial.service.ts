@@ -3,6 +3,7 @@ import { Router } from '@angular/router'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 import { User } from '@platon/core/common'
 import { Resource } from '@platon/feature/resource/common'
+import { NzMessageService } from 'ng-zorro-antd/message'
 
 @Injectable({
   providedIn: 'root',
@@ -10,16 +11,14 @@ import { Resource } from '@platon/feature/resource/common'
 export class ResourcesTutorialService {
   private readonly router = inject(Router)
   private readonly shepherdService = inject(ShepherdService)
+  private readonly message = inject(NzMessageService)
 
-  // Flag pour indiquer qu'on vient du tutoriel
   private isFromTutorial = false
 
-  // Méthode pour vérifier si on vient du tutoriel
   getIsFromTutorial(): boolean {
     return this.isFromTutorial
   }
 
-  // Méthode pour réinitialiser le flag
   resetTutorialFlag(): void {
     this.isFromTutorial = false
   }
@@ -49,8 +48,28 @@ export class ResourcesTutorialService {
     const steps: TutorialStep[] = [
       {
         id: 'welcome',
-        title: 'Bienvenue dans votre espace de travail !',
-        text: 'Ce tutoriel va vous apprendre à rechercher, prévisualiser et éditer des ressources pédagogiques. Découvrons ensemble comment utiliser efficacement cet espace.',
+        title: 'Bienvenue dans votre espace de travail',
+        text: `<div style="text-align: center; padding: 20px;">
+                <h3 style="color: var(--brand-text-primary); margin: 0 0 12px 0; font-weight: 600;">
+                  Qu'allez-vous apprendre ?
+                </h3>
+                <p style="color: var(--brand-text-secondary); margin: 0 0 20px 0; line-height: 1.5;">
+                  Ce tutoriel vous présente les outils pour rechercher, naviguer et gérer vos ressources pédagogiques.
+                </p>
+                <div style="background: var(--brand-background-components);
+                            border-radius: 8px; padding: 16px; margin: 16px 0;
+                            border-left: 3px solid var(--brand-color-primary);">
+                  <div style="text-align: left; color: var(--brand-text-primary); font-size: 14px; line-height: 1.8;">
+                    Utiliser la barre de recherche<br>
+                    Naviguer dans les cercles et ressources<br>
+                    Utiliser les filtres avancés<br>
+                    Accéder à votre espace personnel
+                  </div>
+                </div>
+                <p style="color: var(--brand-text-secondary); font-size: 13px; margin: 16px 0 0 0;">
+                  Durée : ~4 minutes &nbsp;|&nbsp; Interruptible à tout moment
+                </p>
+              </div>`,
         buttons: [
           {
             text: 'Passer le tutoriel',
@@ -58,7 +77,7 @@ export class ResourcesTutorialService {
             action: () => this.shepherdService.cancel(),
           },
           {
-            text: 'Commencer le tutoriel',
+            text: 'Commencer',
             action: () => {
               this.shepherdService.next()
               this.shepherdService.disableEnterNavigation()
@@ -68,8 +87,17 @@ export class ResourcesTutorialService {
       },
       {
         id: 'workspace-title',
-        title: 'Espace de travail',
-        text: 'Cet espace vous permet de gérer toutes vos ressources pédagogiques : exercices, activités, cercles et cours.',
+        title: "L'espace de travail",
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 L'espace de travail centralise toutes vos
+                 <strong style="color: var(--brand-text-primary);">ressources pédagogiques</strong> :
+                 exercices, activités, cercles et cours.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   Vous pouvez consulter les ressources auxquelles vous avez accès, ainsi que celles que vous avez créées.
+                 </small>
+               </div>`,
         attachTo: {
           element: '#tuto-resources-title',
           on: 'bottom',
@@ -77,19 +105,38 @@ export class ResourcesTutorialService {
       },
       {
         id: 'search-bar',
-        title: 'Barre de recherche',
-        text: "Utilisez cette barre pour rechercher des ressources par nom, topic, niveau ou tout autre critère. C'est votre outil principal pour trouver du contenu.",
+        title: 'La barre de recherche',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Saisissez un mot-clé pour trouver des ressources par
+                 <strong style="color: var(--brand-text-primary);">nom, sujet, niveau ou auteur</strong>.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;
+                           border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                 <small style="color: var(--brand-text-secondary);">
+                   La recherche s'applique à l'ensemble des ressources accessibles sur la plateforme.
+                 </small>
+               </div>`,
         attachTo: {
-          element: '#tuto-search-bar', //'#tuto-resources-searchbar',
+          element: '#tuto-search-bar',
           on: 'bottom',
         },
       },
       {
         id: 'search-example',
-        title: 'Faisons une recherche !',
-        text: 'Pour continuer le tutoriel, essayez de rechercher une ressource. Par exemple, tapez "python", "math", ou tout autre sujet qui vous intéresse.',
+        title: 'Effectuez une recherche',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Essayez de rechercher une ressource : tapez un sujet comme
+                 <strong style="color: var(--brand-text-primary);">"python"</strong> ou
+                 <strong style="color: var(--brand-text-primary);">"mathématiques"</strong>.
+               </p>
+               <div style="background: rgba(var(--brand-color-primary-rgb), 0.05); border-radius: 8px;
+                           padding: 12px; border: 2px solid rgba(var(--brand-color-primary-rgb), 0.3);">
+                 <p style="margin: 0; font-size: 13px; color: var(--brand-text-primary);">
+                   Cliquez sur <strong>J'ai fait ma recherche</strong> une fois votre recherche effectuée.
+                 </p>
+               </div>`,
         attachTo: {
-          element: '#tuto-search-bar', //'#tuto-resources-searchbar',
+          element: '#tuto-search-bar',
           on: 'bottom',
         },
         buttons: [
@@ -129,8 +176,16 @@ export class ResourcesTutorialService {
     steps.push(
       {
         id: 'search-results',
-        title: 'Résultats de recherche',
-        text: 'Voici les ressources trouvées. Chaque carte représente une ressource avec ses informations principales : nom, type, auteur et statistiques.',
+        title: 'Les résultats de recherche',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Chaque carte représente une ressource avec ses informations essentielles :
+                 <strong style="color: var(--brand-text-primary);">nom, type, auteur et statistiques d'usage</strong>.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   Cliquez sur une ressource pour consulter sa page de détail.
+                 </small>
+               </div>`,
         attachTo: {
           element: '#tuto-resources-list',
           on: 'top',
@@ -141,7 +196,7 @@ export class ResourcesTutorialService {
       },
       {
         id: 'resource-actions',
-        title: 'Actions sur les ressources',
+        title: 'Actions disponibles sur une ressource',
         text: this.buildResourceActionsHTML(),
         when: {
           show: () => this.highlightFirstResource(),
@@ -152,8 +207,15 @@ export class ResourcesTutorialService {
     steps.push(
       {
         id: 'filters',
-        title: 'Filtres avancés',
-        text: 'Affinez votre recherche avec des filtres par type, statut, niveau, topic et plus encore. Cliquez sur le bouton filtre dans la barre de recherche.',
+        title: 'Filtres de recherche',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Affinez vos résultats grâce aux filtres : <strong style="color: var(--brand-text-primary);">type, statut, niveau, sujet</strong> et bien d'autres critères.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   Le bouton filtre se trouve dans la barre de recherche, à droite du champ de saisie.
+                 </small>
+               </div>`,
         attachTo: {
           element: '#tuto-resources-filters',
           on: 'bottom',
@@ -161,8 +223,16 @@ export class ResourcesTutorialService {
       },
       {
         id: 'tree-view',
-        title: 'Arbre des cercles',
-        text: "Visualisez la structure hiérarchique de vos cercles et ressources. Cela vous aide à comprendre l'organisation de votre contenu.",
+        title: 'Vue en arborescence',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Ce bouton affiche la <strong style="color: var(--brand-text-primary);">structure hiérarchique</strong>
+                 de vos cercles et ressources, comme un explorateur de fichiers.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   Utile pour visualiser l'organisation de votre contenu pédagogique en un coup d'œil.
+                 </small>
+               </div>`,
         attachTo: {
           element: '#tuto-resources-tree-button',
           on: 'bottom',
@@ -170,8 +240,12 @@ export class ResourcesTutorialService {
       },
       {
         id: 'sidebar',
-        title: 'Panneau latéral',
-        text: 'Ce panneau affiche votre espace personnel et les ressources récemment consultées.',
+        title: 'Le panneau latéral',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Ce panneau donne un accès rapide à votre
+                 <strong style="color: var(--brand-text-primary);">espace personnel</strong>
+                 et à votre <strong style="color: var(--brand-text-primary);">historique de navigation</strong>.
+               </p>`,
         attachTo: {
           element: '#tuto-resources-sidebar',
           on: 'left',
@@ -179,8 +253,11 @@ export class ResourcesTutorialService {
       },
       {
         id: 'collapse-button',
-        title: 'Réduire le panneau',
-        text: "Cliquez ici pour réduire le panneau latéral et gagner de l'espace.",
+        title: 'Réduire le panneau latéral',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0;">
+                 Ce bouton permet de <strong style="color: var(--brand-text-primary);">masquer ou afficher</strong>
+                 le panneau latéral pour agrandir la zone de résultats.
+               </p>`,
         attachTo: {
           element: '#tuto-resources-collapse-button',
           on: 'left',
@@ -189,7 +266,10 @@ export class ResourcesTutorialService {
       {
         id: 'my-space',
         title: 'Mon espace personnel',
-        text: 'Votre cercle personnel où vous pouvez organiser vos propres ressources et créations.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Votre <strong style="color: var(--brand-text-primary);">cercle personnel</strong> est l'espace
+                 dédié à vos propres créations. Les ressources que vous y ajoutez sont privées par défaut.
+               </p>`,
         attachTo: {
           element: '#tuto-resources-my-space',
           on: 'left',
@@ -197,8 +277,11 @@ export class ResourcesTutorialService {
       },
       {
         id: 'recent-views',
-        title: 'Historique',
-        text: 'Retrouvez rapidement les ressources que vous avez consultées récemment.',
+        title: 'Historique de consultation',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0;">
+                 Retrouvez ici les <strong style="color: var(--brand-text-primary);">ressources consultées récemment</strong>
+                 pour reprendre rapidement votre travail là où vous vous étiez arrêté.
+               </p>`,
         attachTo: {
           element: '#tuto-resources-recent-views',
           on: 'left',
@@ -206,8 +289,16 @@ export class ResourcesTutorialService {
       },
       {
         id: 'filter-button-intro',
-        title: 'Utilisons les filtres avancés !',
-        text: "Maintenant que vous connaissez l'interface, apprenons à filtrer précisément les résultats.</br> <b>Cliquez sur le bouton filtre dans la barre de recherche.</b>",
+        title: 'Utilisons les filtres avancés',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Maintenant que vous connaissez l'interface, voyons comment filtrer précisément les résultats.
+               </p>
+               <div style="background: rgba(var(--brand-color-primary-rgb), 0.05); border-radius: 8px;
+                           padding: 12px; border: 2px solid rgba(var(--brand-color-primary-rgb), 0.3);">
+                 <p style="margin: 0; font-size: 13px; color: var(--brand-text-primary);">
+                   Cliquez sur le bouton filtre dans la barre de recherche pour continuer.
+                 </p>
+               </div>`,
         attachTo: {
           element: '#tuto_filter_list',
           on: 'bottom',
@@ -244,11 +335,20 @@ export class ResourcesTutorialService {
       },
       {
         id: 'filter-drawer-intro',
-        title: 'Panneau de filtres',
-        text: 'Les filtres avancés vous permettent de préciser votre recherche selon différents critères.',
+        title: 'Le panneau de filtres avancés',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Le panneau de filtres s'est ouvert sur la droite de votre écran.
+                 Vous pouvez y affiner votre recherche selon de nombreux critères.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;
+                           border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                 <small style="color: var(--brand-text-secondary);">
+                   Dans l'étape suivante, nous allons filtrer par type de ressource.
+                 </small>
+               </div>`,
         buttons: [
           {
-            text: 'Suivant (Entrée)',
+            text: 'Suivant',
             action: () => this.shepherdService.next(),
           },
         ],
@@ -260,15 +360,19 @@ export class ResourcesTutorialService {
       },
       {
         id: 'filter-drawer-open',
-        title: 'Panneau de recherche avancée',
-        text: `<div style="text-align: center; padding: 10px;">
-                <h4>Filtres avancés ouverts !</h4>
-                <p>Le panneau de recherche avancée est maintenant ouvert sur la droite de votre écran.</p>
-                <p><strong>Prochaine étape :</strong> Nous allons apprendre à filtrer par type de ressource dans la section mise en évidence.</p>
-              </div>`,
+        title: 'Filtrer par type de ressource',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Le panneau de filtres est maintenant ouvert. Nous allons apprendre à filtrer
+                 les résultats par <strong style="color: var(--brand-text-primary);">type de ressource</strong>.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   Dans l'étape suivante, repérez la section <strong>Types</strong> dans le panneau de droite.
+                 </small>
+               </div>`,
         buttons: [
           {
-            text: 'Parfait, continuons !',
+            text: 'Continuer',
             action: () => this.shepherdService.next(),
           },
         ],
@@ -289,20 +393,29 @@ export class ResourcesTutorialService {
       },
       {
         id: 'select-circle-type',
-        title: 'Sélectionnez le type "Cercle"',
-        text: 'Cochez la case "Cercle" pour filtrer uniquement les ressources de type Cercle. Décochez les autres types s\'ils sont sélectionnés.',
+        title: 'Sélectionnez le type « Cercle »',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Cochez uniquement la case <strong style="color: var(--brand-text-primary);">« Cercle »</strong>
+                 dans la section Types pour filtrer les résultats.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;
+                           border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                 <small style="color: var(--brand-text-secondary);">
+                   Décochez les autres types s'ils sont déjà sélectionnés.
+                 </small>
+               </div>`,
         attachTo: {
           element: '#tuto-types-recourses',
           on: 'left',
         },
         buttons: [
           {
-            text: 'J\'ai coché "Cercle"',
+            text: "J'ai coché « Cercle »",
             action: () => {
               setTimeout(() => {
                 const typeSection = document.querySelector('#tuto-types-recourses')
                 if (!typeSection) {
-                  alert('Erreur: Section non trouvée. Veuillez réessayer.')
+                  this.message.error('Section non trouvée. Veuillez réessayer.')
                   return
                 }
 
@@ -312,7 +425,7 @@ export class ResourcesTutorialService {
                 if (totalChecked === 1 && checkedLabels.some((label) => label.toLowerCase().includes('cercle'))) {
                   this.shepherdService.next()
                 } else {
-                  alert('Veuillez cocher seulement la case "Cercle" pour continuer.')
+                  this.message.warning('Veuillez cocher seulement la case "Cercle" pour continuer.')
                 }
               }, 100)
             },
@@ -343,8 +456,11 @@ export class ResourcesTutorialService {
       },
       {
         id: 'apply-filters',
-        title: 'Appliquez les filtres',
-        text: 'Parfait ! Maintenant cliquez sur le bouton "Appliquer" pour voir uniquement les cercles.',
+        title: 'Appliquer les filtres',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Cliquez sur le bouton <strong style="color: var(--brand-text-primary);">Appliquer</strong>
+                 pour lancer la recherche avec le filtre « Cercle » sélectionné.
+               </p>`,
         attachTo: {
           element: '#tuto-apply-filters',
           on: 'top',
@@ -380,7 +496,15 @@ export class ResourcesTutorialService {
       {
         id: 'circles-list',
         title: 'Liste des cercles',
-        text: 'Voici tous les cercles disponibles ! Chaque cercle peut contenir des exercices, activités et autres ressources.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Voici les <strong style="color: var(--brand-text-primary);">cercles disponibles</strong>.
+                 Chaque cercle peut contenir des exercices, activités et d'autres ressources organisées par thème.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   Dans l'étape suivante, vous allez explorer le contenu d'un cercle.
+                 </small>
+               </div>`,
         when: {
           show: () => {
             setTimeout(() => {
@@ -393,8 +517,17 @@ export class ResourcesTutorialService {
 
     const clickCircleStep: TutorialStep = {
       id: 'click-circle',
-      title: 'Explorez le premier cercle',
-      text: 'Cliquez sur le <strong>premier cercle</strong> de la liste pour découvrir son contenu et continuer le tutoriel.',
+      title: 'Explorez un cercle',
+      text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+               Cliquez sur le <strong style="color: var(--brand-text-primary);">premier cercle</strong>
+               de la liste pour découvrir son contenu.
+             </p>
+             <div style="background: rgba(var(--brand-color-primary-rgb), 0.05); border-radius: 8px;
+                         padding: 12px; border: 2px solid rgba(var(--brand-color-primary-rgb), 0.3);">
+               <p style="margin: 0; font-size: 13px; color: var(--brand-text-primary);">
+                 Cliquez maintenant sur le titre du premier cercle pour continuer.
+               </p>
+             </div>`,
       attachTo: {
         element: '#tuto-title-resource',
         on: 'bottom',
@@ -406,7 +539,8 @@ export class ResourcesTutorialService {
       buttons: [
         {
           secondary: true,
-          text: 'Cliquer sur le premier cercle',
+          text: 'Précédent',
+          action: () => this.shepherdService.previous(),
         },
       ],
       when: {
@@ -448,40 +582,29 @@ export class ResourcesTutorialService {
   }
 
   private buildResourceActionsHTML(): string {
-    return `
-      <div style="padding: 20px; max-width: 400px;">
-      <h3 style="margin-bottom: 16px; font-weight: 600;">Actions disponibles sur chaque ressource:</h3>
-
-      <div style="margin-bottom: 16px;">
-
-        <div style="display: flex; align-items: center; margin-bottom: 16px;">
-        <svg viewBox="64 64 896 896" focusable="false" fill="currentColor" width="3.5em" height="3.5em" data-icon="edit" aria-hidden="true" style="margin-right: 16px;"><path d="M257.7 752c2 0 4-.2 6-.5L431.9 722c2-.4 3.9-1.3 5.3-2.8l423.9-423.9a9.96 9.96 0 000-14.1L694.9 114.9c-1.9-1.9-4.4-2.9-7.1-2.9s-5.2 1-7.1 2.9L256.8 538.8c-1.5 1.5-2.4 3.3-2.8 5.3l-29.5 168.2a33.5 33.5 0 009.4 29.8c6.6 6.4 14.9 9.9 23.8 9.9zm67.4-174.4L687.8 215l73.3 73.3-362.7 362.6-88.9 15.7 15.6-89zM880 836H144c-17.7 0-32 14.3-32 32v36c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-36c0-17.7-14.3-32-32-32z"></path></svg>
-        <div>
-          <strong>Éditer</strong>
-          <p style="margin: 4px 0; font-size: 14px; color: var(--brand-text-secondary);">
-          Cliquez sur le bouton crayon pour modifier la ressource (si vous en avez les droits).
-          </p>
-        </div>
-        </div>
-
-        <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <svg viewBox="64 64 896 896" focusable="false" fill="currentColor" width="3.5em" height="3.5em" data-icon="play-circle" aria-hidden="true" style="margin-right: 16px;"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path><path d="M719.4 499.1l-296.1-215A15.9 15.9 0 00398 297v430c0 13.1 14.8 20.5 25.3 12.9l296.1-215a15.9 15.9 0 000-25.8zm-257.6 134V390.9L628.5 512 461.8 633.1z"></path></svg>
-        <div>
-          <strong>Prévisualiser</strong>
-          <p style="margin: 4px 0; font-size: 14px; color: var(--brand-text-secondary);">
-          Cliquez sur le titre ou l'icône prévisualisée pour voir le contenu de la ressource sans l'ouvrir en édition.
-          </p>
-        </div>
-        </div>
-      </div>
-
-      <div style="padding: 12px; background: var(--brand-background-components); border-radius: 8px; margin-top: 16px;">
-        <p style="margin: 0; font-size: 14px;">
-        <strong>💡 Astuce :</strong> Les actions disponibles dépendent de vos permissions sur chaque ressource.
-        </p>
-      </div>
-      </div>
-    `
+    return `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+               Chaque ressource propose plusieurs actions selon vos droits d'accès.
+             </p>
+             <div style="display: flex; flex-direction: column; gap: 8px;">
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 12px;">
+                 <strong style="color: var(--brand-text-primary); font-size: 13px;">Consulter</strong><br>
+                 <small style="color: var(--brand-text-secondary);">Cliquez sur le titre d'une ressource pour accéder à sa page de détail</small>
+               </div>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 12px;">
+                 <strong style="color: var(--brand-text-primary); font-size: 13px;">Éditer</strong><br>
+                 <small style="color: var(--brand-text-secondary);">Modifiez le contenu si vous disposez des droits d'édition sur cette ressource</small>
+               </div>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 12px;">
+                 <strong style="color: var(--brand-text-primary); font-size: 13px;">Prévisualiser</strong><br>
+                 <small style="color: var(--brand-text-secondary);">Consultez le rendu de la ressource sans la modifier</small>
+               </div>
+             </div>
+             <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;
+                         border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8); margin-top: 8px;">
+               <small style="color: var(--brand-text-secondary);">
+                 Les actions disponibles dépendent de vos permissions sur chaque ressource.
+               </small>
+             </div>`
   }
 
   private waitForFilterDrawer(): Promise<void> {
@@ -499,22 +622,14 @@ export class ResourcesTutorialService {
     })
   }
 
-  /**
-   * Vérifie si une checkbox est cochée.
-   */
   private isCheckboxChecked(checkbox: HTMLElement): boolean {
-    // Standard HTML : l'input natif
     const input = checkbox.querySelector('input[type="checkbox"]') as HTMLInputElement | null
     if (input) {
       return input.checked
     }
-
     return checkbox.getAttribute('aria-checked') === 'true'
   }
 
-  /**
-   * Retourne les labels des checkboxes cochées en se basant sur le contenu textuel.
-   */
   private getCheckedCheckboxLabels(checkboxes: NodeListOf<Element>): { checkedLabels: string[]; totalChecked: number } {
     const checkedLabels: string[] = []
     checkboxes.forEach((cb) => {
@@ -541,6 +656,7 @@ export class ResourcesTutorialService {
       }, index * 100)
     })
   }
+
   startActionTutorial(action: 'preview' | 'edit' | 'duplicate' | 'share'): void {
     let steps: TutorialStep[] = []
 
@@ -550,7 +666,10 @@ export class ResourcesTutorialService {
           {
             id: 'preview-tutorial',
             title: 'Prévisualisation',
-            text: "La prévisualisation vous permet de voir le contenu d'une ressource sans la modifier. C'est idéal pour explorer rapidement le contenu disponible.",
+            text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0;">
+                     La prévisualisation vous permet de voir le contenu d'une ressource sans la modifier.
+                     C'est idéal pour explorer rapidement le contenu disponible.
+                   </p>`,
           },
         ]
         break
@@ -560,7 +679,10 @@ export class ResourcesTutorialService {
           {
             id: 'edit-tutorial',
             title: 'Édition de ressource',
-            text: "L'éditeur vous permet de modifier le contenu, les métadonnées et les paramètres d'une ressource. Assurez-vous d'avoir les permissions nécessaires.",
+            text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0;">
+                     L'éditeur vous permet de modifier le contenu, les métadonnées et les paramètres d'une ressource.
+                     Assurez-vous de disposer des permissions nécessaires avant de modifier une ressource.
+                   </p>`,
           },
         ]
         break
@@ -572,9 +694,6 @@ export class ResourcesTutorialService {
     })
   }
 
-  /**
-   * Attend qu'un élément spécifique soit présent dans le DOM
-   */
   private waitForElement(selector: string): Promise<HTMLElement> {
     return new Promise<HTMLElement>((resolve) => {
       const checkElement = () => {
@@ -598,7 +717,7 @@ export class ResourcesTutorialService {
 
   /**
    * Ajoute le paramètre fromTutorial aux liens du premier cercle via #tuto-title-resource.
-   * On utilise le sélecteur #tuto-title-resource plutôt que resource-item:first-child
+   * On utilise ce sélecteur plutôt que resource-item:first-child
    * car Angular insère des view containers qui cassent le :first-child.
    */
   private addTutorialParamToFirstCircleLinks(): void {
@@ -617,7 +736,6 @@ export class ResourcesTutorialService {
       link.href = url.toString()
     })
 
-    // On utilise le flag isFromTutorial pour la navigation au lieu de preventDefault
     titleResource.addEventListener(
       'click',
       () => {

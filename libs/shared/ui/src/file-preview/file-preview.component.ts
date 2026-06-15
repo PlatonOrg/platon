@@ -17,6 +17,7 @@ import {
 } from '@angular/core'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
+import * as Papa from 'papaparse'
 import * as pdfjsLib from 'pdfjs-dist/build/pdf'
 import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry'
 
@@ -291,26 +292,22 @@ export class UiFilePreviewComponent implements OnChanges, OnDestroy {
   }
 
   /** separate cell for the csv.  */
-  private parseCsvForPreview(rawContent: string) {
-    if (!rawContent) return
-    const lines = rawContent.trim().split(/\r?\n/)
-    if (lines.length > 0) {
-      const delimiter = lines[0].includes(';') ? ';' : ','
-      this.csvHeaders = lines[0].split(delimiter).map((h) => h.trim().replace(/^"(.*)"$/, '$1'))
-      let maxSize = this.csvHeaders.length
-      let numberRow = 1
-      this.csvRows = lines.slice(1).map((line) => {
-        const result = line.split(delimiter).map((v) => v.trim().replace(/^"(.*)"$/, '$1'))
-        if (maxSize < result.length) {
-          maxSize = result.length
+  private parseCsvForPreview(csv: string): void {
+    Papa.parse(csv, {
+      skipEmptyLines: 'greedy',
+      complete: (result) => {
+        const data = result.data as string[][]
+        if (data.length === 0) {
+          return // empty file
         }
-        numberRow = numberRow + 1
-        return result
-      })
-      for (let i = this.csvHeaders.length; i < maxSize; i++) {
-        this.csvHeaders.push(' ')
-      }
-    }
-    this.changeDetectorRef.detectChanges()
+        this.csvHeaders = data[0]
+        this.csvRows = data.slice(1)
+        const maxSize = Math.max(...data.map((row) => row.length))
+        while (this.csvHeaders.length < maxSize) {
+          this.csvHeaders.push(' ')
+        }
+        this.changeDetectorRef.markForCheck()
+      },
+    })
   }
 }

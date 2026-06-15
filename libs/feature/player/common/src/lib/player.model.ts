@@ -240,4 +240,14 @@ export const getClosingTime = (player: Partial<ActivityPlayer>): number | null =
   return closingTime
 }
 
+/**
+ * Determines if an exercise player contains an error log.
+ *
+ * @param player - The exercise player object to check.
+ * @returns True if the player contains a `platon_logs` with type `error`, false otherwise.
+ */
+export const hasError = (player: Partial<ExercisePlayer>): boolean => {
+  return player.platon_logs?.some((log) => log.type === LogType.ERROR) ?? false
+}
+
 export const NO_COPY_PASTER_CLASS_NAME = 'no-copy-paste'

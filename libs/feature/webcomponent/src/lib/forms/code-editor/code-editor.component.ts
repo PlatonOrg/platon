@@ -1,23 +1,30 @@
 // tslint:disable: no-bitwise
 
 import {
-  AfterViewChecked,
+  AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
+  Inject,
   Injector,
   Input,
   OnDestroy,
-  Output,
-  ViewChild,
   OnInit,
+  Output,
+  Renderer2,
+  ViewChild,
 } from '@angular/core'
+import { DOCUMENT } from '@angular/common'
 import { ACTION_GOTO_LINE, ACTION_INDENT_USING_SPACES, ACTION_QUICK_COMMAND } from '@cisstech/nge/monaco'
 import { NO_COPY_PASTER_CLASS_NAME } from '@platon/feature/player/common'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
+import { WebComponentService } from '../../web-component.service'
 import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor'
+
+const MIN_EDITOR_HEIGHT_PX = 400
 
 @Component({
   selector: 'wc-code-editor',
@@ -26,40 +33,57 @@ import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(CodeEditorComponentDefinition)
-export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComponentHooks<CodeEditorState>, OnInit {
+export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, WebComponentHooks<CodeEditorState> {
   private readonly disposables: monaco.IDisposable[] = []
   private model?: monaco.editor.ITextModel
   private editor?: monaco.editor.IStandaloneCodeEditor
-  private width = 0
-  private height = 0
+  private resizeObserver?: ResizeObserver
 
   @Input() state!: CodeEditorState
   @Output() stateChange = new EventEmitter<CodeEditorState>()
 
-  @ViewChild('footer', { static: true })
-  footer!: ElementRef<HTMLElement>
+  @ViewChild('resizableEl', { static: true })
+  resizableEl!: ElementRef<HTMLElement>
 
   initialCode = ''
   cursor: monaco.IPosition = {
     column: 0,
     lineNumber: 0,
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  decorations: any[] = []
 
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {}
+  isResizing = false
+  private resizeStartY = 0
+  private resizeStartHeight = 0
+  private savedBodyOverflow = ''
+  private capturedPointerId: number | null = null
+  private capturingElement: HTMLElement | null = null
+  private unlistenPointerUp?: () => void
+  private unlistenPointerCancel?: () => void
+  private unlistenLostPointerCapture?: () => void
+  private unlistenWindowResize?: () => void
+  private rafId?: number
+  private pendingClientY?: number
 
-  ngAfterViewChecked() {
-    if (!this.editor || !this.footer) return
+  constructor(
+    readonly injector: Injector,
+    readonly changeDetector: WebComponentChangeDetectorService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly renderer: Renderer2,
+    @Inject(DOCUMENT) private readonly document: Document,
+    private readonly webComponentService: WebComponentService
+  ) {}
 
-    const rect = this.footer.nativeElement.getBoundingClientRect()
-    if (!rect) return
-
-    const { width, height } = rect
-    if (this.width !== width || this.height !== height) {
-      this.editor?.layout()
-      this.width = width
-      this.height = height
+  ngAfterViewInit() {
+    const onResize = () => {
+      if (!this.isResizing) {
+        this.editor?.layout()
+      }
+    }
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(onResize)
+      this.resizeObserver.observe(this.resizableEl.nativeElement)
+    } else {
+      this.unlistenWindowResize = this.renderer.listen('window', 'resize', onResize)
     }
   }
 
@@ -68,13 +92,90 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
   }
 
   ngOnDestroy() {
+    this.resizeObserver?.disconnect()
+    this.unlistenWindowResize?.()
+    this.cleanupResize()
     this.disposables.forEach((d) => d.dispose())
   }
 
-  onCreateEditor(editor: monaco.editor.IEditor) {
-    this.editor = editor as monaco.editor.IStandaloneCodeEditor
+  onResizeStart(event: PointerEvent) {
+    if (this.isResizing) return
+    event.preventDefault()
+    const target = event.currentTarget as HTMLElement
+    target.setPointerCapture(event.pointerId)
+    this.capturedPointerId = event.pointerId
+    this.capturingElement = target
+    this.isResizing = true
+    this.resizeStartY = event.clientY
+    this.resizeStartHeight = this.resizableEl.nativeElement.getBoundingClientRect().height
+    this.savedBodyOverflow = this.document.body.style.overflow
+    this.renderer.setStyle(this.document.body, 'overflow', 'hidden')
+    this.renderer.setStyle(this.document.documentElement, 'overflow', 'hidden')
+    this.renderer.setStyle(this.document.body, 'cursor', 'ns-resize')
+    // Filets de sécurité : garantissent le nettoyage même si les événements ne remontent pas jusqu'au grip
+    this.unlistenLostPointerCapture = this.renderer.listen(target, 'lostpointercapture', this.cleanupResize)
+    this.unlistenPointerUp = this.renderer.listen(this.document, 'pointerup', this.cleanupResize)
+    this.unlistenPointerCancel = this.renderer.listen(this.document, 'pointercancel', this.cleanupResize)
+  }
 
-    editor.setModel(
+  onResizeMove(event: PointerEvent) {
+    if (!this.isResizing) return
+    event.preventDefault()
+    this.pendingClientY = event.clientY
+    if (this.rafId === undefined) {
+      this.rafId = this.document.defaultView?.requestAnimationFrame(() => {
+        this.rafId = undefined
+        const clientY = this.pendingClientY
+        this.pendingClientY = undefined
+        if (clientY === undefined) return
+        const newHeight = Math.max(MIN_EDITOR_HEIGHT_PX, this.resizeStartHeight + (clientY - this.resizeStartY))
+        this.changeDetector
+          .ignore(this, () => {
+            this.state.height = newHeight
+          })
+          .catch(console.error)
+      })
+    }
+  }
+
+  onResizeEnd(_event: PointerEvent) {
+    this.cleanupResize()
+  }
+
+  private readonly cleanupResize = () => {
+    if (this.rafId !== undefined) {
+      this.document.defaultView?.cancelAnimationFrame(this.rafId)
+      this.rafId = undefined
+      this.pendingClientY = undefined
+    }
+    this.isResizing = false
+    if (this.capturedPointerId !== null && this.capturingElement?.hasPointerCapture(this.capturedPointerId)) {
+      this.capturingElement.releasePointerCapture(this.capturedPointerId)
+    }
+    this.unlistenLostPointerCapture?.()
+    this.unlistenLostPointerCapture = undefined
+    this.capturedPointerId = null
+    this.capturingElement = null
+    this.unlistenPointerUp?.()
+    this.unlistenPointerCancel?.()
+    this.unlistenPointerUp = undefined
+    this.unlistenPointerCancel = undefined
+    if (this.savedBodyOverflow) {
+      this.renderer.setStyle(this.document.body, 'overflow', this.savedBodyOverflow)
+    } else {
+      this.renderer.removeStyle(this.document.body, 'overflow')
+    }
+    this.renderer.removeStyle(this.document.documentElement, 'overflow')
+    this.renderer.removeStyle(this.document.body, 'cursor')
+    this.editor?.layout()
+    this.cdr.markForCheck()
+  }
+
+  onCreateEditor(editor: monaco.editor.IEditor) {
+    const standaloneEditor = editor as monaco.editor.IStandaloneCodeEditor
+    this.editor = standaloneEditor
+
+    standaloneEditor.setModel(
       (this.model = this.model || monaco.editor.createModel(this.state.code || '', this.state.language || 'plaintext'))
     )
 
@@ -86,14 +187,14 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
       trimAutoWhitespace: true,
     })
 
-    this.editor.updateOptions({
+    standaloneEditor.updateOptions({
       autoIndent: 'advanced',
       lineNumbers: 'on',
       renderWhitespace: 'all',
       quickSuggestions: true,
       glyphMargin: false,
       renderControlCharacters: true,
-      contextmenu: document.querySelector(`.${NO_COPY_PASTER_CLASS_NAME}`) == null,
+      contextmenu: this.document.querySelector(`.${NO_COPY_PASTER_CLASS_NAME}`) == null,
       minimap: {
         enabled: true,
       },
@@ -105,7 +206,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
 
     // LISTENERS
     this.disposables.push(this.model)
-    this.disposables.push(this.editor)
+    this.disposables.push(standaloneEditor)
     this.disposables.push(
       this.model.onDidChangeContent(() => {
         this.changeDetector
@@ -117,7 +218,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
       })
     )
     this.disposables.push(
-      this.editor.onDidChangeCursorPosition((e) => {
+      standaloneEditor.onDidChangeCursorPosition((e) => {
         this.changeDetector
           .ignore(this, () => {
             this.cursor = e.position
@@ -126,31 +227,18 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
       })
     )
 
-    /*    this.disposables.push(
-      this.editor.onDidChangeCursorSelection(() => {
-        console.log('onDidChangeCursorSelection')
-        const { column, lineNumber } = this.editor!.getPosition()!
-        this.editor!.setPosition({ lineNumber, column })
-      })
-    ) */
     // COMMANDS
-    this.editor.addCommand(
+    standaloneEditor.addCommand(
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
       () => {
         //
       },
       ''
     )
-    /*
-    this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, () => {
-      console.log('Ctrl+C')
-      return null
-    })
 
-    this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {
-      console.log('Ctrl+V')
-      return null
-    }) */
+    standaloneEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      this.webComponentService.submit(this)
+    })
 
     this.initialCode = this.state.code
   }
@@ -164,7 +252,9 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
       tabSize: this.state.tabSize,
       quickSuggestions: this.state.quickSuggestions,
     })
-    this.model.setValue(this.state.code)
+    if (this.model.getValue() !== this.state.code) {
+      this.model.setValue(this.state.code)
+    }
   }
 
   reset() {

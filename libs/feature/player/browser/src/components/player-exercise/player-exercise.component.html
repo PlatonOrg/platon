@@ -32,6 +32,17 @@
           <mat-icon>refresh</mat-icon>
           Réessayer
         </button>
+
+        <button
+          mat-stroked-button
+          color="accent"
+          (click)="goToNextPlayer.emit()"
+          *ngIf="!editorPreview && hasNext"
+          aria-label="Passer à l'exercice suivant"
+        >
+          <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+          Passer l'exercice
+        </button>
       </div>
 
       <div class="error-tips">
@@ -201,12 +212,7 @@
 
 <ui-modal-drawer #commentDrawer title="Commentaires">
   <ng-template>
-    <player-comments
-      *ngIf="player"
-      [canComment]="canComment"
-      [answerId]="player.answerId!"
-      [sessionId]="player.sessionId"
-    />
+    <player-comments [canComment]="canComment" [answers]="players" [sessionId]="player?.sessionId" />
   </ng-template>
 </ui-modal-drawer>
 

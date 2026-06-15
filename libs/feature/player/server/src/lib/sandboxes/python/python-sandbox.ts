@@ -96,7 +96,7 @@ export class PythonSandbox implements Sandbox {
           )
           return result.data
         },
-        { prefix: 'envs', suffix: '.tgz', cleanup: false }
+        { prefix: 'envs', suffix: '.tgz', cleanup: true }
       )
 
       if (response.status === -2) {

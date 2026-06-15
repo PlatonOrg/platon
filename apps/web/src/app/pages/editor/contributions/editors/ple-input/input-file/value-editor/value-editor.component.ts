@@ -114,6 +114,22 @@ export class ValueEditorComponent extends BaseValueEditor<string> implements OnD
     this.isDragging = true
   }
 
+  /** upload file selected in the file exploreur pop up*/
+  protected async onFileSelected(event: Event) {
+    if (this.disabled) {
+      return
+    }
+    const input = event.target as HTMLInputElement
+    if (input.files && input.files.length > 0) {
+      const selectedFile = input.files[0]
+      const dndDataMock: DndData = {
+        file: selectedFile,
+      }
+      await this.uploadFile(dndDataMock)
+      input.value = '' // otherwise open directly on the last uploaded file
+    }
+  }
+
   private async uploadFile(data: DndData) {
     if (data.file === undefined) {
       return // should never append

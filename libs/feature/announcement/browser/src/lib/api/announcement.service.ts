@@ -55,4 +55,8 @@ export class AnnouncementService {
   getActiveAnnouncements(): Observable<ListResponse<Announcement>> {
     return this.getVisibleForUser({ active: true })
   }
+
+  findByIdForUser(id: string): Observable<Announcement> {
+    return this.announcementProvider.findByIdForUser(id)
+  }
 }

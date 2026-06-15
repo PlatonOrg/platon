@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { RouterModule } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { Subscription } from 'rxjs'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -31,7 +31,6 @@ import { Title } from '@angular/platform-browser'
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule,
 
     MatIconModule,
 
@@ -54,6 +53,8 @@ import { Title } from '@angular/platform-browser'
 export class CoursePage implements OnInit, OnDestroy {
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly router = inject(Router)
+  private readonly activatedRoute = inject(ActivatedRoute)
   private readonly subscriptions: Subscription[] = []
 
   protected context = this.presenter.defaultContext()
@@ -72,6 +73,10 @@ export class CoursePage implements OnInit, OnDestroy {
         }
       })
     )
+  }
+
+  protected async onBack(): Promise<void> {
+    await this.router.navigate(['../'], { relativeTo: this.activatedRoute })
   }
 
   ngOnDestroy(): void {

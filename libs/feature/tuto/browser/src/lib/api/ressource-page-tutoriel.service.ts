@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
-import { User } from '@platon/core/common'
 import { Resource, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 
 @Injectable({
@@ -21,19 +20,27 @@ export class ResourcePageTutorialService {
   }
 
   private buildTutorialSteps(
-    //user: User,
     resource: Resource,
     isOwner: boolean,
     isMember: boolean,
     isWatcher: boolean
   ): TutorialStep[] {
+    const resourceLabel = resource.type === 'CIRCLE' ? 'ce cercle' : 'cette ressource'
+
     const steps: TutorialStep[] = [
       {
         id: 'welcome',
-        title: `Bienvenue sur la page de ${resource.type === 'CIRCLE' ? 'ce cercle' : 'cette ressource'} !`,
-        text: `Découvrons ensemble les fonctionnalités disponibles pour ${this.getResourceTypeText(
-          resource.type
-        )}. Ce tutoriel vous montrera comment interagir avec cette ressource.`,
+        title: `Page de ${resource.type === 'CIRCLE' ? 'cercle' : 'ressource'}`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Ce tutoriel vous présente les fonctionnalités disponibles pour interagir avec
+                 <strong style="color: var(--brand-text-primary);">${resourceLabel}</strong>.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;
+                           border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                 <small style="color: var(--brand-text-secondary);">
+                   Les options disponibles varient selon vos droits sur cette ressource.
+                 </small>
+               </div>`,
         buttons: [
           {
             text: 'Passer le tutoriel',
@@ -41,15 +48,24 @@ export class ResourcePageTutorialService {
             action: () => this.shepherdService.cancel(),
           },
           {
-            text: 'Commencer le tutoriel',
+            text: 'Commencer',
             action: () => this.shepherdService.next(),
           },
         ],
       },
       {
         id: 'breadcrumb',
-        title: 'Navigation',
-        text: "Le fil d'Ariane vous montre où vous êtes dans la hiérarchie. Vous pouvez cliquer sur le parent pour remonter d'un niveau ou sur l'icône d'arbre pour voir la structure complète.",
+        title: "Fil d'Ariane",
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Le fil d'Ariane indique votre position dans la
+                 <strong style="color: var(--brand-text-primary);">hiérarchie des ressources</strong>.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   Cliquez sur un élément parent pour remonter d'un niveau,
+                   ou sur l'icône d'arbre pour voir la structure complète.
+                 </small>
+               </div>`,
         attachTo: {
           element: '#tuto-breadcrumb',
           on: 'bottom',
@@ -59,8 +75,14 @@ export class ResourcePageTutorialService {
         id: 'resource-name',
         title: 'Nom de la ressource',
         text: isOwner
-          ? 'En tant que propriétaire, vous pouvez modifier le nom en cliquant dessus.'
-          : 'Voici le nom de la ressource. Seul le propriétaire peut le modifier.',
+          ? `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+               En tant que <strong style="color: var(--brand-text-primary);">propriétaire</strong>,
+               vous pouvez modifier le nom en cliquant directement dessus.
+             </p>`
+          : `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+               Voici le nom de la ressource. Seul le
+               <strong style="color: var(--brand-text-primary);">propriétaire</strong> peut le modifier.
+             </p>`,
         attachTo: {
           element: '#tuto-resource-name-item',
           on: 'bottom',
@@ -70,8 +92,14 @@ export class ResourcePageTutorialService {
         id: 'description',
         title: 'Description',
         text: isOwner
-          ? 'Cliquez sur la description pour la modifier et donner plus de contexte sur votre ressource.'
-          : "La description vous donne des informations sur le contenu et l'objectif de cette ressource.",
+          ? `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+               Cliquez sur la description pour la modifier et donner plus de
+               <strong style="color: var(--brand-text-primary);">contexte</strong> sur votre ressource.
+             </p>`
+          : `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+               La description présente le contenu et les
+               <strong style="color: var(--brand-text-primary);">objectifs pédagogiques</strong> de la ressource.
+             </p>`,
         attachTo: {
           element: '#tuto-resource-description',
           on: 'bottom',
@@ -92,8 +120,16 @@ export class ResourcePageTutorialService {
       id: 'watch-button',
       title: isWatcher ? 'Ne plus suivre' : 'Suivre la ressource',
       text: isWatcher
-        ? 'Vous suivez actuellement cette ressource. Cliquez pour ne plus recevoir de notifications lors des mises à jour.'
-        : "Suivre une ressource vous permet de l'ajouter dans vos cours/activités et de recevoir des notifications lors des mises à jour.",
+        ? `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+             Vous suivez actuellement cette ressource. Cliquez pour
+             <strong style="color: var(--brand-text-primary);">ne plus recevoir</strong>
+             de notifications lors des mises à jour.
+           </p>`
+        : `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+             Suivre une ressource vous permet de l'
+             <strong style="color: var(--brand-text-primary);">intégrer dans vos cours</strong>
+             et de recevoir des notifications lors des mises à jour.
+           </p>`,
       attachTo: {
         element: '#tuto-watch-button',
         on: 'bottom',
@@ -104,7 +140,10 @@ export class ResourcePageTutorialService {
       steps.push({
         id: 'join-button',
         title: 'Rejoindre le cercle',
-        text: 'Cliquez ici pour demander à rejoindre ce cercle. Le propriétaire recevra une notification et pourra accepter ou refuser votre demande.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Cliquez ici pour <strong style="color: var(--brand-text-primary);">demander à rejoindre</strong>
+                 ce cercle. Le propriétaire recevra une notification et pourra accepter ou refuser votre demande.
+               </p>`,
         attachTo: {
           element: '#tuto-join-button',
           on: 'bottom',
@@ -122,13 +161,15 @@ export class ResourcePageTutorialService {
       },
     })
 
-    // Si ce n'est pas un cercle, ajouter les boutons spécifiques
     if (resource.type !== 'CIRCLE') {
       steps.push(
         {
           id: 'share-button',
           title: 'Partager',
-          text: "Partagez cette ressource avec d'autres utilisateurs ou cercles en définissant des permissions spécifiques.",
+          text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                   Partagez cette ressource avec d'autres utilisateurs ou cercles en définissant des
+                   <strong style="color: var(--brand-text-primary);">permissions spécifiques</strong>.
+                 </p>`,
           attachTo: {
             element: '#tuto-share-button',
             on: 'left',
@@ -137,7 +178,11 @@ export class ResourcePageTutorialService {
         {
           id: 'preview-button',
           title: 'Prévisualiser',
-          text: "Testez la ressource pour voir comment elle fonctionne avant de l'utiliser dans vos cours.",
+          text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                   Testez la ressource pour voir comment elle fonctionne
+                   <strong style="color: var(--brand-text-primary);">en conditions réelles</strong>
+                   avant de l'utiliser dans vos cours.
+                 </p>`,
           attachTo: {
             element: '#tuto-preview-button',
             on: 'left',
@@ -146,28 +191,29 @@ export class ResourcePageTutorialService {
       )
     }
 
-    // Onglets de navigation
     steps.push(
       {
         id: 'tabs',
         title: 'Navigation par onglets',
-        text: `<div style="text-align: center; padding: 20px;">
-           <h4>Navigation par onglets</h4>
-           <p>Cette ressource est organisée en plusieurs sections accessibles via les onglets ci-dessous :</p>
-
-           <div style="text-align: left; margin: 20px 0;">
-             <p><strong>Vue d'ensemble</strong> : Statistiques et informations générales</p>
-             <p><strong>Explorer</strong> : ${
-               resource.type === 'CIRCLE' ? 'Contenu du cercle' : 'Fichiers et contenu'
-             }</p>
-             <p><strong>Événements</strong> : Historique des modifications</p>
-             <p><strong>Paramètres</strong> : Configuration et permissions</p>
-           </div>
-
-           <p style="font-size: 14px; color: var(--brand-text-secondary);">
-             Cliquez sur chaque onglet pour explorer les différentes sections !
-           </p>
-         </div>`,
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 La ressource est organisée en plusieurs sections accessibles via les onglets.
+               </p>
+               <div style="display: flex; flex-direction: column; gap: 6px;">
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Vue d'ensemble</strong> — statistiques et informations générales</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Explorer</strong> — ${
+                     resource.type === 'CIRCLE' ? 'contenu du cercle' : 'fichiers et contenu'
+                   }</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Événements</strong> — historique des modifications</small>
+                 </div>
+                 <div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+                   <small style="color: var(--brand-text-secondary);"><strong>Paramètres</strong> — configuration et permissions</small>
+                 </div>
+               </div>`,
         attachTo: {
           element: '#tuto-resource-tabs',
           on: 'bottom',
@@ -176,7 +222,7 @@ export class ResourcePageTutorialService {
       },
       {
         id: 'tutorial-complete',
-        title: 'Tutoriel terminé !',
+        title: 'Tutoriel terminé',
         text: this.buildCompletionText(resource),
         buttons: [
           {
@@ -203,77 +249,96 @@ export class ResourcePageTutorialService {
     }
   }
 
-  /**
-   * Construit le texte d'explication du statut
-   */
   private buildStatusText(status: ResourceStatus, isOwner: boolean): string {
     const statusDescriptions: Record<ResourceStatus, string> = {
-      DRAFT: "La ressource est en cours de création et n'est pas encore prête.",
-      READY: 'La ressource est prête à être utilisée !',
-      BUGGED: 'La ressource contient des bugs connus qui doivent être corrigés.',
+      DRAFT: "La ressource est en cours de création et n'est pas encore publiée.",
+      READY: 'La ressource est prête à être utilisée.',
+      BUGGED: 'La ressource contient des anomalies connues qui doivent être corrigées.',
       NOT_TESTED: "La ressource n'a pas encore été testée et nécessite une validation.",
       DEPRECATED: 'La ressource est obsolète et ne devrait plus être utilisée.',
     }
 
-    let text = `<strong>Statut actuel :</strong> ${statusDescriptions[status]}`
+    let text = `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                  <strong style="color: var(--brand-text-primary);">Statut actuel :</strong>
+                  ${statusDescriptions[status]}
+                </p>`
 
     if (isOwner) {
-      text += "<br><br>En tant que propriétaire, vous pouvez changer le statut selon l'état de votre ressource."
+      text += `<div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   En tant que propriétaire, vous pouvez modifier le statut selon l'état d'avancement de votre ressource.
+                 </small>
+               </div>`
     }
 
     return text
   }
 
   private buildActionsText(resource: Resource, isOwner: boolean): string {
-    let text = '<strong>Actions disponibles :</strong><br><br>'
-
-    const actions = []
+    const actions: string[] = []
 
     if (isOwner && resource.type !== 'CIRCLE') {
-      actions.push('<strong>Supprimer</strong> : Retirer définitivement la ressource')
+      actions.push('<strong>Supprimer</strong> — retirer définitivement la ressource')
     }
 
     if (resource.type === 'EXERCISE' && isOwner) {
-      actions.push("<strong>Déplacer</strong> : Changer l'emplacement de l'exercice")
+      actions.push("<strong>Déplacer</strong> — changer l'emplacement de l'exercice")
     }
 
-    actions.push("<strong>Ouvrir dans l'éditeur</strong> : Modifier le contenu de la ressource")
+    actions.push("<strong>Ouvrir dans l'éditeur</strong> — modifier le contenu de la ressource")
 
     if (resource.type !== 'CIRCLE') {
-      actions.push("<strong>Partager</strong> : Donner accès à d'autres utilisateurs")
-      actions.push('<strong>Prévisualiser</strong> : Tester la ressource')
+      actions.push("<strong>Partager</strong> — donner accès à d'autres utilisateurs")
+      actions.push('<strong>Prévisualiser</strong> — tester la ressource')
     }
 
-    text += actions.join('<br>')
-
-    return text
+    return `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+               Actions disponibles selon vos droits sur cette ressource :
+             </p>
+             <div style="display: flex; flex-direction: column; gap: 6px;">
+               ${actions
+                 .map(
+                   (a) =>
+                     `<div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;"><small style="color: var(--brand-text-secondary);">${a}</small></div>`
+                 )
+                 .join('')}
+             </div>`
   }
 
-  /**
-   * Construit le texte de fin de tutoriel
-   */
   private buildCompletionText(resource: Resource): string {
-    return `
-      <div style="text-align: center; padding: 20px;">
-        <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
-        <h3 style="margin-bottom: 16px;">Bravo ! Vous maîtrisez maintenant cette page.</h3>
+    const extras =
+      resource.type === 'CIRCLE'
+        ? `<div style="background: var(--brand-background-components); border-radius: 6px; padding: 8px;">
+           <small style="color: var(--brand-text-secondary);">Rejoindre des cercles pour accéder aux ressources partagées</small>
+         </div>`
+        : ''
 
-        <div style="text-align: left; max-width: 400px; margin: 0 auto;">
-          <p style="margin-bottom: 16px;">Vous savez maintenant :</p>
-          <ul style="list-style: none; padding: 0;">
-            <li style="margin-bottom: 8px;">- Naviguer dans la hiérarchie des ressources</li>
-            <li style="margin-bottom: 8px;">- Comprendre et modifier le statut</li>
-            <li style="margin-bottom: 8px;">- Suivre les ressources pour recevoir des notifications</li>
-            ${resource.type === 'CIRCLE' ? '<li style="margin-bottom: 8px;">- Rejoindre des cercles</li>' : ''}
-            <li style="margin-bottom: 8px;">- Utiliser les actions disponibles</li>
-            <li style="margin-bottom: 8px;">- Explorer les différents onglets</li>
-          </ul>
-        </div>
-
-        <p style="margin-top: 16px; font-size: 14px; color: #666;">
-          N'hésitez pas à explorer les différents onglets pour découvrir toutes les fonctionnalités !
-        </p>
-      </div>
-    `
+    return `<div style="text-align: center; padding: 20px;">
+               <h3 style="color: var(--brand-text-primary); margin: 0 0 16px 0;">
+                 Vous maîtrisez cette page !
+               </h3>
+               <div style="background: var(--brand-background-components); border-radius: 8px;
+                           padding: 16px; margin: 16px 0;
+                           border-left: 4px solid rgba(var(--brand-color-primary-rgb), 0.8);">
+                 <div style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
+                   <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                     <small style="color: var(--brand-text-secondary);">Naviguer dans la hiérarchie des ressources</small>
+                   </div>
+                   <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                     <small style="color: var(--brand-text-secondary);">Comprendre et modifier le statut</small>
+                   </div>
+                   <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                     <small style="color: var(--brand-text-secondary);">Suivre les ressources pour recevoir des notifications</small>
+                   </div>
+                   ${extras}
+                   <div style="background: var(--brand-background-card); border-radius: 6px; padding: 8px;">
+                     <small style="color: var(--brand-text-secondary);">Utiliser les actions et explorer les onglets</small>
+                   </div>
+                 </div>
+               </div>
+               <p style="color: var(--brand-text-secondary); font-size: 13px; margin: 0;">
+                 Explorez les différents onglets pour découvrir toutes les fonctionnalités.
+               </p>
+             </div>`
   }
 }

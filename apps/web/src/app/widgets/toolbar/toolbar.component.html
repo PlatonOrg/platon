@@ -1,6 +1,6 @@
 <header>
   <button id="tuto-toolbar-menu-button" nz-button nzType="text" (click)="drawerOpenedChange.emit(!drawerOpened)">
-    <mat-icon class="icon-color">menu</mat-icon>
+    <mat-icon class="icon-color">{{ drawerOpened ? 'menu_open' : 'menu' }}</mat-icon>
   </button>
 
   <img

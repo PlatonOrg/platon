@@ -14,7 +14,7 @@
   <!-- Partie droite : Grille si inline, sinon partie en bas-->
   <div class="grid-panel">
     <div
-      [style.gridTemplateColumns]="'repeat(' + grid[0].length + ', 1fr)'"
+      [style.gridTemplateColumns]="'repeat(' + grid[0].length + ', minmax(30px, 100px))'"
       [style.gridTemplateRows]="'repeat(' + grid.length + ', 1fr)'"
       class="crossword-grid responsive-grid"
     >
@@ -25,22 +25,16 @@
             <input
               class="cell-square"
               [ngClass]="getBackgroundColorClasses(x, y)"
-              maxlength="1"
               [attr.data-x]="x"
               [attr.data-y]="y"
+              (input)="onInput($event, x, y)"
+              (focus)="onFocus($event, x, y)"
               (keydown)="onKeyDown($event, x, y)"
               placeholder="{{ getCharAt(x, y) }}"
               [disabled]="this.state.disabled"
             />
-
-            <span
-              [ngClass]="{
-                isStartCellVertical: isStartCellVertical(x, y),
-                isStartCellHorizental: isStartCellHorizental(x, y)
-              }"
-              *ngIf="isStartCellVertical(x, y) || isStartCellHorizental(x, y)"
-            >
-              {{ resultByCoordonateXY(x, y).position }}
+            <span *ngFor="let res of getResultsAtCoordinates(x, y)" [ngClass]="res.orientation">
+              {{ res.position }}
             </span>
           </div>
           } @else {

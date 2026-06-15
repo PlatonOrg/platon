@@ -408,16 +408,14 @@ export class Repo {
   async commit(message: string): Promise<boolean> {
     if (this.ignoreCommits) return false
 
-    // add all
-    await git
-      .statusMatrix(this.repo)
-      .then((status) =>
-        Promise.all(
-          status.map(([filepath, , worktreeStatus]) =>
-            worktreeStatus ? git.add({ ...this.repo, filepath }) : git.remove({ ...this.repo, filepath })
-          )
-        )
-      )
+    const status = await git.statusMatrix(this.repo)
+    const toAdd = status.filter(([, , worktreeStatus]) => worktreeStatus).map(([filepath]) => filepath)
+    const toRemove = status.filter(([, , worktreeStatus]) => !worktreeStatus).map(([filepath]) => filepath)
+
+    if (toAdd.length) await git.add({ ...this.repo, filepath: toAdd })
+    for (const filepath of toRemove) {
+      await git.remove({ ...this.repo, filepath })
+    }
 
     await git.commit({
       ...this.repo,
