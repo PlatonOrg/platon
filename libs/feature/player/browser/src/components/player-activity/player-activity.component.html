@@ -122,35 +122,49 @@
     </mat-card-content>
   </mat-card>
   <ng-template #showExercices>
-    <section>
-      <ng-container *ngFor="let exercise of exercises; trackBy: trackBySessionId; let i = index">
-        <nz-ribbon [nzText]="ribbon">
-          <ng-template #ribbon>
-            @if (nextNavigation) { Exercice {{ player.navigation.nextExercisesHistoryPosition + 1 }}
-            } @else {
-            {{ composed ? i + 1 : position + 1 }} / {{ navExerciceCount }}
-            }
-          </ng-template>
-          <player-exercise
-            #playerExercise
-            [id]="exercise.sessionId"
-            [player]="exercise"
-            [state]="answerStates[exercise.sessionId]"
-            (evaluated)="onChangeNavigation($event)"
-            [hasPrev]="hasPrev"
-            [hasNext]="hasNext"
-            (goToPrevPlayer)="play(player.navigation.exercises[position - 1], true)"
-            (goToNextPlayer)="play(player.navigation.exercises[position + 1])"
-          />
-        </nz-ribbon>
-      </ng-container>
-    </section>
+    <div [class.leave-warning-frame]="showLeaveWarning()">
+      @if (showLeaveWarning()) {
+      <div class="leave-warning-banner" role="alert" aria-live="polite">
+        <span class="leave-warning-icon" aria-hidden="true"><mat-icon>info</mat-icon></span>
+        <p>
+          Vous n'êtes pas autorisé à quitter cette page. Si vous quittez, votre activité sera automatiquement terminée.
+        </p>
+      </div>
+      }
+      <section>
+        <ng-container *ngFor="let exercise of exercises; trackBy: trackBySessionId; let i = index">
+          <nz-ribbon [nzText]="ribbon">
+            <ng-template #ribbon>
+              @if (nextNavigation) { Exercice {{ player.navigation.nextExercisesHistoryPosition + 1 }}
+              } @else {
+              {{ composed ? i + 1 : position + 1 }} / {{ navExerciceCount }}
+              }
+            </ng-template>
+            <player-exercise
+              #playerExercise
+              [id]="exercise.sessionId"
+              [player]="exercise"
+              [state]="answerStates[exercise.sessionId]"
+              (evaluated)="onChangeNavigation($event)"
+              [hasPrev]="hasPrev"
+              [hasNext]="hasNext"
+              (goToPrevPlayer)="play(player.navigation.exercises[position - 1], true)"
+              (goToNextPlayer)="play(player.navigation.exercises[position + 1])"
+            />
+          </nz-ribbon>
+        </ng-container>
+      </section>
 
-    @if(canShowTerminalLogs()) {
-    <player-terminal-logs [logs]="activityLogs" title="Terminal Next" />
-    }
+      @if(canShowTerminalLogs()) {
+      <player-terminal-logs [logs]="activityLogs" title="Terminal Next" />
+      }
+    </div>
   </ng-template>
 </main>
+
+@if (showLeaveWarning()) {
+<div class="leave-warning-overlay" aria-hidden="true"></div>
+}
 <footer [class.glass]="countdown" *ngIf="exercises">
   <nz-countdown
     *ngIf="countdown"
