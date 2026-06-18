@@ -261,6 +261,10 @@ export class CoursesPage implements OnInit, OnDestroy {
     if (!this.user || (this.user.role !== UserRoles.admin && this.user.role !== UserRoles.teacher)) return
     this.courseManagementTutorialService.startCourseManagementTutorial(this.user, this.items)
   }
+
+  protected showArchiveButtonIfNotAdmin(): boolean {
+    return this.user?.role !== UserRoles.admin
+  }
 }
 
 interface QueryParams {

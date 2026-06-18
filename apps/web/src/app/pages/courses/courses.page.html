@@ -24,16 +24,14 @@
   [nzSelectedIndex]="activeTab === 'current' ? 0 : 1"
   (nzSelectedIndexChange)="onTabChange($event === 0 ? 'current' : 'archived')"
 >
-  <nz-tab nzTitle="Cours actuels">
-    <ng-container *ngTemplateOutlet="courseContent; context: { isArchived: false }"></ng-container>
-  </nz-tab>
-  <nz-tab nzTitle="Cours archivés">
-    <ng-container *ngTemplateOutlet="courseContent; context: { isArchived: true }"></ng-container>
-  </nz-tab>
+  <nz-tab nzTitle="Cours actuels"></nz-tab>
+  <nz-tab nzTitle="Cours archivés"></nz-tab>
 </nz-tabset>
 
+<ng-container *ngTemplateOutlet="courseContent; context: { isArchived: activeTab === 'archived' }"></ng-container>
+
 <ng-template #courseContent let-isArchived="isArchived">
-  <article>
+  <article class="courses-content">
     <ng-container *ngIf="!searching; else spinner">
       <h2 *ngIf="items.length">Voici ce que nous avons trouvé selon vos critères de recherche...</h2>
       <div class="filter-indicators">
@@ -68,7 +66,7 @@
       </button>
       <course-list
         [items]="items"
-        [showArchiveButton]="true"
+        [showArchiveButton]="showArchiveButtonIfNotAdmin()"
         [isArchived]="isArchived"
         id="tuto-courses-course-list"
         (archiveToggle)="onArchiveToggle($event)"
@@ -82,7 +80,9 @@
     </ng-container>
   </article>
   <ng-template #spinner>
-    <nz-spin nzSimple nzSize="large" />
+    <div class="spinner-wrapper">
+      <nz-spin nzSimple nzSize="large" />
+    </div>
   </ng-template>
 </ng-template>
 
