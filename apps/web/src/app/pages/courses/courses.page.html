@@ -18,49 +18,72 @@
     <span nz-icon nzType="plus" nzTheme="outline"></span>
   </button>
 </header>
-<article>
-  <ng-container *ngIf="!searching; else spinner">
-    <h2 *ngIf="items.length">Voici ce que nous avons trouvé selon vos critères de recherche...</h2>
-    <div class="filter-indicators">
-      <ui-filter-indicators
-        [filters]="filters"
-        (filtersChange)="search($event, $event.search)"
-        [indicators]="indicators"
-      />
+
+<nz-tabset
+  id="tuto-courses-tabs"
+  [nzSelectedIndex]="activeTab === 'current' ? 0 : 1"
+  (nzSelectedIndexChange)="onTabChange($event === 0 ? 'current' : 'archived')"
+>
+  <nz-tab nzTitle="Cours actuels"></nz-tab>
+  <nz-tab nzTitle="Cours archivés"></nz-tab>
+</nz-tabset>
+
+<ng-container *ngTemplateOutlet="courseContent; context: { isArchived: activeTab === 'archived' }"></ng-container>
+
+<ng-template #courseContent let-isArchived="isArchived">
+  <article class="courses-content">
+    <ng-container *ngIf="!searching; else spinner">
+      <h2 *ngIf="items.length">Voici ce que nous avons trouvé selon vos critères de recherche...</h2>
+      <div class="filter-indicators">
+        <ui-filter-indicators
+          [filters]="filters"
+          (filtersChange)="search($event, $event.search)"
+          [indicators]="indicators"
+        />
+      </div>
+      <div class="total-matches">
+        <ng-container [ngPlural]="totalMatches">
+          <ng-template ngPluralCase="=0"></ng-template>
+          <ng-template ngPluralCase="=1">
+            <p>1 résultat</p>
+          </ng-template>
+          <ng-template ngPluralCase="other">
+            <p>{{ totalMatches }} résultats</p>
+          </ng-template>
+        </ng-container>
+      </div>
+      <button
+        class="show-all-button"
+        *ngIf="displayShowAllButton && !isArchived"
+        id="tuto-courses-show-all-button"
+        nz-button
+        nzType="default"
+        nzShape="round"
+        nzSize="small"
+        (click)="searchAll()"
+      >
+        Afficher tous les cours
+      </button>
+      <course-list
+        [items]="items"
+        [showArchiveButton]="showArchiveButtonIfNotAdmin()"
+        [isArchived]="isArchived"
+        id="tuto-courses-course-list"
+        (archiveToggle)="onArchiveToggle($event)"
+      >
+        <h2>Aucun cours ne correspond à votre recherche</h2>
+        <ul>
+          <li>Vérifiez les termes de votre recherche</li>
+          <li>Essayez d'autres critères de recherche</li>
+        </ul>
+      </course-list>
+    </ng-container>
+  </article>
+  <ng-template #spinner>
+    <div class="spinner-wrapper">
+      <nz-spin nzSimple nzSize="large" />
     </div>
-    <div class="total-matches">
-      <ng-container [ngPlural]="totalMatches">
-        <ng-template ngPluralCase="=0"></ng-template>
-        <ng-template ngPluralCase="=1">
-          <p>1 résultat</p>
-        </ng-template>
-        <ng-template ngPluralCase="other">
-          <p>{{ totalMatches }} résultats</p>
-        </ng-template>
-      </ng-container>
-    </div>
-    <button
-      class="show-all-button"
-      *ngIf="displayShowAllButton"
-      id="tuto-courses-show-all-button"
-      nz-button
-      nzType="default"
-      nzShape="round"
-      nzSize="small"
-      (click)="searchAll()"
-    >
-      Afficher tous les cours
-    </button>
-    <course-list [items]="items" id="tuto-courses-course-list">
-      <h2>Aucun cours ne correspond à votre recherche</h2>
-      <ul>
-        <li>Vérifiez les termes de votre recherche</li>
-        <li>Essayez d'autres critères de recherche</li>
-      </ul>
-    </course-list>
-  </ng-container>
-</article>
-<ng-template #spinner>
-  <nz-spin nzSimple nzSize="large" />
+  </ng-template>
 </ng-template>
+
 <course-filters #filterDrawer [filters]="filters" (triggered)="this.search($event, this.filters.search)" />

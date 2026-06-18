@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core'
 
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 
@@ -19,4 +19,8 @@ import { CourseItemComponent } from '../course-item/course-item.component'
 export class CourseListComponent {
   @Input() items: Course[] = []
   @Input() simple = false
+
+  readonly showArchiveButton = input<boolean>(false)
+  readonly isArchived = input<boolean>(false)
+  readonly archiveToggle = output<Course>()
 }
