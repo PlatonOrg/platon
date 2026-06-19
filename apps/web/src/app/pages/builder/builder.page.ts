@@ -98,6 +98,7 @@ export class BuilderPage implements OnInit {
   protected readonly isTemplateCreator = signal(false)
   protected readonly inputs = signal<PleInput[]>([])
   protected readonly overrides = signal<Variables>({})
+  protected readonly overridesTemplateBase = signal<Variables>({})
   protected readonly loading = signal(true)
   protected readonly saving = signal(false)
   protected readonly aiTransforming = signal(false)
@@ -306,6 +307,10 @@ export class BuilderPage implements OnInit {
       }
     }
 
+    await this.persistOverrides(resource)
+  }
+
+  private async persistOverrides(resource: Resource, showFirstSaveInfo = true): Promise<void> {
     try {
       this.saving.set(true)
       try {
@@ -327,7 +332,7 @@ export class BuilderPage implements OnInit {
       this.hasUnsavedChanges.set(false)
       await this.inputFileService.save()
       this.dialogService.success('Sauvegardé avec succès')
-      this.showFirstSaveInfo()
+      if (showFirstSaveInfo) this.showFirstSaveInfo()
     } catch {
       this.dialogService.error('Erreur lors de la sauvegarde')
     } finally {
@@ -396,8 +401,10 @@ export class BuilderPage implements OnInit {
         this.http.get<string>(overridesFile.url, { responseType: 'text' as 'json' })
       )
       this.overrides.set(JSON.parse(overridesContent))
+      this.overridesTemplateBase.set(JSON.parse(overridesContent))
     } catch {
       this.overrides.set({})
+      this.overridesTemplateBase.set({})
     }
 
     const inputs = baseInputs.map((input) => ({ ...input, value: this.overrides()[input.name] ?? input.value }))
@@ -586,7 +593,7 @@ export class BuilderPage implements OnInit {
     }
   }
 
-  private confirmUnsavedChanges(): Promise<'cancel' | 'save' | 'discard'> {
+  private confirmUnsavedChanges(): Promise<'cancel' | 'save' | 'discard' | 'destroy'> {
     return new Promise((resolve) => {
       const modalRef = this.modal.create({
         nzTitle: 'Modifications non sauvegardées',
@@ -603,13 +610,22 @@ export class BuilderPage implements OnInit {
               resolve('cancel')
             },
           },
+          // {
+          //   label: 'Quitter sans sauvegarder les modifications',
+          //   type: 'primary',
+          //   danger: true,
+          //   onClick: () => {
+          //     modalRef.destroy()
+          //     resolve('discard')
+          //   },
+          // },
           {
-            label: 'Quitter sans sauvegarder',
+            label: 'Quitter et supprimer',
             type: 'primary',
             danger: true,
             onClick: () => {
               modalRef.destroy()
-              resolve('discard')
+              resolve('destroy')
             },
           },
           {
@@ -625,11 +641,27 @@ export class BuilderPage implements OnInit {
     })
   }
 
-  protected async goBack(): Promise<void> {
+  private async deleteResource(): Promise<boolean> {
+    return firstValueFrom(this.resourceService.delete(this.resource()!))
+      .then(() => {
+        return true
+      })
+      .catch(() => false)
+  }
+
+  protected goBack(): void {
+    window.history.go(-1)
+  }
+
+  async canDeactivate(): Promise<boolean> {
     if (this.hasUnsavedChanges()) {
       const action = await this.confirmUnsavedChanges()
-      if (action === 'cancel') return
-      if (action === 'save') await this.save()
+      if (action === 'cancel') return false
+      if (action === 'save') {
+        const resource = this.resource()
+        if (resource) await this.persistOverrides(resource, false)
+      }
+      if (action === 'destroy') await this.deleteResource()
     }
 
     if (this.debounceTimeout) {
@@ -642,7 +674,10 @@ export class BuilderPage implements OnInit {
         console.error
       )
     }
-    window.history.go(-1)
+    if (JSON.stringify(this.overridesTemplateBase()) === JSON.stringify(this.overrides())) {
+      await this.deleteResource()
+    }
+    return true
   }
 
   protected trackInput(_: number, input: PleInput): string {
@@ -661,7 +696,6 @@ export class BuilderPage implements OnInit {
   protected onBeforeUnload(event: BeforeUnloadEvent): void {
     if (this.hasUnsavedChanges()) {
       event.preventDefault()
-      event.returnValue = true
     }
 
     if (this.previewSessionId) {
