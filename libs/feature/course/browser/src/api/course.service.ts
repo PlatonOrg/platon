@@ -121,6 +121,10 @@ export class CourseService {
     return this.courseMemberProvider.updateRole(member, role)
   }
 
+  archiveMember(courseId: string, archived: boolean): Observable<CourseMember> {
+    return this.courseMemberProvider.archive(courseId, archived)
+  }
+
   searchMembers(course: Course | string, filters?: CourseMemberFilters): Observable<ListResponse<CourseMember>> {
     return this.courseMemberProvider.search(course, filters)
   }

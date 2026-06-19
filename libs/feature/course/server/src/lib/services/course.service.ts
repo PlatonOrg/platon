@@ -44,6 +44,30 @@ export class CourseService {
       query.andWhere(`(f_unaccent(course.name) ILIKE f_unaccent(:search))`, { search: `%${search}%` })
     }
 
+    if (filters.archived !== undefined && filters.members?.length) {
+      if (filters.archived) {
+        query.andWhere(
+          `EXISTS (
+            SELECT 1 FROM "CourseMembers" cm
+            WHERE cm.course_id = course.id
+            AND cm.user_id IN (:...archivedMemberIds)
+            AND cm.archived = TRUE
+          )`,
+          { archivedMemberIds: filters.members }
+        )
+      } else {
+        query.andWhere(
+          `NOT EXISTS (
+            SELECT 1 FROM "CourseMembers" cm
+            WHERE cm.course_id = course.id
+            AND cm.user_id IN (:...archivedMemberIds)
+            AND cm.archived = TRUE
+          )`,
+          { archivedMemberIds: filters.members }
+        )
+      }
+    }
+
     if (filters.period) {
       const subtractDays = (days: number): Date => {
         const result = new Date()

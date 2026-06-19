@@ -220,6 +220,13 @@ export class CourseMemberService {
     await this.repository.update({ courseId, id: memberId }, { role })
   }
 
+  async setArchivedByUser(courseId: string, userId: string, archived: boolean): Promise<void> {
+    const member = (await this.getByUserIdAndCourseId(userId, courseId)).orElseThrow(
+      () => new NotFoundResponse('You are not a direct member of this course')
+    )
+    await this.repository.update({ id: member.id, courseId }, { archived })
+  }
+
   async isMember(courseId: string, userId: string): Promise<boolean> {
     const result = await this.view.findOne({
       where: { courseId, id: userId },
