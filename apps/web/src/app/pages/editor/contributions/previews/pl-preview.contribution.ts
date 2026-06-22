@@ -39,6 +39,48 @@ const buildPreview = (uri: monaco.Uri): Preview => ({
   data: buildPreviewUrl(uri, [`timestamp=${Date.now()}`, PLAYER_EDITOR_PREVIEW]), // Add timestamp to avoid cache, might be changed later
 })
 
+// Re-opening an already shown preview through `editorService.open` makes its iframe
+// navigate to a new URL (fresh timestamp), which the browser treats as a real navigation
+// and adds to the tab's history. After a few previews, "back" has to unwind all of them
+// before actually leaving the editor. Reloading the existing iframe via `location.replace`
+// instead avoids growing that history.
+export const tryReloadPreviewInPlace = (editorService: EditorService, uri: monaco.Uri): boolean => {
+  // The preview always opens in its own group, separate from the code editor's group
+  // (see EditorService.open: it picks a non-active group for previews), so the group
+  // showing it is not necessarily the active one once focus moves back to the code.
+  const group = editorService.findGroup(
+    (g) => g.isInPreviewMode && g.activeResource?.toString(true) === uri.toString(true)
+  )
+  // There's no stable DOM hook tying an EditorGroup to its container, but the active
+  // group is the only one rendered with this class. Bail out instead of guessing if the
+  // matching group isn't the active one, so a split view with another preview open
+  // elsewhere never gets its iframe reloaded by mistake.
+  if (!group || !editorService.isActiveGroup(group)) return false
+
+  const iframes = document.querySelectorAll<HTMLIFrameElement>('.editor-group--active .preview-editor iframe')
+  if (iframes.length !== 1 || !iframes[0].contentWindow) return false
+
+  iframes[0].contentWindow.location.replace(buildPreviewUrl(uri, [`timestamp=${Date.now()}`, PLAYER_EDITOR_PREVIEW]))
+  return true
+}
+
+// @cisstech/nge-ide also ships its own "Prévisualiser"/"Recharger" buttons inside the
+// preview tab's own toolbar (commands 'editor.commands.preview' and
+// 'editor.commands.preview-reload', registered by its EditorContribution). They always
+// reopen the preview through `editorService.open` too, so they have the same history
+// growth issue. They're internal to the library (not part of its public API), so we can't
+// import their classes - patch them in place by id instead, regardless of registration order.
+export const patchBuiltinPreviewCommand = (command: ICommand, editorService: EditorService) => {
+  const original = command.execute as (...args: unknown[]) => void | Promise<void>
+  command.execute = (...args: unknown[]) => {
+    const { activeResource } = editorService
+    if (activeResource && tryReloadPreviewInPlace(editorService, activeResource)) {
+      return
+    }
+    return original.apply(command, args)
+  }
+}
+
 class PreviewInNewTabCommand implements ICommand {
   readonly id = 'platon.contrib.ple.commands.preview-in-new-tab'
   readonly label = 'Prévisualiser dans un nouvel onglet'
@@ -96,14 +138,21 @@ class ToolbarPreviewCommand implements ICommand {
       .with({
         query: PLAYER_EDITOR_PREVIEW,
       })
+
+    try {
+      await this.editorService.saveAll()
+    } catch (error) {
+      console.error(error)
+      return
+    }
+
+    if (tryReloadPreviewInPlace(this.editorService, uri)) {
+      return
+    }
+
     this.editorService
-      .saveAll()
-      .then(() => {
-        this.editorService
-          .open(uri, {
-            preview: buildPreview(uri),
-          })
-          .catch(console.error)
+      .open(uri, {
+        preview: buildPreview(uri),
       })
       .catch(console.error)
   }
@@ -175,6 +224,19 @@ export class Contribution implements IContribution {
     )
 
     editorService.registerCommands(new PreviewInNewTabCommand(presenter, editorService))
+
+    const patchedBuiltinCommands = new WeakSet<ICommand>()
+    this.subscriptions.push(
+      commandService
+        .findAll((c) => c.id === 'editor.commands.preview' || c.id === 'editor.commands.preview-reload')
+        .subscribe((commands) => {
+          commands.forEach((command) => {
+            if (patchedBuiltinCommands.has(command)) return
+            patchedBuiltinCommands.add(command)
+            patchBuiltinPreviewCommand(command, editorService)
+          })
+        })
+    )
 
     const backToResourcesCommand = new BackToResourcesCommand()
     const previewFromToolbar = new ToolbarPreviewCommand(presenter, fileService, editorService)
