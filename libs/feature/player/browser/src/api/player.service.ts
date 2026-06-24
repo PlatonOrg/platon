@@ -11,6 +11,7 @@ import {
   PlayExerciseOuput,
   PreviewInput,
   PreviewOuput,
+  Feedback,
 } from '@platon/feature/player/common'
 import { Observable } from 'rxjs'
 import { PlayerProvider } from '../models/player-provider'
@@ -53,5 +54,9 @@ export class PlayerService {
 
   saveTemporaryAnswer(input: EvalExerciseInput): Observable<void> {
     return this.provider.saveTemporaryAnswer(input)
+  }
+
+  sendFeedback(feedback: Feedback): Observable<void> {
+    return this.provider.sendFeedback(feedback)
   }
 }
