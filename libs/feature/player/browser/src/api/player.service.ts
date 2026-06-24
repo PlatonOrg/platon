@@ -56,7 +56,7 @@ export class PlayerService {
     return this.provider.saveTemporaryAnswer(input)
   }
 
-  sendFeedback(feedback: Feedback): Observable<void> {
-    return this.provider.sendFeedback(feedback)
+  submitFeedback(feedback: Feedback): Observable<void> {
+    return this.provider.submitFeedback(feedback)
   }
 }

@@ -33,5 +33,5 @@ export interface Feedback {
   readonly exerciseTitle?: string
   readonly author?: string | null
   readonly category: FeedbackCategoryValue
-  readonly message: string
+  readonly message?: string
 }
