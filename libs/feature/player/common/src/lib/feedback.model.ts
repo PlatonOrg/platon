@@ -3,7 +3,6 @@ export enum FeedbackCategoryValue {
   ANSWER = 'answer',
   ACCESSIBILITY = 'accessibility',
   TECHNICAL = 'technical',
-  SUGGESTION = 'suggestion',
   OTHER = 'other',
 }
 
@@ -12,7 +11,6 @@ export const feedbackCategoryLabels: Record<FeedbackCategoryValue, string> = {
   [FeedbackCategoryValue.ANSWER]: 'Les modalités de réponse',
   [FeedbackCategoryValue.ACCESSIBILITY]: "L'accessibilité de l'exercice",
   [FeedbackCategoryValue.TECHNICAL]: "Le fonctionnement de l'exercice",
-  [FeedbackCategoryValue.SUGGESTION]: 'Une suggestion d’amélioration',
   [FeedbackCategoryValue.OTHER]: 'Autre chose',
 }
 
