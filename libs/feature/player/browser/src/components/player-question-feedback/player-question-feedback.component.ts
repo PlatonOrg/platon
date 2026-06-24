@@ -3,14 +3,10 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
 import { FormsModule } from '@angular/forms'
 
 import { MatIconModule } from '@angular/material/icon'
+import { FEEDBACK_CATEGORIES, FeedbackCategoryValue } from '@platon/feature/player/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzSelectModule } from 'ng-zorro-antd/select'
-
-interface FeedbackCategory {
-  readonly value: string
-  readonly label: string
-}
 
 @Component({
   selector: 'player-question-feedback',
@@ -27,18 +23,12 @@ export class PlayerQuestionFeedbackComponent {
 
   protected readonly maxLength = 10000
 
-  protected readonly categories: FeedbackCategory[] = [
-    { value: 'statement', label: "L'énoncé de l'exercice" },
-    { value: 'answer', label: 'Les modalités de réponse' },
-    { value: 'accessibility', label: "L'accessibilité de l'exercice" },
-    { value: 'technical', label: "Le fonctionnement de l'exercice" },
-    { value: 'other', label: 'Autre chose' },
-  ]
+  protected readonly categories = FEEDBACK_CATEGORIES
 
   protected readonly expanded = signal(false)
   protected readonly submitted = signal(false)
 
-  protected category = signal<string | null>(null)
+  protected category = signal<FeedbackCategoryValue | null>(null)
   protected readonly message = signal('')
 
   protected toggle(): void {
