@@ -127,6 +127,8 @@ pre {
 .exercice-actions-list-below {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   &.align-right {
     justify-content: flex-end;
   }
