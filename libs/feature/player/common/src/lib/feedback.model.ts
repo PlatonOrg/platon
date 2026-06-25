@@ -31,7 +31,6 @@ export function getFeedbackCategoryLabel(value: FeedbackCategoryValue): string {
 export interface Feedback {
   readonly sessionId: string
   readonly exerciseTitle?: string
-  readonly author?: string | null
   readonly category: FeedbackCategoryValue
   readonly message?: string
 }

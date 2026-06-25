@@ -11,11 +11,6 @@ export class FeedbackDTO implements Feedback {
   @ApiProperty()
   exerciseTitle?: string
 
-  @IsString()
-  @ApiProperty()
-  @IsOptional()
-  author?: string | null
-
   @IsEnum(FeedbackCategoryValue)
   @ApiProperty({ enum: FeedbackCategoryValue })
   category!: FeedbackCategoryValue

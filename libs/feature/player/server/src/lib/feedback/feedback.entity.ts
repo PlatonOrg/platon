@@ -16,15 +16,6 @@ export class FeedbackEntity extends BaseEntity implements Feedback {
   @Column({ name: 'exercise_title', nullable: true })
   exerciseTitle?: string
 
-  @Column({ nullable: true })
-  author?: string | null
-
-  @Column({ type: 'enum', enum: FeedbackCategoryValue })
-  category!: FeedbackCategoryValue
-
-  @Column({ type: 'text', nullable: true })
-  message?: string
-
   @Column({ name: 'sender_id', default: '00000000-0000-0000-0000-000000000000' })
   senderId!: string
 
@@ -32,4 +23,13 @@ export class FeedbackEntity extends BaseEntity implements Feedback {
   @ManyToOne(() => UserEntity, { onDelete: 'SET DEFAULT' })
   @JoinColumn({ name: 'sender_id' })
   sender!: UserEntity
+
+  @Column({ name: 'creator_id', nullable: true })
+  creatorId?: string
+
+  @Column({ type: 'enum', enum: FeedbackCategoryValue })
+  category!: FeedbackCategoryValue
+
+  @Column({ type: 'text', nullable: true })
+  message?: string
 }

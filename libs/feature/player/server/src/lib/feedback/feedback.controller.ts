@@ -8,5 +8,7 @@ export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   @Post()
-  async submitFeedback(@Req() req: IRequest, @Body() feedback: FeedbackDTO): Promise<void> {}
+  async submitFeedback(@Req() req: IRequest, @Body() feedback: FeedbackDTO): Promise<void> {
+    await this.feedbackService.submitFeedback(feedback, req.user.id)
+  }
 }
