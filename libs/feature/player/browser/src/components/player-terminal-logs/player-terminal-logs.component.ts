@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, input, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, OnInit, signal } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
@@ -12,6 +12,7 @@ import { User, UserRoles } from '@platon/core/common'
   selector: 'player-terminal-logs',
   templateUrl: './player-terminal-logs.component.html',
   styleUrls: ['./player-terminal-logs.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule, MatButtonModule, NzToolTipModule],
 })
 export class PlayerTerminalLogsComponent implements OnInit {
