@@ -197,9 +197,6 @@ export class Contribution implements IContribution {
   readonly id = 'platon.contrib.preview'
 
   activate(injector: Injector) {
-    if (this.activated) return
-    this.activated = true
-
     const presenter = injector.get(EditorPresenter)
     const fileService = injector.get(FileService)
     const editorService = injector.get(EditorService)
@@ -244,6 +241,11 @@ export class Contribution implements IContribution {
 
     commandService.register(previewFromToolbar)
 
+    if (this.activated) return // Not registering the buttons again if the contribution is re-activated
+    // TODO: This is a temporary solution might have to be changed in the editor library.
+
+    this.activated = true
+
     toolbarService.registerButton({
       command: backToResourcesCommand,
       buttonType: 'text',
@@ -272,7 +274,6 @@ export class Contribution implements IContribution {
   }
 
   deactivate(): void | Promise<void> {
-    this.activated = false
     this.subscriptions.forEach((s) => s.unsubscribe())
   }
 }

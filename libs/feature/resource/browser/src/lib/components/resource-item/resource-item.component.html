@@ -174,9 +174,18 @@
         <ng-template ngPluralCase="=1">Variable à remplir</ng-template>
         <ng-template ngPluralCase="other">Variables à remplir :</ng-template>
       </ng-container>
-      <div *ngFor="let meta of (item.metadata! | exerciseResourceMeta)?.config?.inputs" style="margin-left: 1rem">
+      <div
+        *ngFor="let meta of (item.metadata! | exerciseResourceMeta)?.config?.inputs"
+        style="margin-left: 1rem; margin-bottom: 1em"
+      >
         <span
-          >• <span class="customise-font">{{ meta.name }}</span> - {{ meta.description }}
+          >• <span class="customise-font">{{ meta.name }} :</span>
+          @if (meta.description !== '') {
+          <nge-markdown [data]="meta.description" class="markdown-inline"></nge-markdown>
+          } @else {
+          <br />
+          <span class="markdown-inline missing-description">non renseigné</span>
+          }
         </span>
       </div>
     </div>

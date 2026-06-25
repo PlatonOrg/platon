@@ -3,14 +3,21 @@
     <div nz-col [nzSpan]="24" [nzXs]="24" [nzSm]="12">
       <div
         cdkDropList
-        [cdkDropListData]="state.selectedWords"
+        [cdkDropListData]="localSelectedWords"
         class="example-list"
         (cdkDropListDropped)="drop($event)"
         cdkDropListOrientation="mixed"
+        [cdkDropListDisabled]="state.disabled"
       >
-        @for (word of state.selectedWords; track word){
-        <div class="example-box" cdkDrag (click)="removeWord(word)">
-          {{ word }}
+        @for (word of localSelectedWords; track word.id){
+        <div
+          class="example-box"
+          cdkDrag
+          (click)="removeWord(word)"
+          [class.disabled]="state.disabled"
+          [style]="word.css"
+        >
+          {{ word.content }}
         </div>
         }
       </div>
@@ -23,14 +30,15 @@
     <div nz-col [nzSpan]="24" [nzXs]="24" [nzSm]="12">
       <div
         cdkDropList
-        [cdkDropListData]="state.words"
+        [cdkDropListData]="localWords"
         class="example-list"
         (cdkDropListDropped)="drop($event)"
         cdkDropListOrientation="mixed"
+        [cdkDropListDisabled]="state.disabled"
       >
-        @for (word of state.words; track word){
-        <div class="example-box" cdkDrag (click)="addWord(word)">
-          {{ word }}
+        @for (word of localWords; track word.id){
+        <div class="example-box" [class.disabled]="state.disabled" cdkDrag (click)="addWord(word)" [style]="word.css">
+          {{ word.content }}
         </div>
         }
       </div>

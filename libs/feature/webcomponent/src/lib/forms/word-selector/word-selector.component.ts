@@ -1,8 +1,15 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, OnInit } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { WordSelectorComponentDefinition, WordSelectorState } from './word-selector'
+import { WordSelectorComponentDefinition, WordSelectorItem, WordSelectorState } from './word-selector'
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop'
+
+interface InternalWordItem {
+  id: number // help reduce delay when move the word
+  content: string
+  css: string
+  isObject: boolean // false string, true string + css
+}
 
 @Component({
   selector: 'wc-word-selector',
@@ -17,17 +24,52 @@ export class WordSelectorComponent implements WebComponentHooks<WordSelectorStat
    */
   @Input() state!: WordSelectorState
 
+  private idCounter = 0
+  localWords: InternalWordItem[] = []
+  localSelectedWords: InternalWordItem[] = []
+
   constructor(readonly injector: Injector) {}
 
   /**
    * Initializes the component.
    */
   ngOnInit() {
+    this.initLocalLists()
     this.shuffleArray()
     this.state.isFilled = false
+    this.syncState()
   }
 
-  drop(event: CdkDragDrop<string[]>) {
+  private initLocalLists() {
+    this.localWords = this.normalizeArray(this.state.words)
+    this.localSelectedWords = this.normalizeArray(this.state.selectedWords)
+  }
+
+  private normalizeArray(array: (string | WordSelectorItem)[]): InternalWordItem[] {
+    if (!array) return []
+    return array.map((item) => {
+      const isObj = typeof item !== 'string'
+      return {
+        id: this.idCounter++,
+        content: isObj ? (item as WordSelectorItem).content : (item as string),
+        css: isObj ? (item as WordSelectorItem).css || '' : '',
+        isObject: isObj,
+      }
+    })
+  }
+
+  private syncState() {
+    const mapToState = (word: InternalWordItem) => {
+      if (word.isObject || word.css) {
+        return { content: word.content, css: word.css }
+      }
+      return word.content
+    }
+    this.state.words = this.localWords.map(mapToState)
+    this.state.selectedWords = this.localSelectedWords.map(mapToState)
+  }
+
+  drop(event: CdkDragDrop<InternalWordItem[]>) {
     if (event.previousContainer !== event.container || event.previousIndex !== event.currentIndex) {
       this.state.isFilled = true
     }
@@ -36,29 +78,28 @@ export class WordSelectorComponent implements WebComponentHooks<WordSelectorStat
     } else {
       transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex)
     }
+    this.syncState()
   }
 
-  suppremerUneLettre(phrase: string[], word: string) {
-    const index = phrase.indexOf(word)
-    if (index > -1) {
-      phrase.splice(index, 1)
-    }
+  addWord(word: InternalWordItem) {
+    this.localSelectedWords.push(word)
+    const index = this.localWords.findIndex((w) => w.id === word.id)
+    if (index > -1) this.localWords.splice(index, 1)
+    this.syncState()
   }
 
-  addWord(word: string) {
-    this.state.selectedWords.push(word)
-    this.suppremerUneLettre(this.state.words, word)
-  }
-
-  removeWord(word: string) {
-    this.state.words.push(word)
-    this.suppremerUneLettre(this.state.selectedWords, word)
+  removeWord(word: InternalWordItem) {
+    this.localWords.push(word)
+    const index = this.localSelectedWords.findIndex((w) => w.id === word.id)
+    if (index > -1) this.localSelectedWords.splice(index, 1)
+    this.syncState()
   }
 
   shuffleArray(): void {
-    for (let i = this.state.words.length - 1; i > 0; i--) {
+    for (let i = this.localWords.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
-      ;[this.state.words[i], this.state.words[j]] = [this.state.words[j], this.state.words[i]]
+      ;[this.localWords[i], this.localWords[j]] = [this.localWords[j], this.localWords[i]]
     }
+    this.syncState()
   }
 }
