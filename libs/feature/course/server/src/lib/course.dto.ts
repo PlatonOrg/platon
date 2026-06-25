@@ -104,4 +104,9 @@ export class CourseFiltersDTO implements CourseFilters {
   @IsBoolean()
   @IsOptional()
   readonly showAll?: boolean
+
+  @Transform(({ value }) => (value === undefined || value === null ? undefined : value === 'true'))
+  @IsBoolean()
+  @IsOptional()
+  readonly archived?: boolean
 }

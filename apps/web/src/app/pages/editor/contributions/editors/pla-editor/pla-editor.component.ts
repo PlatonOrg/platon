@@ -418,6 +418,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         queryParams,
         relativeTo: this.activatedRoute,
         queryParamsHandling: 'merge',
+        replaceUrl: true,
       })
       .catch(console.error)
   }

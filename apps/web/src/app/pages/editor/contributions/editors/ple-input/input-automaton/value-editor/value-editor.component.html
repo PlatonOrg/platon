@@ -1,4 +1,1 @@
-<wc-automaton-editor
-  [state]="{ automaton: value }"
-  (stateChange)="notifyValueChange?.($any($event).detail.automaton)"
-/>
+<wc-automaton-editor [state]="{ automaton: value }" (stateChange)="onStateChange($any($event).detail.automaton)" />

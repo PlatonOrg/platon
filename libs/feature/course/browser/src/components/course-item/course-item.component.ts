@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, input, output } from '@angular/core'
 
 import { MatIconModule } from '@angular/material/icon'
 
@@ -37,6 +37,10 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 export class CourseItemComponent implements OnChanges {
   @Input() item!: Course
   @Input() simple = false
+
+  readonly showArchiveButton = input<boolean>(false)
+  readonly isArchived = input<boolean>(false)
+  readonly archiveToggle = output<void>()
 
   protected name = ''
   protected desc = ''
