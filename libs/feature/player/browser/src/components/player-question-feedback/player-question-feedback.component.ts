@@ -3,10 +3,11 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
 import { FormsModule } from '@angular/forms'
 
 import { MatIconModule } from '@angular/material/icon'
-import { FEEDBACK_CATEGORIES, FeedbackCategoryValue } from '@platon/feature/player/common'
+import { Feedback, FEEDBACK_CATEGORIES, FeedbackCategoryValue } from '@platon/feature/player/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzSelectModule } from 'ng-zorro-antd/select'
+import { PlayerService } from '../../api/player.service'
 
 @Component({
   selector: 'player-question-feedback',
@@ -20,6 +21,8 @@ export class PlayerQuestionFeedbackComponent {
   sessionId = input<string | undefined>(undefined)
   exerciseTitle = input<string | undefined>(undefined)
   author = input<string | null | undefined>(undefined)
+
+  constructor(private readonly playerService: PlayerService) {}
 
   protected readonly maxLength = 10000
 
@@ -43,7 +46,7 @@ export class PlayerQuestionFeedbackComponent {
     this.message.set('')
   }
 
-  protected submit(): void {
+  protected async submit(): Promise<void> {
     if (!this.category || !this.message().trim()) {
       return
     }
@@ -53,10 +56,38 @@ export class PlayerQuestionFeedbackComponent {
       author: this.author(),
       category: this.category(),
       message: this.message(),
-    }
+    } as Feedback
     console.log('Signalement de problème (front uniquement) :', payload)
+    this.playerService.submitFeedback(payload).subscribe({
+      next: () => {
+        this.submitted.set(true)
+      },
+      error: (error) => {
+        console.error("Erreur lors de l'envoi du feedback :", error)
+      },
+    })
     this.submitted.set(true)
   }
+
+  // protected async submit(): Promise<void> {
+  //   if (!this.category || !this.message().trim()) {
+  //     return
+  //   }
+  //   const payload = {
+  //     sessionId: this.sessionId(),
+  //     exerciseTitle: this.exerciseTitle(),
+  //     author: this.author(),
+  //     category: this.category(),
+  //     message: this.message(),
+  //   } as Feedback
+  //   console.log('Signalement de problème (front uniquement) :', payload)
+  //   try {
+  //     await this.playerService.submitFeedback(payload)
+  //     this.submitted.set(true)
+  //   } catch (error) {
+  //     console.error("Erreur lors de l'envoi du feedback :", error)
+  //   }
+  // }
 
   protected close(): void {
     this.expanded.set(false)
