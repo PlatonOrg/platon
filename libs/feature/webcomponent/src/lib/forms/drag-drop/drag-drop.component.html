@@ -7,10 +7,11 @@
   [class.dropzone]="!state.draggable"
   [class.disabled]="state.disabled"
   (dropped)="dropped($event)"
+  (dragstart)="state.disabled ? $event.preventDefault() : null"
 >
   <nge-markdown *ngIf="state.content" [data]="state.content"></nge-markdown>
 </div>
-<ng-container *ngIf="!state.draggable && state.content">
+<ng-container *ngIf="!state.draggable && state.content && !state.disabled">
   <span class="btn-clear" (click)="clear()">&times;</span>
 </ng-container>
 <wc-base [(state)]="state"></wc-base>
