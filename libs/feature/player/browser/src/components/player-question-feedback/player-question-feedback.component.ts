@@ -8,6 +8,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { PlayerService } from '../../api/player.service'
+import { firstValueFrom } from 'rxjs'
 
 @Component({
   selector: 'player-question-feedback',
@@ -57,37 +58,13 @@ export class PlayerQuestionFeedbackComponent {
       category: this.category(),
       message: this.message(),
     } as Feedback
-    console.log('Signalement de problème (front uniquement) :', payload)
-    this.playerService.submitFeedback(payload).subscribe({
-      next: () => {
-        this.submitted.set(true)
-      },
-      error: (error) => {
-        console.error("Erreur lors de l'envoi du feedback :", error)
-      },
-    })
-    this.submitted.set(true)
+    try {
+      await firstValueFrom(this.playerService.submitFeedback(payload))
+      this.submitted.set(true)
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du feedback :", error)
+    }
   }
-
-  // protected async submit(): Promise<void> {
-  //   if (!this.category || !this.message().trim()) {
-  //     return
-  //   }
-  //   const payload = {
-  //     sessionId: this.sessionId(),
-  //     exerciseTitle: this.exerciseTitle(),
-  //     author: this.author(),
-  //     category: this.category(),
-  //     message: this.message(),
-  //   } as Feedback
-  //   console.log('Signalement de problème (front uniquement) :', payload)
-  //   try {
-  //     await this.playerService.submitFeedback(payload)
-  //     this.submitted.set(true)
-  //   } catch (error) {
-  //     console.error("Erreur lors de l'envoi du feedback :", error)
-  //   }
-  // }
 
   protected close(): void {
     this.expanded.set(false)

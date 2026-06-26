@@ -133,7 +133,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
 
   protected readonly playerSignal = signal<ExercisePlayer | undefined>(undefined)
   protected readonly errorsDismissed = signal(false)
-  private user: User | undefined = undefined
+  protected user: User | undefined = undefined
 
   @Input() state?: AnswerStates
   @Input() player?: ExercisePlayer

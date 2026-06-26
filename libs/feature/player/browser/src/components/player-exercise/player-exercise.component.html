@@ -185,7 +185,7 @@
         <mat-divider></mat-divider>
 
         <div class="exercice-actions-list-below">
-          @if(player) {
+          @if(player && user) {
           <player-question-feedback
             [sessionId]="player.sessionId"
             [exerciseTitle]="player.title"
