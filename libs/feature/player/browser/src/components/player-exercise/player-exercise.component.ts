@@ -602,7 +602,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       })
     } finally {
       this.runningAction = undefined
-      this.changeDetectorRef.markForCheck()
+      // detectChanges (not markForCheck) so the view reflects the new player data
+      // (e.g. platon_logs) immediately instead of waiting for the next unrelated CD trigger
+      this.changeDetectorRef.detectChanges()
     }
   }
 
