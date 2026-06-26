@@ -48,7 +48,7 @@ export class PlayerQuestionFeedbackComponent {
   }
 
   protected async submit(): Promise<void> {
-    if (!this.category || !this.message().trim()) {
+    if (!this.category() || !this.message().trim()) {
       return
     }
     const payload = {
