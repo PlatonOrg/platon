@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   TemplateRef,
   ViewChild,
   ViewChildren,
@@ -115,8 +116,12 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected navExerciceCount = 0
   protected terminatedAfterLoseFocus = false
   protected terminatedAfterLeavePage = false
+  protected readonly showLeaveWarning = signal(false)
   protected onLoseTabFocusFn = this.onLoseTabFocus.bind(this)
   protected onVisibilityChangeFn = this.onVisibilityChange.bind(this)
+  private readonly onBeforeUnloadFn = this.onBeforeUnload.bind(this)
+  private readonly onDocumentPointerLeaveFn = this.onDocumentPointerLeave.bind(this)
+  private readonly onDocumentPointerEnterFn = this.onDocumentPointerEnter.bind(this)
   protected onKeydownFn = this.onKeydown.bind(this)
   protected onContextMenuFn = this.onContextMenu.bind(this)
   protected loadingNext = false
@@ -320,6 +325,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   }
 
   protected async terminate(): Promise<void> {
+    this.showLeaveWarning.set(false)
     this.countdownBreakpoints = []
 
     const output = await firstValueFrom(this.playerService.terminate(this.player.sessionId))
@@ -616,14 +622,32 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     this.terminate().catch(console.error)
   }
 
-  private onVisibilityChange(): void {
-    if (!this.isPlaying || !this.player.settings?.security?.terminateOnLeavePage) return
+  private shouldWarnOnLeave(): boolean {
+    return this.isPlaying && !!this.player.settings?.security?.terminateOnLeavePage
+  }
 
-    // passed from hidden to visible
+  private onVisibilityChange(): void {
+    if (!this.shouldWarnOnLeave()) return
+
     if (document.visibilityState === 'hidden') {
       this.terminatedAfterLeavePage = true
       this.terminate().catch(console.error)
     }
+  }
+
+  private onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.shouldWarnOnLeave()) return
+    event.preventDefault()
+    event.returnValue = ''
+  }
+
+  private onDocumentPointerLeave(): void {
+    if (!this.shouldWarnOnLeave()) return
+    this.showLeaveWarning.set(true)
+  }
+
+  private onDocumentPointerEnter(): void {
+    this.showLeaveWarning.set(false)
   }
 
   private enableCopyPasteIfNeeded(): void {
@@ -646,12 +670,18 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
 
   private startWatchingVisibilityChange(): void {
     window.addEventListener('blur', this.onLoseTabFocusFn)
+    window.addEventListener('beforeunload', this.onBeforeUnloadFn)
     document.addEventListener('visibilitychange', this.onVisibilityChangeFn)
+    document.documentElement.addEventListener('pointerleave', this.onDocumentPointerLeaveFn)
+    document.documentElement.addEventListener('pointerenter', this.onDocumentPointerEnterFn)
   }
 
   private stopWatchingVisibilityChange(): void {
     window.removeEventListener('blur', this.onLoseTabFocusFn)
+    window.removeEventListener('beforeunload', this.onBeforeUnloadFn)
     document.removeEventListener('visibilitychange', this.onVisibilityChangeFn)
+    document.documentElement.removeEventListener('pointerleave', this.onDocumentPointerLeaveFn)
+    document.documentElement.removeEventListener('pointerenter', this.onDocumentPointerEnterFn)
   }
 
   protected back() {

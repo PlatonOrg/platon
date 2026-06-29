@@ -54,6 +54,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
+import { PlayerQuestionFeedbackComponent } from '../player-question-feedback/player-question-feedback.component'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
 import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
 import { User } from '@platon/core/common'
@@ -116,6 +117,7 @@ type FullscreenElement = HTMLElement & {
     AnswerStatePipesModule,
     PlayerCommentsComponent,
     PlayerTerminalLogsComponent,
+    PlayerQuestionFeedbackComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -131,7 +133,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
 
   protected readonly playerSignal = signal<ExercisePlayer | undefined>(undefined)
   protected readonly errorsDismissed = signal(false)
-  private user: User | undefined = undefined
+  protected user: User | undefined = undefined
 
   @Input() state?: AnswerStates
   @Input() player?: ExercisePlayer
@@ -211,7 +213,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
         icon: 'save',
         label: 'Sauvegarder',
         tooltip: 'Sauvegarder',
-        visible: !this.reviewMode,
+        visible: !this.reviewMode && !this.previewMode,
         disabled: !!this.runningAction,
         playerAction: PlayerActions.SAVE_ANSWER,
         showLabel: this.showLabelIfEnoughSpace,

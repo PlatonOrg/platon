@@ -1,3 +1,4 @@
+export * from './lib/feedback.model'
 export * from './lib/player-answer.model'
 export * from './lib/player-guards.model'
 export * from './lib/player-manager.model'

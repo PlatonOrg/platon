@@ -185,6 +185,13 @@
         <mat-divider></mat-divider>
 
         <div class="exercice-actions-list-below">
+          @if(player && user) {
+          <player-question-feedback
+            [sessionId]="player.sessionId"
+            [exerciseTitle]="player.title"
+            [author]="player.author"
+          />
+          }
           <div class="spacer"></div>
           <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions }" />
         </div>

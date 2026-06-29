@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core'
 import {
   EvalExerciseInput,
   EvalExerciseOutput,
+  Feedback,
   NextOutput,
   PlayActivityInput,
   PlayActivityOuput,
@@ -55,5 +56,9 @@ export class RemotePlayerService extends PlayerProvider {
 
   saveTemporaryAnswer(input: EvalExerciseInput): Observable<void> {
     return this.http.post<void>('/api/v1/player/saveTemporaryAnswer', input)
+  }
+
+  submitFeedback(feedback: Feedback): Observable<void> {
+    return this.http.post<void>('/api/v1/player/feedback', feedback)
   }
 }

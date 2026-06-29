@@ -1,0 +1,48 @@
+<div class="question-feedback">
+  <button type="button" class="trigger" (click)="toggle()">
+    <mat-icon>flag</mat-icon>
+    <span>Signaler un problème avec cet exercice</span>
+  </button>
+
+  @if(expanded()){
+  <div class="panel">
+    @if(!submitted()){
+    <p class="intro">PLaTOn est à l'écoute de vos remarques pour améliorer les exercices proposés&nbsp;!</p>
+
+    <nz-select
+      class="category-select"
+      [(ngModel)]="category"
+      nzPlaceHolder="J'ai un problème avec"
+      (ngModelChange)="onCategoryChange()"
+    >
+      @for (cat of categories; track cat.value) {
+      <nz-option [nzLabel]="cat.label" [nzValue]="cat.value" />
+      }
+    </nz-select>
+
+    @if(category()){
+    <p class="char-limit">Votre message est limité à {{ maxLength }} caractères.</p>
+    <textarea
+      nz-input
+      class="message-input"
+      [ngModel]="message()"
+      (ngModelChange)="message.set($event)"
+      [maxlength]="maxLength"
+      rows="4"
+      placeholder="Décrivez votre problème ou votre suggestion"
+    ></textarea>
+    <span class="counter">{{ message().length }} / {{ maxLength }}</span>
+
+    <button nz-button nzType="primary" class="submit-button" [disabled]="!message().trim()" (click)="submit()">
+      Envoyer
+    </button>
+    } } @else{
+    <div class="thanks">
+      <mat-icon>check_circle</mat-icon>
+      <p>Merci, votre signalement a bien été pris en compte !</p>
+      <button nz-button (click)="close()">Fermer</button>
+    </div>
+    }
+  </div>
+  }
+</div>

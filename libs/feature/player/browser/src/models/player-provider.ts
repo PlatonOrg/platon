@@ -1,6 +1,7 @@
 import {
   EvalExerciseInput,
   EvalExerciseOutput,
+  Feedback,
   NextOutput,
   PlayActivityInput,
   PlayActivityOuput,
@@ -23,4 +24,5 @@ export abstract class PlayerProvider {
   abstract evaluate(input: EvalExerciseInput): Observable<EvalExerciseOutput>
   abstract terminate(sessionId: string): Observable<PlayActivityOuput>
   abstract saveTemporaryAnswer(input: EvalExerciseInput): Observable<void>
+  abstract submitFeedback(feedback: Feedback): Observable<void>
 }
