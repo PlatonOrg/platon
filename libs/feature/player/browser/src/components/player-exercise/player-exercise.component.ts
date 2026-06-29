@@ -186,22 +186,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
 
   protected get primaryActions(): Action[] {
     if (!this.player) return []
-    let saveAnswerAction: Action | undefined = undefined
-    if (!this.previewMode) {
-      saveAnswerAction = {
-        icon: 'save',
-        label: 'Sauvegarder',
-        tooltip: 'Sauvegarder',
-        visible: !this.reviewMode,
-        disabled: !!this.runningAction,
-        playerAction: PlayerActions.SAVE_ANSWER,
-        showLabel: this.showLabelIfEnoughSpace,
-        run: async () => {
-          await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
-          this.dialogService.success('Votre réponse a bien été sauvegardée.')
-        },
-      }
-    }
     return [
       {
         id: 'check-answer-button',
@@ -225,7 +209,19 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
           this.errorsDismissed.set(false)
         },
       },
-      ...(saveAnswerAction ? [saveAnswerAction] : []),
+      {
+        icon: 'save',
+        label: 'Sauvegarder',
+        tooltip: 'Sauvegarder',
+        visible: !this.reviewMode && !this.previewMode,
+        disabled: !!this.runningAction,
+        playerAction: PlayerActions.SAVE_ANSWER,
+        showLabel: this.showLabelIfEnoughSpace,
+        run: async () => {
+          await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)
+          this.dialogService.success('Votre réponse a bien été sauvegardée.')
+        },
+      },
       {
         icon: 'refresh',
         label: 'Recharger',
