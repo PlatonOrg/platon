@@ -11,13 +11,27 @@ import { BaseValueEditor } from '../../ple-input'
 export class ValueEditorComponent extends BaseValueEditor<AutomatonEditorState['automaton']> {
   private lastCommittedSignature?: string
 
+  public editorState!: AutomatonEditorState
+
+  public isComponentActive = false // allow to update the automaton by switching value
+
   constructor() {
     super()
   }
 
   override setValue(value: AutomatonEditorState['automaton']): void {
-    super.setValue(value)
-    this.lastCommittedSignature = this.toSignature(value)
+    this.isComponentActive = false
+
+    const rawValue = value ? this.safeUnwrap(value) : value
+
+    super.setValue(rawValue)
+    this.lastCommittedSignature = this.toSignature(rawValue)
+    setTimeout(() => {
+      // don't remove the setTimeout it help to correctly update
+      this.editorState = { automaton: rawValue } as unknown as AutomatonEditorState
+      this.isComponentActive = true
+      this.changeDetectorRef.markForCheck()
+    }, 1)
   }
 
   protected onStateChange(value: unknown): void {
@@ -31,9 +45,21 @@ export class ValueEditorComponent extends BaseValueEditor<AutomatonEditorState['
       return
     }
 
-    this.value = nextValue
+    const rawNextValue = nextValue ? this.safeUnwrap(nextValue) : nextValue
+    this.value = rawNextValue
     this.lastCommittedSignature = nextSignature
-    this.notifyValueChange?.(nextValue)
+
+    this.notifyValueChange?.(rawNextValue)
+    this.changeDetectorRef.markForCheck()
+  }
+
+  // remove proxy around value
+  private safeUnwrap(value: any): any {
+    try {
+      return JSON.parse(JSON.stringify(value))
+    } catch (e) {
+      return value
+    }
   }
 
   private toSignature(value: AutomatonEditorState['automaton'] | undefined): string {

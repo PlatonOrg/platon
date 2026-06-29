@@ -1,1 +1,5 @@
-<wc-automaton-editor [state]="{ automaton: value }" (stateChange)="onStateChange($any($event).detail.automaton)" />
+<wc-automaton-editor
+  *ngIf="isComponentActive"
+  [state]="editorState"
+  (stateChange)="onStateChange($any($event).detail.automaton)"
+/>
