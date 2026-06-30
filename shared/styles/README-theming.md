@@ -31,6 +31,13 @@ Utilise les variables CSS via `var(--variable-name)` pour tous les thèmes Mater
 | `--brand-background-hover`      | État hover                              |
 | `--brand-text-primary`          | Texte principal                         |
 | `--brand-text-secondary`        | Texte secondaire                        |
+| `--brand-color-success`         | États de succès (validation, réussite)  |
+| `--brand-color-warning`         | États d'avertissement                   |
+| `--brand-color-danger`          | États d'erreur/échec                    |
+| `--brand-color-info`            | États informatifs                       |
+| `--brand-color-primary-soft`    | Fond teinté pour un état "sélectionné"  |
+| `--brand-shadow-sm/md/lg`       | Échelle d'élévation (ombres)            |
+| `--brand-motion-fast/base/slow` | Échelle de durée de transition          |
 
 ## Avantages
 
