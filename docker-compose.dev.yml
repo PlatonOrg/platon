@@ -24,6 +24,15 @@ services:
     env_file:
       - .env
 
+  maildev:
+    image: maildev/maildev
+    container_name: platon_maildev
+    ports:
+      - '1080:1080' # web UI to view captured emails
+      - '1025:1025' # SMTP server
+    networks:
+      - platon-network
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: platon_pgadmin
