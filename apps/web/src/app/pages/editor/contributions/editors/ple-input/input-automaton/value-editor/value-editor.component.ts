@@ -13,25 +13,17 @@ export class ValueEditorComponent extends BaseValueEditor<AutomatonEditorState['
 
   public editorState!: AutomatonEditorState
 
-  public isComponentActive = false // allow to update the automaton by switching value
-
   constructor() {
     super()
   }
 
   override setValue(value: AutomatonEditorState['automaton']): void {
-    this.isComponentActive = false
-
     const rawValue = value ? this.safeUnwrap(value) : value
 
     super.setValue(rawValue)
     this.lastCommittedSignature = this.toSignature(rawValue)
-    setTimeout(() => {
-      // don't remove the setTimeout it help to correctly update
-      this.editorState = { automaton: rawValue } as unknown as AutomatonEditorState
-      this.isComponentActive = true
-      this.changeDetectorRef.markForCheck()
-    }, 1)
+    this.editorState = { automaton: rawValue } as unknown as AutomatonEditorState
+    this.changeDetectorRef.markForCheck()
   }
 
   protected onStateChange(value: unknown): void {
