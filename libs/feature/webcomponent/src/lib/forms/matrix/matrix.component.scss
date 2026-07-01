@@ -24,7 +24,7 @@
     position: absolute;
     top: -6px;
     bottom: -6px;
-    border: 1px solid #000;
+    border: 1px solid var(--brand-border-color);
     width: 6px;
   }
 
@@ -43,10 +43,24 @@
     position: relative;
     width: var(--col-size);
     height: var(--row-size);
-    border: none;
     border-radius: 4px;
     text-align: center;
-    border: 1px solid #f0f0f0;
+    border: 1px solid var(--brand-border-color);
+    background-color: var(--brand-background-card);
+    color: var(--brand-text-primary);
+    transition: border-color var(--brand-motion-base) var(--brand-motion-ease),
+      box-shadow var(--brand-motion-base) var(--brand-motion-ease);
+
+    &:hover:not(:disabled) {
+      border-color: var(--brand-color-primary);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--brand-color-primary);
+      box-shadow: 0 0 0 2px var(--brand-color-primary-soft);
+    }
+
     &:disabled {
       border: none;
     }

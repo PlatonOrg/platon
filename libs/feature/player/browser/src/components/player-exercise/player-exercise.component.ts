@@ -399,6 +399,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       .ready()
       .then((user) => {
         this.user = user
+        this.changeDetectorRef.markForCheck()
       })
       .catch(console.error)
 
