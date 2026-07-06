@@ -170,6 +170,8 @@ export class CsvDownloadButtonComponent implements OnInit {
         Object.values(student.exercises).forEach((exercise) => {
           if (exercise.state === 'NOT_STARTED') {
             csvContent[student.username] += ';'
+          } else if (exercise.state === 'ERROR') {
+            csvContent[student.username] += ';ERROR'
           } else {
             csvContent[student.username] += `;${exercise.grade}`
           }
