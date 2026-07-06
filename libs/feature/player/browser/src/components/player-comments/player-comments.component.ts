@@ -57,7 +57,7 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
   protected user!: User
   protected submitting = false
   private sessionId = ''
-  private answerId = ''
+  protected answerId = ''
   protected isLoading = true
   protected previousComments: SessionComment[] = []
   protected showSuggestions = false
@@ -71,17 +71,27 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
 
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User
-    this.sessionId = this.answers[this.answers.length - 1].sessionId
-    this.answerId = this.answers[this.answers.length - 1].answerId as string
-    const response = await firstValueFrom(this.resultService.listComments(this.sessionId, this.answerId))
-    this.isLoading = false
-    this.comments = response.resources
-    this.changeDetectorRef.markForCheck()
+    await this.loadComments()
   }
 
   async ngOnChanges(): Promise<void> {
-    this.sessionId = this.answers[this.answers.length - 1].sessionId
-    this.answerId = this.answers[this.answers.length - 1].answerId as string
+    await this.loadComments()
+  }
+
+  private async loadComments(): Promise<void> {
+    const lastAnswer = this.answers[this.answers.length - 1] as ExercisePlayer | undefined
+    this.sessionId = lastAnswer?.sessionId ?? ''
+    this.answerId = lastAnswer?.answerId ?? ''
+
+    // No answer has been submitted for this session yet (e.g. the exercise crashed before the
+    // student could answer): there is nothing to fetch/post comments against.
+    if (!this.sessionId || !this.answerId) {
+      this.comments = []
+      this.isLoading = false
+      this.changeDetectorRef.markForCheck()
+      return
+    }
+
     const response = await firstValueFrom(this.resultService.listComments(this.sessionId, this.answerId))
     this.isLoading = false
     this.comments = response.resources

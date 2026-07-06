@@ -1,0 +1,66 @@
+<div class="custom-error-page">
+  <button
+    mat-icon-button
+    class="dismiss-error-button"
+    (click)="onDismissErrors()"
+    nz-tooltip="Afficher l'exercice quand même"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+  <div class="error-illustration">
+    <mat-icon class="error-icon">bug_report</mat-icon>
+  </div>
+
+  <div class="error-content">
+    <h2 class="error-title">Oups ! Un problème est survenu</h2>
+    <p class="error-description">
+      Nous avons rencontré une erreur lors de l'exécution de cet exercice. Cela peut être dû à un problème temporaire ou
+      à une configuration incorrecte.
+    </p>
+
+    <div class="error-actions">
+      <a [href]="mailtoLink">
+        <button mat-stroked-button color="accent" class="contact-button">
+          <mat-icon>email</mat-icon>
+          Contacter mon enseignant
+        </button>
+      </a>
+
+      @if(!editorPreview() && execRetryExercise()) {
+      <button mat-stroked-button color="accent" (click)="execRetryExercise()?.()">
+        <mat-icon>refresh</mat-icon>
+        Réessayer
+      </button>
+      } @if (canGoToNextPlayer()) {
+      <button
+        mat-stroked-button
+        color="accent"
+        (click)="execGoToNextPlayer()?.()"
+        aria-label="Passer à l'exercice suivant"
+      >
+        <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+        Passer l'exercice
+      </button>
+      }
+    </div>
+
+    <div class="error-tips">
+      <h4>Que puis-je faire ?</h4>
+      <ul>
+        <li>Vérifiez votre connexion internet</li>
+        <li>Actualisez la page</li>
+        <li>Contactez votre enseignant si le problème persiste</li>
+      </ul>
+    </div>
+  </div>
+
+  <details class="technical-details">
+    <summary>
+      <mat-icon>info</mat-icon>
+      Détails techniques
+    </summary>
+    <div class="details-content">
+      <pre>{{ errorServerSignal() }}</pre>
+    </div>
+  </details>
+</div>

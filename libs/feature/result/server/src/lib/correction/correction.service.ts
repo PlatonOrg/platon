@@ -63,9 +63,11 @@ export class CorrectionService {
     status?: CorrectionStatus
   ): Promise<ActivityCorrection[]> {
     // In viewer mode, list exercise sessions directly from the activity without requiring answers.
+    // Uses a LEFT JOIN (not INNER) so exercises that crashed before the student could submit an
+    // answer (no "Answers" row at all) are still listed, as long as the session itself recorded an error.
     const answerJoin = viewerMode
       ? ''
-      : `INNER JOIN LATERAL (
+      : `LEFT JOIN LATERAL (
       SELECT * FROM "Answers" a
       WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
       ORDER BY a.created_at DESC
@@ -90,7 +92,9 @@ export class CorrectionService {
     const whereConditions = [
       activityId ? `activity.id=${activityParam}` : undefined,
       userParam ? `(exercise_session.user_id IS NULL OR exercise_session.user_id <> ${userParam})` : undefined,
-      viewerMode ? undefined : 'answer.variables IS NOT NULL',
+      viewerMode
+        ? undefined
+        : `(answer.variables IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`,
       viewerMode ? undefined : "(activity_session.variables->'navigation'->>'terminated')::boolean = TRUE",
       userParam
         ? `EXISTS (

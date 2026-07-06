@@ -115,6 +115,9 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Get('list-correction/:sessionId/:answerId')
   async listCorrectionLabels(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
+    if (!req.params.sessionId || !req.params.answerId) {
+      return new ListResponse<LabelDTO>({ resources: [], total: 0 })
+    }
     const labels = await Promise.all(
       (
         await this.correctionLabelService.list(req.params.sessionId, req.params.answerId)

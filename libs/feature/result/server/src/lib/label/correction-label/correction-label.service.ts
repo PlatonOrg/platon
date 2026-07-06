@@ -14,6 +14,9 @@ export class CorrectionLabelService {
   ) {}
 
   async list(sessionId: string, answerId: string): Promise<CorrectionLabelEntity[]> {
+    if (!sessionId || !answerId) {
+      return []
+    }
     return this.correctionLabelRepository.find({ where: { sessionId, answerId } })
   }
 
@@ -23,6 +26,9 @@ export class CorrectionLabelService {
     labelId: string,
     correctionId: string
   ): Promise<CorrectionLabelEntity[]> {
+    if (!sessionId || !answerId || !labelId) {
+      return []
+    }
     const existing = await this.correctionLabelRepository.findOne({ where: { sessionId, answerId, labelId } })
     if (existing) {
       return this.list(sessionId, answerId)

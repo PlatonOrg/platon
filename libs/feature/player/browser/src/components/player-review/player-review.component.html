@@ -3,47 +3,68 @@
     <div>
       <div>
         <mat-card-title>
-          <mat-icon *ngIf="state" [style.color]="state | answerStateColor" [nz-tooltip]="state | answerStateLabel">
-            {{ state | answerStateIcon }}
+          <mat-icon
+            *ngIf="state()"
+            [style.color]="state()! | answerStateColor"
+            [nz-tooltip]="state()! | answerStateLabel"
+          >
+            {{ state()! | answerStateIcon }}
           </mat-icon>
-          {{ player?.title }}
+          {{ player()?.title }}
         </mat-card-title>
-        <mat-card-subtitle *ngIf="player?.author">
-          @if (player!.author!|isUUID) {
-          <user-avatar [userIdOrName]="player!.author!" [size]="24" /> } @else {
-          {{ player?.author }}
+        <mat-card-subtitle *ngIf="player()?.author">
+          @if (player()!.author!|isUUID) {
+          <user-avatar [userIdOrName]="player()!.author!" [size]="24" /> } @else {
+          {{ player()?.author }}
           }
         </mat-card-subtitle>
         <mat-card-subtitle>
-          <nz-countdown *ngIf="countdownValue" [nzValue]="countdownValue" [nzValueStyle]="{ color: countdownColor }" />
+          <nz-countdown
+            *ngIf="countdownValue()"
+            [nzValue]="countdownValue()!"
+            [nzValueStyle]="{ color: countdownColor() }"
+          />
         </mat-card-subtitle>
       </div>
       <div>
-        <button *ngIf="canRequestFullscreen" nz-tooltip="Plein écran" (click)="toggleFullscreen()" mat-icon-button>
-          <mat-icon>{{ fullscreen ? 'fullscreen' : 'fullscreen_exit' }}</mat-icon>
+        <button *ngIf="canRequestFullscreen()" nz-tooltip="Plein écran" (click)="toggleFullscreen()" mat-icon-button>
+          <mat-icon>{{ fullscreen() ? 'fullscreen' : 'fullscreen_exit' }}</mat-icon>
         </button>
       </div>
     </div>
   </mat-card-header>
-  <ng-container *ngIf="player; else noPlayer">
+  @if (hasErrorLogs()) {
+  <nz-alert
+    nzType="error"
+    nzBanner
+    nzShowIcon
+    nzMessage="Erreur lors de l'évaluation"
+    [nzDescription]="errorBannerMessage()"
+  />
+  }
+  <ng-container *ngIf="player(); else noPlayer">
     <mat-card-content>
       <nz-tabset>
         <nz-tab nzTitle="Réponse">
-          <nz-skeleton [nzActive]="loading" [nzLoading]="loading" [nzParagraph]="{ rows: 5 }">
+          <nz-skeleton [nzActive]="loading()" [nzLoading]="loading()" [nzParagraph]="{ rows: 5 }">
             <section>
+              @if (hasErrors()) {
+              <player-error [player]="player()!" (dismissErrors)="dismissErrors()" />
+              } @else {
               <div id="form" class="exercise-form">
-                <nge-markdown [data]="player.form" (render)="onRender()" />
+                <nge-markdown [data]="player()!.form" (render)="onRender()" />
               </div>
+              }
             </section>
           </nz-skeleton>
         </nz-tab>
 
         <nz-tab nzTitle="Énoncé">
-          <nz-skeleton [nzActive]="loading" [nzLoading]="loading" [nzParagraph]="{ rows: 5 }">
+          <nz-skeleton [nzActive]="loading()" [nzLoading]="loading()" [nzParagraph]="{ rows: 5 }">
             <section>
-              <ng-container *ngIf="player.statement">
+              <ng-container *ngIf="player()?.statement">
                 <div class="exercise-statement">
-                  <nge-markdown [data]="player.statement" />
+                  <nge-markdown [data]="player()?.statement" />
                 </div>
               </ng-container>
             </section>
@@ -51,10 +72,10 @@
         </nz-tab>
 
         <nz-tab nzTitle="Retour">
-          <nz-skeleton [nzActive]="loading" [nzLoading]="loading" [nzParagraph]="{ rows: 5 }">
+          <nz-skeleton [nzActive]="loading()" [nzLoading]="loading()" [nzParagraph]="{ rows: 5 }">
             <section #containerFeedbacks>
-              <ng-container *ngIf="player?.feedbacks">
-                <ng-container *ngFor="let feedback of player?.feedbacks">
+              <ng-container *ngIf="player()?.feedbacks">
+                <ng-container *ngFor="let feedback of player()?.feedbacks">
                   @if (!feedback.content) {
                   <!-- noting -->
                   } @else if (isFeedbackContentAnObject(feedback)) {
@@ -69,9 +90,9 @@
               </ng-container>
             </section>
             <section #containerHints>
-              <ng-container *ngIf="player?.hints">
+              <ng-container *ngIf="player()?.hints">
                 <div class="exercise-hints">
-                  <ng-container *ngFor="let hint of player?.hints">
+                  <ng-container *ngFor="let hint of player()?.hints">
                     <nz-alert nzShowIcon [nzType]="'info'" [nzMessage]="content">
                       <ng-template #content>
                         <nge-markdown [data]="hint" />
@@ -82,14 +103,14 @@
               </ng-container>
             </section>
             <section #containerSolution>
-              <ng-container *ngIf="player?.solution">
+              <ng-container *ngIf="player()?.solution">
                 <mat-accordion class="exercise-solution">
                   <mat-expansion-panel expanded>
                     <mat-expansion-panel-header>
                       <mat-panel-title>Solution</mat-panel-title>
                     </mat-expansion-panel-header>
                     <div class="exercise-form">
-                      <nge-markdown [data]="player!.solution!" />
+                      <nge-markdown [data]="player()!.solution!" />
                     </div>
                   </mat-expansion-panel>
                 </mat-accordion>
@@ -103,21 +124,21 @@
 
   <nz-skeleton
     class="skeleton-actions"
-    [class.active]="loading"
-    [nzActive]="loading"
-    [nzLoading]="loading"
+    [class.active]="loading()"
+    [nzActive]="loading()"
+    [nzLoading]="loading()"
     [nzParagraph]="{ rows: 1 }"
   >
     <mat-card-actions>
       <div class="exercice-actions">
         <div class="exercice-actions-list">
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions() }" />
         </div>
         <div class="exercice-actions-list">
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: primaryActions }" />
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: reviewModeActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: primaryActions() }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: reviewModeActions() }" />
           <div class="spacer"></div>
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: secondaryActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: secondaryActions() }" />
         </div>
       </div>
     </mat-card-actions>
@@ -141,8 +162,8 @@
       [nz-tooltip]="action.tooltip"
       [matMenuTriggerFor]="action.menu ?? null"
     >
-      <nz-spin *ngIf="runningAction && runningAction === action.playerAction" nzSpinning nzSimple nzSize="small" />
-      <ng-container *ngIf="!runningAction || runningAction !== action.playerAction">
+      <nz-spin *ngIf="runningAction() && runningAction() === action.playerAction" nzSpinning nzSimple nzSize="small" />
+      <ng-container *ngIf="!runningAction() || runningAction() !== action.playerAction">
         <mat-icon>{{ action.icon }}</mat-icon>
         <ng-container *ngIf="action.showLabel">{{ action.label }}</ng-container>
       </ng-container>

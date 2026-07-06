@@ -1,18 +1,3 @@
-/**
- * Tests E2E — PlayerController
- *
- * On teste la couche HTTP du contrôleur :
- *   - Mapping des routes et verbes HTTP
- *   - Validation des entrées (ValidationPipe / class-validator) pour les routes
- *     qui utilisent de vrais DTOs décorés (@Body() InputDTO)
- *   - Sérialisation des réponses
- *
- * Note : les routes /play/answers, /evaluate et /saveTemporaryAnswer reçoivent
- * des types interface depuis @platon/feature/player/common (pas des classes
- * décorées) — la ValidationPipe ne valide donc pas ces corps de requêtes.
- *
- * PlayerService est mocké pour isoler la couche HTTP sans dépendances DB.
- */
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
 const request = require('supertest')
 import { INestApplication, ValidationPipe } from '@nestjs/common'
