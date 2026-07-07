@@ -34,7 +34,7 @@
         </ng-container>
       </nz-list>
 
-      <nz-comment *ngIf="canComment">
+      <nz-comment *ngIf="canComment && answerId">
         <nz-comment-content>
           <nz-form-item>
             <textarea [(ngModel)]="input" nz-input rows="4" (keydown)="blockEvents($event)"></textarea>
@@ -52,6 +52,9 @@
           </nz-form-item>
         </nz-comment-content>
       </nz-comment>
+      <div *ngIf="canComment && !answerId" style="text-align: center; padding: 1rem; color: #888">
+        Aucune réponse n'a été soumise pour cet exercice, impossible de commenter.
+      </div>
     </ng-container>
     <ng-template #loading>
       <div class="loading-spinner"><nz-spin></nz-spin> Chargement des commentaires...</div>

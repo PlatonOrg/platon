@@ -79,6 +79,8 @@ export const sessionDurationInSeconds = (input: SessionDataEntity): number => {
  * @returns The corresponding answer state.
  */
 export const answerStateFromSession = (session: SessionDataEntity) => {
+  if (session.exerciseMeta?.error) return AnswerStates.ERROR
+
   return session.startedAt
     ? session.attempts
       ? answerStateFromGrade(session.correctionGrade ?? session.grade)

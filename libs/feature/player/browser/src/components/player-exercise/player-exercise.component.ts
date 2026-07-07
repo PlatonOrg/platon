@@ -57,6 +57,7 @@ import { PlayerCommentsComponent } from '../player-comments/player-comments.comp
 import { PlayerQuestionFeedbackComponent } from '../player-question-feedback/player-question-feedback.component'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
 import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
+import { PlayerErrorComponent } from '../player-error/player-error.component'
 import { User } from '@platon/core/common'
 
 type Action = {
@@ -118,6 +119,7 @@ type FullscreenElement = HTMLElement & {
     PlayerCommentsComponent,
     PlayerTerminalLogsComponent,
     PlayerQuestionFeedbackComponent,
+    PlayerErrorComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -638,14 +640,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     }
   }
 
-  protected readonly errorServerSignal = computed(() => {
-    const player = this.playerSignal()
-    if (!player) return ''
-    return this.getErrorLogsFromPlayer(player)
-      .map((log) => log.message)
-      .join('\n')
-  })
-
   readonly hasErrors = computed(() => {
     if (this.errorsDismissed()) return false
     const player = this.playerSignal()
@@ -654,7 +648,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     return !this.editorPreview && errorLogs.length > 0
   })
 
-  protected dismissErrors(): void {
+  protected onDismissErrors(): void {
     this.errorsDismissed.set(true)
   }
 
@@ -662,35 +656,19 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     return player.platon_logs?.filter((log) => log.type === LogType.ERROR) || []
   }
 
-  get mailtoLink(): string {
-    const subject = encodeURIComponent(`Problème avec l'exercice: ${this.player?.title || 'Exercice'}`)
-
-    const name =
-      this.user?.firstName && this.user?.lastName ? `${this.user.firstName} ${this.user.lastName}` : '[PRENOM] [NOM]'
-
-    const body = encodeURIComponent(`
-    Bonjour,
-
-    J'ai rencontré un problème avec l'exercice "${this.player?.title || 'Exercice'}" dans PLaTon.
-
-    Détails de l'erreur:
-    ${this.errorServerSignal()}
-
-    Pourriez-vous m'aider à résoudre ce problème ?
-
-    Merci,
-    ${name}
-    `)
-
-    return `mailto:${this.getTeacherEmail()}?subject=${subject}&body=${body}`
-  }
-
   protected retryExercise(): void {
     window.location.reload()
   }
 
-  // TODO: implement this method to return the teacher's email based on the context (exercise, player, user, etc.)
-  private getTeacherEmail(): string {
-    return ''
+  protected execRetryExercise = () => {
+    this.retryExercise()
+  }
+
+  protected execGoToNextPlayer = () => {
+    this.goToNextPlayer.emit()
+  }
+
+  get firstNameAndLastName(): { firstName: string | undefined; lastName: string | undefined } {
+    return { firstName: this.user?.firstName, lastName: this.user?.lastName }
   }
 }

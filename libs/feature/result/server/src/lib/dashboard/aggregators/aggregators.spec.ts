@@ -152,5 +152,51 @@ describe('aggregators', () => {
       const result = answerStateFromSession(session)
       expect(result).toBe(answerStateFromGrade(50))
     })
+
+    it('should return AnswerStates.ERROR when the exercise crashed before any attempt (zero attempts)', () => {
+      const session = {
+        startedAt: new Date(),
+        attempts: 0,
+        grade: -1,
+        exerciseMeta: { error: true },
+      } as unknown as SessionDataEntity
+
+      const result = answerStateFromSession(session)
+
+      expect(result).toBe(AnswerStates.ERROR)
+    })
+
+    it('should return AnswerStates.ERROR even when a previous attempt succeeded (grade masks the crash)', () => {
+      // session.grade is the best grade across attempts, so a later crashed attempt would otherwise
+      // be hidden behind an earlier SUCCEEDED grade if we relied on grade/correctionGrade alone.
+      const session = {
+        startedAt: new Date(),
+        attempts: 2,
+        grade: 100,
+        exerciseMeta: { error: true },
+      } as unknown as SessionDataEntity
+
+      const result = answerStateFromSession(session)
+
+      expect(result).toBe(AnswerStates.ERROR)
+    })
+
+    it('should not report AnswerStates.ERROR when exerciseMeta.error is false or missing', () => {
+      const withExplicitFalse = {
+        startedAt: new Date(),
+        attempts: 1,
+        grade: 100,
+        exerciseMeta: { error: false },
+      } as unknown as SessionDataEntity
+
+      const withoutExerciseMeta = {
+        startedAt: new Date(),
+        attempts: 1,
+        grade: 100,
+      } as unknown as SessionDataEntity
+
+      expect(answerStateFromSession(withExplicitFalse)).toBe(AnswerStates.SUCCEEDED)
+      expect(answerStateFromSession(withoutExerciseMeta)).toBe(AnswerStates.SUCCEEDED)
+    })
   })
 })

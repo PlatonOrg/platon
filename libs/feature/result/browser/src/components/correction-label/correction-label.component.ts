@@ -162,21 +162,22 @@ export class CorrectionLabelComponent implements OnChanges {
   }
 
   private async getLabels() {
+    const lastAnswerId = this.answers[this.answers.length - 1]?.answerId
     if (
       !this.activityId ||
       !this.navigationExerciseId ||
       this.answers.length === 0 ||
-      !this.currentExercise?.exerciseSessionId
+      !this.currentExercise?.exerciseSessionId ||
+      !lastAnswerId
     ) {
+      // No answer has been submitted for this session yet (e.g. the exercise crashed before the
+      // student could answer): there is nothing to fetch/attach labels to.
+      this.selectedLabels = []
+      this.currentLabelsChange.emit(this.selectedLabels)
       return
     }
     const [selectedLabels] = await Promise.all([
-      firstValueFrom(
-        this.resultService.listCorrectionLabels(
-          this.currentExercise?.exerciseSessionId,
-          this.answers[this.answers.length - 1].answerId ?? ''
-        )
-      ),
+      firstValueFrom(this.resultService.listCorrectionLabels(this.currentExercise.exerciseSessionId, lastAnswerId)),
       //firstValueFrom(this.resultService.getFavLabels()),
     ])
 

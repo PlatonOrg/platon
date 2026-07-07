@@ -172,7 +172,7 @@ if __name__ == "__main__":
     try:
         exec(with_try_clause(script, StopExec), variables)
         exec("", glob)
-    except Exception as e:
+    except BaseException as e:
         # Ne pas catcher les erreurs de timeout - les laisser se propager
         if is_timeout_error(e):
             raise e

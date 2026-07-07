@@ -95,7 +95,7 @@ export class PlayerService extends PlayerManager {
     })
     if (!session) throw new NotFoundResponse('Session not found')
     const answers = await this.answerService.findAllOfSession(sessionId)
-    return answers.map((answer) => withExercisePlayer(session, answer))
+    return answers.length ? answers.map((answer) => withExercisePlayer(session, answer)) : [withExercisePlayer(session)]
   }
 
   /**

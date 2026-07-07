@@ -516,16 +516,20 @@ export class PlayerCorrectionComponent implements OnInit {
         const validatedGrade = Math.max(0, Math.min(100, this.correctedGrade as number))
         this.correctedGrade = validatedGrade
 
+        // Labels are tied to a specific answer (DB foreign key, cannot be empty/fake): if the
+        // exercise crashed before the student could submit anything, skip labels but still save the grade.
+        const lastAnswerId = this.answers[this.answers.length - 1]?.answerId
+
         await firstValueFrom(
           this.resultService.upsertCorrection(this.currentExercise.exerciseSessionId, {
             grade: validatedGrade,
-            labels: this.currentLabels.map((label) => {
-              return {
-                labelId: label.id,
-                sessionId: this.currentExercise?.exerciseSessionId ?? '',
-                answerId: this.answers[this.answers.length - 1].answerId ?? '',
-              }
-            }),
+            labels: lastAnswerId
+              ? this.currentLabels.map((label) => ({
+                  labelId: label.id,
+                  sessionId: this.currentExercise?.exerciseSessionId ?? '',
+                  answerId: lastAnswerId,
+                }))
+              : [],
           })
         )
         this.currentExercise.correctedGrade = validatedGrade
