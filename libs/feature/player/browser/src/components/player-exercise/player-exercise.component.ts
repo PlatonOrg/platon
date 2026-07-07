@@ -665,7 +665,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   }
 
   protected execGoToNextPlayer = () => {
-    console.log('execGoToNextPlayer')
     this.goToNextPlayer.emit()
   }
 
