@@ -29,6 +29,7 @@
     "serve:home": "nx serve home",
     "build:web": "nx build web --configuration=production",
     "build:api": "nx build api --configuration=production",
+    "build:migrations": "tsc -p tsconfig.migrations.json",
     "build:docs": "cd apps/docs && yarn build",
     "prebuild:docs": "./bin/cli/wc-docs.sh",
     "build:docs:ghpage": "cd apps/docs && yarn build:ghpage",
