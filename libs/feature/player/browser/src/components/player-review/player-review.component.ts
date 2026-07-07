@@ -397,7 +397,6 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
         }
       })
     )
-    console.log('PlayerReviewComponent initialized :', this.players(), this.state(), this.player())
   }
 
   ngOnDestroy(): void {
