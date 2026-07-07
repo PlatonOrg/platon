@@ -45,6 +45,11 @@ RUN yarn build:web
 RUN NODE_OPTIONS="--max-old-space-size=4096" NX_DAEMON=false yarn build:api --verbose
 RUN yarn build:docs
 
+# Compile TypeScript migrations to JS (prod-safe, no ts-node needed at runtime)
+COPY --chown=node:node migrations ./migrations
+COPY --chown=node:node tsconfig.migrations.json ./tsconfig.migrations.json
+RUN yarn build:migrations
+
 # Rebuild node_modules with only production dependencies
 ENV NODE_ENV=production
 RUN yarn install --frozen-lockfile --non-interactive --production
@@ -69,7 +74,13 @@ WORKDIR /src
 
 COPY --chown=node:node --from=build /src/node_modules ./node_modules
 COPY --chown=node:node --from=build /src/dist/apps/api ./dist/apps/api
+COPY --chown=node:node --from=build /src/dist/migrations ./dist/migrations
+COPY --chown=node:node --from=build /src/dist/tools/datasource.prod.js ./dist/tools/datasource.prod.js
 COPY --chown=node:node --from=build /src/schema.gql ./schema.gql
 COPY --chown=node:node templates ./templates
+COPY --chown=node:node .docker/node/docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
 USER node
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
