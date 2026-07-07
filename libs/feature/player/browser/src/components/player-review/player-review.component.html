@@ -46,7 +46,7 @@
     <mat-card-content>
       <nz-tabset>
         <nz-tab nzTitle="Réponse">
-          <nz-skeleton [nzActive]="loading()" [nzLoading]="loading()" [nzParagraph]="{ rows: 5 }">
+          <nz-skeleton [nzActive]="contentLoading()" [nzLoading]="contentLoading()" [nzParagraph]="{ rows: 5 }">
             <section>
               @if (hasErrors()) {
               <player-error [player]="player()!" (dismissErrors)="dismissErrors()" />
@@ -60,7 +60,7 @@
         </nz-tab>
 
         <nz-tab nzTitle="Énoncé">
-          <nz-skeleton [nzActive]="loading()" [nzLoading]="loading()" [nzParagraph]="{ rows: 5 }">
+          <nz-skeleton [nzActive]="contentLoading()" [nzLoading]="contentLoading()" [nzParagraph]="{ rows: 5 }">
             <section>
               <ng-container *ngIf="player()?.statement">
                 <div class="exercise-statement">
@@ -72,7 +72,7 @@
         </nz-tab>
 
         <nz-tab nzTitle="Retour">
-          <nz-skeleton [nzActive]="loading()" [nzLoading]="loading()" [nzParagraph]="{ rows: 5 }">
+          <nz-skeleton [nzActive]="contentLoading()" [nzLoading]="contentLoading()" [nzParagraph]="{ rows: 5 }">
             <section #containerFeedbacks>
               <ng-container *ngIf="player()?.feedbacks">
                 <ng-container *ngFor="let feedback of player()?.feedbacks">
@@ -124,9 +124,9 @@
 
   <nz-skeleton
     class="skeleton-actions"
-    [class.active]="loading()"
-    [nzActive]="loading()"
-    [nzLoading]="loading()"
+    [class.active]="contentLoading()"
+    [nzActive]="contentLoading()"
+    [nzLoading]="contentLoading()"
     [nzParagraph]="{ rows: 1 }"
   >
     <mat-card-actions>

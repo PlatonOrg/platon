@@ -329,6 +329,8 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
     return this.hasErrorLogs()
   })
 
+  protected readonly contentLoading = computed(() => this.loading() && !this.hasErrors())
+
   protected dismissErrors(): void {
     this.errorsDismissed.set(true)
   }
@@ -395,6 +397,7 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
         }
       })
     )
+    console.log('PlayerReviewComponent initialized :', this.players(), this.state(), this.player())
   }
 
   ngOnDestroy(): void {
