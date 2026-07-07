@@ -58,7 +58,6 @@ import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
 import { PlayerErrorComponent } from '../player-error/player-error.component'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
-import { NzEmptyModule } from 'ng-zorro-antd/empty'
 
 type Action = {
   id?: string
@@ -107,7 +106,6 @@ type FullscreenElement = HTMLElement & {
     NzSkeletonModule,
     NzStatisticModule,
     NzTabsModule,
-    NzEmptyModule,
 
     SafePipe,
     IsUUIDPipe,

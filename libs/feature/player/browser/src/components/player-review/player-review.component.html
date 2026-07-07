@@ -173,6 +173,6 @@
 
 <ng-template #noPlayer>
   <mat-card-content>
-    <nz-empty [nzNotFoundContent]="'Aucun exercice à afficher'" [nzNotFoundImage]="''"></nz-empty>
+    <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 5 }"></nz-skeleton>
   </mat-card-content>
 </ng-template>
