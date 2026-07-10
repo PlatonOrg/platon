@@ -213,40 +213,6 @@
             </nz-form-control>
           </nz-form-item>
         </nz-collapse-panel>
-
-        <!-- Navigation -->
-        <nz-collapse-panel nzHeader="Navigation" [nzExpandedIcon]="navigationIcon">
-          <ng-template #navigationIcon>
-            <span nz-icon nzType="compass" nzTheme="outline"></span>
-          </ng-template>
-
-          <nz-form-item>
-            <nz-form-label
-              nzFor="navigationMode"
-              nzTooltipTitle="Détermine comment les exercices sont présentés aux étudiants"
-            >
-              Mode de navigation
-            </nz-form-label>
-            <nz-form-control>
-              <nz-select [(ngModel)]="navigation.mode" id="navigationMode">
-                <nz-option nzValue="manual" nzLabel="Progressive"></nz-option>
-                <nz-option nzValue="composed" nzLabel="Composée"></nz-option>
-                <nz-option nzValue="next" nzLabel="Intelligente (Bêta)"></nz-option>
-                <nz-option nzValue="peer" nzLabel="Comparaison par les pairs (Bêta)"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-          @if (navigation.mode === 'peer' || navigation.mode === 'next') {
-          <nz-alert
-            nzType="warning"
-            nzMessage="Cette fonctionnalité est en cours de développement."
-            nzShowIcon
-            class="beta-warning"
-          />
-          }
-        </nz-collapse-panel>
-
         <!-- Actions -->
         <nz-collapse-panel nzHeader="Actions" [nzExpandedIcon]="actionsIcon">
           <ng-template #actionsIcon>
