@@ -144,23 +144,61 @@
           }
         </section>
       </ng-template>
+      <!-- STEP 3 -->
+      <ng-template #iconFunction>
+        <mat-icon>category</mat-icon>
+      </ng-template>
+      <ng-template uiStepperStep stepTitle="Fonction" [stepIcon]="iconFunction" [stepValidator]="!!activityFunction()">
+        <section>
+          <h4>Quelle est la fonction de cette activité ?</h4>
+          <p>Choisissez le type d'activité que vous souhaitez ajouter, cela adaptera les étapes suivantes.</p>
+          <div class="activity-function-cards">
+            <div
+              class="activity-function-card"
+              [class.selected]="activityFunction() === 'training'"
+              (click)="selectActivityFunction('training')"
+            >
+              <mat-icon>fitness_center</mat-icon>
+              <h3>Entraînement</h3>
+              <p>Une activité simple, sans notation, pour permettre aux élèves de s'entraîner librement.</p>
+            </div>
+            <div
+              class="activity-function-card"
+              [class.selected]="activityFunction() === 'graded'"
+              (click)="selectActivityFunction('graded')"
+            >
+              <mat-icon>fact_check</mat-icon>
+              <h3>TP noté / Examen</h3>
+              <p>Une activité évaluée dont les résultats sont corrigés et notés.</p>
+            </div>
+            <div
+              class="activity-function-card"
+              [class.selected]="activityFunction() === 'challenge'"
+              (click)="selectActivityFunction('challenge')"
+            >
+              <mat-icon>emoji_events</mat-icon>
+              <h3>Challenge</h3>
+              <p>
+                Une activité réalisable uniquement par les élèves du cours, dont les résultats sont visibles par tous.
+              </p>
+            </div>
+          </div>
+        </section>
+      </ng-template>
       <ng-container *ngIf="!isTest">
-        <!-- STEP 3 -->
+        <!-- STEP 4 -->
         <ng-template #icon3>
           <mat-icon>settings</mat-icon>
         </ng-template>
         <ng-template uiStepperStep stepTitle="Configuration" [stepIcon]="icon3">
           <section>
             <form [formGroup]="settingsInfo">
-              <h4 id="challenge">Cette activité est-elle un challenge?</h4>
-              <nz-radio-group [nzDisabled]="challenge" aria-labelledby="challenge" formControlName="isChallenge">
-                <label nz-radio [nzValue]="true">Oui</label>
-                <label nz-radio [nzValue]="false">Non</label>
-              </nz-radio-group>
+              @if (activityFunction() === 'challenge') {
               <p>
                 Les challenges sont des activités réalisables uniquement par les élèves du cours. Les résultats d'un
                 challenge sont visibles par tous dans la page du cours.
               </p>
+              }
               <h4 id="openDates">Souhaitez-vous limiter l'accès de cette activité à une date en particulier?</h4>
               <div class="date-picker">
                 <nz-date-picker
@@ -180,6 +218,9 @@
                   nzFormat="dd MMMM yyyy, HH:mm:ss"
                 />
               </div>
+              @if (activityFunction() === 'graded') {
+              <app-graded-activity-settings />
+              }
             </form>
           </section>
         </ng-template>
