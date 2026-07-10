@@ -86,4 +86,12 @@ export class PlayerErrorComponent {
   private getTeacherEmail(): string {
     return ''
   }
+
+  protected examenMode(): boolean {
+    return (
+      this.player()?.settings?.security?.terminateOnLeavePage ||
+      this.player()?.settings?.security?.terminateOnLoseFocus ||
+      false
+    )
+  }
 }
