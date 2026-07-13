@@ -1,6 +1,14 @@
 // Variables CSS centralisées pour tous les systèmes de theming
 // Ces variables seront utilisées par SCSS, Material Design et ng-zorro
 
+:root {
+  // === MOTION (identique quel que soit le thème) ===
+  --brand-motion-fast: 120ms;
+  --brand-motion-base: 200ms;
+  --brand-motion-slow: 320ms;
+  --brand-motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .light-theme {
   // === COLORS PRINCIPALES ===
   --brand-color-primary: #171c8f;
@@ -62,6 +70,24 @@
   --brand-pastel-red: #ffdddd;
   --brand-pastel-blue: #ddddff;
   --brand-pastel-green: #ddffdd;
+
+  // === COULEURS SÉMANTIQUES (états) ===
+  --brand-color-success: #2e7d32;
+  --brand-color-success-rgb: 46, 125, 50;
+  --brand-color-warning: #b25000;
+  --brand-color-warning-rgb: 178, 80, 0;
+  --brand-color-danger: #de0029;
+  --brand-color-danger-rgb: 222, 0, 41;
+  --brand-color-info: #3466fe;
+  --brand-color-info-rgb: 52, 102, 254;
+
+  // Teinte douce de la couleur primaire, pour les fonds d'état "sélectionné"
+  --brand-color-primary-soft: rgba(23, 28, 143, 0.08);
+
+  // === ÉLÉVATION ===
+  --brand-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --brand-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --brand-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
 .dark-theme {
@@ -101,4 +127,22 @@
   --brand-pastel-red: #aa0000;
   --brand-pastel-blue: #0000aa;
   --brand-pastel-green: #00aa00;
+
+  // === COULEURS SÉMANTIQUES (états) ===
+  --brand-color-success: #4caf50;
+  --brand-color-success-rgb: 76, 175, 80;
+  --brand-color-warning: #e6a700;
+  --brand-color-warning-rgb: 230, 167, 0;
+  --brand-color-danger: #ff1a44;
+  --brand-color-danger-rgb: 255, 26, 68;
+  --brand-color-info: #5e8bff;
+  --brand-color-info-rgb: 94, 139, 255;
+
+  // Teinte douce de la couleur primaire (or), pour les fonds d'état "sélectionné"
+  --brand-color-primary-soft: rgba(208, 144, 0, 0.12);
+
+  // === ÉLÉVATION ===
+  --brand-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --brand-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --brand-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.45);
 }

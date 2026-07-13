@@ -14,9 +14,9 @@ mat-radio-group {
 
   &.horizontal {
     flex-direction: row;
+    flex-wrap: wrap;
     .radio-item {
       margin-right: 12px;
-      margin-bottom: 0px;
     }
   }
 
@@ -48,20 +48,32 @@ mat-radio-group {
 
 .radio-item {
   cursor: pointer;
-  transition: all 0.25s ease-in-out;
   border-radius: 7px;
-  border: 2px solid #f4f4f4;
+  border: 2px solid var(--brand-border-color-light);
   margin-bottom: 12px;
-  padding: 12px 12px 12px 12px;
-  transition: border 0.25s ease-in-out;
+  padding: 12px;
   position: relative;
+  transition: border-color var(--brand-motion-base) var(--brand-motion-ease),
+    background-color var(--brand-motion-base) var(--brand-motion-ease),
+    box-shadow var(--brand-motion-base) var(--brand-motion-ease),
+    transform var(--brand-motion-fast) var(--brand-motion-ease);
 
   &.selected {
     border: 2px dashed var(--brand-color-primary);
   }
 
-  &:hover,
+  &:hover {
+    border-color: var(--brand-color-primary);
+    box-shadow: var(--brand-shadow-sm);
+  }
+
   &.checked {
     border: 2px solid var(--brand-color-primary);
+    background-color: var(--brand-color-primary-soft);
+    box-shadow: var(--brand-shadow-sm);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }

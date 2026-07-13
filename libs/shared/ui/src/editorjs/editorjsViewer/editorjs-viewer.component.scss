@@ -1,0 +1,164 @@
+:host {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  color: var(--brand-text-primary);
+}
+
+::ng-deep {
+  p.paragraph {
+    margin: 0 0 1rem;
+    line-height: 1.6;
+    color: var(--brand-text-primary);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 1.5rem 0 0.75rem;
+    color: var(--brand-text-primary);
+    font-weight: 600;
+    line-height: 1.3;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  ul,
+  ol {
+    margin: 0 0 1rem;
+    color: var(--brand-text-primary);
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  blockquote {
+    margin: 0 0 1rem;
+    padding: 0.5rem 1rem;
+    border-left: 3px solid var(--brand-color-primary);
+    background-color: var(--brand-background-hover);
+    border-radius: 0 6px 6px 0;
+    color: var(--brand-text-secondary);
+    font-style: italic;
+
+    p {
+      margin: 0;
+    }
+
+    cite {
+      display: block;
+      margin-top: 0.5rem;
+      font-style: normal;
+      font-size: 0.85em;
+      color: var(--brand-text-tertiary);
+    }
+  }
+
+  .checklist {
+    margin: 0 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      input[type='checkbox'] {
+        accent-color: var(--brand-color-primary);
+      }
+
+      .checklist-text {
+        color: var(--brand-text-primary);
+      }
+
+      &.checked .checklist-text {
+        color: var(--brand-text-secondary);
+        text-decoration: line-through;
+      }
+    }
+  }
+
+  table {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 0 0 1rem;
+
+    tr {
+      border-bottom: 1px solid var(--brand-border-color-light);
+    }
+
+    td {
+      padding: 0.5rem 0.75rem;
+      color: var(--brand-text-primary);
+    }
+  }
+
+  pre {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: var(--brand-background-secondary);
+    border: 1px solid var(--brand-border-color-light);
+    overflow-x: auto;
+
+    code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--brand-text-primary);
+      background: none;
+    }
+  }
+
+  .fig-img {
+    margin: 0 0 1rem;
+    max-width: 100%;
+
+    .img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: var(--brand-shadow-sm);
+
+      &.img-fullwidth {
+        width: 100%;
+      }
+
+      &.img-border {
+        border: 1px solid var(--brand-border-color);
+      }
+    }
+
+    .fig-cap {
+      margin-top: 0.4rem;
+      font-size: 0.85em;
+      color: var(--brand-text-secondary);
+      text-align: center;
+    }
+  }
+
+  .embed {
+    position: relative;
+    max-width: 100%;
+    margin: 0 0 1rem;
+
+    iframe {
+      max-width: 100%;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: none;
+      border-radius: 8px;
+    }
+  }
+}

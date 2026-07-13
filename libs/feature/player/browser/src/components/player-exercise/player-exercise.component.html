@@ -47,7 +47,7 @@
     <nz-skeleton [nzActive]="loading" [nzLoading]="loading" [nzParagraph]="{ rows: 5 }">
       <section>
         <ng-container *ngIf="player?.statement">
-          <div class="exercise-statement">
+          <div class="exercise-statement animate__animated animate__fadeIn">
             <nge-markdown [data]="player?.statement" />
           </div>
         </ng-container>
@@ -83,7 +83,7 @@
       </section>
       <section>
         <mat-divider />
-        <div id="form" class="exercise-form">
+        <div id="form" class="exercise-form animate__animated animate__fadeIn">
           <nge-markdown [data]="player?.form" (render)="onRender()" />
         </div>
       </section>
@@ -120,8 +120,8 @@
     <mat-card-actions>
       <div class="exercice-actions">
         <div class="exercice-actions-list">
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: secondaryActions }" />
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: reviewModeActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: secondaryActions, secondary: true }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: reviewModeActions, secondary: true }" />
           <div class="spacer"></div>
           <ng-container *ngTemplateOutlet="actionList; context: { $implicit: primaryActions.reverse() }" />
         </div>
@@ -137,7 +137,7 @@
           />
           }
           <div class="spacer"></div>
-          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions }" />
+          <ng-container *ngTemplateOutlet="actionList; context: { $implicit: navigationActions, secondary: true }" />
         </div>
       </div>
     </mat-card-actions>
@@ -171,7 +171,7 @@
   <pre>{{ data.message }}</pre>
 </ng-template>
 
-<ng-template #actionList let-actions>
+<ng-template #actionList let-actions let-secondary="secondary">
   <ng-container *ngFor="let action of actions; trackBy: trackAction">
     <button
       *ngIf="action.visible"
@@ -180,6 +180,7 @@
       (click)="action.run?.()"
       [color]="action.color"
       [class.danger]="action.danger"
+      [class.action-secondary]="secondary"
       [disabled]="action.disabled"
       [matMenuTriggerFor]="action.menu ?? null"
     >

@@ -2,7 +2,7 @@
   display: flex;
   height: calc(100vh - 70px);
   overflow: hidden;
-  background-color: var(--brand-background-primary);
+  background-color: var(--brand-background-secondary);
 
   * {
     transition: all 0.2s ease-in-out;
@@ -15,13 +15,14 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background-color: var(--brand-background-primary);
+  background-color: var(--brand-background-secondary);
+  border-right: 1px solid var(--brand-border-color-light);
 
   .search-bar {
     padding: 2px;
     border-bottom: 1px solid var(--brand-border-color-light);
     flex-shrink: 0;
-    background-color: var(--brand-background-primary);
+    background-color: var(--brand-background-secondary);
 
     .search-field {
       width: 100%;
@@ -37,7 +38,7 @@
     flex-direction: column;
     gap: 12px;
     min-height: 0;
-    background-color: var(--brand-background-primary);
+    background-color: var(--brand-background-secondary);
 
     &::-webkit-scrollbar {
       width: 1px;
@@ -189,7 +190,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background-color: var(--brand-background-primary);
+  background-color: var(--brand-background-secondary);
 
   &::-webkit-scrollbar {
     width: 0px;
@@ -225,7 +226,7 @@
       .announcement-content {
         padding: 16px;
         border-radius: 8px;
-        background-color: var(--brand-background-primary);
+        background-color: var(--brand-background-secondary);
       }
     }
   }
@@ -271,26 +272,9 @@
 }
 
 :host-context(.dark-theme) {
-  .announcements-container,
-  .sidebar,
-  .sidebar .search-bar,
-  .sidebar .announcements-list,
-  .sidebar .loading-container,
-  .content {
-    background-color: var(--brand-background-components);
-  }
-
   .sidebar .search-bar ::ng-deep .mat-mdc-form-field-flex,
   .sidebar .search-bar ::ng-deep .mat-mdc-text-field-wrapper {
-    background-color: var(--brand-background-components);
-  }
-
-  .sidebar .announcement-item {
-    background-color: var(--brand-background-components);
-
-    &.selected {
-      background-color: var(--brand-background-secondary);
-    }
+    background-color: var(--brand-background-secondary);
   }
 
   .sidebar .loading-card {
@@ -301,14 +285,6 @@
     .loading-text {
       background-color: rgba(246, 246, 246, 0.1);
     }
-  }
-
-  .content .announcement-detail-card {
-    background-color: var(--brand-background-components);
-  }
-
-  .content .announcement-content {
-    background-color: var(--brand-background-components);
   }
 
   .announcements-list::-webkit-scrollbar-thumb,
