@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, forwardRef } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  forwardRef,
+  CUSTOM_ELEMENTS_SCHEMA,
+} from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select'
@@ -24,6 +31,7 @@ import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
     },
   ],
   imports: [CommonModule, FormsModule, NzTreeSelectModule, UserAvatarComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CourseMemberSelectComponent implements ControlValueAccessor {
   protected disabled = false

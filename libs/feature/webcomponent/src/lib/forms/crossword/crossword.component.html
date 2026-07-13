@@ -1,0 +1,48 @@
+<div [ngClass]="state.appearance === 'inline' ? 'inline' : ''">
+  @if(state.definition) {
+  <!-- Partie gauche : Clues si inline, sinon partie en hant-->
+  <div style="flex: 1" class="clue-panel" [ngStyle]="state.appearance === 'inline' ? {} : { 'margin-bottom': '30px' }">
+    <h3>Définitions</h3>
+    <ol>
+      <li *ngFor="let result of results">
+        <span>{{ result.position }} - </span>{{ result.clue }}
+      </li>
+    </ol>
+  </div>
+  }
+
+  <!-- Partie droite : Grille si inline, sinon partie en bas-->
+  <div class="grid-panel">
+    <div
+      [style.gridTemplateColumns]="'repeat(' + grid[0].length + ', minmax(30px, 100px))'"
+      [style.gridTemplateRows]="'repeat(' + grid.length + ', 1fr)'"
+      class="crossword-grid responsive-grid"
+    >
+      <ng-container *ngFor="let row of grid; let y = index">
+        <ng-container *ngFor="let cell of row; let x = index">
+          @if(getCharAt(x,y) !== '-') {
+          <div class="cell-wrapper">
+            <input
+              class="cell-square"
+              [ngClass]="getBackgroundColorClasses(x, y)"
+              [attr.data-x]="x"
+              [attr.data-y]="y"
+              (input)="onInput($event, x, y)"
+              (focus)="onFocus($event, x, y)"
+              (keydown)="onKeyDown($event, x, y)"
+              placeholder="{{ getCharAt(x, y) }}"
+              [disabled]="this.state.disabled"
+            />
+            <span *ngFor="let res of getResultsAtCoordinates(x, y)" [ngClass]="res.orientation">
+              {{ res.position }}
+            </span>
+          </div>
+          } @else {
+          <div class="empty-cell"></div>
+          }
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>
+</div>
+<wc-base [(state)]="state"></wc-base>

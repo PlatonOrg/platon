@@ -7,7 +7,7 @@ export interface PickerState extends IWebComponent {
   prefix: string
   suffix: string
   appearance: 'fill' | 'outline' | 'inline'
-  type : 'default' | 'select'
+  type: 'default' | 'select'
   selection: string
   placeholder: string
   disabled: boolean
@@ -74,7 +74,7 @@ export const PickerComponentDefinition = defineWebComponent({
       type: {
         type: 'string',
         default: 'default',
-        description:" change l'apparence du picker lorsque le format est en 'inline'",
+        description: " change l'apparence du picker lorsque le format est en 'inline'",
       },
     },
   },

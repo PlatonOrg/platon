@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   TemplateRef,
   ViewChild,
   ViewChildren,
@@ -31,6 +32,7 @@ import {
   Player,
   PlayerExercise,
   PlayerNavigation,
+  PlatonLog,
 } from '@platon/feature/player/common'
 
 import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
@@ -52,6 +54,7 @@ import { PlayerExerciseComponent } from '../player-exercise/player-exercise.comp
 import { PlayerNavigationComponent } from '../player-navigation/player-navigation.component'
 import { PlayerResultsComponent } from '../player-results/player-results.component'
 import { PlayerSettingsComponent } from '../player-settings/player-settings.component'
+import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
 import { NotificationService } from '@platon/feature/notification/browser'
 import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -92,6 +95,7 @@ import { SixcodeComponent } from '@platon/shared/ui'
     PlayerExerciseComponent,
     PlayerSettingsComponent,
     PlayerNavigationComponent,
+    PlayerTerminalLogsComponent,
   ],
 })
 export class PlayerActivityComponent implements OnInit, OnDestroy {
@@ -120,11 +124,16 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected navExerciceCount = 0
   protected terminatedAfterLoseFocus = false
   protected terminatedAfterLeavePage = false
+  protected readonly showLeaveWarning = signal(false)
   protected onLoseTabFocusFn = this.onLoseTabFocus.bind(this)
   protected onVisibilityChangeFn = this.onVisibilityChange.bind(this)
+  private readonly onBeforeUnloadFn = this.onBeforeUnload.bind(this)
+  private readonly onDocumentPointerLeaveFn = this.onDocumentPointerLeave.bind(this)
+  private readonly onDocumentPointerEnterFn = this.onDocumentPointerEnter.bind(this)
   protected onKeydownFn = this.onKeydown.bind(this)
   protected onContextMenuFn = this.onContextMenu.bind(this)
   protected loadingNext = false
+  protected activityLogs: PlatonLog[] = []
   protected code = ''
   protected isCodeError = false
 
@@ -345,6 +354,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   }
 
   protected async terminate(): Promise<void> {
+    this.showLeaveWarning.set(false)
     this.countdownBreakpoints = []
 
     const output = await firstValueFrom(this.playerService.terminate(this.player.sessionId))
@@ -424,6 +434,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
               exerciseSessionIds: [],
             })
           )
+          this.activityLogs = nextExercise.logs ?? []
           const nextExerciseId = nextExercise.nextExerciseId
           this.navigation.exercises = nextExercise.navigation.exercises
           if (nextExercise.navigation.terminated) {
@@ -433,6 +444,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
           exercise = this.navigation.exercises.find((item) => item.id === nextExerciseId) as PlayerExercise
           if (!exercise) {
             this.dialogService.error("L'exercice suivant n'a pas été trouvé.")
+            this.changeDetectorRef.markForCheck()
             return
           }
         } catch (error) {
@@ -664,14 +676,32 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     this.terminate().catch(console.error)
   }
 
-  private onVisibilityChange(): void {
-    if (!this.isPlaying || !this.player.settings?.security?.terminateOnLeavePage) return
+  private shouldWarnOnLeave(): boolean {
+    return this.isPlaying && !!this.player.settings?.security?.terminateOnLeavePage
+  }
 
-    // passed from hidden to visible
+  private onVisibilityChange(): void {
+    if (!this.shouldWarnOnLeave()) return
+
     if (document.visibilityState === 'hidden') {
       this.terminatedAfterLeavePage = true
       this.terminate().catch(console.error)
     }
+  }
+
+  private onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.shouldWarnOnLeave()) return
+    event.preventDefault()
+    event.returnValue = ''
+  }
+
+  private onDocumentPointerLeave(): void {
+    if (!this.shouldWarnOnLeave()) return
+    this.showLeaveWarning.set(true)
+  }
+
+  private onDocumentPointerEnter(): void {
+    this.showLeaveWarning.set(false)
   }
 
   private enableCopyPasteIfNeeded(): void {
@@ -694,12 +724,18 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
 
   private startWatchingVisibilityChange(): void {
     window.addEventListener('blur', this.onLoseTabFocusFn)
+    window.addEventListener('beforeunload', this.onBeforeUnloadFn)
     document.addEventListener('visibilitychange', this.onVisibilityChangeFn)
+    document.documentElement.addEventListener('pointerleave', this.onDocumentPointerLeaveFn)
+    document.documentElement.addEventListener('pointerenter', this.onDocumentPointerEnterFn)
   }
 
   private stopWatchingVisibilityChange(): void {
     window.removeEventListener('blur', this.onLoseTabFocusFn)
+    window.removeEventListener('beforeunload', this.onBeforeUnloadFn)
     document.removeEventListener('visibilitychange', this.onVisibilityChangeFn)
+    document.documentElement.removeEventListener('pointerleave', this.onDocumentPointerLeaveFn)
+    document.documentElement.removeEventListener('pointerenter', this.onDocumentPointerEnterFn)
   }
 
   protected back() {
@@ -710,5 +746,13 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     } else {
       close()
     }
+  }
+
+  protected get editorPreview(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
+  protected canShowTerminalLogs = (): boolean => {
+    return this.editorPreview && this.nextNavigation && this.activityLogs.length > 0
   }
 }

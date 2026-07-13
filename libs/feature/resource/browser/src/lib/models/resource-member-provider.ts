@@ -3,6 +3,7 @@ import { Resource, ResourceMember, ResourceMemberFilters, UpdateResourceMember }
 import { Observable } from 'rxjs'
 
 export abstract class ResourceMemberProvider {
+  abstract autoJoin(resource: Resource | string): Observable<ResourceMember>
   abstract join(resource: Resource | string): Observable<ResourceMember>
   abstract find(resource: Resource | string, userId: string): Observable<ResourceMember>
   abstract update(resource: Resource | string, userId: string, input: UpdateResourceMember): Observable<ResourceMember>

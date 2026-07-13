@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "dependencies": {
     "tslib": "^2.3.0",
-    "editorjs-parser": "^1.5.3"
+    "editorjs-parser": "^1.5.3",
+    "highlight.js": "10.7.3"
   },
   "type": "commonjs",
   "main": "./src/index.js",

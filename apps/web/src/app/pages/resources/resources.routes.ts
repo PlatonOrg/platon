@@ -5,6 +5,7 @@ import ResourcesPage from './resources.page'
 export default [
   withAuthGuard(
     {
+      title: 'PLaTon - Espace de travail',
       path: '',
       component: ResourcesPage,
     },
@@ -12,6 +13,7 @@ export default [
   ),
   withAuthGuard(
     {
+      title: 'PLaTon - Création',
       path: 'create',
       loadChildren: () =>
         import(
@@ -32,6 +34,7 @@ export default [
     },
     ['admin', 'teacher']
   ),
+
   withAuthGuard(
     {
       path: ':id',

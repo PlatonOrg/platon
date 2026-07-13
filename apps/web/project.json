@@ -49,7 +49,7 @@
           },
           {
             "glob": "**/*",
-            "input": "./node_modules/@cisstech/nge/assets/ui/icon/icons/files",
+            "input": "./node_modules/@cisstech/nge/assets/ui/icon/assets/icons/files",
             "output": "./assets/vendors/nge/ui/icon/icons/files/"
           },
           {
@@ -131,6 +131,11 @@
             "glob": "**/*",
             "input": "./node_modules/d3-graphviz/build/",
             "output": "./assets/vendors/d3-graphviz/"
+          },
+          {
+            "glob": "*.css",
+            "input": "./node_modules/highlight.js/styles/",
+            "output": "./assets/vendors/highlight.js/styles/"
           }
         ],
         "styles": [
@@ -193,12 +198,12 @@
             {
               "type": "initial",
               "maximumWarning": "6mb",
-              "maximumError": "7mb"
+              "maximumError": "12mb"
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "2kb",
-              "maximumError": "4kb"
+              "maximumWarning": "6kb",
+              "maximumError": "14kb"
             }
           ],
           "outputHashing": "all"

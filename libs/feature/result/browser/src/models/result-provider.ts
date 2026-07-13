@@ -1,16 +1,18 @@
 import { ListResponse } from '@platon/core/common'
 import {
+  ActivityCorrection,
+  ActivityCorrectionSummary,
   ActivityResults,
   Correction,
-  ActivityCorrection,
-  UpsertCorrection,
-  UserResults,
+  CorrectionStatus,
   DashboardOutput,
   ActivityLeaderboardEntry,
   CourseLeaderboardEntry,
   FindActivityLeaderboard,
   FindCourseLeaderboard,
+  UpsertCorrection,
   UserActivityResultsDistribution,
+  UserResults,
 } from '@platon/feature/result/common'
 import { Observable } from 'rxjs'
 
@@ -30,7 +32,13 @@ export abstract class ResultProvider {
   abstract courseLeaderboard(input: FindCourseLeaderboard): Observable<CourseLeaderboardEntry[]>
   abstract activityLeaderboard(input: FindActivityLeaderboard): Observable<ActivityLeaderboardEntry[]>
 
-  abstract findCorrection(activityId: string): Observable<ActivityCorrection>
-  abstract listCorrections(): Observable<ListResponse<ActivityCorrection>>
+  abstract findCorrection(activityId: string, viewerMode?: boolean): Observable<ActivityCorrection>
+  abstract listCorrections(status?: CorrectionStatus): Observable<ListResponse<ActivityCorrection>>
+  abstract listCorrectionsSummary(status?: CorrectionStatus): Observable<ListResponse<ActivityCorrectionSummary>>
   abstract upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction>
+  abstract downloadAllSubmissions(
+    activityId: string,
+    exerciseId: string,
+    sessionId: string
+  ): Observable<{ blob: Blob; fileName: string }>
 }

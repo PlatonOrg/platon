@@ -1,5 +1,5 @@
 import { BaseEntity, UserEntity } from '@platon/core/server'
-import { ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
+import { ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import { Activity, ActivityOpenStates, ActivityPermissions, RestrictionList } from '@platon/feature/course/common'
 import { Column, Entity, Index, JoinColumn, ManyToOne, VirtualColumn } from 'typeorm'
 import { CourseEntity } from '../entites/course.entity'
@@ -90,6 +90,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
     query: (alias) => `SELECT (${alias}.source->'variables'->'settings'->'navigation'->>'mode' = 'peer')::boolean`,
   })
   readonly isPeerComparison!: boolean
+
+  @VirtualColumn({ query: () => `SELECT '{}'::jsonb` })
+  readonly activitySettings!: ActivitySettings
 
   @VirtualColumn({
     query: (alias) => `SELECT (

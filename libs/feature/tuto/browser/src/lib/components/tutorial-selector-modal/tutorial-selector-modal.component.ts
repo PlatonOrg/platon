@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { TutorialSelectorService, TutorialOption } from '../../api/tutorial-selector.service'
 import { AuthService } from '@platon/core/browser'
 import { MatIconModule } from '@angular/material/icon'
-import {NzGridModule} from 'ng-zorro-antd/grid'
+import { NzGridModule } from 'ng-zorro-antd/grid'
 
 @Component({
   selector: 'tutorial-selector-modal',
@@ -13,20 +13,17 @@ import {NzGridModule} from 'ng-zorro-antd/grid'
   styleUrl: './tutorial-selector-modal.component.scss',
 })
 export class TutorialSelectorModalComponent {
-  @Input() tutorials: TutorialOption[] = [];
+  @Input() tutorials: TutorialOption[] = []
 
-  constructor(
-    public tutorialService: TutorialSelectorService,
-    private authService: AuthService
-  ) {
-    this.tutorials = this.tutorialService.tutorials;
+  constructor(protected tutorialService: TutorialSelectorService, private authService: AuthService) {
+    this.tutorials = this.tutorialService.tutorials
   }
 
   selectTutorial(tutorialId: string): void {
-    this.tutorialService.startTutorial(tutorialId);
+    void this.tutorialService.startTutorial(tutorialId)
   }
 
   onOverlayClick(): void {
-    this.tutorialService.closeTutorialSelector();
+    this.tutorialService.closeTutorialSelector()
   }
 }

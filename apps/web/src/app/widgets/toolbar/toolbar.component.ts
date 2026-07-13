@@ -34,7 +34,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { firstValueFrom, Subscription } from 'rxjs'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
-import { TutorialSelectorService } from '@platon/feature/tuto/browser'
+import { TutorialSelectorService, CircleSubscriptionTutorialService } from '@platon/feature/tuto/browser'
 import { FeatureAnnouncementService, FeatureAnnouncementModalComponent } from '@platon/feature/announcement/browser'
 
 import { MatDividerModule } from '@angular/material/divider'
@@ -80,7 +80,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private readonly breakpointObserver = inject(BreakpointObserver)
   private readonly elementRef = inject(ElementRef)
   private readonly tutorialSelectorService = inject(TutorialSelectorService)
-  private readonly featureAnnouncementService = inject(FeatureAnnouncementService) // Nouveau service
+  private readonly circleSubscriptionTutorialService = inject(CircleSubscriptionTutorialService)
+
+  private readonly featureAnnouncementService = inject(FeatureAnnouncementService)
 
   private readonly subscriptions: Subscription[] = []
 
@@ -147,7 +149,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.userCharterAccepted = this.userCharter?.acceptedUserCharter ?? false
     }
 
-    this.firstLoginStartTuto()
+    await this.firstLoginStartTuto()
     this.checkFeatureAnnouncements()
 
     this.subscriptions.push(
@@ -250,20 +252,18 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  private firstLoginStartTuto(): void {
+  private async firstLoginStartTuto(): Promise<void> {
     if (this.user && isTeacherRole(this.user.role) && this.user.firstLogin && this.user.lastLogin) {
-      // Si c'est vraiment la première connexion
-      // firstLogin est défini mais lastLogin n'existe pas ou est undefined
       const isFirstLogin = this.user.lastLogin <= this.user.firstLogin
       const tutoSeen = localStorage.getItem('tutoSeen') === 'true'
 
       if (isFirstLogin && !tutoSeen) {
+        // lanch the circle subscription tutorial or  if not seen yet
+        this.tutorialSelectorService.startCircleSubscriptionTutorial()
         localStorage.setItem('tutoSeen', 'true')
-        this.tutorialSelectorService.startPlatformTutorial()
       }
     }
   }
-
   private checkFeatureAnnouncements(): void {
     if (this.user) {
       setTimeout(async () => {

@@ -8,7 +8,7 @@
       "mode": "manual"
     },
     "actions": {
-      "retry": 1,
+      "retry": 0,
       "hints": true,
       "reroll": true,
       "theories": true,

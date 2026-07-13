@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 
 import { JwtHelperService } from '@auth0/angular-jwt'
-import { AuthToken, ItemResponse, ResetPasswordInput, User } from '@platon/core/common'
-import { lastValueFrom } from 'rxjs'
+import { AuthToken, CreatedResponse, ItemResponse, ResetPasswordInput, SignUpInput, User } from '@platon/core/common'
+import { catchError, lastValueFrom, map, throwError } from 'rxjs'
 import { TokenService } from '../api/token.service'
 import { AuthProvider } from '../models/auth-provider'
 
@@ -11,6 +11,18 @@ import { AuthProvider } from '../models/auth-provider'
 export class RemoteAuthProvider extends AuthProvider {
   constructor(private readonly http: HttpClient, private readonly tokenService: TokenService) {
     super()
+  }
+
+  async signUp(input: SignUpInput): Promise<CreatedResponse<AuthToken>> {
+    const newUser = await lastValueFrom(
+      this.http.post<ItemResponse<AuthToken>>('/api/v1/auth/signup/', input).pipe(
+        map((response) => response),
+        catchError((error: HttpErrorResponse) => {
+          return throwError(() => error)
+        })
+      )
+    )
+    return newUser
   }
 
   token(): Promise<AuthToken | undefined> {

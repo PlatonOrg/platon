@@ -4,6 +4,7 @@
 }
 
 .menu-item:hover {
+  cursor: pointer;
   background-color: var(--brand-background-hover);
 }
 
@@ -14,6 +15,7 @@
 .cancel-btn {
   display: block;
   margin: 20px auto 0;
+  cursor: pointer;
   width: 100%;
   border: none;
   background-color: var(--brand-color-primary);

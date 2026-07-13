@@ -16,6 +16,7 @@ import { CourseNotificationService } from '../course-notification/course-notific
 import { CourseMemberEntity } from './course-member.entity'
 import { CourseMemberRoles } from '@platon/feature/course/common'
 import { CourseMemberView } from './course-member.view'
+import { UserGroupService, UserService } from '@platon/core/server'
 
 @Injectable()
 export class CourseMemberService {
@@ -23,6 +24,8 @@ export class CourseMemberService {
 
   constructor(
     private readonly notificationService: CourseNotificationService,
+    private readonly userGroupService: UserGroupService,
+    private readonly userService: UserService,
 
     @InjectRepository(CourseMemberView)
     private readonly view: Repository<CourseMemberView>,
@@ -48,6 +51,28 @@ export class CourseMemberService {
     }
 
     return Optional.ofNullable(member)
+  }
+
+  async findByIds(courseId: string, ids: string[]): Promise<CourseMemberEntity[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
+    const query = this.repository.createQueryBuilder('member')
+    query.leftJoinAndSelect('member.user', 'user')
+    query.leftJoinAndSelect('member.group', 'group')
+    query.leftJoinAndSelect('group.users', 'groupusers')
+
+    query.where('member.course_id = :courseId', { courseId }).andWhere('member.id IN (:...ids)', { ids })
+
+    const members = await query.getMany()
+    members.forEach((member) => {
+      if (member && !member.user?.id) {
+        member.user = undefined
+      }
+    })
+
+    return members
   }
 
   async findViewsByCourseId(courseId: string): Promise<CourseMemberView[]> {
@@ -125,6 +150,12 @@ export class CourseMemberService {
   }
 
   async addUser(courseId: string, userId: string, role: CourseMemberRoles, notify = true): Promise<CourseMemberEntity> {
+    if (role === CourseMemberRoles.teacher) {
+      const user = (await this.userService.findById(userId)).orElseThrow(() => new NotFoundResponse('User not found'))
+      if (!isTeacherRole(user.role)) {
+        throw new ForbiddenResponse('Only users with a teacher role can be assigned the role of teacher')
+      }
+    }
     const member = await this.repository.save(this.repository.create({ courseId, userId, role }))
     if (notify) {
       this.notificationService
@@ -143,8 +174,20 @@ export class CourseMemberService {
     return member
   }
 
-  async addGroup(courseId: string, groupId: string, notify = true): Promise<CourseMemberEntity> {
-    const member = await this.repository.save(this.repository.create({ courseId, groupId }))
+  async addGroup(
+    courseId: string,
+    groupId: string,
+    options?: { notify?: boolean; role?: CourseMemberRoles }
+  ): Promise<CourseMemberEntity> {
+    const { notify = true, role = CourseMemberRoles.student } = options ?? {}
+    if (role === CourseMemberRoles.teacher) {
+      const groupMembers = await this.userGroupService.listMembers(groupId)
+      if (!groupMembers.every((member) => isTeacherRole(member.role))) {
+        throw new ForbiddenResponse('Only groups composed of teachers can be assigned the role of teacher')
+      }
+    }
+
+    const member = await this.repository.save(this.repository.create({ courseId, groupId, role }))
     if (notify) {
       this.notificationService
         .notifyCourseMemberBeingCreated(
@@ -175,6 +218,13 @@ export class CourseMemberService {
       throw new ForbiddenResponse('Only teachers can be assigned the role of teacher')
     }
     await this.repository.update({ courseId, id: memberId }, { role })
+  }
+
+  async setArchivedByUser(courseId: string, userId: string, archived: boolean): Promise<void> {
+    const member = (await this.getByUserIdAndCourseId(userId, courseId)).orElseThrow(
+      () => new NotFoundResponse('You are not a direct member of this course')
+    )
+    await this.repository.update({ id: member.id, courseId }, { archived })
   }
 
   async isMember(courseId: string, userId: string): Promise<boolean> {

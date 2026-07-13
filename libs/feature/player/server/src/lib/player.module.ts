@@ -11,9 +11,14 @@ import { NodeSandbox } from './sandboxes'
 import { PythonSandbox } from './sandboxes/python/python-sandbox'
 import { SandboxService } from './sandboxes/sandbox.service'
 import { FeatureEmailModule } from '@platon/feature/email/server'
+import { FeedbackController } from './feedback/feedback.controller'
+import { FeedbackService } from './feedback/feedback.service'
+import { FeedbackEntity } from './feedback/feedback.entity'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { UserModule } from '@platon/core/server'
 
 @Module({
-  controllers: [PlayerController],
+  controllers: [PlayerController, FeedbackController],
   imports: [
     HttpModule,
     DiscoveryModule,
@@ -22,8 +27,10 @@ import { FeatureEmailModule } from '@platon/feature/email/server'
     FeatureResourceServerModule,
     FeaturePeerServerModule,
     FeatureEmailModule,
+    UserModule,
+    TypeOrmModule.forFeature([FeedbackEntity]),
   ],
-  providers: [PlayerService, NodeSandbox, PythonSandbox, SandboxService],
+  providers: [PlayerService, NodeSandbox, PythonSandbox, SandboxService, FeedbackService],
   exports: [PlayerService, SandboxService],
 })
 export class FeaturePlayerServerModule {}

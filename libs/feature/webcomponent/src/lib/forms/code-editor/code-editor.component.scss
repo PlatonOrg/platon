@@ -12,8 +12,8 @@ footer {
   z-index: 11;
   display: flex;
   align-items: center;
-  background-color: rgb(59, 66, 82); // #724cf9;
-  color: rgb(216, 222, 233);
+  background-color: var(--brand-background-sidebar);
+  color: var(--brand-color-primary-contrast);
   padding: 0.2rem 0;
   font-size: 0.8em;
   .footer-item {
@@ -21,7 +21,7 @@ footer {
     padding: 0 0.6rem;
   }
   .footer-item:hover {
-    background-color: rgba(216, 222, 233, 0.2);
+    background-color: var(--brand-background-hover);
   }
 
   .footer-item-icon {
@@ -30,15 +30,50 @@ footer {
 }
 
 #resizable {
-  appearance: textarea;
-  -moz-appearance: textfield-multiline;
-  -webkit-appearance: textarea;
-  font: medium -moz-fixed;
-  font: -webkit-small-control;
-  min-height: 400px;
-  overflow: auto;
-  resize: vertical;
+  min-height: var(--code-editor-min-height, 400px);
+  overflow: hidden;
   width: 100%;
+
+  &.is-resizing {
+    nge-monaco-editor {
+      pointer-events: none;
+    }
+  }
+}
+
+.resize-grip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  height: 100%;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 3px;
+    border-radius: 2px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--brand-color-primary-contrast) 0px,
+      var(--brand-color-primary-contrast) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover::after,
+  &.resizing::after {
+    opacity: 1;
+  }
 }
 
 .spacer {

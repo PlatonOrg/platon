@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core'
 import {
   EvalExerciseInput,
   EvalExerciseOutput,
+  Feedback,
   NextOutput,
   PlayActivityInput,
   PlayActivityOuput,
@@ -63,5 +64,9 @@ export class RemotePlayerService extends PlayerProvider {
 
   openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput> {
     return this.http.post<PlayActivityOuput>('/api/v1/player/openSessionWithCode/' + sessionId, { code })
+  }
+
+  submitFeedback(feedback: Feedback): Observable<void> {
+    return this.http.post<void>('/api/v1/player/feedback', feedback)
   }
 }

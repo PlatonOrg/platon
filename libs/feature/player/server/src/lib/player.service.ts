@@ -35,6 +35,7 @@ import {
   PlayerNavigation,
   PreviewInput,
   SandboxEnvironment,
+  hasError,
   updateActivityNavigationState,
   withActivityFeedbacksGuard,
   withActivityPlayer,
@@ -95,7 +96,7 @@ export class PlayerService extends PlayerManager {
     })
     if (!session) throw new NotFoundResponse('Session not found')
     const answers = await this.answerService.findAllOfSession(sessionId)
-    return answers.map((answer) => withExercisePlayer(session, answer))
+    return answers.length ? answers.map((answer) => withExercisePlayer(session, answer)) : [withExercisePlayer(session)]
   }
 
   /**
@@ -122,7 +123,7 @@ export class PlayerService extends PlayerManager {
     if (resource.type === 'EXERCISE') {
       session = await this.buildExercise(session)
     }
-
+    await this.updateSettingsSession(session)
     return {
       exercise: resource.type === 'EXERCISE' ? withExercisePlayer(session) : undefined,
       activity: resource.type === 'ACTIVITY' ? withActivityPlayer(session) : undefined,
@@ -147,24 +148,20 @@ export class PlayerService extends PlayerManager {
       return
     }
     await this.activityService.updateActivitiesDates([activity])
-    //const dateRange =
-    /*if (dateRange && dateRange.start) {
-      const startTime = new Date(dateRange.start).getTime()
-      const nowTime = new Date().getTime()
+  }
 
-      if (startTime > nowTime) {
-        throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
-      }
+  private async updateSettingsSession(session: SessionEntity): Promise<void> {
+    if (
+      session?.activity?.source &&
+      session?.variables &&
+      typeof session.variables === 'object' &&
+      'settings' in session.variables
+    ) {
+      // eslint-disable-next-line prettier/prettier
+      (session.variables as ActivityVariables).settings = session.activity.source.variables.settings
+    } else if (session?.parent) {
+      await this.updateSettingsSession(session.parent)
     }
-
-    if (dateRange && dateRange.end) {
-      const endTime = new Date(dateRange.end).getTime()
-      const nowTime = new Date().getTime()
-
-      if (endTime < nowTime) {
-        throw new ForbiddenResponse("L'activité est fermée.")
-      }
-    }*/
   }
 
   async playActivity(activityId: string, user: User): Promise<PlayActivityOuput> {
@@ -182,7 +179,7 @@ export class PlayerService extends PlayerManager {
     if (activitySession.activity) {
       await this.checkActivityDateRestrictions(activitySession.activity)
     }
-
+    await this.updateSettingsSession(activitySession)
     return { activity: withActivityPlayer(activitySession) }
   }
 
@@ -198,14 +195,11 @@ export class PlayerService extends PlayerManager {
     if (!activitySession) {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
     }
-    // Les modifs commencent ici : restrictions
-
     if (!activitySession.activity) {
       throw new NotFoundResponse(`Activity not found: ${activitySessionId}`)
     }
-
     await this.checkActivityDateRestrictions(activitySession.activity)
-    // Fin des modifs
+    await this.updateSettingsSession(activitySession)
 
     // CREATE PLAYERS
     const exercisePlayers = await Promise.all(
@@ -239,7 +233,6 @@ export class PlayerService extends PlayerManager {
         exerciseSession.startedAt = exerciseSession.startedAt || new Date()
 
         await this.sessionService.update(exerciseSession.id, { startedAt: exerciseSession.startedAt })
-
         return withExercisePlayer(exerciseSession)
       })
     )
@@ -277,7 +270,11 @@ export class PlayerService extends PlayerManager {
 
     const session = await this.buildNext(activitySession)
 
-    return { nextExerciseId: session.variables.nextExerciseId, navigation: session.variables.navigation }
+    return {
+      nextExerciseId: session.variables.nextExerciseId,
+      navigation: session.variables.navigation,
+      logs: session.variables.platon_logs,
+    }
   }
 
   async compareTrainOrWait(
@@ -521,7 +518,7 @@ export class PlayerService extends PlayerManager {
   }
 
   protected findExerciseSessionById(id: string): Promise<ExerciseSession | null | undefined> {
-    return this.sessionService.findExerciseSessionById(id, { parent: true, activity: true })
+    return this.sessionService.findExerciseSessionById(id, { parent: true, activity: true, submissions: true })
   }
 
   protected override onChallengeSucceeded(_activity: Activity): void {
@@ -539,7 +536,7 @@ export class PlayerService extends PlayerManager {
   @OnEvent(ON_RELOAD_ACTIVITY_EVENT)
   protected async onReloadActivity(payload: OnReloadActivityEventPayload): Promise<void> {
     const { activity } = payload
-    this.dataSource
+    await this.dataSource
       .transaction(async (manager) => {
         this.logger.log(`Reload activity ${activity.id}`)
         const sessions = await manager.find(SessionEntity, {
@@ -566,6 +563,14 @@ export class PlayerService extends PlayerManager {
 
     exerciseSession.envid = envid
     exerciseSession.isBuilt = true
+
+    if (hasError(variables)) {
+      variables['.meta'] = {
+        ...variables['.meta'],
+        error: true,
+      }
+    }
+
     exerciseSession.variables = variables as ExerciseVariables
 
     await this.sessionService.update(exerciseSession.id, {
@@ -643,13 +648,6 @@ export class PlayerService extends PlayerManager {
       sessions = await this.sessionService.findAllWithParent(activitySession.id)
     }
 
-    // If the next as logs, add them to nextParams to be passed to the next exercise
-    if (variables.platon_logs && variables.platon_logs.length > 0) {
-      variables.nextParams = variables.nextParams || {}
-      variables.platon_logs = ['\n#####   LOGS DU NEXT   #####\n', ...variables.platon_logs]
-      variables.nextParams.platon_next_logs = variables.platon_logs
-    }
-
     // If the next exercise has parameters, update the exercise session variables
     if (variables.nextParams) {
       const nextExerciseSessionId = variables.navigation.exercises.find(
@@ -703,7 +701,7 @@ export class PlayerService extends PlayerManager {
       grade: variables.activityGrade,
     })
 
-    return activitySession
+    return { ...activitySession, variables } as SessionEntity
   }
 
   /**

@@ -35,7 +35,7 @@ import {
   PleInputValueEditor,
   VALUE_EDITOR_TOKEN,
 } from './ple-input'
-import { NgeMarkdownHighlighterProvider } from '@cisstech/nge/markdown'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'app-ple-input',
@@ -55,7 +55,7 @@ import { NgeMarkdownHighlighterProvider } from '@cisstech/nge/markdown'
     InputFileProvider,
     InputCodeProvider, // string is always handled by code editor
     InputTextProvider,
-    NgeMarkdownHighlighterProvider,
+    NgeMarkdownModule,
     InputListOfListProvider,
     {
       provide: NG_VALUE_ACCESSOR,

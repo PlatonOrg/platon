@@ -1,21 +1,17 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { InjectRepository } from "@nestjs/typeorm";
-import { AnnouncementEntity } from "./announcement.entity"
-import { Repository } from "typeorm";
+import { InjectRepository } from '@nestjs/typeorm'
+import { AnnouncementEntity } from './announcement.entity'
+import { Repository } from 'typeorm'
 //import { NotificationService } from "@cisstech/nge-ide/core";
-import { NotFoundResponse } from "@platon/core/common";
-import { UserRoles } from "@platon/core/common";
+import { NotFoundResponse } from '@platon/core/common'
+import { UserRoles } from '@platon/core/common'
 import { AnnouncementFilters } from '@platon/feature/announcement/common'
-
-
 
 @Injectable()
 export class AnnouncementService {
   private readonly logger = new Logger(AnnouncementService.name)
 
-  constructor(
-    @InjectRepository(AnnouncementEntity) private readonly repository: Repository<AnnouncementEntity>,
-  ) {}
+  constructor(@InjectRepository(AnnouncementEntity) private readonly repository: Repository<AnnouncementEntity>) {}
 
   async create(announcement: Partial<AnnouncementEntity>): Promise<AnnouncementEntity> {
     const newAnnouncennouncement = await this.repository.save(this.repository.create(announcement))
@@ -64,9 +60,7 @@ export class AnnouncementService {
       query.andWhere('announcement.active = :active', { active: filters.active })
     }
 
-
     query.orderBy('announcement.created_at', 'DESC')
-
 
     if (filters.offset) {
       query.offset(filters.offset)
@@ -92,42 +86,81 @@ export class AnnouncementService {
     return announcement
   }
 
-
-  async getVisibleForUser(userId: string, userRole: UserRoles, filters: AnnouncementFilters = {}): Promise<[AnnouncementEntity[], number]> {
-    const queryBuilder = this.repository.createQueryBuilder('announcement')
-      .leftJoinAndSelect('announcement.publisher', 'publisher')
-      .where('announcement.active = :active', { active: true });
-
-    queryBuilder.andWhere(`
-      (announcement."targetedRoles" IS NULL OR
-       array_length(announcement."targetedRoles", 1) IS NULL OR
-       :userRole = ANY(announcement."targetedRoles"))
-    `, { userRole });
-
+  async getVisibleForUser(
+    userId: string,
+    userRole: UserRoles,
+    filters: AnnouncementFilters = {}
+  ): Promise<[AnnouncementEntity[], number]> {
+    const queryBuilder = this.repository
+      .createQueryBuilder('announcement')
+      .leftJoin('announcement.publisher', 'publisher')
+      .select([
+        'announcement.id',
+        'announcement.createdAt',
+        'announcement.updatedAt',
+        'announcement.title',
+        'announcement.description',
+        'announcement.active',
+        'announcement.icon',
+        'announcement.version',
+        'announcement.displayUntil',
+        'announcement.displayDurationInDays',
+        'announcement.targetedRoles',
+        'announcement.actions',
+        'publisher.id',
+        'publisher.username',
+        'publisher.firstName',
+        'publisher.lastName',
+        'publisher.role',
+      ])
+      .where('announcement.active = :active', { active: true })
+      .andWhere(
+        `(announcement."targetedRoles" IS NULL OR
+          array_length(announcement."targetedRoles", 1) IS NULL OR
+          :userRole = ANY(announcement."targetedRoles"))`,
+        { userRole }
+      )
 
     if (filters.search) {
-      queryBuilder.andWhere('(announcement.title ILIKE :search OR announcement.description ILIKE :search)',
-        { search: `%${filters.search}%` });
+      queryBuilder.andWhere('(announcement.title ILIKE :search OR announcement.description ILIKE :search)', {
+        search: `%${filters.search}%`,
+      })
     }
 
-    if (filters.limit) {
-      queryBuilder.take(filters.limit);
-    }
+    queryBuilder.orderBy('announcement.createdAt', 'DESC')
+    queryBuilder.take(filters.limit ?? 20)
 
     if (filters.offset) {
-      queryBuilder.skip(filters.offset);
+      queryBuilder.skip(filters.offset)
     }
 
-    queryBuilder.orderBy('announcement.createdAt', 'DESC');
-
     try {
-      const [items, count] = await queryBuilder.getManyAndCount();
-      return [items, count];
+      const [items, count] = await queryBuilder.getManyAndCount()
+      return [items, count]
     } catch (error) {
-      // @ts-ignore
-      this.logger.error(`Erreur lors de la récupération des annonces: ${error.message}`);
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error))
+      this.logger.error(`Erreur lors de la récupération des annonces: ${err.message}`)
+      throw err
     }
   }
 
+  async findByIdForUser(id: string, userRole: UserRoles): Promise<AnnouncementEntity> {
+    const announcement = await this.repository
+      .createQueryBuilder('announcement')
+      .leftJoinAndSelect('announcement.publisher', 'publisher')
+      .where('announcement.id = :id', { id })
+      .andWhere('announcement.active = :active', { active: true })
+      .andWhere(
+        `(announcement."targetedRoles" IS NULL OR
+          array_length(announcement."targetedRoles", 1) IS NULL OR
+          :userRole = ANY(announcement."targetedRoles"))`,
+        { userRole }
+      )
+      .getOne()
+
+    if (!announcement) {
+      throw new NotFoundResponse(`Annonce avec id ${id} non trouvée`)
+    }
+    return announcement
+  }
 }

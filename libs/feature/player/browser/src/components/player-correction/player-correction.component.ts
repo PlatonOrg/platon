@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   Input,
@@ -48,9 +49,13 @@ import { User } from '@platon/core/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { MatCardModule } from '@angular/material/card'
 import { animate, style, transition, trigger } from '@angular/animations'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { GRADE_BOUNDS, GRADE_OPTIONS, PlayerCorrectionService } from './player-correction.service'
+
+type PlayerCorrectionMode = 'correction' | 'review'
+
 interface ExerciseGroup {
   exerciseId: string
   exerciseName: string
@@ -121,6 +126,7 @@ export class PlayerCorrectionComponent implements OnInit {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly userService = inject(UserService)
   private readonly route = inject(ActivatedRoute)
+  private readonly destroyRef = inject(DestroyRef)
 
   // === VIEW REFERENCES ===
   @ViewChild('GradeCard', { read: ElementRef }) cardRef!: ElementRef<HTMLElement>
@@ -174,10 +180,23 @@ export class PlayerCorrectionComponent implements OnInit {
   ])
 
   @Input() courseCorrection!: CourseCorrection
+  @Input() mode: PlayerCorrectionMode = 'correction'
+
+  protected get isCorrectionMode(): boolean {
+    return this.mode === 'correction'
+  }
+
+  protected get pageTitle(): string {
+    return this.isCorrectionMode ? 'Corrections' : 'Visualisation des copies'
+  }
+
+  protected get currentAttemptCount(): number {
+    return this.answers.length
+  }
 
   // === LIFECYCLE ===
   async ngOnInit(): Promise<void> {
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.activityId = params.activityId
       this.sessionId = params.sessionId
     })
@@ -193,6 +212,7 @@ export class PlayerCorrectionComponent implements OnInit {
   // === SESSION MANAGEMENT ===
   private getSessionId(): ExerciseGroup | undefined {
     if (!this.sessionId) {
+      console.warn('Session ID is missing in query parameters')
       return undefined
     }
     for (const group of this.listExerciseGroup) {
@@ -217,6 +237,59 @@ export class PlayerCorrectionComponent implements OnInit {
         counter++
       }
     }
+  }
+
+  protected get uploadedFiles(): boolean {
+    return this.currentGroup?.users.some((exercise) => exercise.hasUploads) ?? false
+  }
+
+  protected downloadAllSubmissions(): void {
+    // Récupère le session ID de l'exercice courant
+    const exerciseSessionId = this.currentExercise?.exerciseSessionId
+
+    if (!this.activityId || !this.currentGroup?.exerciseId || !exerciseSessionId) {
+      console.warn('Missing required parameters', {
+        activityId: this.activityId,
+        exerciseId: this.currentGroup?.exerciseId,
+        exerciseSessionId,
+      })
+      return
+    }
+
+    this.resultService
+      .downloadAllSubmissions(this.activityId, this.currentGroup.exerciseId, exerciseSessionId)
+      .subscribe({
+        next: (response: { blob: Blob; fileName: string }) => {
+          // Crée un URL blob et déclenche le téléchargement
+          const url = window.URL.createObjectURL(response.blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = response.fileName
+          link.click()
+
+          // Nettoie
+          window.URL.revokeObjectURL(url)
+          this.dialogService.success('Téléchargement démarré')
+        },
+        error: (error) => {
+          console.error('Download error:', error)
+          this.dialogService.error('Erreur lors du téléchargement')
+          console.error(error)
+        },
+      })
+  }
+
+  protected getDownloadAllSubmissionsUrl(): string | null {
+    if (!this.currentActivityId) {
+      return null
+    }
+    // Récupère l'ID de l'exercice du groupe courant
+    const exerciseId = this.currentGroup?.exerciseId
+    if (!exerciseId) {
+      return null
+    }
+    // Construit l'URL de l'API
+    return `/api/v1/sessions/${this.sessionId}/submissions/${this.currentActivityId}/${exerciseId}/download-all`
   }
 
   // === GROUP BUILDING ===
@@ -304,6 +377,12 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected async onChooseExercise(index: number): Promise<void> {
+    if (this.exercises.length === 0) {
+      this.currentExercise = undefined
+      this.answers = []
+      this.changeDetectorRef.markForCheck()
+      return
+    }
     this.selectedExerciseIndex = (index + this.exercises.length) % this.exercises.length
     const exercise = this.exercises[this.selectedExerciseIndex]
     if (exercise) {
@@ -313,6 +392,17 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected async onChooseNextUserExercise(): Promise<void> {
+    if (this.isCorrectionMode) {
+      await this.onSaveGrade()
+      if (
+        this.selectedExerciseIndex === this.exercises.length - 1 &&
+        this.exerciseCorrected.size === this.exercises.length
+      ) {
+        this.resumeMode = true
+        this.changeDetectorRef.markForCheck()
+        return
+      }
+    }
     await this.onChooseExercise(this.selectedExerciseIndex + 1)
   }
 
@@ -389,15 +479,6 @@ export class PlayerCorrectionComponent implements OnInit {
         }, 400)
         break
       case 'ArrowRight':
-        await this.onSaveGrade()
-        if (
-          this.selectedExerciseIndex === this.exercises.length - 1 &&
-          this.exerciseCorrected.size === this.exercises.length
-        ) {
-          this.resumeMode = true
-          this.changeDetectorRef.markForCheck()
-          return
-        }
         await this.onChooseNextUserExercise()
         this.animationState = 'right'
         setTimeout(() => {
@@ -417,7 +498,7 @@ export class PlayerCorrectionComponent implements OnInit {
         this.onChooseGroup(
           this.listExerciseGroup[
             Math.min(
-              this.listExerciseGroup.length,
+              this.listExerciseGroup.length - 1,
               this.listExerciseGroup.indexOf(this.currentGroup as ExerciseGroup) + 1
             )
           ]
@@ -427,21 +508,28 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   protected async onSaveGrade() {
+    if (!this.isCorrectionMode) {
+      return
+    }
     if (this.currentExercise) {
       try {
         const validatedGrade = Math.max(0, Math.min(100, this.correctedGrade as number))
         this.correctedGrade = validatedGrade
 
+        // Labels are tied to a specific answer (DB foreign key, cannot be empty/fake): if the
+        // exercise crashed before the student could submit anything, skip labels but still save the grade.
+        const lastAnswerId = this.answers[this.answers.length - 1]?.answerId
+
         await firstValueFrom(
           this.resultService.upsertCorrection(this.currentExercise.exerciseSessionId, {
             grade: validatedGrade,
-            labels: this.currentLabels.map((label) => {
-              return {
-                labelId: label.id,
-                sessionId: this.currentExercise?.exerciseSessionId ?? '',
-                answerId: this.answers[this.answers.length - 1].answerId ?? '',
-              }
-            }),
+            labels: lastAnswerId
+              ? this.currentLabels.map((label) => ({
+                  labelId: label.id,
+                  sessionId: this.currentExercise?.exerciseSessionId ?? '',
+                  answerId: lastAnswerId,
+                }))
+              : [],
           })
         )
         this.currentExercise.correctedGrade = validatedGrade

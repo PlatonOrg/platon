@@ -12,6 +12,18 @@ export enum PlayerActions {
   SAVE_ANSWER = 'SAVE_ANSWER',
 }
 
+export enum LogType {
+  INFO = 'info',
+  ERROR = 'error',
+  WARNING = 'warn',
+  DEBUG = 'debug',
+}
+
+export interface PlatonLog {
+  type: LogType
+  message: string
+}
+
 export interface PlayerExercise {
   id: string
   sessionId: string
@@ -102,6 +114,7 @@ export interface PlayActivityOuput {
 export interface NextOutput {
   nextExerciseId: string
   navigation: PlayerNavigation
+  logs?: PlatonLog[]
 }
 
 export interface EvalExerciseOutput {
@@ -130,7 +143,7 @@ export interface ExercisePlayer {
   solution?: string | null
   settings?: ActivitySettings | null
   feedbacks?: ExerciseFeedback[] | null
-  platon_logs: string[] | null
+  platon_logs?: PlatonLog[] | null
   theories?:
     | {
         url: string
@@ -225,6 +238,16 @@ export const getClosingTime = (player: Partial<ActivityPlayer>): number | null =
   }
 
   return closingTime
+}
+
+/**
+ * Determines if an exercise player contains an error log.
+ *
+ * @param player - The exercise player object to check.
+ * @returns True if the player contains a `platon_logs` with type `error`, false otherwise.
+ */
+export const hasError = (player: Partial<ExercisePlayer>): boolean => {
+  return player.platon_logs?.some((log) => log.type === LogType.ERROR) ?? false
 }
 
 export const NO_COPY_PASTER_CLASS_NAME = 'no-copy-paste'

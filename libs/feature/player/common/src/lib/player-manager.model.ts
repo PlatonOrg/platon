@@ -10,6 +10,7 @@ import { withActivityPlayer, withExercisePlayer } from './player-renderer.model'
 import {
   EvalExerciseInput,
   ExercisePlayer,
+  hasError,
   PlayActivityOuput,
   PlayerActions,
   PlayerActivityVariables,
@@ -256,6 +257,14 @@ export abstract class PlayerManager {
     let variables = exerciseSession.variables
     variables.feedback = { type: 'info', content: '' }
 
+    const submissionFiles = await Promise.all(
+      exerciseSession?.submissions?.map(async (file) => ({
+        path: 'submission/' + basename(file.fileName),
+        content: await file.getContent(),
+        hash: '',
+      })) || []
+    )
+
     const output = await this.sandboxManager.run(
       {
         envid,
@@ -265,9 +274,12 @@ export abstract class PlayerManager {
           content: file.content,
           hash: file.hash,
         })),
+        submissionFiles: submissionFiles,
       },
       variables.grader
     )
+
+    exerciseSession.envid = output.envid
 
     let grade = Number.parseInt(output.variables.grade) ?? -1
     if (Number.isNaN(grade)) {
@@ -278,7 +290,10 @@ export abstract class PlayerManager {
 
     variables = output.variables as ExerciseVariables
 
-    patchExerciseMeta(variables, (meta) => ({ attempts: meta.attempts + increment }))
+    patchExerciseMeta(variables, (meta) => ({
+      attempts: meta.attempts + increment,
+      error: hasError(variables),
+    }))
 
     exerciseSession.grade = Math.max(grade, exerciseSession.grade ?? -1)
     exerciseSession.attempts += increment
@@ -316,6 +331,7 @@ export abstract class PlayerManager {
 
     const promises: Promise<unknown>[] = [
       this.updateSession(exerciseSession.id, {
+        envid: exerciseSession.envid,
         grade: exerciseSession.grade,
         attempts: exerciseSession.attempts,
         variables: exerciseSession.variables,
@@ -420,6 +436,9 @@ export abstract class PlayerManager {
 
   async showSolution(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
     patchExerciseMeta(exerciseSession.variables, () => ({ showSolution: true }))
+    await this.updateSession(exerciseSession.id, {
+      variables: exerciseSession.variables,
+    })
     return withExercisePlayer(exerciseSession)
   }
 

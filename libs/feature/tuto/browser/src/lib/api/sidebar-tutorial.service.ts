@@ -1,197 +1,226 @@
-import { Injectable } from '@angular/core';
-import { ShepherdService, TutorialStep } from './shepherd/shepherd.service';
-import { User, UserRoles, isTeacherRole } from '@platon/core/common';
-import { Router, RouterModule } from '@angular/router'
-
+import { Injectable } from '@angular/core'
+import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
+import { User, UserRoles, isTeacherRole } from '@platon/core/common'
+import { Router } from '@angular/router'
+import { NzMessageService } from 'ng-zorro-antd/message'
 
 export interface NavigationChoice {
-  title: string;
-  url: string;
-  icon: string;
-  description: string;
-  queryParams?: { [key: string]: string };
+  title: string
+  url: string
+  icon: string
+  description: string
+  queryParams?: { [key: string]: string }
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SidebarTutorialService {
-  private selectedNavigation: string | null = null;
-  private user: User | null = null;
+  private selectedNavigation: string | null = null
+  private user: User | null = null
 
-  constructor(
-    private shepherdService: ShepherdService,
-    private router: Router
-  ) {}
+  constructor(private shepherdService: ShepherdService, private router: Router, private message: NzMessageService) {}
 
-  /**
-   * Démarre le tutoriel complet de la sidebar
-   */
-  startSidebarTutorial(
-    user: User,
-  ): void {
-    this.user = user;
-    const steps = this.buildTutorialSteps(user);
+  startSidebarTutorial(user: User): void {
+    this.user = user
+    const steps = this.buildTutorialSteps(user)
 
     this.shepherdService.startTutorial(steps, {
       tourName: 'sidebar-tutorial',
       useModalOverlay: true,
       confirmCancel: true,
-      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de navigation ?'
-    });
+      confirmCancelMessage: 'Voulez-vous vraiment quitter le tutoriel de navigation ?',
+    })
   }
 
-  /**
-   * Construit les étapes du tutoriel en fonction de l'utilisateur
-   * Texte adapté pour les enseignants et administrateurs
-   */
-  private buildTutorialSteps(
-    user: User
-  ): TutorialStep[] {
+  private buildTutorialSteps(user: User): TutorialStep[] {
     const steps: TutorialStep[] = [
       {
         id: 'logo',
         title: 'Logo PLaTon',
-        text: 'Le logo PLaTon vous permet de revenir rapidement au tableau de bord depuis n\'importe quelle page, vous donnant un accès rapide à toutes les fonctionnalités essentielles.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Cliquez sur le logo pour revenir au
+                 <strong style="color: var(--brand-text-primary);">tableau de bord</strong>
+                 depuis n'importe quelle page de la plateforme.
+               </p>`,
         attachTo: {
           element: '#tuto-sidebar-logo',
-          on: 'right'
+          on: 'right',
         },
         buttons: [
           {
             text: 'Passer le tutoriel',
             secondary: true,
-            action: () => this.shepherdService.cancel()
+            action: () => this.shepherdService.cancel(),
           },
           {
-            text: 'Suivant (Entrée)',
-            action: () => this.shepherdService.next()
-          }
-        ]
+            text: 'Suivant',
+            action: () => this.shepherdService.next(),
+          },
+        ],
       },
       {
         id: 'dashboard',
         title: 'Tableau de bord',
-        text: 'Le tableau de bord est votre centre de contrôle. Vous y retrouvez un résumé de l\'activité de vos cours, les statistiques d\'utilisation et les dernières notifications importantes.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Votre centre de contrôle : résumé de l'activité de vos cours,
+                 <strong style="color: var(--brand-text-primary);">statistiques d'utilisation</strong>
+                 et modèles d'exercices disponibles.
+               </p>`,
         attachTo: {
           element: '#tuto-sidebar-tableau-de-bord',
-          on: 'right'
-        }
+          on: 'right',
+        },
       },
       {
-        id:'annonces',
+        id: 'annonces',
         title: 'Annonces',
-        text: 'Dans cette section vous trouverez des messages personnalisés pour les enseignants et les étudiants. Vous trouverez ici des informations importantes, des mises à jour ou des informations de soutien.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Retrouvez ici les <strong style="color: var(--brand-text-primary);">messages importants</strong>
+                 de la plateforme : mises à jour, informations de soutien et communications à l'attention des enseignants.
+               </p>`,
         attachTo: {
           element: '#tuto-sidebar-annonces',
-          on: 'right'
-        }
+          on: 'right',
+        },
       },
       {
         id: 'courses',
-        title: 'Section Cours',
-        text: 'Gérez tous vos cours, créez de nouvelles sessions et suivez la progression de vos étudiants. C\'est ici que vous organisez votre enseignement et structurez votre contenu pédagogique.',
+        title: 'Cours',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Gérez vos cours, créez de nouvelles sessions et
+                 <strong style="color: var(--brand-text-primary);">suivez la progression</strong>
+                 de vos étudiants.
+               </p>
+               <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                 <small style="color: var(--brand-text-secondary);">
+                   C'est ici que vous organisez votre enseignement et structurez votre contenu pédagogique.
+                 </small>
+               </div>`,
         attachTo: {
           element: '#tuto-sidebar-cours',
-          on: 'right'
-        }
+          on: 'right',
+        },
       },
       {
         id: 'corrections',
         title: 'Corrections',
-        text: 'Accédez aux travaux de vos étudiants qui nécessitent une évaluation manuelle. Vous pouvez y fournir des retours détaillés et attribuer des notes pour les exercices non auto-évalués.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Accédez aux travaux de vos étudiants nécessitant une
+                 <strong style="color: var(--brand-text-primary);">évaluation manuelle</strong>.
+                 Rédigez des retours détaillés et attribuez des notes.
+               </p>`,
         attachTo: {
           element: '#tuto-sidebar-corrections',
-          on: 'right'
-        }
-      }
-    ];
+          on: 'right',
+        },
+      },
+    ]
 
-    // Ajouter l'espace de travail pour les enseignants
     if (isTeacherRole(user.role) || user.role === UserRoles.admin) {
-      steps.push({
-        id: 'workspace',
-        title: 'Espace de travail',
-        text: 'Votre atelier de création pédagogique. Créez et organisez vos ressources : exercices interactifs, activités d\'apprentissage, et cercles thématiques. C\'est le cœur créatif de PLaTon pour les enseignants.',
-        attachTo: {
-          element: '#tuto-sidebar-espace-de-travail',
-          on: 'right'
+      steps.push(
+        {
+          id: 'workspace',
+          title: 'Espace de travail',
+          text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                   Votre espace de <strong style="color: var(--brand-text-primary);">création pédagogique</strong> :
+                   exercices interactifs, activités, cercles thématiques. C'est le cœur créatif de PLaTon pour les enseignants.
+                 </p>`,
+          attachTo: {
+            element: '#tuto-sidebar-espace-de-travail',
+            on: 'right',
+          },
+        },
+        {
+          id: 'tests',
+          title: "Tests d'entrée",
+          text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                   Configurez des <strong style="color: var(--brand-text-primary);">évaluations diagnostiques</strong>
+                   pour mesurer les compétences de vos étudiants avant le début des cours.
+                 </p>
+                 <div style="background: var(--brand-background-components); border-radius: 8px; padding: 10px;">
+                   <small style="color: var(--brand-text-secondary);">
+                     Utilisez les résultats pour adapter votre enseignement aux besoins de votre groupe.
+                   </small>
+                 </div>`,
+          attachTo: {
+            element: '#tuto-sidebar-tests-d-entree',
+            on: 'right',
+          },
         }
-      });
+      )
     }
 
-    // Ajouter l'administration pour les admins
     if (user.role === UserRoles.admin) {
       steps.push({
         id: 'admin',
         title: 'Administration',
-        text: 'En tant qu\'administrateur, vous avez accès au panneau d\'administration complet. Gérez les utilisateurs, configurez les paramètres globaux, supervisez l\'utilisation de la plateforme et maintenez son bon fonctionnement.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 En tant qu'administrateur, accédez au panneau d'administration complet :
+                 <strong style="color: var(--brand-text-primary);">gestion des utilisateurs</strong>,
+                 configuration globale et supervision de la plateforme.
+               </p>`,
         attachTo: {
           element: '#tuto-sidebar-administration',
-          on: 'right'
-        }
-      });
+          on: 'right',
+        },
+      })
     }
 
-
-
-    // Documentation pour les enseignants
     if (isTeacherRole(user.role)) {
       steps.push({
         id: 'documentation',
         title: 'Documentation',
-        text: 'Accédez à la documentation technique complète de PLaTon, incluant des guides pour la création d\'exercices avancés, l\'utilisation des langages spécifiques et les bonnes pratiques pédagogiques recommandées.',
+        text: `<p style="color: var(--brand-text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                 Consultez la <strong style="color: var(--brand-text-primary);">documentation technique</strong> :
+                 guides de création d'exercices avancés, langages PLaTon et bonnes pratiques pédagogiques.
+               </p>`,
         attachTo: {
           element: '#tuto-sidebar-documentation',
-          on: 'right'
-        }
-      });
+          on: 'right',
+        },
+      })
     }
 
-    // Étape finale avec choix de navigation
     steps.push({
       id: 'navigation-choice',
-      title: 'Où souhaitez-vous commencer votre parcours ?',
+      title: 'Par où souhaitez-vous commencer ?',
       text: this.buildNavigationChoiceHTML(user),
       buttons: [
         {
           text: 'Terminer le tutoriel',
           secondary: true,
-          action: () => this.shepherdService.complete()
+          action: () => this.shepherdService.complete(),
         },
         {
           text: 'Aller à la section choisie',
-          action: () => this.handleNavigationChoice()
-        }
+          action: () => this.handleNavigationChoice(),
+        },
       ],
       when: {
-        show: () => this.setupNavigationSelection(user)
-      }
-    });
+        show: () => this.setupNavigationSelection(user),
+      },
+    })
 
-    return steps;
+    return steps
   }
 
-  /**
-   * Construit le HTML pour le choix de navigation
-   */
   private buildNavigationChoiceHTML(user: User): string {
-    const choices = this.getNavigationChoices(user);
+    const choices = this.getNavigationChoices(user)
 
-    let html = '<div class="navigation-selection-container" style="margin: 5px 0;">';
-    html += '<p style="margin-bottom: 16px; font-weight: 500; color: var(--brand-text-primary);">' +
-      'Maintenant que vous avez exploré les différentes sections de l\'interface.' + '<br>' +
-      'Decouvrons ensemble comment naviguer efficacement dans PLaTon pour gérer vos cours et ressources. '+ '<br>' +
-      'Choisissez où vous souhaitez commencer :</p>';
+    let html = '<div class="navigation-selection-container" style="margin: 5px 0;">'
+    html +=
+      '<p style="margin-bottom: 16px; color: var(--brand-text-secondary); line-height: 1.5;">' +
+      "Vous avez découvert les sections de l'interface. " +
+      'Choisissez où vous souhaitez commencer votre exploration :' +
+      '</p>'
 
     choices.forEach((choice) => {
       html += `
         <div class="navigation-option"
              data-navigation-url="${choice.url}"
              style="
-               display: flex;
-               align-items: center;
-               padding: 12px;
+               padding: 12px 16px;
                margin: 8px 0;
                border: 2px solid var(--brand-border-color);
                border-radius: 8px;
@@ -199,27 +228,13 @@ export class SidebarTutorialService {
                transition: all 0.2s ease;
                background: var(--brand-background-card);
              ">
-          <div style="
-            width: 40px;
-            height: 40px;
-            background: var(--brand-background-components);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-          ">
-            <mat-icon style="font-size: 20px; color: var(--brand-text-secondary);">${choice.icon}</mat-icon>
-          </div>
-          <div>
-            <div style="font-weight: 600; margin-bottom: 4px; color: var(--brand-text-primary);">${choice.title}</div>
-            <div style="font-size: 14px; color: var(--brand-text-secondary);">${choice.description}</div>
-          </div>
+          <div style="font-weight: 600; margin-bottom: 4px; color: var(--brand-text-primary);">${choice.title}</div>
+          <div style="font-size: 13px; color: var(--brand-text-secondary);">${choice.description}</div>
         </div>
-      `;
-    });
+      `
+    })
 
-    html += '</div>';
+    html += '</div>'
     html += `
       <style>
         .navigation-option:hover {
@@ -231,92 +246,75 @@ export class SidebarTutorialService {
           background-color: rgba(var(--brand-color-primary-rgb), 0.1) !important;
         }
       </style>
-    `;
+    `
 
-    return html;
+    return html
   }
 
-  /**
-   * Retourne les choix de navigation disponibles
-   */
   private getNavigationChoices(user: User): NavigationChoice[] {
     const choices: NavigationChoice[] = [
-
       {
         title: 'Cours',
         url: '/courses',
-        icon: '📚',
-        description: 'Explorer les cours disponibles',
-        queryParams: { tutorial: 'course-management' }
+        icon: 'book',
+        description: 'Explorer et gérer vos cours',
+        queryParams: { tutorial: 'course-management' },
       },
-
-    ];
+    ]
 
     if (isTeacherRole(user.role)) {
       choices.push({
         title: 'Espace de travail',
         url: '/resources',
-        icon: '🛠️',
-        description: 'Créer et gérer vos ressources',
-        queryParams: { tutorial: 'workspace' }
-      });
+        icon: 'folder',
+        description: 'Créer et organiser vos ressources pédagogiques',
+        queryParams: { tutorial: 'workspace' },
+      })
     }
 
-    return choices;
+    return choices
   }
 
-  /**
-   * Configure la sélection de navigation
-   */
-  private setupNavigationSelection(user: User): void {
+  private setupNavigationSelection(_user: User): void {
     setTimeout(() => {
-      const options = document.querySelectorAll('.navigation-option');
-      options.forEach(option => {
+      const options = document.querySelectorAll('.navigation-option')
+      options.forEach((option) => {
         option.addEventListener('click', (event) => {
-          const target = event.currentTarget as HTMLElement;
-          const navigationUrl = target.getAttribute('data-navigation-url');
-          this.selectedNavigation = navigationUrl;
+          const target = event.currentTarget as HTMLElement
+          const navigationUrl = target.getAttribute('data-navigation-url')
+          this.selectedNavigation = navigationUrl
 
-          // Mettre à jour la sélection visuelle
-          options.forEach(opt => opt.classList.remove('selected'));
-          target.classList.add('selected');
-        });
-      });
+          options.forEach((opt) => opt.classList.remove('selected'))
+          target.classList.add('selected')
+        })
+      })
 
-      // Sélectionner "Cours" par défaut
-      const coursesOption = Array.from(options).find(
-        opt => opt.getAttribute('data-navigation-url') === '/courses'
-      );
+      const coursesOption = Array.from(options).find((opt) => opt.getAttribute('data-navigation-url') === '/courses')
       if (coursesOption) {
-        coursesOption.classList.add('selected');
-        this.selectedNavigation = '/courses';
+        coursesOption.classList.add('selected')
+        this.selectedNavigation = '/courses'
       }
-    }, 100);
+    }, 100)
   }
 
-  /**
- * Gère la navigation vers la section choisie
- */
   private handleNavigationChoice(): void {
     if (!this.selectedNavigation) {
-      alert('Veuillez sélectionner une section avant de continuer.');
-      return;
+      this.message.warning('Veuillez sélectionner une section avant de continuer.')
+      return
     }
 
-    // Terminer le tutoriel
-    this.shepherdService.complete();
+    this.shepherdService.complete()
 
     const selectedChoice = this.getNavigationChoices(this.user as User).find(
-      choice => choice.url === this.selectedNavigation
-    );
+      (choice) => choice.url === this.selectedNavigation
+    )
 
-    // Naviguer vers la section choisie
     setTimeout(() => {
       if (selectedChoice?.queryParams) {
-        this.router.navigate([this.selectedNavigation!], { queryParams: selectedChoice.queryParams });
+        void this.router.navigate([this.selectedNavigation!], { queryParams: selectedChoice.queryParams })
       } else {
-        this.router.navigate([this.selectedNavigation!]);
+        void this.router.navigate([this.selectedNavigation!])
       }
-    }, 500);
+    }, 500)
   }
 }

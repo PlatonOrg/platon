@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'tuto',
+  displayName: 'feature-tuto-browser',
   preset: '../../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

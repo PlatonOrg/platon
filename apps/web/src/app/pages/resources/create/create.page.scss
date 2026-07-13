@@ -21,6 +21,23 @@ main {
   width: 100%;
 }
 
+.quick-create-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 2rem;
+  padding: 4rem 2rem;
+
+  p {
+    font-size: 1.125rem;
+    color: var(--brand-text-secondary);
+    text-align: center;
+    margin: 0;
+  }
+}
+
 footer {
   display: flex;
   align-items: center;
@@ -164,17 +181,28 @@ nz-select {
 
 .template-circle-filter {
   display: flex;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  align-items: center;
   width: 100%;
   margin-bottom: 1rem;
+  gap: 8px;
   justify-content: center;
-  nz-tag {
-    flex: 0 0 auto;
-    margin-right: 10px;
-    &:last-child {
-      margin-right: 0;
-    }
-  }
+}
+
+.circle-source-picker {
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px dashed var(--brand-border-color-light, #d9d9d9);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 1rem;
+}
+
+.circle-picker-popover {
+  width: 280px;
+  max-height: 360px;
+  overflow-y: auto;
 }
 
 .template-grid {
@@ -189,10 +217,7 @@ nz-select {
 
 nz-collapse {
   width: 100%;
-}
-
-.template-item {
-  cursor: pointer;
+  margin-bottom: 1rem;
 }
 
 .final-step {

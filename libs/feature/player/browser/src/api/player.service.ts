@@ -11,6 +11,7 @@ import {
   PlayExerciseOuput,
   PreviewInput,
   PreviewOuput,
+  Feedback,
 } from '@platon/feature/player/common'
 import { Observable } from 'rxjs'
 import { PlayerProvider } from '../models/player-provider'
@@ -61,5 +62,9 @@ export class PlayerService {
 
   openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput> {
     return this.provider.openSessionWithCode(sessionId, code)
+  }
+
+  submitFeedback(feedback: Feedback): Observable<void> {
+    return this.provider.submitFeedback(feedback)
   }
 }

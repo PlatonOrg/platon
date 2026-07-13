@@ -3,7 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
 import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@platon/core/server'
-import { ActivityExerciseGroup, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
+import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
   ActivityFilters,
   CreateActivity,
@@ -12,11 +12,10 @@ import {
   UpdateActivity,
   calculateActivityOpenState,
 } from '@platon/feature/course/common'
-import { ResourceEntity, ResourceFileService } from '@platon/feature/resource/server'
+import { ResourceEntity, ResourceFileService, ResourceService } from '@platon/feature/resource/server'
 import { CLS_REQ } from 'nestjs-cls'
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm'
 import { Optional } from 'typescript-optional'
-import { ActivityCorrectorService } from '../activity-corrector/activity-corrector.service'
 import { ActivityMemberService } from '../activity-member/activity-member.service'
 import { ActivityMemberView } from '../activity-member/activity-member.view'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
@@ -36,8 +35,6 @@ import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
 
-import { CourseGroupService } from '../course-group/course-group.service'
-
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
 @Injectable()
@@ -52,9 +49,7 @@ export class ActivityService {
     private readonly databaseService: DatabaseService,
     private readonly notificationService: CourseNotificationService,
     private readonly activityMemberService: ActivityMemberService,
-    private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
-    private readonly courseGroup: CourseGroupService,
     private readonly activityDatesService: ActivityDatesService,
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -62,7 +57,8 @@ export class ActivityService {
     private readonly resourceRepository: Repository<ResourceEntity>,
     @InjectRepository(CourseGroupMemberEntity)
     private readonly courseGroupMemberRepository: Repository<CourseGroupMemberEntity>,
-    private readonly activityGroupService: ActivityGroupService
+    private readonly activityGroupService: ActivityGroupService,
+    private readonly resourceService: ResourceService
   ) {}
 
   async search(courseId: string, filters?: ActivityFilters): Promise<[ActivityEntity[], number]> {
@@ -159,6 +155,18 @@ export class ActivityService {
     return result
   }
 
+  async createActivities(activities: Partial<ActivityEntity>[]): Promise<ActivityEntity[]> {
+    const maxOrder =
+      (await this.repository.maximum('order', {
+        courseId: activities[0].courseId,
+        sectionId: activities[0].sectionId,
+      })) ?? 0
+    const activitiesWithOrder = activities.map((activity, index) => ({ ...activity, order: maxOrder + index + 1 }))
+    const result = await this.repository.save(activitiesWithOrder)
+    await this.addVirtualColumns(...result)
+    return result
+  }
+
   async updateActivitesOrder(ids: string[]): Promise<void> {
     const activitiesWithOrder = ids.map((activity, index) => ({ id: activity, order: index }))
     await this.repository.save(activitiesWithOrder)
@@ -185,6 +193,13 @@ export class ActivityService {
       await guard(activity)
     }
 
+    if (changes.activitySettings !== undefined) {
+      if (!activity.source.variables) {
+        activity.source.variables = {} as ActivityVariables
+      }
+      activity.source.variables.settings = changes.activitySettings
+    }
+
     Object.assign(activity, {
       ...changes,
 
@@ -196,6 +211,7 @@ export class ActivityService {
       exerciseCount: undefined,
       progression: undefined,
       permissions: undefined,
+      activitySettings: undefined,
     } as Partial<ActivityEntity>)
 
     const result = await this.repository.save(activity)
@@ -233,11 +249,13 @@ export class ActivityService {
       await guard(activity)
     }
 
+    const activitySettings = activity.source.variables.settings as ActivitySettings
     const { source } = await this.fileService.compile({
       resourceId: activity.source.resource,
       version: input.version,
     })
     activity.source = source as PLSourceFile<ActivityVariables>
+    activity.source.variables.settings = activitySettings
 
     activity = await this.repository.save(activity)
 
@@ -254,7 +272,6 @@ export class ActivityService {
       this.logger.error('Failed to send notification', error)
     })
 
-    // Des changements ici
     const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
     if (!activity) {
       throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
@@ -263,7 +280,6 @@ export class ActivityService {
       await guard(activity)
     }
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, false)
-    // Fin de changement
     this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: new Date(), restrictions: activity.restrictions }, guard)
   }
@@ -276,9 +292,7 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
-    // Des changements ici
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, true)
-    // Fin de changement
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: null, restrictions: activity.restrictions })
   }
@@ -317,18 +331,32 @@ export class ActivityService {
   async fromInput(input: CreateActivity | UpdateActivity): Promise<ActivityEntity> {
     const activity = new ActivityEntity()
 
-    if ('resourceId' in input) {
-      const { source } = await this.fileService.compile({
-        resourceId: input.resourceId,
-        version: input.resourceVersion,
-      })
-      activity.source = source as PLSourceFile<ActivityVariables>
-      delete (input as any).resourceId
-      delete (input as any).resourceVersion
+    try {
+      if ('resourceId' in input) {
+        const { source } = await this.fileService.compile({
+          resourceId: input.resourceId,
+          version: input.resourceVersion,
+        })
+        activity.source = source as PLSourceFile<ActivityVariables>
+        delete (input as any).resourceId
+        delete (input as any).resourceVersion
+      }
+    } catch (error) {
+      if ('resourceId' in input) {
+        const activityFailure = await this.findByActivityId(input.resourceId)
+        activityFailure.ifPresent((activity) => {
+          throw new NotFoundResponse(`Resource not found: ${activity.title} version ${input.resourceVersion}`)
+        })
+
+        const resource = await this.resourceService.findByIdOrCode(input.resourceId)
+        resource.ifPresent((resource) => {
+          throw new NotFoundResponse(`Erreur lord du chargement de l'activité: ${resource.name}`)
+        })
+      }
+      throw error
     }
 
     Object.assign(activity, input)
-
     return activity
   }
 
@@ -384,6 +412,7 @@ export class ActivityService {
             viewStats: hasWritePermission,
             viewResource: hasWritePermission,
           },
+          activitySettings: activity.source.variables.settings as ActivitySettings,
         } as Partial<ActivityEntity>)
       })
     )

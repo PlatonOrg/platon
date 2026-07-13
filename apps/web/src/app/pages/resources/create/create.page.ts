@@ -18,6 +18,7 @@ import { MatInputModule } from '@angular/material/input'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
@@ -36,6 +37,7 @@ import {
   CircleTree,
   LATEST,
   Resource,
+  ResourceStatus,
   ResourceTypes,
   branchFromCircleTree,
   circleAncestors,
@@ -78,6 +80,7 @@ type TemplateSource = {
     NzCollapseModule,
     NzSkeletonModule,
     NzPageHeaderModule,
+    NzPopoverModule,
 
     UiStepDirective,
     UiStepperComponent,
@@ -99,6 +102,7 @@ export class ResourceCreatePage implements OnInit {
   protected loading = true
   protected creating = false
   protected editionMode?: 'scratch' | 'template'
+  protected mode?: string
   protected loadingTemplates = false
   protected isFinished = false
   protected user?: User
@@ -113,6 +117,8 @@ export class ResourceCreatePage implements OnInit {
   protected levels: Level[] = []
   protected templateSources: TemplateSource[] = []
   protected selectedTemplateSources = new SelectionModel<TemplateSource>(true, [])
+  protected circlePickerVisible = false
+  protected loadingAdditionalTemplates = false
   protected infos = new FormGroup({
     name: new FormControl('', [Validators.required]),
     code: new FormControl(''),
@@ -148,12 +154,15 @@ export class ResourceCreatePage implements OnInit {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes
     this.parentId = this.activatedRoute.snapshot.queryParamMap.get('parent') || undefined
     const templateId = this.activatedRoute.snapshot.queryParamMap.get('template') || undefined
+    this.mode = this.activatedRoute.snapshot.queryParamMap.get('mode') || undefined
+
     if (templateId) {
       this.template = await firstValueFrom(this.resourceService.find({ id: templateId }))
       this.editionMode = 'template'
     }
 
     const user = (await this.authService.ready()) as User
+
     const [tree, topics, levels, userCharter] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.tagService.listTopics()),
@@ -190,6 +199,7 @@ export class ResourceCreatePage implements OnInit {
     this.userCharterAccepted = userCharter?.acceptedUserCharter ?? false
 
     this.loading = false
+
     this.changeDetectorRef.markForCheck()
   }
 
@@ -209,6 +219,7 @@ export class ResourceCreatePage implements OnInit {
         this.resourceService.create({
           type: this.type,
           parentId: this.parentId as string,
+          status: ResourceStatus.DRAFT,
           templateId: this.editionMode === 'template' ? this.template?.id : undefined,
           templateVersion: this.editionMode === 'template' ? LATEST : undefined,
           name: infos.name as string,
@@ -218,10 +229,14 @@ export class ResourceCreatePage implements OnInit {
           topics: tags.topics as string[],
         })
       )
-      if (resource.type === 'EXERCISE' || resource.type === 'ACTIVITY') {
-        window.open(`/editor/${resource.id}?version=latest`, '_blank')
+      if (resource.type === 'EXERCISE' && resource.templateId) {
+        await this.router.navigate(['/builder', resource.id], { replaceUrl: true })
+      } else {
+        if (resource.type === 'EXERCISE' || resource.type === 'ACTIVITY') {
+          window.open(`/editor/${resource.id}?version=latest`, '_blank', 'noopener,noreferrer')
+        }
+        this.router.navigate(['/resources', resource.id, 'overview'], { replaceUrl: true }).catch(console.error)
       }
-      this.router.navigate(['/resources', resource.id, 'overview'], { replaceUrl: true }).catch(console.error)
     } catch {
       this.dialogService.error('Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !')
     } finally {
@@ -276,6 +291,52 @@ export class ResourceCreatePage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  protected async addTemplateSourceFromCircle(circleId: string): Promise<void> {
+    this.circlePickerVisible = false
+    if (this.templateSources.some((s) => s.circle.id === circleId)) {
+      return
+    }
+
+    this.loadingAdditionalTemplates = true
+    this.changeDetectorRef.markForCheck()
+
+    try {
+      const response = await firstValueFrom(
+        this.resourceService.search({
+          types: ['EXERCISE'],
+          configurable: true,
+          parents: [circleId],
+          expands: ['metadata', 'statistic'],
+        })
+      )
+
+      response.resources = response.resources
+        .map((r) => ({
+          ...r,
+          exerciseLength: r.statistic?.exercise?.references?.total ?? 0,
+        }))
+        .sort((a, b) => b.exerciseLength - a.exerciseLength)
+
+      const circleNode = branchFromCircleTree(this.tree, circleId)
+      if (!circleNode) return
+
+      const templates = response.resources
+      if (!templates.length) {
+        this.dialogService.error('Aucun template trouvé dans ce cercle.')
+        return
+      }
+
+      const newSource: TemplateSource = { circle: circleNode, count: templates.length, templates }
+      this.templateSources = [...this.templateSources, newSource]
+      this.selectedTemplateSources.select(newSource)
+    } catch {
+      this.dialogService.error('Une erreur est survenue lors du chargement des templates.')
+    } finally {
+      this.loadingAdditionalTemplates = false
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
   private codeValidator(codes: string[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const forbidden = [...codes, 'relative'].includes(control.value)
@@ -284,7 +345,7 @@ export class ResourceCreatePage implements OnInit {
   }
 
   protected openTemplateResource(templateId: string): void {
-    window.open(`/resources/${templateId}`, '_blank')
+    window.open(`/resources/${templateId}`, '_blank', 'noopener,noreferrer')
   }
 
   protected selectEditionMode(mode: 'scratch' | 'template', stepper: UiStepperComponent): void {

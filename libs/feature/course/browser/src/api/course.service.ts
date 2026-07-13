@@ -121,6 +121,10 @@ export class CourseService {
     return this.courseMemberProvider.updateRole(member, role)
   }
 
+  archiveMember(courseId: string, archived: boolean): Observable<CourseMember> {
+    return this.courseMemberProvider.archive(courseId, archived)
+  }
+
   searchMembers(course: Course | string, filters?: CourseMemberFilters): Observable<ListResponse<CourseMember>> {
     return this.courseMemberProvider.search(course, filters)
   }
@@ -165,6 +169,10 @@ export class CourseService {
 
   createActivity(course: Course, input: CreateActivity): Observable<Activity> {
     return this.activityProvider.create(course, input)
+  }
+
+  createActivities(course: Course, inputs: CreateActivity[]): Observable<ListResponse<Activity>> {
+    return this.activityProvider.createActivities(course, inputs)
   }
 
   updateActivity(activity: Activity, input: UpdateActivity): Observable<Activity> {

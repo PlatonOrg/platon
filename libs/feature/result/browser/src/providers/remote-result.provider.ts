@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import {
   ActivityCorrection,
+  ActivityCorrectionSummary,
   ActivityLeaderboardEntry,
   ActivityResults,
   Correction,
+  CorrectionStatus,
   CourseLeaderboardEntry,
   DashboardOutput,
   FindActivityLeaderboard,
@@ -68,19 +70,38 @@ export class RemoteResultProvider extends ResultProvider {
     return this.http.get<ActivityResults>(`/api/v1/results/activity/${activityId}`)
   }
 
-  findCorrection(activityId: string): Observable<ActivityCorrection> {
-    return this.http.get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections/${activityId}`).pipe(
-      map((response) => {
-        if (!response.total) {
-          throw new Error(`Correction not found for activity ${activityId}`)
-        }
-        return response.resources[0]
-      })
-    )
+  findCorrection(activityId: string, viewerMode = false): Observable<ActivityCorrection> {
+    let params = new HttpParams()
+    if (viewerMode) {
+      params = params.set('viewer', 'true')
+    }
+
+    return this.http
+      .get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections/${activityId}`, { params })
+      .pipe(
+        map((response) => {
+          if (!response.total) {
+            throw new Error(`Correction not found for activity ${activityId}`)
+          }
+          return response.resources[0]
+        })
+      )
   }
 
-  listCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.http.get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections`)
+  listCorrections(status?: CorrectionStatus): Observable<ListResponse<ActivityCorrection>> {
+    let params = new HttpParams()
+    if (status) {
+      params = params.set('status', status)
+    }
+    return this.http.get<ListResponse<ActivityCorrection>>(`/api/v1/results/corrections`, { params })
+  }
+
+  listCorrectionsSummary(status?: CorrectionStatus): Observable<ListResponse<ActivityCorrectionSummary>> {
+    let params = new HttpParams()
+    if (status) {
+      params = params.set('status', status)
+    }
+    return this.http.get<ListResponse<ActivityCorrectionSummary>>(`/api/v1/results/corrections/summary`, { params })
   }
 
   upsertCorrection(sessionId: string, input: UpsertCorrection): Observable<Correction> {
@@ -97,5 +118,33 @@ export class RemoteResultProvider extends ResultProvider {
     return this.http.get<UserActivityResultsDistribution[]>(
       `/api/v1/results/dashboard/activities/${activityId}/${startDate}/${endDate}`
     )
+  }
+
+  downloadAllSubmissions(
+    activityId: string,
+    exerciseId: string,
+    sessionId: string
+  ): Observable<{ blob: Blob; fileName: string }> {
+    return this.http
+      .get(`/api/v1/sessions/${sessionId}/submissions/${activityId}/${exerciseId}/download-all`, {
+        responseType: 'blob',
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          const contentDisposition = response.headers.get('content-disposition') || ''
+          let fileName = 'submissions.tar'
+
+          const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
+          if (fileNameMatch && fileNameMatch[1]) {
+            fileName = fileNameMatch[1]
+          }
+
+          return {
+            blob: response.body as Blob,
+            fileName,
+          }
+        })
+      )
   }
 }

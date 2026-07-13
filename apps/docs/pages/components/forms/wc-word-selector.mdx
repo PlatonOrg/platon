@@ -98,18 +98,55 @@ Ce composant permet de créer des exercices variés comme la construction de phr
     "words": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": [
+          "string",
+          "object"
+        ],
+        "description": "La liste initiale des mots disponibles.",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Le texte à afficher."
+          },
+          "css": {
+            "type": "string",
+            "description": "Le style CSS à appliquer à l'étiquette."
+          }
+        },
+        "required": [
+          "content"
+        ]
       },
-      "default": [],
-      "description": "La liste initiale des mots disponibles."
+      "default": []
     },
     "selectedWords": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": [
+          "string",
+          "object"
+        ],
+        "description": "La liste des mots construits par l'utilisateur.",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Le texte à afficher."
+          },
+          "css": {
+            "type": "string",
+            "description": "Le style CSS à appliquer à l'étiquette."
+          }
+        },
+        "required": [
+          "content"
+        ]
       },
-      "default": [],
-      "description": "La liste des mots construits par l'utilisateur."
+      "default": []
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le composant?"
     }
   }
 }} />
@@ -124,18 +161,55 @@ Ce composant permet de créer des exercices variés comme la construction de phr
     "words": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": [
+          "string",
+          "object"
+        ],
+        "description": "La liste initiale des mots disponibles.",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Le texte à afficher."
+          },
+          "css": {
+            "type": "string",
+            "description": "Le style CSS à appliquer à l'étiquette."
+          }
+        },
+        "required": [
+          "content"
+        ]
       },
-      "default": [],
-      "description": "La liste initiale des mots disponibles."
+      "default": []
     },
     "selectedWords": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": [
+          "string",
+          "object"
+        ],
+        "description": "La liste des mots construits par l'utilisateur.",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Le texte à afficher."
+          },
+          "css": {
+            "type": "string",
+            "description": "Le style CSS à appliquer à l'étiquette."
+          }
+        },
+        "required": [
+          "content"
+        ]
       },
-      "default": [],
-      "description": "La liste des mots construits par l'utilisateur."
+      "default": []
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le composant?"
     }
   }
 }

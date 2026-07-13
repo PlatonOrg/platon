@@ -57,7 +57,7 @@ export class PlaExerciseEditorComponent {
           }
           this.inputs.push({
             ...input,
-            value: this.overrides[input.name],
+            value: this.overrides[input.name] ?? input.value,
           })
         }
         if (!this.inputs.length) {
@@ -83,6 +83,10 @@ export class PlaExerciseEditorComponent {
   protected onOverrideVariable(name: string, value: unknown) {
     this.overrides[name] = value
     this.exercise.overrides = this.overrides
+    const input = this.inputs?.find((i) => i.name === name)
+    if (input) {
+      input.value = value
+    }
     this.exerciseChange.emit(this.exercise)
   }
 

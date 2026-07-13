@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule, ActivatedRoute } from '@angular/router'
-import { firstValueFrom, Subscription } from 'rxjs'
+import { Subscription } from 'rxjs'
+import { Title } from '@angular/platform-browser'
 
 import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
@@ -80,6 +81,9 @@ export class ResourcePage implements OnInit, OnDestroy {
   protected configurable = false
   protected certifiedTemplate = false
 
+  // for the tab name
+  constructor(private titleService: Title) {}
+
   get isOtherPersonal(): boolean {
     return this.context.resource!.personal && this.context.resource!.ownerId !== this.context.user!.id
   }
@@ -96,9 +100,12 @@ export class ResourcePage implements OnInit, OnDestroy {
         }
 
         this.changeDetectorRef.markForCheck()
+
+        if (this.context.resource?.name) {
+          this.titleService.setTitle('Ressource - ' + this.context.resource?.name)
+        }
       })
     )
-    //this.checkFirstVisit()
     this.checkForTutorialContinuation()
   }
 
@@ -152,6 +159,17 @@ export class ResourcePage implements OnInit, OnDestroy {
     window.open(url, '_blank')
   }
 
+  protected urlPath(url: string): string {
+    return new URL(url, window.location.origin).pathname
+  }
+
+  protected async duplicate(): Promise<void> {
+    const duplicatedResourceId = await this.presenter.duplicate()
+    if (duplicatedResourceId) {
+      await this.router.navigate(['/resources', duplicatedResourceId])
+    }
+  }
+
   protected isAdmin(): boolean {
     return this.context.user?.role === 'admin'
   }
@@ -174,41 +192,25 @@ export class ResourcePage implements OnInit, OnDestroy {
     return this.context.resource?.statistic?.exercise?.references?.total || 0
   }
 
-  /**
-   * Vérifie si c'est la première visite de l'utilisateur
-
-  private checkFirstVisit(): void {
-    setTimeout(() => {
-      this.startResourcesTutorial()
-    }, 1000)
-  }*/
-
   private checkForTutorialContinuation(): void {
     this.activatedRoute.queryParams.subscribe((params) => {
-      const fromTutorial = params['fromTutorial']
+      const fromTutorial = params['fromTutorial'] as string
       const isFromTutorialService = this.resourcesTutorialService.getIsFromTutorial()
-
       if (fromTutorial === 'true' || isFromTutorialService) {
-        // L'utilisateur vient du tutoriel
-        setTimeout(() => {
-          this.startResourcePageTutorial()
-        }, 1000)
-        //this.startResourcePageTutorial()
-
-        // Nettoyer les paramètres d'URL
-        this.cleanTutorialParams()
-
-        // Réinitialiser le flag du service
-        this.resourcesTutorialService.resetTutorialFlag()
-      } else {
-        console.log('NOTHING')
+        // Attendre que le contexte soit chargé avant de lancer le tuto
+        const sub = this.presenter.contextChange.subscribe((ctx) => {
+          if (ctx.resource) {
+            sub.unsubscribe()
+            setTimeout(() => this.startResourcePageTutorial(), 500)
+            this.cleanTutorialParams()
+            this.resourcesTutorialService.resetTutorialFlag()
+          }
+        })
+        this.subscriptions.push(sub)
       }
     })
   }
 
-  /**
-   * Démarre le tutoriel complet de l'espace de travail
-   */
   startResourcePageTutorial(): void {
     if (this.context.resource) {
       this.resourcePageTutorialService.startResourcePageTutorial(this.context.resource, false, false, false)
@@ -216,7 +218,6 @@ export class ResourcePage implements OnInit, OnDestroy {
   }
 
   private cleanTutorialParams(): void {
-    // Supprimer le paramètre fromTutorial de l'URL sans recharger la page
     const url = new URL(window.location.href)
     url.searchParams.delete('fromTutorial')
     window.history.replaceState(null, '', url.toString())

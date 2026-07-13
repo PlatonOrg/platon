@@ -14,6 +14,33 @@
       "options": {
         "jestConfig": "libs/feature/player/server/jest.config.ts"
       }
+    },
+    "test:integration": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}/integration"],
+      "options": {
+        "jestConfig": "libs/feature/player/server/jest.integration.config.ts",
+        "passWithNoTests": false
+      }
+    },
+    "test:e2e": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}/e2e"],
+      "options": {
+        "jestConfig": "libs/feature/player/server/jest.e2e.config.ts",
+        "passWithNoTests": false
+      }
+    },
+    "test:all": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run feature-player-server:test",
+          "nx run feature-player-server:test:integration",
+          "nx run feature-player-server:test:e2e"
+        ],
+        "parallel": false
+      }
     }
   }
 }

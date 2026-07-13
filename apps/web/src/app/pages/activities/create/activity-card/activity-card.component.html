@@ -1,0 +1,58 @@
+<div class="activity-card-wrapper" [class.selected]="selected()">
+  <div class="radio-wrapper">
+    <input
+      type="checkbox"
+      [id]="'activity-checkbox-' + item().id"
+      [checked]="selected()"
+      (change)="handleClick()"
+      class="activity-checkbox"
+    />
+  </div>
+
+  <nz-ribbon [nzText]="ribbonTemplate" [nzColor]="item().status | resourceStatusColor" class="activity-card-content">
+    <ui-list-item-article
+      [style.--border-color]="selected() ? 'var(--brand-color-primary)' : 'transparent'"
+      [articleTitle]="titleTemplate"
+      [articleIconTemplate]="imageTemplate"
+      [articleDescription]="descriptionTemplate"
+      (didClickTitle)="handleClick()"
+      [class.selected]="selected()"
+    >
+      <ui-list-item-article-action
+        (click)="openTab('/resources/' + item().id)"
+        class="action"
+        nz-tooltip="Voir la ressource"
+      >
+        <i nz-icon nzType="eye" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+
+      <ui-list-item-article-action (click)="openTab(previewUrl)" class="action" nz-tooltip="Prévisualiser">
+        <i nz-icon nzType="play-circle" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+
+      <div class="spacer"></div>
+
+      <ui-list-item-article-action
+        nz-tooltip="Dernière mise à jour : {{ item().updatedAt | date : 'dd/MM/yyyy à HH:mm' }}"
+      >
+        <i nz-icon nzType="history" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+    </ui-list-item-article>
+
+    <ng-template #ribbonTemplate>
+      <mat-icon [nz-tooltip]="item().status | resourceStatus">{{ item().status | resourceStatusIcon }}</mat-icon>
+    </ng-template>
+
+    <ng-template #titleTemplate>
+      <h3>{{ item().name }}</h3>
+    </ng-template>
+
+    <ng-template #imageTemplate>
+      <mat-icon>widgets</mat-icon>
+    </ng-template>
+
+    <ng-template #descriptionTemplate>
+      <p>{{ item().desc || 'Aucune description' }}</p>
+    </ng-template>
+  </nz-ribbon>
+</div>

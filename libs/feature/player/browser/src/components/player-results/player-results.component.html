@@ -64,7 +64,9 @@
       </ng-container>
     </tbody>
   </table>
-  <a (click)="displayAll = !displayAll">@if (displayAll) { Cacher } @else { Afficher }les exercices non commencés </a>
+  @if (hasNonStartedExercises) {
+  <a (click)="displayAll = !displayAll"> @if (displayAll) { Cacher } @else { Afficher }les exercices non commencés </a>
+  }
 </ng-container>
 
 <ng-template #correcting>

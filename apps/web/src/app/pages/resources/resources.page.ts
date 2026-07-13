@@ -56,11 +56,12 @@ import {
   ResourceTypes,
 } from '@platon/feature/resource/common'
 
-import { ShepherdService } from '@platon/feature/tuto/browser'
 import { ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
+// Just metadata is already quite expensive to fetch, dones't need statistic
+const EXPANDS_VIEW: ResourceExpandableFields[] = ['metadata']
 
 interface QueryParams {
   q?: string
@@ -120,7 +121,6 @@ export default class ResourcesPage implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly resourceService = inject(ResourceService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
-  private readonly shepherdService = inject(ShepherdService)
   private readonly resourcesTutorialService = inject(ResourcesTutorialService)
 
   protected readonly searchbar: SearchBar<string> = {
@@ -209,7 +209,7 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     const [tree, circle, views, topics, levels, owners] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.resourceService.circle(this.user.username)),
-      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS })),
+      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS_VIEW })),
       firstValueFrom(this.tagService.listTopics()),
       firstValueFrom(this.tagService.listLevels()),
       firstValueFrom(this.resourceService.listOwners()),
@@ -383,17 +383,6 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     this.changeDetectorRef.markForCheck()
   }
 
-  private checkFirstVisit(): void {
-    if (this.user) {
-      setTimeout(() => {
-        this.startResourcesTutorial()
-      }, 100) // Délai de 100 ms pour permettre à la page de se charger
-    }
-  }
-
-  /**
-   * Démarre le tutoriel complet de l'espace de travail
-   */
   startResourcesTutorial(): void {
     if (!this.user) return
 

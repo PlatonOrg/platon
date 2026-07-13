@@ -9,10 +9,12 @@ import {
   ACTIVITY_TOTAL_ATTEMPTS,
   ACTIVITY_TOTAL_COMPLETIONS,
   ActivityCorrection,
+  ActivityCorrectionSummary,
   ActivityLeaderboardEntry,
   ActivityResults,
   AnswerStates,
   Correction,
+  CorrectionStatus,
   CourseLeaderboardEntry,
   CreateLabel,
   CreateSessionComment,
@@ -150,32 +152,16 @@ export class ResultService {
 
   //#region Correction
 
-  findCorrection(activityId: string): Observable<ActivityCorrection> {
-    return this.resultProvider.findCorrection(activityId)
+  findCorrection(activityId: string, viewerMode = false): Observable<ActivityCorrection> {
+    return this.resultProvider.findCorrection(activityId, viewerMode)
   }
 
-  listPendingCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.resultProvider.listCorrections().pipe(
-      map((response) => {
-        response.resources = response.resources.filter((correction) => {
-          return correction.exercises.some((exercise) => exercise.correctedAt == null)
-        })
-        response.total = response.resources.length
-        return response
-      })
-    )
+  listPendingCorrections(): Observable<ListResponse<ActivityCorrectionSummary>> {
+    return this.resultProvider.listCorrectionsSummary(CorrectionStatus.pending)
   }
 
-  listAvailableCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.resultProvider.listCorrections().pipe(
-      map((response) => {
-        response.resources = response.resources.filter((correction) => {
-          return correction.exercises.every((exercise) => exercise.correctedAt !== null)
-        })
-        response.total = response.resources.length
-        return response
-      })
-    )
+  listAvailableCorrections(): Observable<ListResponse<ActivityCorrectionSummary>> {
+    return this.resultProvider.listCorrectionsSummary(CorrectionStatus.available)
   }
 
   getLabels(navigationExerciseId: string): Observable<Label[]> {
@@ -228,6 +214,14 @@ export class ResultService {
 
   deleteComment(comment: SessionComment): Observable<void> {
     return this.commentProvider.delete(comment)
+  }
+
+  downloadAllSubmissions(
+    activityId: string,
+    exerciseId: string,
+    sessionId: string
+  ): Observable<{ blob: Blob; fileName: string }> {
+    return this.resultProvider.downloadAllSubmissions(activityId, exerciseId, sessionId)
   }
 
   //#endregion

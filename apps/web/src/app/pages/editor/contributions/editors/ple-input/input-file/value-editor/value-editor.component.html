@@ -1,10 +1,26 @@
-<div id="drop-zone" class="drop-zone" dnd (dropped)="onDrop($event)">
-  <span>
-    {{ (value | hideResourceId) || "Déposez un fichier ici depuis l'explorateur..." }}
-  </span>
+<div class="drop-wrapper">
+  <div
+    id="drop-zone"
+    class="drop-zone"
+    [class.drag-active]="isDragging"
+    nz-tooltip
+    style="text-align: center"
+    nzTooltipTitle="Cliquez ou déposez un fichier pour le remplacer"
+    dnd
+    (click)="fileInput.click()"
+    (dropped)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+  >
+    <span>
+      {{ (value | hideResourceId) || 'Déposez un fichier ici' }}
+    </span>
+  </div>
 </div>
+<input type="file" #fileInput (change)="onFileSelected($event)" hidden />
+
 <ng-container *ngIf="value">
-  <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="openFile()">
+  <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="eyeButton()">
     <span nz-icon nzType="eye" nzTheme="outline"></span>
   </button>
   <button *ngIf="isContent" nz-button nzType="text" nz-tooltip="Changer en url" (click)="switchToUrl()">
@@ -17,3 +33,33 @@
     <span nz-icon nzType="close" nzTheme="outline"></span>
   </button>
 </ng-container>
+@if (this.modeBuilder && watchContent) {
+<ui-modal-template
+  closable
+  height="70vh"
+  width="80vw"
+  (closed)="closePreview()"
+  [visible]="watchContent"
+  [footer]="modalFooter"
+>
+  <ng-template>
+    <ng-container *ngIf="watchContent">
+      <ui-file-preview #editorPreview [src]="getUrl()" (saveCmd)="saveChange(true)"></ui-file-preview>
+    </ng-container>
+    <div></div>
+  </ng-template>
+  <ng-template #modalFooter>
+    @if(editService.isEditing()) {
+    <a mat-button (click)="closelEdit()"> <mat-icon>close</mat-icon>Annuler</a>
+    <a mat-button (click)="saveChange(false)" style="margin-left: 10px"> <mat-icon>save</mat-icon>sauvegarder </a>
+    } @else { @if(editService.isEditable(this.url)) {
+    <a mat-button (mousedown)="changeMode()"><mat-icon>edit</mat-icon>Modifier le fichier</a>
+    }
+    <a mat-button [href]="getUrl()" target="_blank" style="margin-left: 10px">
+      <mat-icon>download</mat-icon>
+      Télécharger
+    </a>
+    }
+  </ng-template>
+</ui-modal-template>
+}

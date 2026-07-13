@@ -120,4 +120,8 @@ export const userDisplayName = (user: User): string => {
 
 export const isTeacherRole = (role: UserRoles) => [UserRoles.admin, UserRoles.teacher].includes(role)
 
+export const isUser = (u: User | UserGroup): u is User => 'username' in u
+
+export const isUserGroup = (u: User | UserGroup): u is UserGroup => 'users' in u
+
 export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000000'

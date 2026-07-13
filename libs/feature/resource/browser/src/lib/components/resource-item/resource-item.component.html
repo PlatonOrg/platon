@@ -6,10 +6,32 @@
     [articleIconTemplate]="imageTemplate"
     [articleDescription]="descriptionTemplate"
     (didClickTagItem)="handleTagClick($event)"
+    (didClick)="itemClicked.emit()"
+    (didClickTitle)="itemClicked.emit()"
   >
-    <ui-list-item-article-action *ngIf="editable" (click)="openTab(editorUrl)" class="action" actionTitle="Éditer">
-      <i nz-icon nzType="edit" nzTheme="outline"></i>
-    </ui-list-item-article-action>
+    @if(item.templateId) {
+    <a
+      *ngIf="editable"
+      [routerLink]="['/builder', item.id]"
+      [queryParams]="{ version: 'latest' }"
+      style="display: contents; color: inherit; text-decoration: none"
+    >
+      <ui-list-item-article-action class="action" actionTitle="Paramétrer">
+        <i nz-icon nzType="edit" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+    </a>
+    } @else {
+    <a
+      *ngIf="editable"
+      [routerLink]="['/editor', item.id]"
+      [queryParams]="{ version: 'latest' }"
+      style="display: contents; color: inherit; text-decoration: none"
+    >
+      <ui-list-item-article-action class="action" actionTitle="Éditer">
+        <i nz-icon nzType="edit" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+    </a>
+    }
 
     <ng-container *ngIf="item.type !== 'CIRCLE'">
       <ui-list-item-article-action
@@ -27,6 +49,14 @@
         actionTitle="Créer à partir"
       >
         <i nz-icon nzType="node-expand" nzTheme="outline"></i>
+      </ui-list-item-article-action>
+      <ui-list-item-article-action
+        *ngIf="!configurable && !shorten"
+        class="action"
+        (click)="duplicateResource()"
+        actionTitle="Dupliquer"
+      >
+        <i nz-icon nzType="copy" nzTheme="outline"></i>
       </ui-list-item-article-action>
     </ng-container>
     <div class="spacer"></div>
@@ -103,7 +133,7 @@
     [nzPopoverTrigger]="configurable ? 'hover' : null"
     (mouseenter)="configurable ? getReadmeContent() : null"
   >
-    @if( clickable) {
+    @if(clickable) {
     <a [routerLink]="detailsUrl" class="resource-item-title">{{ name }}</a>
     } @else {
     <span class="resource-item-title">{{ name }}</span>
@@ -144,9 +174,18 @@
         <ng-template ngPluralCase="=1">Variable à remplir</ng-template>
         <ng-template ngPluralCase="other">Variables à remplir :</ng-template>
       </ng-container>
-      <div *ngFor="let meta of (item.metadata! | exerciseResourceMeta)?.config?.inputs" style="margin-left: 1rem">
+      <div
+        *ngFor="let meta of (item.metadata! | exerciseResourceMeta)?.config?.inputs"
+        style="margin-left: 1rem; margin-bottom: 1em"
+      >
         <span
-          >• <span class="customise-font">{{ meta.name }}</span> - {{ meta.description }}
+          >• <span class="customise-font">{{ meta.name }} :</span>
+          @if (meta.description !== '') {
+          <nge-markdown [data]="meta.description" class="markdown-inline"></nge-markdown>
+          } @else {
+          <br />
+          <span class="markdown-inline missing-description">non renseigné</span>
+          }
         </span>
       </div>
     </div>

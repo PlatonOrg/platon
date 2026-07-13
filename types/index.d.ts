@@ -29,3 +29,5 @@ declare module 'ace-builds/src-noconflict/worker-html?url' {
 
 declare module 'pdfjs-dist/build/pdf.worker.entry'
 declare module 'pdfjs-dist/build/pdf'
+
+declare module 'crossword-layout-generator'

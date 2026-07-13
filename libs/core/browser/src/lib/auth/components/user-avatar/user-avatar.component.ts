@@ -1,13 +1,14 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input,
   Output,
   booleanAttribute,
+  computed,
+  effect,
   inject,
+  input,
+  signal,
 } from '@angular/core'
 
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -15,7 +16,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 
-import { User, UserGroup } from '@platon/core/common'
+import { User, UserGroup, UserRoles } from '@platon/core/common'
 import { firstValueFrom } from 'rxjs'
 import { UserService } from '../../api/user.service'
 import { UserGroupAvatarComponent } from '../user-group-avatar/user-group-avatar.component'
@@ -24,35 +25,48 @@ import { UserGroupAvatarComponent } from '../user-group-avatar/user-group-avatar
   standalone: true,
   selector: 'user-avatar',
   templateUrl: './user-avatar.component.html',
-  styleUrls: ['./user-avatar.component.scss'],
+  styleUrl: './user-avatar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzIconModule, NzBadgeModule, NzAvatarModule, NzToolTipModule, UserGroupAvatarComponent],
+  imports: [NzIconModule, NzBadgeModule, NzAvatarModule, NzToolTipModule, UserGroupAvatarComponent],
 })
 export class UserAvatarComponent {
   private readonly authUserService = inject(UserService)
-  private readonly changeDetectorRef = inject(ChangeDetectorRef)
 
-  @Input() size = 32
-  @Input() user?: User
-  @Input() group?: UserGroup
-  @Input({ transform: booleanAttribute }) noIcon = false
-  @Input() showUsername: 'stacked' | 'inline' | 'none' | 'no' = 'stacked'
+  readonly size = input<number>(32)
+  readonly noIcon = input(false, { transform: booleanAttribute })
+  readonly showUsername = input<'stacked' | 'inline' | 'none'>('stacked')
+  readonly lastNameFirst = input(false, { transform: booleanAttribute })
+  readonly userIdOrName = input<string>()
 
-  @Output() openGroupDetails = new EventEmitter<UserGroup>()
+  readonly userInput = input<User | undefined>(undefined, { alias: 'user' })
+  private readonly loadedUser = signal<User | undefined>(undefined)
+  protected readonly user = computed(() => this.userInput() ?? this.loadedUser())
+  readonly group = input<UserGroup | undefined>(undefined)
 
-  @Input()
-  set userIdOrName(value: string) {
-    if (value) {
-      firstValueFrom(this.authUserService.findByIdOrName(value))
-        .then((user) => {
-          this.user = user
-          this.changeDetectorRef.markForCheck()
-        })
-        .catch(console.error)
-    }
-  }
+  protected readonly isAdmin = computed(() => this.user()?.role === UserRoles.admin)
+  protected readonly avatarUrl = computed(() => {
+    const u = this.user()
+    return u ? `https://robohash.org/${u.username}.png` : undefined
+  })
+
+  @Output() readonly openGroupDetails = new EventEmitter<UserGroup>()
 
   get displayName(): string {
-    return this.group?.name || this.user?.username || ''
+    const u = this.user()
+    if (u?.firstName && u?.lastName) {
+      return this.lastNameFirst() ? `${u.lastName} ${u.firstName}` : `${u.firstName} ${u.lastName}`
+    }
+    return this.group()?.name || u?.username || ''
+  }
+
+  constructor() {
+    effect(() => {
+      const value = this.userIdOrName()
+      if (value) {
+        firstValueFrom(this.authUserService.findByIdOrName(value))
+          .then((user) => this.loadedUser.set(user))
+          .catch(console.error)
+      }
+    })
   }
 }

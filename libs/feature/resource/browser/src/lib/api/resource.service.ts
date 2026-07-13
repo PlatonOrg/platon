@@ -42,7 +42,10 @@ export class ResourceService {
       : user.role === UserRoles.admin || user.role === UserRoles.teacher
   }
 
-  editorUrl(resourceId: string, version?: string): string {
+  editorUrl(resourceId: string, version?: string, templateId?: string): string {
+    if (templateId) {
+      return `/builder/${resourceId}?version=${version || 'latest'}`
+    }
     return `/editor/${resourceId}?version=${version || 'latest'}`
   }
 
@@ -79,6 +82,10 @@ export class ResourceService {
 
   create(input: CreateResource): Observable<Resource> {
     return this.resourceProvider.create(input)
+  }
+
+  duplicate(resourceId: string): Observable<Resource> {
+    return this.resourceProvider.duplicate(resourceId)
   }
 
   createPreview(input: CreatePreviewResource): Observable<Resource> {
@@ -118,6 +125,10 @@ export class ResourceService {
 
   join(resource: Resource | string): Observable<ResourceMember> {
     return this.resourceMemberProvider.join(resource)
+  }
+
+  autoJoin(resource: Resource | string): Observable<ResourceMember> {
+    return this.resourceMemberProvider.autoJoin(resource)
   }
 
   acceptJoin(resource: Resource | string, userId: string): Observable<ResourceMember> {

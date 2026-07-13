@@ -16,6 +16,7 @@ import {
   ResourceFile,
 } from '@platon/feature/resource/common'
 import { ResourceFileProvider } from '../models/resource-file-provider'
+import { CreatedResponse } from '@platon/core/common'
 
 @Injectable({ providedIn: 'root' })
 export class ResourceFileService {
@@ -53,7 +54,8 @@ export class ResourceFileService {
     return this.provider.create(resource, input)
   }
 
-  upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<void> {
+  /** return the file name or '' if cannot parse the name */
+  upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<CreatedResponse<string>> {
     return this.provider.upload(file, data)
   }
 

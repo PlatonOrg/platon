@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { TestEntity } from './test.entity'
@@ -130,6 +130,9 @@ export class TestService {
   private async getVariables(courseId: string, user: UserEntity): Promise<Record<string, string>> {
     const course = (await this.courseService.findById(courseId)).get()
     const activity = (await this.activityService.search(courseId))[0][0]
+    if (!activity) {
+      throw new NotFoundException(`Une activité doit être définie pour envoyer le mail.`)
+    }
     const duration = activity.source.variables.settings?.duration
     return {
       testName: course.name || '',

@@ -1,5 +1,5 @@
 {
-  "name": "browser",
+  "name": "feature-announcement-browser",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/feature/announcement/browser/src",
   "prefix": "lib",

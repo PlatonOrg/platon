@@ -1,4 +1,4 @@
-import { AuthToken, ResetPasswordInput, User } from '@platon/core/common'
+import { AuthToken, CreatedResponse, ResetPasswordInput, SignUpInput, User } from '@platon/core/common'
 
 export abstract class AuthProvider {
   abstract token(): Promise<AuthToken | undefined>
@@ -20,6 +20,8 @@ export abstract class AuthProvider {
   abstract signInWithToken(token: AuthToken): Promise<User>
 
   abstract resetPassword(input: ResetPasswordInput): Promise<User>
+
+  abstract signUp(input: SignUpInput): Promise<CreatedResponse<AuthToken>>
 
   /**
    * Sign out the current user

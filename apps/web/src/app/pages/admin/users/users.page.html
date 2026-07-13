@@ -1,4 +1,51 @@
 <user-search-bar #searchbar [(ngModel)]="users" [autoSelect]="true" [filters]="filters" />
+<div class="form-container">
+  <button (click)="addUser()" nz-button nzType="primary" nzTheme="outline">
+    {{ showFields ? '- Annuler' : '+ Ajouter utilisateur' }}
+  </button>
+
+  <div *ngIf="showFields">
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <div class="Add-inline">
+        <input formControlName="firstname" placeholder="Prénom" nz-button nzType="primary" nzTheme="outline" />
+
+        <input formControlName="lastname" placeholder="Nom" nz-button nzType="primary" nzTheme="outline" />
+
+        <input
+          formControlName="username"
+          placeholder="Nom d'utilisateur"
+          nz-button
+          nzType="primary"
+          nzTheme="outline"
+        />
+
+        <input formControlName="email" type="email" placeholder="Email" nz-button nzType="primary" nzTheme="outline" />
+
+        <select formControlName="role">
+          <option value="" disabled>Choisir un rôle</option>
+          <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+        </select>
+      </div>
+      <div>
+        <label>Mot de passe : </label>
+        <input
+          formControlName="password"
+          value="password"
+          nz-button
+          nzType="primary"
+          nzTheme="outline"
+          class="Add-password"
+        />
+
+        <button type="button" (click)="generatePassword()" nz-button nzType="primary" nzTheme="outline">
+          Régénérer
+        </button>
+      </div>
+      <button type="submit" [disabled]="userForm.invalid" nz-button nzType="primary" nzTheme="outline">Ajouter</button>
+    </form>
+  </div>
+</div>
+
 <user-table
   [total]="searchbar.total"
   [loading]="searchbar.searching"

@@ -1,14 +1,13 @@
 import { Injectable, signal } from '@angular/core'
 import { Router } from '@angular/router'
 import { ShepherdService } from './shepherd/shepherd.service'
-import { ResourcesTutorialService } from './resources-tutorial.service'
-import { SidebarTutorialService } from './sidebar-tutorial.service'
 import { ToolbarTutorialService } from './toolbar-tutorial.service'
 import { IdeTutorialService } from './ide-tutorial.service'
 import { SharedResourceTutorialService } from './shared-resource-tutorial.service'
 import { ResourceCreationTutorialService } from './resource-creation-tutorial.service'
-import { TutorialSelectorModalComponent } from '../components/tutorial-selector-modal/tutorial-selector-modal.component'
-import { User } from '@platon/core/common'
+import { CircleSubscriptionTutorialService } from './circle-subscription-tutorial.service'
+import { BuilderTutorialService } from './builder-tutorial.service'
+import { User, UserRoles } from '@platon/core/common'
 import { AuthService } from '@platon/core/browser'
 
 export interface TutorialOption {
@@ -29,12 +28,15 @@ export class TutorialSelectorService {
     private readonly router: Router,
     private readonly shepherdService: ShepherdService,
     private readonly toolbarTutorialService: ToolbarTutorialService,
-    private readonly resourcesTutorialService: ResourcesTutorialService,
     private readonly resourceCreationTutorialService: ResourceCreationTutorialService,
     private readonly ideTutorialService: IdeTutorialService,
-    private readonly sharedResourceTutorailService: SharedResourceTutorialService
+    private readonly sharedResourceTutorialService: SharedResourceTutorialService,
+    private readonly circleSubscriptionTutorialService: CircleSubscriptionTutorialService,
+    private readonly builderTutorialService: BuilderTutorialService
   ) {
-    this.initUser()
+    this.initUser().catch(() => {
+      console.error("Erreur lors de l'initialisation de l'utilisateur dans le service de sélection de tutoriel.")
+    })
   }
 
   async initUser(): Promise<void> {
@@ -57,6 +59,13 @@ export class TutorialSelectorService {
       icon: 'folder',
     },
     {
+      id: 'builder',
+      title: 'Créer un exercice interactif',
+      description:
+        "Découvrir l'interface de création d'exercice : choisir un modèle, configurer le contenu et prévisualiser",
+      icon: 'edit_note',
+    },
+    {
       id: 'course-management',
       title: 'Gestion de cours',
       description: 'Créer et organiser un cours : sections, activités et contenu pédagogique',
@@ -68,12 +77,12 @@ export class TutorialSelectorService {
       description: "Tutoriel pour apprendre à créer une ressource dans l'espace de travail",
       icon: 'add_circle_outline',
     },
-    {
-      id: 'ide-basics',
-      title: "Découverte de l'IDE",
-      description: "Maîtriser l'environnement de développement",
-      icon: 'code',
-    },
+    // {
+    //   id: 'ide-basics',
+    //   title: "Découverte de l'IDE",
+    //   description: "Maîtriser l'environnement de développement",
+    //   icon: 'code',
+    // },
     {
       id: 'shared-resources',
       title: "Partage d'une ressource aux non utilisateurs de la plateforme",
@@ -93,6 +102,7 @@ export class TutorialSelectorService {
   async startTutorial(tutorialId: string): Promise<void> {
     this.shepherdService.complete()
     this.closeTutorialSelector()
+    if (!this.user || (this.user.role !== UserRoles.teacher && this.user.role !== UserRoles.admin)) return
 
     switch (tutorialId) {
       case 'platform':
@@ -117,7 +127,12 @@ export class TutorialSelectorService {
         this.ideTutorial()
         break
       case 'shared-resources':
-        this.sharedResourceTutorial()
+        await this.router.navigate(['/resources'])
+        setTimeout(() => this.sharedResourceTutorial(), 500)
+        break
+      case 'builder':
+        await this.router.navigate(['/dashboard'])
+        this.builderTutorial()
         break
       default:
         break
@@ -125,18 +140,20 @@ export class TutorialSelectorService {
   }
 
   private createResourceTutorial(): void {
-    if (!this.user) return
+    if (!this.user || (this.user.role !== UserRoles.teacher && this.user.role !== UserRoles.admin)) return
     this.resourceCreationTutorialService.startResourceCreationTutorial(this.user)
   }
 
   private ideTutorial() {
-    if (!this.user) return
     this.ideTutorialService.startIdeTutorial()
   }
 
   private sharedResourceTutorial() {
-    if (!this.user) return
-    this.sharedResourceTutorailService.startIdeTutorial()
+    this.sharedResourceTutorialService.startSharedResourceTutorial()
+  }
+
+  private builderTutorial() {
+    this.builderTutorialService.startFullBuilderTutorial()
   }
 
   /**
@@ -145,7 +162,14 @@ export class TutorialSelectorService {
    * de la barre latérale une fois le premier terminé
    */
   startPlatformTutorial(): void {
-    if (!this.user) return
+    if (!this.user || (this.user.role !== UserRoles.teacher && this.user.role !== UserRoles.admin)) return
     this.toolbarTutorialService.startToolbarTutorial(this.user as User)
+  }
+
+  startCircleSubscriptionTutorial(): void {
+    if (!this.user || (this.user.role !== UserRoles.teacher && this.user.role !== UserRoles.admin)) return
+    this.circleSubscriptionTutorialService.startCircleSubscriptionTutorial(this.user).catch(() => {
+      console.error("Erreur lors du démarrage du tutoriel d'inscription aux cercles.")
+    })
   }
 }

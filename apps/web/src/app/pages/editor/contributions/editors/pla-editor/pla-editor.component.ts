@@ -113,7 +113,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       duration: 0,
       navigation: { mode: 'manual' },
       actions: {
-        retry: 1,
+        retry: 0,
         hints: true,
         reroll: true,
         theories: true,
@@ -418,6 +418,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         queryParams,
         relativeTo: this.activatedRoute,
         queryParamsHandling: 'merge',
+        replaceUrl: true,
       })
       .catch(console.error)
   }

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { RouterModule } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { Subscription } from 'rxjs'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -19,6 +19,7 @@ import { CourseSharingComponent } from '@platon/feature/course/browser'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { CoursePresenter } from './course.presenter'
+import { Title } from '@angular/platform-browser'
 
 @Component({
   standalone: true,
@@ -30,7 +31,6 @@ import { CoursePresenter } from './course.presenter'
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule,
 
     MatIconModule,
 
@@ -53,17 +53,30 @@ import { CoursePresenter } from './course.presenter'
 export class CoursePage implements OnInit, OnDestroy {
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly router = inject(Router)
+  private readonly activatedRoute = inject(ActivatedRoute)
   private readonly subscriptions: Subscription[] = []
 
   protected context = this.presenter.defaultContext()
+
+  // for the tab name
+  constructor(private titleService: Title) {}
 
   ngOnInit(): void {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
         this.changeDetectorRef.markForCheck()
+
+        if (this.context.course?.name) {
+          this.titleService.setTitle('Cours - ' + this.context.course?.name)
+        }
       })
     )
+  }
+
+  protected async onBack(): Promise<void> {
+    await this.router.navigate(['../'], { relativeTo: this.activatedRoute })
   }
 
   ngOnDestroy(): void {

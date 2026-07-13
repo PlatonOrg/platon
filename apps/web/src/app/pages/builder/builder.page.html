@@ -1,0 +1,209 @@
+<div class="builder-page">
+  @if (loading()) {
+  <div class="loading-container">
+    <nz-spin nzSimple [nzSize]="'large'" nzTip="Chargement de la configuration..."></nz-spin>
+  </div>
+  } @if (error()) {
+  <div class="error-container">
+    <ui-error [error]="error()" [showMessage]="true" [showButtons]="true" />
+  </div>
+  } @if (!loading() && !error() && resource()) {
+  <div class="builder-header">
+    <button
+      id="tuto-builder-back-btn"
+      mat-icon-button
+      (click)="goBack()"
+      class="back-btn"
+      title="Retour au tableau de bord"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 id="tuto-builder-title" class="builder-title">
+      @if (!isEditingTitle()) {
+      <span class="title-text" (click)="startEditingTitle()">{{ resource()!.name }}</span>
+      <button (click)="startEditingTitle()" class="edit-title-btn">
+        <mat-icon>edit</mat-icon>
+      </button>
+      } @else {
+      <input
+        #titleInput
+        class="title-input"
+        [value]="resource()!.name"
+        (blur)="saveTitle($event)"
+        (keydown.enter)="saveTitle($event)"
+        (keydown.escape)="cancelEditingTitle()"
+      />
+      } @if (hasUnsavedChanges()) {
+      <span class="unsaved-indicator" title="Modifications non sauvegardées">
+        <span>Non sauvegardé</span>
+      </span>
+      }
+    </h1>
+    <div class="header-actions">
+      <div class="preview-toolbar">
+        <!-- <button
+          mat-stroked-button
+          class="label"
+          (click)="openAITransform()"
+          [disabled]="loading() || saving() || aiTransforming()"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+          <span>Transformer avec l'IA</span>
+        </button> -->
+        <button
+          id="tuto-builder-editor-btn"
+          mat-stroked-button
+          class="label"
+          (click)="openInEditor()"
+          title="Mode développeur"
+        >
+          <mat-icon>code</mat-icon>
+          <span>Ouvrir dans l'éditeur</span>
+        </button>
+        <button
+          id="tuto-builder-preview-btn"
+          class="label"
+          mat-stroked-button
+          (click)="iframe.open(previewUrlFrame)"
+          title="Prévisualiser grand écran"
+        >
+          <mat-icon>play_circle</mat-icon>
+          <span>Prévisualiser</span>
+        </button>
+        <button id="tuto-builder-save-btn" class="label" mat-stroked-button (click)="save()" [disabled]="saving()">
+          <mat-icon>save</mat-icon>
+          <span>Sauvegarder</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout principal: 3 colonnes -->
+  <div class="builder-layout">
+    <!-- Colonne gauche: Sidebar avec sections -->
+    <div
+      id="tuto-builder-sidebar"
+      class="builder-sidebar"
+      [class.collapsed]="!sidebarOpen()"
+      [style.width.px]="sidebarWidth()"
+    >
+      <div class="sidebar-sections">
+        @for (section of sidebarSections(); track section.id) {
+        <div
+          class="sidebar-section"
+          [class.active]="!section.collapsed"
+          [id]="
+            section.id === 'content'
+              ? 'tuto-builder-content-section'
+              : section.id === 'settings'
+              ? 'tuto-builder-settings-section'
+              : null
+          "
+        >
+          <div class="section-header" (click)="toggleSection(section.id)" [title]="section.label">
+            <mat-icon class="section-icon">{{ section.icon }}</mat-icon>
+            @if (sidebarOpen()) {
+            <span class="section-label">{{ section.label }}</span>
+            <mat-icon class="collapse-icon">{{
+              section.collapsed ? 'keyboard_arrow_down' : 'keyboard_arrow_up'
+            }}</mat-icon>
+            }
+          </div>
+
+          <!-- Contenu de section (seulement si non collapsed ET sidebar ouverte) -->
+          @if (!section.collapsed && sidebarOpen()) {
+          <div class="section-content">
+            <!-- Section Contenu -->
+            @if (section.id === 'content') {
+            <div class="sidebar-list">
+              @for (input of inputs(); track $index) {
+              <div class="content-item" [class.selected]="selectionIndex() === $index" (click)="selectInput($index)">
+                <mat-icon>description</mat-icon>
+                <span class="item-label">{{ input.name }}</span>
+              </div>
+              } @if (isTemplateCreator()) {
+              <!-- Je rajouterai cette fonctionnalité plus tard ou jamais -->
+              <button mat-stroked-button class="add-content-btn">
+                <mat-icon>add</mat-icon>
+                AJOUTER DU CONTENU
+              </button>
+              }
+            </div>
+            }
+
+            <!-- Section Paramètres -->
+            @if (section.id === 'settings') {
+            <div class="sidebar-list">
+              @for (setting of settingItems; track setting.id) {
+              <div
+                class="setting-item"
+                [class.selected]="selectedSetting()?.id === setting.id"
+                [title]="setting.label"
+                (click)="selectSetting(setting)"
+              >
+                <mat-icon>{{ setting.icon }}</mat-icon>
+                <span class="item-label">{{ setting.label }}</span>
+              </div>
+              }
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="sidebar-footer">
+        <button
+          id="tuto-builder-sidebar-toggle"
+          mat-icon-button
+          (click)="toggleSidebar()"
+          [title]="sidebarOpen() ? 'Réduire la barre latérale' : 'Étendre la barre latérale'"
+          class="toggle-btn"
+        >
+          <mat-icon>{{ sidebarOpen() ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Séparateur redimensionnable pour la sidebar -->
+    <div class="resizer resizer-sidebar" (mousedown)="onResizerMouseDown($event, 'sidebar')"></div>
+
+    <!-- Colonne centrale: Configuration du contenu sélectionné -->
+    <div id="tuto-builder-main" class="builder-main">
+      @if (mainViewMode() === 'input' && selection() !== undefined) {
+      <div class="config-panel">
+        <app-ple-input mode="plo" [disabled]="saving()" [input]="selection()!!" (inputChange)="onInputChange($event)" />
+      </div>
+      } @else if (mainViewMode() === 'setting' && selectedSetting() && resource() !== undefined) {
+      <app-builder-settings
+        [selectedSetting]="selectedSetting()"
+        [resource]="resource()!!"
+        (resourceUpdated)="onResourceUpdated($event)"
+      />
+      } @else if (mainViewMode() === 'history') {
+      <div class="history-panel">
+        <app-version-history [resource]="resource()!!" (versionChanged)="onVersionChanged($event)" />
+      </div>
+      } @else {
+      <div class="empty-state">
+        <mat-icon>touch_app</mat-icon>
+        <p>Sélectionnez un élément dans la liste pour le configurer</p>
+      </div>
+      }
+    </div>
+
+    <!-- Séparateur redimensionnable pour la preview -->
+    <div class="resizer resizer-preview" (mousedown)="onResizerMouseDown($event, 'preview')"></div>
+
+    <!-- Colonne droite: Prévisualisation -->
+    <div id="tuto-builder-preview" class="builder-preview" [style.width.px]="previewWidth()">
+      <div class="preview-content">
+        <lib-builder-iframe [src]="previewUrl()" />
+      </div>
+    </div>
+  </div>
+  }
+</div>
+
+<ui-modal-iframe width="100vw" height="100vh" [closable]="true" #iframe />

@@ -1,7 +1,7 @@
 <ui-layout-tabs [state]="context.state">
   <ng-container *ngIf="context.course as course">
     <header id="tuto-course-header">
-      <nz-page-header [nzSubtitle]="header" nzBackIcon>
+      <nz-page-header [nzSubtitle]="header" (nzBack)="onBack()" nzBackIcon>
         <ng-template #header>
           <nz-breadcrumb nzSeparator="">
             <nz-breadcrumb-item>

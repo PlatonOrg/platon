@@ -9,6 +9,7 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { RouterModule } from '@angular/router'
@@ -20,11 +21,11 @@ import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 
 import { Activity, CourseSection } from '@platon/feature/course/common'
-import { antTagColorFromPercentage, UiModalDrawerComponent } from '@platon/shared/ui'
+import { antTagColorFromPercentage } from '@platon/shared/ui'
 
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { CoursePipesModule } from '../../pipes'
-import { CourseActivitySettingsComponent } from '../activity-settings/activity-settings.component'
+import { CourseActivitySettingsDrawerComponent } from '../activity-settings-drawer/activity-settings-drawer.component'
 
 type Value = string[] | undefined
 type Model = {
@@ -59,8 +60,7 @@ type Model = {
 
     CoursePipesModule,
 
-    UiModalDrawerComponent,
-    CourseActivitySettingsComponent,
+    CourseActivitySettingsDrawerComponent,
   ],
 })
 export class CourseActivityTableComponent implements OnChanges, ControlValueAccessor {
@@ -73,6 +73,8 @@ export class CourseActivityTableComponent implements OnChanges, ControlValueAcce
   protected selection = new Set<string>()
   protected dataSource: Model[] = []
   protected settingsSelectedActivity?: Activity
+
+  @ViewChild('settingsDrawer') settingsDrawer?: CourseActivitySettingsDrawerComponent
 
   @Input() sections: CourseSection[] = []
   @Input() activities: Activity[] = []
@@ -105,6 +107,10 @@ export class CourseActivityTableComponent implements OnChanges, ControlValueAcce
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled
+  }
+
+  trackByFn(_: number, item: Model): string {
+    return item.activity.id
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -145,5 +151,23 @@ export class CourseActivityTableComponent implements OnChanges, ControlValueAcce
   protected onAllChecked(checked: boolean): void {
     this.activities.forEach(({ id }) => this.updateSelection(id, checked))
     this.refreshSelection()
+  }
+
+  protected openSettings(activity: Activity): void {
+    this.settingsSelectedActivity = activity
+    this.settingsDrawer?.open()
+  }
+
+  protected onActivityChange(activity: Activity): void {
+    this.settingsSelectedActivity = activity
+    const index = this.dataSource.findIndex((m) => m.activity.id === activity.id)
+    if (index !== -1) {
+      this.dataSource[index] = {
+        ...this.dataSource[index],
+        activity,
+        progressionColor: antTagColorFromPercentage(activity.progression),
+      }
+    }
+    this.changeDetectorRef.markForCheck()
   }
 }

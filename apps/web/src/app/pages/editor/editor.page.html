@@ -1,4 +1,10 @@
-<div *ngIf="loading" [@fadeOutDownOnLeave] class="loading-container">
+<ng-container *ngIf="httpError">
+  <div class="error-container">
+    <ui-error [error]="httpError" [showMessage]="true" [showButtons]="true" />
+  </div>
+</ng-container>
+
+<div *ngIf="loading && !httpError" [@fadeOutDownOnLeave] class="loading-container">
   <header>
     <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 1 }" />
   </header>
@@ -10,7 +16,7 @@
     <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 1 }" />
   </footer>
 </div>
-<nz-spin *ngIf="loading" [@fadeInOnEnter] nzTip="Préparation de l'éditeur..." nzSize="large" nzSpinning />
+<nz-spin *ngIf="loading && !httpError" [@fadeInOnEnter] nzTip="Préparation de l'éditeur..." nzSize="large" nzSpinning />
 <ide-root *ngIf="isReady" [class.loading]="loading">
   <h2>Bienvenue dans l'environnement de développement</h2>
   <p>

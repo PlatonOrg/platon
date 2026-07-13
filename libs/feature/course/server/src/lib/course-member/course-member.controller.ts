@@ -1,8 +1,16 @@
 import { Body, Controller, Delete, Get, Patch, Post, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ForbiddenResponse, ItemResponse, ListResponse, NoContentResponse, UserRoles } from '@platon/core/common'
+import {
+  ForbiddenResponse,
+  ItemResponse,
+  ListResponse,
+  NoContentResponse,
+  NotFoundResponse,
+  UserRoles,
+} from '@platon/core/common'
 import { AuthService, IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import {
+  ArchiveCourseMemberDTO,
   CourseMemberDTO,
   CourseMemberFiltersDTO,
   CreateCourseMemberDTO,
@@ -41,7 +49,7 @@ export class CourseMemberController {
     }
 
     const member = input.isGroup
-      ? await this.courseMemberService.addGroup(courseId, input.id)
+      ? await this.courseMemberService.addGroup(courseId, input.id, { notify: true, role: input.role })
       : await this.courseMemberService.addUser(courseId, input.id, input.role)
 
     return new ItemResponse({
@@ -73,7 +81,7 @@ export class CourseMemberController {
       )
     )
 
-    const AddedMembers: CourseMemberDTO[] = []
+    const addedMemberIds: string[] = []
 
     for (const member of input) {
       const key = `${member.firstName?.toLowerCase() ?? ''}|${member.lastName?.toLowerCase() ?? ''}|${
@@ -84,14 +92,17 @@ export class CourseMemberController {
       } else {
         const id = await this.authService.createCandidateAccount(member)
         const newMember = await this.courseMemberService.addUser(courseId, id, CourseMemberRoles.student, false)
-        AddedMembers.push(Mapper.map(newMember, CourseMemberDTO))
+        addedMemberIds.push(newMember.id)
         existingMembersSet.add(key)
       }
     }
 
+    const addedMembers =
+      addedMemberIds.length > 0 ? await this.courseMemberService.findByIds(courseId, addedMemberIds) : []
+
     return new ListResponse({
-      total: AddedMembers.length,
-      resources: Mapper.mapAll(AddedMembers, CourseMemberDTO),
+      total: addedMembers.length,
+      resources: Mapper.mapAll(addedMembers, CourseMemberDTO),
     })
   }
 
@@ -108,6 +119,21 @@ export class CourseMemberController {
 
     await this.courseMemberService.delete(courseId, memberId)
     return new NoContentResponse()
+  }
+
+  @Patch('/me')
+  async archiveMyMembership(
+    @Req() req: IRequest,
+    @UUIDParam('courseId') courseId: string,
+    @Body() input: ArchiveCourseMemberDTO
+  ): Promise<ItemResponse<CourseMemberDTO>> {
+    await this.courseMemberService.setArchivedByUser(courseId, req.user.id, input.archived)
+    const member = (await this.courseMemberService.getByUserIdAndCourseId(req.user.id, courseId)).orElseThrow(
+      () => new NotFoundResponse('Member not found')
+    )
+    return new ItemResponse({
+      resource: Mapper.map(member, CourseMemberDTO),
+    })
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)

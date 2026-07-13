@@ -1,0 +1,67 @@
+<div class="version-history">
+  @if (loading) {
+  <div class="loading-container">
+    <nz-spin nzSimple></nz-spin>
+  </div>
+  } @else {
+  <div class="version-header">
+    <h3>Historique des versions</h3>
+    <resource-versioning #versioning [resource]="resource()" (versionCreated)="onVersionCreated($event)" />
+    <button nz-button nzType="primary" nzSize="small" (click)="versioning.open()" title="Créer une nouvelle version">
+      <mat-icon>add</mat-icon>
+      Nouvelle version
+    </button>
+  </div>
+
+  @if (hasVersions) {
+  <div class="version-list">
+    @for (version of versions; track version.tag) {
+    <div class="version-item" [class.current]="version.tag === currentVersion">
+      <div class="version-info">
+        <div class="version-header-item">
+          <mat-icon class="version-icon">{{ version.tag === currentVersion ? 'check_circle' : 'history' }}</mat-icon>
+          <span class="version-tag">{{ version.tag }}</span>
+          @if (version.tag === currentVersion) {
+          <span class="current-badge">Actuelle</span>
+          } @if (version.tag === 'latest') {
+          <span class="current-badge">latest</span>
+          }
+        </div>
+        <p class="version-message">{{ version.message }}</p>
+        <div class="version-meta">
+          <span class="version-author">
+            <mat-icon>person</mat-icon>
+            {{ version.tagger.name }}
+          </span>
+          <span class="version-date">
+            <mat-icon>schedule</mat-icon>
+            {{ formatDate(version.createdAt) }}
+          </span>
+        </div>
+      </div>
+
+      @if (version.tag !== currentVersion && version.tag !== 'latest') {
+      <div class="version-actions">
+        <button
+          nz-button
+          nzType="default"
+          nzSize="small"
+          (click)="confirmRestoreVersion(version)"
+          title="Restaurer cette version"
+        >
+          <mat-icon>restore</mat-icon>
+          Restaurer
+        </button>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  } @else {
+  <nz-empty nzNotFoundContent="Aucune version disponible" [nzNotFoundFooter]="emptyFooter">
+    <ng-template #emptyFooter>
+      <button nz-button nzType="primary" (click)="versioning.open()">Créer la première version</button>
+    </ng-template>
+  </nz-empty>
+  } }
+</div>

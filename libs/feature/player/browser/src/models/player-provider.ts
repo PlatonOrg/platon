@@ -1,6 +1,7 @@
 import {
   EvalExerciseInput,
   EvalExerciseOutput,
+  Feedback,
   NextOutput,
   PlayActivityInput,
   PlayActivityOuput,
@@ -25,4 +26,5 @@ export abstract class PlayerProvider {
   abstract saveTemporaryAnswer(input: EvalExerciseInput): Observable<void>
   abstract openSession(sessionId: string): Observable<PlayActivityOuput>
   abstract openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput>
+  abstract submitFeedback(feedback: Feedback): Observable<void>
 }

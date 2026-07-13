@@ -13,7 +13,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core'
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 
 import differenceInCalendarDays from 'date-fns/differenceInCalendarDays'
@@ -28,10 +28,21 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
+import { NzTabsModule } from 'ng-zorro-antd/tabs'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
+import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
 
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import {
   Activity,
+  calculateActivityOpenState,
   CourseGroup,
   CourseMember,
   Restriction,
@@ -43,7 +54,9 @@ import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
 import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
 import { CourseColorPickerComponent } from '../color-picker/color-picker.component'
-import { User, userDisplayName } from '@platon/core/common'
+import { User } from '@platon/core/common'
+import { ActivityRestrictionsValidatorService } from '../../services/activity-restrictions-validator.service'
+import { ActivitySettings } from '@platon/feature/compiler'
 
 @Component({
   standalone: true,
@@ -66,9 +79,19 @@ import { User, userDisplayName } from '@platon/core/common'
     NzPopconfirmModule,
     NzCardModule,
     NzDividerModule,
+    NzTabsModule,
+    NzIconModule,
+    NzCollapseModule,
+    NzFormModule,
+    NzInputModule,
+    NzInputNumberModule,
+    NzSelectModule,
+    NzCheckboxModule,
+    NzAlertModule,
     DialogModule,
     RestrictionManagerComponent,
     CourseColorPickerComponent,
+    NzTimePickerModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -76,25 +99,83 @@ export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
   @Output() activityChange = new EventEmitter<Activity>()
   @Output() saveRequested = new EventEmitter<void>()
-  protected accessPeriods: RestrictionList[] = [] as RestrictionList[]
+  protected accessPeriods = signal<RestrictionList[]>([])
+
+  protected activitySettings: ActivitySettings = {
+    duration: 0,
+    seedPerExercise: false,
+    navigation: {
+      mode: 'manual',
+    },
+    actions: {
+      retry: 0,
+      hints: true,
+      reroll: true,
+      theories: true,
+      solution: true,
+    },
+    feedback: {
+      validation: true,
+      review: true,
+    },
+    security: {
+      noCopyPaste: false,
+      terminateOnLeavePage: false,
+      terminateOnLoseFocus: false,
+    },
+  }
+
+  // Getters pour garantir que les objets ne sont jamais undefined
+  get navigation() {
+    if (!this.activitySettings.navigation) {
+      this.activitySettings.navigation = { mode: 'manual' }
+    }
+    return this.activitySettings.navigation
+  }
+
+  get actions() {
+    if (!this.activitySettings.actions) {
+      this.activitySettings.actions = {
+        retry: 0,
+        hints: true,
+        reroll: true,
+        theories: true,
+        solution: true,
+      }
+    }
+    return this.activitySettings.actions
+  }
+
+  get feedback() {
+    if (!this.activitySettings.feedback) {
+      this.activitySettings.feedback = {
+        validation: true,
+        review: true,
+      }
+    }
+    return this.activitySettings.feedback
+  }
+
+  get security() {
+    if (!this.activitySettings.security) {
+      this.activitySettings.security = {
+        noCopyPaste: false,
+        terminateOnLeavePage: false,
+        terminateOnLoseFocus: false,
+      }
+    }
+    return this.activitySettings.security
+  }
 
   currentHue = 210
-
-  protected form = new FormGroup({
-    openAt: new FormControl<Date | undefined>(undefined),
-    closeAt: new FormControl<Date | undefined>(undefined),
-    members: new FormControl<string[] | undefined>(undefined),
-    correctors: new FormControl<string[] | undefined>(undefined),
-    groups: new FormControl<string[] | undefined>(undefined),
-  })
 
   protected editOpenDate = false
   protected editCloseDate = false
   protected tempOpenDate?: Date
   protected tempCloseDate?: Date
 
-  @ViewChild('openDatePicker') openDatePicker?: any
-  @ViewChild('closeDatePicker') closeDatePicker?: any
+  @ViewChild('openDatePicker') openDatePicker?: unknown
+  @ViewChild('closeDatePicker') closeDatePicker?: unknown
 
   private readonly loadingSignal = signal(false)
   private readonly updatingSignal = signal(false)
@@ -113,7 +194,8 @@ export class CourseActivitySettingsComponent implements OnInit {
     private readonly courseService: CourseService,
     private readonly dialogService: DialogService,
     private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly validatorService: ActivityRestrictionsValidatorService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -130,7 +212,7 @@ export class CourseActivitySettingsComponent implements OnInit {
       })
     )
 
-    const [courseMembers, activityMembers, activityCorrectors, courseGroups, activityGroups] = await Promise.all([
+    const [courseMembers, _activityMembers, _activityCorrectors, courseGroups, _activityGroups] = await Promise.all([
       firstValueFrom(this.courseService.searchMembers(course)),
       firstValueFrom(this.courseService.searchActivityMembers(this.activity)),
       firstValueFrom(this.courseService.searchActivityCorrector(this.activity)),
@@ -141,20 +223,16 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.courseMembers = courseMembers.resources
     this.courseGroups = courseGroups.resources
 
-    this.form.patchValue({
-      openAt: this.activity.openAt,
-      closeAt: this.activity.closeAt,
-      members: activityMembers.resources.map((m) => `${m.member.id}${m.user ? ':' + m.user.id : ''}`),
-      correctors: activityCorrectors.resources.map((c) => `${c.member.id}${c.user ? ':' + c.user.id : ''}`),
-      groups: activityGroups.resources.map((g) => g.groupId),
-    })
-
     if (this.activity.restrictions && this.activity?.restrictions.length > 0) {
-      this.accessPeriods = [...this.activity.restrictions]
+      this.accessPeriods.set([...this.activity.restrictions])
     }
 
     this.tempOpenDate = this.activity.openAt ? new Date(this.activity.openAt) : undefined
     this.tempCloseDate = this.activity.closeAt ? new Date(this.activity.closeAt) : undefined
+
+    if (this.activity.activitySettings) {
+      this.activitySettings = { ...this.activitySettings, ...this.activity.activitySettings }
+    }
 
     this.loadingSignal.set(false)
     this.changeDetectorRef.markForCheck()
@@ -166,232 +244,70 @@ export class CourseActivitySettingsComponent implements OnInit {
   }
 
   protected updateRestriction(index: number, updatedRestrictions: Restriction[]) {
-    if (updatedRestrictions.length === 0) {
-      this.accessPeriods.splice(index, 1)
-    } else {
-      this.accessPeriods[index] = { restriction: updatedRestrictions }
-    }
-    this.changeDetectorRef.markForCheck()
+    this.accessPeriods.update((periods) => {
+      if (updatedRestrictions.length === 0) {
+        return periods.filter((_, i) => i !== index)
+      } else {
+        const updated = [...periods]
+        updated[index] = { restriction: updatedRestrictions }
+        return updated
+      }
+    })
   }
 
   protected newAccessPeriod() {
-    this.accessPeriods.push({
-      restriction: [
-        {
-          type: 'DateRange',
-          config: {
-            start: undefined,
-            end: undefined,
+    this.accessPeriods.update((periods) => [
+      ...periods,
+      {
+        restriction: [
+          {
+            type: 'DateRange',
+            config: {
+              start: undefined,
+              end: undefined,
+            },
           },
-        },
-      ],
-    })
-    this.changeDetectorRef.markForCheck()
+        ],
+      },
+    ])
   }
 
   get accessPeriodsLength(): number {
-    return this.accessPeriods.length
+    return this.accessPeriods().length
   }
 
   protected onDropAccessPeriod(event: CdkDragDrop<RestrictionList[]>) {
     if (event.previousIndex !== event.currentIndex) {
-      moveItemInArray(this.accessPeriods, event.previousIndex, event.currentIndex)
-      this.changeDetectorRef.markForCheck()
-    }
-  }
-
-  private checkSameOthers(): boolean {
-    const periodsWithOthers = this.accessPeriods.filter((period) => period.restriction.some((r) => r.type === 'Others'))
-    return periodsWithOthers.length > 1
-  }
-
-  private checkDateOnlyPeriods(): { indices: number[]; details: string[] } {
-    const result = { indices: [] as number[], details: [] as string[] }
-
-    this.accessPeriods.forEach((period, index) => {
-      if (period.restriction.length === 1 && period.restriction[0].type === 'DateRange') {
-        result.indices.push(index + 1)
-        result.details.push(`Période n°${index + 1} : seulement une date définie`)
-      }
-    })
-
-    return result
-  }
-
-  /**
-   * Vérifie les conflits de groupes entre les périodes d'accès
-   */
-  private checkGroupConflicts(): { hasConflicts: boolean; conflicts: Array<{ groupId: string; periods: number[] }> } {
-    const result = { hasConflicts: false, conflicts: [] as Array<{ groupId: string; periods: number[] }> }
-    const groupToPeriods = new Map<string, number[]>()
-
-    this.accessPeriods.forEach((period, periodIndex) => {
-      period.restriction.forEach((restriction) => {
-        if (restriction.type === 'Groups') {
-          const config = restriction.config as RestrictionConfig['Groups']
-          config.groups?.forEach((groupId) => {
-            if (!groupToPeriods.has(groupId)) {
-              groupToPeriods.set(groupId, [])
-            }
-            groupToPeriods.get(groupId)!.push(periodIndex + 1)
-          })
-        }
+      this.accessPeriods.update((periods) => {
+        const updated = [...periods]
+        moveItemInArray(updated, event.previousIndex, event.currentIndex)
+        return updated
       })
-    })
-
-    groupToPeriods.forEach((periods, groupId) => {
-      if (periods.length > 1) {
-        result.hasConflicts = true
-        result.conflicts.push({ groupId, periods })
-      }
-    })
-
-    return result
-  }
-
-  /**
-   * Vérifie les conflits de membres entre les périodes d'accès
-   */
-  private checkMemberConflicts(): { hasConflicts: boolean; conflicts: Array<{ memberId: string; periods: number[] }> } {
-    const result = { hasConflicts: false, conflicts: [] as Array<{ memberId: string; periods: number[] }> }
-    const memberToPeriods = new Map<string, number[]>()
-
-    this.accessPeriods.forEach((period, periodIndex) => {
-      period.restriction.forEach((restriction) => {
-        if (restriction.type === 'Members') {
-          const config = restriction.config as RestrictionConfig['Members']
-          config.members?.forEach((memberId) => {
-            if (!memberToPeriods.has(memberId)) {
-              memberToPeriods.set(memberId, [])
-            }
-            memberToPeriods.get(memberId)!.push(periodIndex + 1)
-          })
-        }
-      })
-    })
-
-    memberToPeriods.forEach((periods, memberId) => {
-      if (periods.length > 1) {
-        result.hasConflicts = true
-        result.conflicts.push({ memberId, periods })
-      }
-    })
-
-    return result
-  }
-
-  /**
-   * Trouve le nom d'un groupe par son ID
-   */
-  private getGroupName(groupId: string): string {
-    const group = this.courseGroups.find((g) => g.id === groupId)
-    return group?.name || `Groupe ${groupId}`
-  }
-
-  /**
-   * Trouve le nom d'un membre par son ID
-   */
-  private getMemberName(memberId: string): string {
-    const [memberIdPart] = memberId.split(':')
-    const member = this.courseMembers.find((m) => m.id === memberIdPart)
-
-    if (!member) {
-      return `Membre ${memberId}`
     }
-
-    // Si c'est un membre avec userId spécifique
-    if (memberId.includes(':')) {
-      const [, userId] = memberId.split(':')
-      if (member.group) {
-        const user = member.group.users.find((u) => u.id === userId)
-        return user ? userDisplayName(user) : `Utilisateur ${userId}`
-      }
-    }
-
-    return member.user ? userDisplayName(member.user) : member.group?.name || `Membre ${memberId}`
   }
 
   hasOthersRule(): boolean {
-    return this.accessPeriods.some((period) => period.restriction.some((r) => r.type === 'Others'))
+    return this.validatorService.hasOthersRule(this.accessPeriods())
   }
 
-  /**
-   * Méthode mise à jour pour vérifier tous les conflits
-   */
   private allCheckAccessPeriodspassed(): boolean {
-    // Vérification des "Tous les autres" multiples
-    if (this.checkSameOthers()) {
-      this.dialogService.error(
-        'Vous avez plusieurs périodes d\'accès avec le type "Tous les autres".\n' +
-          'Une seule est autorisée car elle inclut automatiquement tous les utilisateurs restants.\n' +
-          "Supprimez ou modifiez pour en garder qu'une seule.",
-        { duration: 15000 }
-      )
-      return false
+    const result = this.validatorService.validateRestrictions(
+      this.accessPeriods(),
+      this.courseMembers,
+      this.courseGroups
+    )
+
+    if (!result.isValid && result.errorMessage) {
+      this.dialogService.error(result.errorMessage, { duration: 15000 })
     }
 
-    // Vérification des périodes avec seulement des dates
-    const dateOnlyCheck = this.checkDateOnlyPeriods()
-    if (dateOnlyCheck.indices.length > 0) {
-      this.dialogService.error(
-        'Périodes incomplètes détectées :\n\n' +
-          dateOnlyCheck.details.join('\n') +
-          '\n\nChaque période doit définir QUI peut accéder (pas seulement QUAND).' +
-          "\n\nAjoutez des types d'utilisateurs ou supprimez cette période.",
-        { duration: 15000 }
-      )
-      return false
-    }
-
-    // Vérification des conflits de groupes
-    const groupConflicts = this.checkGroupConflicts()
-    if (groupConflicts.hasConflicts) {
-      const conflictMessages = groupConflicts.conflicts.map((conflict) => {
-        const groupName = this.getGroupName(conflict.groupId)
-        return `${groupName} (périodes n°${conflict.periods.join(', ')})`
-      })
-
-      this.dialogService.error(
-        'Conflits de groupes détectés :\n\n' +
-          conflictMessages.join('\n') +
-          "\n\nUn groupe ne peut être assigné qu'à une seule période d'accès.\n" +
-          'Supprimez les doublons pour éviter les conflits.',
-        { duration: 15000 }
-      )
-      return false
-    }
-
-    // Vérification des conflits de membres
-    const memberConflicts = this.checkMemberConflicts()
-    if (memberConflicts.hasConflicts) {
-      const conflictMessages = memberConflicts.conflicts.map((conflict) => {
-        const memberName = this.getMemberName(conflict.memberId)
-        return `${memberName} (périodes n°${conflict.periods.join(', ')})`
-      })
-
-      this.dialogService.error(
-        "Conflits d'utilisateurs détectés :\n\n" +
-          conflictMessages.join('\n') +
-          "\n\nUn utilisateur ne peut être assigné qu'à une seule période d'accès.\n" +
-          'Supprimez les doublons pour éviter les conflits.',
-        { duration: 15000 }
-      )
-      return false
-    }
-
-    return true
+    return result.isValid
   }
 
-  /**
-   * Désactive les dates dans le passé pour la date d'ouverture
-   */
   protected disabledOpenDate = (current: Date): boolean => {
     return differenceInCalendarDays(current, new Date()) < 0
   }
 
-  /**
-   * Désactive les dates dans le passé et avant la date d'ouverture pour la date de fermeture
-   */
   protected disabledCloseDate = (current: Date): boolean => {
     // Si on a une date d'ouverture (temporaire ou de l'activité), la date de fermeture doit être après
     const openDate = this.tempOpenDate || this.activity.openAt
@@ -402,16 +318,12 @@ export class CourseActivitySettingsComponent implements OnInit {
     return differenceInCalendarDays(current, new Date()) < 0
   }
 
-  /**
-   * Vérifie que la date de fermeture est supérieure à la date d'ouverture
-   */
   private checkCloseDateIsSuperiorToOpenDate(openDate?: Date, closeDate?: Date): boolean {
     if (openDate && closeDate) {
       if (differenceInMilliseconds(closeDate, openDate) > 0) {
         return true
       }
       if (closeDate !== undefined) {
-        console.log(closeDate, openDate)
         this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
         return false
       }
@@ -419,7 +331,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     return true
   }
 
-  private async getUserSpecificDate(defaultDate?: Date): Promise<{ start: Date | undefined; end: Date | undefined }> {
+  private async getUserSpecificDate(_defaultDate?: Date): Promise<{ start: Date | undefined; end: Date | undefined }> {
     if (!this.user) return { start: undefined, end: undefined }
 
     const userSpecificPeriod = await this.findUserSpecificAccessPeriod()
@@ -435,26 +347,42 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   private async findUserSpecificAccessPeriod(): Promise<RestrictionList | null> {
     if (!this.user) return null
-    for (const period of this.accessPeriods) {
+    for (const period of this.accessPeriods()) {
       const membersRestriction = period.restriction.find((r) => r.type === 'Members')
       if (membersRestriction) {
         const config = membersRestriction.config as RestrictionConfig['Members']
         const isUserInMembers = config.members?.some((memberId) => {
           if (memberId.includes(':')) {
             const [, userId] = memberId.split(':')
-            return userId === this.user!.id
+            return userId === this.user?.id
           } else {
             const member = this.courseMembers.find((m) => m.id === memberId)
-            return member?.user?.id === this.user!.id
+            return member?.user?.id === this.user?.id
           }
         })
         if (isUserInMembers) return period
       }
 
+      const correctorsRestriction = period.restriction.find((r) => r.type === 'Correctors')
+      if (correctorsRestriction) {
+        const config = correctorsRestriction.config as RestrictionConfig['Correctors']
+        const isUserInCorrectors = config.correctors?.some((memberId) => {
+          if (memberId.includes(':')) {
+            const [, userId] = memberId.split(':')
+            return userId === this.user?.id
+          } else {
+            const member = this.courseMembers.find((m) => m.id === memberId)
+            return member?.user?.id === this.user?.id
+          }
+        })
+        if (isUserInCorrectors) return period
+      }
+
       const groupsRestriction = period.restriction.find((r) => r.type === 'Groups')
       if (groupsRestriction) {
         const config = groupsRestriction.config as RestrictionConfig['Groups']
-        for (const groupId of config.groups!) {
+        const groups = config.groups || []
+        for (const groupId of groups) {
           const isMemberOfGroup = await firstValueFrom(
             this.courseService.isMemberOfGroup(this.activity.courseId, groupId)
           )
@@ -473,11 +401,25 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
     this.updatingSignal.set(true)
     try {
-      if (this.activity.ignoreRestrictions && this.accessPeriods.length > 0) {
+      const settingsToSend = JSON.parse(JSON.stringify(this.activitySettings))
+
+      const periods = this.accessPeriods()
+      if (this.activity.ignoreRestrictions && periods.length > 0) {
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
             ignoreRestrictions: false,
+            activitySettings: settingsToSend,
+          })
+        )
+      } else if (!this.activity.ignoreRestrictions && periods.length === 0) {
+        await firstValueFrom(
+          this.courseService.updateActivity(this.activity, {
+            colorHue: this.currentHue,
+            openAt: this.tempOpenDate,
+            closeAt: this.tempCloseDate,
+            ignoreRestrictions: true,
+            activitySettings: settingsToSend,
           })
         )
       } else if (this.activity.ignoreRestrictions) {
@@ -489,24 +431,35 @@ export class CourseActivitySettingsComponent implements OnInit {
             colorHue: this.currentHue,
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
+            activitySettings: settingsToSend,
+          })
+        )
+      } else {
+        // Cas où il y a des restrictions et ignoreRestrictions est false
+        // Il faut quand même mettre à jour les settings
+        await firstValueFrom(
+          this.courseService.updateActivity(this.activity, {
+            colorHue: this.currentHue,
+            activitySettings: settingsToSend,
           })
         )
       }
 
       const result = await Promise.all([
         ...(!this.activity.isChallenge
-          ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, this.accessPeriods))]
+          ? [firstValueFrom(this.courseService.updateActivityRestrictions(this.activity, periods))]
           : []),
       ])
       this.activity = result[0]
-      if (this.accessPeriods.length > 0) {
+      // Là egalement le if et else peuvent être optimisés
+      if (periods.length > 0) {
         const userSpecificDate = await this.getUserSpecificDate()
         this.activityChange.emit(
           (this.activity = {
             ...this.activity,
             openAt: userSpecificDate.start,
             closeAt: userSpecificDate.end,
-            //state: result[0].state,
+            state: calculateActivityOpenState({ openAt: userSpecificDate.start, closeAt: userSpecificDate.end }),
             colorHue: this.currentHue,
           })
         )
@@ -522,10 +475,23 @@ export class CourseActivitySettingsComponent implements OnInit {
         )
       }
 
+      // Quick fix pour attribuer les correcteurs. À revoir plus tard.
+      // TODO: Optimiser cette partie pour que ce soit fait côté serveur lors de la mise à jour des restrictions.
+      await firstValueFrom(
+        this.courseService.updateActivityCorrectors(
+          this.activity,
+          this.getCorrectors().map((memberId) => {
+            return {
+              userId: this.courseMembers.find((m) => memberId.startsWith(m.id))?.user?.id,
+              memberId,
+            }
+          })
+        )
+      )
+
       this.dialogService.success('Activité mise à jour !')
       this.saveRequested.emit()
     } catch (error) {
-      console.error("Échec à l'étape:", error)
       this.dialogService.error(
         "Une erreur est survenue lors de la mise à jour de l'activité, veuillez réessayer un peu plus tard !"
       )
@@ -533,6 +499,75 @@ export class CourseActivitySettingsComponent implements OnInit {
       this.updatingSignal.set(false)
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  get durationAsDate(): Date {
+    const duration = this.activitySettings.duration || 0
+    const hours = Math.floor(duration / 3600)
+    const minutes = Math.floor((duration % 3600) / 60)
+    const seconds = duration % 60
+    const date = new Date(0)
+    date.setHours(hours, minutes, seconds, 0)
+    return date
+  }
+
+  set durationAsDate(date: Date) {
+    if (date) {
+      const hours = date.getHours()
+      const minutes = date.getMinutes()
+      const seconds = date.getSeconds()
+      this.activitySettings.duration = hours * 3600 + minutes * 60 + seconds
+    } else {
+      this.activitySettings.duration = 0
+    }
+  }
+
+  get durationHours(): number {
+    const duration = this.activitySettings.duration || 0
+    return Math.floor(duration / 3600)
+  }
+
+  set durationHours(hours: number) {
+    const duration = this.activitySettings.duration || 0
+    const currentMinutes = Math.floor((duration % 3600) / 60)
+    const currentSeconds = duration % 60
+    this.activitySettings.duration = (hours || 0) * 3600 + currentMinutes * 60 + currentSeconds
+  }
+
+  get durationMinutes(): number {
+    const duration = this.activitySettings.duration || 0
+    return Math.floor((duration % 3600) / 60)
+  }
+
+  set durationMinutes(minutes: number) {
+    const duration = this.activitySettings.duration || 0
+    const currentHours = Math.floor(duration / 3600)
+    const currentSeconds = duration % 60
+    this.activitySettings.duration = currentHours * 3600 + (minutes || 0) * 60 + currentSeconds
+  }
+
+  get durationSeconds(): number {
+    const duration = this.activitySettings.duration || 0
+    return duration % 60
+  }
+
+  set durationSeconds(seconds: number) {
+    const duration = this.activitySettings.duration || 0
+    const currentHours = Math.floor(duration / 3600)
+    const currentMinutes = Math.floor((duration % 3600) / 60)
+    this.activitySettings.duration = currentHours * 3600 + currentMinutes * 60 + (seconds || 0)
+  }
+
+  private getCorrectors(): string[] {
+    const correctors = new Set<string>()
+    this.accessPeriods()
+      .flatMap((period: RestrictionList) =>
+        period.restriction
+          .filter((r: Restriction) => r.type === 'Correctors')
+          .flatMap((r: Restriction) => (r.config as RestrictionConfig['Correctors']).correctors || [])
+      )
+      .forEach((corrector: string) => correctors.add(corrector))
+    return Array.from(correctors)
   }
 
   protected async reload(): Promise<void> {
@@ -571,10 +606,17 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
+  private resetTempDates(): void {
+    this.tempOpenDate = undefined
+    this.tempCloseDate = undefined
+  }
   protected async close(): Promise<void> {
     this.updatingSignal.set(true)
     this.changeDetectorRef.markForCheck()
     const activity = await firstValueFrom(this.courseService.closeActivity(this.activity))
+    if (activity.restrictions) {
+      this.accessPeriods.set(activity.restrictions)
+    }
     this.activityChange.emit(
       (this.activity = {
         ...this.activity,
@@ -582,9 +624,6 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
-    this.form.patchValue({
-      closeAt: this.activity.closeAt,
-    })
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }
@@ -593,6 +632,9 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.updatingSignal.set(true)
     this.changeDetectorRef.markForCheck()
     const activity = await firstValueFrom(this.courseService.reopenActivity(this.activity))
+    if (activity.restrictions) {
+      this.accessPeriods.set(activity.restrictions)
+    }
     this.activityChange.emit(
       (this.activity = {
         ...this.activity,
@@ -600,9 +642,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
-    this.form.patchValue({
-      closeAt: this.activity.closeAt,
-    })
+    this.resetTempDates()
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }

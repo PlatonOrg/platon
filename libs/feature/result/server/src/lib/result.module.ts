@@ -32,6 +32,13 @@ import { ActivityLabelEntity } from './label/activity-label/activity-label.entit
 import { UserFavoriteLabel } from './label/user-favorite-label/user-favorite-label.entity'
 import { ResourceLabelEntity } from './label/resource-label/resource-label.entity'
 import { ResourceLabelService } from './label/resource-label/resource-label.service'
+import { SubmissionController } from './submissions/submission.controller'
+import { SubmissionService } from './submissions/submission.service'
+import { SubmissionStorageService } from './submissions/storage.service'
+import { StudentSubmissionEntity } from './submissions/submission.entity'
+import { ResourceSessionStatsView } from './sessions/session-stats.view'
+import { SessionStatsScheduler } from './sessions/session-stats.scheduler'
+
 @Module({
   imports: [
     FeatureCourseServerModule,
@@ -49,6 +56,8 @@ import { ResourceLabelService } from './label/resource-label/resource-label.serv
       ActivityLabelEntity,
       ResourceLabelEntity,
       UserFavoriteLabel,
+      StudentSubmissionEntity,
+      ResourceSessionStatsView,
     ]),
   ],
   controllers: [
@@ -58,6 +67,7 @@ import { ResourceLabelService } from './label/resource-label/resource-label.serv
     LeaderboardController,
     SessionCommentController,
     LabelController,
+    SubmissionController,
   ],
   providers: [
     AnswerService,
@@ -70,10 +80,13 @@ import { ResourceLabelService } from './label/resource-label/resource-label.serv
     ActivityResultsVirtualColumnsResolver,
     CourseExpander,
     ResourceExpander,
+    SessionStatsScheduler,
     ActivityService,
     LabelService,
     CorrectionLabelService,
     ResourceLabelService,
+    SubmissionService,
+    SubmissionStorageService,
   ],
   exports: [
     TypeOrmModule,
@@ -86,6 +99,8 @@ import { ResourceLabelService } from './label/resource-label/resource-label.serv
     ActivityService,
     LabelService,
     CorrectionLabelService,
+    SubmissionService,
+    SubmissionStorageService,
   ],
 })
 export class FeatureResultServerModule {}

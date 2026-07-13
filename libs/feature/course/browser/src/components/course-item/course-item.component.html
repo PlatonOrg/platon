@@ -18,7 +18,9 @@
     [articleTitle]="title"
     [articleDescription]="desc"
     [articleIconTemplate]="image"
-    [articleUrl]="['/courses/', item.id]"
+    (didClick)="navigate()"
+    (didClickTitle)="navigate()"
+    (didClickTag)="navigate()"
     class="tuto-course-article"
   >
     <ui-list-item-article-action
@@ -45,6 +47,17 @@
     >
       <i nz-icon nzType="history" nzTheme="outline"></i>
     </ui-list-item-article-action>
+    @if (showArchiveButton()) {
+    <button
+      nz-button
+      nzType="text"
+      nzSize="small"
+      [nz-tooltip]="isArchived() ? 'Désarchiver ce cours' : 'Archiver ce cours'"
+      (click)="$event.stopPropagation(); archiveToggle.emit()"
+    >
+      <i nz-icon [nzType]="isArchived() ? 'reload' : 'inbox'" nzTheme="outline"></i>
+    </button>
+    }
   </ui-list-item-article>
 </ng-template>
 
@@ -62,7 +75,9 @@
 </ng-template>
 
 <ng-template #title>
-  {{ name }}
+  <span nz-tooltip [nzTooltipTitle]="isTitleTruncated ? name : null" (mouseenter)="checkTitleTruncation($event)">{{
+    name
+  }}</span>
   <a *ngIf="item.statistic?.challengeCount" nz-button nzType="link" [routerLink]="['/courses', item.id, 'challenges']">
     <span nz-tooltip="Afficher les challenges du cours" nz-icon nzType="trophy" nzTheme="twotone"></span>
   </a>

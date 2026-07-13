@@ -220,6 +220,29 @@ mat-toolbar {
 }
 
 
+#downloadFilesButton {
+  height: 30px;
+  background: linear-gradient(135deg, #ff008c, #ff6f00);
+  color: white;
+  box-shadow: none;
+  border: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #ff1493, #ff7f00);
+    box-shadow: 0 2px 8px rgba(255, 0, 140, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
 #summarizeButton {
   height: 30px;
   background-color: inherit;
@@ -230,4 +253,15 @@ mat-toolbar {
 .statistic-wrapper {
   display: flex;
   gap: 0.2rem;
+}
+
+.review-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  h3,
+  p {
+    margin: 0;
+  }
 }

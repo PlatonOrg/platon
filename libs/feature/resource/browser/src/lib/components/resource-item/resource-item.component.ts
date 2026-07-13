@@ -21,9 +21,9 @@ import { ExerciseResourceMeta, Resource } from '@platon/feature/resource/common'
 
 import { UiModalIFrameComponent, positiveGreenColor } from '@platon/shared/ui'
 
-import { RouterModule } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
-import { StorageService } from '@platon/core/browser'
+import { DialogService, StorageService } from '@platon/core/browser'
 import { Variables } from '@platon/feature/compiler'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
@@ -31,6 +31,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { firstValueFrom } from 'rxjs'
 import { ResourceFileService } from '../../api/file.service'
 import { ResourcePipesModule } from '../../pipes'
+import { ResourceService } from '../../api/resource.service'
 
 export const getPreviewOverridesStorageKey = (sessionId: string) => `preview.overrides.${sessionId}`
 type Tag = {
@@ -67,6 +68,9 @@ type Tag = {
 export class ResourceItemComponent implements OnChanges {
   private readonly storageService = inject(StorageService)
   private readonly fileService = inject(ResourceFileService)
+  private readonly resourceService = inject(ResourceService)
+  private readonly dialogService = inject(DialogService)
+  private readonly router = inject(Router)
   protected name = ''
   protected desc = ''
   protected averageScore = 0
@@ -86,6 +90,7 @@ export class ResourceItemComponent implements OnChanges {
   @Input() shorten = false
   @Output() levelClicked = new EventEmitter<string>()
   @Output() topicClicked = new EventEmitter<string>()
+  @Output() itemClicked = new EventEmitter<void>()
 
   get detailsUrl(): string {
     return `/resources/${this.item.id}`
@@ -93,6 +98,10 @@ export class ResourceItemComponent implements OnChanges {
 
   get editorUrl(): string {
     return `/editor/${this.item.id}?version=latest`
+  }
+
+  get builderUrl(): string {
+    return `/builder/${this.item.id}?version=latest`
   }
 
   get previewUrl(): string {
@@ -159,6 +168,15 @@ export class ResourceItemComponent implements OnChanges {
   protected async getReadmeContent(): Promise<void> {
     if (!this.readme) {
       this.readme = await firstValueFrom(this.fileService.content(`${this.item.id}/readme.md`))
+    }
+  }
+
+  protected async duplicateResource(): Promise<void> {
+    try {
+      const resource: Resource = await firstValueFrom(this.resourceService.duplicate(this.item.id))
+      this.router.navigate(['/resources', resource.id]).catch(console.error)
+    } catch (error) {
+      this.dialogService.error("Une erreur s'est produite lors de la duplication de la ressource.")
     }
   }
 }

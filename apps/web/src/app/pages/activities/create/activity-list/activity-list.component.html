@@ -1,0 +1,19 @@
+@if (items().length > 0) {
+<div class="activity-grid">
+  @for (item of items(); track item.id) {
+  <div class="activity-grid-item">
+    <app-activity-card
+      [item]="item"
+      [selected]="selectedIds().includes(item.id)"
+      (activityClicked)="activityClicked.emit($event)"
+    />
+  </div>
+  }
+</div>
+} @else {
+<nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="content">
+  <ng-template #content>
+    <p><ng-content></ng-content></p>
+  </ng-template>
+</nz-empty>
+}

@@ -1,8 +1,8 @@
-<ui-layout-tabs [state]="context.state">
+<ui-layout-tabs id="tuto-resource-tabs" [state]="context.state">
   <ng-container *ngIf="context.resource">
     <nz-page-header [nzSubtitle]="header" nzBackIcon>
       <ng-template #header>
-        <nz-breadcrumb nzSeparator="" nzRouteLabel="breadcrumb">
+        <nz-breadcrumb id="tuto-breadcrumb" nzSeparator="" nzRouteLabel="breadcrumb">
           <button
             id="tuto-tree-button"
             *ngIf="context.circles"
@@ -21,7 +21,7 @@
           <nz-breadcrumb-item class="hide-on-mobile" *ngIf="context.parent">
             <a [routerLink]="['/resources', context.parent.id]">{{ context.parent.name }}</a>
           </nz-breadcrumb-item>
-          <nz-breadcrumb-item>
+          <nz-breadcrumb-item id="tuto-resource-name-item">
             <mat-icon>{{ context.resource.type | resourceIcon }}</mat-icon>
             <span
               id="tuto-resource-name"
@@ -100,7 +100,7 @@
         </button>
       </nz-button-group>
       <div class="spacer"></div>
-      <nz-button-group>
+      <nz-button-group id="tuto-resource-actions">
         @if (isAdmin() && configurable) { @if (certifiedTemplate) {
         <button
           nz-button
@@ -162,13 +162,26 @@
           [routerLink]="['/resources/move']"
           [queryParams]="{ type: context.resource.type, id: context.resource.id, parent: context.resource.parentId }"
         >
-          <i nz-icon nzType="copy" nzTheme="outline"></i>
+          <i nz-icon nzType="export" nzTheme="outline"></i>
           <span class="hide-on-mobile">Déplacer</span>
         </button>
-        <button id="tuto-editor-button" nz-button (click)="openTab(context.editorUrl!)">
-          <i nz-icon nzType="edit" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Ouvrir dans l'éditeur</span>
+        <!-- TODO: add tutorial for duplication -->
+        <button id="tuto-duplicate-button" *ngIf="context.resource.type !== 'CIRCLE'" nz-button (click)="duplicate()">
+          <i nz-icon nzType="copy" nzTheme="outline"></i>
+          <span class="hide-on-mobile">Dupliquer</span>
         </button>
+        <a
+          id="tuto-editor-button"
+          nz-button
+          [routerLink]="urlPath(context.editorUrl!)"
+          [queryParams]="{ version: context.version }"
+        >
+          <i nz-icon nzType="edit" nzTheme="outline"></i>
+          @if (context.resource.templateId) {
+          <span class="hide-on-mobile">Paramétrer</span>
+          } @else {<span class="hide-on-mobile">Éditer</span>
+          }
+        </a>
         <button
           id="tuto-share-button"
           *ngIf="context.resource.type !== 'CIRCLE'"

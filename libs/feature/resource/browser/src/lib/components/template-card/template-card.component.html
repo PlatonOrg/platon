@@ -37,9 +37,21 @@
         <mat-icon>trending_up</mat-icon>
         <span>{{ templateUtilizations() }} sessions</span>
       </span>
+      <span
+        (click)="$event.stopPropagation(); openPreview($event)"
+        class="stat-item stat-item-action"
+        matTooltip="Prévisualiser le modèle"
+        matTooltipPosition="above"
+        matTooltipClass="custom-tooltip"
+      >
+        <mat-icon>play_circle</mat-icon>
+        <span>Aperçu</span>
+      </span>
     </div>
   </div>
   <div class="template-overlay">
     <mat-icon>arrow_forward</mat-icon>
   </div>
 </div>
+
+<ui-modal-iframe width="98vw" height="98vh" #previewIframe [closable]="true" />

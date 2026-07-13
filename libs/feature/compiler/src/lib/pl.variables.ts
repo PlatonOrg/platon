@@ -61,6 +61,9 @@ export interface ExerciseMeta {
 
   /** Number of hints consumed (always set to 0 after reroll) */
   consumedHints?: number
+
+  /** Whether the last build/grading of this exercise raised an error (sandbox/grader crash). */
+  error?: boolean
 }
 
 export interface ExerciseFoldableFeedbackContent {

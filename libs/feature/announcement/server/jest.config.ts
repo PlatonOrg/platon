@@ -1,22 +1,17 @@
 /* eslint-disable */
 export default {
-  displayName: 'server',
+  displayName: 'feature-announcement-server',
   preset: '../../../../jest.preset.js',
-  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../../coverage/libs/feature/announcement/server',
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$', '\\.e2e\\.spec\\.ts$'],
+  testEnvironment: 'node',
   transform: {
-    '^.+\\.(ts|mjs|js|html)$': [
-      'jest-preset-angular',
+    '^.+\\.[tj]s$': [
+      'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
-        stringifyContentPathRegex: '\\.(html|svg)$',
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
-  snapshotSerializers: [
-    'jest-preset-angular/build/serializers/no-ng-attributes',
-    'jest-preset-angular/build/serializers/ng-snapshot',
-    'jest-preset-angular/build/serializers/html-comment',
-  ],
+  moduleFileExtensions: ['ts', 'js', 'html'],
+  coverageDirectory: '../../../../coverage/libs/feature/announcement/server',
 }

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -11,46 +11,44 @@ import {
   signal,
   CUSTOM_ELEMENTS_SCHEMA,
 } from '@angular/core'
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule as MatSelectModule_1 } from '@angular/material/select';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzSwitchModule } from 'ng-zorro-antd/switch';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
+import { MatDatepickerModule } from '@angular/material/datepicker'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { MatSelectModule as MatSelectModule_1 } from '@angular/material/select'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
+import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzSwitchModule } from 'ng-zorro-antd/switch'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzTagModule } from 'ng-zorro-antd/tag'
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
 
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
- import { FormsModule } from '@angular/forms';
-import { OutputData } from '@editorjs/editorjs';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog'
+import { FormsModule } from '@angular/forms'
+import { OutputData } from '@editorjs/editorjs'
 
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon'
+import { MatTooltipModule } from '@angular/material/tooltip'
 
-
-import { DialogModule, DialogService } from '@platon/core/browser';
+import { DialogModule, DialogService } from '@platon/core/browser'
 import { emptyEditorJsData, UiEditorJsModule } from '@platon/shared/ui'
 import { Announcement, EditorOutputData, UpdateAnnouncementInput } from '@platon/feature/announcement/common'
-import { UserRoles } from '@platon/core/common';
+import { UserRoles } from '@platon/core/common'
 
-import { firstValueFrom } from 'rxjs';
-import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { firstValueFrom } from 'rxjs'
+import { NzRadioModule } from 'ng-zorro-antd/radio'
 
 import { AnnouncementPreviewModalComponent } from '../announcement-preview-modal/announcement-preview-modal.component'
 import { AnnouncementService } from '../../api/announcement.service'
 
-
-
 @Component({
-  selector: 'announcement-create-drawer',
+  selector: 'lib-announcement-create-drawer',
   standalone: true,
   imports: [
     CommonModule,
@@ -69,6 +67,7 @@ import { AnnouncementService } from '../../api/announcement.service'
     NzInputNumberModule,
     NzCheckboxModule,
     NzTagModule,
+    NzAlertModule,
     MatDialogModule,
     MatIconModule,
     MatTooltipModule,
@@ -91,9 +90,9 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
   protected form!: FormGroup
   loading = false
   protected hasUnsavedChanges = false
+  protected errorMessage: string | null = null
 
   terms: OutputData = emptyEditorJsData()
-
 
   constructor(
     public dialogRef: MatDialogRef<AnnouncementCreateDrawerComponent>,
@@ -101,7 +100,7 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     private readonly announcementService: AnnouncementService,
     private readonly dialogService: DialogService,
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly dialog : MatDialog,
+    private readonly dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
@@ -115,6 +114,7 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
 
     this.dialogRef.beforeClosed().subscribe(async () => {
       if (this.hasUnsavedChanges) {
+        // TODO: Ajouter la logique de confirmation
       }
     })
   }
@@ -134,8 +134,8 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     })
 
     this.form.valueChanges.subscribe(() => {
-        this.hasUnsavedChanges = true
-        this.changeDetectorRef.markForCheck()
+      this.hasUnsavedChanges = true
+      this.changeDetectorRef.markForCheck()
     })
   }
 
@@ -162,14 +162,13 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     this.hasUnsavedChanges = false
   }
 
-
   previewAnnouncement(): void {
-    this.updateTargetedRoles();
+    this.updateTargetedRoles()
 
     const previewData: Announcement = {
       id: this.announcement?.id || 'preview',
-      title: this.form.value.title || 'Titre de l\'annonce',
-      description: this.form.value.description || 'Description de l\'annonce',
+      title: this.form.value.title || "Titre de l'annonce",
+      description: this.form.value.description || "Description de l'annonce",
       active: this.form.value.active !== undefined ? this.form.value.active : true,
       icon: this.getIcon(this.form.value.icon || 'notification'),
       displayUntil: this.form.value.displayUntil,
@@ -177,21 +176,21 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
       targetedRoles: this.form.value.targetedRoles || [],
       data: this.terms,
       createdAt: this.announcement?.createdAt || new Date(),
-      updatedAt: this.announcement?.updatedAt || new  Date(),
-    };
+      updatedAt: this.announcement?.updatedAt || new Date(),
+    }
 
     const dialogRef = this.dialog.open(AnnouncementPreviewModalComponent, {
       width: '99%',
       height: '100%',
       disableClose: true,
-      data: { announcement: previewData }
-    });
+      data: { announcement: previewData },
+    })
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result?.action === 'edit') {
         // Pour l'instant on fait rien.
       }
-    });
+    })
   }
 
   get dialogTitle(): string {
@@ -201,8 +200,6 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
   get submitButtonText(): string {
     return this.announcement ? 'Mettre à jour' : 'Créer'
   }
-
-
 
   protected updateTargetedRoles(): void {
     const targetedRoles: UserRoles[] = []
@@ -242,7 +239,6 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-
   private getIcon(icon: string): string {
     switch (icon) {
       case 'Announcement':
@@ -252,14 +248,19 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     }
   }
 
-
-
   async save(): Promise<void> {
-    this.loading = true;
-    this.changeDetectorRef.markForCheck();
+    this.loading = true
+    this.changeDetectorRef.markForCheck()
 
     try {
-      this.updateTargetedRoles();
+      if (!this.form.valid) {
+        this.errorMessage = 'Veuillez remplir tous les champs requis'
+        this.changeDetectorRef.markForCheck()
+        return
+      }
+
+      this.errorMessage = null
+      this.updateTargetedRoles()
 
       const formData = {
         title: this.form.value.title,
@@ -275,32 +276,30 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
       if (this.announcement) {
         const updatedAnnouncement = await firstValueFrom(
           this.announcementService.update(this.announcement.id, formData as UpdateAnnouncementInput)
-        );
+        )
 
-        this.dialogService.success('Annonce mise à jour avec succès');
-        this.hasUnsavedChanges = false;
-        this.updated.emit(updatedAnnouncement);
-        this.dialogRef.close(updatedAnnouncement);
+        this.dialogService.success('Annonce mise à jour avec succès')
+        this.hasUnsavedChanges = false
+        this.updated.emit(updatedAnnouncement)
+        this.dialogRef.close(updatedAnnouncement)
       } else {
-        const newAnnouncement = await firstValueFrom(
-          this.announcementService.create(formData)
-        );
+        const newAnnouncement = await firstValueFrom(this.announcementService.create(formData))
 
-        if(newAnnouncement) {
-          this.dialogService.success('Annonce créée avec succès');
-          this.hasUnsavedChanges = false;
-          this.created.emit(newAnnouncement);
-          this.dialogRef.close(newAnnouncement);
+        if (newAnnouncement) {
+          this.dialogService.success('Annonce créée avec succès')
+          this.hasUnsavedChanges = false
+          this.created.emit(newAnnouncement)
+          this.dialogRef.close(newAnnouncement)
         } else {
-          this.dialogService.error('Erreur lors de la création de l\'annonce');
+          this.dialogService.error("Erreur lors de la création de l'annonce")
         }
       }
     } catch (error) {
-      const action = this.announcement ? 'la mise à jour' : 'la création';
-      this.dialogService.error(`Erreur lors de ${action} de l'annonce`);
+      const action = this.announcement ? 'la mise à jour' : 'la création'
+      this.dialogService.error(`Erreur lors de ${action} de l'annonce`)
     } finally {
-      this.loading = false;
-      this.changeDetectorRef.markForCheck();
+      this.loading = false
+      this.changeDetectorRef.markForCheck()
     }
   }
 }

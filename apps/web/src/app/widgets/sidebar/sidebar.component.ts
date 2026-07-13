@@ -30,12 +30,7 @@ export class SidebarComponent implements OnInit {
 
   protected user?: User
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly sidebarTutorialService: SidebarTutorialService,
-    private readonly router: Router
-  ) {}
+  constructor(private readonly authService: AuthService, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   async ngOnInit(): Promise<void> {
     this.user = await this.authService.ready()
@@ -131,6 +126,13 @@ export class SidebarComponent implements OnInit {
   }
 
   protected generateId(title: string): string {
-    return 'tuto-sidebar-' + title.toLowerCase().replace(/ /g, '-')
+    const normalizedTitle = title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
+    return 'tuto-sidebar-' + normalizedTitle
   }
 }

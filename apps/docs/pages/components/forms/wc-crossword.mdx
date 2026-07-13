@@ -1,0 +1,243 @@
+---
+title: Crossword
+description: Composant de grille interactive de mots croisés. Conçu pour la saisie mot par mot, il est idéal pour les exercices de vocabulaire ciblés et l'association terme-définition.
+---
+
+import { Tabs, Tab } from 'nextra/components'
+import { ComponentProperties, Playground } from '../../../components'
+import { useAbsoluteUrl } from '../../../hooks'
+
+# Crossword
+
+`wc-crossword`
+
+Composant de grille interactive de mots croisés. Conçu pour la saisie mot par mot, il est idéal pour les exercices de vocabulaire ciblés et l'association terme-définition.
+
+## Documentation
+
+Le composant Crossword permet de créer des exercices interactifs où les apprenants peuvent remplir une grille de mots croisés. Il permet aux apprenants d'apprendre des termes de manière ludique.
+
+### Conseils d'utilisation
+
+- Ne pas utiliser ce composant pour saisir des caractères spéciaux comme @, $, ?, etc , il ne sont pas acceptés.
+
+- Les réponses attendues ne doivent pas être trop longues (moins de 20 caractères).
+
+- Limitez le nombre de définitions (il est conseillé de ne pas dépasser les 10 définitions).
+
+- Pour la correction, utilisez le champ `results` qui donne la saisie de l'utilisateur et le numéro de la définition correspondant.
+
+### Structure des données
+
+Le composant génère une grille que l'apprenant devra remplir à partir d'une liste de mots et de leurs définitions. Le tableau utilisé pour générer cette grille (le champ `words` du composant) doit avoir le format suivant :
+
+```
+{
+  "clue": "La définition du mot",
+  "answer": "la réponse attendue"
+}
+```
+
+### Apparence personnalisable
+
+Vous pouvez ajuster certains paramètres visuels du composant :
+
+- `appearance` : Choisissez d'afficher la grille de mots croisés à droite (inline) ou au-dessus (outline) des définitions.
+
+- `cellSize` : Permet d'augmenter ou de diminuer la taille des cellules.
+
+- `definition` : Si vous activez l'option (`true`) alors les définitions sont affichées avec la grille. Si elle n'est pas activée, c'est à vous de récupérer et d'afficher les définitions.
+
+- `correctionColor` : Les cases sont coloriées en vert si la saisie est correcte et en rouge dans le cas contraire. Cet affichage apparaît lors de la validation et disparaît dès que l'apprenant effectue une nouvelle saisie.
+
+## Exemple interactif
+
+<Playground
+  width="100%"
+  items={[
+    {
+      name: 'Visualisation',
+      url: 'playground/components/wc-crossword',
+    },
+    ...[],
+  ]}
+/>
+
+## API
+
+<Tabs items={['Graphique', 'JSON']}>
+  <Tab>
+    <ComponentProperties schema={{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "Crossword",
+  "properties": {
+    "appearance": {
+      "type": "string",
+      "default": "inline",
+      "description": "L'alignement des définitions et du mot croisé.",
+      "enum": [
+        "outline",
+        "inline"
+      ]
+    },
+    "cellSize": {
+      "type": "number",
+      "default": 30,
+      "description": "La taille des cellules de la grille à remplir."
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le champ de saisi?"
+    },
+    "words": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des mots et de leurs définitions.",
+      "items": {
+        "type": "object",
+        "description": "Liste des mots et de leurs définition.",
+        "properties": {
+          "clue": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "array",
+      "default": [],
+      "description": "Réponses de l'apprenant.",
+      "items": {
+        "type": "object",
+        "description": "La réponse et le numéro de la définition.",
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "definition": {
+      "type": "boolean",
+      "default": true,
+      "description": "Affiche les définitions si activé"
+    },
+    "correctionColor": {
+      "type": "boolean",
+      "default": false,
+      "description": "Colorie la case de la grille pour indiquer si la saisie est correcte ou non."
+    },
+    "grid": {
+      "type": "array",
+      "default": [],
+      "description": "Grille ligne par ligne contenant les caractéres à aficher.",
+      "items": {
+        "type": "array",
+        "default": [],
+        "items": {
+          "type": "string",
+          "default": "",
+          "description": "Caractère à placer dans la grille de mots croisés. '-' permet de ne pas afficher la case."
+        }
+      }
+    }
+  }
+}} />
+  </Tab>
+  <Tab>
+    ```json
+    {
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "Crossword",
+  "properties": {
+    "appearance": {
+      "type": "string",
+      "default": "inline",
+      "description": "L'alignement des définitions et du mot croisé.",
+      "enum": [
+        "outline",
+        "inline"
+      ]
+    },
+    "cellSize": {
+      "type": "number",
+      "default": 30,
+      "description": "La taille des cellules de la grille à remplir."
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le champ de saisi?"
+    },
+    "words": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des mots et de leurs définitions.",
+      "items": {
+        "type": "object",
+        "description": "Liste des mots et de leurs définition.",
+        "properties": {
+          "clue": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "array",
+      "default": [],
+      "description": "Réponses de l'apprenant.",
+      "items": {
+        "type": "object",
+        "description": "La réponse et le numéro de la définition.",
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "definition": {
+      "type": "boolean",
+      "default": true,
+      "description": "Affiche les définitions si activé"
+    },
+    "correctionColor": {
+      "type": "boolean",
+      "default": false,
+      "description": "Colorie la case de la grille pour indiquer si la saisie est correcte ou non."
+    },
+    "grid": {
+      "type": "array",
+      "default": [],
+      "description": "Grille ligne par ligne contenant les caractéres à aficher.",
+      "items": {
+        "type": "array",
+        "default": [],
+        "items": {
+          "type": "string",
+          "default": "",
+          "description": "Caractère à placer dans la grille de mots croisés. '-' permet de ne pas afficher la case."
+        }
+      }
+    }
+  }
+}
+    ```
+  </Tab>
+</Tabs>
