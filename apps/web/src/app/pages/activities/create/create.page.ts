@@ -6,6 +6,7 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
+  viewChild,
   ElementRef,
   inject,
   signal,
@@ -208,10 +209,9 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   protected filtersComponent!: ResourceFiltersComponent
 
   @ViewChild('activitySection')
-  protected activitySection?: ElementRef<HTMLElement>
+  protected activitySection!: ElementRef<HTMLElement>
 
-  @ViewChild(GradedActivitySettingsComponent)
-  protected gradedSettings?: GradedActivitySettingsComponent
+  protected readonly gradedSettings = viewChild.required<GradedActivitySettingsComponent>('gradedSettings')
 
   protected async handleKeyDown() {
     if (this.stepper.isValid) {
@@ -266,7 +266,6 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       ...Object.values(ResourceTypes).map(ResourceTypeFilterIndicator),
       ...Object.values(ResourceStatus).map(ResourceStatusFilterIndicator),
       ...Object.values(ResourceOrderings).map(ResourceOrderingFilterIndicator),
-      //ResourceDependOnFilterIndicator(),
       ExerciseConfigurableFilterIndicator,
       PeriodFilterMatcher,
     ])
@@ -464,14 +463,16 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
         )
       )
 
-      if (this.activityFunction() === 'graded' && this.gradedSettings) {
-        const gradedSettings = this.gradedSettings.settings()
+      if (this.activityFunction() === 'graded' && this.gradedSettings()) {
+        const gradedSettings = this.gradedSettings()?.settings()
+        const code = this.gradedSettings()?.code()
         await Promise.all(
           createdActivities.resources.map((activity) =>
             Promise.all([
               firstValueFrom(
                 this.courseService.updateActivity(activity, {
                   activitySettings: { ...activity.activitySettings, ...gradedSettings },
+                  code,
                 })
               ),
               firstValueFrom(

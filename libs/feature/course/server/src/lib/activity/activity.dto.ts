@@ -10,7 +10,7 @@ import {
   UpdateActivity,
 } from '@platon/feature/course/common'
 import { Exclude, Transform, Type } from 'class-transformer'
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator'
+import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, IsUUID, Matches } from 'class-validator'
 import { ActivityPermissionsDTO } from '../permissions/permissions.dto'
 import { RestrictionListDTO } from './activity-restriction.dto'
 
@@ -169,6 +169,12 @@ export class UpdateCourseActivityDTO implements UpdateActivity {
   @ApiProperty()
   @IsOptional()
   readonly activitySettings?: ActivitySettings
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z0-9]{6}$/)
+  @ApiProperty()
+  readonly code?: string
 }
 
 export class ReloadCourseActivityDTO implements ReloadActivity {

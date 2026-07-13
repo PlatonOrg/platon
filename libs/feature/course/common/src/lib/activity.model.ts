@@ -55,6 +55,7 @@ export interface UpdateActivity {
   readonly colorHue?: number | null
   readonly ignoreRestrictions?: boolean
   readonly activitySettings?: ActivitySettings
+  readonly code?: string
 }
 
 export interface ReloadActivity {

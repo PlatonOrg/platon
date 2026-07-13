@@ -56,6 +56,21 @@
     <nz-input-number [ngModel]="maxAttempts()" (ngModelChange)="maxAttempts.set($event)" [nzMin]="0" [nzStep]="1" />
   </div>
 
+  <div class="setting-row code-row">
+    <label
+      class="setting-label"
+      nz-tooltip="Code demandé à l'élève pour se débloquer si l'activité s'est auto-terminée suite au non-respect des paramètres de sécurité (changement d'onglet, perte de focus...)"
+    >
+      Code de déblocage
+    </label>
+    <div class="code-generator">
+      <span class="generated-code">{{ code() }}</span>
+      <button mat-icon-button type="button" (click)="regenerateCode()" nz-tooltip="Générer un nouveau code">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
   <div class="setting-row security-row">
     <label class="setting-label">Sécurité</label>
     <div class="security-options">

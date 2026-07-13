@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
+import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
@@ -15,7 +16,15 @@ import { ActivitySettings } from '@platon/feature/compiler'
   templateUrl: './graded-activity-settings.component.html',
   styleUrls: ['./graded-activity-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, MatIconModule, NzInputNumberModule, NzCheckboxModule, NzToolTipModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatButtonModule,
+    NzInputNumberModule,
+    NzCheckboxModule,
+    NzToolTipModule,
+  ],
 })
 export class GradedActivitySettingsComponent {
   protected readonly durationHours = signal(0)
@@ -25,6 +34,18 @@ export class GradedActivitySettingsComponent {
   protected readonly noCopyPaste = signal(true)
   protected readonly terminateOnLeavePage = signal(true)
   protected readonly terminateOnLoseFocus = signal(true)
+
+  // Code de déblocage demandé à l'élève en sortie d'activité : uniquement généré aléatoirement,
+  // jamais saisi à la main par l'enseignant pour éviter les codes trop simples (ex: "123456").
+  readonly code = signal(this.generateCode())
+
+  protected regenerateCode(): void {
+    this.code.set(this.generateCode())
+  }
+
+  private generateCode(): string {
+    return Math.random().toString(36).substring(2, 8).toUpperCase()
+  }
 
   // Les TP notés / examens n'affichent jamais ces actions aux élèves : pas de configuration nécessaire.
   readonly settings = computed<ActivitySettings>(() => ({
