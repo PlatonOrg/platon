@@ -104,9 +104,6 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected activitySettings: ActivitySettings = {
     duration: 0,
     seedPerExercise: false,
-    navigation: {
-      mode: 'manual',
-    },
     actions: {
       retry: 0,
       hints: true,
@@ -123,14 +120,6 @@ export class CourseActivitySettingsComponent implements OnInit {
       terminateOnLeavePage: false,
       terminateOnLoseFocus: false,
     },
-  }
-
-  // Getters pour garantir que les objets ne sont jamais undefined
-  get navigation() {
-    if (!this.activitySettings.navigation) {
-      this.activitySettings.navigation = { mode: 'manual' }
-    }
-    return this.activitySettings.navigation
   }
 
   get actions() {

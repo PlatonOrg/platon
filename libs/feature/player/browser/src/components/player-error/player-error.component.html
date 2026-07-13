@@ -19,6 +19,7 @@
     </p>
 
     <div class="error-actions">
+      @if(!examenMode()) {
       <a [href]="mailtoLink">
         <button mat-stroked-button color="accent" class="contact-button">
           <mat-icon>email</mat-icon>
@@ -26,13 +27,12 @@
         </button>
       </a>
 
-      <!-- @if(!editorPreview() && execRetryExercise()) {
+      @if(!editorPreview() && execRetryExercise()) {
       <button mat-stroked-button color="accent" (click)="execRetryExercise()?.()">
         <mat-icon>refresh</mat-icon>
         Réessayer
       </button>
-      } -->
-      @if (canGoToNextPlayer()) {
+      } } @if (canGoToNextPlayer()) {
       <button
         mat-stroked-button
         color="accent"
