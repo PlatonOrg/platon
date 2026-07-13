@@ -85,6 +85,7 @@ interface PLCompilerOptions {
   resolver: PLReferenceResolver
   dependencyResolver?: PLDependencyResolver
   withAst?: boolean
+  extendsStack?: string[]
 }
 
 interface ToExerciseOptions {
@@ -114,6 +115,7 @@ const emptySource = (resource: string, version: string, main: string): PLSourceF
 export class PLCompiler implements PLVisitor {
   private readonly urls = new Map<string, string>()
   private readonly contents = new Map<string, string>()
+  private readonly extendsStack: string[]
   private readonly resolver: PLReferenceResolver
   private readonly dependencyResolver?: PLDependencyResolver
   private parent?: PLCompiler
@@ -132,6 +134,7 @@ export class PLCompiler implements PLVisitor {
     this.resolver = options.resolver
     this.withAst = options.withAst
     this.source = emptySource(options.resource, options.version, options.main)
+    this.extendsStack = options.extendsStack ? options.extendsStack.slice() : [this.source.abspath]
     this.dependencyResolver = options.dependencyResolver
   }
 
@@ -245,7 +248,14 @@ export class PLCompiler implements PLVisitor {
 
   async visitExtends(node: ExtendsNode | PLDict, merge: boolean): Promise<PLSourceFile> {
     this.lineno = node.lineno
-    const { resource, version, relpath } = this.resolveReference('path' in node ? node.path : node.value)
+    const { resource, version, relpath, abspath } = this.resolveReference('path' in node ? node.path : node.value)
+
+    const cycleStartIndex = this.extendsStack.indexOf(abspath)
+    if (cycleStartIndex !== -1) {
+      const chain = this.extendsStack.slice(cycleStartIndex).concat(abspath).join(' -> ')
+      this.error(`Compiler: cyclic extends detected: ${chain}`)
+      return emptySource(resource, version, relpath)
+    }
 
     const content = await this.resolver.resolveContent(resource, version, relpath)
     const compiler = new PLCompiler({
@@ -254,6 +264,7 @@ export class PLCompiler implements PLVisitor {
       main: relpath,
       resolver: this.resolver,
       dependencyResolver: undefined, // dependencyResolver is not used in extends
+      extendsStack: this.extendsStack.concat(abspath),
     })
 
     await compiler.compileExercise(content)
