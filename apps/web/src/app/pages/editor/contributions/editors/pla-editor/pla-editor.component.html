@@ -60,7 +60,7 @@
       </div>
     </button>
     <button
-      *ngIf="activity?.settings?.navigation?.mode === 'next'"
+      *ngIf="activity?.settings?.navigation?.mode === 'next' || activity?.settings?.navigation?.mode === 'validation'"
       nz-button
       nzType="default"
       (click)="getToStep(3)"
@@ -163,6 +163,20 @@
             nzMessage="Attention la fonctionnalité de navigation intelligente est en cours de développement."
             nzShowIcon
           ></nz-alert>
+          <nz-alert
+            *ngIf="activity?.settings?.navigation?.mode === 'validation'"
+            nzType="warning"
+            nzMessage="Attention la fonctionnalité de navigation validation est en cours de développement."
+            nzShowIcon
+          ></nz-alert>
+          <nz-form-item *ngIf="activity?.settings?.navigation?.mode === 'validation'">
+            <nz-form-label [nzSpan]="3" nzLabelAlign="left" for="random" nzTooltipTitle="Parcours aléatoire des groupes"
+              >Groupe Aléatoire</nz-form-label
+            >
+            <nz-form-control>
+              <label nz-checkbox formControlName="random" id="random"></label>
+            </nz-form-control>
+          </nz-form-item>
         </nz-collapse-panel>
         <nz-collapse-panel formGroupName="actions" nzHeader="Actions" nzExpandedIcon="play-circle" nzActive>
           <nz-form-item>
@@ -364,6 +378,104 @@
                   class="draggable-container"
                   id="array{{ i }}"
                 >
+                  <div *ngIf="activity?.settings?.navigation?.mode === 'validation'" class="validation-panel">
+                    <div (click)="expandedGroups[i] = !expandedGroups[i]" class="validation-panel__expanded">
+                      <span style="font-weight: 500; color: rgba(0, 0, 0, 0.85); font-size: 13px">
+                        <span nz-icon nzType="setting" style="margin-right: 6px; color: #1890ff"></span>
+                        Paramètres de validation
+                      </span>
+                      <span
+                        nz-icon
+                        [nzType]="expandedGroups[i] ? 'up' : 'down'"
+                        style="font-size: 11px; color: rgba(0, 0, 0, 0.45)"
+                      ></span>
+                    </div>
+
+                    <div
+                      *ngIf="expandedGroups[i]"
+                      style="padding: 14px; background: #ffffff; border-top: 1px solid #e8e8e8"
+                    >
+                      <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px"
+                      >
+                        <span style="color: rgba(0, 0, 0, 0.85); font-size: 13px; font-weight: 500"
+                          >Type d'évaluation</span
+                        >
+                        <nz-select
+                          style="width: 170px"
+                          [ngModel]="group.grader.type || 'success'"
+                          [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="onGraderTypeChange($event, i)"
+                        >
+                          <nz-option nzValue="success" nzLabel="Série de réussite"></nz-option>
+                          <nz-option nzValue="mean" nzLabel="Moyenne"></nz-option>
+                        </nz-select>
+                      </div>
+
+                      <div
+                        *ngIf="group.grader.type === 'mean' || group.grader.type === 'success'"
+                        style="border-top: 1px dashed #e8e8e8; padding-top: 12px"
+                      >
+                        <div class="validation-panel__row">
+                          <span
+                            nz-tooltip
+                            nzTooltipTitle="Nombre d'exercices à comptabiliser (en partant des plus récents)."
+                            style="cursor: help; color: #555; font-size: 13px"
+                          >
+                            Taille de l'historique
+                            <span nz-icon nzType="question-circle" style="font-size: 11px"></span>
+                          </span>
+                          <nz-input-number
+                            style="width: 65px; flex-shrink: 0"
+                            [ngModel]="group.grader.exerciseCount"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="group.grader.exerciseCount = $event; onChangeData()"
+                            [nzMin]="1"
+                            [nzStep]="1"
+                          ></nz-input-number>
+                        </div>
+
+                        <div class="validation-panel__row">
+                          <span
+                            nz-tooltip
+                            nzTooltipTitle="La note minimale requise pour valider le groupe."
+                            style="cursor: help; color: #555; font-size: 13px"
+                          >
+                            Note minimale
+                            <span nz-icon nzType="question-circle" style="font-size: 11px; color: #aaa"></span>
+                          </span>
+                          <nz-input-number
+                            style="width: 65px; flex-shrink: 0"
+                            [ngModel]="group.grader.targetScore"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="group.grader.targetScore = $event; onChangeData()"
+                            [nzMin]="0"
+                            [nzMax]="100"
+                            [nzStep]="5"
+                          ></nz-input-number>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center">
+                          <span
+                            nz-tooltip
+                            nzTooltipTitle="Nombre maximum de tentatives autorisées par exercice pour valider le groupe."
+                            style="cursor: help; color: #555; font-size: 13px"
+                          >
+                            Tentatives max
+                            <span nz-icon nzType="question-circle" style="font-size: 11px; color: #aaa"></span>
+                          </span>
+                          <nz-input-number
+                            style="width: 65px; flex-shrink: 0"
+                            [ngModel]="group.grader.maxAttempts"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="group.grader.maxAttempts = $event; onChangeData()"
+                            [nzMin]="-1"
+                            [nzStep]="1"
+                          ></nz-input-number>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div
                     *ngFor="let exercise of group.exercises; trackBy: trackByExerciseId; index as i"
                     class="draggable-item exercise-in-group"
@@ -407,7 +519,14 @@
             <nz-form-control>
               <nz-select formControlName="sandbox" id="sandbox">
                 <nz-option nzValue="python" nzLabel="Python" nzCustomContent> Python (next.py) </nz-option>
-                <nz-option nzValue="node" nzLabel="Node" nzCustomContent> Node (next.js) </nz-option>
+                <nz-option
+                  nzValue="node"
+                  nzLabel="Node"
+                  nzCustomContent
+                  *ngIf="activity?.settings?.navigation?.mode !== 'validation'"
+                >
+                  Node (next.js)
+                </nz-option>
               </nz-select>
             </nz-form-control>
           </nz-form-item>
@@ -452,7 +571,7 @@
               <label nz-checkbox formControlName="allowFreeNavigation" id="allowFreeNavigation"></label>
             </nz-form-control>
           </nz-form-item>
-          <nz-form-item>
+          <nz-form-item *ngIf="activity?.settings?.navigation?.mode !== 'validation'">
             <nz-form-label
               nzLabelAlign="left"
               for="hasExercisesVariables"
@@ -466,79 +585,6 @@
           </nz-form-item>
         </nz-collapse-panel>
       </nz-collapse>
-      <!-- <div *ngIf="false" class="next">
-        <div class="exercise-group-list">
-          <h3>Groupes d'exercices</h3>
-          <mat-accordion
-            cdkDropListGroup
-            cdkDropList
-            [cdkDropListDisabled]="readOnly"
-            (cdkDropListDropped)="onReorderGroups($any($event))"
-            class="draggable-container"
-            multi
-          >
-            <mat-expansion-panel
-              cdkDrag
-              cdkDropList
-              [cdkDropListDisabled]="readOnly"
-              [cdkDropListData]="group"
-              (cdkDropListDropped)="drop($any($event))"
-              [cdkDropListConnectedTo]="['itemList']"
-              id="panel{{ i }}"
-              [class.selected]="selectedGroupIndex === i"
-              (click)="selectGroup(i)"
-              *ngFor="let group of exerciseGroups; trackBy: trackByIndex; index as i"
-              class="expansion-panel draggable-item"
-              #panel
-            >
-              <mat-expansion-panel-header>
-                <mat-icon class="drag-icon">drag_indicator</mat-icon>
-                <div class="group-header">
-                  <div class="group-number">
-                    {{ group.name }}
-                  </div>
-                  <div class="exercise-number">
-                    <ng-container [ngPlural]="group.exercises.length">
-                      <ng-template ngPluralCase="=0">0 exercice</ng-template>
-                      <ng-template ngPluralCase="=1">1 exercice</ng-template>
-                      <ng-template ngPluralCase="other">{{ group.exercises.length }} exercices</ng-template>
-                    </ng-container>
-                  </div>
-                </div>
-              </mat-expansion-panel-header>
-              <div class="mat-expansion-panel-content draggable-container">
-                <nz-list
-                  cdkDropList
-                  [cdkDropListDisabled]="readOnly"
-                  (cdkDropListDropped)="drop($any($event))"
-                  [cdkDropListConnectedTo]="connectedTo[i]"
-                  [cdkDropListData]="group.exercises"
-                  (cdkDropListDropped)="onReorderExercises($any($event))"
-                  [nzDataSource]="group.exercises"
-                  nzBordered
-                  class="draggable-container"
-                  id="array{{ i }}"
-                >
-                  <div
-                    *ngFor="let exercise of group.exercises; trackBy: trackByExerciseId; index as i"
-                    class="draggable-item exercise-in-group"
-                    cdkDrag
-                  >
-                    <app-pla-exercise-editor
-                      [disabled]="readOnly"
-                      [exercise]="exercise"
-                      (exerciseChange)="updateExercise($event)"
-                      (exerciseLoadFailed)="onExerciseLoadFailed($event)"
-                      (deleteClicked)="deleteExercise(i)"
-                    />
-                  </div>
-                </nz-list>
-              </div>
-            </mat-expansion-panel>
-          </mat-accordion>
-        </div>
-        <div class="graph-container"></div>
-      </div> -->
     </ng-container>
   </form>
 </div>

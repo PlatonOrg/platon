@@ -145,7 +145,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   }
 
   protected get nextNavigation(): boolean {
-    return this.player.settings?.navigation?.mode === 'next'
+    return this.player.settings?.navigation?.mode === 'next' || this.player.settings?.navigation?.mode === 'validation'
   }
 
   protected get isPlaying(): boolean {
@@ -488,7 +488,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
 
   protected onChangeNavigation(navigation: PlayerNavigation): void {
     if (
-      this.player.settings?.navigation?.mode === 'next' &&
+      this.nextNavigation &&
       this.player.settings?.nextSettings?.autoNext &&
       !this.loadingNext &&
       navigation.current?.grade != undefined &&
@@ -584,7 +584,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       this.hasNext = index < navigation.exercises.length - 1
       this.hasPrev = index > 0
       this.position = index
-    } else if (current && this.player.settings?.navigation?.mode === 'next') {
+    } else if (current && this.player.settings && this.nextNavigation) {
       const index = navigation.exercises.findIndex((item) => item.sessionId === current.sessionId)
       this.hasNext = true
       this.hasPrev =

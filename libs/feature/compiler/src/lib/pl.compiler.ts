@@ -439,8 +439,16 @@ export class PLCompiler implements PLVisitor {
     variables.introduction = introduction || ''
     variables.conclusion = conclusion || ''
 
-    Object.keys(groups).forEach((groupName) => {
-      groups[groupName].exercises.forEach((exercise) => {
+    Object.keys(groups).forEach((groupId) => {
+      groups[groupId].exercises.forEach((exercise) => {
+        const intGroupId = Number(groupId)
+        if (Number.isNaN(intGroupId)) {
+          console.warn(
+            `[Compilation] Échec de la conversion en nombre de l'identifiant pour le groupe "${groupId}". Ce groupe a été ignoré.`
+          )
+          return // ignore this group
+        }
+        exercise.groupId = intGroupId
         exercises.push(exercise)
       })
     })
@@ -472,7 +480,7 @@ export class PLCompiler implements PLVisitor {
       })
     )
 
-    if (variables.settings?.navigation?.mode === 'next') {
+    if (variables.settings?.navigation?.mode === 'next' || variables.settings?.navigation?.mode === 'validation') {
       const file =
         variables.settings.nextSettings?.sandbox === 'python' ? ACTIVITY_NEXT_FILE_PYTHON : ACTIVITY_NEXT_FILE_NODE
       const next = await this.resolveContent(file)

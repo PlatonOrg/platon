@@ -106,6 +106,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     seedPerExercise: false,
     navigation: {
       mode: 'manual',
+      random: false,
     },
     actions: {
       retry: 0,
@@ -128,7 +129,7 @@ export class CourseActivitySettingsComponent implements OnInit {
   // Getters pour garantir que les objets ne sont jamais undefined
   get navigation() {
     if (!this.activitySettings.navigation) {
-      this.activitySettings.navigation = { mode: 'manual' }
+      this.activitySettings.navigation = { mode: 'manual', random: false }
     }
     return this.activitySettings.navigation
   }

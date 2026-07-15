@@ -1,0 +1,276 @@
+---
+title: Programmation du mode validation
+description: Guide technique du Next préconfiguré de validation pour les experts de la création de contenu. Architecture, persistance, templates universels et fonctions dédiées.
+---
+
+import { Callout } from 'nextra/components'
+
+# Mode Validation : Architecture et Fonctionnalités Avancées
+
+Le **Mode Validation** s'appuie sur un script de navigation (*Next*) préconfiguré au sein de la plateforme. Il intègre des fonctionnalités spécifiques indispensables à son fonctionnement, telles que la sélection de groupes aléatoires, la configuration de règles de validation pour chaque groupe ou encore l'usage de templates universels.
+
+Ce guide technique est destiné aux **experts de la création de contenu sur la plateforme** qui souhaitent comprendre les mécanismes internes de ce mode, manipuler sa mémoire persistante ou écrire des logiques d'évaluation personnalisées.
+
+---
+
+## Architecture et Cycle de Vie
+
+Le script de validation fonctionne de manière **stateless** (sans état persistant en mémoire vive) et s'exécute en Python. Il est entièrement relancé à chaque fois qu'un étudiant soumet un exercice. Son rôle est d'analyser l'historique enregistré dans la mémoire sérialisée de l'activité afin de déterminer l'exercice suivant à présenter ou de siffler la fin de l'activité.
+
+---
+
+## Fonctions du Mode Validation
+
+Pour interagir avec la configuration du Mode Validation depuis vos scripts, trois fonctions spécifiques sont intégrées à la bibliothèque. Voici leurs points clés :
+
+* **`getGroupGradeRules(groupNb: int) -> Optional[dict]`**
+  * **Rôle** : Récupère les critères de succès configurés dans l'interface PLaTon pour un groupe donné.
+  * **Points importants** : Si aucune règle n’est définie pour le groupe (type `'empty'`), elle renvoie `None`. Sinon, elle renvoie un dictionnaire contenant le type de barème (`'mean'` ou `'success'`), le score cible (`targetScore`), le nombre d'exercices évalués (`exercisesCount`) et la limite de tentatives (`maxAttempts`). Cela permet à votre script de s'adapter automatiquement aux exigences de chaque groupe.
+
+* **`isValidationModeRandom() -> bool`**
+  * **Rôle** : Indique l'état du paramètre "Groupe Aléatoire" de l'activité.
+  * **Points importants** : Renvoie `True` si l'activité est configurée pour basculer aléatoirement d'un groupe non validé à un autre entre chaque exercice, et `False` si le parcours doit être linéaire. Elle lève une erreur (`ValueError`) si l'activité n'utilise pas le mode validation.
+
+* **`getGroupName(groupNb: int) -> str`**
+  * **Rôle** : Récupère le nom textuel attribué à un groupe d'exercices.
+  * **Points importants** : Indispensable pour identifier des groupes nommés de manière spécifique dans votre code (comme le groupe technique `"template universel"`) ou pour enrichir vos messages de débogage dans les logs (`platon_log`).
+
+<Callout type="info">
+  Une documentation complète répertoriant toutes les autres fonctions générales de navigation de la plateforme est disponible sur la page officielle de la [Documentation NextLib](https://platon.univ-eiffel.fr/docs/main/programing/activity/next-navigation/nextlib).
+</Callout>
+
+---
+
+## État de la Mémoire (Persistance)
+
+Pour maintenir la continuité du parcours utilisateur entre deux exécutions indépendantes, l'état est stocké et récupéré au format JSON via les fonctions de persistance globales :
+
+| Variable | Type | Description |
+| :--- | :--- | :--- |
+| `ENVSET` | `bool` | Flag d'initialisation. Positionné à `True` une fois la structure initiale de l'activité générée au premier lancement. |
+| `HAS_UNIVERSAL_TEMPLATE` | `bool` | Flag confirmant la détection et la prise en compte du groupe technique du template universel. |
+| `UNIQUE_INDEX_EXERCISE` | `int` | Compteur incrémental passé à `generateAndPlayExercise` afin de forcer la création d'une nouvelle instance d'exercice lors des boucles sur un groupe. |
+| `TOVALID` | `dict` | Registre des groupes en cours de complétion. *(Voir structure ci-dessous)* |
+| `VALID` | `dict` | Registre des groupes validés. Structure identique à `TOVALID`, complétée par la clé `grade`. |
+
+### Topologie des dictionnaires de suivi (`TOVALID` / `VALID`)
+Chaque entrée de groupe est modélisée de la façon suivante :
+* **`idGroup`** `(str)` : Identifiant unique ou index de position du groupe.
+* **`exercisesIndex`** `(list[int])` : Index des exercices rattachés.
+* **`turn`** `(int)` : Nombre d'exercices exécutés au sein de ce groupe.
+* **`useUniversalTemplate`** `(bool)` : Indique si le groupe est alimenté dynamiquement.
+* **`logs`** `(dict)` : Historique complet structuré en deux clés :
+  * `order` `(list[uuid])` : Liste chronologique des UUIDs d'instances d'exercices lancées.
+  * `info` `(dict)` : Cartographie indexée par l'UUID contenant les métriques de performance (`indexSource`, `id`, `grade`, `attempts`, `hints`, `error`).
+
+---
+
+## Génération Dynamique : Templates Universels
+
+Le template universel permet de générer un exercice avec n'importe quel composant de la plateforme en fournissant dynamiquement les informations de configuration de l'exercice au format JSON.
+
+<Callout type="info">
+  Pour une compréhension exhaustive du comportement global et des propriétés de ces composants, veuillez vous référer à la documentation spécifique présente dans le cercle **Z_AMC**.
+</Callout>
+
+### 1. Fichier de configuration : `exercices.json`
+Créez un fichier au format JSON nommé obligatoirement `exercices.json` et déposez-le dans le dossier `includes/` de la ressource. Ce fichier associe l'index du groupe cible (exemple : `"1"`, `"2"`) à une liste d'objets représentant les configurations de vos exercices.
+
+Voici un exemple de structure regroupant trois types de composants universels différents (*Automaton*, *Word Selector* et *Drag & Drop*) :
+
+```json
+{
+  "1": [
+    {
+      "coeff": 1.0,
+      "type": "wc-automaton-editor",
+      "theme": "Théorie des langages",
+      "title": "Reconnaissance de motif simple",
+      "statement": "Créez un automate fini qui accepts toutes les chaînes sur l'alphabet {a, b} commençant impérativement par la lettre 'a' et se terminant par la lettre 'b'.",
+      "countdownTime": 180,
+      "automaton": {
+        "states": ["s0", "s1", "s2"],
+        "initialStates": ["s0"],
+        "acceptingStates": ["s2"],
+        "alphabet": ["a", "b"],
+        "transitions": [],
+        "position": {
+          "s0": {"x": 100, "y": 250},
+          "s1": {"x": 300, "y": 250},
+          "s2": {"x": 500, "y": 250}
+        }
+      },
+      "solution": {
+        "states": ["s0", "s1", "s2"],
+        "initialStates": ["s0"],
+        "acceptingStates": ["s2"],
+        "alphabet": ["a", "b"],
+        "transitions": [
+          {"fromState": "s0", "toState": "s1", "symbols": ["a"]},
+          {"fromState": "s1", "toState": "s1", "symbols": ["a", "b"]},
+          {"fromState": "s1", "toState": "s2", "symbols": ["b"]}
+        ],
+        "position": {
+          "s0": {"x": 100, "y": 250},
+          "s1": {"x": 300, "y": 250},
+          "s2": {"x": 500, "y": 250}
+        }
+      },
+      "bareme": "lambda student_automaton, soluce_automaton: (lambda s, c: (lambda states_score: states_score + (20 if s['initialStates'] == c['initialStates'] else 0) + (20 if set(s['acceptingStates']) == set(c['acceptingStates']) else 0) + (lambda stu_trans, sol_trans: (lambda matches: (len(matches) / len(sol_trans) * 30) if len(sol_trans) > 0 else 0)(set((t['fromState'], t['toState'], tuple(sorted(t['symbols']))) for t in stu_trans).intersection(set((t['fromState'], t['toState'], tuple(sorted(t['symbols']))) for t in sol_trans))))(s['transitions'], c['transitions']))(30 if set(s['states']) == set(c['states']) else 0))(student_automaton, soluce_automaton)",
+      "explication": "Pour valider une chaîne commençant par 'a' et finissant par 'b' : 1. L'état initial s0 doit consommer un 'a' pour transiter vers s1. 2. L'état s1 possède une boucle réflexive pour lire tous les symboles intermédiaires. 3. Dès qu'un 'b' est rencontré en fin de chaîne, l'automate bascule vers s2 (état acceptant).",
+      "feedbacks": {
+        "correct": "Votre automate filtre parfaitement le langage demandé.",
+        "partial": "C'est un bon début. Vérifiez que votre alphabet comporte toutes les transitions requises.",
+        "incorrect": "La logique n'est pas correcte. Relisez attentivement la consigne."
+      }
+    }
+  ],
+  "2": [
+    {
+      "coeff": 1.0,
+      "type": "wc-word-selector",
+      "theme": "Histoire - Monarchie",
+      "title": "Le premier roi des Francs",
+      "assignment": "Retrouvez le nom du premier roi des Francs à s'être fait baptiser.",
+      "words": ["Clovis", "Ier", "Charlemagne", "Childebert", "Baptême"],
+      "selectedWords": ["Clovis", "Ier"],
+      "explication": "Clovis Ier est historiquement considéré comme le premier roi des Francs chrétien à la suite de son baptême dans la cathédrale de Reims.",
+      "bareme": "lambda student_words, soluce_words: 100 if set(student_words) == set(soluce_words) else max(0, 100 - (len(set(student_words) ^ set(soluce_words)) * 33))",
+      "feedbacks": {
+        "correct": "Vous avez correctement identifié le souverain.",
+        "partial": "Votre sélection de mots est incomplète ou contient un intrus.",
+        "incorrect": "Ce souverain ne correspond pas au premier roi des Francs baptisé."
+      }
+    },
+    {
+      "coeff": 1.0,
+      "type": "wc-drag-drop",
+      "theme": "Histoire - Chronologie",
+      "title": "Grandes dates de l'histoire",
+      "assignment": "Associez chaque événement historique marquant à sa date correspondante.",
+      "nbq": 4,
+      "listofvalues": [
+        {"content": "Chute de l'Empire romain d'Occident", "correct": "476", "explication": "Cet événement marque traditionnellement la rupture avec l'Antiquité."},
+        {"content": "Sacre de Charlemagne comme empereur", "correct": "800", "explication": "Charlemagne est couronné à Rome par le pape Léon III le jour de Noël l'an 800."},
+        {"content": "Arrivée de Christophe Colomb en Amérique", "correct": "1492", "explication": "Cette date clé marque le début de la Renaissance."},
+        {"content": "Prise de la Bastille", "correct": "1789", "explication": "Le 14 juillet 1789 est l'événement fondateur marquant le début de la Révolution française."}
+      ],
+      "bareme": "lambda student_answer, soluce_answer: (sum(1 for k, v in soluce_answer.items() if student_answer.get(k) and student_answer[k][0] == v) / len(student_answer)) * 100 if student_answer else 0",
+      "feedbacks": {
+        "correct": "Toutes les associations chronologiques sont parfaitement exactes.",
+        "partial": "Certains événements historiques n'ont pas été déposés sur les bons repères temporels.",
+        "incorrect": "Aucune des correspondances chronologiques proposées n'est valide."
+      }
+    }
+  ]
+}
+```
+
+### 2. Le Groupe Maître (L'index 0)
+Pour activer la génération dynamique, vous devez créer un tout premier groupe d'exercices nommé **exactement** `"template universel"` dans les paramètres de la plateforme.
+
+* **Comportement technique** : Ce groupe fait office de "local technique". Il doit contenir **uniquement** le template universel de base. Dès qu'un exercice dynamique doit être généré et joué à travers le parcours, le moteur intercepte l'appel, cible ce conteneur de l'index `0`, et lui applique les paramètres extraits de votre fichier `exercices.json`.
+* **Exclusion** : Ce groupe technique n'est jamais joué directement par l'étudiant et est exclu des calculs de notation finale.
+
+### 3. Les Groupes Cibles et Restrictions de mixage
+Puisque l'index `0` est monopolisé par le local technique du template universel, **les véritables groupes de contenu de l'activité commencent à l'index 1**.
+
+Si un groupe est configuré pour n'être composé que d'exercices dynamiques issus du template universel, vous devez simplement déclarer ce groupe dans l'interface PLaTon mais le **laisser totalement vide**. Le Next injectera dynamiquement les exercices voulus lors de l'exécution.
+
+<Callout type="warning">
+  **Règle critique de mixage** : Comme le moteur s'appuie de manière transverse sur le conteneur du groupe 0 pour instancier les modèles, il est **impossible de faire commencer un groupe par un exercice "template universel" si ce même groupe contient également des exercices classiques** déclarés manuellement.
+</Callout>
+
+---
+
+## Surcharge de l'évaluation : Grader Personnalisé
+
+Si les règles d'évaluation par défaut (`mean` ou `success`) ne s'adaptent pas à la structure pédagogique souhaitée, vous pouvez intercepter le processus de notation en fournissant un script dédié.
+
+### Configuration du fichier `grader.py`
+1. Créez un fichier nommé `grader.py` et déposez-le dans le dossier `includes/`.
+2. Ce fichier doit obligatoirement exposer la fonction d'entrée `customGradeManager`.
+3. **Liberté d'écriture du script** : À l'exception de cette fonction d'entrée obligatoire, le reste du fichier est **totalement libre**. Vous pouvez y définir vos propres variables globales, fonctions d'aide ou classes intermédiaires pour organiser vos calculs comme vous le souhaitez.
+4. **Le cas par défaut (Obligatoire)** : Vous devez impérativement inclure à la fin de la fonction un cas par défaut renvoyant `None, None`. Cela permet de basculer automatiquement sur le comportement standard de la plateforme pour tous les groupes d'exercices n'ayant pas besoin de règles spécifiques.
+
+### Prototype et exemple d'implémentation
+```python
+from typing import Optional, Tuple
+
+def calculateGroupOneGrade(exerciseList: list) -> Tuple[bool, Optional[int]]:
+    """
+    Vérifie les conditions de validation spécifiques pour le Groupe 1.
+    Règles : exercice 1 >= 70, exercice 2 >= 85, exercice 3 >= 100 (selon l'ordre dans le groupe).
+    """
+    # Cartographie de la note maximale obtenue pour chaque index d'exercice
+    maxGrades = {}
+    for exercise in exerciseList:
+        indexSource = exercise["indexSource"]
+        grade = exercise["grade"]
+        if grade is not None:
+            maxGrades[indexSource] = max(maxGrades.get(indexSource, 0), grade)
+
+    # Vérification des seuils pour les trois premiers exercices (index 0, 1 et 2)
+    hasEx1 = maxGrades.get(0, 0) >= 70
+    hasEx2 = maxGrades.get(1, 0) >= 85
+    hasEx3 = maxGrades.get(2, 0) >= 100
+
+    if hasEx1 and hasEx2 and hasEx3:
+        # Si validé, on retourne la moyenne des scores de ces trois exercices cibles
+        finalGrade = int((maxGrades[0] + maxGrades[1] + maxGrades[2]) / 3)
+        return True, finalGrade
+
+    return False, None
+
+
+def customGradeManager(lastGroup: int, groupGradeInformation: dict, logs: dict) -> Tuple[Optional[bool], Optional[int]]:
+    """
+    Gestionnaire personnalisé des règles de validation d'un groupe.
+
+    :param lastGroup: Index numérique du groupe venant d'être évalué.
+    :param groupGradeInformation: Métriques standards configurées dans l'interface.
+    :param logs: Dictionnaire d'historique de performance (conforme à TOVALID.logs).
+
+    :return: (valid, grade)
+            - valid: True (validé), False (non validé), ou None (déléguer aux règles natives).
+            - grade: Entier entre 0 et 100 si valid=True, sinon None.
+    """
+    exerciseOrder = logs.get("order", [])
+    exerciseInfo = logs.get("info", {})
+
+    # ---- GROUPE 1 : Validation par paliers de score sur des exercices précis ----
+    if lastGroup == 1:
+        playedExercises = list(exerciseInfo.values())
+        return calculateGroupOneGrade(playedExercises)
+
+    # ---- GROUPE 3 : Moyenne glissante et contrainte d'efficacité sur le dernier exercice ----
+    if lastGroup == 3:
+        # Il faut au minimum 3 exercices complétés pour prétendre à la validation
+        if len(exerciseOrder) < 3:
+            return False, None
+
+        # Extraction des performances sur les 3 dernières instances jouées (ordre chronologique)
+        lastThreeUuids = exerciseOrder[-3:]
+        lastThreeExercises = [exerciseInfo[uuid] for uuid in lastThreeUuids]
+
+        # Calcul de la moyenne des scores des 3 derniers exercices
+        grades = [exercise["grade"] for exercise in lastThreeExercises if exercise["grade"] is not None]
+        if len(grades) < 3:
+            return False, None
+
+        meanGrade = sum(grades) / 3
+
+        # Vérification des contraintes strictes sur le TOUT DERNIER exercice exécuté
+        lastExercise = lastThreeExercises[-1]
+        perfectLastAttempt = lastExercise["attempts"] == 1 and lastExercise["hints"] == 0
+
+        # Validation si la moyenne est >= 80 ET le dernier exercice a été réussi du premier coup sans aide
+        if meanGrade >= 80 and perfectLastAttempt:
+            return True, int(meanGrade)
+
+        return False, None
+
+    # CRITIQUE : Cas par défaut obligatoire. Renvoie toujours (None, None)
+    # pour permettre aux autres groupes de basculer sur le comportement standard de PLaTon.
+    return None, None
+```
