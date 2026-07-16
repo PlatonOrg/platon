@@ -12,6 +12,7 @@ import {
   computed,
   signal,
   ViewChild,
+  output,
 } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
@@ -97,7 +98,7 @@ import { ActivitySettings } from '@platon/feature/compiler'
 })
 export class CourseActivitySettingsComponent implements OnInit {
   @Input() activity!: Activity
-  @Output() activityChange = new EventEmitter<Activity>()
+  activityChange = output<Activity>()
   @Output() saveRequested = new EventEmitter<void>()
   protected accessPeriods = signal<RestrictionList[]>([])
 

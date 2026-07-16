@@ -3,11 +3,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Input,
   inject,
   OnDestroy,
   OnInit,
   CUSTOM_ELEMENTS_SCHEMA,
+  input,
+  signal,
+  computed,
 } from '@angular/core'
 import { RouterModule } from '@angular/router'
 import { firstValueFrom, Subscription } from 'rxjs'
@@ -69,15 +71,18 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
   private readonly resourceService = inject(ResourceService)
   private themeSubscription?: Subscription
 
-  @Input() item!: Activity
+  item = input.required<Activity>()
+
+  private readonly localActivity = signal<Activity | null>(null)
+  protected readonly activity = computed(() => this.localActivity() ?? this.item())
 
   async ngOnInit(): Promise<void> {
     this.themeSubscription = this.themeService.themeChange.subscribe(() => {
       this.cdr.markForCheck()
     })
 
-    if (this.item.colorHue === undefined || this.item.colorHue === null) {
-      await firstValueFrom(this.courseService.updateActivity(this.item, { colorHue: -1 }))
+    if (this.activity().colorHue === undefined || this.activity().colorHue === null) {
+      await firstValueFrom(this.courseService.updateActivity(this.activity(), { colorHue: -1 }))
     }
   }
 
@@ -86,8 +91,8 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
   }
 
   get color(): string {
-    if (this.item.colorHue !== undefined && this.item.colorHue !== null) {
-      return this.hueToCSS(this.item.colorHue)
+    if (this.activity().colorHue !== undefined && this.activity().colorHue !== null) {
+      return this.hueToCSS(this.activity().colorHue!)
     }
 
     return this.hueToCSS(-1)
@@ -118,7 +123,7 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
   }
 
   get completedExercises(): number {
-    return Math.floor((this.item.progression * this.item.exerciseCount) / 100)
+    return Math.floor((this.activity().progression * this.activity().exerciseCount) / 100)
   }
 
   protected openTab(url: string): void {
@@ -126,11 +131,11 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
   }
 
   get editorUrl(): string {
-    return this.resourceService.editorUrl(this.item.resourceId, 'latest')
+    return this.resourceService.editorUrl(this.activity().resourceId, 'latest')
   }
 
   protected onActivityChange(activity: Activity): void {
-    this.item = activity
+    this.localActivity.set(activity)
     this.cdr.markForCheck()
   }
 
