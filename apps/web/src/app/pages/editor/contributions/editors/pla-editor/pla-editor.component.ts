@@ -479,6 +479,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   }
 
   protected addGroup(name?: string): void {
+    const initialGrader: GroupGrader =
+      this.activity?.settings?.navigation?.mode === 'validation' ? this.defaultGrader : { type: 'empty' }
     if (name) {
       if (this.exerciseGroups.find((group) => group.name === name)) {
         return // prevent adding a group with the same name
@@ -488,14 +490,14 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         {
           name,
           exercises: [],
-          grader: this.activity?.settings?.navigation?.mode === 'validation' ? this.defaultGrader : { type: 'empty' },
+          grader: initialGrader,
         },
       ]
     } else {
       const newGroup: ActivityExerciseGroup = {
         name: 'Groupe ' + (this.exerciseGroups.length + 1),
         exercises: [],
-        grader: { type: 'empty' },
+        grader: initialGrader,
       }
       this.exerciseGroups = [...this.exerciseGroups, newGroup]
     }
