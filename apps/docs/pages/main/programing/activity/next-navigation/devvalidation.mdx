@@ -191,11 +191,20 @@ Si les règles d'évaluation par défaut (`mean` ou `success`) ne s'adaptent pas
 1. Créez un fichier nommé `grader.py` et déposez-le dans le dossier `includes/`.
 2. Ce fichier doit obligatoirement exposer la fonction d'entrée `customGradeManager`.
 3. **Liberté d'écriture du script** : À l'exception de cette fonction d'entrée obligatoire, le reste du fichier est **totalement libre**. Vous pouvez y définir vos propres variables globales, fonctions d'aide ou classes intermédiaires pour organiser vos calculs comme vous le souhaitez.
-4. **Le cas par défaut (Obligatoire)** : Vous devez impérativement inclure à la fin de la fonction un cas par défaut renvoyant `None, None`. Cela permet de basculer automatiquement sur le comportement standard de la plateforme pour tous les groupes d'exercices n'ayant pas besoin de règles spécifiques.
+4. **Débogage** : Si vous avez besoin de tracer des informations ou de déboguer votre logique d'évaluation, vous pouvez utiliser `platon_log`. Pour cela, injectez de façon sécurisée la fonction `platon_log` au tout début de votre fichier :
+   ```python
+   import builtins
+   platon_log = getattr(builtins, "platon_log", print)
+   ```
+5. **Le cas par défaut (Obligatoire)** : Vous devez impérativement inclure à la fin de la fonction un cas par défaut renvoyant `None, None`. Cela permet de basculer automatiquement sur le comportement standard de la plateforme pour tous les groupes d'exercices n'ayant pas besoin de règles spécifiques.
 
 ### Prototype et exemple d'implémentation
 ```python
+import builtins
 from typing import Optional, Tuple
+
+# Récupération du système de log de la plateforme
+platon_log = getattr(builtins, "platon_log", print)
 
 def calculateGroupOneGrade(exerciseList: list) -> Tuple[bool, Optional[int]]:
     """
@@ -240,6 +249,7 @@ def customGradeManager(lastGroup: int, groupGradeInformation: dict, logs: dict) 
 
     # ---- GROUPE 1 : Validation par paliers de score sur des exercices précis ----
     if lastGroup == 1:
+        platon_log(f"[Grader] Évaluation personnalisée lancée pour le Groupe {lastGroup}")
         playedExercises = list(exerciseInfo.values())
         return calculateGroupOneGrade(playedExercises)
 
@@ -247,6 +257,7 @@ def customGradeManager(lastGroup: int, groupGradeInformation: dict, logs: dict) 
     if lastGroup == 3:
         # Il faut au minimum 3 exercices complétés pour prétendre à la validation
         if len(exerciseOrder) < 3:
+            platon_log("[Grader] Groupe 3 : Nombre d'exercices insuffisant (< 3)")
             return False, None
 
         # Extraction des performances sur les 3 dernières instances jouées (ordre chronologique)
@@ -266,8 +277,10 @@ def customGradeManager(lastGroup: int, groupGradeInformation: dict, logs: dict) 
 
         # Validation si la moyenne est >= 80 ET le dernier exercice a été réussi du premier coup sans aide
         if meanGrade >= 80 and perfectLastAttempt:
+            platon_log(f"[Grader] Groupe 3 validé avec succès ! Note : {int(meanGrade)}")
             return True, int(meanGrade)
 
+        platon_log("[Grader] Groupe 3 non validé : conditions de moyenne ou d'essais non remplies.")
         return False, None
 
     # CRITIQUE : Cas par défaut obligatoire. Renvoie toujours (None, None)

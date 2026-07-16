@@ -4,6 +4,9 @@
 playPreviousIfUnplayed()
 import random
 import json
+import builtins
+
+builtins.platon_log = platon_log # allow to use platon_log in other files
 
 ###
 # Manage settings
