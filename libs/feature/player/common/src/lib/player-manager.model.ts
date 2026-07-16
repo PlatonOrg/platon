@@ -443,18 +443,27 @@ export abstract class PlayerManager {
   }
 
   private isExpired(session: Session): boolean {
-    let expiresAt: Date | undefined
     const settingsHolder = session.parent ?? session
     const duration = settingsHolder.variables.settings?.duration
-    if (session.startedAt && duration) {
-      expiresAt = new Date(session.startedAt)
-      expiresAt.setSeconds(expiresAt.getSeconds() + duration)
+    const now = new Date()
+
+    if (settingsHolder.startedAt && duration) {
+      const durationExpiresAt = new Date(settingsHolder.startedAt)
+      durationExpiresAt.setSeconds(durationExpiresAt.getSeconds() + duration + 30)
+      if (now > durationExpiresAt) {
+        return true
+      }
     }
+
     if (session.activity?.closeAt) {
-      expiresAt = new Date(session.activity.closeAt)
+      const closeAtExpiresAt = new Date(session.activity.closeAt)
+      closeAtExpiresAt.setSeconds(closeAtExpiresAt.getSeconds() + 30)
+      if (now > closeAtExpiresAt) {
+        return true
+      }
     }
-    expiresAt?.setSeconds(expiresAt.getSeconds() + 30)
-    return !!expiresAt && new Date() > expiresAt
+
+    return false
   }
 
   protected abstract createAnswer(answer: Partial<Answer>): Promise<Answer>
