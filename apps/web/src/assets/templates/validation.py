@@ -34,8 +34,8 @@ if not ENVSET:
     group0Name = getGroupName(0)
     if "template universel" == group0Name :
         HAS_UNIVERSAL_TEMPLATE = True
-        if not customGradeManager:
-            raise ValueError("Fonction 'customGradeManager' non trouvé.")
+        if not JSON:
+            raise ValueError("Le fichier 'exercices.json' dans 'includes' n'a pas été trouvé.")
     else :
         HAS_UNIVERSAL_TEMPLATE = False
 
@@ -48,10 +48,8 @@ if not ENVSET:
         # check for universal template
         if JSON and groupIdStr in JSON:
             useUniversalTemplate = True
-            if "exercices" not in JSON[groupIdStr]:
-                raise ValueError("Format invalide, 'exercices' non trouvé dans le fichier JSON des templates universels.")
             offset = len(exercisesIndex)
-            exercisesIndex.extend([offset + i for i in range(len(JSON[groupIdStr]["exercices"]))])
+            exercisesIndex.extend([offset + i for i in range(len(JSON[groupIdStr]))])
         else:
             useUniversalTemplate = False
         if len(exercisesIndex) == 0:
@@ -102,6 +100,7 @@ if lastId :
         evaluate = True
         group = TOVALID[groupIdStr]
         logs = group["logs"]
+        sourcelastExerciseId = getExerciseVariable(lastId,"CHOOSEN_EXERCISE_ID")
         if lastId in logs["info"]:
             # replay an exercise
             logs["info"][lastId]["attempts"] += lastAttempts
@@ -112,7 +111,7 @@ if lastId :
             logs["order"].append(lastId)
         else :
             logs["info"][lastId] = {
-                "indexSource": lastGroup,
+                "indexSource": sourcelastExerciseId,
                 "id": lastId,
                 "grade": lastGrade,
                 "attempts": lastAttempts,
@@ -271,13 +270,15 @@ choosenGroup["turn"] += 1
 save("TOVALID", TOVALID)
 
 DIC = {
-    "UNIQUE_INDEX_EXERCISE": UNIQUE_INDEX_EXERCISE
+    "UNIQUE_INDEX_EXERCISE": UNIQUE_INDEX_EXERCISE,
+    "CHOOSEN_EXERCISE_ID" : choosenExerciseId
 }
 
-if HAS_UNIVERSAL_TEMPLATE and choosenGroup >= getGroupExercisesCount(choosenGroupId):
-    choosenJSONExercise = JSON[choosenGroup][ choosenExerciseId  - getGroupExercisesCount(choosenGroup)]
+numberOfExercises = getGroupExercisesCount(choosenGroupId)
+if HAS_UNIVERSAL_TEMPLATE and (choosenExerciseId >= numberOfExercises or numberOfExercises == 0) :
+    choosenJSONExercise = JSON[choosenGroupId][ choosenExerciseId  - getGroupExercisesCount(choosenGroupId)]
     DIC["JSONExercice"] = choosenJSONExercise
-    DIC["INFORMATIONS"] = {"group" : choosenGroup}
+    DIC["INFORMATIONS"] = {"group" : choosenGroupId}
     generateAndPlayExercise(getExerciseId(0,0),DIC)
 
 generateAndPlayExercise(getExerciseId(choosenGroupId,choosenExerciseId), DIC)
