@@ -11,15 +11,15 @@
     </p>
     <nz-list
       cdkDropList
-      [cdkDropListDisabled]="readOnly"
+      [cdkDropListDisabled]="readOnly()"
       (cdkDropListDropped)="onReorder($any($event))"
-      [nzDataSource]="inputs"
+      [nzDataSource]="inputs()"
       nzBordered
     >
       <nz-list-item
         cdkDrag
-        [class.selected]="selectionIndex === i"
-        *ngFor="let input of inputs; trackBy: trackByIndex; index as i"
+        [class.selected]="selectionIndex() === i"
+        *ngFor="let input of inputs(); trackBy: trackByIndex; index as i"
         (click)="selectInput(i)"
       >
         <b>{{ input.name }}</b>
@@ -30,7 +30,7 @@
               nzDanger
               nzType="text"
               nz-tooltip="Supprimer"
-              [disabled]="readOnly"
+              [disabled]="readOnly()"
               (click)="deleteInput(i)"
             >
               <span nz-icon nzType="delete" nzTheme="outline"></span>
@@ -39,7 +39,7 @@
         </ul>
       </nz-list-item>
     </nz-list>
-    <button class="btn-add-input" nz-button nzType="primary" [disabled]="readOnly" (click)="addInput()">+</button>
+    <button class="btn-add-input" nz-button nzType="primary" [disabled]="readOnly()" (click)="addInput()">+</button>
     <br />
     <h3>Debug</h3>
     <p>
@@ -49,10 +49,12 @@
     <nz-switch [(ngModel)]="debug"></nz-switch>
     <br /><br />
     <div>
-      <pre *ngIf="debug">{{ inputs | json }}</pre>
+      <pre *ngIf="debug">{{ inputs() | json }}</pre>
     </div>
   </div>
-  <div class="container-selection" *ngIf="selection">
-    <app-ple-input [disabled]="readOnly" [(input)]="selection" (inputChange)="onChangeInput($event)" />
+  <div class="container-selection" *ngIf="selection()">
+    @if (selection(); as selectedInput) { @for (key of [selectionIndex()]; track key) {
+    <app-ple-input [disabled]="readOnly()" [input]="selectedInput" (inputChange)="onChangeInput($event)" />
+    } }
   </div>
 </div>
