@@ -75,6 +75,11 @@ export class ExerciseCardComponent implements OnChanges, AfterViewInit {
   protected configurable = false
   protected readme?: ResourceFile
 
+  // use for blocking the opening of the resource if drag by the resource name.
+  protected startX = 0
+  protected startY = 0
+  protected isDrag = false
+
   @Input() item!: Resource
   @Input({ transform: booleanAttribute }) modalMode = false
   @Input({ transform: booleanAttribute }) editable = true
@@ -120,6 +125,9 @@ export class ExerciseCardComponent implements OnChanges, AfterViewInit {
   }
 
   protected openTab(url: string): void {
+    if (this.isDrag) {
+      return
+    }
     window.open(url, '_blank')
   }
 
@@ -139,5 +147,22 @@ export class ExerciseCardComponent implements OnChanges, AfterViewInit {
     this.fileService.read(`${this.item.id}`, 'readme.md').subscribe((file) => {
       this.readme = file
     })
+  }
+
+  // take coordinate when clic on the resource name
+  protected onMouseDown(event: MouseEvent): void {
+    this.startX = event.clientX
+    this.startY = event.clientY
+    this.isDrag = false
+  }
+
+  // update isDrag to see if the card as been drag or not
+  protected onMouseUp(event: MouseEvent): void {
+    const deltaX = Math.abs(event.clientX - this.startX)
+    const deltaY = Math.abs(event.clientY - this.startY)
+    const limit = 5 // if the mouse mouve more than limit px we don't open the resource
+    if (deltaX > limit || deltaY > limit) {
+      this.isDrag = true
+    }
   }
 }
