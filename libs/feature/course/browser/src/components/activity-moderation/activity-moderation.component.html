@@ -2,7 +2,7 @@
   <mat-card>
     <mat-card-header class="header-card">
       <mat-card-title>Modération de l'activité</mat-card-title>
-      <!-- <div class="header">
+      <div class="header">
         <div class="actions">
           <button
             mat-icon-button
@@ -45,10 +45,10 @@
             <mat-icon>lock</mat-icon>
           </button>
         </div>
-      </div> -->
+      </div>
     </mat-card-header>
     <mat-card-content>
-      @if (code) {
+      @if (code(); as activityCode) {
       <div class="activity-code">
         <span class="code-label">Code de déblocage :</span>
         <span
@@ -57,21 +57,51 @@
           (click)="toggleCodeVisibility()"
           [title]="isCodeRevealed ? 'Cliquer pour cacher' : 'Cliquer pour révéler le code'"
         >
-          {{ isCodeRevealed ? code : '●●●●●●' }}
+          {{ isCodeRevealed ? activityCode : '●●●●●●' }}
         </span>
+        @if (isCodeRevealed) {
+        <button
+          mat-icon-button
+          class="copy-code-button"
+          [cdkCopyToClipboard]="activityCode"
+          (cdkCopyToClipboardCopied)="onCodeCopied()"
+          [matTooltip]="isCodeCopied ? 'Copié !' : 'Copier le code'"
+          matTooltipPosition="above"
+        >
+          <mat-icon>{{ isCodeCopied ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+        }
       </div>
       }
-      <!--<div class="users-compact-grid">
+      <mat-form-field class="search-field" appearance="outline">
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          type="text"
+          matInput
+          placeholder="Rechercher un étudiant"
+          [formControl]="searchForm"
+          [matAutocomplete]="auto"
+        />
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+          @for (filteredUser of filteredUsers(); track filteredUser.id) {
+          <mat-option [value]="filteredUser"> {{ filteredUser.firstName }} {{ filteredUser.lastName }} </mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <div class="spacer"></div>
+      <div class="users-compact-grid">
+        @for (user of filteredUsers(); track user.id) {
         <div
-          *ngFor="let user of results; trackBy: trackByUserId"
           class="user-chip"
           [class.selected]="isUserSelected(user.id)"
           (click)="toggleUserSelection(user.id, user.activitySessionId)"
           [title]="user.firstName + ' ' + user.lastName"
         >
-          <user-avatar [userIdOrName]="user.id" [showUsername]="'no'" />
+          <user-avatar [userIdOrName]="user.id" [showUsername]="'none'" />
+          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
         </div>
-      </div> -->
+        }
+      </div>
     </mat-card-content>
   </mat-card>
 </div>

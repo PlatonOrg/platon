@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { provideNoopAnimations } from '@angular/platform-browser/animations'
+import { UserService } from '@platon/core/browser'
+import { of } from 'rxjs'
 import { ActivityModerationComponent } from './activity-moderation.component'
 
 describe('ActivityModerationComponent', () => {
@@ -13,6 +16,7 @@ describe('ActivityModerationComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ActivityModerationComponent],
+      providers: [provideNoopAnimations(), { provide: UserService, useValue: { findByIdOrName: () => of(undefined) } }],
     }).compileComponents()
 
     fixture = TestBed.createComponent(ActivityModerationComponent)
@@ -53,6 +57,41 @@ describe('ActivityModerationComponent', () => {
       fixture.detectChanges()
       expect(component['isCodeRevealed']).toBe(false)
       expect(el.querySelector('.code-spoiler')?.textContent?.trim()).toBe('●●●●●●')
+    })
+  })
+
+  describe('recherche', () => {
+    it('reste disponible même pour une activité sans code de déblocage (pas de TP noté)', () => {
+      setCode(undefined)
+
+      const el: HTMLElement = fixture.nativeElement
+      expect(el.querySelector('.search-field input')).toBeTruthy()
+    })
+
+    it("se met à jour tant qu'on ne tape rien, quand results change (rafraîchissement live)", () => {
+      const userA = { id: 'a', firstName: 'Alice', lastName: 'Martin', activitySessionId: 'session-a' } as any
+      const userB = { id: 'b', firstName: 'Bob', lastName: 'Durand', activitySessionId: 'session-b' } as any
+
+      fixture.componentRef.setInput('results', [userA])
+      fixture.detectChanges()
+      expect(component['filteredUsers']()).toEqual([userA])
+
+      // Simule un rafraîchissement live (nouvelle réponse d'un étudiant) sans que le prof ait tapé dans la recherche.
+      fixture.componentRef.setInput('results', [userA, userB])
+      fixture.detectChanges()
+      expect(component['filteredUsers']()).toEqual([userA, userB])
+    })
+
+    it('filtre les étudiants par nom ou prénom', () => {
+      const userA = { id: 'a', firstName: 'Alice', lastName: 'Martin', activitySessionId: 'session-a' } as any
+      const userB = { id: 'b', firstName: 'Bob', lastName: 'Durand', activitySessionId: 'session-b' } as any
+      fixture.componentRef.setInput('results', [userA, userB])
+      fixture.detectChanges()
+
+      component['searchForm'].setValue('ali')
+      fixture.detectChanges()
+
+      expect(component['filteredUsers']()).toEqual([userA])
     })
   })
 })

@@ -1,12 +1,13 @@
 import { Body, Controller, Post } from '@nestjs/common'
 import { MonitorPresencePayload } from '@platon/feature/course/common'
-import { PubSubService } from '@platon/core/server'
+import { PubSubService, Roles } from '@platon/core/server'
 import { MONITOR_PRESENCE_SUBSCRIBE, MONITOR_PRESENCE_UNSUBSCRIBE } from '@platon/feature/course/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 
 @ApiBearerAuth()
 @Controller('courses/monitor-presence')
 @ApiTags('Courses')
+@Roles('teacher', 'admin')
 export class CourseMonitorPresenceController {
   constructor(private readonly pubSubService: PubSubService) {}
 

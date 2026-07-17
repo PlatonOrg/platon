@@ -119,12 +119,22 @@
       animation: spoilerReveal 0.3s ease-out;
     }
   }
+
+  .copy-code-button {
+    display: flex;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
 }
 
 // Grid ultra-compact pour beaucoup d'utilisateurs
 .users-compact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 0.25rem;
   max-height: 400px;
   overflow-y: auto;
@@ -135,7 +145,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 0.6rem;
-  border-radius: 20px;
+  border-radius: 12px;
   background: var(--brand-background-components);
   border: 1px solid #dee2e6;
   cursor: pointer;
@@ -180,11 +190,42 @@
 
 .user-name {
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: break-word;
   font-weight: 500;
   font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.spacer {
+  height: 1rem;
+}
+
+.search-field {
+  width: 100%;
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: var(--brand-background-components);
+  }
+
+  ::ng-deep .mdc-notched-outline__leading,
+  ::ng-deep .mdc-notched-outline__notch,
+  ::ng-deep .mdc-notched-outline__trailing {
+    border-color: var(--brand-border-color) !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-icon-prefix mat-icon {
+    color: var(--brand-text-secondary);
+  }
+
+  ::ng-deep .mat-mdc-input-element {
+    color: var(--brand-text-primary);
+    caret-color: var(--brand-color-primary);
+
+    &::placeholder {
+      color: var(--brand-text-secondary);
+    }
+  }
 }
 
 // Responsive pour mobile
@@ -201,7 +242,7 @@
   }
 
   .users-compact-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 0.2rem;
     max-height: 300px;
   }
@@ -231,6 +272,32 @@
   }
   100% {
     transform: scale(1);
+  }
+}
+
+// Le panneau d'autocomplétion est rendu par le CDK Overlay à la racine du document,
+// donc en dehors de l'arbre DOM de ce composant : il faut le cibler hors de
+// .moderation-container (l'encapsulation de vue ne l'atteindrait sinon jamais).
+::ng-deep .mat-mdc-autocomplete-panel {
+  background-color: var(--brand-background-dialog, var(--brand-background-components)) !important;
+  border: 1px solid var(--brand-border-color);
+
+  .mat-mdc-option {
+    color: var(--brand-text-primary) !important;
+
+    .mdc-list-item__primary-text {
+      color: inherit;
+    }
+
+    &:hover:not(.mdc-list-item--disabled),
+    &.mat-mdc-option-active {
+      background-color: var(--brand-background-hover) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background-color: var(--brand-background-hover) !important;
+      color: var(--brand-color-primary) !important;
+    }
   }
 }
 
