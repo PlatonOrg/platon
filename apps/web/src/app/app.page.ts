@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { CoreService } from '@platon/core/browser'
 import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
-import { User, UserRoles } from '@platon/core/common'
+import { UserRoles } from '@platon/core/common'
 
 @Component({
   standalone: true,

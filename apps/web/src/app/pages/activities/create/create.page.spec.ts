@@ -56,7 +56,10 @@ describe('ActivityCreatePage', () => {
         { provide: AuthService, useValue: { ready: jest.fn().mockResolvedValue({ id: 'teacher-id' }) } },
         { provide: CourseService, useValue: courseService },
         { provide: DialogService, useValue: { error: jest.fn(), info: jest.fn(), warning: jest.fn() } },
-        { provide: TagService, useValue: { listTopics: jest.fn().mockReturnValue(of([])), listLevels: jest.fn().mockReturnValue(of([])) } },
+        {
+          provide: TagService,
+          useValue: { listTopics: jest.fn().mockReturnValue(of([])), listLevels: jest.fn().mockReturnValue(of([])) },
+        },
         {
           provide: ResourceService,
           useValue: {
@@ -101,7 +104,7 @@ describe('ActivityCreatePage', () => {
     expect(stepper['activeStep']?.stepTitle).toBe('Configuration')
   }
 
-  it("envoie le code et les paramètres graded uniquement pour une activité TP noté / Examen", async () => {
+  it('envoie le code et les paramètres graded uniquement pour une activité TP noté / Examen', async () => {
     goToConfigurationStep()
     component['selectActivityFunction']('graded')
     fixture.detectChanges()
