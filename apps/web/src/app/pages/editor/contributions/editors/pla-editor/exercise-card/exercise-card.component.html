@@ -5,6 +5,8 @@
 >
   <ui-list-item-article
     #articleComponent
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp($event)"
     [style.--border-color]="'transparent'"
     [articleTitle]="titleTemplate"
     [articleIconTemplate]="imageTemplate"

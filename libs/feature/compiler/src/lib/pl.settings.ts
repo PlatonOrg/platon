@@ -72,8 +72,10 @@ export interface ActivitySecuritySettings {
  * - `manual` => The user can jump between the exercises by using the navigation card.
  * - `composed` => All exercises are shown together.
  * - `peer` => The user either has to finish the exercise or has to review the exercise of the peer.
+ * - `next` => Adaptive navigation driven by a custom Python script to dynamically choose the next exercise.
+ * - `validation` => Group-based navigation where the user must successively validate predefined exercise groups (based on 'next').
  */
-export type ActivityNavigationModes = 'manual' | 'composed' | 'next' | 'peer'
+export type ActivityNavigationModes = 'manual' | 'composed' | 'next' | 'peer' | 'validation'
 
 /** Settings specific to navigation. */
 export interface ActivityNavigationSettings {
@@ -82,8 +84,13 @@ export interface ActivityNavigationSettings {
    * - `manual` => The user can jump between the exercises by using the navigation card.
    * - `composed` => All exercises are shown together.
    * - `peer` => The user either has to finish the exercise or has to review the exercise of the peer.
+   * - `next` => Adaptive navigation driven by a custom Python script to dynamically choose the next exercise.
+   * - `validation` => Group-based navigation where the user must successively validate predefined exercise groups (based on 'next').
    */
   mode?: ActivityNavigationModes
+
+  /** for the mode validation, if true, use a random group otherwise, it take in order */
+  random?: boolean
 }
 
 /** Default settings for preview mode. */
@@ -102,6 +109,7 @@ export const defaultActivitySettings = (): ActivitySettings => ({
   },
   navigation: {
     mode: 'manual',
+    random: false,
   },
   security: {
     noCopyPaste: false,

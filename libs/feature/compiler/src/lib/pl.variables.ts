@@ -132,6 +132,7 @@ export interface ExerciseVariables {
 
 export interface ActivityExercise {
   id: string
+  groupId: number
   resource: string
   version: string
   overrides?: Variables
@@ -143,6 +144,14 @@ export type ActivityExerciseGroups = Record<string, ActivityExerciseGroup>
 export interface ActivityExerciseGroup {
   name: string
   exercises: ActivityExercise[]
+  grader: GroupGrader
+}
+
+export interface GroupGrader {
+  type: 'empty' | 'mean' | 'success' // success last 'exerciseCount' exercises had more than 'targetScore'
+  exerciseCount?: number // take the last 'exercicesCount' exercises to verify the validation
+  targetScore?: number
+  maxAttempts?: number // attempts on one exercice
 }
 
 /**

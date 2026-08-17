@@ -1,0 +1,61 @@
+---
+title: Mode Validation
+description: Guide de configuration et d'utilisation du mode de navigation par Validation dans PLaTon pour les enseignants et concepteurs de contenu.
+---
+
+import { Callout } from 'nextra/components'
+
+# Navigation par Mode Validation
+
+Le **Mode Validation** est un parcours pédagogique intelligent pré-configuré. Il organise une activité autour de la réussite successive de **groupes d'exercices**. L'étudiant doit valider un groupe selon des critères précis (score à atteindre, nombre d'essais maximum) pour progresser et valider son activité.
+
+<Callout type="info">
+  Ce mode de navigation fonctionne exclusivement avec le moteur Python de la plateforme (configuré par défaut).
+</Callout>
+
+---
+
+## Configuration de l'activité
+
+Pour activer ce comportement, rendez-vous dans les paramètres de votre activité, puis dans l'onglet **Next**.
+
+### Options principales
+* **Navigation libre** : Cochez cette option si vous souhaitez autoriser l'étudiant à revenir en arrière sur des exercices ou des groupes déjà passés.
+* **Groupe Aléatoire** : Détermine la manière dont l'étudiant passe d'un groupe à un autre :
+  * **Désactivé (Par défaut)** : L'activité est linéaire. L'étudiant commence par le premier groupe d'exercices et doit le valider entièrement avant de pouvoir passer au groupe suivant.
+  * **Activé** : Entre chaque exercice, un groupe est choisit au hasard parmi tous ceux que l'étudiant n'a pas encore validés.
+
+---
+
+## Parcours de l'étudiant et règles de boucle
+
+Au sein d'un même groupe, les exercices sont présentés dans l'ordre que vous avez définit.
+
+Si l'étudiant arrive à la fin des exercices d'un groupe sans avoir réussi à obtenir les critères de validation requis, le système fait automatiquement une **boucle** : il relance le premier exercice du groupe.
+*(Note : Lors de cette boucle, l'exercice est entièrement réinitialisé, ce qui permet de modifier les données ou variables aléatoires de l'exercice pour renouveler la question).*
+
+---
+
+## Configuration de la Notation et de la Validation
+
+Les critères permettant de déclarer qu'un groupe est "validé" se configurent **directement au niveau des paramètres de chaque groupe d'exercices** dans l'interface PLaTon.
+
+Vous pouvez choisir entre deux règles standards :
+
+### 1. Règle "Mean" (Moyenne)
+Le groupe est validé si la moyenne des scores obtenus sur les *N* derniers exercices tentés dans ce groupe est supérieure ou égale au score cible que vous avez fixé.
+* *Exemple : Demander une moyenne d'au moins 80 sur les 3 derniers exercices.*
+
+### 2. Règle "Success" (Succès individuel)
+Le groupe est validé si chacun des *N* derniers exercices évalués possède un score individuel supérieur ou égal au score cible.
+* *Exemple : Réussir individuellement chacun des 2 derniers exercices avec une note d'au moins 70.*
+
+<Callout type="warning">
+  Pour ces deux règles, si un exercice dépasse le nombre maximal de tentatives autorisé dans vos paramètres, le groupe ne pourra pas être validé sur cette série.
+</Callout>
+
+### Calcul de la note finale de l'activité
+La note globale de l'étudiant pour l'ensemble de l'activité suit des règles automatisées :
+* **Coefficients égaux** : Tous les groupes d'exercices configurés ont exactement le même poids dans la note finale.
+* **Note figée** : La note d'un groupe est définitivement enregistrée dès sa toute première validation. Si l'étudiant décide de rejouer un exercice dans un groupe qu'il a déjà validé avec succès, la note globale de ce groupe ne changera plus.
+* **Pénalité de non-validation** : Tout groupe d'exercices qui n'a pas été validé avec succès à la fin de l'activité compte pour 0 point dans le calcul de la moyenne finale.

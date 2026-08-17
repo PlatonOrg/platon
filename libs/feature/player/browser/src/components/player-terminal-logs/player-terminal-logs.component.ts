@@ -16,9 +16,9 @@ import { User, UserRoles } from '@platon/core/common'
   imports: [CommonModule, MatIconModule, MatButtonModule, NzToolTipModule],
 })
 export class PlayerTerminalLogsComponent implements OnInit {
-  logs = input<PlatonLog[]>([])
-  title = input('Terminal PlaTon')
-  protected isTeacherOrAdmin = signal(false)
+  readonly logs = input<PlatonLog[]>([])
+  readonly title = input('Terminal PlaTon')
+  protected readonly isTeacherOrAdmin = signal(false)
 
   constructor(private readonly dialogService: DialogService, private readonly authService: AuthService) {}
 

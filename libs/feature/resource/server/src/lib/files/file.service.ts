@@ -213,8 +213,11 @@ export class ResourceFileService {
       dependencyResolver: dependencyResolver,
     })
     await compiler.compile(Buffer.from((await buffer).buffer).toString())
-
     const source = await compiler.output(overrides)
+
+    if (source.errors.length > 0) {
+      throw new BadRequestResponse(source.errors.map((error) => error.description).join('\n'))
+    }
 
     source.variables.author = resource.ownerId
     return { source, resource, compiler }

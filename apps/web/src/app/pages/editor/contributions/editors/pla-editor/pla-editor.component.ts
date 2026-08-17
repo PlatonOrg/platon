@@ -12,6 +12,7 @@ import {
   ActivityExercise,
   ActivityExerciseGroup,
   ActivityVariables,
+  GroupGrader,
 } from '@platon/feature/compiler'
 import {
   CircleFilterIndicator,
@@ -39,6 +40,7 @@ import Fuse from 'fuse.js'
 import { Subscription, debounceTime, firstValueFrom, map, shareReplay, skip } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
 import { ResourceFileImpl, ResourceFileSystemProvider } from '../../file-system'
+import { HttpClient } from '@angular/common/http'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
@@ -76,6 +78,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   private readonly editorService = inject(EditorService)
   private readonly resourceFileSystemProvider = inject(ResourceFileSystemProvider)
 
+  constructor(private http: HttpClient) {}
+
   protected readonly searchbar: SearchBar<string> = {
     placeholder: 'Essayez un nom, un topic, un niveau...',
     filterer: {
@@ -111,7 +115,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     conclusion: '',
     settings: {
       duration: 0,
-      navigation: { mode: 'manual' },
+      navigation: { mode: 'manual', random: false },
       actions: {
         retry: 0,
         hints: true,
@@ -147,6 +151,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
 
   protected step = 2
 
+  protected expandedGroups: { [index: number]: boolean } = {} // tracking if the grader is expanded for each group
   @Input()
   protected editor!: Editor
 
@@ -158,6 +163,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     seedPerExercise: [!!this.activity.settings?.seedPerExercise],
     navigation: this.fb.group({
       mode: [this.activity.settings?.navigation?.mode || 'manual', [Validators.required]],
+      random: [this.activity.settings?.navigation?.random || false],
     }),
     actions: this.fb.group({
       retry: [this.activity?.settings?.actions?.retry, [Validators.required, Validators.min(0)]],
@@ -197,6 +203,11 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       label: 'Comparaison par les pairs',
       tooltip: "Mode composé que l'on utilise pour afficher deux exercices et les comparer.",
     },
+    {
+      value: 'validation',
+      label: 'Validation',
+      tooltip: "Les groupes permettent de réunir un ensemble d'exercices afin de structurer les étapes de l'activité.",
+    },
   ]
 
   protected exerciseGroups: ActivityExerciseGroup[] = []
@@ -232,6 +243,14 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
 
   protected peer_activity_groups = ['exercice', 'comparaison', 'entrainement', 'attente']
 
+  // default grader for validation mode
+  protected defaultGrader: GroupGrader = {
+    type: 'success',
+    exerciseCount: 3,
+    targetScore: 80,
+    maxAttempts: 5,
+  }
+
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User
     const direction = localStorage.getItem('order-direction') as OrderingDirections
@@ -260,6 +279,14 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       if (partial.navigation?.mode === 'peer') {
         this.peer_activity_groups.forEach((group) => {
           this.addGroup(group)
+        })
+      }
+      if (partial.navigation?.mode === 'validation') {
+        this.form.get('nextSettings.hasExercisesVariables')?.setValue(true, { emitEvent: false })
+        this.exerciseGroups.forEach((group) => {
+          if (!group.grader || group.grader.type === 'empty') {
+            group.grader = this.defaultGrader
+          }
         })
       }
     })
@@ -452,6 +479,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   }
 
   protected addGroup(name?: string): void {
+    const initialGrader: GroupGrader =
+      this.activity?.settings?.navigation?.mode === 'validation' ? this.defaultGrader : { type: 'empty' }
     if (name) {
       if (this.exerciseGroups.find((group) => group.name === name)) {
         return // prevent adding a group with the same name
@@ -461,12 +490,14 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         {
           name,
           exercises: [],
+          grader: initialGrader,
         },
       ]
     } else {
       const newGroup: ActivityExerciseGroup = {
         name: 'Groupe ' + (this.exerciseGroups.length + 1),
         exercises: [],
+        grader: initialGrader,
       }
       this.exerciseGroups = [...this.exerciseGroups, newGroup]
     }
@@ -492,6 +523,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
             id: uuidv4(),
             version: 'latest',
             resource: this.selectedExercise.id,
+            groupId: this.selectedGroupIndex,
           } as ActivityExercise,
         ]
       } else {
@@ -503,6 +535,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
             resource: this.isActivityExercise(this.selectedExercise)
               ? (this.selectedExercise as ActivityExercise).resource
               : this.selectedExercise.id,
+            groupId: this.selectedGroupIndex,
           } as ActivityExercise,
           ...this.selectedGroup.exercises.slice(index),
         ]
@@ -521,6 +554,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.selectedGroup = {
       name: this.selectedGroup?.name || '',
       exercises: this.selectedGroup?.exercises.filter((_, i) => i !== index) ?? [],
+      grader: this.selectedGroup?.grader || { type: 'empty' },
     }
     this.exerciseGroups = this.exerciseGroups.map((group, i) =>
       i === this.selectedGroupIndex
@@ -535,6 +569,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.selectedGroup = {
       name: this.selectedGroup?.name || '',
       exercises: this.selectedGroup?.exercises.map((e) => (e.id === exercise.id ? exercise : e)) ?? [],
+      grader: this.selectedGroup?.grader || { type: 'empty' },
     }
     this.exerciseGroups = this.exerciseGroups.map((group, i) =>
       i === this.selectedGroupIndex
@@ -583,6 +618,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         seedPerExercise: value.seedPerExercise || false,
         navigation: {
           mode: value.navigation?.mode || 'composed',
+          random: value.navigation?.random || false,
         },
         actions: {
           retry: value.actions?.retry || 0,
@@ -605,11 +641,20 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
           autoNext: value.nextSettings?.autoNext || false,
           autoNextGrade: value.nextSettings?.autoNextGrade || 0,
           allowFreeNavigation: value.nextSettings?.allowFreeNavigation || false,
-          hasExercisesVariables: value.nextSettings?.hasExercisesVariables || false,
+          hasExercisesVariables:
+            // mode validation cannot work without hasExercisesVariables set has true
+            value.navigation?.mode === 'validation' ? true : value.nextSettings?.hasExercisesVariables || false,
         },
       },
       exerciseGroups: this.exerciseGroups.reduce((acc, group, index) => {
-        acc[index] = group
+        acc[index] = {
+          // update exercise groupId
+          ...group,
+          exercises: group.exercises.map((exercise) => ({
+            ...exercise,
+            groupId: index,
+          })),
+        }
         return acc
       }, {} as Record<number, ActivityExerciseGroup>),
     }
@@ -651,6 +696,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       seedPerExercise: this.activity.settings?.seedPerExercise,
       navigation: {
         mode: this.activity.settings?.navigation?.mode,
+        random: this.activity.settings?.navigation?.random,
       },
       actions: {
         retry: this.activity?.settings?.actions?.retry,
@@ -673,7 +719,10 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         autoNext: this.activity.settings?.nextSettings?.autoNext,
         autoNextGrade: this.activity.settings?.nextSettings?.autoNextGrade,
         allowFreeNavigation: this.activity.settings?.nextSettings?.allowFreeNavigation,
-        hasExercisesVariables: this.activity.settings?.nextSettings?.hasExercisesVariables,
+        hasExercisesVariables:
+          this.activity.settings?.navigation?.mode === 'validation'
+            ? true // mode validation always need hasExercisesVariables to be true
+            : this.activity.settings?.nextSettings?.hasExercisesVariables,
       },
     })
 
@@ -705,6 +754,19 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.onChangeData()
   }
 
+  /** Update infotmation when switching the grade validation mode for validation type of activity*/
+  protected onGraderTypeChange(type: 'empty' | 'mean' | 'success', index: number): void {
+    const group = this.exerciseGroups[index]
+    if (!group) return
+
+    if (type === 'empty') {
+      group.grader = { type: 'empty' }
+    } else if (type === 'mean' || type === 'success') {
+      group.grader = this.defaultGrader
+    }
+    this.onChangeData()
+  }
+
   onExerciseLoadFailed(failedExercise: ActivityExercise) {
     for (const group of this.exerciseGroups) {
       group.exercises = group.exercises.filter((exercise) => exercise.id !== failedExercise.id)
@@ -727,14 +789,20 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     )
 
     if (!this.resourceFileSystemProvider.exists(nextUri)) {
-      await this.resourceFileSystemProvider.write(
-        nextUri,
-        // this.activity.settings?.nextSettings?.sandbox == 'python'
-        //   ? 'from /utils/libs/platon/NextLib import *\n\n'
-        //   : '// TODO : import NextLib\n\n'
-        '',
-        false
-      )
+      let defaultContent = ''
+
+      if (this.activity.settings?.navigation?.mode === 'validation') {
+        try {
+          defaultContent = await firstValueFrom(
+            this.http.get('assets/templates/validation.py', { responseType: 'text' })
+          )
+        } catch (error) {
+          console.error("cannon't load the template of validation", error)
+          defaultContent = '# Erreur de chargement du template du next nécessaire pour le mode validation.\n'
+        }
+      }
+
+      await this.resourceFileSystemProvider.write(nextUri, defaultContent, false)
     }
 
     this.editorService.open(nextUri).catch(console.log)

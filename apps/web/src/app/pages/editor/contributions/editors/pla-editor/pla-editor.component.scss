@@ -289,3 +289,28 @@ div.ant-typography {
 .openNextButton {
   margin-bottom: 1rem;
 }
+
+.validation-panel {
+  margin-bottom: 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  overflow: scroll;
+}
+
+.validation-panel__expanded {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #fafafa;
+  cursor: pointer;
+  user-select: none;
+}
+
+.validation-panel__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}

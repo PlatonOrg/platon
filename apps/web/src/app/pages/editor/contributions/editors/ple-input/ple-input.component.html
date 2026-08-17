@@ -2,15 +2,19 @@
 <ng-container *ngIf="mode === 'config' || mode === 'ple'">
   <form class="config-editor" [formGroup]="form">
     <h3>Informations</h3>
-    <nz-form-item nzRequired>
-      <nz-form-label [nzSpan]="3" nzLabelAlign="left" for="name">Nom</nz-form-label>
+    <nz-form-item style="display: flex; flex-wrap: wrap; align-items: center">
+      <nz-form-label nzLabelAlign="left" for="name" style="flex: 0 0 110px; width: 110px; padding: 0"
+        >Nom</nz-form-label
+      >
       <nz-form-control [nzValidateStatus]="hasNameError ? 'error' : 'success'" nzErrorTip="Ce nom est réservé">
         <input nz-input id="name" formControlName="name" />
       </nz-form-control>
     </nz-form-item>
-    <nz-form-item>
-      <nz-form-label [nzSpan]="3" nzLabelAlign="left" for="type">Type</nz-form-label>
-      <nz-form-control>
+    <nz-form-item style="display: flex; flex-wrap: wrap; align-items: center">
+      <nz-form-label nzLabelAlign="left" for="type" style="flex: 0 0 110px; width: 110px; padding: 0"
+        >Type</nz-form-label
+      >
+      <nz-form-control style="flex: 1; min-width: 250px">
         <nz-select id="type" formControlName="type">
           <nz-option
             *ngFor="let provider of sortedProviders; trackBy: trackProvider"
@@ -21,15 +25,20 @@
       </nz-form-control>
     </nz-form-item>
     <ng-container *ngIf="mode === 'config'">
-      <nz-form-item>
-        <nz-form-label [nzSpan]="3" nzLabelAlign="left" for="description">Description</nz-form-label>
-        <nz-form-control>
+      <nz-form-item style="display: flex; flex-wrap: wrap; align-items: flex-start">
+        <nz-form-label
+          nzLabelAlign="left"
+          for="description"
+          style="flex: 0 0 110px; width: 110px; padding: 0; white-space: nowrap"
+          >Description</nz-form-label
+        >
+        <nz-form-control style="flex: 1; min-width: 250px">
           <textarea nz-input formControlName="description" id="description"></textarea>
+          <p>
+            Décrivez (en markdown) ce que représente cette variable et énumérez les hypothèses formulées quant à sa
+            valeur.
+          </p>
         </nz-form-control>
-        <p>
-          Décrivez (en markdown) ce que représente cette variable et énumérez les hypothèses formulées quant à sa
-          valeur.
-        </p>
       </nz-form-item>
       <ng-container *ngIf="selectedProvider?.configEditor">
         <h3>Options</h3>
