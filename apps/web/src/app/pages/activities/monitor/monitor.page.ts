@@ -56,8 +56,8 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   protected columnOrder?: string[] = []
   protected gradeList: number[] = []
   ngOnInit(): void {
-    this.presenter.contextChange
-      .subscribe(async (context) => {
+    this.subscriptions.push(
+      this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
         this.columnOrder = context.results?.exercises.map((e) => e.title)
         this.changeDetectorRef.markForCheck()
@@ -68,16 +68,18 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
           this.updateGradeList()
         }
       })
-      .add(() => this.subscriptions.push()),
-      this.presenter.onDeletedActivity.subscribe(() => this.location.back()).add(() => this.subscriptions.push()),
-      this.presenter.onExerciseChanges
-        .subscribe(async () => {
-          if (this.context.activity && this.context.course) {
-            await this.presenter.refresh(this.context.course.id, this.context.activity.id)
-          }
-          this.changeDetectorRef.markForCheck()
-        })
-        .add(() => this.subscriptions.push())
+    )
+
+    this.subscriptions.push(this.presenter.onDeletedActivity.subscribe(() => this.location.back()))
+
+    this.subscriptions.push(
+      this.presenter.onExerciseChanges.subscribe(async () => {
+        if (this.context.activity && this.context.course) {
+          await this.presenter.refresh(this.context.course.id, this.context.activity.id)
+        }
+        this.changeDetectorRef.markForCheck()
+      })
+    )
   }
 
   ngOnDestroy(): void {

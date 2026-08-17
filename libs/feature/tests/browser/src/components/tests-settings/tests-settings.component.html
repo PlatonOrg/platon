@@ -29,6 +29,102 @@
         />
       </div>
     </div>
+    <div class="settings-item exam-settings-item">
+      <div class="settings-item-title">
+        <i nz-icon nzType="safety" nzTheme="outline"></i>
+        <span>Paramètres de l'examen :</span>
+      </div>
+      <form class="exam-settings" (ngSubmit)="saveActivitySettings()">
+        <div class="setting-row">
+          <label class="setting-label" nz-tooltip="Laissez à 0 pour une durée illimitée">Durée maximale</label>
+          <div class="time-input-group">
+            <div class="time-input-field">
+              <nz-input-number
+                [ngModel]="durationHours()"
+                (ngModelChange)="durationHours.set($event)"
+                name="durationHours"
+                [nzMin]="0"
+                [nzMax]="23"
+                [nzStep]="1"
+                nzPlaceHolder="HH"
+              />
+              <span class="time-label">h</span>
+            </div>
+            <div class="time-input-field">
+              <nz-input-number
+                [ngModel]="durationMinutes()"
+                (ngModelChange)="durationMinutes.set($event)"
+                name="durationMinutes"
+                [nzMin]="0"
+                [nzMax]="59"
+                [nzStep]="1"
+                nzPlaceHolder="MM"
+              />
+              <span class="time-label">m</span>
+            </div>
+            <div class="time-input-field">
+              <nz-input-number
+                [ngModel]="durationSeconds()"
+                (ngModelChange)="durationSeconds.set($event)"
+                name="durationSeconds"
+                [nzMin]="0"
+                [nzMax]="59"
+                [nzStep]="1"
+                nzPlaceHolder="SS"
+              />
+              <span class="time-label">s</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label" nz-tooltip="Nombre maximum de tentatives par exercice. 0 = illimité">
+            Tentatives maximales
+          </label>
+          <nz-input-number
+            [ngModel]="maxAttempts()"
+            (ngModelChange)="maxAttempts.set($event)"
+            name="retry"
+            [nzMin]="0"
+            [nzStep]="1"
+          />
+        </div>
+
+        <div class="setting-row security-row">
+          <label class="setting-label">Sécurité</label>
+          <div class="security-options">
+            <label nz-checkbox [ngModel]="noCopyPaste()" (ngModelChange)="noCopyPaste.set($event)" name="noCopyPaste">
+              Désactiver copier-coller
+            </label>
+            <label
+              nz-checkbox
+              [ngModel]="terminateOnLeavePage()"
+              (ngModelChange)="terminateOnLeavePage.set($event)"
+              name="terminateOnLeavePage"
+            >
+              Terminer si changement d'onglet
+            </label>
+            <label
+              nz-checkbox
+              [ngModel]="terminateOnLoseFocus()"
+              (ngModelChange)="terminateOnLoseFocus.set($event)"
+              name="terminateOnLoseFocus"
+            >
+              Terminer si perte de focus
+            </label>
+          </div>
+        </div>
+
+        <div class="exam-settings-actions">
+          <ng-container *ngIf="savingActivitySettings; else examSettingsActions">
+            <nz-spin></nz-spin>
+          </ng-container>
+          <ng-template #examSettingsActions>
+            <button nz-button nzType="primary" type="submit" [disabled]="!canEdit">Enregistrer</button>
+          </ng-template>
+        </div>
+      </form>
+    </div>
     } @if (course) {
     <div class="settings-item">
       <div class="settings-item-title">
