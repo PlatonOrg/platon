@@ -290,6 +290,10 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       this.settingsInfo.get('isChallenge')?.setValue(true)
       this.activityFunction.set('challenge')
     }
+    if (this.isTest) {
+      // Un test d'entrée est toujours un TP noté, l'étape "Fonction" est donc inutile.
+      this.activityFunction.set('graded')
+    }
 
     const course = courseId
       ? await firstValueFrom(
@@ -400,6 +404,9 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     let updatedResources: Resource[]
     if (index > -1) {
       updatedResources = currentResources.filter((_, i) => i !== index)
+    } else if (this.isTest) {
+      // Un test d'entrée n'accepte qu'une seule activité : toute nouvelle sélection remplace la précédente.
+      updatedResources = [activity]
     } else {
       updatedResources = [...currentResources, activity]
     }

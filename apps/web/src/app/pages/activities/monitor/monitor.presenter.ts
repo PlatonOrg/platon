@@ -17,6 +17,7 @@ import { PlayerService } from '@platon/feature/player/browser'
 @Injectable()
 export class MonitorPresenter implements OnDestroy {
   private readonly subscriptions: Subscription[] = []
+  private isTest = false
   private readonly context = new BehaviorSubject<Context>(this.defaultContext())
   private readonly exerciseChanges = new Subject<ExerciseChangeEvent>()
   private readonly processedNotifications = new Set<string>()
@@ -40,6 +41,13 @@ export class MonitorPresenter implements OnDestroy {
       })
     )
 
+    this.subscriptions.push(
+      this.activatedRoute.queryParamMap.subscribe((queryParamMap) => {
+        this.isTest = queryParamMap.get('test') === 'true'
+        this.context.next({ ...this.context.value, isTest: this.isTest })
+      })
+    )
+
     // Subscribe to exercise changes notifications
     this.subscribeToExerciseChanges().catch((error) => {
       this.dialogService.error("Une erreur est survenue lors de la souscription aux changements d'exercice.", error)
@@ -52,7 +60,7 @@ export class MonitorPresenter implements OnDestroy {
   }
 
   defaultContext(): Context {
-    return { state: 'LOADING' }
+    return { state: 'LOADING', isTest: this.isTest }
   }
 
   async refresh(courseId: string, activityId: string): Promise<void> {
@@ -70,6 +78,7 @@ export class MonitorPresenter implements OnDestroy {
 
     this.context.next({
       state: 'READY',
+      isTest: this.isTest,
       user,
       course,
       activity,
@@ -81,7 +90,7 @@ export class MonitorPresenter implements OnDestroy {
     try {
       await this.refresh(courseId, activityId)
     } catch (error) {
-      this.context.next({ state: layoutStateFromError(error) })
+      this.context.next({ state: layoutStateFromError(error), isTest: this.isTest })
     }
   }
 
@@ -147,6 +156,7 @@ export class MonitorPresenter implements OnDestroy {
 
 export interface Context {
   state: LayoutState
+  isTest: boolean
   user?: User
   course?: Course
   activity?: Activity

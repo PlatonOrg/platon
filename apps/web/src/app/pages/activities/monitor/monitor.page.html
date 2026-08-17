@@ -2,7 +2,7 @@
   <!-- Bouton retour au cours -->
   <button class="back-button" nz-button nzType="default" (click)="navigateToCourse()" *ngIf="context.course?.id">
     <i nz-icon nzType="arrow-left"></i>
-    Retour au cours
+    Retour au {{ context.isTest ? 'test' : 'cours' }}
   </button>
 
   <!-- Titre de la page -->

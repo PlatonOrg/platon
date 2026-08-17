@@ -126,7 +126,11 @@
                 [courseId]="activity().courseId"
               />
             </li>
-            <li nz-menu-item *ngIf="activity().permissions.viewResource" [routerLink]="['/resources', activity().resourceId]">
+            <li
+              nz-menu-item
+              *ngIf="activity().permissions.viewResource"
+              [routerLink]="['/resources', activity().resourceId]"
+            >
               Ouvrir la ressource associée
             </li>
             <li nz-menu-item *ngIf="activity().permissions.update" (click)="settingsDrawer.open()">Paramètres</li>

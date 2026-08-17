@@ -55,7 +55,6 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   protected context = this.presenter.defaultContext()
   protected columnOrder?: string[] = []
   protected gradeList: number[] = []
-
   ngOnInit(): void {
     this.presenter.contextChange
       .subscribe(async (context) => {
@@ -91,7 +90,6 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
 
   private updateGradeList(): void {
     if (!this.context.results) return
-
     this.gradeList = this.context.results.users
       .flatMap((user) => Object.values(user.exercises).map((exercise) => exercise.grade))
       .filter((grade) => typeof grade === 'number') as number[]
@@ -149,7 +147,10 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   }
 
   protected async navigateToCourse(): Promise<void> {
-    if (this.context.course?.id) {
+    if (!this.context.course?.id) return
+    if (this.context.isTest) {
+      await this.router.navigate(['/tests', this.context.course.id])
+    } else {
       await this.router.navigate(['/courses', this.context.course.id])
     }
   }
