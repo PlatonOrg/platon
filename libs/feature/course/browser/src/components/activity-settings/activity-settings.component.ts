@@ -104,6 +104,10 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected activitySettings: ActivitySettings = {
     duration: 0,
     seedPerExercise: false,
+    navigation: {
+      mode: 'manual',
+      random: false,
+    },
     actions: {
       retry: 0,
       hints: true,

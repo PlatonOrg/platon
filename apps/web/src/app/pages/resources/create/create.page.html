@@ -155,7 +155,7 @@
           <h4>Sélectionnez un template puis cliquez sur créer.</h4>
           }
           <div class="template-circle-filter">
-            @if (templateSources.length > 1) { @for (source of templateSources; track source.circle.id) {
+            @if (templateSources.length > 0) { @for (source of templateSources; track source.circle.id) {
             <nz-tag
               *ngIf="source.count > 0"
               nzMode="checkable"

@@ -22,6 +22,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 
 import { SelectionModel } from '@angular/cdk/collections'
 import { AuthService, DialogModule, DialogService, TagService, UserService } from '@platon/core/browser'
@@ -81,6 +82,7 @@ type TemplateSource = {
     NzSkeletonModule,
     NzPageHeaderModule,
     NzPopoverModule,
+    NzToolTipModule,
 
     UiStepDirective,
     UiStepperComponent,

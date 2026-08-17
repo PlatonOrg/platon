@@ -622,6 +622,7 @@ export class PlayerService extends PlayerManager {
       variables.exerciseGroups['-1'] = {
         name: 'Exercices générés',
         exercises: variables.exerciseGroups['-1']?.exercises || [],
+        grader: { type: 'empty' },
       }
       const exercises = extractExercisesFromActivityVariables(variables as PlayerActivityVariables)
       const nextExercise = exercises.find((e) => e.id === variables.nextExerciseId)
@@ -786,6 +787,7 @@ export class PlayerService extends PlayerManager {
             title: await this.resourceFileService.getTitle(item.resource),
             state: AnswerStates.NOT_STARTED,
             sessionId: session.id,
+            groupId: item.groupId,
           }
         }
         return item
