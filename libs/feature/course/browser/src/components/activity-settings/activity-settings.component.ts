@@ -126,14 +126,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     },
   }
 
-  // Getters pour garantir que les objets ne sont jamais undefined
-  get navigation() {
-    if (!this.activitySettings.navigation) {
-      this.activitySettings.navigation = { mode: 'manual', random: false }
-    }
-    return this.activitySettings.navigation
-  }
-
   get actions() {
     if (!this.activitySettings.actions) {
       this.activitySettings.actions = {
