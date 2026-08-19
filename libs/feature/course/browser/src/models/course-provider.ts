@@ -8,4 +8,5 @@ export abstract class CourseProvider {
   abstract update(id: string, input: UpdateCourse): Observable<Course>
   abstract delete(course: Course): Observable<void>
   abstract create(input: CreateCourse): Observable<Course>
+  abstract duplicate(sourceCourseId: string, targetCourseId: string): Observable<Course>
 }

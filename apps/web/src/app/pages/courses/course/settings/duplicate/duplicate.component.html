@@ -1,0 +1,61 @@
+@if(askToLoad()){
+<div class="duplication-search-container">
+  <ui-search-bar [searchbar]="searchbar" />
+  <div class="duplication-header">
+    <h2>Sélectionnez le cours que vous souhaitez dupliquer :</h2>
+    <div class="actions">
+      <button nz-button (click)="reset()">Annuler</button>
+      <button
+        nz-button
+        nzType="primary"
+        (nzOnConfirm)="processDuplicate()"
+        [disabled]="!selectedCourse()"
+        nzDanger
+        nz-popconfirm
+        nzPopconfirmTitle="Êtes-vous sûr de vouloir charger un cours ? (les données actuelles seront perdues)"
+      >
+        Confirmer
+      </button>
+    </div>
+  </div>
+  <article class="courses-content">
+    @if (searching()) {
+    <div class="spinner-wrapper">
+      <nz-spin nzSimple nzSize="large" />
+    </div>
+    } @else { @if (items().length > 0) {
+    <div class="courses-grid">
+      @for (course of items(); track course.id){
+      <div class="selectable-card" [class.selected]="selectedCourse()?.id === course.id" (click)="selectCourse(course)">
+        <div class="disabled-course-item">
+          <course-item [item]="course" />
+        </div>
+        <div class="card-actions">
+          <a
+            [href]="'/courses/' + course.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            nz-button
+            nzType="default"
+            nzSize="small"
+            (click)="$event.stopPropagation()"
+            ><span nz-icon nzType="eye"></span>Voir</a
+          >
+          <button nz-button nzSize="small" [nzType]="selectedCourse()?.id === course.id ? 'primary' : 'default'">
+            {{ selectedCourse()?.id === course.id ? 'Sélectionné' : 'Sélectionner' }}
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+    } @else {
+    <div class="no-results">
+      <h2>Aucun cours ne correspond à votre recherche</h2>
+      <p>Vérifiez l'orthographe ou tentez un autre nom de cours.</p>
+    </div>
+    } }
+  </article>
+</div>
+} @else {
+<button nz-button nzDanger nzType="primary" (click)="startDuplication()">Charger un cours</button>
+}

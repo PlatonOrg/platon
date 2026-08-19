@@ -19,6 +19,7 @@ import { Clipboard } from '@angular/cdk/clipboard'
 import { MatCardModule } from '@angular/material/card'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { Router } from '@angular/router'
+import { CourseDuplicateComponent } from './duplicate/duplicate.component'
 
 @Component({
   standalone: true,
@@ -45,6 +46,7 @@ import { Router } from '@angular/router'
     NzInputModule,
     NzIconModule,
     NzPopconfirmModule,
+    CourseDuplicateComponent,
   ],
 })
 export class CourseSettingsPage implements OnInit, OnDestroy {

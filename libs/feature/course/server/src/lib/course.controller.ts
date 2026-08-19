@@ -14,6 +14,7 @@ import { CourseDTO, CourseFiltersDTO, CreateCourseDTO, UpdateCourseDTO } from '.
 import { CourseService } from './services/course.service'
 import { CoursePermissionsService } from './permissions/permissions.service'
 import { CourseMemberService } from './course-member/course-member.service'
+import { CourseEntity } from './entites/course.entity'
 
 @ApiBearerAuth()
 @Controller('courses')
@@ -95,5 +96,14 @@ export class CourseController {
         throw new ForbiddenResponse(`You cannot delete this course`)
       }
     })
+  }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Post(':targetCourseId/duplicate')
+  async duplicate(
+    @UUIDParam('targetCourseId') targetCourseId: string,
+    @Body('sourceCourseId') sourceCourseId: string
+  ): Promise<CourseEntity> {
+    return this.courseService.duplicate(sourceCourseId, targetCourseId)
   }
 }

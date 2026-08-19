@@ -49,4 +49,10 @@ export class RemoteCourseProvider extends CourseProvider {
       })
       .pipe(map((response) => response.resource))
   }
+
+  duplicate(sourceCourseId: string, targetCourseId: string): Observable<Course> {
+    return this.http
+      .post<ItemResponse<Course>>(`/api/v1/courses/${targetCourseId}/duplicate`, { sourceCourseId })
+      .pipe(map((response) => response.resource))
+  }
 }
