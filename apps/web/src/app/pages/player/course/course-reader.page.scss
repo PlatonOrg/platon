@@ -1,0 +1,146 @@
+:host {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background: var(--brand-background-primary);
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.toc {
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 16px 0;
+  border-right: 1px solid var(--brand-border-color);
+  background: var(--brand-background-components);
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 16px;
+  font-weight: 600;
+  color: var(--brand-text-primary);
+  border-bottom: 1px solid var(--brand-border-color);
+  margin-bottom: 8px;
+}
+
+.toc-section {
+  padding: 8px 16px;
+
+  h4 {
+    margin: 8px 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--brand-text-secondary);
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.toc-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--brand-text-primary);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--brand-background-hover);
+  }
+
+  &.active {
+    background: var(--brand-color-primary-soft);
+    color: var(--brand-color-primary);
+    font-weight: 600;
+  }
+}
+
+.toc-item-icon {
+  color: var(--brand-text-tertiary);
+
+  &.done {
+    color: var(--brand-color-success);
+  }
+}
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 48px;
+}
+
+.content-header {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto 24px;
+
+  .section-label {
+    color: var(--brand-text-secondary);
+    margin: 0 0 4px;
+  }
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.lesson-content {
+  display: block;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+}
+
+.exercise-card {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  border: 1px dashed var(--brand-border-color);
+  border-radius: 8px;
+  background: var(--brand-background-components);
+}
+
+.exercise-icon {
+  font-size: 32px;
+  color: var(--brand-color-primary);
+}
+
+.reader-footer {
+  max-width: 860px;
+  width: 100%;
+  margin: 32px auto 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.empty-course {
+  margin: auto;
+  color: var(--brand-text-secondary);
+}
