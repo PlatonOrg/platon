@@ -6,11 +6,13 @@ import {
   OnDestroy,
   ViewEncapsulation,
   forwardRef,
+  input,
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
-import EditorJS, { OutputData } from '@editorjs/editorjs'
+import EditorJS, { OutputData, ToolConstructable, ToolSettings } from '@editorjs/editorjs'
 import { v4 as uuidv4 } from 'uuid'
 import { EditorJsService } from './editorjs.service'
+import { CalloutExtension } from './extensions/callout.extension'
 import { CodeExtension } from './extensions/code.extension'
 import { DelimiterExtension } from './extensions/delimiter.extension'
 import { ImageExtension } from './extensions/image.extension'
@@ -27,6 +29,7 @@ import { TextExtension } from './extensions/text.extension'
   encapsulation: ViewEncapsulation.None,
   providers: [
     EditorJsService,
+    CalloutExtension,
     CodeExtension,
     DelimiterExtension,
     ListExtension,
@@ -51,6 +54,11 @@ export class EditorJsComponent implements AfterViewInit, OnDestroy, ControlValue
 
   @Input() minHeight?: number
 
+  // Outils supplémentaires propres à cette instance, fusionnés après les extensions globales
+  // (voir EditorJsService.newInstance) : permet de surcharger une clé (ex. `image`) ou d'ajouter
+  // un outil sans l'exposer à toutes les autres instances de <ui-editorjs> de l'app.
+  readonly extraTools = input<Record<string, ToolConstructable | ToolSettings>>()
+
   @Input()
   get disabled(): boolean | null | undefined {
     return this._disabled
@@ -73,6 +81,7 @@ export class EditorJsComponent implements AfterViewInit, OnDestroy, ControlValue
       holder: this.id,
       minHeight: this.minHeight,
       readOnly: !!this.disabled,
+      extraTools: this.extraTools(),
       onChange: async () => {
         if (initialChange) {
           initialChange = false

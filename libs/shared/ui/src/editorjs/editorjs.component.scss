@@ -20,4 +20,54 @@ ui-editorjs {
 
     }
 
+    .ce-callout {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--brand-color-info);
+      background-color: var(--brand-background-hover);
+
+      &[data-variant='important'] {
+        border-left-color: var(--brand-color-warning);
+      }
+
+      &[data-variant='dialogue'] {
+        border-left-color: var(--brand-color-tertiary);
+      }
+    }
+
+    .ce-callout__variants {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .ce-callout__variant-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border: 1px solid var(--brand-border-color);
+      border-radius: 6px;
+      background: var(--brand-background-components);
+      color: var(--brand-text-secondary);
+      cursor: pointer;
+
+      &--active {
+        border-color: var(--brand-color-primary);
+        color: var(--brand-color-primary);
+      }
+    }
+
+    .ce-callout__text {
+      min-height: 1.4em;
+      outline: none;
+
+      &:empty::before {
+        content: attr(data-placeholder);
+        color: var(--brand-text-tertiary);
+      }
+    }
+
 }

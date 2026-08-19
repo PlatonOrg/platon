@@ -161,4 +161,43 @@
       border-radius: 8px;
     }
   }
+
+  .ce-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--brand-color-info);
+    background-color: var(--brand-background-hover);
+    color: var(--brand-text-primary);
+
+    p {
+      margin: 0;
+    }
+
+    &--important {
+      border-left-color: var(--brand-color-warning);
+    }
+
+    &--dialogue {
+      border-left-color: var(--brand-color-tertiary);
+    }
+  }
+
+  .ce-callout__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    margin-top: 0.15rem;
+    color: var(--brand-color-info);
+  }
+
+  .ce-callout--important .ce-callout__icon {
+    color: var(--brand-color-warning);
+  }
+
+  .ce-callout--dialogue .ce-callout__icon {
+    color: var(--brand-color-tertiary);
+  }
 }

@@ -4,12 +4,14 @@ import EdjsParser from 'editorjs-parser'
 import { ListParser } from './parsers/list-parser'
 import { ChecklistParser } from './parsers/checklist-parser'
 import { CodeParser } from './parsers/code-parser'
+import { CalloutParser } from './parsers/callout-parser'
 
 export class EditorjsViewerService {
   private readonly parser = new EdjsParser(undefined, {
     list: ListParser,
     checklist: ChecklistParser,
     code: CodeParser,
+    callout: CalloutParser,
   })
 
   hasCodeBlock = (data: any): boolean => {
