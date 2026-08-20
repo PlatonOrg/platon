@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, inject, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  OnInit,
+  forwardRef,
+  inject,
+  signal,
+} from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
@@ -11,7 +19,12 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { DialogService } from '@platon/core/browser'
 import { Activity, Course, LessonContent } from '@platon/feature/course/common'
 import { CourseService } from '@platon/feature/course/browser'
-import { emptyEditorJsData, UiEditorJsModule } from '@platon/shared/ui'
+import {
+  EditorJsImageUploader,
+  EditorJsImageUploadResponse,
+  emptyEditorJsData,
+  UiEditorJsModule,
+} from '@platon/shared/ui'
 
 @Component({
   standalone: true,
@@ -29,9 +42,10 @@ import { emptyEditorJsData, UiEditorJsModule } from '@platon/shared/ui'
     NzSpinModule,
     UiEditorJsModule,
   ],
+  providers: [{ provide: EditorJsImageUploader, useExisting: forwardRef(() => LessonEditorPage) }],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class LessonEditorPage implements OnInit {
+export class LessonEditorPage implements OnInit, EditorJsImageUploader {
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly courseService = inject(CourseService)
@@ -95,5 +109,19 @@ export class LessonEditorPage implements OnInit {
 
   protected back(): void {
     this.router.navigate(['/courses', this.course()?.id, 'dashboard']).catch(console.error)
+  }
+
+  // Implémente EditorJsImageUploader : branché automatiquement par le bloc `image` d'EditorJS
+  // (extensions/image.extension.ts) via l'injection Angular, sans configuration côté template.
+  async uploadByFile(file: Blob): Promise<EditorJsImageUploadResponse> {
+    const course = this.course()
+    if (!course) {
+      throw new Error('Cannot upload an image before the course is loaded')
+    }
+    return firstValueFrom(this.courseService.uploadFile(course.id, file as File))
+  }
+
+  async uploadByUrl(url: string): Promise<EditorJsImageUploadResponse> {
+    return { success: 1, file: { url } }
   }
 }
