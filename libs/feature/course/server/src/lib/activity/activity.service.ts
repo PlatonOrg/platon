@@ -6,6 +6,7 @@ import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@plat
 import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
   ActivityFilters,
+  ActivityKind,
   CreateActivity,
   ReloadActivity,
   RestrictionList,
@@ -33,6 +34,7 @@ import { CourseGroupEntity } from '../course-group/course-group.entity'
 import { ActivityGroupEntity } from '../activity-group/activity-group.entity'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
+import { LessonProgressService } from '../lesson-progress/lesson-progress.service'
 import { ActivityDatesService } from './activity-dates.service'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
@@ -51,6 +53,7 @@ export class ActivityService {
     private readonly activityMemberService: ActivityMemberService,
     private readonly courseMemberService: CourseMemberService,
     private readonly activityDatesService: ActivityDatesService,
+    private readonly lessonProgressService: LessonProgressService,
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
     @InjectRepository(ResourceEntity)
@@ -79,7 +82,10 @@ export class ActivityService {
     await this.updateActivitiesDates(entities)
     await this.addVirtualColumns(...entities)
 
-    return [entities, count]
+    // Les leçons en brouillon (rédaction en cours, import PDF non revu) sont invisibles
+    // à quiconque n'a pas la permission d'écriture sur le cours.
+    const visible = entities.filter((activity) => !activity.draft || activity.permissions.update)
+    return [visible, visible.length === entities.length ? count : visible.length]
   }
 
   async findByIdForUser(id: string, user: User): Promise<ActivityEntity> {
@@ -376,8 +382,13 @@ export class ActivityService {
   }
 
   private async addVirtualColumns(...activities: ActivityEntity[]): Promise<void> {
+    // Les leçons n'ont pas de `source` compilée depuis une Resource : on les traite à part
+    // pour ne jamais toucher `activity.source.variables` (resterait `{}` et planterait).
+    const exerciseActivities = activities.filter((activity) => activity.kind !== ActivityKind.LESSON)
+    const lessonActivities = activities.filter((activity) => activity.kind === ActivityKind.LESSON)
+
     const resourceIdOfUntitleActivities = new Set(
-      activities
+      exerciseActivities
         .filter((activity) => !(activity.source.variables.title as string)?.trim())
         .map((activity) => activity.source.resource as string)
     )
@@ -390,8 +401,15 @@ export class ActivityService {
         })
       : []
 
+    const completedLessonIds = lessonActivities.length
+      ? await this.lessonProgressService.findCompletedActivityIds(
+          lessonActivities.map((activity) => activity.id),
+          this.request.user.id
+        )
+      : new Set<string>()
+
     await Promise.all(
-      activities.map(async (activity) => {
+      exerciseActivities.map(async (activity) => {
         const title = activity.source.variables.title as string
         const exerciseGroups = (activity.source.variables.exerciseGroups as Record<string, ActivityExerciseGroup>) || {}
         const hasWritePermission = await this.courseMemberService.hasWritePermission(
@@ -413,6 +431,29 @@ export class ActivityService {
             viewResource: hasWritePermission,
           },
           activitySettings: activity.source.variables.settings as ActivitySettings,
+        } as Partial<ActivityEntity>)
+      })
+    )
+
+    await Promise.all(
+      lessonActivities.map(async (activity) => {
+        const hasWritePermission = await this.courseMemberService.hasWritePermission(
+          activity.courseId,
+          this.request.user
+        )
+        Object.assign(activity, {
+          state: calculateActivityOpenState(activity),
+          title: activity.lessonTitle ?? '',
+          resourceId: '',
+          exerciseCount: 0,
+          progression: completedLessonIds.has(activity.id) ? 100 : 0,
+          permissions: {
+            answer: true,
+            update: hasWritePermission,
+            viewStats: hasWritePermission,
+            viewResource: false,
+          },
+          activitySettings: {},
         } as Partial<ActivityEntity>)
       })
     )

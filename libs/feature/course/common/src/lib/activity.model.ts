@@ -2,6 +2,28 @@ import { RestrictionList } from './activity-restriction.model'
 import { ActivityPermissions } from './permissions.model'
 import { ActivitySettings } from '@platon/feature/compiler'
 
+/**
+ * Nature d'un item de section de cours :
+ * - `EXERCISE` : activité classique liée à une Resource compilée (comportement historique).
+ * - `LESSON` : contenu narratif (blocs EditorJS), utilisé par le format de cours OpenClass.
+ */
+export enum ActivityKind {
+  EXERCISE = 'exercise',
+  LESSON = 'lesson',
+}
+
+export interface LessonContentBlock {
+  readonly id?: string
+  readonly type: string
+  readonly data: Record<string, unknown>
+}
+
+export interface LessonContent {
+  readonly time?: number
+  readonly version?: string
+  readonly blocks: LessonContentBlock[]
+}
+
 export interface Activity {
   readonly id: string
   readonly createdAt: Date
@@ -16,6 +38,7 @@ export interface Activity {
   readonly isPeerComparison: boolean
   readonly order?: number
 
+  readonly kind: ActivityKind
   readonly title: string
   readonly resourceId: string
   readonly exerciseCount: number
@@ -23,6 +46,10 @@ export interface Activity {
   readonly timeSpent: number
   readonly progression: number
   readonly permissions: ActivityPermissions
+
+  readonly lessonTitle?: string
+  readonly content?: LessonContent | null
+  readonly draft: boolean
 
   readonly ignoreRestrictions?: boolean // checkActivityDateRestrictions
   readonly restrictions?: RestrictionList[] | null
@@ -38,7 +65,8 @@ export interface ActivityFilters {
   readonly challenge?: boolean | null
 }
 
-export interface CreateActivity {
+export interface CreateExerciseActivity {
+  readonly kind?: ActivityKind.EXERCISE
   readonly sectionId: string
 
   readonly resourceId: string
@@ -49,6 +77,20 @@ export interface CreateActivity {
   readonly isChallenge?: boolean
 }
 
+export interface CreateLessonActivity {
+  readonly kind: ActivityKind.LESSON
+  readonly sectionId: string
+
+  readonly lessonTitle: string
+  readonly content?: LessonContent
+  readonly draft?: boolean
+
+  readonly openAt?: Date
+  readonly closeAt?: Date
+}
+
+export type CreateActivity = CreateExerciseActivity | CreateLessonActivity
+
 export interface UpdateActivity {
   readonly openAt?: Date | null
   readonly closeAt?: Date | null
@@ -56,6 +98,10 @@ export interface UpdateActivity {
   readonly ignoreRestrictions?: boolean
   readonly activitySettings?: ActivitySettings
   readonly code?: string
+
+  readonly lessonTitle?: string
+  readonly content?: LessonContent
+  readonly draft?: boolean
 }
 
 export interface ReloadActivity {

@@ -1,6 +1,13 @@
 import { BaseEntity, UserEntity } from '@platon/core/server'
 import { ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
-import { Activity, ActivityOpenStates, ActivityPermissions, RestrictionList } from '@platon/feature/course/common'
+import {
+  Activity,
+  ActivityKind,
+  ActivityOpenStates,
+  ActivityPermissions,
+  LessonContent,
+  RestrictionList,
+} from '@platon/feature/course/common'
 import { Column, Entity, Index, JoinColumn, ManyToOne, VirtualColumn } from 'typeorm'
 import { CourseEntity } from '../entites/course.entity'
 import { CourseSectionEntity } from '../section/section.entity'
@@ -61,6 +68,21 @@ export class ActivityEntity extends BaseEntity implements Activity {
 
   @Column({ default: '' })
   code!: string
+
+  @Index('Activities_kind_idx')
+  @Column({ type: 'enum', enum: ActivityKind, default: ActivityKind.EXERCISE })
+  kind!: ActivityKind
+
+  @Column({ name: 'lesson_title', nullable: true })
+  lessonTitle?: string
+
+  // Contenu narratif (blocs EditorJS) d'une activité de type "lesson".
+  @Column({ type: 'jsonb', nullable: true })
+  content?: LessonContent | null
+
+  // Leçon en rédaction (non générée par import IA ou non finalisée par l'enseignant) : invisible aux étudiants.
+  @Column({ default: false })
+  draft!: boolean
 
   // VIRTUAL COLUMNS
   // TODO: use expanders instead of virtual columns
