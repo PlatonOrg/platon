@@ -48,6 +48,11 @@ import { ActivityListeners } from './activity/activity.listeners'
 import { ActivityDatesService } from './activity/activity-dates.service'
 import { CourseMonitorPresenceService } from './course-monitor-presence/course-monitor-presence.service'
 import { CourseMonitorPresenceController } from './course-monitor-presence/course-monitor-presence.controller'
+import { LessonProgressController } from './lesson-progress/lesson-progress.controller'
+import { LessonProgressService } from './lesson-progress/lesson-progress.service'
+import { CourseLessonProgressEntity } from './lesson-progress/lesson-progress.entity'
+import { CourseFileController } from './course-file/course-file.controller'
+import { CourseFileService } from './course-file/course-file.service'
 @Module({
   imports: [
     UserModule,
@@ -69,6 +74,7 @@ import { CourseMonitorPresenceController } from './course-monitor-presence/cours
       CourseGroupEntity,
       CourseGroupMemberEntity,
       ActivityGroupEntity,
+      CourseLessonProgressEntity,
     ]),
   ],
   controllers: [
@@ -83,6 +89,8 @@ import { CourseMonitorPresenceController } from './course-monitor-presence/cours
     CourseGroupMemberController,
     ActivityGroupController,
     CourseMonitorPresenceController,
+    LessonProgressController,
+    CourseFileController,
   ],
   providers: [
     CourseService,
@@ -105,6 +113,8 @@ import { CourseMonitorPresenceController } from './course-monitor-presence/cours
     ActivityGroupService,
     ActivityDatesService,
     CourseMonitorPresenceService,
+    LessonProgressService,
+    CourseFileService,
   ],
   exports: [
     TypeOrmModule,
@@ -122,6 +132,7 @@ import { CourseMonitorPresenceController } from './course-monitor-presence/cours
     CourseGroupService,
     ActivityDatesService,
     CourseMonitorPresenceService,
+    LessonProgressService,
   ],
 })
 export class FeatureCourseServerModule {}
