@@ -59,7 +59,7 @@ export class ActivityEntity extends BaseEntity implements Activity {
   @Column({ type: 'integer', name: 'color_hue', nullable: true })
   colorHue?: number
 
-  @Column({ default: '' })
+  @Column({ type: 'varchar', length: 6, default: () => 'upper(substr(md5(random()::text), 1, 6))' })
   code!: string
 
   // VIRTUAL COLUMNS

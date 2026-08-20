@@ -32,7 +32,6 @@ export class CourseMonitorPresenceService implements OnDestroy {
     const payload: MonitorPresencePayload = {
       userId,
       activityId,
-      courseId,
     }
 
     // Store the current subscription
@@ -53,7 +52,6 @@ export class CourseMonitorPresenceService implements OnDestroy {
     const payload: MonitorPresencePayload = {
       userId: this.userId,
       activityId: this.currentSubscription.activityId,
-      courseId: this.currentSubscription.courseId,
     }
 
     this.courseMonitorPresenceProvider.unsubscribeFromMonitorPresence(payload)
