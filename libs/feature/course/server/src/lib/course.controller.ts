@@ -101,9 +101,13 @@ export class CourseController {
   @Roles(UserRoles.teacher, UserRoles.admin)
   @Post(':targetCourseId/duplicate')
   async duplicate(
+    @Req() req: IRequest,
     @UUIDParam('targetCourseId') targetCourseId: string,
     @Body('sourceCourseId') sourceCourseId: string
   ): Promise<CourseEntity> {
-    return this.courseService.duplicate(sourceCourseId, targetCourseId)
+    return this.courseService.duplicate(sourceCourseId, targetCourseId, {
+      sourceGuard: (course) => this.permissionsService.ensureCourseWritePermission(course.id, req),
+      targetGuard: (course) => this.permissionsService.ensureCourseWritePermission(course.id, req),
+    })
   }
 }

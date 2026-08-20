@@ -10,9 +10,8 @@
         nzType="primary"
         (nzOnConfirm)="processDuplicate()"
         [disabled]="!selectedCourse()"
-        nzDanger
         nz-popconfirm
-        nzPopconfirmTitle="Êtes-vous sûr de vouloir charger un cours ? (les données actuelles seront perdues)"
+        nzPopconfirmTitle="Êtes-vous sûr de vouloir charger ce cours ?"
       >
         Confirmer
       </button>
@@ -57,5 +56,5 @@
   </article>
 </div>
 } @else {
-<button nz-button nzDanger nzType="primary" (click)="startDuplication()">Charger un cours</button>
+<button nz-button nzType="primary" (click)="startDuplication()">Charger un cours</button>
 }

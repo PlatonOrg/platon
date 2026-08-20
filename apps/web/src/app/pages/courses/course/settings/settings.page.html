@@ -63,7 +63,7 @@
         </ng-template>
       </mat-card-content>
     </mat-card>
-    <mat-card class="danger-zone">
+    <mat-card>
       <mat-card-header>
         <mat-card-title>Charger un cours</mat-card-title>
       </mat-card-header>
@@ -73,7 +73,7 @@
           <br />
           Les dates d'ouverture et de fermeture seront automatiquement repositionnées pour l'année scolaire suivante.
           <br />
-          <b>Attention : cette action écrasera l'intégralité du contenu actuel de ce cours.</b>
+          Les sections importées seront mises après les sections existantes.
         </p>
         <app-course-duplicate [currentCourse]="context.course" />
       </mat-card-content>

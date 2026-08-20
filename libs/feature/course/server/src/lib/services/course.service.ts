@@ -11,6 +11,11 @@ import { ActivityEntity } from '../activity/activity.entity'
 
 type CourseGuard = (course: CourseEntity) => void | Promise<void>
 
+interface DuplicateGuards {
+  sourceGuard: CourseGuard
+  targetGuard: CourseGuard
+}
+
 @Injectable()
 export class CourseService {
   constructor(
@@ -147,8 +152,7 @@ export class CourseService {
     await this.courseRepository.remove(course)
   }
 
-  async duplicate(sourceCourseId: string, targetCourseId: string): Promise<CourseEntity> {
-    console.log('source : ', sourceCourseId, '\n target: ', targetCourseId)
+  async duplicate(sourceCourseId: string, targetCourseId: string, guards?: DuplicateGuards): Promise<CourseEntity> {
     if (sourceCourseId === targetCourseId) {
       throw new BadRequestException('Source and target courses cannot be the same')
     }
@@ -161,19 +165,30 @@ export class CourseService {
     if (!targetCourse) {
       throw new NotFoundResponse('Target course not found')
     }
-
+    if (guards?.sourceGuard) {
+      await guards.sourceGuard(sourceCourse)
+    }
+    if (guards?.targetGuard) {
+      await guards.targetGuard(targetCourse)
+    }
     return this.dataSource.transaction(async (manager) => {
-      await manager.delete(ActivityEntity, { courseId: targetCourseId })
-      await manager.delete(CourseSectionEntity, { courseId: targetCourseId })
+      const sourceSections = await manager.find(CourseSectionEntity, {
+        where: { courseId: sourceCourseId },
+        order: { order: 'ASC' },
+      })
 
-      const sourceSections = await manager.find(CourseSectionEntity, { where: { courseId: sourceCourseId } })
-      const sourceActivities = await manager.find(ActivityEntity, { where: { courseId: sourceCourseId } })
+      const sourceActivities = await manager.find(ActivityEntity, {
+        where: { courseId: sourceCourseId },
+        order: { sectionId: 'ASC', order: 'ASC' },
+      })
+
+      const targetSectionsNumber = await manager.count(CourseSectionEntity, { where: { courseId: targetCourseId } })
 
       for (const section of sourceSections) {
         const newSection = await manager.save(CourseSectionEntity, {
           courseId: targetCourseId,
           name: section.name,
-          order: section.order,
+          order: section.order + targetSectionsNumber,
         })
         const sectionAcitivities = sourceActivities.filter((a) => a.sectionId === section.id)
         for (const activity of sectionAcitivities) {
