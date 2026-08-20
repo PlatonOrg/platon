@@ -35,7 +35,9 @@
       <td nzAlign="center">{{ model.activity.title }}</td>
       <td nzAlign="center">{{ model.section?.name }}</td>
       <td nzAlign="center">
+        @if (model.activity.kind !== 'lesson') {
         <nz-tag>{{ model.activity.exerciseCount }}</nz-tag>
+        } @else { — }
       </td>
       <td nzAlign="center">
         <nz-tag>{{ model.activity.createdAt | date }}</nz-tag>
@@ -86,8 +88,8 @@
         >
           <span nz-icon nzType="paper-clip" nzTheme="outline"></span>
         </a>
+        @if (model.activity.permissions.answer && model.activity.kind !== 'lesson') {
         <a
-          *ngIf="model.activity.permissions.answer"
           nz-tooltip="Lancer"
           nz-button
           nzShape="round"
@@ -97,8 +99,30 @@
         >
           <i nz-icon nzType="play-circle" nzTheme="outline"></i>
         </a>
+        } @if (model.activity.permissions.answer && model.activity.kind === 'lesson') {
         <a
-          *ngIf="model.activity.permissions.viewStats"
+          nz-tooltip="Lire la leçon"
+          nz-button
+          nzShape="round"
+          nzType="primary"
+          target="_blank"
+          [routerLink]="['/player/course', model.activity.courseId]"
+          [queryParams]="{ item: model.activity.id }"
+        >
+          <i nz-icon nzType="read" nzTheme="outline"></i>
+        </a>
+        } @if (model.activity.kind === 'lesson' && model.activity.permissions.update) {
+        <a
+          nz-tooltip="Éditer le contenu de la leçon"
+          nz-button
+          nzShape="round"
+          nzType="default"
+          [routerLink]="['/lessons', model.activity.courseId, model.activity.id]"
+        >
+          <i nz-icon nzType="edit" nzTheme="outline"></i>
+        </a>
+        } @if (model.activity.permissions.viewStats && model.activity.kind !== 'lesson') {
+        <a
           nz-tooltip="Statistiques"
           nz-button
           nzShape="round"
@@ -107,6 +131,7 @@
         >
           <i nz-icon nzType="bar-chart" nzTheme="outline"></i>
         </a>
+        }
         <div class="spacer"></div>
         <a
           *ngIf="model.activity.permissions.update"

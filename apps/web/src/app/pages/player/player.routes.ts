@@ -25,4 +25,12 @@ export default [
         './correction/correction.routes'
       ),
   },
+  {
+    path: 'course',
+    loadChildren: () =>
+      import(
+        /* webpackChunkName: "player-course" */
+        './course/course-reader.routes'
+      ),
+  },
 ] as Routes

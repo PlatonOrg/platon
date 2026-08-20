@@ -39,6 +39,7 @@ import { CourseDemoProvider } from '../models/course-demo-provider'
 import { Optional } from 'typescript-optional'
 import { CourseGroupProvider } from '../models/course-group-provider'
 import { ActivityGroupProvider } from '../models/activity-group.provider'
+import { CourseFileProvider, CourseFileUploadResponse } from '../models/course-file-provider'
 
 @Injectable({ providedIn: 'root' })
 export class CourseService {
@@ -59,7 +60,8 @@ export class CourseService {
     private readonly activityProvider: ActivityProvider,
     private readonly activityMemberProvider: ActivityMemberProvider,
     private readonly activityCorrectorProvider: ActivityCorrectorProvider,
-    private readonly activityGroupProvider: ActivityGroupProvider
+    private readonly activityGroupProvider: ActivityGroupProvider,
+    private readonly courseFileProvider: CourseFileProvider
   ) {}
 
   //#region Courses
@@ -201,6 +203,14 @@ export class CourseService {
 
   getCourseColors(courseId: string): Observable<number[]> {
     return this.activityProvider.getCourseColors(courseId)
+  }
+
+  markLessonCompleted(activity: Activity): Observable<void> {
+    return this.activityProvider.markLessonCompleted(activity)
+  }
+
+  uploadFile(courseId: string, file: File): Observable<CourseFileUploadResponse> {
+    return this.courseFileProvider.upload(courseId, file)
   }
 
   //#endregion

@@ -26,13 +26,13 @@
         <div class="circle-progression-container">
           <nz-progress
             *ngIf="activity().permissions.answer"
-            nz-tooltip="Avancement sur les exercices"
+            [nz-tooltip]="activity().kind === 'lesson' ? 'Avancement sur la lecture' : 'Avancement sur les exercices'"
             [nzPercent]="activity().progression"
             nzType="circle"
             nzStrokeWidth="8"
             [nzWidth]="150"
             [nzStrokeColor]="color"
-            [nzFormat]="progressionTemplate"
+            [nzFormat]="activity().kind === 'lesson' ? lessonProgressionTemplate : progressionTemplate"
             nzStatus="normal"
           />
         </div>
@@ -62,7 +62,7 @@
     <mat-card-actions>
       <div>
         <a
-          *ngIf="activity().permissions.answer"
+          *ngIf="activity().permissions.answer && activity().kind !== 'lesson'"
           [nz-tooltip]="activity().state === 'closed' ? 'Voir mes résultats' : 'Lancer l\'activité'"
           nz-button
           nzShape="round"
@@ -73,6 +73,19 @@
         >
           <mat-icon fontSet="material-icons">{{ activity().state === 'closed' ? 'bar_chart' : 'play_arrow' }}</mat-icon>
           {{ activity().state === 'closed' ? 'Voir mes résultats' : 'Lancer' }}
+        </a>
+        <a
+          *ngIf="activity().permissions.answer && activity().kind === 'lesson'"
+          nz-tooltip="Lire la leçon"
+          nz-button
+          nzShape="round"
+          nzType="primary"
+          [routerLink]="['/player/course', activity().courseId]"
+          [queryParams]="{ item: activity().id }"
+          class="action-button"
+        >
+          <mat-icon fontSet="material-icons">menu_book</mat-icon>
+          Lire
         </a>
         <button
           *ngIf="activity().permissions.viewResource"
@@ -85,6 +98,17 @@
           <mat-icon>edit</mat-icon>
           Editer
         </button>
+        <a
+          *ngIf="activity().kind === 'lesson' && activity().permissions.update"
+          nz-tooltip="Éditer le contenu de la leçon"
+          nz-button
+          nzShape="round"
+          [routerLink]="['/lessons', activity().courseId, activity().id]"
+          class="action-button"
+        >
+          <mat-icon>edit</mat-icon>
+          Éditer
+        </a>
       </div>
       <div>
         <button
@@ -105,19 +129,19 @@
           <ul nz-menu>
             <li
               nz-menu-item
-              *ngIf="activity().permissions.viewStats"
+              *ngIf="activity().permissions.viewStats && activity().kind !== 'lesson'"
               [routerLink]="['/activities/monitor', activity().courseId, activity().id]"
             >
               Suivi de l'activité
             </li>
             <li
               nz-menu-item
-              *ngIf="activity().permissions.viewStats"
+              *ngIf="activity().permissions.viewStats && activity().kind !== 'lesson'"
               [routerLink]="['/activities', activity().courseId, activity().id]"
             >
               Statistiques
             </li>
-            <li nz-menu-item>
+            <li nz-menu-item *ngIf="activity().kind !== 'lesson'">
               <course-csv-download-button
                 *ngIf="activity().permissions.update"
                 [activities]="[activity()]"
@@ -141,6 +165,15 @@
   </mat-card>
 </ng-container>
 <course-activity-settings-drawer [activity]="activity()" (activityChange)="onActivityChange($event)" #settingsDrawer />
+<ng-template #lessonProgressionTemplate>
+  <div class="progression">
+    <span class="progression-value">{{ activity().progression }}</span>
+    <span class="progression-unit">%</span>
+  </div>
+  <div class="progression-exercises">
+    {{ activity().progression === 100 ? 'Lue' : 'Non lue' }}
+  </div>
+</ng-template>
 <ng-template #progressionTemplate>
   <div class="progression">
     <span class="progression-value">{{ activity().progression }}</span>

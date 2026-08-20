@@ -98,4 +98,10 @@ export class RemoteActivityProvider extends ActivityProvider {
       .get<ItemResponse<number[]>>(`/api/v1/courses/${courseId}/activities/colors`)
       .pipe(map((response) => response.resource))
   }
+
+  markLessonCompleted(activity: Activity): Observable<void> {
+    return this.http
+      .post<NoContentResponse>(`/api/v1/courses/${activity.courseId}/activities/${activity.id}/lesson-progress`, {})
+      .pipe(map(() => undefined))
+  }
 }
