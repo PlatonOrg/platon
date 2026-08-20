@@ -3,8 +3,8 @@ import Fuse from 'fuse.js'
 
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
-import { RouterModule } from '@angular/router'
-import { Subscription, of } from 'rxjs'
+import { Router, RouterModule } from '@angular/router'
+import { Subscription, firstValueFrom, of } from 'rxjs'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
@@ -17,9 +17,11 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography'
 import {
   CourseActivityGridComponent,
   CourseActivityTableComponent,
+  CourseService,
+  CourseStudentOverviewComponent,
   CsvDownloadButtonComponent,
 } from '@platon/feature/course/browser'
-import { Activity, CourseSection } from '@platon/feature/course/common'
+import { Activity, ActivityKind, CourseSection } from '@platon/feature/course/common'
 import { CourseSectionActionsComponent } from './section-actions/section-actions.component'
 import { CourseManagementTutorialService } from '@platon/feature/tuto/browser'
 
@@ -55,6 +57,7 @@ import { CoursePresenter } from '../course.presenter'
     CourseActivityGridComponent,
     CourseActivityTableComponent,
     CourseSectionActionsComponent,
+    CourseStudentOverviewComponent,
     CsvDownloadButtonComponent,
 
     DurationPipe,
@@ -109,6 +112,9 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
     },
     onSearch: this.search.bind(this),
   }
+
+  private readonly router = inject(Router)
+  private readonly courseService = inject(CourseService)
 
   constructor(private readonly courseManagementTutorialService: CourseManagementTutorialService) {}
 
@@ -197,6 +203,21 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
     await this.refresh()
   }
 
+  protected async addLesson(section: CourseSection): Promise<void> {
+    const course = this.context.course
+    if (!course) {
+      return
+    }
+    const activity = await firstValueFrom(
+      this.courseService.createActivity(course, {
+        kind: ActivityKind.LESSON,
+        sectionId: section.id,
+        lessonTitle: 'Nouvelle leçon',
+      })
+    )
+    await this.router.navigate(['/lessons', course.id, activity.id])
+  }
+
   protected trackSection(_: number, item: SectionWithActivities): string {
     return item.section.id
   }
@@ -269,6 +290,12 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
 
   protected get flattenedActivities(): Activity[] {
     return this.sectionWithActivities.flatMap((item) => item.activities)
+  }
+
+  // Un étudiant sur un cours OpenClass voit la page d'accueil de lecture (façon OpenClassrooms),
+  // pas la grille de gestion réservée aux enseignants (réordonnancement, ajout de sections...).
+  protected get isStudentOpenClassView(): boolean {
+    return this.context.course?.format === 'openclass' && !this.context.course?.permissions?.update
   }
 }
 

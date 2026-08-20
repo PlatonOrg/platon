@@ -1,4 +1,7 @@
 <ng-container *ngIf="context.course as course">
+  @if (isStudentOpenClassView) {
+  <course-student-overview [course]="course" [sections]="sections" [activities]="activities" />
+  } @else {
   <nz-row [nzGutter]="[24, 24]" nzAlign="top">
     <nz-col nzXs="24" nzSm="24" nzMd="18" nzLg="18" nzXl="18">
       <header id="tuto-course-dashboard-header">
@@ -27,6 +30,12 @@
         >
           Ajouter une activité
         </button>
+        @if (course.format === 'openclass') {
+        <a nz-button nzShape="round" [routerLink]="['/player/course', course.id]" id="tuto-course-read-button">
+          <span nz-icon nzType="read"></span>
+          Lire le cours
+        </a>
+        }
         <course-csv-download-button
           *ngIf="context.course?.permissions?.update"
           [activities]="activities"
@@ -86,6 +95,19 @@
                     >
                       Ajouter une activité
                     </button>
+                    @if (course.permissions?.update && course.format === 'openclass') {
+                    <button
+                      class="add-lesson"
+                      nz-button
+                      nzShape="round"
+                      nzSize="small"
+                      (click)="addLesson(item.section)"
+                      id="tuto-course-add-lesson-button"
+                    >
+                      <span nz-icon nzType="read"></span>
+                      Ajouter une leçon
+                    </button>
+                    }
                     <app-course-section-actions
                       *ngIf="course.permissions?.update"
                       [section]="item.section"
@@ -166,6 +188,7 @@
       </aside>
     </nz-col>
   </nz-row>
+  }
 </ng-container>
 
 <ng-template #noSections>
