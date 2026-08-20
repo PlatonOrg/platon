@@ -14,6 +14,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
+import { CourseFormat } from '@platon/feature/course/common'
 import { CourseService } from '@platon/feature/course/browser'
 import { UiStepDirective, UiStepperComponent } from '@platon/shared/ui'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
@@ -46,12 +47,22 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
   ],
 })
 export class CourseCreatePage {
+  protected readonly CourseFormat = CourseFormat
+
   protected loading = false
   protected creating = false
 
   protected infos = new FormGroup({
     name: new FormControl('', [Validators.required]),
     desc: new FormControl('', [Validators.required]),
+  })
+
+  // Choix figé à la création : le format n'est jamais proposé dans un formulaire d'édition du cours.
+  protected format = new FormGroup({
+    format: new FormControl<CourseFormat>(CourseFormat.CLASSIC, {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
   })
 
   @ViewChild(UiStepperComponent)
@@ -81,6 +92,7 @@ export class CourseCreatePage {
           name: infos.name as string,
           desc: infos.desc as string,
           isTest: false,
+          format: this.format.value.format,
         })
       )
 
