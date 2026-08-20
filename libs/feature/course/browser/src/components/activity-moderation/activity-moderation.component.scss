@@ -75,6 +75,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
+  padding-bottom: 0.5rem;
 
   .code-label {
     color: var(--brand-text-secondary);
@@ -121,7 +122,15 @@
   }
 
   .copy-code-button {
+    // Aligne le bouton sur la taille du pill de code plutôt que sur la zone
+    // tactile 40px par défaut de mat-icon-button.
+    --mdc-icon-button-state-layer-size: 28px;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 5px;
 
     mat-icon {
       font-size: 18px;
