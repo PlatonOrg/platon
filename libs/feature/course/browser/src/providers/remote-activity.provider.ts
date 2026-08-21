@@ -84,6 +84,15 @@ export class RemoteActivityProvider extends ActivityProvider {
       .pipe(map((response) => response.resource))
   }
 
+  regenerateCode(activity: Activity): Observable<Activity> {
+    return this.http
+      .post<ItemResponse<Activity>>(
+        `/api/v1/courses/${activity.courseId}/activities/${activity.id}/regenerate-code`,
+        {}
+      )
+      .pipe(map((response) => response.resource))
+  }
+
   updateRestrictions(activity: Activity, restrictions: RestrictionList[]): Observable<Activity> {
     return this.http
       .patch<ItemResponse<Activity>>(

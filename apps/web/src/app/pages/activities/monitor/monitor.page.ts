@@ -154,6 +154,24 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
     }
   }
 
+  protected async onRegenerateCode(): Promise<void> {
+    const confirmed = await this.dialogService.confirm({
+      nzTitle: 'Régénérer le code',
+      nzContent: "L'ancien code ne fonctionnera plus, continuer ?",
+      nzOkText: 'Oui',
+      nzCancelText: 'Non',
+    })
+    if (!confirmed) return
+
+    try {
+      await this.presenter.regenerateActivityCode()
+      this.dialogService.success('Le code a été régénéré.')
+    } catch (error) {
+      console.error('Erreur lors de la régénération du code:', error)
+      this.dialogService.error('Une erreur est survenue lors de la régénération du code.')
+    }
+  }
+
   protected async onModerationAction(event: ActivityModerationEvent): Promise<void> {
     const { action, selections } = event
     switch (action) {

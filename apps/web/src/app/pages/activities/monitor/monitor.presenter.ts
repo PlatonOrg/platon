@@ -152,6 +152,13 @@ export class MonitorPresenter implements OnDestroy {
   async closeActivityForUser(sessionId: string): Promise<void> {
     await firstValueFrom(this.playerService.terminate(sessionId))
   }
+
+  async regenerateActivityCode(): Promise<void> {
+    const { activity } = this.context.value
+    if (!activity) return
+    await firstValueFrom(this.courseService.regenerateActivityCode(activity))
+    await this.refresh(activity.courseId, activity.id)
+  }
 }
 
 export interface Context {

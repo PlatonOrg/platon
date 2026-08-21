@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { randomInt } from 'crypto'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
@@ -36,6 +37,17 @@ import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
+
+const ACCESS_CODE_CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const ACCESS_CODE_LENGTH = 6
+
+function generateAccessCode(): string {
+  let code = ''
+  for (let i = 0; i < ACCESS_CODE_LENGTH; i++) {
+    code += ACCESS_CODE_CHARSET[randomInt(ACCESS_CODE_CHARSET.length)]
+  }
+  return code
+}
 
 @Injectable()
 export class ActivityService {
@@ -295,6 +307,17 @@ export class ActivityService {
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, true)
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: null, restrictions: activity.restrictions })
+  }
+
+  async regenerateCode(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityEntity> {
+    const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
+    if (!activity) {
+      throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
+    }
+    if (guard) {
+      await guard(activity)
+    }
+    return this.update(courseId, activityId, { code: generateAccessCode() }, guard)
   }
 
   async delete(courseId: string, activityId: string, guard?: ActivityGuard) {

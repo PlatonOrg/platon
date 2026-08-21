@@ -71,6 +71,15 @@
           <mat-icon>{{ isCodeCopied ? 'check' : 'content_copy' }}</mat-icon>
         </button>
         }
+        <button
+          mat-icon-button
+          class="regenerate-code-button"
+          (click)="regenerateCode.emit()"
+          matTooltip="Régénérer le code (l'ancien ne fonctionnera plus)"
+          matTooltipPosition="above"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
       </div>
       }
       <mat-form-field class="search-field" appearance="outline">

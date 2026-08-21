@@ -193,6 +193,21 @@ export class ActivityController {
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)
+  @Post('/:activityId/regenerate-code')
+  async regenerateCode(
+    @Req() req: IRequest,
+    @UUIDParam('courseId') courseId: string,
+    @UUIDParam('activityId') activityId: string
+  ): Promise<ItemResponse<ActivityDTO>> {
+    const activity = await this.activityService.regenerateCode(courseId, activityId, (activity) =>
+      this.permissionsService.ensureActivityWritePermission(activity, req)
+    )
+    return new ItemResponse({
+      resource: Mapper.map(activity, ActivityDTO),
+    })
+  }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
   @Patch('/:activityId/restrictions')
   async updateRestrictions(
     @Req() req: IRequest,
