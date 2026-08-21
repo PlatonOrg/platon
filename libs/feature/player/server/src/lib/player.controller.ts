@@ -97,6 +97,7 @@ export class PlayerController {
 
   @Public()
   @Post('/openSessionWithCode/:activitySessionId')
+  // TODO: Add a rate limit to prevent brute force attacks on the code
   openSessionWithCode(
     @Req() req: IRequest,
     @UUIDParam('activitySessionId') activitySessionId: string,

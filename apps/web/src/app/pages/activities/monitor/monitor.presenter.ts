@@ -106,7 +106,7 @@ export class MonitorPresenter implements OnDestroy {
         const exerciseChangeNotifications = pagination.notifications.filter((notification) => {
           const data = notification.data as Record<string, unknown>
           // Filter out notifications we've already processed
-          return data.type === EXERCISE_CHANGES_NOTIFICATION && !this.processedNotifications.has(notification.id)
+          return data['type'] === EXERCISE_CHANGES_NOTIFICATION && !this.processedNotifications.has(notification.id)
         })
 
         if (exerciseChangeNotifications.length === 0) return
@@ -117,14 +117,14 @@ export class MonitorPresenter implements OnDestroy {
           this.processedNotifications.add(notification.id)
 
           const notificationData = notification.data as Record<string, unknown>
-          const changes = notificationData.changes as PlayerExercise
+          const changes = notificationData['changes'] as PlayerExercise
 
           // Check if we have valid changes
           if (changes) {
             // Forward the notification to components that are listening
             this.exerciseChanges.next({
-              userId: notificationData.userId as string,
-              userName: notificationData.userName as string | undefined,
+              userId: notificationData['userId'] as string,
+              userName: notificationData['userName'] as string | undefined,
               changes,
             })
 

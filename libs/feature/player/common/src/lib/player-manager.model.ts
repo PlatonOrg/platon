@@ -164,8 +164,8 @@ export abstract class PlayerManager {
 
     const answers = input.answers || {}
 
-    session.variables.answers = {
-      ...session.variables.answers,
+    session.variables['answers'] = {
+      ...session.variables['answers'],
       ...answers,
     }
 
@@ -281,7 +281,7 @@ export abstract class PlayerManager {
 
     exerciseSession.envid = output.envid
 
-    let grade = Number.parseInt(output.variables.grade) ?? -1
+    let grade = Number.parseInt(output.variables['grade']) ?? -1
     if (Number.isNaN(grade)) {
       grade = -1
     }
@@ -419,7 +419,9 @@ export abstract class PlayerManager {
     }
     return [
       exoPlayer ?? withExercisePlayer(exerciseSession),
-      activitySession ? withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables.navigation : undefined,
+      activitySession
+        ? withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables['navigation']
+        : undefined,
     ]
   }
 
@@ -431,7 +433,7 @@ export abstract class PlayerManager {
 
     activitySession.activity = activitySession.activity ?? exerciseSession.activity
 
-    return [withExercisePlayer(exerciseSession), activitySession.variables.navigation]
+    return [withExercisePlayer(exerciseSession), activitySession.variables['navigation']]
   }
 
   async showSolution(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
