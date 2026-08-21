@@ -44,7 +44,11 @@ export class GradedActivitySettingsComponent {
   }
 
   private generateCode(): string {
-    return Math.random().toString(36).substring(2, 8).toUpperCase()
+    // crypto.getRandomValues plutôt que Math.random() : ce code sert à débloquer un examen,
+    // il doit être imprévisible (Math.random() n'est pas un générateur cryptographiquement sûr).
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const randomValues = crypto.getRandomValues(new Uint32Array(6))
+    return Array.from(randomValues, (value) => charset[value % charset.length]).join('')
   }
 
   // Les TP notés / examens n'affichent jamais ces actions aux élèves : pas de configuration nécessaire.
