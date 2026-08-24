@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { NotFoundResponse } from '@platon/core/common'
+import { NotFoundResponse, User } from '@platon/core/common'
 import { DataSource, Repository, MoreThanOrEqual, And, MoreThan, LessThanOrEqual, LessThan, Not } from 'typeorm'
 import { Optional } from 'typescript-optional'
 import { CourseSectionEntity } from './section.entity'
+import { CourseMemberService } from '../course-member/course-member.service'
 
 @Injectable()
 export class CourseSectionService {
   constructor(
     private readonly dataSource: DataSource,
+    private readonly courseMemberService: CourseMemberService,
 
     @InjectRepository(CourseSectionEntity)
     private readonly repository: Repository<CourseSectionEntity>
@@ -18,7 +20,19 @@ export class CourseSectionService {
     return Optional.ofNullable(await this.repository.findOne({ where: { courseId, id } }))
   }
 
-  async ofCourse(courseId: string): Promise<[CourseSectionEntity[], number]> {
+  async ofCourse(courseId: string, user?: User): Promise<[CourseSectionEntity[], number]> {
+    let showAllSection = true
+    if (user) {
+      showAllSection = await this.courseMemberService.hasWritePermission(courseId, user)
+    }
+    if (!showAllSection) {
+      return this.repository.findAndCount({
+        where: { courseId, hidden: false },
+        order: {
+          order: { direction: 'ASC' },
+        },
+      })
+    }
     return this.repository.findAndCount({
       where: { courseId },
       order: {

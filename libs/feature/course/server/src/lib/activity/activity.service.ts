@@ -2,7 +2,7 @@
 import { randomInt } from 'crypto'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
+import { ForbiddenResponse, NotFoundResponse, User, UserRoles } from '@platon/core/common'
 import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@platon/core/server'
 import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
@@ -74,6 +74,11 @@ export class ActivityService {
   ) {}
 
   async search(courseId: string, filters?: ActivityFilters): Promise<[ActivityEntity[], number]> {
+    let showhidden = false
+    if (this.request.user) {
+      showhidden = await this.courseMemberService.hasWritePermission(courseId, this.request.user)
+    }
+
     const qb = this.createQueryBuilder(courseId)
 
     if (filters?.sectionId) {
@@ -82,6 +87,9 @@ export class ActivityService {
 
     if (filters?.challenge != null) {
       qb.andWhere(`is_challenge = :isChallenge`, { isChallenge: !!filters.challenge })
+    }
+    if (!showhidden) {
+      qb.andWhere('hidden = false')
     }
 
     qb.orderBy('activity.createdAt')

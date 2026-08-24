@@ -176,7 +176,7 @@ export class CourseActivitySettingsComponent implements OnInit {
   }
 
   currentHue = 210
-
+  protected hidden = false
   protected editOpenDate = false
   protected editCloseDate = false
   protected tempOpenDate?: Date
@@ -200,7 +200,7 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.currentHue = this.activity.colorHue ?? 210
-
+    this.hidden = this.activity.hidden ? this.activity.hidden : false
     this.activityColors = await firstValueFrom(this.courseService.getCourseColors(this.activity.courseId))
 
     this.loadingSignal.set(true)
@@ -253,6 +253,10 @@ export class CourseActivitySettingsComponent implements OnInit {
         return updated
       }
     })
+  }
+
+  protected updateHidden() {
+    this.hidden = !this.hidden
   }
 
   protected newAccessPeriod() {
@@ -408,6 +412,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
+            hidden: this.hidden,
             ignoreRestrictions: false,
             activitySettings: settingsToSend,
           })
@@ -418,6 +423,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             colorHue: this.currentHue,
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
+            hidden: this.hidden,
             ignoreRestrictions: true,
             activitySettings: settingsToSend,
           })
@@ -431,6 +437,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             colorHue: this.currentHue,
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
+            hidden: this.hidden,
             activitySettings: settingsToSend,
           })
         )
@@ -440,6 +447,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
+            hidden: this.hidden,
             activitySettings: settingsToSend,
           })
         )
@@ -461,6 +469,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             closeAt: userSpecificDate.end,
             state: calculateActivityOpenState({ openAt: userSpecificDate.start, closeAt: userSpecificDate.end }),
             colorHue: this.currentHue,
+            hidden: this.hidden,
           })
         )
       } else {
@@ -471,6 +480,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             closeAt: this.activity.closeAt,
             state: result[0].state,
             colorHue: this.currentHue,
+            hidden: this.hidden,
           })
         )
       }

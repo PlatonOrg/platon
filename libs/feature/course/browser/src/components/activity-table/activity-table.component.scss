@@ -9,3 +9,23 @@ a {
 td.clickable {
   cursor: pointer;
 }
+.hidden-student-title {
+  padding: 2px;
+  gap: 0.25rem;
+  background-color: #80808080;
+  border-radius: 8px;
+}
+
+.hidden-student-section {
+  padding: 2px;
+  gap: 0.25rem;
+  background-color: #80808080;
+  border-radius: 8px;
+}
+
+.hidden-activity {
+  background-color: #dbd9d4;
+  border-radius: 8px;
+  margin-top: 3px;
+  overflow: hidden;
+}

@@ -10,6 +10,9 @@ export class CourseSectionEntity extends BaseEntity {
   @Column({ type: 'int' })
   order!: number
 
+  @Column({ default: false })
+  hidden!: boolean
+
   @Column({ nullable: true })
   desc?: string
 

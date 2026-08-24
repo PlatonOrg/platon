@@ -55,6 +55,7 @@
           [nzExtra]="extra"
           class="tuto-course-section-panel"
           [id]="'tuto-course-section-' + item.section.id"
+          [class.hidden-section]="item.section.hidden"
         >
           <ng-template #header>
             <span
@@ -68,6 +69,12 @@
             </span>
           </ng-template>
           <ng-template #extra>
+            @if (item.section.hidden){
+            <div class="hidden-student-message">
+              <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
+              Caché aux étudiants
+            </div>
+            }
             @if (context.course.permissions?.update) {
             <button
               class="add-activity"
@@ -91,6 +98,7 @@
               [sectionCount]="sections.length"
               (moveUp)="moveUpSection(item.section)"
               (moveDown)="moveDownSection(item.section)"
+              (hiddeToStudent)="hiddeToStudent(item.section)"
               (insertBelow)="addSection(item.section)"
               (edit)="editModeOn(item)"
               (save)="saveSection(item)"

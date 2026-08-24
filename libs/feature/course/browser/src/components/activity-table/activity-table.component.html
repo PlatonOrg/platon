@@ -24,15 +24,33 @@
   </thead>
   <tbody>
     @for (model of nzTable.data; track trackByFn($index, model)) {
-    <tr>
+    <tr [class.hidden-activity]="model.section?.hidden">
       @if (selectable && !disabled) {
       <td
         [nzChecked]="selection.has(model.activity.id)"
         (nzCheckedChange)="onItemChecked(model.activity.id, $event)"
       ></td>
-      }
-      <td nzAlign="center">{{ model.activity.title }}</td>
-      <td nzAlign="center">{{ model.section?.name }}</td>
+      <td nzAlign="center">
+        @if(model.activity.hidden) {
+        <div class="hidden-student-title">
+          <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
+          Caché aux étudiants
+        </div>
+        }
+        {{ model.activity.title }}
+      </td>
+      <td nzAlign="center">
+        @if (model.section?.hidden) {
+        <span
+          class="hidden-student-section"
+          nz-icon
+          [nzType]="'eye-invisible'"
+          nzTheme="outline"
+          nz-tooltip="Cacher aux étudiants"
+        ></span>
+        }
+        {{ model.section?.name }}
+      </td>
       <td nzAlign="center">
         <nz-tag>{{ model.activity.exerciseCount }}</nz-tag>
       </td>
