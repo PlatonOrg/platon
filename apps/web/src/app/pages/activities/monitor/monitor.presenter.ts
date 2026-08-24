@@ -118,22 +118,42 @@ export class MonitorPresenter implements OnDestroy {
 
           const notificationData = notification.data as Record<string, unknown>
           const changes = notificationData['changes'] as PlayerExercise
+          const userId = notificationData['userId'] as string
 
           // Check if we have valid changes
           if (changes) {
-            // Forward the notification to components that are listening
+            // Delete the notification so it doesn't accumulate in the UI
+            firstValueFrom(this.notificationService.deleteNotification(notification.id)).catch((error) => {
+              console.warn('Failed to delete notification:', error)
+            })
+            const oldUserResults = context.results?.users.find((user) => user.id === userId)
+            if (oldUserResults) {
+              const userResults = await firstValueFrom(
+                this.resultService.sessionResults(oldUserResults.activitySessionId)
+              )
+              // Re-read the latest context here to avoid clobbering updates made concurrently during the await above.
+              const latestContext = this.context.value as Required<Context>
+              this.context.next({
+                ...latestContext,
+                results: {
+                  ...latestContext.results,
+                  users: latestContext.results.users.map((user) => (user.id === userId ? userResults : user)),
+                },
+              })
+            } else {
+              const results = await firstValueFrom(this.resultService.activityResults(context.activity.id))
+              // Re-read the latest context here to avoid clobbering updates made concurrently during the await above.
+              const latestContext = this.context.value as Required<Context>
+              this.context.next({
+                ...latestContext,
+                results,
+              })
+            }
             this.exerciseChanges.next({
-              userId: notificationData['userId'] as string,
+              userId: userId as string,
               userName: notificationData['userName'] as string | undefined,
               changes,
             })
-
-            // Delete the notification so it doesn't accumulate in the UI
-            try {
-              await firstValueFrom(this.notificationService.deleteNotification(notification.id))
-            } catch (error) {
-              console.warn('Failed to delete notification:', error)
-            }
           }
         }
       },

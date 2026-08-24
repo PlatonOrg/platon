@@ -72,15 +72,6 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
     )
 
     this.subscriptions.push(this.presenter.onDeletedActivity.subscribe(() => this.location.back()))
-
-    this.subscriptions.push(
-      this.presenter.onExerciseChanges.subscribe(async () => {
-        if (this.context.activity && this.context.course) {
-          await this.presenter.refresh(this.context.course.id, this.context.activity.id)
-        }
-        this.changeDetectorRef.markForCheck()
-      })
-    )
   }
 
   ngOnDestroy(): void {

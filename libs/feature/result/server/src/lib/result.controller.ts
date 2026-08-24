@@ -1,6 +1,6 @@
 import { Controller, Get, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ForbiddenResponse, UserRoles } from '@platon/core/common'
+import { ForbiddenResponse, isTeacherRole, UserRoles } from '@platon/core/common'
 import { IRequest, Roles, UUIDParam } from '@platon/core/server'
 import {
   ACTIVITY_ANSWER_RATE,
@@ -41,7 +41,7 @@ export class ResultController {
   @Get('/session/:sessionId')
   async sessionResults(@Req() req: IRequest, @UUIDParam('sessionId') sessionId: string): Promise<UserResults> {
     const [session, output] = await this.service.ofSession(sessionId)
-    if (session.userId && req.user?.id !== session.userId) {
+    if (!isTeacherRole(req.user.role) && session.userId && req.user?.id !== session.userId) {
       throw new ForbiddenResponse(`You don't have access to this session`)
     }
     const results = output[ACTIVITY_USER_RESULTS] as UserResults[]
