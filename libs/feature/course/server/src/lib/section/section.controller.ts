@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Patch, Post, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse, ListResponse, NoContentResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
-import { Mapper, Roles, UUIDParam } from '@platon/core/server'
+import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import { CourseSectionDTO, CreateCourseSectionDTO, UpdateCourseSectionDTO } from './section.dto'
 import { CourseSectionEntity } from './section.entity'
 import { CourseSectionService } from './section.service'
@@ -26,8 +26,8 @@ export class CourseSectionController {
   }
 
   @Get()
-  async list(@UUIDParam('courseId') courseId: string): Promise<ListResponse<CourseSectionDTO>> {
-    const [items, total] = await this.service.ofCourse(courseId)
+  async list(@Req() req: IRequest, @UUIDParam('courseId') courseId: string): Promise<ListResponse<CourseSectionDTO>> {
+    const [items, total] = await this.service.ofCourse(courseId, req.user)
     return new ListResponse({
       total,
       resources: Mapper.mapAll(items, CourseSectionDTO),

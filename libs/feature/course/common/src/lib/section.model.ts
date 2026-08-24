@@ -5,6 +5,7 @@ export interface CourseSection {
   readonly name: string
   readonly order: number
   readonly courseId: string
+  readonly hidden: boolean
 }
 
 export interface CreateCourseSection {
@@ -15,4 +16,5 @@ export interface CreateCourseSection {
 export interface UpdateCourseSection {
   readonly name?: string
   readonly order?: number
+  readonly hidden?: boolean
 }

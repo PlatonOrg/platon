@@ -56,50 +56,62 @@
                   [nzExtra]="extra"
                   class="tuto-course-section-panel"
                   [id]="'tuto-course-section-' + item.section.id"
+                  [class.hidden-section]="item.section.hidden"
                 >
                   <ng-template #header>
-                    <span
-                      nz-typography
-                      [nzEditable]="course.permissions?.update"
-                      [nzContent]="item.section.name"
-                      (nzContentChange)="renameSection(item.section, $event)"
-                      (click)="$event.stopPropagation()"
-                      class="tuto-course-section-title"
-                    >
-                    </span>
+                    <div class="course-section-header">
+                      <span
+                        nz-typography
+                        [nzEditable]="course.permissions?.update"
+                        [nzContent]="item.section.name"
+                        (nzContentChange)="renameSection(item.section, $event)"
+                        (click)="$event.stopPropagation()"
+                        class="tuto-course-section-title"
+                      >
+                      </span>
+                    </div>
                   </ng-template>
                   <ng-template #extra>
-                    <button
-                      *ngIf="context.course?.permissions?.update"
-                      class="add-activity"
-                      nz-button
-                      nzType="primary"
-                      nzShape="round"
-                      nzSize="small"
-                      [routerLink]="['/activities/create']"
-                      [queryParams]="{
-                        course: item.section.courseId,
-                        section: item.section.id
-                      }"
-                      id="tuto-course-add-activity-button"
-                      class="add-activity"
-                    >
-                      Ajouter une activité
-                    </button>
-                    <app-course-section-actions
-                      *ngIf="course.permissions?.update"
-                      [section]="item.section"
-                      [sectionCount]="sections.length"
-                      (moveUp)="moveUpSection(item.section)"
-                      (moveDown)="moveDownSection(item.section)"
-                      (insertBelow)="addSection(item.section)"
-                      (edit)="editModeOn(item)"
-                      (save)="saveSection(item)"
-                      (remove)="deleteSection(item.section)"
-                      [nbActivities]="numberOfActivities(item.section)"
-                      id="tuto-course-section-actions"
-                      class="tuto-course-section-actions"
-                    />
+                    <div class="section-extra-actions">
+                      @if (item.section.hidden){
+                      <div class="hidden-student-message">
+                        <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
+                        Caché aux étudiants
+                      </div>
+                      }
+                      <button
+                        *ngIf="context.course?.permissions?.update"
+                        class="add-activity"
+                        nz-button
+                        nzType="primary"
+                        nzShape="round"
+                        nzSize="small"
+                        [routerLink]="['/activities/create']"
+                        [queryParams]="{
+                          course: item.section.courseId,
+                          section: item.section.id
+                        }"
+                        id="tuto-course-add-activity-button"
+                        class="add-activity"
+                      >
+                        Ajouter une activité
+                      </button>
+                      <app-course-section-actions
+                        *ngIf="course.permissions?.update"
+                        [section]="item.section"
+                        [sectionCount]="sections.length"
+                        (moveUp)="moveUpSection(item.section)"
+                        (moveDown)="moveDownSection(item.section)"
+                        (hiddeToStudent)="hiddeToStudent(item.section)"
+                        (insertBelow)="addSection(item.section)"
+                        (edit)="editModeOn(item)"
+                        (save)="saveSection(item)"
+                        (remove)="deleteSection(item.section)"
+                        [nbActivities]="numberOfActivities(item.section)"
+                        id="tuto-course-section-actions"
+                        class="tuto-course-section-actions"
+                      />
+                    </div>
                   </ng-template>
                   <course-activity-grid
                     [items]="item.activities"

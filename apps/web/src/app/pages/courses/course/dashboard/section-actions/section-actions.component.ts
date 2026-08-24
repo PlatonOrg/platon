@@ -39,6 +39,7 @@ export class CourseSectionActionsComponent {
   @Output() edit = new EventEmitter()
   @Output() save = new EventEmitter()
   @Output() remove = new EventEmitter()
+  @Output() hiddeToStudent = new EventEmitter()
 
   onEdit() {
     this.editMode = true

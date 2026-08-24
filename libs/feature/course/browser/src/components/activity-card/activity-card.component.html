@@ -1,6 +1,12 @@
-<ng-container *ngIf="activity() | courseActivityState as activityState">
-  <mat-card>
-    <div class="card-header" [style.background-color]="color"></div>
+<ng-container *ngIf="item | courseActivityState as activityState">
+  @if (item.hidden){
+  <div class="hidden-student-message">
+    <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
+    Caché aux étudiants
+  </div>
+  }
+  <mat-card [class]="item">
+    <div [class]="item.hidden ? 'card-header-hidden' : 'card-header'" [style.background-color]="color"></div>
     <mat-card-header>
       <mat-card-title>
         <a

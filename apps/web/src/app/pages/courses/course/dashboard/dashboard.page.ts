@@ -182,6 +182,11 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
     await this.refresh()
   }
 
+  protected async hiddeToStudent(section: CourseSection): Promise<void> {
+    await this.presenter.updateSection(section, { hidden: !section.hidden })
+    await this.refresh()
+  }
+
   protected async editModeOn(section: SectionWithActivities): Promise<void> {
     section.editMode = true
     this.changeDetectorRef.markForCheck()

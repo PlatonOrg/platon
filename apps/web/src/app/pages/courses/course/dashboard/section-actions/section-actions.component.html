@@ -25,6 +25,9 @@
       >
         Ajouter une activité
       </button>
+      <button nz-button (click)="hiddeToStudent.emit(section)">
+        {{ section.hidden ? 'Montrer aux étudiants' : 'Cacher aux étudiants' }}
+      </button>
       <button nz-button (click)="insertBelow.emit(section)">Insérer une section après</button>
       @if (!editMode) {
       <button nz-button (click)="onEdit()">Modifier l'ordre des activités</button>

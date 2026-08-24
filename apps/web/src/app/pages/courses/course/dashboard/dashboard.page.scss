@@ -2,6 +2,10 @@
   display: block;
 }
 
+::ng-deep .ant-collapse-item:last-child {
+  border-radius: 8px !important;
+  overflow: hidden;
+}
 nz-empty {
   margin: 2rem 0;
 }
@@ -36,4 +40,29 @@ ui-search-bar {
 
 .add-activity {
   margin-right: 1rem;
+}
+
+.course-section-header {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hidden-student-message {
+  margin-right: 1rem;
+  padding: 2px;
+  gap: 0.25rem;
+  background-color: #80808080;
+  border-radius: 8px;
+}
+
+.section-extra-actions {
+  display: flex;
+  align-items: center;
+}
+
+.hidden-section {
+  background-color: #dbd9d4;
+  border-radius: 8px;
+  margin-top: 3px;
+  overflow: hidden;
 }

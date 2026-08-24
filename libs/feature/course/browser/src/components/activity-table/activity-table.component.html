@@ -26,14 +26,33 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let model of nzTable.data; trackBy: trackByFn">
+    <tr *ngFor="let model of nzTable.data; trackBy: trackByFn" [class.hidden-activity]="model.section?.hidden">
       <td
         *ngIf="selectable && !disabled"
         [nzChecked]="selection.has(model.activity.id)"
         (nzCheckedChange)="onItemChecked(model.activity.id, $event)"
       ></td>
-      <td nzAlign="center">{{ model.activity.title }}</td>
-      <td nzAlign="center">{{ model.section?.name }}</td>
+      <td nzAlign="center">
+        @if(model.activity.hidden) {
+        <div class="hidden-student-title">
+          <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
+          Caché aux étudiants
+        </div>
+        }
+        {{ model.activity.title }}
+      </td>
+      <td nzAlign="center">
+        @if (model.section?.hidden) {
+        <span
+          class="hidden-student-section"
+          nz-icon
+          [nzType]="'eye-invisible'"
+          nzTheme="outline"
+          nz-tooltip="Cacher aux étudiants"
+        ></span>
+        }
+        {{ model.section?.name }}
+      </td>
       <td nzAlign="center">
         <nz-tag>{{ model.activity.exerciseCount }}</nz-tag>
       </td>
