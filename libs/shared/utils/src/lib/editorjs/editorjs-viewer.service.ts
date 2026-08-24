@@ -5,6 +5,8 @@ import { ListParser } from './parsers/list-parser'
 import { ChecklistParser } from './parsers/checklist-parser'
 import { CodeParser } from './parsers/code-parser'
 import { CalloutParser } from './parsers/callout-parser'
+import { EmbedParser } from './parsers/embed-parser'
+import { VideoParser } from './parsers/video-parser'
 
 export class EditorjsViewerService {
   private readonly parser = new EdjsParser(undefined, {
@@ -12,6 +14,8 @@ export class EditorjsViewerService {
     checklist: ChecklistParser,
     code: CodeParser,
     callout: CalloutParser,
+    embed: EmbedParser,
+    video: VideoParser,
   })
 
   hasCodeBlock = (data: any): boolean => {

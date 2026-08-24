@@ -162,6 +162,32 @@
     }
   }
 
+  .embed-caption {
+    margin-top: 0.4rem;
+    font-size: 0.85em;
+    color: var(--brand-text-secondary);
+    text-align: center;
+  }
+
+  .video {
+    position: relative;
+    max-width: 100%;
+    margin: 0 0 1rem;
+
+    video {
+      max-width: 100%;
+      width: 100%;
+      border-radius: 8px;
+    }
+  }
+
+  .video-caption {
+    margin-top: 0.4rem;
+    font-size: 0.85em;
+    color: var(--brand-text-secondary);
+    text-align: center;
+  }
+
   .ce-callout {
     display: flex;
     align-items: flex-start;

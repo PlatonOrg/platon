@@ -1,5 +1,5 @@
 export * from './editorjs'
-export * from './editorjs-image-uploader'
+export * from './editorjs-file-uploader'
 export * from './editorjs.component'
 export * from './editorjs.module'
 export * from './editorjs.service'

@@ -14,11 +14,13 @@ import { EditorJsService } from './editorjs.service'
 import { CalloutExtension } from './extensions/callout.extension'
 import { CodeExtension } from './extensions/code.extension'
 import { DelimiterExtension } from './extensions/delimiter.extension'
+import { EmbedExtension } from './extensions/embed.extension'
 import { ImageExtension } from './extensions/image.extension'
 import { ListExtension } from './extensions/list.extension'
 import { RawExtension } from './extensions/raw.extension'
 import { TableExtension } from './extensions/table.extension'
 import { TextExtension } from './extensions/text.extension'
+import { VideoExtension } from './extensions/video.extension'
 
 @Component({
   selector: 'ui-editorjs',
@@ -31,11 +33,13 @@ import { TextExtension } from './extensions/text.extension'
     CalloutExtension,
     CodeExtension,
     DelimiterExtension,
+    EmbedExtension,
     ListExtension,
     RawExtension,
     TableExtension,
     TextExtension,
     ImageExtension,
+    VideoExtension,
 
     {
       provide: NG_VALUE_ACCESSOR,

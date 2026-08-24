@@ -70,4 +70,64 @@ ui-editorjs {
       }
     }
 
+    .ce-video__form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .ce-video__button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--brand-border-color);
+      border-radius: 6px;
+      background: var(--brand-background-components);
+      color: var(--brand-text-primary);
+      cursor: pointer;
+    }
+
+    .ce-video__file-input {
+      display: none;
+    }
+
+    .ce-video__url-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--brand-border-color);
+      border-radius: 6px;
+      background: var(--brand-background-components);
+      color: var(--brand-text-primary);
+    }
+
+    .ce-video__loading {
+      color: var(--brand-text-secondary);
+      font-style: italic;
+    }
+
+    .ce-video__error {
+      color: var(--brand-color-warning);
+      font-size: 0.85em;
+      margin-top: 0.25rem;
+    }
+
+    .ce-video__player {
+      max-width: 100%;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .ce-video__caption {
+      min-height: 1.2em;
+      margin-top: 0.4rem;
+      font-size: 0.85em;
+      color: var(--brand-text-secondary);
+      text-align: center;
+      outline: none;
+
+      &:empty::before {
+        content: attr(data-placeholder);
+        color: var(--brand-text-tertiary);
+      }
+    }
+
 }
