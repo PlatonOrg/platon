@@ -26,12 +26,28 @@ describe('buildVideoExtension', () => {
       success: 1,
       file: { url: 'https://cdn.example.com/v.mp4' },
     })
-    expect(uploader.uploadByFile).toHaveBeenCalledWith(file)
+    expect(uploader.uploadByFile).toHaveBeenCalledWith(file, undefined)
 
     await expect(config.uploader.uploadByUrl('https://example.com/v.mp4')).resolves.toEqual({
       success: 1,
       file: { url: 'https://cdn.example.com/v.mp4' },
     })
     expect(uploader.uploadByUrl).toHaveBeenCalledWith('https://example.com/v.mp4')
+  })
+
+  it('transmet le callback de progression à uploadByFile', async () => {
+    const uploader: EditorJsFileUploader = {
+      uploadByFile: jest.fn().mockResolvedValue({ success: 1, file: { url: 'https://cdn.example.com/v.mp4' } }),
+      uploadByUrl: jest.fn(),
+    }
+
+    const extension = buildVideoExtension(uploader)
+    const config = (extension.tools?.['video'] as any).config
+
+    const onProgress = jest.fn()
+    const file = new Blob(['x'])
+    await config.uploader.uploadByFile(file, onProgress)
+
+    expect(uploader.uploadByFile).toHaveBeenCalledWith(file, onProgress)
   })
 })

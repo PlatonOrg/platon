@@ -77,7 +77,7 @@ export class VideoTool implements BlockTool {
       fileInput.addEventListener('change', () => {
         const file = fileInput.files?.[0]
         if (file) {
-          this.upload(() => this.uploader!.uploadByFile(file))
+          this.upload((onProgress) => this.uploader!.uploadByFile(file, onProgress))
         }
       })
 
@@ -128,7 +128,7 @@ export class VideoTool implements BlockTool {
     }
   }
 
-  private upload(action: () => Promise<{ file: { url: string } }>): void {
+  private upload(action: (onProgress: (percent: number) => void) => Promise<{ file: { url: string } }>): void {
     if (!this.wrapper) {
       return
     }
@@ -138,7 +138,11 @@ export class VideoTool implements BlockTool {
     loading.textContent = 'Envoi en cours…'
     this.wrapper.appendChild(loading)
 
-    action()
+    const onProgress = (percent: number) => {
+      loading.textContent = `Envoi en cours… ${percent}%`
+    }
+
+    action(onProgress)
       .then((response) => {
         this.data.url = response.file.url
         this.renderPlayer()

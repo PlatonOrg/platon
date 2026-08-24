@@ -81,7 +81,7 @@ describe('VideoTool', () => {
     expect(tool.save().url).toBe('https://cdn.example.com/v.mp4')
   })
 
-  it('appelle uploadByFile quand un fichier est sélectionné', async () => {
+  it('appelle uploadByFile avec un callback de progression quand un fichier est sélectionné', async () => {
     const response = { success: 1 as const, file: { url: 'https://cdn.example.com/v.mp4' } }
     const uploader: EditorJsFileUploader = {
       uploadByFile: jest.fn().mockResolvedValue(response),
@@ -95,11 +95,42 @@ describe('VideoTool', () => {
     Object.defineProperty(fileInput, 'files', { value: [file] })
     fileInput.dispatchEvent(new Event('change'))
 
-    expect(uploader.uploadByFile).toHaveBeenCalledWith(file)
+    expect(uploader.uploadByFile).toHaveBeenCalledWith(file, expect.any(Function))
+
     await Promise.resolve()
     await Promise.resolve()
 
     expect(tool.save().url).toBe('https://cdn.example.com/v.mp4')
+  })
+
+  it('met à jour le message de chargement quand le callback de progression est appelé', () => {
+    let capturedOnProgress: ((percent: number) => void) | undefined
+    let resolveUpload: (value: { success: 1; file: { url: string } }) => void = () => {
+      //
+    }
+    const pending = new Promise<{ success: 1; file: { url: string } }>((resolve) => {
+      resolveUpload = resolve
+    })
+    const uploader: EditorJsFileUploader = {
+      uploadByFile: jest.fn((_file: Blob, onProgress?: (percent: number) => void) => {
+        capturedOnProgress = onProgress
+        return pending
+      }),
+      uploadByUrl: jest.fn(),
+    }
+    const tool = new VideoTool({ data: {}, config: { uploader } } as any)
+    const wrapper = tool.render()
+
+    const fileInput = wrapper.querySelector('.ce-video__file-input') as HTMLInputElement
+    const file = new File(['content'], 'video.mp4', { type: 'video/mp4' })
+    Object.defineProperty(fileInput, 'files', { value: [file] })
+    fileInput.dispatchEvent(new Event('change'))
+
+    capturedOnProgress?.(42)
+
+    expect(wrapper.querySelector('.ce-video__loading')?.textContent).toBe('Envoi en cours… 42%')
+
+    resolveUpload({ success: 1, file: { url: 'https://cdn.example.com/v.mp4' } })
   })
 
   it("affiche une erreur et revient au formulaire en cas d'échec d'upload", async () => {

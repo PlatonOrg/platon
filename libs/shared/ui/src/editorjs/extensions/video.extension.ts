@@ -11,7 +11,8 @@ export const buildVideoExtension = (uploader: EditorJsFileUploader | null): Edit
         config: {
           uploader: uploader
             ? {
-                uploadByFile: (file: Blob) => uploader.uploadByFile(file),
+                uploadByFile: (file: Blob, onProgress?: (percent: number) => void) =>
+                  uploader.uploadByFile(file, onProgress),
                 uploadByUrl: (url: string) => uploader.uploadByUrl(url),
               }
             : undefined,
