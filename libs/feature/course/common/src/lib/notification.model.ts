@@ -68,3 +68,16 @@ export interface ResourceMovedByAdminNotification {
   circleId: string
   circleName: string
 }
+
+export const EXERCISE_CHANGES_NOTIFICATION = 'EXERCISE-CHANGES' as const
+export interface ExerciseChangesNotification {
+  type: typeof EXERCISE_CHANGES_NOTIFICATION
+  userId: string
+  changes: object
+}
+
+export const MODERATION_ACTIVITY_CHANGES_NOTIFICATION = 'MODERATION-ACTIVITY-CHANGES' as const
+export interface ModerationActivityChangesNotification {
+  type: typeof MODERATION_ACTIVITY_CHANGES_NOTIFICATION
+  activity: object
+}

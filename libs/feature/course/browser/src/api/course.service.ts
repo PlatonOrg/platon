@@ -204,6 +204,10 @@ export class CourseService {
     return this.activityProvider.reopen(activity)
   }
 
+  regenerateActivityCode(activity: Activity): Observable<Activity> {
+    return this.activityProvider.regenerateCode(activity)
+  }
+
   getCourseColors(courseId: string): Observable<number[]> {
     return this.activityProvider.getCourseColors(courseId)
   }

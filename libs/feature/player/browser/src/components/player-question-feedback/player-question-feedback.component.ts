@@ -19,9 +19,9 @@ import { firstValueFrom } from 'rxjs'
   styleUrl: './player-question-feedback.component.scss',
 })
 export class PlayerQuestionFeedbackComponent {
-  sessionId = input<string | undefined>(undefined)
-  exerciseTitle = input<string | undefined>(undefined)
-  author = input<string | null | undefined>(undefined)
+  readonly sessionId = input<string | undefined>(undefined)
+  readonly exerciseTitle = input<string | undefined>(undefined)
+  readonly author = input<string | null | undefined>(undefined)
 
   constructor(private readonly playerService: PlayerService) {}
 
@@ -32,7 +32,7 @@ export class PlayerQuestionFeedbackComponent {
   protected readonly expanded = signal(false)
   protected readonly submitted = signal(false)
 
-  protected category = signal<FeedbackCategoryValue | null>(null)
+  protected readonly category = signal<FeedbackCategoryValue | null>(null)
   protected readonly message = signal('')
 
   protected toggle(): void {

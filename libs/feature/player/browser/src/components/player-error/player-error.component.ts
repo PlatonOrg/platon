@@ -29,16 +29,16 @@ import { ExercisePlayer, LogType, PlatonLog } from '@platon/feature/player/commo
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class PlayerErrorComponent {
-  player = input.required<ExercisePlayer>()
-  user = input<{
+  readonly player = input.required<ExercisePlayer>()
+  readonly user = input<{
     firstName?: string | null
     lastName?: string | null
   } | null>(null)
-  execRetryExercise = input<() => void | undefined>()
-  execGoToNextPlayer = input<() => void | undefined>()
-  hasNext = input<boolean | undefined>(undefined)
-  editorPreview = input<boolean>(false)
-  dismissErrors = output<void>()
+  readonly execRetryExercise = input<() => void | undefined>()
+  readonly execGoToNextPlayer = input<() => void | undefined>()
+  readonly hasNext = input<boolean | undefined>(undefined)
+  readonly editorPreview = input<boolean>(false)
+  readonly dismissErrors = output<void>()
 
   protected onDismissErrors() {
     this.dismissErrors.emit()
@@ -85,5 +85,13 @@ export class PlayerErrorComponent {
 
   private getTeacherEmail(): string {
     return ''
+  }
+
+  protected examenMode(): boolean {
+    return (
+      this.player()?.settings?.security?.terminateOnLeavePage ||
+      this.player()?.settings?.security?.terminateOnLoseFocus ||
+      false
+    )
   }
 }

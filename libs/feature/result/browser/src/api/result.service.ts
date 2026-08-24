@@ -150,6 +150,8 @@ export class ResultService {
     return this.resultProvider.activityLeaderboard(input)
   }
 
+  //#region Correction
+
   findCorrection(activityId: string, viewerMode = false): Observable<ActivityCorrection> {
     return this.resultProvider.findCorrection(activityId, viewerMode)
   }
@@ -221,4 +223,6 @@ export class ResultService {
   ): Observable<{ blob: Blob; fileName: string }> {
     return this.resultProvider.downloadAllSubmissions(activityId, exerciseId, sessionId)
   }
+
+  //#endregion
 }

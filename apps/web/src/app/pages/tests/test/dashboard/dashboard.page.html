@@ -44,6 +44,16 @@
             <i nz-icon nzType="play-circle" nzTheme="outline"></i>
           </a>
           <a
+            *ngIf="activity.permissions?.viewStats"
+            nz-tooltip="Suivi des candidats en cours de passage"
+            nz-button
+            nzShape="round"
+            [routerLink]="['/activities/monitor', activity.courseId, activity.id]"
+            [queryParams]="{ test: true }"
+          >
+            <i nz-icon nzType="eye" nzTheme="outline"></i>
+          </a>
+          <a
             *ngIf="activity.permissions?.viewResource"
             nz-tooltip="Ouvrir la ressource associée"
             nz-button

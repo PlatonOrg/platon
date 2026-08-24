@@ -16,6 +16,7 @@ import { Activity } from '@platon/feature/course/common'
 import {
   ActivityEntity,
   ActivityService,
+  CourseNotificationService,
   ON_CHALLENGE_SUCCEEDED_EVENT,
   ON_RELOAD_ACTIVITY_EVENT,
   ON_TERMINATE_ACTIVITY_EVENT,
@@ -39,7 +40,6 @@ import {
   withActivityFeedbacksGuard,
   withActivityPlayer,
   withExercisePlayer,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   withSessionAccessGuard,
 } from '@platon/feature/player/common'
 import { ResourceFileService } from '@platon/feature/resource/server'
@@ -82,7 +82,8 @@ export class PlayerService extends PlayerManager {
     private readonly sessionService: SessionService,
     private readonly activityService: ActivityService,
     private readonly resourceFileService: ResourceFileService,
-    private readonly peerService: PeerService
+    private readonly peerService: PeerService,
+    private readonly courseNotificationService: CourseNotificationService
   ) {
     super(sandboxService)
   }
@@ -292,8 +293,9 @@ export class PlayerService extends PlayerManager {
       activitySession.activityId
     )
     if (nextCopy) {
-      const nav = withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables
-        .navigation as PlayerNavigation
+      const nav = withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables[
+        'navigation'
+      ] as PlayerNavigation
 
       const [nextExerciseSession, copy1, copy2]: (SessionEntity<ExerciseVariables> | null)[] = await Promise.all(
         [comparisonSessionId, nextCopy.answerP1, nextCopy.answerP2].map((sessionId) =>
@@ -310,9 +312,9 @@ export class PlayerService extends PlayerManager {
         throw new NotFoundResponse(`Copy 2 not found: ${nextCopy.answerP2}`)
       }
 
-      nextExerciseSession.source.variables.__peer_copy_1 = withExercisePlayer(copy1).form
-      nextExerciseSession.source.variables.__peer_copy_2 = withExercisePlayer(copy2).form
-      nextExerciseSession.source.variables._$PLATON$_peer_id = nextCopy.peerId
+      nextExerciseSession.source.variables['__peer_copy_1'] = withExercisePlayer(copy1).form
+      nextExerciseSession.source.variables['__peer_copy_2'] = withExercisePlayer(copy2).form
+      nextExerciseSession.source.variables['_$PLATON$_peer_id'] = nextCopy.peerId
       await nextExerciseSession.save()
 
       nav.current = {
@@ -324,7 +326,7 @@ export class PlayerService extends PlayerManager {
 
       return [
         { reviewMode: true, ...withExercisePlayer(nextExerciseSession) },
-        nav ?? activitySession.variables.navigation,
+        nav ?? activitySession.variables['navigation'],
       ]
     } else {
       // if there's no answers to compare we return a training exerise, if there's no training exercise we return a waiting exercise
@@ -346,7 +348,7 @@ export class PlayerService extends PlayerManager {
             sessionId: nextExerciseSession.id,
           }
         }
-        return [withExercisePlayer(nextExerciseSession), navigation ?? activitySession.variables.navigation]
+        return [withExercisePlayer(nextExerciseSession), navigation ?? activitySession.variables['navigation']]
       }
       const nextExerciseSession = await this.sessionService.findById<ExerciseVariables>(
         waitingExerciseSessionId ?? '',
@@ -365,7 +367,7 @@ export class PlayerService extends PlayerManager {
           sessionId: nextExerciseSession.id,
         }
       }
-      return [withExercisePlayer(nextExerciseSession), navigation ?? activitySession.variables.navigation]
+      return [withExercisePlayer(nextExerciseSession), navigation ?? activitySession.variables['navigation']]
     }
   }
 
@@ -387,7 +389,7 @@ export class PlayerService extends PlayerManager {
       return [
         withExercisePlayer(exerciseSession),
         navigation ||
-          (withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables.navigation as PlayerNavigation),
+          (withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables['navigation'] as PlayerNavigation),
       ]
     }
 
@@ -485,7 +487,15 @@ export class PlayerService extends PlayerManager {
         }
         break
     }
-    return [withExercisePlayer(exerciseSession), activitySession.variables.navigation]
+    return [withExercisePlayer(exerciseSession), activitySession.variables['navigation']]
+  }
+
+  protected notifyModerationActivityChanges(userId: string, activityChange: PlayActivityOuput): Promise<void> {
+    return this.courseNotificationService.notifyModerationActivityChanges(userId, activityChange)
+  }
+
+  protected notifyExerciseChanges(userId: string, sessionId: string, exercise: PlayerExercise): Promise<void> {
+    return this.courseNotificationService.notifyExerciseChanges(userId, sessionId, exercise)
   }
 
   protected createAnswer(answer: Partial<Answer>): Promise<Answer> {
@@ -584,7 +594,7 @@ export class PlayerService extends PlayerManager {
     // If hasExercisesVariables settings is true, store the variables of each exercise
     sources.variables.exercisesVariables = {}
     if (sources.variables.settings?.nextSettings?.hasExercisesVariables) {
-      for (const exercise of activitySession.variables.navigation.exercises) {
+      for (const exercise of activitySession.variables['navigation'].exercises) {
         const vars = sessions.find((s) => s.id === exercise.sessionId)?.variables
         if (vars) {
           sources.variables.exercisesVariables[exercise.id] = vars
@@ -594,7 +604,7 @@ export class PlayerService extends PlayerManager {
 
     // Store the meta of each exercise
     sources.variables.exercisesMeta = {}
-    for (const exercise of activitySession.variables.navigation.exercises) {
+    for (const exercise of activitySession.variables['navigation'].exercises) {
       const meta = sessions.find((s) => s.id === exercise.sessionId)?.variables['.meta']
       if (meta) {
         sources.variables.exercisesMeta[exercise.id] = meta
@@ -610,7 +620,7 @@ export class PlayerService extends PlayerManager {
     }
 
     // Store the navigation of the activity
-    sources.variables.navigation = activitySession.variables.navigation
+    sources.variables['navigation'] = activitySession.variables['navigation']
 
     // Launch the next
     const { envid, variables } = await this.sandboxService.buildNext(sources)
@@ -642,7 +652,7 @@ export class PlayerService extends PlayerManager {
 
     // If the next exercise has parameters, update the exercise session variables
     if (variables.nextParams) {
-      const nextExerciseSessionId = variables.navigation.exercises.find(
+      const nextExerciseSessionId = variables['navigation'].exercises.find(
         (ex: PlayerExercise) => ex.id === variables.nextExerciseId
       )?.sessionId
 
@@ -668,11 +678,11 @@ export class PlayerService extends PlayerManager {
 
     // Update the navigation history
     if (
-      variables.navigation.nextExercisesHistory[variables.navigation.nextExercisesHistory.length - 1] !==
+      variables['navigation'].nextExercisesHistory[variables['navigation'].nextExercisesHistory.length - 1] !==
       variables.nextExerciseId
     ) {
-      variables.navigation.nextExercisesHistory.push(variables.nextExerciseId)
-      variables.navigation.nextExercisesHistoryPosition = variables.navigation.nextExercisesHistory.length - 1
+      variables['navigation'].nextExercisesHistory.push(variables.nextExerciseId)
+      variables['navigation'].nextExercisesHistoryPosition = variables['navigation'].nextExercisesHistory.length - 1
     }
 
     // Update the activity session
@@ -680,11 +690,11 @@ export class PlayerService extends PlayerManager {
     activitySession.variables = {
       ...activitySession.variables,
       nextExerciseId: variables.nextExerciseId,
-      navigation: variables.navigation,
+      navigation: variables['navigation'],
       activityGrade: variables.activityGrade,
       savedVariables: variables.savedVariables,
       generatedExercises: variables.generatedExercises,
-      exercisesHistory: variables.exercisesHistory,
+      exercisesHistory: variables['exercisesHistory'],
     }
 
     await this.sessionService.update(activitySession.id, {
@@ -705,7 +715,7 @@ export class PlayerService extends PlayerManager {
     const runWithEntityManager = async (manager: EntityManager): Promise<SessionEntity> => {
       const { user, source, parentId, activity, isBuilt } = args
 
-      source.variables.seed = (Number.parseInt(source.variables.seed + '') || randomInt(100)) % 100
+      source.variables['seed'] = (Number.parseInt(source.variables['seed'] + '') || randomInt(100)) % 100
 
       const session = await this.sessionService.create(
         {
@@ -769,8 +779,8 @@ export class PlayerService extends PlayerManager {
     navigation.exercises = await Promise.all(
       exercises.map(async (item) => {
         if (!('sessionId' in item)) {
-          if (!item.source.variables.seed) {
-            item.source.variables.seed = variables?.settings?.seedPerExercise ? randomInt(100) : variables.seed
+          if (!item.source.variables['seed']) {
+            item.source.variables['seed'] = variables?.settings?.seedPerExercise ? randomInt(100) : variables['seed']
           }
           const session = await this.createNewSession(
             {

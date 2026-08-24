@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule, UserModule } from '@platon/core/server'
 import { FeatureLtiServerModule } from '@platon/feature/lti/server'
@@ -46,7 +46,8 @@ import { LmsCourseService } from './services/lms-course.service'
 import { ActivityListeners } from './activity/activity.listeners'
 
 import { ActivityDatesService } from './activity/activity-dates.service'
-
+import { CourseMonitorPresenceService } from './course-monitor-presence/course-monitor-presence.service'
+import { CourseMonitorPresenceController } from './course-monitor-presence/course-monitor-presence.controller'
 @Module({
   imports: [
     UserModule,
@@ -81,6 +82,7 @@ import { ActivityDatesService } from './activity/activity-dates.service'
     CourseGroupController,
     CourseGroupMemberController,
     ActivityGroupController,
+    CourseMonitorPresenceController,
   ],
   providers: [
     CourseService,
@@ -102,6 +104,7 @@ import { ActivityDatesService } from './activity/activity-dates.service'
     CourseGroupMemberService,
     ActivityGroupService,
     ActivityDatesService,
+    CourseMonitorPresenceService,
   ],
   exports: [
     TypeOrmModule,
@@ -118,6 +121,7 @@ import { ActivityDatesService } from './activity/activity-dates.service'
     ActivityGroupService,
     CourseGroupService,
     ActivityDatesService,
+    CourseMonitorPresenceService,
   ],
 })
 export class FeatureCourseServerModule {}

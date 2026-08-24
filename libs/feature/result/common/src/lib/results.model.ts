@@ -100,6 +100,11 @@ export interface UserResults {
   correcting?: boolean
 
   /**
+   * Activity Session Id
+   */
+  activitySessionId: string
+
+  /**
    * A map of exercise results for the user.
    */
   exercises: Record<string, UserExerciseResults>
@@ -331,5 +336,6 @@ export const emptyUserResults = (defaults?: Partial<UserResults>): UserResults =
   email: '',
   correcting: false,
   exercises: {},
+  activitySessionId: '',
   ...defaults,
 })

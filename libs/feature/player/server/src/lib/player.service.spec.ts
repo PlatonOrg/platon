@@ -7,7 +7,7 @@ import { PlayerService } from './player.service'
 import { SandboxService } from './sandboxes/sandbox.service'
 import { EventService } from '@platon/core/server'
 import { AnswerService, SessionService } from '@platon/feature/result/server'
-import { ActivityService } from '@platon/feature/course/server'
+import { ActivityService, CourseNotificationService } from '@platon/feature/course/server'
 import { ResourceFileService } from '@platon/feature/resource/server'
 import { PeerService } from '@platon/feature/peer/server'
 import {
@@ -115,6 +115,13 @@ describe('PlayerService', () => {
             getNextCopy: jest.fn(),
             createMatch: jest.fn(),
             resolveGame: jest.fn(),
+          },
+        },
+        {
+          provide: CourseNotificationService,
+          useValue: {
+            notifyModerationActivityChanges: jest.fn(),
+            notifyExerciseChanges: jest.fn(),
           },
         },
       ],

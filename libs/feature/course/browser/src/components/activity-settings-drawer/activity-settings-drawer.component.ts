@@ -29,13 +29,13 @@ export class CourseActivitySettingsDrawerComponent {
   private readonly cdr = inject(ChangeDetectorRef)
   private readonly modalWarning = inject(NzModalService)
 
-  activity = input<Activity>()
-  activityChange = output<Activity>()
+  readonly activity = input<Activity>()
+  readonly activityChange = output<Activity>()
 
   @ViewChild('settingsComponent') settingsComponent?: CourseActivitySettingsComponent
   @ViewChild('modal') modal?: UiModalDrawerComponent
 
-  localActivity = signal<Activity | undefined>(undefined)
+  readonly localActivity = signal<Activity | undefined>(undefined)
 
   constructor() {
     effect(

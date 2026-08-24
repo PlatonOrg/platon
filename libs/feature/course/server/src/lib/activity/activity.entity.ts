@@ -59,6 +59,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
   @Column({ type: 'integer', name: 'color_hue', nullable: true })
   colorHue?: number
 
+  @Column({ type: 'varchar', length: 6, default: () => 'upper(substr(md5(random()::text), 1, 6))' })
+  code!: string
+
   // VIRTUAL COLUMNS
   // TODO: use expanders instead of virtual columns
 
@@ -90,4 +93,12 @@ export class ActivityEntity extends BaseEntity implements Activity {
 
   @VirtualColumn({ query: () => `SELECT '{}'::jsonb` })
   readonly activitySettings!: ActivitySettings
+
+  @VirtualColumn({
+    query: (alias) => `SELECT (
+      COALESCE((${alias}."source"->'variables'->'settings'->'security'->>'terminateOnLeavePage')::boolean, false) OR
+      COALESCE((${alias}."source"->'variables'->'settings'->'security'->>'terminateOnLoseFocus')::boolean, false)
+    ) AS security`,
+  })
+  readonly security!: boolean // true if the activity can terminate earlier with user behavior
 }

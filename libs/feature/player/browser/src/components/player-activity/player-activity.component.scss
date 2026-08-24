@@ -457,3 +457,82 @@ pre {
     max-width: 100%;
   }
 }
+
+.alert-section {
+  max-width: 970px;
+  margin: 0 auto 1.5rem auto;
+
+  .custom-alert {
+    border: 1px solid #ff4d4f;
+    background: #fff2f0;
+    margin-bottom: 1rem;
+
+    ::ng-deep {
+      .ant-alert-message {
+        font-weight: 600;
+        color: #a8071a;
+      }
+
+      .ant-alert-description {
+        color: #cf1322;
+        line-height: 1.6;
+      }
+
+      .ant-alert-icon {
+        color: #ff4d4f;
+      }
+    }
+  }
+}
+
+.unlock-section {
+  width: 100%;
+  max-width: 970px;
+  background: #fff7e6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #ffd591;
+  margin: 0 auto 1.5rem auto;
+}
+
+.unlock-content {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ffe7ba;
+  line-height: 1.6;
+  text-align: center;
+
+  p {
+    margin: 0;
+    margin-top: 1rem;
+    font-weight: 500;
+    color: #d46b08;
+  }
+
+  ui-sixcode {
+    display: block;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 991px) {
+  .alert-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .unlock-section {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .alert-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .unlock-section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+}

@@ -1,0 +1,116 @@
+<div class="moderation-container">
+  <mat-card>
+    <mat-card-header class="header-card">
+      <mat-card-title>Modération de l'activité</mat-card-title>
+      <div class="header">
+        <div class="actions">
+          <button
+            mat-icon-button
+            (click)="selectAll()"
+            [disabled]="getSelectedCount() === getTotalCount()"
+            matTooltip="Tout sélectionner"
+          >
+            <mat-icon>select_all</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            (click)="clearSelection()"
+            [disabled]="getSelectedCount() === 0"
+            matTooltip="Désélectionner tout"
+            title="Désélectionner tout"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+
+          <div class="action-separator"></div>
+
+          <button
+            mat-icon-button
+            (click)="onOpenActivity()"
+            [disabled]="getSelectedCount() === 0"
+            matTooltip="Ouvrir l'activité pour les utilisateurs sélectionnés"
+            class="action-open"
+          >
+            <mat-icon>lock_open</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            (click)="onCloseActivity()"
+            [disabled]="getSelectedCount() === 0"
+            matTooltip="Fermer l'activité pour les utilisateurs sélectionnés"
+            class="action-close"
+          >
+            <mat-icon>lock</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      @if (code(); as activityCode) {
+      <div class="activity-code">
+        <span class="code-label">Code de déblocage :</span>
+        <span
+          class="code-spoiler"
+          [class.revealed]="isCodeRevealed"
+          (click)="toggleCodeVisibility()"
+          [title]="isCodeRevealed ? 'Cliquer pour cacher' : 'Cliquer pour révéler le code'"
+        >
+          {{ isCodeRevealed ? activityCode : '●●●●●●' }}
+        </span>
+        @if (isCodeRevealed) {
+        <button
+          mat-icon-button
+          class="copy-code-button"
+          [cdkCopyToClipboard]="activityCode"
+          (cdkCopyToClipboardCopied)="onCodeCopied()"
+          [matTooltip]="isCodeCopied ? 'Copié !' : 'Copier le code'"
+          matTooltipPosition="above"
+        >
+          <mat-icon>{{ isCodeCopied ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+        }
+        <button
+          mat-icon-button
+          class="regenerate-code-button"
+          (click)="regenerateCode.emit()"
+          matTooltip="Régénérer le code (l'ancien ne fonctionnera plus)"
+          matTooltipPosition="above"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      }
+      <mat-form-field class="search-field" appearance="outline">
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          type="text"
+          matInput
+          placeholder="Rechercher un étudiant"
+          [formControl]="searchForm"
+          [matAutocomplete]="auto"
+        />
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+          @for (filteredUser of filteredUsers(); track filteredUser.id) {
+          <mat-option [value]="filteredUser"> {{ filteredUser.firstName }} {{ filteredUser.lastName }} </mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <div class="spacer"></div>
+      <div class="users-compact-grid">
+        @for (user of filteredUsers(); track user.id) {
+        <div
+          class="user-chip"
+          [class.selected]="isUserSelected(user.id)"
+          (click)="toggleUserSelection(user.id, user.activitySessionId)"
+          [title]="user.firstName + ' ' + user.lastName"
+        >
+          <user-avatar [userIdOrName]="user.id" [showUsername]="'none'" />
+          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+        </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

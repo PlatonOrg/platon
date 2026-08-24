@@ -28,9 +28,12 @@
         </td>
         <ng-container *ngFor="let pair of item.exercises | keyvalue : trackByColumnOrder">
           <td nzAlign="center">
-            <mat-icon [nz-popover]="popover" [style.color]="pair.value.state | answerStateColor">
-              {{ pair.value.state | answerStateIcon }}
-            </mat-icon>
+            <div class="result-cell">
+              <mat-icon [nz-popover]="popover" [style.color]="pair.value.state | answerStateColor">
+                {{ pair.value.state | answerStateIcon }}
+              </mat-icon>
+              {{ pair.value.grade }}
+            </div>
           </td>
           <ng-template #popover>
             <div nz-row nzType="flex" nzJustify="space-around" nzAlign="top">

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ForbiddenResponse, User } from '@platon/core/common'
+import { ForbiddenResponse, User, UserRoles } from '@platon/core/common'
 import { ActivityVariables, ExerciseVariables, patchExerciseMeta } from '@platon/feature/compiler'
 import { Activity } from '@platon/feature/course/common'
 import { Answer, ExerciseSession, Session, answerStateFromGrade } from '@platon/feature/result/common'
@@ -14,6 +14,7 @@ import {
   PlayActivityOuput,
   PlayerActions,
   PlayerActivityVariables,
+  PlayerExercise,
   PlayerNavigation,
 } from './player.model'
 import { SandboxManager } from './sandbox-manager.model'
@@ -36,7 +37,16 @@ export abstract class PlayerManager {
   constructor(private readonly sandboxManager: SandboxManager) {}
 
   async terminate(sessionId: string, user?: User): Promise<PlayActivityOuput> {
-    const session = withSessionAccessGuard(await this.findSessionById(sessionId), user)
+    let session: Session
+    if (user?.role === UserRoles.teacher || user?.role === UserRoles.admin) {
+      const foundSession = await this.findSessionById(sessionId)
+      if (!foundSession) {
+        throw new ForbiddenResponse(`Session with id ${sessionId} not found.`)
+      }
+      session = foundSession
+    } else {
+      session = withSessionAccessGuard(await this.findSessionById(sessionId), user)
+    }
 
     const activitySession = session.parent || session
     const activityVariables = activitySession.variables
@@ -54,9 +64,80 @@ export abstract class PlayerManager {
       this.onTerminate?.(activitySession.activity)
     }
 
+    if (user?.role === UserRoles.teacher || user?.role === UserRoles.admin) {
+      if (session.userId) {
+        await this.notifyModerationActivityChanges(session.userId, {
+          activity: withActivityPlayer(activitySession),
+        })
+      }
+    }
+
     return {
       activity: withActivityPlayer(activitySession),
     }
+  }
+
+  async openSession(sessionId: string): Promise<PlayActivityOuput> {
+    const session = await this.findSessionById(sessionId)
+    if (!session) {
+      throw new ForbiddenResponse(`Session with id ${sessionId} not found.`)
+    }
+    const activitySession = session.parent || session
+    const activityVariables = activitySession.variables
+
+    if (this.isExpired(activitySession)) {
+      throw new ForbiddenResponse(`This session is expired.`)
+    }
+
+    if (!activityVariables.navigation.terminated) {
+      return { activity: withActivityPlayer(activitySession) }
+    }
+    activityVariables.navigation.terminated = false
+    activitySession.variables = activityVariables
+    await this.updateSession(activitySession.id, {
+      variables: activitySession.variables,
+    })
+
+    const result = {
+      activity: withActivityPlayer(activitySession),
+    }
+
+    if (!session.userId) return result
+    await this.notifyModerationActivityChanges(session.userId, result)
+    return result
+  }
+
+  async openSessionWithCode(sessionId: string, code: string): Promise<PlayActivityOuput> {
+    const session = await this.findSessionById(sessionId)
+    if (!session) {
+      throw new ForbiddenResponse(`Session with id ${sessionId} not found.`)
+    }
+    if (code !== session.activity?.code) {
+      throw new ForbiddenResponse(`Invalid activity code.`)
+    }
+    const activitySession = session.parent || session
+    const activityVariables = activitySession.variables
+
+    if (this.isExpired(activitySession)) {
+      throw new ForbiddenResponse(`This session is expired.`)
+    }
+
+    if (!activityVariables.navigation.terminated) {
+      return { activity: withActivityPlayer(activitySession) }
+    }
+    activityVariables.navigation.terminated = false
+    activitySession.variables = activityVariables
+    await this.updateSession(activitySession.id, {
+      variables: activitySession.variables,
+    })
+
+    const result = {
+      activity: withActivityPlayer(activitySession),
+    }
+
+    if (!session.userId) return result
+    await this.notifyModerationActivityChanges(session.userId, result)
+    return result
   }
 
   async evaluate(input: EvalExerciseInput, user?: User): Promise<ExercisePlayer | [ExercisePlayer, PlayerNavigation]> {
@@ -83,8 +164,8 @@ export abstract class PlayerManager {
 
     const answers = input.answers || {}
 
-    session.variables.answers = {
-      ...session.variables.answers,
+    session.variables['answers'] = {
+      ...session.variables['answers'],
       ...answers,
     }
 
@@ -200,7 +281,7 @@ export abstract class PlayerManager {
 
     exerciseSession.envid = output.envid
 
-    let grade = Number.parseInt(output.variables.grade) ?? -1
+    let grade = Number.parseInt(output.variables['grade']) ?? -1
     if (Number.isNaN(grade)) {
       grade = -1
     }
@@ -227,12 +308,26 @@ export abstract class PlayerManager {
       variables: exerciseSession.variables,
     })
 
+    // NOTIFY EXERCISE CHANGES TO MONITORING USERS
+    if (exerciseSession.userId) {
+      // Créer un PlayerExercise à partir de l'exerciseSession
+      const playerExercise: PlayerExercise = {
+        id: exerciseSession.id,
+        title: exerciseSession.source.variables.title as string,
+        state: answerStateFromGrade(answer.grade),
+        sessionId: exerciseSession.id,
+      }
+      await this.notifyExerciseChanges(exerciseSession.userId, exerciseSession.id, playerExercise)
+    }
+
     if (answer.grade === 100 && !exerciseSession.succeededAt) {
       exerciseSession.succeededAt = new Date()
     }
 
     const grades = [...variables['.meta']['grades'], grade]
     patchExerciseMeta(variables, () => ({ grades, isInitialBuild: false }))
+
+    // alert potential monitoringUsers
 
     const promises: Promise<unknown>[] = [
       this.updateSession(exerciseSession.id, {
@@ -324,7 +419,9 @@ export abstract class PlayerManager {
     }
     return [
       exoPlayer ?? withExercisePlayer(exerciseSession),
-      activitySession ? withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables.navigation : undefined,
+      activitySession
+        ? withActivityFeedbacksGuard<ActivityVariables>(activitySession).variables['navigation']
+        : undefined,
     ]
   }
 
@@ -336,7 +433,7 @@ export abstract class PlayerManager {
 
     activitySession.activity = activitySession.activity ?? exerciseSession.activity
 
-    return [withExercisePlayer(exerciseSession), activitySession.variables.navigation]
+    return [withExercisePlayer(exerciseSession), activitySession.variables['navigation']]
   }
 
   async showSolution(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
@@ -348,20 +445,33 @@ export abstract class PlayerManager {
   }
 
   private isExpired(session: Session): boolean {
-    let expiresAt: Date | undefined
-    if (session.startedAt && session.startedAt != null && session.parent?.variables.settings?.duration) {
-      expiresAt = session.startedAt
-      expiresAt?.setSeconds(expiresAt.getSeconds() + session.parent?.variables.settings?.duration)
+    const settingsHolder = session.parent ?? session
+    const duration = settingsHolder.variables.settings?.duration
+    const now = new Date()
+
+    if (settingsHolder.startedAt && duration) {
+      const durationExpiresAt = new Date(settingsHolder.startedAt)
+      durationExpiresAt.setSeconds(durationExpiresAt.getSeconds() + duration + 30)
+      if (now > durationExpiresAt) {
+        return true
+      }
     }
+
     if (session.activity?.closeAt) {
-      expiresAt = new Date(session.activity.closeAt)
+      const closeAtExpiresAt = new Date(session.activity.closeAt)
+      closeAtExpiresAt.setSeconds(closeAtExpiresAt.getSeconds() + 30)
+      if (now > closeAtExpiresAt) {
+        return true
+      }
     }
-    expiresAt?.setSeconds(expiresAt.getSeconds() + 30) // 30 seconds of margin
-    return !!expiresAt && new Date() > expiresAt
+
+    return false
   }
 
   protected abstract createAnswer(answer: Partial<Answer>): Promise<Answer>
   protected abstract updateSession(sessionId: string, changes: PartialDeep<Session>): Promise<void>
+  protected abstract notifyExerciseChanges(userId: string, sessionId: string, exercise: PlayerExercise): Promise<void>
+  protected abstract notifyModerationActivityChanges(userId: string, activityChange: PlayActivityOuput): Promise<void>
 
   protected abstract findGrades(sessionId: string): Promise<number[]>
   protected abstract findSessionById(sessionId: string): Promise<Session | null | undefined>

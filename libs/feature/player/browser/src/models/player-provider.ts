@@ -24,5 +24,7 @@ export abstract class PlayerProvider {
   abstract evaluate(input: EvalExerciseInput): Observable<EvalExerciseOutput>
   abstract terminate(sessionId: string): Observable<PlayActivityOuput>
   abstract saveTemporaryAnswer(input: EvalExerciseInput): Observable<void>
+  abstract openSession(sessionId: string): Observable<PlayActivityOuput>
+  abstract openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput>
   abstract submitFeedback(feedback: Feedback): Observable<void>
 }

@@ -3,11 +3,13 @@ import { SyncResourceMetadatasCommand } from './database/sync-resource-metadata.
 import { FeatureResourceServerModule } from '@platon/feature/resource/server'
 import { SyncActivities } from './database/sync-activities-command'
 import { SyncExercisesDependencies } from './database/sync-exercises-dependencies.command'
+import { CreateActivityCodeCommand } from './database/create-activity-code.command'
+import { FeatureCourseServerModule } from '@platon/feature/course/server'
 
-const commands = [SyncResourceMetadatasCommand, SyncActivities, SyncExercisesDependencies]
+const commands = [SyncResourceMetadatasCommand, SyncActivities, SyncExercisesDependencies, CreateActivityCodeCommand]
 
 @Module({
-  imports: [FeatureResourceServerModule],
+  imports: [FeatureResourceServerModule, FeatureCourseServerModule],
   providers: [...commands],
   exports: [...commands],
 })

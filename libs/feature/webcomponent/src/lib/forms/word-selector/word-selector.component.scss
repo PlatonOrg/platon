@@ -4,7 +4,7 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 10px;
-  border: 2px solid #ccc;
+  border: 2px solid var(--brand-border-color);
   border-radius: 8px;
   min-height: 60px;
   overflow: hidden;
@@ -13,26 +13,31 @@
 
 
 .example-box {
-  padding: 5px 10px;//20px 10px;
-  border: solid 1px #ccc;
+  padding: 5px 10px;
+  border: solid 1px var(--brand-border-color);
   border-radius: 4px;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--brand-text-primary);
   display: inline-block;
   box-sizing: border-box;
   cursor: move;
-  background: white;
+  background: var(--brand-background-card);
   text-align: center;
   font-size: 14px;
-  min-width: 70px //115px;
+  min-width: 70px;
+  transition: border-color var(--brand-motion-base) var(--brand-motion-ease),
+    box-shadow var(--brand-motion-base) var(--brand-motion-ease);
+
+  &:hover {
+    border-color: var(--brand-color-primary);
+    box-shadow: var(--brand-shadow-sm);
+  }
 }
 
 
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-              0 8px 10px 1px rgba(0, 0, 0, 0.14),
-              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--brand-shadow-lg);
 }
 
 .cdk-drag-placeholder {

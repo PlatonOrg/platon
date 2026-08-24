@@ -30,10 +30,7 @@ export class EditorjsViewerComponent implements OnChanges {
           .pipe(take(1))
           .subscribe()
       }
-      console.log('EditorjsViewerComponent: data changed, updating HTML', this.data)
       const newData = this.editorjsViewerService.editorJStoHtml(this.data)
-      console.log('Generated HTML:', newData)
-
       this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(newData)
     }
   }

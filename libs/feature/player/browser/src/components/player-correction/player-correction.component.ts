@@ -197,8 +197,8 @@ export class PlayerCorrectionComponent implements OnInit {
   // === LIFECYCLE ===
   async ngOnInit(): Promise<void> {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      this.activityId = params.activityId
-      this.sessionId = params.sessionId
+      this.activityId = params['activityId']
+      this.sessionId = params['sessionId']
     })
     this.buildGroups()
     await this.getUsers()

@@ -44,7 +44,16 @@ section {
   }
 }
 
+mat-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 mat-card-header {
+  background: var(--brand-background-secondary);
+  border-bottom: 1px solid var(--brand-border-color-light);
+  padding-bottom: 1rem;
+
   > div {
     width: 100%;
     display: flex;
@@ -57,6 +66,17 @@ mat-card-title {
   display: flex;
   align-items: center;
   gap: 8px;
+
+  mat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--brand-background-hover);
+    transition: transform var(--brand-motion-base) var(--brand-motion-ease);
+  }
 }
 
 mat-divider {
@@ -139,7 +159,39 @@ pre {
 }
 
 .danger {
-  background-color: #ff4d4f !important;
+  background-color: var(--brand-color-danger) !important;
+}
+
+button[mat-raised-button] {
+  border-radius: 8px;
+  box-shadow: var(--brand-shadow-sm);
+  transition: box-shadow var(--brand-motion-base) var(--brand-motion-ease),
+    transform var(--brand-motion-fast) var(--brand-motion-ease);
+
+  &:hover:not(:disabled) {
+    box-shadow: var(--brand-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--brand-shadow-sm);
+  }
+
+  // Actions secondaires (Solution, Aide, Théorie, Commentaires, navigation) :
+  // même structure que les actions primaires mais un poids visuel plus discret.
+  &.action-secondary {
+    background: var(--brand-background-components) !important;
+    color: var(--brand-text-secondary) !important;
+    border: 1px solid var(--brand-border-color);
+    box-shadow: none;
+
+    &:hover:not(:disabled) {
+      background: var(--brand-background-hover) !important;
+      box-shadow: none;
+      transform: none;
+    }
+  }
 }
 
 button.primary {

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core'
-import { MathLiveState } from '@platon/feature/webcomponent'
 import { BaseValueEditor } from '../../ple-input'
 
 @Component({

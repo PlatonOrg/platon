@@ -15,18 +15,25 @@ nz-timeline {
 }
 
 .timeline-content {
-  padding: 0 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: background-color var(--brand-motion-base) var(--brand-motion-ease);
+
+  &:hover {
+    background-color: var(--brand-background-hover);
+  }
+
   &.current {
     border-bottom: 2px solid var(--brand-color-primary);
   }
 }
 
 .timeline-status {
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--brand-text-secondary);
 }
 
 button {
   margin: 0 auto;
   color: white !important;
-  background-color: #ff4d4f !important;
+  background-color: var(--brand-color-danger) !important;
 }

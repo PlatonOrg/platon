@@ -1,4 +1,13 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject, Input } from '@angular/core'
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  inject,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core'
 import { ExerciseResults } from '@platon/feature/result/common'
 import { CommonModule } from '@angular/common'
 import { CoreEchartsDirective } from '@platon/core/browser'
@@ -12,14 +21,27 @@ import { EChartsOption } from 'echarts'
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
-export class ResultBoxPlotComponent {
+export class ResultBoxPlotComponent implements OnInit, OnChanges {
   protected chart?: EChartsOption
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
 
-  @Input()
-  set data(data: ExerciseResults[] | undefined) {
-    this.chart = this.drawChart(data || [])
-    this.changeDetectorRef.detectChanges()
+  @Input() data: ExerciseResults[] | undefined
+
+  ngOnInit(): void {
+    this.updateChart()
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data']) {
+      this.updateChart()
+    }
+  }
+
+  private updateChart(): void {
+    if (this.data && this.data.length > 0) {
+      this.chart = this.drawChart(this.data)
+      this.changeDetectorRef.markForCheck()
+    }
   }
 
   drawChart(data: ExerciseResults[]): EChartsOption {

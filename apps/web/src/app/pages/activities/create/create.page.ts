@@ -6,6 +6,7 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
+  viewChild,
   ElementRef,
   inject,
   signal,
@@ -21,14 +22,13 @@ import { MatIconModule } from '@angular/material/icon'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
-import { NzRadioModule } from 'ng-zorro-antd/radio'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 
 import { AuthService, DialogModule, DialogService, TagService } from '@platon/core/browser'
-import { Level, Topic, User, uniquifyBy } from '@platon/core/common'
+import { Level, Topic, User, UserRoles, uniquifyBy } from '@platon/core/common'
 import {
   CourseMemberSelectComponent,
   CourseSearchBarComponent,
@@ -36,7 +36,13 @@ import {
   CourseService,
   CourseGroupSelectComponent,
 } from '@platon/feature/course/browser'
-import { Course, CourseGroup, CourseMember, CourseSection } from '@platon/feature/course/common'
+import {
+  Course,
+  CourseGroup,
+  CourseMember,
+  CourseSection,
+  CreateActivityCorrector,
+} from '@platon/feature/course/common'
 import {
   ResourceFiltersComponent,
   ResourceService,
@@ -72,11 +78,14 @@ import {
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { catchError, firstValueFrom, of, map, shareReplay, Subscription } from 'rxjs'
 import { ActivityListComponent } from './activity-list/activity-list.component'
+import { GradedActivitySettingsComponent } from './graded-activity-settings/graded-activity-settings.component'
 import { ViewportIntersectionDirective } from '@cisstech/nge/directives'
 import { HttpErrorResponse } from '@angular/common/http'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
+
+export type ActivityFunction = 'training' | 'graded' | 'challenge'
 
 @Component({
   standalone: true,
@@ -97,7 +106,6 @@ const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
     MatButtonModule,
 
     NzSpinModule,
-    NzRadioModule,
     NzButtonModule,
     NzSelectModule,
     NzSkeletonModule,
@@ -120,6 +128,7 @@ const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
     ViewportIntersectionDirective,
 
     CourseGroupSelectComponent,
+    GradedActivitySettingsComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -200,7 +209,9 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   protected filtersComponent!: ResourceFiltersComponent
 
   @ViewChild('activitySection')
-  protected activitySection?: ElementRef<HTMLElement>
+  protected activitySection!: ElementRef<HTMLElement>
+
+  protected readonly gradedSettings = viewChild.required<GradedActivitySettingsComponent>('gradedSettings')
 
   protected async handleKeyDown() {
     if (this.stepper.isValid) {
@@ -216,6 +227,8 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   protected resourceInfo = new FormGroup({
     resources: new FormControl<Resource[]>([], [Validators.required, Validators.minLength(1)]),
   })
+
+  protected readonly activityFunction = signal<ActivityFunction | undefined>(undefined)
 
   protected settingsInfo = new FormGroup({
     members: new FormControl<string[] | undefined>(undefined),
@@ -253,7 +266,6 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       ...Object.values(ResourceTypes).map(ResourceTypeFilterIndicator),
       ...Object.values(ResourceStatus).map(ResourceStatusFilterIndicator),
       ...Object.values(ResourceOrderings).map(ResourceOrderingFilterIndicator),
-      //ResourceDependOnFilterIndicator(),
       ExerciseConfigurableFilterIndicator,
       PeriodFilterMatcher,
     ])
@@ -276,6 +288,11 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     this.challenge = !!queryParamMap.get('challenge')
     if (this.challenge) {
       this.settingsInfo.get('isChallenge')?.setValue(true)
+      this.activityFunction.set('challenge')
+    }
+    if (this.isTest) {
+      // Un test d'entrée est toujours un TP noté, l'étape "Fonction" est donc inutile.
+      this.activityFunction.set('graded')
     }
 
     const course = courseId
@@ -387,12 +404,20 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     let updatedResources: Resource[]
     if (index > -1) {
       updatedResources = currentResources.filter((_, i) => i !== index)
+    } else if (this.isTest) {
+      // Un test d'entrée n'accepte qu'une seule activité : toute nouvelle sélection remplace la précédente.
+      updatedResources = [activity]
     } else {
       updatedResources = [...currentResources, activity]
     }
 
     this.resourceInfo.patchValue({ resources: updatedResources })
     this.changeDetectorRef.markForCheck()
+  }
+
+  protected selectActivityFunction(activityFunction: ActivityFunction): void {
+    this.activityFunction.set(activityFunction)
+    this.settingsInfo.get('isChallenge')?.setValue(activityFunction === 'challenge')
   }
 
   protected onScroll(event: Event): void {
@@ -414,6 +439,15 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     this.changeDetectorRef.markForCheck()
   }
 
+  private selectTeachersFromMembers(members: CourseMember[]): CreateActivityCorrector[] {
+    return members
+      .filter((member) => member.user?.role === UserRoles.teacher)
+      .map((member) => ({
+        userId: member.user?.id as string,
+        memberId: member.id,
+      }))
+  }
+
   protected async create(): Promise<void> {
     try {
       this.creating = true
@@ -421,6 +455,7 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       const { resources } = this.resourceInfo.value
       const { openAt, closeAt, members, correctors, groups, isChallenge } = this.settingsInfo.value
 
+      console.log("Membres sélectionnés pour l'activité :", this.members)
       const createdActivities = await firstValueFrom(
         this.courseService.createActivities(
           course as Course,
@@ -434,6 +469,26 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
           }))
         )
       )
+
+      if (this.activityFunction() === 'graded' && this.gradedSettings()) {
+        const gradedSettings = this.gradedSettings()?.settings()
+        const code = this.gradedSettings()?.code()
+        await Promise.all(
+          createdActivities.resources.map((activity) =>
+            Promise.all([
+              firstValueFrom(
+                this.courseService.updateActivity(activity, {
+                  activitySettings: { ...activity.activitySettings, ...gradedSettings },
+                  code,
+                })
+              ),
+              firstValueFrom(
+                this.courseService.updateActivityCorrectors(activity, this.selectTeachersFromMembers(this.members))
+              ),
+            ])
+          )
+        )
+      }
 
       if (this.isTest) {
         await this.router.navigateByUrl(`/tests/${course?.id}`, { replaceUrl: true })

@@ -11,8 +11,8 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, I
 export class BuilderIFrameComponent implements AfterViewInit {
   @ViewChild('iframeEl') private iframeEl!: ElementRef<HTMLIFrameElement>
 
-  width = input<string>('100%')
-  height = input<string>('100%')
+  readonly width = input<string>('100%')
+  readonly height = input<string>('100%')
 
   private _src?: string
   private viewInitialized = false

@@ -111,25 +111,25 @@ export class PleEditorComponent implements OnInit, OnDestroy {
     ])
 
     const { variables } = source.ast
-    const sandbox = source.variables.sandbox || 'javascript'
+    const sandbox = source.variables['sandbox'] || 'javascript'
 
     this.form.patchValue({
-      title: (variables.title as string) || '',
-      statement: editorJsFromRawString(variables.statement as string),
-      form: editorJsFromRawString(variables.form as string),
+      title: (variables['title'] as string) || '',
+      statement: editorJsFromRawString(variables['statement'] as string),
+      form: editorJsFromRawString(variables['form'] as string),
       builder: {
         name: 'builder',
         type: 'code',
         description: 'The builder is used to generate the exercise',
         options: { language: sandbox },
-        value: variables.builder || '',
+        value: variables['builder'] || '',
       } as PleInput,
       grader: {
         name: 'grader',
         type: 'code',
         description: 'The grader is used to grade the exercise',
         options: { language: sandbox },
-        value: variables.grader || '',
+        value: variables['grader'] || '',
       } as PleInput,
       variables: Object.keys(variables)
         .filter((variable) => !HIDDEN_VARIABLES.includes(variable))

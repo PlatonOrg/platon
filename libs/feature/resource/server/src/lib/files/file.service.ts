@@ -219,7 +219,7 @@ export class ResourceFileService {
       throw new BadRequestResponse(source.errors.map((error) => error.description).join('\n'))
     }
 
-    source.variables.author = resource.ownerId
+    source.variables['author'] = resource.ownerId
     return { source, resource, compiler }
   }
 

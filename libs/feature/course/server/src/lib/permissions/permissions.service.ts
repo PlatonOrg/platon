@@ -5,13 +5,15 @@ import { ActivityMemberService } from '../activity-member/activity-member.servic
 import { ActivityEntity } from '../activity/activity.entity'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
+import { ActivityService } from '../activity/activity.service'
 
 @Injectable()
 export class CoursePermissionsService {
   constructor(
     private readonly courseMemberService: CourseMemberService,
     private readonly activityMemberService: ActivityMemberService,
-    private readonly activityGroupService: ActivityGroupService
+    private readonly activityGroupService: ActivityGroupService,
+    private readonly activityService: ActivityService
   ) {}
 
   async ensureCourseReadPermission(courseId: string, req: IRequest): Promise<void> {
@@ -26,26 +28,32 @@ export class CoursePermissionsService {
     }
   }
 
-  async ensureActivityReadPermission(activity: ActivityEntity | null, req: IRequest): Promise<void> {
-    if (!activity) {
-      throw new NotFoundResponse(`Activity not found.`)
-    }
+  async ensureActivityReadPermission(activity: string | ActivityEntity, req: IRequest): Promise<void> {
+    const activityEntity =
+      typeof activity === 'string'
+        ? (await this.activityService.findByActivityId(activity)).orElseThrow(
+            () => new NotFoundResponse(`Activity not found.`)
+          )
+        : activity
     const isTeacher = isTeacherRole(req.user.role)
-    const isPrivateMember = await this.activityMemberService.isPrivateMember(activity.id, req.user.id)
-    const isInGroup = await this.activityGroupService.isUserInActivityGroup(activity.id, req.user.id)
+    const isPrivateMember = await this.activityMemberService.isPrivateMember(activityEntity.id, req.user.id)
+    const isInGroup = await this.activityGroupService.isUserInActivityGroup(activityEntity.id, req.user.id)
     const isMember =
-      (await this.activityMemberService.isMember(activity.id, req.user.id)) &&
-      (await this.activityGroupService.numberOfGroups(activity.id)) === 0
+      (await this.activityMemberService.isMember(activityEntity.id, req.user.id)) &&
+      (await this.activityGroupService.numberOfGroups(activityEntity.id)) === 0
     if (!isTeacher && !isPrivateMember && !isInGroup && !isMember) {
       throw new ForbiddenResponse('You are not a member of this activity')
     }
   }
 
-  async ensureActivityWritePermission(activity: ActivityEntity | null, req: IRequest): Promise<void> {
-    if (!activity) {
-      throw new NotFoundResponse(`Activity not found.`)
-    }
-    if (activity.creatorId == req.user.id) return
-    await this.ensureCourseWritePermission(activity.courseId, req)
+  async ensureActivityWritePermission(activity: string | ActivityEntity, req: IRequest): Promise<void> {
+    const activityEntity =
+      typeof activity === 'string'
+        ? (await this.activityService.findByActivityId(activity)).orElseThrow(
+            () => new NotFoundResponse(`Activity not found.`)
+          )
+        : activity
+    if (activityEntity.creatorId == req.user.id) return
+    await this.ensureCourseWritePermission(activityEntity.courseId, req)
   }
 }

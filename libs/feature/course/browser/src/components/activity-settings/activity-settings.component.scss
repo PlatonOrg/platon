@@ -35,6 +35,11 @@
           margin-right: 8px;
         }
       }
+
+      .ant-tabs-ink-bar {
+        visibility: visible !important;
+        background: var(--brand-color-primary);
+      }
     }
 
     .ant-tabs-content {
@@ -137,6 +142,11 @@
       &:last-child {
         margin-bottom: 0;
       }
+    }
+
+    &.ant-collapse-borderless > .ant-collapse-item:last-child {
+      border-bottom: 1px solid var(--brand-border-color-light);
+      border-radius: 8px;
     }
 
     .ant-collapse-header {

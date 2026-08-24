@@ -56,6 +56,14 @@ export class PlayerService {
     return this.provider.saveTemporaryAnswer(input)
   }
 
+  openSession(sessionId: string): Observable<PlayActivityOuput> {
+    return this.provider.openSession(sessionId)
+  }
+
+  openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput> {
+    return this.provider.openSessionWithCode(sessionId, code)
+  }
+
   submitFeedback(feedback: Feedback): Observable<void> {
     return this.provider.submitFeedback(feedback)
   }

@@ -11,28 +11,33 @@
   justify-content: center;
   align-items: center;
   border: 2px solid transparent;
-  border-radius: 6px;
+  border-radius: 7px;
   margin: 8px;
+  transition: border-color var(--brand-motion-base) var(--brand-motion-ease),
+    background-color var(--brand-motion-base) var(--brand-motion-ease),
+    box-shadow var(--brand-motion-base) var(--brand-motion-ease);
 
   &.dnd-drag {
     opacity: 0.6;
   }
 
   &.dragzone {
-    background-color: AntiqueWhite;
+    background-color: var(--brand-color-primary-soft);
+    border-color: var(--brand-border-color-light);
   }
 
   &.dropzone {
     cursor: pointer;
-    border: 1px solid black;
+    border: 1px solid var(--brand-border-color);
     &:hover,
     &.dnd-over {
-      border: 2px solid black;
+      border: 2px solid var(--brand-color-primary);
+      box-shadow: var(--brand-shadow-sm);
     }
   }
 
   &.disabled {
-    border: 1px dashed;
+    border: 1px dashed var(--brand-border-color);
     pointer-events: none;
     cursor: not-allowed;
   }
