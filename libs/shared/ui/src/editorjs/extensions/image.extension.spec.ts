@@ -1,5 +1,5 @@
 import { buildImageExtension } from './image.extension'
-import { EditorJsImageUploader } from '../editorjs-image-uploader'
+import { EditorJsFileUploader } from '../editorjs-file-uploader'
 
 describe('buildImageExtension', () => {
   it("utilise le bloc image en mode URL uniquement quand aucun uploader n'est fourni", () => {
@@ -10,7 +10,7 @@ describe('buildImageExtension', () => {
 
   it('branche un vrai upload de fichier quand un EditorJsImageUploader est fourni', async () => {
     const response = { success: 1 as const, file: { url: '/files/abc.png' } }
-    const uploader: EditorJsImageUploader = {
+    const uploader: EditorJsFileUploader = {
       uploadByFile: jest.fn().mockResolvedValue(response),
       uploadByUrl: jest.fn(),
     }
@@ -25,7 +25,7 @@ describe('buildImageExtension', () => {
 
   it("délègue aussi le collage d'une URL d'image externe (ex: image libre de droit trouvée sur le web)", async () => {
     const response = { success: 1 as const, file: { url: 'https://example.com/photo.jpg' } }
-    const uploader: EditorJsImageUploader = {
+    const uploader: EditorJsFileUploader = {
       uploadByFile: jest.fn(),
       uploadByUrl: jest.fn().mockResolvedValue(response),
     }
