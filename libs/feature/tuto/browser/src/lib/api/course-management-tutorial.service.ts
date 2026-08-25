@@ -628,7 +628,7 @@ export class CourseManagementTutorialService {
                  </div>
                </div>`,
         attachTo: {
-          element: '#tuto-first-activity-card .ribbon-container',
+          element: '#tuto-first-activity-card .ant-ribbon',
           on: 'right',
         },
       },
