@@ -310,7 +310,7 @@ export class CourseManagementTutorialService {
                  </div>
                </div>`,
         attachTo: {
-          element: '#tuto-course-header',
+          element: '#tuto-course-header-group',
           on: 'bottom',
         },
       },
@@ -334,6 +334,10 @@ export class CourseManagementTutorialService {
                    <small style="color: var(--brand-text-secondary);"><strong>Paramètres</strong> — configuration avancée</small>
                  </div>
                </div>`,
+        attachTo: {
+          element: '#tuto-course-tabs .ant-tabs-nav',
+          on: 'bottom',
+        },
       },
       {
         id: 'dashboard-overview',
