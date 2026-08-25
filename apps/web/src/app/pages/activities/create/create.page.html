@@ -200,13 +200,22 @@
       <ng-template uiStepperStep stepTitle="Configuration" [stepIcon]="icon3">
         <section>
           <form [formGroup]="settingsInfo">
+            <div class="hidden-option">
+              <h4>Souhaitez-vous caché l'activité aux étudiants ?</h4>
+              @if(hidden) {
+              <p>L'activité devra être manuellement réaffichée pour les étudiants.</p>
+              }
+              <button nz-button (click)="updateHidden()" nzType="primary">
+                {{ this.hidden ? 'Montrer aux étudiant' : 'Cacher aux édutiants' }}
+              </button>
+            </div>
             @if (activityFunction() === 'challenge') {
             <p>
               Les challenges sont des activités réalisables uniquement par les élèves du cours. Les résultats d'un
               challenge sont visibles par tous dans la page du cours.
             </p>
             }
-            <h4 id="openDates">Souhaitez-vous limiter l'accès de cette activité à une date en particulier?</h4>
+            <h4 id="openDates">Souhaitez-vous limiter l'accès de cette activité à une date en particulier ?</h4>
             <div class="date-picker">
               <nz-date-picker
                 [nzShowTime]="true"

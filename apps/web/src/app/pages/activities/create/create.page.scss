@@ -321,3 +321,17 @@ nz-date-picker {
     height: 24px;
   }
 }
+
+.hidden-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 14px;
+
+  h4,
+  p {
+    margin: 6px;
+  }
+
+}
