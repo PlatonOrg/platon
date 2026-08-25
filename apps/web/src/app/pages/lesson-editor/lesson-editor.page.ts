@@ -20,8 +20,8 @@ import { DialogService } from '@platon/core/browser'
 import { Activity, Course, LessonContent } from '@platon/feature/course/common'
 import { CourseService } from '@platon/feature/course/browser'
 import {
-  EditorJsImageUploader,
-  EditorJsImageUploadResponse,
+  EditorJsFileUploader,
+  EditorJsFileUploadResponse,
   emptyEditorJsData,
   UiEditorJsModule,
 } from '@platon/shared/ui'
@@ -42,10 +42,10 @@ import {
     NzSpinModule,
     UiEditorJsModule,
   ],
-  providers: [{ provide: EditorJsImageUploader, useExisting: forwardRef(() => LessonEditorPage) }],
+  providers: [{ provide: EditorJsFileUploader, useExisting: forwardRef(() => LessonEditorPage) }],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class LessonEditorPage implements OnInit, EditorJsImageUploader {
+export class LessonEditorPage implements OnInit, EditorJsFileUploader {
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly courseService = inject(CourseService)
@@ -111,17 +111,15 @@ export class LessonEditorPage implements OnInit, EditorJsImageUploader {
     this.router.navigate(['/courses', this.course()?.id, 'dashboard']).catch(console.error)
   }
 
-  // Implémente EditorJsImageUploader : branché automatiquement par le bloc `image` d'EditorJS
-  // (extensions/image.extension.ts) via l'injection Angular, sans configuration côté template.
-  async uploadByFile(file: Blob): Promise<EditorJsImageUploadResponse> {
+  async uploadByFile(file: Blob, onProgress?: (percent: number) => void): Promise<EditorJsFileUploadResponse> {
     const course = this.course()
     if (!course) {
-      throw new Error('Cannot upload an image before the course is loaded')
+      throw new Error('Cannot upload a file before the course is loaded')
     }
-    return firstValueFrom(this.courseService.uploadFile(course.id, file as File))
+    return firstValueFrom(this.courseService.uploadFile(course.id, file as File, onProgress))
   }
 
-  async uploadByUrl(url: string): Promise<EditorJsImageUploadResponse> {
+  async uploadByUrl(url: string): Promise<EditorJsFileUploadResponse> {
     return { success: 1, file: { url } }
   }
 }

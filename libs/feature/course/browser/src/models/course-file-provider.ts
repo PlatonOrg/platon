@@ -6,5 +6,9 @@ export interface CourseFileUploadResponse {
 }
 
 export abstract class CourseFileProvider {
-  abstract upload(courseId: string, file: File): Observable<CourseFileUploadResponse>
+  abstract upload(
+    courseId: string,
+    file: File,
+    onProgress?: (percent: number) => void
+  ): Observable<CourseFileUploadResponse>
 }

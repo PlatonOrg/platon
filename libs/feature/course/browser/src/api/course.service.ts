@@ -209,8 +209,12 @@ export class CourseService {
     return this.activityProvider.markLessonCompleted(activity)
   }
 
-  uploadFile(courseId: string, file: File): Observable<CourseFileUploadResponse> {
-    return this.courseFileProvider.upload(courseId, file)
+  uploadFile(
+    courseId: string,
+    file: File,
+    onProgress?: (percent: number) => void
+  ): Observable<CourseFileUploadResponse> {
+    return this.courseFileProvider.upload(courseId, file, onProgress)
   }
 
   //#endregion

@@ -9,6 +9,8 @@ import mime from 'mime-types'
 import { CoursePermissionsService } from '../permissions/permissions.service'
 import { CourseFileService } from './course-file.service'
 
+const MAX_COURSE_FILE_SIZE_BYTES = Number.parseInt(process.env['MAX_COURSE_FILE_SIZE_MB'] || '200') * 1024 * 1024
+
 // Stockage minimal de fichiers attachés à un cours (images des leçons pour l'instant), distinct
 // du système de Resources versionnées par Git (voir libs/feature/resource/server) : un Course n'est
 // pas une Resource, pas besoin de tout l'appareil de versioning pour une simple pièce jointe.
@@ -23,7 +25,9 @@ export class CourseFileController {
 
   @Roles(UserRoles.teacher, UserRoles.admin)
   @Post()
-  @UseInterceptors(FileInterceptor('file', { dest: './resources/uploads' }))
+  @UseInterceptors(
+    FileInterceptor('file', { dest: './resources/uploads', limits: { fileSize: MAX_COURSE_FILE_SIZE_BYTES } })
+  )
   async upload(
     @Req() request: IRequest,
     @UUIDParam('courseId') courseId: string,
