@@ -198,6 +198,7 @@
     "@editorjs/checklist": "1.6.0",
     "@editorjs/delimiter": "1.4.2",
     "@editorjs/editorjs": "2.30.8",
+    "@editorjs/embed": "2.7.7",
     "@editorjs/image": "2.10.2",
     "@editorjs/marker": "1.4.0",
     "@editorjs/nested-list": "1.4.3",
