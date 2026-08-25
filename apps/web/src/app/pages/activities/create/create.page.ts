@@ -134,6 +134,7 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   protected courseGroups: CourseGroup[] = []
   protected hasFirstStep = true
   protected isTest = false
+  protected hidden = false
 
   protected readonly tree = signal<CircleTree>(undefined as unknown as CircleTree)
   protected readonly circles = signal<CircleTree[]>([])
@@ -224,6 +225,10 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     groups: new FormControl<string[] | undefined>(undefined),
     isChallenge: new FormControl<boolean>(false),
   })
+
+  protected updateHidden() {
+    this.hidden = !this.hidden
+  }
 
   protected disabledDate = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
 
@@ -452,6 +457,7 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
             openAt: openAt as Date,
             closeAt: closeAt as Date,
             isChallenge: !!isChallenge,
+            hidden: this.hidden,
           }))
         )
       )
