@@ -1,32 +1,32 @@
-<ui-layout-tabs [state]="context.state">
+<ui-layout-tabs [state]="context.state" id="tuto-course-tabs">
   <ng-container *ngIf="context.course as course">
-    <header id="tuto-course-header">
-      <nz-page-header [nzSubtitle]="header" (nzBack)="onBack()" nzBackIcon>
-        <ng-template #header>
-          <nz-breadcrumb nzSeparator="">
-            <nz-breadcrumb-item>
-              <mat-icon>local_library</mat-icon>
-              <span
-                nz-typography
-                [nzEditable]="course.permissions?.update"
-                [nzContent]="course.name"
-                (nzContentChange)="updateName($event)"
-                class="title"
-                id="tuto-course-title"
-              ></span>
-            </nz-breadcrumb-item>
-            <div class="spacer"></div>
-          </nz-breadcrumb>
-        </ng-template>
-      </nz-page-header>
-    </header>
-    <p
-      nz-typography
-      [nzEditable]="course.permissions?.update"
-      [nzContent]="course.desc"
-      (nzContentChange)="updateDesc($event)"
-      id="tuto-course-description"
-    ></p>
+    <div id="tuto-course-header-group">
+      <header id="tuto-course-header">
+        <nz-page-header [nzSubtitle]="header" (nzBack)="onBack()" nzBackIcon>
+          <ng-template #header>
+            <nz-breadcrumb nzSeparator="">
+              <nz-breadcrumb-item>
+                <mat-icon>local_library</mat-icon>
+                <span
+                  nz-typography
+                  [nzEditable]="course.permissions?.update"
+                  [nzContent]="course.name"
+                  (nzContentChange)="updateName($event)"
+                  class="title"
+                ></span>
+              </nz-breadcrumb-item>
+              <div class="spacer"></div>
+            </nz-breadcrumb>
+          </ng-template>
+        </nz-page-header>
+      </header>
+      <p
+        nz-typography
+        [nzEditable]="course.permissions?.update"
+        [nzContent]="course.desc"
+        (nzContentChange)="updateDesc($event)"
+      ></p>
+    </div>
     <div class="container-toolbar" id="tuto-course-toolbar">
       <nz-tag>
         <span nz-icon nzType="calendar" nzTheme="outline"></span>
