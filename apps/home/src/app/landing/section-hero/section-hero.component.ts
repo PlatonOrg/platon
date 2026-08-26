@@ -3,7 +3,6 @@ import { MatIconModule } from '@angular/material/icon'
 import { gsap } from 'gsap'
 
 @Component({
-  standalone: true,
   selector: 'app-landing-section-hero',
   templateUrl: './section-hero.component.html',
   styleUrls: ['./section-hero.component.scss'],

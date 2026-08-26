@@ -19,7 +19,6 @@ import { EChartsOption } from 'echarts'
   styleUrls: ['./result-box-plot.component.scss'],
   imports: [CommonModule, CoreEchartsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
 })
 export class ResultBoxPlotComponent implements OnInit, OnChanges {
   protected chart?: EChartsOption

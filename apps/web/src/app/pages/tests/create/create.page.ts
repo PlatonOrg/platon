@@ -20,7 +20,6 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { TestsService } from '@platon/feature/tests/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-tests-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
@@ -30,17 +29,14 @@ import { TestsService } from '@platon/feature/tests/browser'
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSelectModule,
     NzSkeletonModule,
     NzPageHeaderModule,
-
     UiStepDirective,
     UiStepperComponent,
     DialogModule,

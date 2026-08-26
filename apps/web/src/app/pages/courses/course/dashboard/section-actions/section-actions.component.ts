@@ -11,7 +11,6 @@ import { CourseSection } from '@platon/feature/course/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 
 @Component({
-  standalone: true,
   selector: 'app-course-section-actions',
   templateUrl: './section-actions.component.html',
   styleUrls: ['./section-actions.component.scss'],

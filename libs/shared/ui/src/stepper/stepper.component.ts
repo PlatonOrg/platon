@@ -17,7 +17,6 @@ import { Subscription } from 'rxjs'
 import { UiStepDirective } from './step.directive'
 
 @Component({
-  standalone: true,
   selector: 'ui-stepper',
   templateUrl: './stepper.component.html',
   styleUrls: ['./stepper.component.scss'],

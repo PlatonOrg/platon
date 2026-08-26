@@ -1,7 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, Input, ViewChild } from '@angular/core'
 
 @Component({
-  standalone: true,
   selector: 'lib-builder-iframe',
   templateUrl: './builder-iframe.component.html',
   styleUrls: ['./builder-iframe.component.scss'],

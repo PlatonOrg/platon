@@ -30,7 +30,6 @@ export interface ChangeRoleEvent {
 }
 
 @Component({
-  standalone: true,
   selector: 'course-member-table',
   templateUrl: './course-member-table.component.html',
   styleUrls: ['./course-member-table.component.scss'],
@@ -44,14 +43,12 @@ export interface ChangeRoleEvent {
   ],
   imports: [
     CommonModule,
-
     NzIconModule,
     NzTableModule,
     NzButtonModule,
     NzPopconfirmModule,
     NzSelectModule,
     FormsModule,
-
     UserAvatarComponent,
     UserGroupDrawerComponent,
     CoursePipesModule,

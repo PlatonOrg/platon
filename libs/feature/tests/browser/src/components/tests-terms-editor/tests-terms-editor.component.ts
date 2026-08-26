@@ -13,7 +13,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { AngularSplitModule } from 'angular-split'
 
 @Component({
-  standalone: true,
   selector: 'tests-terms-editor',
   templateUrl: './tests-terms-editor.component.html',
   styleUrls: ['./tests-terms-editor.component.scss'],

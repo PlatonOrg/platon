@@ -1,15 +1,11 @@
-import { CommonModule } from '@angular/common'
 import { NgModule, Provider } from '@angular/core'
 import { PLE_INPUT_PROVIDERS, PleInputProvider } from '../ple-input'
 import { ValueEditorComponent } from './value-editor/value-editor.component'
-import { FormsModule } from '@angular/forms'
-import { NzFormModule } from 'ng-zorro-antd/form'
-import { NzSwitchModule } from 'ng-zorro-antd/switch'
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NzFormModule, NzSwitchModule],
+  imports: [ValueEditorComponent],
   exports: [ValueEditorComponent],
-  declarations: [ValueEditorComponent],
+  declarations: [],
 })
 export class InputBooleanModule {}
 

@@ -31,7 +31,6 @@ import {
   CircleTreeComponent,
   ResourceItemComponent,
   ResourcePipesModule,
-  ResourceSearchBarComponent,
   ResourceService,
 } from '@platon/feature/resource/browser'
 import {
@@ -58,7 +57,6 @@ type TemplateSource = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-resource-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
@@ -68,11 +66,9 @@ type TemplateSource = {
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzTagModule,
     NzSpinModule,
     NzIconModule,
@@ -83,15 +79,12 @@ type TemplateSource = {
     NzPageHeaderModule,
     NzPopoverModule,
     NzToolTipModule,
-
     UiStepDirective,
     UiStepperComponent,
     DialogModule,
-
     CircleTreeComponent,
     ResourcePipesModule,
     ResourceItemComponent,
-    ResourceSearchBarComponent,
     UserCharterComponent,
   ],
 })

@@ -14,6 +14,7 @@ import { firstValueFrom } from 'rxjs'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import { JsxComponentDefinition, JsxState } from './jsx'
+import { BaseModule } from '../../shared/components/base/base.module'
 
 declare const JXG: any
 
@@ -22,6 +23,7 @@ declare const JXG: any
   templateUrl: 'jsx.component.html',
   styleUrls: ['jsx.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule],
 })
 @WebComponent(JsxComponentDefinition)
 export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxState> {

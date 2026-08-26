@@ -15,15 +15,8 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import { User } from '@platon/core/common'
-import {
-  CircleTreeComponent,
-  ResourceItemComponent,
-  ResourcePipesModule,
-  ResourceSearchBarComponent,
-  ResourceService,
-} from '@platon/feature/resource/browser'
+import { CircleTreeComponent, ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
 import { CircleTree, Resource, ResourceTypes, branchFromCircleTree } from '@platon/feature/resource/common'
-import { UiStepDirective, UiStepperComponent } from '@platon/shared/ui'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { NzTagModule } from 'ng-zorro-antd/tag'
@@ -38,7 +31,6 @@ type TemplateSource = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-resource-move',
   templateUrl: './move.page.html',
   styleUrls: ['./move.page.scss'],
@@ -48,11 +40,9 @@ type TemplateSource = {
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzTagModule,
     NzSpinModule,
     NzIconModule,
@@ -62,15 +52,9 @@ type TemplateSource = {
     NzSkeletonModule,
     NzPageHeaderModule,
     NzAlertModule,
-
-    UiStepDirective,
-    UiStepperComponent,
     DialogModule,
-
     CircleTreeComponent,
     ResourcePipesModule,
-    ResourceItemComponent,
-    ResourceSearchBarComponent,
   ],
 })
 export class ResourceMovePage implements OnInit {

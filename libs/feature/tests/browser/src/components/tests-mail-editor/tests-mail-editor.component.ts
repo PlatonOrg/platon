@@ -15,7 +15,6 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { EditorjsViewerComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'tests-mail-editor',
   templateUrl: './tests-mail-editor.component.html',
   styleUrls: ['./tests-mail-editor.component.scss'],

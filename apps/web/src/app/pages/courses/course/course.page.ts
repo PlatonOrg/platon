@@ -22,7 +22,6 @@ import { CoursePresenter } from './course.presenter'
 import { Title } from '@angular/platform-browser'
 
 @Component({
-  standalone: true,
   selector: 'app-course',
   templateUrl: './course.page.html',
   styleUrls: ['./course.page.scss'],
@@ -31,9 +30,7 @@ import { Title } from '@angular/platform-browser'
   imports: [
     CommonModule,
     FormsModule,
-
     MatIconModule,
-
     NzTagModule,
     NzIconModule,
     NzButtonModule,
@@ -41,9 +38,7 @@ import { Title } from '@angular/platform-browser'
     NzBreadCrumbModule,
     NzTypographyModule,
     NzPageHeaderModule,
-
     DialogModule,
-
     UserAvatarComponent,
     CourseSharingComponent,
     UiLayoutTabsComponent,

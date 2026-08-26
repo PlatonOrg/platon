@@ -14,12 +14,18 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { RadioGroupComponentDefinition, RadioGroupItem, RadioGroupState } from './radio-group'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
+import { FormsModule } from '@angular/forms'
+import { MatRadioModule } from '@angular/material/radio'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 @Component({
   selector: 'wc-radio-group',
   templateUrl: 'radio-group.component.html',
   styleUrls: ['radio-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, FormsModule, MatRadioModule, NgeMarkdownModule, CssPipeModule],
 })
 @WebComponent(RadioGroupComponentDefinition)
 export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, OnInit, AfterViewInit {

@@ -7,7 +7,6 @@ import { NzGridModule } from 'ng-zorro-antd/grid'
 
 @Component({
   selector: 'tutorial-selector-modal',
-  standalone: true,
   imports: [CommonModule, MatIconModule, NzGridModule],
   templateUrl: './tutorial-selector-modal.component.html',
   styleUrl: './tutorial-selector-modal.component.scss',

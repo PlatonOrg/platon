@@ -22,7 +22,6 @@ export interface ActivityModerationEvent {
 }
 
 @Component({
-  standalone: true,
   selector: 'course-activity-moderation',
   templateUrl: './activity-moderation.component.html',
   styleUrls: ['./activity-moderation.component.scss'],

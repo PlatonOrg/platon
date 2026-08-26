@@ -16,7 +16,6 @@ import { antTagColorFromPercentage } from '@platon/shared/ui'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 
 @Component({
-  standalone: true,
   selector: 'course-item',
   templateUrl: './course-item.component.html',
   styleUrls: ['./course-item.component.scss'],

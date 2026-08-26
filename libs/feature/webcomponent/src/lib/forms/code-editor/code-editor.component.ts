@@ -23,6 +23,9 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import { WebComponentService } from '../../web-component.service'
 import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
 
 const MIN_EDITOR_HEIGHT_PX = 400
 
@@ -31,6 +34,7 @@ const MIN_EDITOR_HEIGHT_PX = 400
   templateUrl: 'code-editor.component.html',
   styleUrls: ['code-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NzToolTipModule, NgeMonacoModule],
 })
 @WebComponent(CodeEditorComponentDefinition)
 export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, WebComponentHooks<CodeEditorState> {

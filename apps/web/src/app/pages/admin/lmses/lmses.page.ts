@@ -15,7 +15,6 @@ import {
 import { Lms, LmsFilters } from '@platon/feature/lti/common'
 
 @Component({
-  standalone: true,
   selector: 'app-admin-lmses',
   templateUrl: './lmses.page.html',
   styleUrls: ['./lmses.page.scss'],
@@ -23,11 +22,9 @@ import { Lms, LmsFilters } from '@platon/feature/lti/common'
   imports: [
     CommonModule,
     FormsModule,
-
     NzIconModule,
     NzButtonModule,
     NzToolTipModule,
-
     LmsTableComponent,
     LmsDrawerComponent,
     LmsSearchBarComponent,

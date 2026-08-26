@@ -12,7 +12,7 @@ import {
   forwardRef,
   inject,
 } from '@angular/core'
-import { ControlValueAccessor, FormBuilder, NG_VALUE_ACCESSOR } from '@angular/forms'
+import { ControlValueAccessor, FormBuilder, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { PleInput } from '@platon/feature/compiler'
 import { Subscription, debounceTime } from 'rxjs'
 import { InputAutomatonProvider } from './input-automaton'
@@ -37,12 +37,40 @@ import {
 } from './ple-input'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
+import { ReactiveFormsModule } from '@angular/forms'
+
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { NzSelectModule } from 'ng-zorro-antd/select'
+
+import { DragDropModule } from '@angular/cdk/drag-drop'
+import { CommonModule } from '@angular/common'
+import { MatIconModule } from '@angular/material/icon'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+
 @Component({
   selector: 'app-ple-input',
   templateUrl: 'ple-input.component.html',
   styleUrls: ['ple-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-
+  imports: [
+    NgeMarkdownModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NzFormModule,
+    NzInputModule,
+    NzSelectModule,
+    NzListModule,
+    DragDropModule,
+    MatIconModule,
+    NzIconModule,
+    NzButtonModule,
+    NzToolTipModule,
+    CommonModule,
+  ],
   providers: [
     // THE ORDER IS IMPORTANT SINCE THE `canHandle` METHOD IS CALLED IN THE SAME ORDER
     InputListProvider,

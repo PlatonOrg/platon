@@ -26,7 +26,6 @@ import { Subscription } from 'rxjs'
 import { CoursePipesModule } from '../../pipes'
 
 @Component({
-  standalone: true,
   selector: 'course-filters',
   templateUrl: './course-filters.component.html',
   styleUrls: ['./course-filters.component.scss'],
@@ -35,16 +34,13 @@ import { CoursePipesModule } from '../../pipes'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatRadioModule,
     MatButtonModule,
     MatDividerModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzDrawerModule,
     NzSelectModule,
-
     CoursePipesModule,
   ],
 })

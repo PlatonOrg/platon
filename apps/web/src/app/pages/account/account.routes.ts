@@ -23,14 +23,6 @@ export default [
             './security/security.routes'
           ),
       },
-      {
-        path: 'notifications',
-        loadChildren: () =>
-          import(
-            /* webpackChunkName: "account-notification-prefs" */
-            './notification-prefs/notification-prefs.routes'
-          ),
-      },
 
       { path: '**', pathMatch: 'full', redirectTo: 'about-me' },
     ],

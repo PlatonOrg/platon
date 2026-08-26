@@ -25,7 +25,6 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { TestPresenter } from '../test.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-test-candidates',
   templateUrl: './candidates.page.html',
   styleUrls: ['./candidates.page.scss'],

@@ -6,7 +6,6 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 
 @Component({
   selector: 'course-propositions',
-  standalone: true,
   imports: [CommonModule, NzDrawerModule, NzListModule, NzModalModule],
   templateUrl: './propositions.component.html',
   styleUrl: './propositions.component.scss',

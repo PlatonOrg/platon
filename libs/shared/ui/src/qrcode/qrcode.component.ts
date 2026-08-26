@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 import { NzQRCodeModule } from 'ng-zorro-antd/qr-code'
 
 @Component({
-  standalone: true,
   selector: 'ui-qrcode',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NzQRCodeModule],

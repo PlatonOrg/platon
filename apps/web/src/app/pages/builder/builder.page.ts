@@ -47,7 +47,6 @@ interface SidebarSection {
 type MainViewMode = 'input' | 'setting' | 'history'
 
 @Component({
-  standalone: true,
   selector: 'app-builder',
   templateUrl: './builder.page.html',
   styleUrls: ['./builder.page.scss'],
@@ -67,7 +66,6 @@ type MainViewMode = 'input' | 'setting' | 'history'
     UiModalIFrameComponent,
     VersionHistoryComponent,
     UiErrorComponent,
-
     NgeIdeModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

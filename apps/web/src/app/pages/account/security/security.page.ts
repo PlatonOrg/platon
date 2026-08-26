@@ -21,7 +21,6 @@ import { HTTP_STATUS_CODE, User } from '@platon/core/common'
 import { HttpErrorResponse } from '@angular/common/http'
 
 @Component({
-  standalone: true,
   selector: 'app-account-security',
   templateUrl: './security.page.html',
   styleUrls: ['./security.page.scss'],
@@ -30,13 +29,10 @@ import { HttpErrorResponse } from '@angular/common/http'
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-
     MatCardModule,
     MatInputModule,
     MatFormFieldModule,
-
     NzButtonModule,
-
     DialogModule,
     ProtectedComponent,
     AuthEditPasswordComponent,

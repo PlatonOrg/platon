@@ -22,7 +22,6 @@ import { Router } from '@angular/router'
 import { CourseDuplicateComponent } from './duplicate/duplicate.component'
 
 @Component({
-  standalone: true,
   selector: 'app-course-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
@@ -33,12 +32,10 @@ import { CourseDuplicateComponent } from './duplicate/duplicate.component'
     UiError403Component,
     ReactiveFormsModule,
     UiQRCodeComponent,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
     MatCardModule,
-
     NzFormModule,
     NzSpinModule,
     NzButtonModule,

@@ -5,7 +5,6 @@ import { TestsService } from '@platon/feature/tests/browser'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 @Component({
-  standalone: true,
   selector: 'app-candidate',
   templateUrl: './candidate.page.html',
   styleUrls: ['./candidate.page.scss'],

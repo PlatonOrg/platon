@@ -19,12 +19,15 @@ import { ResourceLoaderService } from '@cisstech/nge/services'
 import { DOCUMENT } from '@angular/common'
 import { PresenterComponentDefinition, PresenterState } from './presenter'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { Locale } from 'discord-api-types/v10'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
 
 @Component({
   selector: 'wc-presenter',
   templateUrl: 'presenter.component.html',
   styleUrls: ['presenter.component.scss'],
+  imports: [BaseModule, NzButtonModule, NzIconModule],
 })
 @WebComponent(PresenterComponentDefinition)
 export class PresenterComponent implements AfterViewInit, OnDestroy, WebComponentHooks<PresenterState> {

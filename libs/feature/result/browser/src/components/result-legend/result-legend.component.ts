@@ -10,7 +10,6 @@ import { AnswerStates } from '@platon/feature/result/common'
 import { AnswerStatePipesModule } from '../../pipes'
 
 @Component({
-  standalone: true,
   selector: 'result-legend',
   templateUrl: './result-legend.component.html',
   styleUrls: ['./result-legend.component.scss'],

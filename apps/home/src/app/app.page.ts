@@ -4,7 +4,6 @@ import { CoreService } from '@platon/core/browser'
 import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
 
 @Component({
-  standalone: true,
   imports: [RouterModule, FeatureWebComponentModule],
   selector: 'app-root',
   templateUrl: './app.page.html',

@@ -55,7 +55,7 @@ describe('ValueEditorComponent', () => {
     }
 
     await TestBed.configureTestingModule({
-      declarations: [ValueEditorComponent, HideResourceIdPipe],
+      imports: [ValueEditorComponent, HideResourceIdPipe],
       providers: [
         { provide: EditFilePreviewService, useValue: mockEditService },
         { provide: InputFileService, useValue: mockInputFileService },

@@ -31,7 +31,6 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
 import { ResourcePresenter } from '../resource.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-overview',
   templateUrl: './overview.page.html',
   styleUrls: ['./overview.page.scss'],
@@ -40,18 +39,15 @@ import { ResourcePresenter } from '../resource.presenter'
     CommonModule,
     FormsModule,
     RouterModule,
-
     MatCardModule,
     MatChipsModule,
     MatButtonModule,
-
     NzGridModule,
     NzEmptyModule,
     NzButtonModule,
     NzSelectModule,
     NzStatisticModule,
     NzDatePickerModule,
-
     DurationPipe,
     CoreEchartsDirective,
     UiStatisticCardComponent,

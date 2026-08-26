@@ -37,7 +37,6 @@ export interface CsvImportError {
 }
 
 @Component({
-  standalone: true,
   selector: 'ui-csv-import',
   templateUrl: './csv-import.component.html',
   styleUrls: ['./csv-import.component.scss'],

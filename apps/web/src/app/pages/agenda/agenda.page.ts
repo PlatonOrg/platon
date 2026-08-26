@@ -7,7 +7,6 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
 import { NzCalendarModule } from 'ng-zorro-antd/calendar'
 
 @Component({
-  standalone: true,
   selector: 'app-agenda',
   templateUrl: './agenda.page.html',
   styleUrls: ['./agenda.page.scss'],

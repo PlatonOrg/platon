@@ -16,7 +16,6 @@ type NavLink = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],

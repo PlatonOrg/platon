@@ -1,6 +1,6 @@
-@import 'shepherd.js/dist/css/shepherd.css';
+@use 'shepherd.js/dist/css/shepherd.css';
 
-@import './libs/feature/tuto/browser/src/lib/styles/shepherd-override.scss';
+@use '../../../libs/feature/tuto/browser/src/lib/styles/shepherd-override.scss';
 
 
 mat-drawer-container {

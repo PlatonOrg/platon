@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common'
 import { UiError500Component } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'discord-invitation',
   templateUrl: './discord-invitation.component.html',
   styleUrls: ['./discord-invitation.component.scss'],

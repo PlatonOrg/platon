@@ -16,7 +16,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { NzTableModule } from 'ng-zorro-antd/table'
 
 @Component({
-  standalone: true,
   selector: 'resource-member-table',
   templateUrl: './member-table.component.html',
   styleUrls: ['./member-table.component.scss'],

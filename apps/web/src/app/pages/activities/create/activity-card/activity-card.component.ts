@@ -13,7 +13,6 @@ import { Resource } from '@platon/feature/resource/common'
 import { ResourcePipesModule } from '@platon/feature/resource/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-activity-card',
   templateUrl: './activity-card.component.html',
   styleUrls: ['./activity-card.component.scss'],

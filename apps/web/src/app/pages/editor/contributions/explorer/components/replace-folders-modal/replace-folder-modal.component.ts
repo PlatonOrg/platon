@@ -11,7 +11,6 @@ export type ReplaceFolderModalData = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-editor-replace-folder-modal',
   templateUrl: './replace-folder-modal.component.html',
   styleUrls: ['./replace-folder-modal.component.scss'],

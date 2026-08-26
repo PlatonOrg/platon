@@ -7,12 +7,7 @@ import { CoursePresenter } from '../../../courses/course/course.presenter'
 import { Activity, CourseMember, CourseMemberRoles, CourseSection } from '@platon/feature/course/common'
 import { MatCardModule } from '@angular/material/card'
 import { MatIconModule } from '@angular/material/icon'
-import {
-  CourseActivityCardComponent,
-  CourseMemberTableComponent,
-  CoursePipesModule,
-  CourseService,
-} from '@platon/feature/course/browser'
+import { CourseMemberTableComponent, CoursePipesModule, CourseService } from '@platon/feature/course/browser'
 import { DialogModule, DialogService, UserSearchModalComponent } from '@platon/core/browser'
 import { User, UserGroup } from '@platon/core/common'
 import { NzSelectModule } from 'ng-zorro-antd/select'
@@ -32,7 +27,6 @@ import { MatDialog } from '@angular/material/dialog'
 import { UiModalDrawerComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'app-test-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
@@ -45,14 +39,12 @@ import { UiModalDrawerComponent } from '@platon/shared/ui'
     CourseMemberTableComponent,
     UserSearchModalComponent,
     NzSelectModule,
-    CourseActivityCardComponent,
     NzIconModule,
     NzButtonModule,
     NzToolTipModule,
     CoursePipesModule,
     DialogModule,
     NzPopconfirmModule,
-    TestsTermsEditorComponent,
     UiModalDrawerComponent,
     TestsSettingsComponent,
   ],

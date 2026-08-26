@@ -87,14 +87,12 @@ type FullscreenElement = HTMLElement & {
 }
 
 @Component({
-  standalone: true,
   selector: 'player-exercise',
   templateUrl: './player-exercise.component.html',
   styleUrls: ['./player-exercise.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     NzSpinModule,
     NzAlertModule,
     MatIconModule,
@@ -106,7 +104,6 @@ type FullscreenElement = HTMLElement & {
     NzSkeletonModule,
     NzStatisticModule,
     MatExpansionModule,
-
     IsUUIDPipe,
     DialogModule,
     UserAvatarComponent,

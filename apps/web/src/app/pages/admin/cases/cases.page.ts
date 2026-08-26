@@ -12,7 +12,6 @@ import { LTIService } from '@platon/feature/lti/browser'
 import { Lms } from '@platon/feature/lti/common'
 
 @Component({
-  standalone: true,
   selector: 'app-admin-cases',
   templateUrl: './cases.page.html',
   styleUrls: ['./cases.page.scss'],
@@ -20,11 +19,9 @@ import { Lms } from '@platon/feature/lti/common'
   imports: [
     CommonModule,
     FormsModule,
-
     NzIconModule,
     NzButtonModule,
     NzToolTipModule,
-
     CasTableComponent,
     CasSearchBarComponent,
     CasCreateDrawerComponent,

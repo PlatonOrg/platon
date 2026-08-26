@@ -8,7 +8,6 @@ import { LogType, PlatonLog } from '@platon/feature/player/common'
 import { User, UserRoles } from '@platon/core/common'
 
 @Component({
-  standalone: true,
   selector: 'player-terminal-logs',
   templateUrl: './player-terminal-logs.component.html',
   styleUrls: ['./player-terminal-logs.component.scss'],

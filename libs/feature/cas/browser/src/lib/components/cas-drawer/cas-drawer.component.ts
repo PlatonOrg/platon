@@ -27,7 +27,6 @@ import { CasService } from '../../api/cas.service'
 import { Lms } from '@platon/feature/lti/common'
 
 @Component({
-  standalone: true,
   selector: 'cas-drawer',
   templateUrl: './cas-drawer.component.html',
   styleUrls: ['./cas-drawer.component.scss'],
@@ -36,15 +35,12 @@ import { Lms } from '@platon/feature/lti/common'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatFormFieldModule,
     MatSelectModule,
-
     NzIconModule,
     NzButtonModule,
     NzToolTipModule,
-
     UiModalDrawerComponent,
   ],
 })

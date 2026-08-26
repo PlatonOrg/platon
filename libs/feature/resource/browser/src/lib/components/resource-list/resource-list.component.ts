@@ -8,7 +8,6 @@ import { Resource } from '@platon/feature/resource/common'
 import { ResourceItemComponent } from '../resource-item/resource-item.component'
 
 @Component({
-  standalone: true,
   selector: 'resource-list',
   templateUrl: './resource-list.component.html',
   styleUrls: ['./resource-list.component.scss'],

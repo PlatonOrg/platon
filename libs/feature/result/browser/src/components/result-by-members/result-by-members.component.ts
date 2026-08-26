@@ -15,23 +15,18 @@ import { DurationPipe, UiStatisticCardComponent } from '@platon/shared/ui'
 import { AnswerStatePipesModule } from '../../pipes'
 
 @Component({
-  standalone: true,
   selector: 'result-by-members',
   templateUrl: './result-by-members.component.html',
   styleUrls: ['./result-by-members.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     MatIconModule,
-
     NzGridModule,
     NzTableModule,
     NzToolTipModule,
     NzPopoverModule,
-
     DurationPipe,
-
     UserAvatarComponent,
     AnswerStatePipesModule,
     UiStatisticCardComponent,

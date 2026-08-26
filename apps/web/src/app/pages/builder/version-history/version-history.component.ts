@@ -14,7 +14,6 @@ import { firstValueFrom } from 'rxjs'
 import { HttpClient } from '@angular/common/http'
 
 @Component({
-  standalone: true,
   selector: 'app-version-history',
   templateUrl: './version-history.component.html',
   styleUrls: ['./version-history.component.scss'],

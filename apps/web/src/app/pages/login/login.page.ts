@@ -6,7 +6,6 @@ import { AuthSignInComponent } from '@platon/core/browser'
 import { CasSignInComponent } from '@platon/feature/cas/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],

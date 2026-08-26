@@ -1,14 +1,17 @@
 import { ChangeDetectionStrategy, Component, Injector, Input, OnInit } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { CodeViewerComponentDefinition, CodeViewerState } from './code-viewer'
-import { generate } from 'ng-zorro-antd/core/color'
-import { number } from 'echarts'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
+
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-code-viewer',
   templateUrl: 'code-viewer.component.html',
   styleUrls: ['code-viewer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMonacoModule, NgeMarkdownModule],
 })
 @WebComponent(CodeViewerComponentDefinition)
 export class CodeViewerComponent implements WebComponentHooks<CodeViewerState>, OnInit {

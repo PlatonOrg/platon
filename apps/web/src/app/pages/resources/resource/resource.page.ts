@@ -27,7 +27,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { ResourcePageTutorialService, ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-resource',
   templateUrl: './resource.page.html',
   styleUrls: ['./resource.page.scss'],
@@ -37,10 +36,8 @@ import { ResourcePageTutorialService, ResourcesTutorialService } from '@platon/f
     CommonModule,
     FormsModule,
     RouterModule,
-
     MatIconModule,
     MatChipsModule,
-
     NzIconModule,
     NzSelectModule,
     NzButtonModule,
@@ -50,13 +47,10 @@ import { ResourcePageTutorialService, ResourcesTutorialService } from '@platon/f
     NzTypographyModule,
     NzPageHeaderModule,
     NzPopconfirmModule,
-
     DialogModule,
-
     UiLayoutTabsComponent,
     UiModalIFrameComponent,
     UiLayoutTabDirective,
-
     CircleTreeComponent,
     ResourcePipesModule,
     ResourceSharingComponent,

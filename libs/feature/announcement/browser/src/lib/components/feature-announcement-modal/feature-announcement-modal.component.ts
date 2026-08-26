@@ -28,7 +28,6 @@ interface AnnouncementNotification {
 
 @Component({
   selector: 'lib-feature-announcement-modal',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,

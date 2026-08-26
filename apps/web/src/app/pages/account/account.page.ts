@@ -9,7 +9,6 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
 import { UiLayoutTabsComponent, UiLayoutTabDirective } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'app-account',
   templateUrl: './account.page.html',
   styleUrls: ['./account.page.scss'],

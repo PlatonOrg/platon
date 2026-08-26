@@ -22,7 +22,6 @@ import { getPreviewOverridesStorageKey } from '../resource-item/resource-item.co
 import { Variables } from '@platon/feature/compiler'
 
 @Component({
-  standalone: true,
   selector: 'resource-template-card',
   templateUrl: './template-card.component.html',
   styleUrls: ['./template-card.component.scss'],

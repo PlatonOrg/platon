@@ -16,6 +16,14 @@ import CellActive from './model/cell-active'
 import { CellActiveInterface } from './model/cell-active-interface'
 import { Result } from './model/result'
 import { CrossWordService } from './service/cross-word-service'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { MatAutocompleteModule } from '@angular/material/autocomplete'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { MatIconModule } from '@angular/material/icon'
+import { NzPopoverModule } from 'ng-zorro-antd/popover'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 @Component({
   selector: 'wc-crossword',
@@ -25,6 +33,21 @@ import { CrossWordService } from './service/cross-word-service'
     '[style.display]': `state.appearance === 'inline' ? 'inline' : 'outline'`,
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BaseModule,
+
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatInputModule,
+    MatFormFieldModule,
+    MatAutocompleteModule,
+    MatIconModule,
+
+    CssPipeModule,
+
+    NzPopoverModule,
+  ],
 })
 @WebComponent(CrosswordComponentDefinition)
 export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordState> {

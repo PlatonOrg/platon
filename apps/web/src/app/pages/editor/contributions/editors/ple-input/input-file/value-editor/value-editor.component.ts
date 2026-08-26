@@ -15,8 +15,17 @@ import { BaseValueEditor } from '../../ple-input'
 import { ActivatedRoute } from '@angular/router'
 import { InputFileService } from '@platon/feature/resource/browser'
 import { UiFilePreviewComponent, EditFilePreviewService, UiModalTemplateComponent } from '@platon/shared/ui'
+import { CommonModule } from '@angular/common'
+import { EditorDirectivesModule } from '@cisstech/nge-ide/core'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { MatIconModule } from '@angular/material/icon'
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 
-@Pipe({ name: 'hideResourceId' })
+@Pipe({
+  name: 'hideResourceId',
+})
 export class HideResourceIdPipe implements PipeTransform {
   transform(value?: string | null): string | null | undefined {
     if (!value) {
@@ -30,6 +39,18 @@ export class HideResourceIdPipe implements PipeTransform {
   selector: 'app-input-file-value-editor',
   templateUrl: 'value-editor.component.html',
   styleUrls: ['value-editor.component.scss'],
+  imports: [
+    HideResourceIdPipe,
+    CommonModule,
+    NzButtonModule,
+    NzIconModule,
+    NzToolTipModule,
+    EditorDirectivesModule,
+    UiFilePreviewComponent,
+    UiModalTemplateComponent,
+    MatIconModule,
+    NzSkeletonModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValueEditorComponent extends BaseValueEditor<string> implements OnDestroy {

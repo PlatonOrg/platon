@@ -27,7 +27,6 @@ import { TemplateSelectionComponent } from '@platon/feature/resource/browser'
 import { UserRoles } from '@platon/core/common'
 
 @Component({
-  standalone: true,
   selector: 'app-overview',
   templateUrl: './overview.page.html',
   styleUrls: ['./overview.page.scss'],
@@ -36,26 +35,20 @@ import { UserRoles } from '@platon/core/common'
     CommonModule,
     RouterModule,
     FormsModule,
-
     MatIconModule,
     MatCardModule,
-
     NzGridModule,
     NzButtonModule,
     NzSelectModule,
     NzSkeletonModule,
     NzDatePickerModule,
-
     DurationPipe,
-
     ResultValueDistributionComponent,
     ResultAnswerDistributionComponent,
-
     UiError403Component,
     UiError404Component,
     UiError500Component,
     UiStatisticCardComponent,
-
     TemplateSelectionComponent,
   ],
   providers: [OverviewPresenter],

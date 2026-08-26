@@ -13,12 +13,16 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { DragDropComponentDefinition, DragDropState } from './drag-drop'
 import { DragDropDirective, DragDropEvent } from './drag-drop.directive'
 import { DragDropService } from './drag-drop.service'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-drag-drop',
   templateUrl: 'drag-drop.component.html',
   styleUrls: ['drag-drop.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, CssPipeModule, NgeMarkdownModule, DragDropDirective],
 })
 @WebComponent(DragDropComponentDefinition)
 export class DragDropComponent implements OnInit, OnDestroy, WebComponentHooks<DragDropState> {

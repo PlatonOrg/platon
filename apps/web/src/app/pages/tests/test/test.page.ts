@@ -11,12 +11,10 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { DialogModule, UserAvatarComponent } from '@platon/core/browser'
-import { CourseSharingComponent } from '@platon/feature/course/browser'
 import { UiLayoutTabDirective, UiLayoutTabsComponent } from '@platon/shared/ui'
 import { TestPresenter } from './test.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-test',
   templateUrl: './test.page.html',
   styleUrls: ['./test.page.scss'],
@@ -26,19 +24,14 @@ import { TestPresenter } from './test.presenter'
     CommonModule,
     FormsModule,
     RouterModule,
-
     MatIconModule,
-
     NzTagModule,
     NzIconModule,
     NzBreadCrumbModule,
     NzTypographyModule,
     NzPageHeaderModule,
-
     DialogModule,
-
     UserAvatarComponent,
-    CourseSharingComponent,
     UiLayoutTabsComponent,
     UiLayoutTabDirective,
   ],

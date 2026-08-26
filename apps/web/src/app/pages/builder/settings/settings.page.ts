@@ -33,7 +33,6 @@ export interface SettingItem {
 
 @Component({
   selector: 'app-builder-settings',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -69,7 +68,6 @@ export class SettingsPage implements OnInit {
   protected saving = signal(false)
   protected hasFormChanges = signal(false)
 
-  protected close = output<void>()
   protected resourceUpdated = output<Resource>()
 
   readonly isDarkTheme = computed(() => this.themeService.isDark)

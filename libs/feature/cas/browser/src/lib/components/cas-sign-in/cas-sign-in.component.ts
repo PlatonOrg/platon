@@ -10,7 +10,6 @@ import { CasService } from '../../api/cas.service'
 import { NG_VALUE_ACCESSOR } from '@angular/forms'
 
 @Component({
-  standalone: true,
   selector: 'cas-sign-in',
   templateUrl: './cas-sign-in.component.html',
   styleUrls: ['./cas-sign-in.component.scss'],

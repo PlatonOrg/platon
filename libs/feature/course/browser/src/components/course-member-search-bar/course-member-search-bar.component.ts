@@ -28,7 +28,6 @@ import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { CourseService } from '../../api/course.service'
 
 @Component({
-  standalone: true,
   selector: 'course-member-search-bar',
   templateUrl: './course-member-search-bar.component.html',
   styleUrls: ['./course-member-search-bar.component.scss'],

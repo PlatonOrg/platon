@@ -34,7 +34,6 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { CoursePresenter } from '../course.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-course-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
@@ -42,7 +41,6 @@ import { CoursePresenter } from '../course.presenter'
   imports: [
     CommonModule,
     RouterModule,
-
     NzIconModule,
     NzGridModule,
     NzEmptyModule,
@@ -51,12 +49,10 @@ import { CoursePresenter } from '../course.presenter'
     NzCollapseModule,
     NzSegmentedModule,
     NzTypographyModule,
-
     CourseActivityGridComponent,
     CourseActivityTableComponent,
     CourseSectionActionsComponent,
     CsvDownloadButtonComponent,
-
     DurationPipe,
     UiViewModeComponent,
     UiSearchBarComponent,

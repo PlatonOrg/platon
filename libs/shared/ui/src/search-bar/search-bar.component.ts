@@ -31,7 +31,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 const DEFAULT_DEBOUNCE_TIME = 200
 @Component({
-  standalone: true,
   selector: 'ui-search-bar',
   templateUrl: './search-bar.component.html',
   styleUrls: ['./search-bar.component.scss'],
@@ -40,13 +39,10 @@ const DEFAULT_DEBOUNCE_TIME = 200
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatIconModule,
     MatButtonModule,
-
     NzSpinModule,
     NzAutocompleteModule,
-
     NgArrayPipesModule,
   ],
 })
@@ -62,7 +58,6 @@ export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
   @ContentChild(TemplateRef)
   suggestionTemplate?: TemplateRef<any>
 
-  @Output() search = new EventEmitter<string>()
   @Output() filter = new EventEmitter<void>()
 
   protected control = new FormControl()
@@ -122,7 +117,6 @@ export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
 
   protected onTrigger(): void {
     this.searchbar?.onSearch?.(this.control.value)
-    this.search.next(this.control.value)
   }
 
   protected onSelect(event: NzOptionSelectionChange, item: any): void {

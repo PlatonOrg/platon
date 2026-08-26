@@ -16,7 +16,6 @@ import { User } from '@platon/core/common'
 import { createExerciseBuilderDefaultName } from '@platon/feature/builder/browser'
 
 @Component({
-  standalone: true,
   selector: 'resource-template-selection',
   templateUrl: './template-selection.component.html',
   styleUrls: ['./template-selection.component.scss'],

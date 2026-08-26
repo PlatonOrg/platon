@@ -12,11 +12,14 @@ import {
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { ConfettiComponentDefinition, ConfettiState } from './confetti'
 import confetti from 'canvas-confetti'
+import { BaseModule } from '../../shared/components/base/base.module'
+
 @Component({
   selector: 'wc-confetti',
   templateUrl: './confetti.component.html',
   styleUrls: ['confetti.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule],
 })
 @WebComponent(ConfettiComponentDefinition)
 export class ConfettiComponent implements WebComponentHooks<ConfettiState>, OnInit {

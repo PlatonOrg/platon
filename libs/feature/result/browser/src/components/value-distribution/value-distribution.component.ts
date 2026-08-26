@@ -11,12 +11,11 @@ import { EChartsOption } from 'echarts'
 import * as echarts from 'echarts/core'
 
 @Component({
-  standalone: true,
   selector: 'result-value-distribution',
   templateUrl: 'value-distribution.component.html',
   styleUrls: ['./value-distribution.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CoreEchartsDirective, DurationPipe],
+  imports: [CommonModule, CoreEchartsDirective],
   providers: [DurationPipe],
 })
 export class ResultValueDistributionComponent {

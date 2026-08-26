@@ -20,7 +20,6 @@ import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table'
 type Value = string[] | undefined
 
 @Component({
-  standalone: true,
   selector: 'lms-table',
   templateUrl: './lms-table.component.html',
   styleUrls: ['./lms-table.component.scss'],

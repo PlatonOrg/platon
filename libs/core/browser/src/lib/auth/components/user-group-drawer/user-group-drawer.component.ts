@@ -32,7 +32,6 @@ import { UserTableComponent } from '../user-table/user-table.component'
 import { AuthService } from '../../api/auth.service'
 
 @Component({
-  standalone: true,
   selector: 'user-group-drawer',
   templateUrl: './user-group-drawer.component.html',
   styleUrls: ['./user-group-drawer.component.scss'],
@@ -40,21 +39,17 @@ import { AuthService } from '../../api/auth.service'
   imports: [
     CommonModule,
     FormsModule,
-
     MatInputModule,
     MatFormFieldModule,
-
     NzTabsModule,
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
     NzToolTipModule,
     NzPopconfirmModule,
-
     UserTableComponent,
     UserSearchBarComponent,
     UserSearchModalComponent,
-
     UiModalDrawerComponent,
   ],
 })

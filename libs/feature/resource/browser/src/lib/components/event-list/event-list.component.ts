@@ -6,7 +6,6 @@ import { ResourceEventItemComponent } from '../event-item/event-item.component'
 import { NzTimelineModule } from 'ng-zorro-antd/timeline'
 
 @Component({
-  standalone: true,
   selector: 'resource-event-list',
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],

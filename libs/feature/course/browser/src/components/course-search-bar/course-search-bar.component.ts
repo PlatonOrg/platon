@@ -16,7 +16,6 @@ import { CourseService } from '../../api/course.service'
 import { CourseItemComponent } from '../course-item/course-item.component'
 
 @Component({
-  standalone: true,
   selector: 'course-search-bar',
   templateUrl: './course-search-bar.component.html',
   styleUrls: ['./course-search-bar.component.scss'],

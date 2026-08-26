@@ -29,7 +29,6 @@ import { ResourceFileService } from '../../api/file.service'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 
 @Component({
-  standalone: true,
   selector: 'resource-files',
   templateUrl: './resource-files.component.html',
   styleUrls: ['./resource-files.component.scss'],
@@ -38,19 +37,15 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
     CommonModule,
     FormsModule,
     RouterModule,
-
     MatCardModule,
-
     NzTreeModule,
     NzEmptyModule,
     NzSpinModule,
     NzDropDownModule,
     NzButtonModule,
-
     DialogModule,
     NgeUiIconModule,
     NgeMarkdownModule,
-
     UserAvatarComponent,
   ],
 })

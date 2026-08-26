@@ -49,7 +49,6 @@ if (typeof window !== 'undefined') {
 }
 
 @Component({
-  standalone: true,
   selector: 'ui-file-preview',
   templateUrl: 'file-preview.component.html',
   styleUrl: 'file-preview.component.scss',

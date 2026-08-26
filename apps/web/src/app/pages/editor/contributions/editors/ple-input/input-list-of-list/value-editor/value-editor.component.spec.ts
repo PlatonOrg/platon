@@ -9,7 +9,7 @@ describe('ValueEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ValueEditorComponent],
+      imports: [ValueEditorComponent],
       providers: [
         {
           provide: VALUE_EDITOR_TOKEN,

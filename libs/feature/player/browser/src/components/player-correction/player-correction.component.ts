@@ -32,7 +32,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { DialogModule, DialogService, UserService } from '@platon/core/browser'
 import { CourseCorrection, ExerciseCorrection, Label } from '@platon/feature/result/common'
-import { UiModalTemplateComponent, UiStatisticCardComponent } from '@platon/shared/ui'
+import { UiStatisticCardComponent } from '@platon/shared/ui'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { PlayerService } from '../../api/player.service'
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -64,7 +64,6 @@ interface ExerciseGroup {
 }
 
 @Component({
-  standalone: true,
   selector: 'player-correction',
   templateUrl: './player-correction.component.html',
   styleUrls: ['./player-correction.component.scss'],
@@ -86,14 +85,12 @@ interface ExerciseGroup {
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatIconModule,
     MatButtonModule,
     MatToolbarModule,
     MatSidenavModule,
     MatDividerModule,
     MatCardModule,
-
     NzIconModule,
     NzBadgeModule,
     NzEmptyModule,
@@ -106,12 +103,9 @@ interface ExerciseGroup {
     NzProgressModule,
     NzDividerModule,
     NzModalModule,
-
     DialogModule,
-
     PlayerReviewComponent,
     PlayerCommentsComponent,
-    UiModalTemplateComponent,
     UiStatisticCardComponent,
     CorrectionLabelComponent,
     CorrectionResumeTableComponent,

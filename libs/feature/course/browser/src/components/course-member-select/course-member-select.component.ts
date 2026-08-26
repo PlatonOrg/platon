@@ -18,7 +18,6 @@ import { CourseMember } from '@platon/feature/course/common'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 
 @Component({
-  standalone: true,
   selector: 'course-member-select',
   templateUrl: './course-member-select.component.html',
   styleUrls: ['./course-member-select.component.scss'],

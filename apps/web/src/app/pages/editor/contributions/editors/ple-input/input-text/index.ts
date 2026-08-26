@@ -1,15 +1,11 @@
-import { CommonModule } from '@angular/common'
 import { NgModule, Provider } from '@angular/core'
-import { FormsModule } from '@angular/forms'
-import { NzFormModule } from 'ng-zorro-antd/form'
-import { NzInputModule } from 'ng-zorro-antd/input'
 import { PLE_INPUT_PROVIDERS, PleInputProvider } from '../ple-input'
 import { ValueEditorComponent } from './value-editor/value-editor.component'
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NzFormModule, NzInputModule],
+  imports: [ValueEditorComponent],
   exports: [ValueEditorComponent],
-  declarations: [ValueEditorComponent],
+  declarations: [],
 })
 export class InputTextModule {}
 

@@ -40,7 +40,6 @@ import { FeatureAnnouncementService, FeatureAnnouncementModalComponent } from '@
 import { MatDividerModule } from '@angular/material/divider'
 
 @Component({
-  standalone: true,
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],

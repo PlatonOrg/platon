@@ -4,11 +4,19 @@ import { ResourceLoaderService } from '@cisstech/nge/services'
 import { JsonEditorComponent, JsonEditorOptions, JsonEditorTreeNode } from 'ang-jsoneditor'
 import { firstValueFrom } from 'rxjs'
 import { WebComponentDefinition } from '../../web-component'
+import { CommonModule } from '@angular/common'
+
+import { MatButtonModule } from '@angular/material/button'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
+import { NgJsonEditorModule } from 'ang-jsoneditor'
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { MatIconModule } from '@angular/material/icon'
 
 @Component({
   selector: 'wc-showcase',
   templateUrl: './showcase.component.html',
   styleUrls: ['./showcase.component.scss'],
+  imports: [CommonModule, MatButtonModule, NzToolTipModule, NgeMarkdownModule, NgJsonEditorModule, MatIconModule],
 })
 export class ShowcaseComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly elementRef = inject(ElementRef) as ElementRef<HTMLElement>

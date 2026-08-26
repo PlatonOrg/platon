@@ -15,7 +15,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { NzEmptyComponent } from 'ng-zorro-antd/empty'
 
 @Component({
-  standalone: true,
   selector: 'app-course-groups',
   templateUrl: './groups.page.html',
   styleUrls: ['./groups.page.scss'],

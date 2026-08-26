@@ -19,7 +19,6 @@ import { UiStepDirective, UiStepperComponent } from '@platon/shared/ui'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 
 @Component({
-  standalone: true,
   selector: 'app-course-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
@@ -29,17 +28,14 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSelectModule,
     NzSkeletonModule,
     NzPageHeaderModule,
-
     UiStepDirective,
     UiStepperComponent,
     DialogModule,

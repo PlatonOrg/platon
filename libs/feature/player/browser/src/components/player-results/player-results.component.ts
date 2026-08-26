@@ -14,7 +14,6 @@ import { PlayerExerciseComponent } from '../player-exercise/player-exercise.comp
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
 
 @Component({
-  standalone: true,
   selector: 'player-results',
   templateUrl: './player-results.component.html',
   styleUrls: ['./player-results.component.scss', '../common.style.scss'],

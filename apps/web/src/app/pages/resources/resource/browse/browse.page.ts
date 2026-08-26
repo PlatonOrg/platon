@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { Subscription } from 'rxjs'
 
-import { SafePipe } from '@cisstech/nge/pipes'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 
 import { NgeUiIconModule } from '@cisstech/nge/ui/icon'
@@ -16,20 +15,15 @@ import { ResourceBrowseHeaderComponent } from './header/header.component'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-browse',
   templateUrl: './browse.page.html',
   styleUrls: ['./browse.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     NzModalModule,
     NgeUiIconModule,
-
-    SafePipe,
     UiModalIFrameComponent,
-
     ResourceFilesComponent,
     ResourceBrowseHeaderComponent,
   ],

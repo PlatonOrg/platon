@@ -27,7 +27,6 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { debounceTime, Subscription } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'auth-edit-password',
   templateUrl: './edit-password.component.html',
   styleUrls: ['./edit-password.component.scss'],

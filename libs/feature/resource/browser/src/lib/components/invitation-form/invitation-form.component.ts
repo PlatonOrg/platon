@@ -11,7 +11,6 @@ import { UserSearchBarComponent } from '@platon/core/browser'
 import { CreateResourceInvitation } from '@platon/feature/resource/common'
 
 @Component({
-  standalone: true,
   selector: 'resource-invitation-form',
   templateUrl: './invitation-form.component.html',
   styleUrls: ['./invitation-form.component.scss'],

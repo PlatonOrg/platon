@@ -18,7 +18,6 @@ import { DialogModule, DialogService } from '../../../dialog'
 import { AuthService } from '../../api/auth.service'
 
 @Component({
-  standalone: true,
   selector: 'auth-sign-in',
   templateUrl: './sign-in.component.html',
   styleUrls: ['./sign-in.component.scss'],
@@ -26,7 +25,6 @@ import { AuthService } from '../../api/auth.service'
   imports: [
     CommonModule,
     FormsModule,
-
     MatCardModule,
     MatIconModule,
     MatInputModule,
@@ -36,7 +34,6 @@ import { AuthService } from '../../api/auth.service'
     MatFormFieldModule,
     MatButtonToggleModule,
     MatProgressSpinnerModule,
-
     DialogModule,
   ],
 })

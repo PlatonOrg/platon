@@ -17,7 +17,6 @@ import { NzModalModule } from 'ng-zorro-antd/modal'
 export const UI_MODAL_IFRAME_CLOSE = 'UI_MODAL_IFRAME_CLOSE'
 
 @Component({
-  standalone: true,
   selector: 'ui-modal-iframe',
   templateUrl: './modal-iframe.component.html',
   styleUrls: ['./modal-iframe.component.scss'],

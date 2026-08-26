@@ -12,20 +12,16 @@ import { DurationPipe, UiStatisticCardComponent } from '@platon/shared/ui'
 import { AnswerStatePipesModule } from '../../pipes'
 
 @Component({
-  standalone: true,
   selector: 'result-by-exercises',
   templateUrl: './result-by-exercises.component.html',
   styleUrls: ['./result-by-exercises.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     MatIconModule,
-
     NzGridModule,
     NzTableModule,
     NzToolTipModule,
-
     DurationPipe,
     AnswerStatePipesModule,
     UiStatisticCardComponent,

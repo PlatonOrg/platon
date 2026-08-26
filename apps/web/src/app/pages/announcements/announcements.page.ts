@@ -46,13 +46,11 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
 
 @Component({
   selector: 'app-announcements',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatIconModule,
     MatIconModule,
     MatFormFieldModule,
@@ -61,7 +59,6 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
     MatDividerModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-
     NzButtonModule,
     NzCardModule,
     NzDividerModule,
@@ -73,7 +70,6 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
     NzTagModule,
     NzToolTipModule,
     NzTypographyModule,
-
     DialogModule,
     UiEditorJsModule,
     EditorjsViewerComponent,

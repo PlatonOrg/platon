@@ -8,7 +8,6 @@ import { TestPresenter } from '../test.presenter'
 import { CsvImportComponent, CsvImportData } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'app-test-csv-import',
   templateUrl: './csv-import.page.html',
   styleUrls: ['./csv-import.page.scss'],

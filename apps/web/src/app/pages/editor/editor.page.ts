@@ -38,7 +38,6 @@ import { Title } from '@angular/platform-browser'
 import { Resource } from '@platon/feature/resource/common'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-editor',
   templateUrl: './editor.page.html',
   styleUrls: ['./editor.page.scss'],
@@ -46,19 +45,15 @@ import { Resource } from '@platon/feature/resource/common'
   animations: [fadeInOnEnterAnimation(), fadeOutDownOnLeaveAnimation({ duration: 500 })],
   imports: [
     CommonModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSkeletonModule,
-
     NgeIdeModule,
     NgeIdeExplorerModule,
     NgeIdeSearchModule,
     NgeIdeSettingsModule,
-
     NgeIdeProblemsModule,
     NgeIdeNotificationsModule,
-
     PdfEditorContributionModule,
     PlfEditorContributionModule,
     PlaEditorContributionModule,
@@ -70,7 +65,6 @@ import { Resource } from '@platon/feature/resource/common'
     PlcEditorContributionModule,
     PloEditorContributionModule,
     ZipEditorContributionModule,
-
     DialogModule,
     UiErrorComponent,
   ],

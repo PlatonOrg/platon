@@ -15,7 +15,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 @Component({
   selector: 'lib-announcement-preview-modal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     CommonModule,
     MatButtonModule,

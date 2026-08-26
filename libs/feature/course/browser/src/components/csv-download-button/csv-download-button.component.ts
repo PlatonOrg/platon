@@ -16,7 +16,6 @@ import { UserResults } from '@platon/feature/result/common'
 import { CourseService } from '../../api/course.service'
 
 @Component({
-  standalone: true,
   selector: 'course-csv-download-button',
   templateUrl: './csv-download-button.component.html',
   styleUrls: ['./csv-download-button.component.scss'],

@@ -28,7 +28,6 @@ import { ResourcePipesModule } from '../../pipes'
 const ResourceEventToken = new InjectionToken<ResourceEvent>('ResourceEventToken')
 
 @Component({
-  standalone: true,
   selector: 'resource-event-member-remove',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, UserAvatarComponent],
@@ -67,7 +66,6 @@ class MemberCreateEventComponent implements OnInit {
 }
 
 @Component({
-  standalone: true,
   selector: 'resource-event-member-remove',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, UserAvatarComponent],
@@ -86,7 +84,6 @@ class MemberRemoveEventComponent {
 }
 
 @Component({
-  standalone: true,
   selector: 'resource-event-new-status',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UserAvatarComponent, ResourcePipesModule],
@@ -101,7 +98,6 @@ class NewStatusItemComponent {
 }
 
 @Component({
-  standalone: true,
   selector: 'resource-event-new-resource',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UserAvatarComponent, ResourcePipesModule],
@@ -115,12 +111,11 @@ class NewResourceEventComponent {
 }
 
 @Component({
-  standalone: true,
   selector: 'resource-event-item',
   templateUrl: './event-item.component.html',
   styleUrls: ['./event-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzEmptyModule, NzTimelineModule, UserAvatarComponent, ResourcePipesModule],
+  imports: [CommonModule, NzEmptyModule, NzTimelineModule, ResourcePipesModule],
 })
 export class ResourceEventItemComponent {
   @Input()

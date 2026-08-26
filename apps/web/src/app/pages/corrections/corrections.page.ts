@@ -9,7 +9,6 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
 import { UiLayoutTabDirective, UiLayoutTabsComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'app-corrections',
   templateUrl: './corrections.page.html',
   styleUrls: ['./corrections.page.scss'],

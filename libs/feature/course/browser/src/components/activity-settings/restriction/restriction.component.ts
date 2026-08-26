@@ -19,7 +19,6 @@ import { DialogService } from '@platon/core/browser'
 
 @Component({
   selector: 'course-restriction',
-  standalone: true,
   imports: [
     CommonModule,
     NzDatePickerModule,

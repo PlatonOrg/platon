@@ -10,7 +10,6 @@ import { ResourcePresenter } from '../resource.presenter'
 import { ResourcePipesModule } from '@platon/feature/resource/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-events',
   templateUrl: './events.page.html',
   styleUrls: ['./events.page.scss'],

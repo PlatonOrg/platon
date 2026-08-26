@@ -26,7 +26,6 @@ import {
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-admin-announcements',
   templateUrl: './announces.page.html',
   styleUrls: ['./announces.page.scss'],
@@ -35,9 +34,7 @@ import { firstValueFrom } from 'rxjs'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatIconModule,
-
     NzIconModule,
     NzButtonModule,
     NzSpinModule,
@@ -46,9 +43,7 @@ import { firstValueFrom } from 'rxjs'
     NzToolTipModule,
     NzModalModule,
     NzCardModule,
-
     MatDialogModule,
-
     DialogModule,
   ],
 })

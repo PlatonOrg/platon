@@ -5,7 +5,6 @@ import { CourseService } from '@platon/feature/course/browser'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-course-demo',
   templateUrl: './demo.page.html',
   styleUrls: ['./demo.page.scss'],

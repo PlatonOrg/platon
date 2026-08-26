@@ -1,4 +1,4 @@
-@let currentUser = user(); @if (currentUser) { @if (!noIcon()) {
+@let currentUser = effectiveUser(); @if (currentUser) { @if (!noIcon()) {
 <nz-badge
   [class.no-username]="showUsername() === 'none'"
   [nzCount]="isAdmin() ? adminBadgeTpl : undefined"

@@ -29,7 +29,6 @@ import { ResourceFileService } from '../../api/file.service'
 import { LATEST, Resource } from '@platon/feature/resource/common'
 
 @Component({
-  standalone: true,
   selector: 'resource-versioning',
   templateUrl: './resource-versioning.component.html',
   styleUrls: ['./resource-versioning.component.scss'],

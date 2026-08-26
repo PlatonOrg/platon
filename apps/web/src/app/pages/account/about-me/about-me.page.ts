@@ -16,7 +16,6 @@ import { Level, Topic, User, UserPrefs, UserRoles } from '@platon/core/common'
 import { MatIconModule } from '@angular/material/icon'
 
 @Component({
-  standalone: true,
   selector: 'app-account-about-me',
   templateUrl: './about-me.page.html',
   styleUrls: ['./about-me.page.scss'],
@@ -25,16 +24,13 @@ import { MatIconModule } from '@angular/material/icon'
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-
     MatCardModule,
     MatInputModule,
     MatSelectModule,
     MatFormFieldModule,
     MatIconModule,
-
     NzSelectModule,
     NzButtonModule,
-
     DialogModule,
     ProtectedComponent,
   ],
