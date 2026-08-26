@@ -11,7 +11,7 @@ import { ResourceTypePipe } from './resource-type.pipe'
 import { ExerciseResourceMetaPipe } from './resource-exercise.pipe'
 
 @NgModule({
-  exports: [
+  imports: [
     ResourceFindPipe,
     ResourceColorPipe,
     ResourceIconPipe,
@@ -23,7 +23,7 @@ import { ExerciseResourceMetaPipe } from './resource-exercise.pipe'
     ResourceStatusIconPipe,
     ExerciseResourceMetaPipe,
   ],
-  declarations: [
+  exports: [
     ResourceFindPipe,
     ResourceColorPipe,
     ResourceIconPipe,

@@ -35,7 +35,6 @@ type Model = {
 }
 
 @Component({
-  standalone: true,
   selector: 'course-activity-table',
   templateUrl: './activity-table.component.html',
   styleUrls: ['./activity-table.component.scss'],
@@ -50,16 +49,13 @@ type Model = {
   imports: [
     CommonModule,
     RouterModule,
-
     NzIconModule,
     NzTagModule,
     NzTableModule,
     NzButtonModule,
     NzToolTipModule,
     NzPopconfirmModule,
-
     CoursePipesModule,
-
     CourseActivitySettingsDrawerComponent,
   ],
 })

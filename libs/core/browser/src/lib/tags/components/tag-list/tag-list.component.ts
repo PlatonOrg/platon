@@ -15,7 +15,6 @@ type Tag = Topic | Level
 
 /*  TODO: use ui-tag-list component internally */
 @Component({
-  standalone: true,
   selector: 'tag-list',
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss'],

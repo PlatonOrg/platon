@@ -17,7 +17,6 @@ import { User } from '@platon/core/common'
 import { AuthIfDirective } from '../../directives'
 
 @Component({
-  standalone: true,
   selector: 'auth-protected',
   templateUrl: './protected.component.html',
   styleUrls: ['./protected.component.scss'],

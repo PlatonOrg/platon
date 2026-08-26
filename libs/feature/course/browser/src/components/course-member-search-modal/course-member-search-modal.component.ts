@@ -19,7 +19,6 @@ import { CourseMemberSearchBarComponent } from '../course-member-search-bar/cour
 import { CourseMember } from '@platon/feature/course/common'
 
 @Component({
-  standalone: true,
   selector: 'course-member-search-modal',
   templateUrl: './course-member-search-modal.component.html',
   styleUrls: ['./course-member-search-modal.component.scss'],

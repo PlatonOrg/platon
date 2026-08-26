@@ -5,7 +5,6 @@ import { ExerciseTheory } from '@platon/feature/compiler'
 import { UiFilePreviewComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'player-theory',
   templateUrl: './player-theory.component.html',
   styleUrl: './player-theory.component.scss',

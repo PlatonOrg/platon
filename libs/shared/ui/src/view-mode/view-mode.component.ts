@@ -7,7 +7,6 @@ import { Subscription } from 'rxjs'
 import { ViewModes, viewModeIcons, viewModes } from './view-mode'
 
 @Component({
-  standalone: true,
   selector: 'ui-view-mode',
   templateUrl: './view-mode.component.html',
   styleUrls: ['./view-mode.component.scss'],

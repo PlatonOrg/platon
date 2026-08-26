@@ -24,7 +24,6 @@ import { CoursePresenter } from '../course.presenter'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 
 @Component({
-  standalone: true,
   selector: 'app-course-members',
   templateUrl: './members.page.html',
   styleUrls: ['./members.page.scss'],
@@ -32,14 +31,11 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
   imports: [
     CommonModule,
     FormsModule,
-
     MatCardModule,
-
     NzIconModule,
     NzButtonModule,
     NzToolTipModule,
     NzSelectModule,
-
     CoursePipesModule,
     UserSearchModalComponent,
     CourseMemberTableComponent,

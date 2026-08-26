@@ -27,7 +27,6 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component'
 type Item = User | UserGroup
 
 @Component({
-  standalone: true,
   selector: 'user-search-bar',
   templateUrl: './user-search-bar.component.html',
   styleUrls: ['./user-search-bar.component.scss'],

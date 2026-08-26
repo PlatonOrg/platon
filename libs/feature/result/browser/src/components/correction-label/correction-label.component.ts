@@ -25,19 +25,16 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { FormGroup } from '@angular/forms'
 
 @Component({
-  standalone: true,
   selector: 'correction-label',
   templateUrl: 'correction-label.component.html',
   styleUrls: ['./correction-label.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     NzFormModule,
     NzButtonModule,
     NzListModule,
     NzInputModule,
-
     DialogModule,
     FormsModule,
     ReactiveFormsModule,

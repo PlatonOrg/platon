@@ -2,12 +2,19 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, Outp
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { EvaluatorComponentDefinition, EvaluatorState } from './evaluator'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { NzRateModule } from 'ng-zorro-antd/rate'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { FormsModule } from '@angular/forms'
+import { MatCardModule } from '@angular/material/card'
 
 @Component({
   selector: 'wc-evaluator',
   templateUrl: 'evaluator.component.html',
   styleUrls: ['evaluator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, CssPipeModule, NzIconModule, NzRateModule, FormsModule, MatCardModule],
 })
 @WebComponent(EvaluatorComponentDefinition)
 export class EvaluatorComponent implements WebComponentHooks<EvaluatorState> {

@@ -19,7 +19,6 @@ import { TagService } from '@platon/core/browser'
 import { NzModalService } from 'ng-zorro-antd/modal'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-informations',
   templateUrl: './informations.page.html',
   styleUrls: ['./informations.page.scss'],
@@ -27,12 +26,10 @@ import { NzModalService } from 'ng-zorro-antd/modal'
   imports: [
     CommonModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatButtonModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzSpinModule,
     NzFormModule,
     NzButtonModule,

@@ -12,7 +12,7 @@ import {
   Output,
 } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
-import { DialogService, NzTableColumn, UserAvatarComponent, UserGroupDrawerComponent } from '@platon/core/browser'
+import { DialogService, NzTableColumn, UserAvatarComponent } from '@platon/core/browser'
 import { CourseMember, CourseMemberFilters } from '@platon/feature/course/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -29,7 +29,6 @@ type Value = string[] | undefined
 // type overtime = 'none' | 'quarter' | 'third' | 'half'
 
 @Component({
-  standalone: true,
   selector: 'tests-candidates-table',
   templateUrl: './tests-candidates-table.component.html',
   styleUrls: ['./tests-candidates-table.component.scss'],
@@ -43,17 +42,13 @@ type Value = string[] | undefined
   ],
   imports: [
     CommonModule,
-
     NzIconModule,
     NzTableModule,
     NzButtonModule,
     NzPopconfirmModule,
     FormsModule,
-
     UserAvatarComponent,
-    UserGroupDrawerComponent,
     CoursePipesModule,
-
     MatIconModule,
   ],
 })

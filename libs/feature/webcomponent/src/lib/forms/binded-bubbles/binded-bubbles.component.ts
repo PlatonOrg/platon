@@ -16,12 +16,17 @@ import {
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { BindedBubblesComponentDefinition, BindedBubblesState, BubbleItem, PairBubbleItem } from './binded-bubbles'
 import { WebComponentService } from '../../web-component.service'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { MatButtonModule } from '@angular/material/button'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-binded-bubbles',
   templateUrl: 'binded-bubbles.component.html',
   styleUrls: ['binded-bubbles.component.scss'],
   changeDetection: ChangeDetectionStrategy.Default,
+  imports: [BaseModule, CssPipeModule, MatButtonModule, NgeMarkdownModule],
 })
 @WebComponent(BindedBubblesComponentDefinition)
 export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesState>, OnInit, AfterViewInit {

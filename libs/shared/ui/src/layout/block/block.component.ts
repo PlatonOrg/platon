@@ -8,7 +8,6 @@ import { UiError403Component, UiError404Component, UiError500Component } from '.
 import { LayoutState } from '../layout'
 
 @Component({
-  standalone: true,
   selector: 'ui-layout-block',
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.scss'],
@@ -16,9 +15,7 @@ import { LayoutState } from '../layout'
   imports: [
     CommonModule,
     RouterModule,
-
     NzSkeletonModule,
-
     UiError403Component,
     UiError404Component,
     UiError500Component,

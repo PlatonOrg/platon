@@ -29,13 +29,11 @@ import { Activity } from '@platon/feature/course/common'
 import { ThemeService } from '@platon/core/browser'
 import { ResourceService } from '@platon/feature/resource/browser'
 import { CoursePipesModule } from '../../pipes'
-import { CourseItemComponent } from '../course-item/course-item.component'
 import { CsvDownloadButtonComponent } from '../csv-download-button/csv-download-button.component'
 import { CourseActivitySettingsDrawerComponent } from '../activity-settings-drawer/activity-settings-drawer.component'
 import { CourseService } from '../../api/course.service'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-card',
   templateUrl: './activity-card.component.html',
   styleUrls: ['./activity-card.component.scss'],
@@ -43,10 +41,8 @@ import { CourseService } from '../../api/course.service'
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
     MatCardModule,
-
     NzGridModule,
     NzIconModule,
     NzBadgeModule,
@@ -55,11 +51,8 @@ import { CourseService } from '../../api/course.service'
     NzProgressModule,
     NzToolTipModule,
     NzDropDownModule,
-
     CoursePipesModule,
-    CourseItemComponent,
     CsvDownloadButtonComponent,
-
     CourseActivitySettingsDrawerComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

@@ -40,7 +40,6 @@ type Tag = {
 }
 
 @Component({
-  standalone: true,
   selector: 'resource-item',
   templateUrl: './resource-item.component.html',
   styleUrls: ['./resource-item.component.scss'],
@@ -48,20 +47,16 @@ type Tag = {
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
-
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
     NzToolTipModule,
     NzPopoverModule,
     NzSpinModule,
-
     NgeUiListModule,
     NgeMarkdownModule,
     UiModalIFrameComponent,
-
     ResourcePipesModule,
   ],
 })

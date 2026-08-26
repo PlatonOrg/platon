@@ -12,6 +12,8 @@ import {
 import { CssPipe } from '../../shared/pipes/css.pipe'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { TextSelectComponentDefinition, TextSelectState } from './text-select'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 // https://javascript.info/selection-range
 
@@ -23,6 +25,7 @@ const HIGHLIGHT = 'highlight-state'
   templateUrl: 'text-select.component.html',
   styleUrls: ['text-select.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, CssPipeModule],
 })
 @WebComponent(TextSelectComponentDefinition)
 export class TextSelectComponent implements WebComponentHooks<TextSelectState>, OnInit {

@@ -18,12 +18,29 @@ import { FileUploadService, SubmissionReadDTO, UploadResponse } from './file-upl
 import { Subscription } from 'rxjs'
 import { HttpEvent, HttpEventType, HttpErrorResponse } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { MatButtonModule } from '@angular/material/button'
+import { MatIconModule } from '@angular/material/icon'
+import { MatProgressBarModule } from '@angular/material/progress-bar'
 
 @Component({
   selector: 'wc-file-upload',
   templateUrl: 'file-upload.component.html',
   styleUrls: ['file-upload.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BaseModule,
+    CssPipeModule,
+
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+  ],
 })
 @WebComponent(FileUploadComponentDefinition)
 export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks<FileUploadState> {

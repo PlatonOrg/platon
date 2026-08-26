@@ -20,7 +20,6 @@ import { LayoutState } from '../layout'
 import { UiLayoutTabDirective } from './directives/tab-title.directive'
 
 @Component({
-  standalone: true,
   selector: 'ui-layout-tabs',
   templateUrl: './tabs.component.html',
   styleUrls: ['./tabs.component.scss'],
@@ -28,10 +27,8 @@ import { UiLayoutTabDirective } from './directives/tab-title.directive'
   imports: [
     CommonModule,
     RouterModule,
-
     NzTabsModule,
     NzSkeletonModule,
-
     UiError403Component,
     UiError404Component,
     UiError500Component,

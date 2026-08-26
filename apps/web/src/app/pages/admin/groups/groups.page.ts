@@ -18,7 +18,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-admin-groups',
   templateUrl: './groups.page.html',
   styleUrls: ['./groups.page.scss'],
@@ -26,13 +25,11 @@ import { firstValueFrom } from 'rxjs'
   imports: [
     CommonModule,
     FormsModule,
-
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
     NzToolTipModule,
     NzPopconfirmModule,
-
     UserSearchBarComponent,
     UserGroupTableComponent,
     UserGroupDrawerComponent,

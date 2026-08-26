@@ -2,12 +2,15 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Editor, OpenRequest } from '@cisstech/nge-ide/core'
 import { Subscription } from 'rxjs'
+import { CommonModule } from '@angular/common'
+import { UiFilePreviewComponent } from '@platon/shared/ui'
 
 @Component({
   selector: 'app-pdf-editor',
   templateUrl: './pdf-editor.component.html',
   styleUrls: ['./pdf-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, UiFilePreviewComponent],
 })
 export class PdfEditorComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []

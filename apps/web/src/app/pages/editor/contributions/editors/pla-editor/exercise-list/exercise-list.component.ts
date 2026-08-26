@@ -9,7 +9,6 @@ import { ExerciseCardComponent } from '../exercise-card/exercise-card.component'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 
 @Component({
-  standalone: true,
   selector: 'app-exercise-list',
   templateUrl: './exercise-list.component.html',
   styleUrls: ['./exercise-list.component.scss'],

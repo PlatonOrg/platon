@@ -12,12 +12,16 @@ import {
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { TimerComponentDefinition, TimerState } from './timer'
 import { WebComponentService } from '../../web-component.service'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
+import { TimePipeModule } from '../../shared/pipes/time.pipe'
 
 @Component({
   selector: 'wc-timer',
   templateUrl: 'timer.component.html',
   styleUrls: ['timer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMarkdownModule, TimePipeModule],
 })
 @WebComponent(TimerComponentDefinition)
 export class TimerComponent implements AfterViewInit, OnDestroy, WebComponentHooks<TimerState> {

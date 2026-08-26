@@ -12,7 +12,6 @@ import { NotificationService } from '../../api/notification.service'
 import { NotificationListComponent } from '../notification-list/notification-list.component'
 
 @Component({
-  standalone: true,
   selector: 'notif-drawer',
   templateUrl: './notification-drawer.component.html',
   styleUrls: ['./notification-drawer.component.scss'],

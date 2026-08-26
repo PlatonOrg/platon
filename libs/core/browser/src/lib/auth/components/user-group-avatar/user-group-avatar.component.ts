@@ -8,7 +8,6 @@ import { UserGroup } from '@platon/core/common'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 
 @Component({
-  standalone: true,
   selector: 'user-group-avatar',
   templateUrl: './user-group-avatar.component.html',
   styleUrls: ['./user-group-avatar.component.scss'],

@@ -12,11 +12,9 @@ import { ListResponse } from '@platon/core/common'
 import { DialogService } from '@platon/core/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-course-duplicate',
   templateUrl: './duplicate.component.html',
   styleUrls: ['./duplicate.component.scss'],
-
   imports: [CommonModule, UiSearchBarComponent, NzButtonModule, NzPopconfirmModule, NzSpinModule, CourseItemComponent],
 })
 export class CourseDuplicateComponent {

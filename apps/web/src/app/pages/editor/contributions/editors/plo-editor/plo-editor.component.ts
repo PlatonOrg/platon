@@ -1,16 +1,37 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Editor, FileService, NotificationService, OpenRequest } from '@cisstech/nge-ide/core'
-import { EXERCISE_CONFIG_FILE, EXERCISE_MAIN_FILE, PleInput, Variables } from '@platon/feature/compiler'
+import { EXERCISE_CONFIG_FILE, PleInput, Variables } from '@platon/feature/compiler'
 import { Subscription } from 'rxjs'
 import { EditorPresenter } from '../../../editor.presenter'
 import { ActivatedRoute } from '@angular/router'
 import { InputFileService } from '@platon/feature/resource/browser'
+import { CommonModule } from '@angular/common'
 
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzListModule } from 'ng-zorro-antd/list'
+
+import { FormsModule } from '@angular/forms'
+import { MatIconModule } from '@angular/material/icon'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzSwitchModule } from 'ng-zorro-antd/switch'
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { PleInputEditorModule } from '../ple-input/ple-input.module'
 @Component({
   selector: 'app-plo-editor',
   templateUrl: './plo-editor.component.html',
   styleUrls: ['./plo-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    NzButtonModule,
+    NzListModule,
+    FormsModule,
+    MatIconModule,
+    NzIconModule,
+    NzSwitchModule,
+    NzToolTipModule,
+    PleInputEditorModule,
+  ],
 })
 export class PloEditorComponent implements OnInit, OnDestroy {
   private readonly fileService = inject(FileService)

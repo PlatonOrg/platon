@@ -9,7 +9,6 @@ export type UpdateFoldersModalData = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-editor-update-folders-modal',
   templateUrl: './update-folders-modal.component.html',
   styleUrls: ['./update-folders-modal.component.scss'],

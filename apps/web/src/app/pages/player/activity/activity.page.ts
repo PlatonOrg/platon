@@ -10,7 +10,6 @@ import { Player } from '@platon/feature/player/common'
 import { UiErrorComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'app-player-activity',
   templateUrl: './activity.page.html',
   styleUrls: ['./activity.page.scss'],

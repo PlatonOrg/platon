@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   ElementRef,
   EventEmitter,
   Injector,
@@ -14,12 +15,16 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import { MathLiveComponentDefinition, MathLiveState } from './math-live'
 import { ComputeEngine } from '@cortex-js/compute-engine'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { IconGrPipeModule } from '@cisstech/nge/pipes'
 
 @Component({
   selector: 'wc-math-live',
   templateUrl: 'math-live.component.html',
   styleUrls: ['math-live.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, IconGrPipeModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 @WebComponent(MathLiveComponentDefinition)
 export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveState> {

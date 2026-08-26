@@ -24,7 +24,6 @@ import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { LTIService } from '../../api/lti.service'
 
 @Component({
-  standalone: true,
   selector: 'lms-search-bar',
   templateUrl: './lms-search-bar.component.html',
   styleUrls: ['./lms-search-bar.component.scss'],

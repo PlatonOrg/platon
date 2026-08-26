@@ -12,12 +12,17 @@ import {
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { CheckboxGroupComponentDefinition, CheckboxGroupState, CheckboxItem } from './checkbox-group'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { MatCheckboxModule } from '@angular/material/checkbox'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-checkbox-group',
   templateUrl: 'checkbox-group.component.html',
   styleUrls: ['checkbox-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, CssPipeModule, MatCheckboxModule, NgeMarkdownModule],
 })
 @WebComponent(CheckboxGroupComponentDefinition)
 export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroupState>, OnInit, AfterViewInit {

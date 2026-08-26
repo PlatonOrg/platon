@@ -14,7 +14,6 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { firstValueFrom, Subscription } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-tests',
   templateUrl: './tests.page.html',
   styleUrls: ['./tests.page.scss'],

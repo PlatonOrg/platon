@@ -20,7 +20,6 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 
 @Component({
-  standalone: true,
   selector: 'ui-tag-input',
   template: `
     @if (multiline) {
@@ -77,7 +76,6 @@ export class TagInputComponent implements AfterViewInit {
 }
 
 @Component({
-  standalone: true,
   selector: 'ui-tag-list',
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss'],

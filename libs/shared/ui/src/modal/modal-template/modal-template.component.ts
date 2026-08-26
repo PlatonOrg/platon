@@ -11,16 +11,14 @@ import {
   TemplateRef,
   booleanAttribute,
 } from '@angular/core'
-import { SafePipe } from '@cisstech/nge/pipes'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 
 @Component({
-  standalone: true,
   selector: 'ui-modal-template',
   templateUrl: './modal-template.component.html',
   styleUrls: ['./modal-template.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzModalModule, SafePipe],
+  imports: [CommonModule, NzModalModule],
 })
 export class UiModalTemplateComponent {
   @Input() title?: string

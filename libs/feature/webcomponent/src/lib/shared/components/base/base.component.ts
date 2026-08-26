@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
 import { WebComponentDefinition } from '../../../web-component'
 import { WebComponentService } from '../../../web-component.service'
 import { v4 as uuidv4 } from 'uuid'
@@ -8,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
   selector: 'wc-base',
   templateUrl: './base.component.html',
   styleUrls: ['./base.component.scss'],
+  imports: [CommonModule, NgeMonacoModule],
 })
 export class BaseComponent implements OnInit, OnDestroy {
   @ViewChild('container') container!: ElementRef

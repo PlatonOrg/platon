@@ -39,14 +39,12 @@ interface Item {
 }
 
 @Component({
-  standalone: true,
   selector: 'notif-list',
   templateUrl: './notification-list.component.html',
   styleUrls: ['./notification-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     NzIconModule,
     NzListModule,
     NzEmptyModule,
@@ -54,9 +52,7 @@ interface Item {
     NzButtonModule,
     NzPopoverModule,
     NgeUiIconModule,
-
     DialogModule,
-
     RendererTypePipe,
   ],
 })

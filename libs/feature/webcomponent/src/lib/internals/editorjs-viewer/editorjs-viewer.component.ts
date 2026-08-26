@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit } from '@angular/core'
 import { OutputData } from '@editorjs/editorjs'
+import { EditorjsViewerComponent as UiEditorjsViewerComponent } from '@platon/shared/ui'
 
 @Component({
   selector: 'wc-editorjs-viewer',
   templateUrl: './editorjs-viewer.component.html',
   styleUrls: ['./editorjs-viewer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [UiEditorjsViewerComponent],
 })
 export class EditorjsViewerComponent implements OnInit {
   protected data?: OutputData

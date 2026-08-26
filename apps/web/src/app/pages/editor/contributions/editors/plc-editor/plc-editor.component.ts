@@ -5,12 +5,34 @@ import { PleInput } from '@platon/feature/compiler'
 import { Subscription } from 'rxjs'
 import { ActivatedRoute } from '@angular/router'
 import { InputFileService } from '@platon/feature/resource/browser'
+import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
+import { DragDropModule } from '@angular/cdk/drag-drop'
+import { MatIconModule } from '@angular/material/icon'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzSwitchModule } from 'ng-zorro-antd/switch'
+import { PleInputEditorModule } from '../ple-input/ple-input.module'
 
 @Component({
   selector: 'app-plc-editor',
   templateUrl: './plc-editor.component.html',
   styleUrls: ['./plc-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    DragDropModule,
+    MatIconModule,
+    NzListModule,
+    NzButtonModule,
+    NzIconModule,
+    NzToolTipModule,
+    NzSwitchModule,
+    PleInputEditorModule,
+  ],
 })
 export class PlcEditorComponent implements OnInit, OnDestroy {
   private readonly fileService = inject(FileService)

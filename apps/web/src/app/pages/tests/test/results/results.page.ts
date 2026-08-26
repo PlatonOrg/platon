@@ -26,7 +26,6 @@ import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
 import { CsvDownloadButtonComponent } from '@platon/feature/course/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-test-results',
   templateUrl: './results.page.html',
   styleUrls: ['./results.page.scss'],
@@ -35,7 +34,6 @@ import { CsvDownloadButtonComponent } from '@platon/feature/course/browser'
     CommonModule,
     FormsModule,
     RouterModule,
-
     NzPageHeaderModule,
     NzBreadCrumbModule,
     NzGridModule,
@@ -43,16 +41,12 @@ import { CsvDownloadButtonComponent } from '@platon/feature/course/browser'
     NzSliderModule,
     NzInputNumberModule,
     NzDatePickerModule,
-
     MatIconModule,
     MatCardModule,
-
     DurationPipe,
-
     ResultByExercisesComponent,
     ResultByMembersComponent,
     ResultBoxPlotComponent,
-
     UiStatisticCardComponent,
     CsvDownloadButtonComponent,
   ],

@@ -11,7 +11,6 @@ import { CourseActivityCardComponent } from '../activity-card/activity-card.comp
 import { CdkDragDrop, CdkDragMove, CdkDragStart, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-grid',
   templateUrl: './activity-grid.component.html',
   styleUrls: ['./activity-grid.component.scss'],

@@ -13,7 +13,6 @@ import { Activity, CourseGroup, CourseMember, Restriction } from '@platon/featur
 
 @Component({
   selector: 'course-restriction-manager',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,

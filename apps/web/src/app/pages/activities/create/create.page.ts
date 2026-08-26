@@ -29,13 +29,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag'
 
 import { AuthService, DialogModule, DialogService, TagService } from '@platon/core/browser'
 import { Level, Topic, User, UserRoles, uniquifyBy } from '@platon/core/common'
-import {
-  CourseMemberSelectComponent,
-  CourseSearchBarComponent,
-  CourseSectionSearchBarComponent,
-  CourseService,
-  CourseGroupSelectComponent,
-} from '@platon/feature/course/browser'
+import { CourseSectionSearchBarComponent, CourseService } from '@platon/feature/course/browser'
 import {
   Course,
   CourseGroup,
@@ -49,7 +43,6 @@ import {
   ResourceTypeFilterIndicator,
   ResourceStatusFilterIndicator,
   ResourceOrderingFilterIndicator,
-  ResourceDependOnFilterIndicator,
   ExerciseConfigurableFilterIndicator,
   TopicFilterIndicator,
   LevelFilterIndicator,
@@ -88,7 +81,6 @@ const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
 export type ActivityFunction = 'training' | 'graded' | 'challenge'
 
 @Component({
-  standalone: true,
   selector: 'app-activity-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
@@ -101,10 +93,8 @@ export type ActivityFunction = 'training' | 'graded' | 'challenge'
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatIconModule,
     MatButtonModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSelectModule,
@@ -112,22 +102,15 @@ export type ActivityFunction = 'training' | 'graded' | 'challenge'
     NzDatePickerModule,
     NzPageHeaderModule,
     NzTagModule,
-
     DialogModule,
     UiStepDirective,
     UiStepperComponent,
     UiSearchBarComponent,
-
-    CourseSearchBarComponent,
-    CourseMemberSelectComponent,
     CourseSectionSearchBarComponent,
-
     ResourceFiltersComponent,
     ActivityListComponent,
     UiFilterIndicatorComponent,
     ViewportIntersectionDirective,
-
-    CourseGroupSelectComponent,
     GradedActivitySettingsComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

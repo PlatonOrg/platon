@@ -32,8 +32,6 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
-import { SafePipe } from '@cisstech/nge/pipes'
-
 import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
 import { ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
 
@@ -43,19 +41,13 @@ import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
 import { AnswerStatePipesModule } from '@platon/feature/result/browser'
 import { AnswerStates } from '@platon/feature/result/common'
 import { WebComponentService } from '@platon/feature/webcomponent'
-import {
-  FilePreviewSupportedPipe,
-  IsUUIDPipe,
-  UiModalDrawerComponent,
-  UiModalTemplateComponent,
-} from '@platon/shared/ui'
+import { IsUUIDPipe } from '@platon/shared/ui'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
-import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
 import { PlayerErrorComponent } from '../player-error/player-error.component'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
 
@@ -86,7 +78,6 @@ type FullscreenElement = HTMLElement & {
 }
 
 @Component({
-  standalone: true,
   selector: 'player-review',
   templateUrl: './player-review.component.html',
   styleUrls: ['./player-review.component.scss'],
@@ -99,24 +90,17 @@ type FullscreenElement = HTMLElement & {
     MatMenuModule,
     MatButtonModule,
     MatDividerModule,
-
     NzSpinModule,
     NzAlertModule,
     NzToolTipModule,
     NzSkeletonModule,
     NzStatisticModule,
     NzTabsModule,
-
-    SafePipe,
     IsUUIDPipe,
     DialogModule,
     UserAvatarComponent,
     NgeMarkdownModule,
-    UiModalDrawerComponent,
-    UiModalTemplateComponent,
-    PlayerTheoryComponent,
     PlayerErrorComponent,
-    FilePreviewSupportedPipe,
     AnswerStatePipesModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

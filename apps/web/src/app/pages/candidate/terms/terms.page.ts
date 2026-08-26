@@ -14,7 +14,6 @@ import { Activity } from '@platon/feature/course/common'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 
 @Component({
-  standalone: true,
   selector: 'app-terms',
   templateUrl: './terms.page.html',
   styleUrls: ['./terms.page.scss'],

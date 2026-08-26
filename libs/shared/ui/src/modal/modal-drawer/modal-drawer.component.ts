@@ -16,7 +16,6 @@ import {
 import { NzDrawerModule, NzDrawerPlacement, NzDrawerSize } from 'ng-zorro-antd/drawer'
 
 @Component({
-  standalone: true,
   selector: 'ui-modal-drawer',
   templateUrl: './modal-drawer.component.html',
   styleUrls: ['./modal-drawer.component.scss'],

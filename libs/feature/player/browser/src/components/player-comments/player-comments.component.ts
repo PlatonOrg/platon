@@ -23,7 +23,6 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 
 @Component({
-  standalone: true,
   selector: 'player-comments',
   templateUrl: './player-comments.component.html',
   styleUrls: ['./player-comments.component.scss'],
@@ -35,7 +34,6 @@ import { MatButtonModule } from '@angular/material/button'
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
-
     NzFormModule,
     NzListModule,
     NzInputModule,
@@ -43,7 +41,6 @@ import { MatButtonModule } from '@angular/material/button'
     NzCommentModule,
     NzEmptyModule,
     NzSpinModule,
-
     DialogModule,
     UserAvatarComponent,
   ],

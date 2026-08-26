@@ -9,7 +9,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { Subscription, firstValueFrom } from 'rxjs'
 import { ResourcePresenter } from '../../resource.presenter'
 import { NzModalService } from 'ng-zorro-antd/modal'
-import { UiFilePreviewComponent } from '@platon/shared/ui'
 import { ResourceFileService, ResourceService, ResourceVersionComponent } from '@platon/feature/resource/browser'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { NzInputModule } from 'ng-zorro-antd/input'
@@ -18,7 +17,6 @@ import { FileVersion, FileVersions, LATEST, Resource } from '@platon/feature/res
 import { RouterModule } from '@angular/router'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-template',
   templateUrl: './template.page.html',
   styleUrls: ['./template.page.scss'],
@@ -26,7 +24,6 @@ import { RouterModule } from '@angular/router'
   imports: [
     CommonModule,
     RouterModule,
-    UiFilePreviewComponent,
     NzSelectModule,
     NzPopconfirmModule,
     FormsModule,

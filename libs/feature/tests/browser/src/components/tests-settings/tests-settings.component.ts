@@ -32,13 +32,11 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { MatInputModule } from '@angular/material/input'
-import { UiError403Component } from '@platon/shared/ui'
 import { DialogService } from '@platon/core/browser'
 import { Router } from '@angular/router'
 import { ActivitySettings } from '@platon/feature/compiler'
 
 @Component({
-  standalone: true,
   selector: 'tests-settings',
   templateUrl: './tests-settings.component.html',
   styleUrls: ['./tests-settings.component.scss'],
@@ -46,15 +44,12 @@ import { ActivitySettings } from '@platon/feature/compiler'
   imports: [
     CommonModule,
     FormsModule,
-    UiError403Component,
     ReactiveFormsModule,
-
     MatIconModule,
     MatCardModule,
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzDatePickerModule,
     NzModalModule,
     NzFormModule,

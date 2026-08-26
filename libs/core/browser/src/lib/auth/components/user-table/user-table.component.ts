@@ -28,7 +28,6 @@ import { AuthService } from '../../api/auth.service'
 type Value = string[] | undefined
 
 @Component({
-  standalone: true,
   selector: 'user-table',
   templateUrl: './user-table.component.html',
   styleUrls: ['./user-table.component.scss'],

@@ -13,7 +13,6 @@ import { Variables } from '@platon/feature/compiler'
 import { getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-player-preview',
   templateUrl: './preview.page.html',
   styleUrls: ['./preview.page.scss'],

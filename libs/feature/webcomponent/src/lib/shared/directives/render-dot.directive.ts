@@ -52,7 +52,8 @@ export class RenderDotDirective implements OnInit, OnChanges {
 }
 
 @NgModule({
+  declarations: [],
+  imports: [RenderDotDirective],
   exports: [RenderDotDirective],
-  declarations: [RenderDotDirective],
 })
 export class RenderDotModule {}

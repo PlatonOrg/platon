@@ -11,7 +11,6 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 
 @Component({
-  standalone: true,
   selector: 'course-sharing',
   templateUrl: './course-sharing.component.html',
   styleUrls: ['./course-sharing.component.scss'],
@@ -20,13 +19,11 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
     CommonModule,
     CommonModule,
     FormsModule,
-
     NzIconModule,
     NzDropDownModule,
     NzSelectModule,
     NzButtonModule,
     NzToolTipModule,
-
     NzModalModule,
   ],
 })

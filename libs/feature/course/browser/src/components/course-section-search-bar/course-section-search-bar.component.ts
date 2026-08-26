@@ -10,7 +10,6 @@ import { Course, CourseSection } from '@platon/feature/course/common'
 import { CourseService } from '../../api/course.service'
 
 @Component({
-  standalone: true,
   selector: 'course-section-search-bar',
   templateUrl: './course-section-search-bar.component.html',
   styleUrls: ['./course-section-search-bar.component.scss'],

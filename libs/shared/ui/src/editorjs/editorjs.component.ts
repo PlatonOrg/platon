@@ -34,7 +34,6 @@ import { TextExtension } from './extensions/text.extension'
     TableExtension,
     TextExtension,
     ImageExtension,
-
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => EditorJsComponent),

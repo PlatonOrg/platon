@@ -60,7 +60,6 @@ import { ActivityRestrictionsValidatorService } from '../../services/activity-re
 import { ActivitySettings } from '@platon/feature/compiler'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-settings',
   templateUrl: './activity-settings.component.html',
   styleUrls: ['./activity-settings.component.scss'],

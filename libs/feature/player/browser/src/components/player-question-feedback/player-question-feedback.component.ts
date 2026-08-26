@@ -12,7 +12,6 @@ import { firstValueFrom } from 'rxjs'
 
 @Component({
   selector: 'player-question-feedback',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, MatIconModule, NzButtonModule, NzInputModule, NzSelectModule],
   templateUrl: './player-question-feedback.component.html',

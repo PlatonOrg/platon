@@ -5,7 +5,6 @@ import { AnswerStateColors, AnswerStateLabels, AnswerStates } from '@platon/feat
 import { EChartsOption } from 'echarts'
 
 @Component({
-  standalone: true,
   selector: 'result-answer-distribution',
   templateUrl: 'answer-distribution.component.html',
   styleUrls: ['./answer-distribution.component.scss'],

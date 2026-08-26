@@ -6,7 +6,6 @@ import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
 import { UserRoles } from '@platon/core/common'
 
 @Component({
-  standalone: true,
   imports: [RouterModule, FeatureWebComponentModule],
   selector: 'app-root',
   templateUrl: './app.page.html',

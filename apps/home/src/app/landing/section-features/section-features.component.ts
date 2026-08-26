@@ -10,7 +10,6 @@ type Feature = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-landing-section-features',
   templateUrl: './section-features.component.html',
   styleUrls: ['./section-features.component.scss'],

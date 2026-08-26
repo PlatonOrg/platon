@@ -11,7 +11,6 @@ import { SidebarComponent } from '../../widgets/sidebar/sidebar.component'
 import { ToolbarComponent } from '../../widgets/toolbar/toolbar.component'
 import { TutorialSelectorModalComponent } from '@platon/feature/tuto/browser'
 @Component({
-  standalone: true,
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
@@ -19,7 +18,6 @@ import { TutorialSelectorModalComponent } from '@platon/feature/tuto/browser'
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
     MatButtonModule,
     MatToolbarModule,

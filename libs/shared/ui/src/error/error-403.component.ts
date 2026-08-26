@@ -4,7 +4,6 @@ import { ActivatedRoute, RouterModule } from '@angular/router'
 import { NzResultModule } from 'ng-zorro-antd/result'
 
 @Component({
-  standalone: true,
   selector: 'ui-error-403',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NzResultModule, CommonModule, RouterModule],

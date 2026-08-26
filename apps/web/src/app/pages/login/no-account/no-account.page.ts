@@ -5,7 +5,6 @@ import { RouterModule } from '@angular/router'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 
 @Component({
-  standalone: true,
   selector: 'app-no-account',
   templateUrl: './no-account.page.html',
   styleUrls: ['./no-account.page.scss'],

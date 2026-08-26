@@ -20,7 +20,6 @@ import { UiModalTemplateComponent } from '@platon/shared/ui'
 import { UserSearchBarComponent } from '../user-search-bar/user-search-bar.component'
 
 @Component({
-  standalone: true,
   selector: 'user-search-modal',
   templateUrl: './user-search-modal.component.html',
   styleUrls: ['./user-search-modal.component.scss'],

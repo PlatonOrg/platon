@@ -19,7 +19,6 @@ import { UiModalDrawerComponent } from '@platon/shared/ui'
 import { CourseActivitySettingsComponent } from '../activity-settings/activity-settings.component'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-settings-drawer',
   templateUrl: './activity-settings-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

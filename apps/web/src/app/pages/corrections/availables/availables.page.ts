@@ -7,7 +7,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-corrections-availables',
   templateUrl: './availables.page.html',
   styleUrls: ['./availables.page.scss'],

@@ -14,7 +14,6 @@ import { ResourceService } from '../../api/resource.service'
 import { UiQRCodeComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'resource-sharing',
   templateUrl: './resource-sharing.component.html',
   styleUrls: ['./resource-sharing.component.scss'],
@@ -24,12 +23,10 @@ import { UiQRCodeComponent } from '@platon/shared/ui'
     CommonModule,
     FormsModule,
     UiQRCodeComponent,
-
     NzIconModule,
     NzDropDownModule,
     NzSelectModule,
     NzButtonModule,
-
     NzModalModule,
   ],
 })

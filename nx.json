@@ -71,5 +71,6 @@
       "style": "scss"
     }
   },
-  "useInferencePlugins": false
+  "useInferencePlugins": false,
+  "analytics": false
 }

@@ -13,7 +13,6 @@ import { ResourceVersionComponent, ResourceVersioningComponent } from '@platon/f
 import { FileVersion, FileVersions, Resource } from '@platon/feature/resource/common'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-browse-header',
   templateUrl: 'header.component.html',
   styleUrls: ['header.component.scss'],

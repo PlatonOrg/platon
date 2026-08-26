@@ -22,7 +22,6 @@ import { MatCardModule } from '@angular/material/card'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
 
-import { SafePipe } from '@cisstech/nge/pipes'
 import {
   ActivityPlayer,
   ExercisePlayer,
@@ -35,7 +34,7 @@ import {
   PlatonLog,
 } from '@platon/feature/player/common'
 
-import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
+import { DialogModule, DialogService } from '@platon/core/browser'
 import {
   ActivityClosedNotification,
   ActivityOpenStates,
@@ -64,7 +63,6 @@ import { UI_MODAL_IFRAME_CLOSE } from '@platon/shared/ui'
 import { SixcodeComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'player-activity',
   templateUrl: './player-activity.component.html',
   styleUrls: ['./player-activity.component.scss'],
@@ -72,25 +70,18 @@ import { SixcodeComponent } from '@platon/shared/ui'
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
     MatCardModule,
     MatButtonModule,
-
     NzAlertModule,
     NzBadgeModule,
     NzPopoverModule,
     NzStatisticModule,
     NzButtonModule,
     NzProgressModule,
-
-    SafePipe,
     DialogModule,
-    UserAvatarComponent,
     NgeMarkdownModule,
-
     SixcodeComponent,
-
     PlayerResultsComponent,
     PlayerExerciseComponent,
     PlayerSettingsComponent,

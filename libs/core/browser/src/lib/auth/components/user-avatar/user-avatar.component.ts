@@ -22,7 +22,6 @@ import { UserService } from '../../api/user.service'
 import { UserGroupAvatarComponent } from '../user-group-avatar/user-group-avatar.component'
 
 @Component({
-  standalone: true,
   selector: 'user-avatar',
   templateUrl: './user-avatar.component.html',
   styleUrl: './user-avatar.component.scss',
@@ -38,21 +37,21 @@ export class UserAvatarComponent {
   readonly lastNameFirst = input(false, { transform: booleanAttribute })
   readonly userIdOrName = input<string>()
 
-  readonly userInput = input<User | undefined>(undefined, { alias: 'user' })
+  readonly user = input<User | undefined>(undefined)
   private readonly loadedUser = signal<User | undefined>(undefined)
-  protected readonly user = computed(() => this.userInput() ?? this.loadedUser())
+  protected readonly effectiveUser = computed(() => this.user() ?? this.loadedUser())
   readonly group = input<UserGroup | undefined>(undefined)
 
-  protected readonly isAdmin = computed(() => this.user()?.role === UserRoles.admin)
+  protected readonly isAdmin = computed(() => this.effectiveUser()?.role === UserRoles.admin)
   protected readonly avatarUrl = computed(() => {
-    const u = this.user()
+    const u = this.effectiveUser()
     return u ? `https://robohash.org/${u.username}.png` : undefined
   })
 
   @Output() readonly openGroupDetails = new EventEmitter<UserGroup>()
 
   get displayName(): string {
-    const u = this.user()
+    const u = this.effectiveUser()
     if (u?.firstName && u?.lastName) {
       return this.lastNameFirst() ? `${u.lastName} ${u.firstName}` : `${u.firstName} ${u.lastName}`
     }

@@ -80,7 +80,6 @@ interface QueryParams {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-resources',
   templateUrl: 'resources.page.html',
   styleUrls: ['resources.page.scss'],
@@ -88,10 +87,8 @@ interface QueryParams {
   imports: [
     CommonModule,
     RouterModule,
-
     MatCardModule,
     MatIconModule,
-
     NzSpinModule,
     NzIconModule,
     NzButtonModule,
@@ -99,14 +96,11 @@ interface QueryParams {
     NzDividerModule,
     NzToolTipModule,
     NzDrawerModule,
-
     ViewportIntersectionDirective,
-
     ResourcePipesModule,
     ResourceItemComponent,
     ResourceListComponent,
     ResourceFiltersComponent,
-
     CircleTreeComponent,
     UiSearchBarComponent,
     UiFilterIndicatorComponent,

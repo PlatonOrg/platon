@@ -20,7 +20,6 @@ import { Lms } from '@platon/feature/lti/common'
 type Value = string[] | undefined
 
 @Component({
-  standalone: true,
   selector: 'cas-table',
   templateUrl: './cas-table.component.html',
   styleUrls: ['./cas-table.component.scss'],

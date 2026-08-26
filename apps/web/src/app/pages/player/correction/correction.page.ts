@@ -12,7 +12,6 @@ import { CourseService } from '@platon/feature/course/browser'
 import { Activity, FindCourse } from '@platon/feature/course/common'
 
 @Component({
-  standalone: true,
   selector: 'app-player-correction',
   templateUrl: './correction.page.html',
   styleUrls: ['./correction.page.scss'],

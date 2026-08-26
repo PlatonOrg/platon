@@ -49,7 +49,6 @@ import { AnnouncementService } from '../../api/announcement.service'
 
 @Component({
   selector: 'lib-announcement-create-drawer',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,

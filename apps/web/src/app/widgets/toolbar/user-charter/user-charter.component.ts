@@ -10,7 +10,6 @@ import { inject } from '@angular/core'
 
 @Component({
   selector: 'app-user-charter',
-  standalone: true,
   imports: [CommonModule, NzModalModule],
   templateUrl: './user-charter.component.html',
   styleUrl: './user-charter.component.scss',

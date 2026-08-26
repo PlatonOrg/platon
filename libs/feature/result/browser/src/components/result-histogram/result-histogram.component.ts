@@ -5,7 +5,6 @@ import { EChartsOption } from 'echarts'
 import type { ECharts } from 'echarts'
 
 @Component({
-  standalone: true,
   selector: 'result-histogram',
   templateUrl: './result-histogram.component.html',
   styleUrls: ['./result-histogram.component.scss'],

@@ -14,7 +14,6 @@ import { CreateResourceInvitation, ResourceInvitation, ResourceMember } from '@p
 import { ResourcePresenter } from '../../resource.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-members',
   templateUrl: './members.page.html',
   styleUrls: ['./members.page.scss'],

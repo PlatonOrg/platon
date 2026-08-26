@@ -8,6 +8,9 @@ import {
 } from './chart-viewer-radar'
 import { EChartsOption } from 'echarts'
 import { deepCopy } from '@cisstech/nge/utils'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgxEchartsModule } from 'ngx-echarts'
 // import * as d3 from 'd3';
 
 @Component({
@@ -15,6 +18,7 @@ import { deepCopy } from '@cisstech/nge/utils'
   templateUrl: './chart-viewer-radar.component.html',
   styleUrls: ['chart-viewer-radar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMonacoModule, NgxEchartsModule],
 })
 @WebComponent(ChartViewerRadarComponentDefinition)
 export class ChartViewerRadarComponent implements WebComponentHooks<ChartViewerRadarState> {

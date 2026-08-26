@@ -21,7 +21,6 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component'
 type Value = string[] | undefined
 
 @Component({
-  standalone: true,
   selector: 'user-group-table',
   templateUrl: './user-group-table.component.html',
   styleUrls: ['./user-group-table.component.scss'],

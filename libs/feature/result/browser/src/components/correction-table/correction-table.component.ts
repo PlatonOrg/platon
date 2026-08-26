@@ -18,7 +18,6 @@ type Item = ActivityCorrectionSummary & {
 }
 
 @Component({
-  standalone: true,
   selector: 'correction-table',
   templateUrl: './correction-table.component.html',
   styleUrls: ['./correction-table.component.scss'],

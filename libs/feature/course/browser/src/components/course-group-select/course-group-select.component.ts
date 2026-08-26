@@ -5,12 +5,10 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/f
 
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select'
 
-import { UserAvatarComponent } from '@platon/core/browser'
 import { CourseGroup } from '@platon/feature/course/common'
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 
 @Component({
-  standalone: true,
   selector: 'course-group-select',
   templateUrl: './course-group-select.component.html',
   styleUrls: ['./course-group-select.component.scss'],
@@ -22,7 +20,7 @@ import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
       multi: true,
     },
   ],
-  imports: [CommonModule, FormsModule, NzTreeSelectModule, UserAvatarComponent],
+  imports: [CommonModule, FormsModule, NzTreeSelectModule],
 })
 export class CourseGroupSelectComponent implements ControlValueAccessor {
   protected disabled = false

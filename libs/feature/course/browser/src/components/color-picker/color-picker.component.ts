@@ -21,7 +21,6 @@ type ColorSelection = {
 }
 
 @Component({
-  standalone: true,
   selector: 'course-color-picker',
   templateUrl: './color-picker.component.html',
   styleUrls: ['./color-picker.component.scss'],

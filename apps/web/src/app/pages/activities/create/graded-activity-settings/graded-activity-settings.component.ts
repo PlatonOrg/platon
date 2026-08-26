@@ -11,7 +11,6 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { ActivitySettings } from '@platon/feature/compiler'
 
 @Component({
-  standalone: true,
   selector: 'app-graded-activity-settings',
   templateUrl: './graded-activity-settings.component.html',
   styleUrls: ['./graded-activity-settings.component.scss'],

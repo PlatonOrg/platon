@@ -29,7 +29,6 @@ export const positiveRedColor = (value: number) => {
 }
 
 @Component({
-  standalone: true,
   selector: 'ui-statistic-card',
   templateUrl: 'statistic-card.component.html',
   styleUrls: ['./statistic-card.component.scss'],

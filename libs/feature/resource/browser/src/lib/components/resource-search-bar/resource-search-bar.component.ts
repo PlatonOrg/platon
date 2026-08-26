@@ -16,7 +16,6 @@ import { ResourceService } from '../../api/resource.service'
 import { ResourceItemComponent } from '../resource-item/resource-item.component'
 
 @Component({
-  standalone: true,
   selector: 'resource-search-bar',
   templateUrl: './resource-search-bar.component.html',
   styleUrls: ['./resource-search-bar.component.scss'],

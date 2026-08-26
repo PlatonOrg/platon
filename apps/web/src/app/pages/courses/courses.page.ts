@@ -37,7 +37,6 @@ import { CourseManagementTutorialService } from '@platon/feature/tuto/browser'
 type ActiveTab = 'current' | 'archived'
 
 @Component({
-  standalone: true,
   selector: 'app-courses',
   templateUrl: './courses.page.html',
   styleUrls: ['./courses.page.scss'],
@@ -45,19 +44,15 @@ type ActiveTab = 'current' | 'archived'
   imports: [
     CommonModule,
     RouterModule,
-
     MatCardModule,
     MatIconModule,
-
     NzSpinModule,
     NzIconModule,
     NzButtonModule,
     NzTabsModule,
-
     CoursePipesModule,
     CourseListComponent,
     CourseFiltersComponent,
-
     UiSearchBarComponent,
     UiFilterIndicatorComponent,
   ],

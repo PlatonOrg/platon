@@ -15,11 +15,13 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { ImageClickerComponentDefinition, ImageClickerState, ClickDisplayMode, ClickPoint } from './image-clicker'
 import { deepCopy } from '@cisstech/nge/utils'
+import { BaseModule } from '../../shared/components/base/base.module'
 
 @Component({
   selector: 'wc-image-clicker',
   templateUrl: 'image-clicker.component.html',
   styleUrls: ['image-clicker.component.scss'],
+  imports: [BaseModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(ImageClickerComponentDefinition)

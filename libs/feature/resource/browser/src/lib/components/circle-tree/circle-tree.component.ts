@@ -17,7 +17,6 @@ import { NzTreeModule } from 'ng-zorro-antd/tree'
 import { NzTreeFlatDataSource, NzTreeFlattener, NzTreeViewModule } from 'ng-zorro-antd/tree-view'
 
 @Component({
-  standalone: true,
   selector: 'resource-circle-tree',
   templateUrl: './circle-tree.component.html',
   styleUrls: ['./circle-tree.component.scss'],

@@ -16,7 +16,6 @@ import { firstValueFrom } from 'rxjs'
 import { LTIService } from '../../api/lti.service'
 
 @Component({
-  standalone: true,
   selector: 'lms-create-drawer',
   templateUrl: './lms-create-drawer.component.html',
   styleUrls: ['./lms-create-drawer.component.scss'],
@@ -25,16 +24,12 @@ import { LTIService } from '../../api/lti.service'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatFormFieldModule,
-
     NzIconModule,
     NzButtonModule,
     NzToolTipModule,
-
     UiModalDrawerComponent,
-
     DialogModule,
   ],
 })

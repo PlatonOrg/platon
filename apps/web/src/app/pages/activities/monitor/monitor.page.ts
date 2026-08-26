@@ -5,11 +5,7 @@ import { CommonModule, Location } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule } from '@angular/router'
 import { DialogModule, DialogService } from '@platon/core/browser'
-import {
-  ResultBoxPlotComponent,
-  ResultByMembersComponent,
-  ResultHistogramComponent,
-} from '@platon/feature/result/browser'
+import { ResultByMembersComponent } from '@platon/feature/result/browser'
 import {
   CourseMonitorPresenceService,
   ActivityModerationComponent,
@@ -20,7 +16,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 
 @Component({
-  standalone: true,
   selector: 'app-course-activity-monitor',
   templateUrl: 'monitor.page.html',
   styleUrls: ['monitor.page.scss'],
@@ -30,15 +25,11 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
     CommonModule,
     FormsModule,
     RouterModule,
-
     DialogModule,
     MatCardModule,
     NzButtonModule,
     NzIconModule,
-
     ResultByMembersComponent,
-    ResultHistogramComponent,
-    ResultBoxPlotComponent,
     ActivityModerationComponent,
   ],
 })

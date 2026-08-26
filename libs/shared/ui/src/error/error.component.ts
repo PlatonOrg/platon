@@ -10,7 +10,6 @@ import { RouterModule } from '@angular/router'
 import { UiError512Component } from './error-512.component'
 
 @Component({
-  standalone: true,
   selector: 'ui-error',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

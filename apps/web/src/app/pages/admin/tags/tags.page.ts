@@ -7,7 +7,6 @@ import { NzModalService } from 'ng-zorro-antd/modal'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-admin-tags',
   templateUrl: './tags.page.html',
   styleUrls: ['./tags.page.scss'],

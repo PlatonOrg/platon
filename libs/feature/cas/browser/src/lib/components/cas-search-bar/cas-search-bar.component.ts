@@ -14,7 +14,6 @@ import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { CasService } from '../../api/cas.service'
 
 @Component({
-  standalone: true,
   selector: 'cas-search-bar',
   templateUrl: './cas-search-bar.component.html',
   styleUrls: ['./cas-search-bar.component.scss'],

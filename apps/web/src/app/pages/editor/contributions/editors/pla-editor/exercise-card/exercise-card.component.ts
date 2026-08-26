@@ -38,7 +38,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 export const getPreviewOverridesStorageKey = (sessionId: string) => `preview.overrides.${sessionId}`
 
 @Component({
-  standalone: true,
   selector: 'app-exercise-card',
   templateUrl: './exercise-card.component.html',
   styleUrls: ['./exercise-card.component.scss'],
@@ -46,20 +45,16 @@ export const getPreviewOverridesStorageKey = (sessionId: string) => `preview.ove
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
-
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
     NzToolTipModule,
     NzPopoverModule,
     NzSpinModule,
-
     NgeUiListModule,
     NgeMarkdownModule,
     UiModalIFrameComponent,
-
     ResourcePipesModule,
   ],
 })

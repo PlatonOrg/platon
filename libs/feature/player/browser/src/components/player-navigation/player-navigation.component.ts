@@ -9,26 +9,21 @@ import { MatIconModule } from '@angular/material/icon'
 
 import { ActivityPlayer, PlayerExercise } from '@platon/feature/player/common'
 
-import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
+import { DialogModule, DialogService } from '@platon/core/browser'
 import { AnswerStatePipesModule } from '@platon/feature/result/browser'
 
 @Component({
-  standalone: true,
   selector: 'player-navigation',
   templateUrl: './player-navigation.component.html',
   styleUrls: ['./player-navigation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     MatIconModule,
     MatCardModule,
     MatButtonModule,
-
     NzTimelineModule,
-
     DialogModule,
-    UserAvatarComponent,
     AnswerStatePipesModule,
   ],
 })
