@@ -52,7 +52,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
-import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
+import { PLAYER_EDITOR_PREVIEW, PLAYER_HIDE_EXERCISE_META } from '../../models/player.model'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
 import { PlayerQuestionFeedbackComponent } from '../player-question-feedback/player-question-feedback.component'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
@@ -357,6 +357,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
 
   get editorPreview(): boolean {
     return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
+  get hideMeta(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_HIDE_EXERCISE_META)
   }
 
   protected isFeedbackContentAnObject(feedback: ExerciseFeedback): boolean {

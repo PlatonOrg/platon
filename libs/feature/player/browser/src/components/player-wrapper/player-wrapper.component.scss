@@ -20,6 +20,12 @@ player-exercise {
   box-sizing: border-box;
 }
 
+
+player-activity {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
 @media (max-width: 920px) {
   player-exercise {
     margin: 0 1rem !important;

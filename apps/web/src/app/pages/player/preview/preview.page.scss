@@ -5,6 +5,22 @@
   height: 100%;
 }
 
+// Uniquement quand `autoResize=true` (bloc "exercise" d'une leçon, voir preview.page.ts) : la page
+// ne doit plus se caler sur 100vh avec son propre scroll interne (player-wrapper), sinon on mesure
+// en boucle "la taille actuelle de l'iframe" au lieu de la taille naturelle du contenu — ce qui fait
+// rétrécir l'iframe en cascade (voir ngAfterViewInit dans preview.page.ts). On laisse le contenu
+// s'étirer naturellement à sa hauteur réelle, et c'est l'embarqueur (iframe redimensionnée) qui porte
+// le seul scroll. La modale générique ui-modal-iframe (préexistante, n'écoute pas ce signal) n'a pas
+// ce paramètre et garde donc le plein écran à scroll interne habituel.
+:host.embedded {
+  height: auto;
+
+  ::ng-deep player-wrapper {
+    height: auto;
+    overflow-y: visible;
+  }
+}
+
 ui-error {
   color: red;
   position: absolute;
