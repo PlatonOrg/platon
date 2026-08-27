@@ -64,3 +64,16 @@ main {
   justify-content: center;
   height: 100%;
 }
+
+.exercise-picker-hint {
+  color: var(--brand-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.exercise-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 1rem;
+}

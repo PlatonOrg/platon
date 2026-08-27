@@ -4,9 +4,11 @@ import {
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
   OnInit,
+  TemplateRef,
   forwardRef,
   inject,
   signal,
+  viewChild,
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
@@ -14,12 +16,17 @@ import { firstValueFrom } from 'rxjs'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { DialogService } from '@platon/core/browser'
 import { Activity, Course, LessonContent } from '@platon/feature/course/common'
 import { CourseService } from '@platon/feature/course/browser'
+import { ResourceSearchBarComponent, ResourceService } from '@platon/feature/resource/browser'
+import { Resource } from '@platon/feature/resource/common'
 import {
+  EditorJsExercisePickResult,
+  EditorJsExercisePicker,
   EditorJsFileUploader,
   EditorJsFileUploadResponse,
   emptyEditorJsData,
@@ -41,15 +48,25 @@ import {
     NzIconModule,
     NzSpinModule,
     UiEditorJsModule,
+    ResourceSearchBarComponent,
   ],
-  providers: [{ provide: EditorJsFileUploader, useExisting: forwardRef(() => LessonEditorPage) }],
+  providers: [
+    { provide: EditorJsFileUploader, useExisting: forwardRef(() => LessonEditorPage) },
+    { provide: EditorJsExercisePicker, useExisting: forwardRef(() => LessonEditorPage) },
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class LessonEditorPage implements OnInit, EditorJsFileUploader {
+export class LessonEditorPage implements OnInit, EditorJsFileUploader, EditorJsExercisePicker {
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly courseService = inject(CourseService)
+  private readonly resourceService = inject(ResourceService)
   private readonly dialogService = inject(DialogService)
+  private readonly nzModalService = inject(NzModalService)
+
+  protected readonly exercisePickerTemplate = viewChild.required<TemplateRef<unknown>>('exercisePickerTemplate')
+  private exercisePickerModalRef?: NzModalRef
+  protected exercisePickerSelection?: Resource
 
   protected readonly loading = signal(true)
   protected readonly saving = signal(false)
@@ -121,5 +138,38 @@ export class LessonEditorPage implements OnInit, EditorJsFileUploader {
 
   async uploadByUrl(url: string): Promise<EditorJsFileUploadResponse> {
     return { success: 1, file: { url } }
+  }
+
+  async pick(): Promise<EditorJsExercisePickResult | null> {
+    this.exercisePickerSelection = undefined
+    this.exercisePickerModalRef = this.nzModalService.create({
+      nzTitle: 'Choisir un exercice',
+      nzContent: this.exercisePickerTemplate(),
+      nzFooter: null,
+    })
+
+    const result = await firstValueFrom(this.exercisePickerModalRef.afterClose)
+    return (result as EditorJsExercisePickResult | undefined) ?? null
+  }
+
+  protected async confirmExercisePick(): Promise<void> {
+    const resource = this.exercisePickerSelection
+    if (!resource) {
+      return
+    }
+
+    if (!resource.publicPreview) {
+      await firstValueFrom(this.resourceService.update(resource.id, { publicPreview: true }))
+    }
+
+    this.exercisePickerModalRef?.close({
+      resourceId: resource.id,
+      resourceVersion: 'latest',
+      title: resource.name,
+    } as EditorJsExercisePickResult)
+  }
+
+  protected cancelExercisePick(): void {
+    this.exercisePickerModalRef?.close(null)
   }
 }
