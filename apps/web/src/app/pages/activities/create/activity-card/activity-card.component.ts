@@ -43,6 +43,6 @@ export class ActivityCardComponent {
   }
 
   get previewUrl(): string {
-    return `/player/preview/${this.item().id}`
+    return `/player/preview/${this.item().id}?version=latest`
   }
 }
