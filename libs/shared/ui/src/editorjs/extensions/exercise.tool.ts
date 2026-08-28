@@ -131,7 +131,11 @@ export class ExerciseTool implements BlockTool {
     this.detachResizeListener()
 
     this.resizeListener = (event: MessageEvent) => {
-      if (event.source === iframe.contentWindow && isExercisePreviewResizeMessage(event.data)) {
+      if (
+        event.origin === window.location.origin &&
+        event.source === iframe.contentWindow &&
+        isExercisePreviewResizeMessage(event.data)
+      ) {
         iframe.style.height = `${event.data.height}px`
       }
     }

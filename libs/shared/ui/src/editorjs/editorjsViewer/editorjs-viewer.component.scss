@@ -188,6 +188,23 @@
     text-align: center;
   }
 
+  .exercise {
+    margin: 0 0 1rem;
+  }
+
+  .exercise-title {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--brand-text-primary);
+  }
+
+  .exercise-frame {
+    display: block;
+    width: 100%;
+    height: 500px;
+    border: none;
+  }
+
   .ce-callout {
     display: flex;
     align-items: flex-start;

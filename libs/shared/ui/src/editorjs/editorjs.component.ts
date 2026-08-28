@@ -15,6 +15,7 @@ import { CalloutExtension } from './extensions/callout.extension'
 import { CodeExtension } from './extensions/code.extension'
 import { DelimiterExtension } from './extensions/delimiter.extension'
 import { EmbedExtension } from './extensions/embed.extension'
+import { ExerciseExtension } from './extensions/exercise.extension'
 import { ImageExtension } from './extensions/image.extension'
 import { ListExtension } from './extensions/list.extension'
 import { RawExtension } from './extensions/raw.extension'
@@ -40,6 +41,7 @@ import { VideoExtension } from './extensions/video.extension'
     TextExtension,
     ImageExtension,
     VideoExtension,
+    ExerciseExtension,
 
     {
       provide: NG_VALUE_ACCESSOR,

@@ -130,4 +130,31 @@ ui-editorjs {
       }
     }
 
+    .ce-exercise__button,
+    .ce-exercise__change-button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--brand-border-color);
+      border-radius: 6px;
+      background: var(--brand-background-components);
+      color: var(--brand-text-primary);
+      cursor: pointer;
+    }
+
+    .ce-exercise__change-button {
+      margin-top: 0.5rem;
+    }
+
+    .ce-exercise__title {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--brand-text-primary);
+    }
+
+    .ce-exercise__frame {
+      width: 100%;
+      height: 500px;
+      border: 1px solid var(--brand-border-color);
+      border-radius: 8px;
+    }
+
 }
