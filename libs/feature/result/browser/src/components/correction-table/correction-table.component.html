@@ -1,5 +1,6 @@
 <nz-collapse>
-  <nz-collapse-panel *ngFor="let course of groupedCourses" [nzHeader]="course.courseName" [nzActive]="false">
+  @for (course of groupedCourses; track course) {
+  <nz-collapse-panel [nzHeader]="course.courseName" [nzActive]="false">
     <nz-table #nzActivityTable [nzData]="course.activities" [nzBordered]="false" [nzShowPagination]="false">
       <thead>
         <tr>
@@ -9,8 +10,8 @@
         </tr>
       </thead>
       <tbody>
+        @for (activity of course.activities; track activity) {
         <tr
-          *ngFor="let activity of course.activities"
           class="pointer"
           [routerLink]="['/player/correction', activity.courseId]"
           [queryParams]="{ activityId: activity.activityId }"
@@ -33,9 +34,11 @@
             </button>
           </td>
         </tr>
+        }
       </tbody>
     </nz-table>
   </nz-collapse-panel>
+  }
 </nz-collapse>
 
 <ng-template #empty>

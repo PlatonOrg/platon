@@ -51,6 +51,9 @@ import { CssPipeModule } from '../../shared/pipes/css.pipe'
 })
 @WebComponent(CrosswordComponentDefinition)
 export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   @Input() state!: CrosswordState
   @Output() stateChange = new EventEmitter<CrosswordState>()
 
@@ -72,7 +75,9 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
 
   private readonly webComponentService!: WebComponentService
 
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService)!
   }
 

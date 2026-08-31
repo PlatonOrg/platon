@@ -1,5 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
-import { CommonModule } from '@angular/common'
+
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { NzSegmentedModule, NzSegmentedOption } from 'ng-zorro-antd/segmented'
@@ -11,7 +11,7 @@ import { ViewModes, viewModeIcons, viewModes } from './view-mode'
   templateUrl: './view-mode.component.html',
   styleUrls: ['./view-mode.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzSegmentedModule],
+  imports: [FormsModule, NzSegmentedModule],
 })
 export class UiViewModeComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []

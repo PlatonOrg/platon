@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { Subscription } from 'rxjs'
 
@@ -19,7 +18,6 @@ import { ResourcePresenter } from '../../resource.presenter'
   styleUrls: ['./members.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatCardModule,
     ResourceMemberTableComponent,
     ResourceInvitationFormComponent,

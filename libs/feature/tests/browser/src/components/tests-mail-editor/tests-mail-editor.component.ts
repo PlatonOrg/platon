@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { emptyEditorJsData, UiEditorJsModule } from '@platon/shared/ui'
 import { NzModalModule } from 'ng-zorro-antd/modal'
@@ -20,7 +19,6 @@ import { EditorjsViewerComponent } from '@platon/shared/ui'
   styleUrls: ['./tests-mail-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     NzModalModule,
     UiEditorJsModule,
@@ -33,6 +31,13 @@ import { EditorjsViewerComponent } from '@platon/shared/ui'
   ],
 })
 export class TestsMailEditorComponent implements OnInit, OnDestroy {
+  dialogRef = inject<MatDialogRef<TestsMailEditorComponent>>(MatDialogRef)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly testsService = inject(TestsService)
+  data = inject<{
+    courseId: string
+  }>(MAT_DIALOG_DATA)
+
   mail: OutputData = emptyEditorJsData()
   subject = ''
 
@@ -65,13 +70,6 @@ export class TestsMailEditorComponent implements OnInit, OnDestroy {
     { name: 'date', description: 'Date actuelle au format local (jour/mois/année)' },
     { name: 'time', description: 'Heure actuelle au format local (heure:minute:seconde)' },
   ]
-
-  constructor(
-    public dialogRef: MatDialogRef<TestsMailEditorComponent>,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly testsService: TestsService,
-    @Inject(MAT_DIALOG_DATA) public data: { courseId: string }
-  ) {}
 
   async ngOnInit(): Promise<void> {
     const test = await firstValueFrom(this.testsService.getTestByCourseId(this.data.courseId))

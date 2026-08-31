@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input, inject } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { combineLatest, Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -25,9 +25,12 @@ import { CasService } from '../../api/cas.service'
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent],
 })
 export class CasSearchBarComponent implements ControlValueAccessor {
+  private readonly casService = inject(CasService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() multi = true
   @Input() excludes: string[] = []
   @Input() disabled = false
@@ -57,8 +60,6 @@ export class CasSearchBarComponent implements ControlValueAccessor {
   }
 
   selection: Cas[] = []
-
-  constructor(private readonly casService: CasService, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   // ControlValueAccessor methods
 

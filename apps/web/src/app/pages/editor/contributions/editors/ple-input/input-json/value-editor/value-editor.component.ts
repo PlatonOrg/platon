@@ -3,7 +3,7 @@ import { ResourceLoaderService } from '@cisstech/nge/services'
 import { JsonEditorComponent, JsonEditorOptions, JsonEditorTreeNode } from 'ang-jsoneditor'
 import { firstValueFrom } from 'rxjs'
 import { BaseValueEditor } from '../../ple-input'
-import { CommonModule } from '@angular/common'
+
 import { NgJsonEditorModule } from 'ang-jsoneditor'
 
 @Component({
@@ -11,7 +11,7 @@ import { NgJsonEditorModule } from 'ang-jsoneditor'
   templateUrl: 'value-editor.component.html',
   styleUrls: ['value-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NgJsonEditorModule],
+  imports: [NgJsonEditorModule],
 })
 export class ValueEditorComponent extends BaseValueEditor<Record<string, unknown>> implements OnInit {
   private readonly resourceLoader = inject(ResourceLoaderService)

@@ -7,6 +7,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  inject,
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 
@@ -60,6 +61,8 @@ import { UserAvatarComponent } from '@platon/core/browser'
   ],
 })
 export class ResourceFiltersComponent implements OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
 
   protected form = this.createForm()
@@ -73,8 +76,6 @@ export class ResourceFiltersComponent implements OnDestroy {
   @Input() circles: CircleTree[] = []
   @Input() filters: ResourceFilters = {}
   @Output() triggered = new EventEmitter<ResourceFilters>()
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())

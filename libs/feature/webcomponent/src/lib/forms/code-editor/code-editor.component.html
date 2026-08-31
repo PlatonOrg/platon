@@ -4,8 +4,8 @@
     <span class="footer-item" aria-label="Raccourcies" nz-tooltip="Raccourcies" (click)="quickCommand()">
       <span class="footer-item-icon codicon codicon-light-bulb"></span>
     </span>
+    @if (initialCode) {
     <span
-      *ngIf="initialCode"
       class="footer-item"
       aria-label="Remettre le code initial"
       nz-tooltip="Remettre le code initial"
@@ -13,6 +13,7 @@
     >
       <span class="footer-item-icon codicon codicon-sync"></span>
     </span>
+    }
     <span class="spacer"></span>
     <span
       class="footer-item"

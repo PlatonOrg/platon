@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, OnInit, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { CodeViewerComponentDefinition, CodeViewerState } from './code-viewer'
 import { NgeMonacoModule } from '@cisstech/nge/monaco'
@@ -15,11 +15,11 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 })
 @WebComponent(CodeViewerComponentDefinition)
 export class CodeViewerComponent implements WebComponentHooks<CodeViewerState>, OnInit {
+  readonly injector = inject(Injector)
+
   @Input() state!: CodeViewerState
 
   show: Set<number> = new Set()
-
-  constructor(readonly injector: Injector) {}
 
   data = '```'
   lineNumbers: number[] = []

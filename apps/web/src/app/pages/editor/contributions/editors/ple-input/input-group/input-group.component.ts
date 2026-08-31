@@ -3,12 +3,12 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { PleInput } from '@platon/feature/compiler'
 import { PleInputMode } from '../ple-input'
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop'
-import { CommonModule } from '@angular/common'
+
 import { MatIconModule } from '@angular/material/icon'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzListModule } from 'ng-zorro-antd/list'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { PleInputComponent } from '../ple-input.component'
 
 @Component({
@@ -17,13 +17,12 @@ import { PleInputComponent } from '../ple-input.component'
   styleUrls: ['input-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     DragDropModule,
     MatIconModule,
     NzButtonModule,
     NzIconModule,
     NzListModule,
-    NzToolTipModule,
+    NzTooltipModule,
     PleInputComponent,
   ],
   providers: [

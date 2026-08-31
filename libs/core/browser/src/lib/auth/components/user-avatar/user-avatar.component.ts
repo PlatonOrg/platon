@@ -14,7 +14,7 @@ import {
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { User, UserGroup, UserRoles } from '@platon/core/common'
 import { firstValueFrom } from 'rxjs'
@@ -26,7 +26,7 @@ import { UserGroupAvatarComponent } from '../user-group-avatar/user-group-avatar
   templateUrl: './user-avatar.component.html',
   styleUrl: './user-avatar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NzIconModule, NzBadgeModule, NzAvatarModule, NzToolTipModule, UserGroupAvatarComponent],
+  imports: [NzIconModule, NzBadgeModule, NzAvatarModule, NzTooltipModule, UserGroupAvatarComponent],
 })
 export class UserAvatarComponent {
   private readonly authUserService = inject(UserService)

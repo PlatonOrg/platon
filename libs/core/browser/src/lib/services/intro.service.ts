@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 import introJs from 'intro.js'
 import { firstValueFrom } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class IntroService {
-  constructor(private readonly resourceLoader: ResourceLoaderService) {}
+  private readonly resourceLoader = inject(ResourceLoaderService)
 
   async create(options?: {
     element?: HTMLElement

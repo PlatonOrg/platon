@@ -13,7 +13,7 @@ import {
 import { MatIconModule } from '@angular/material/icon'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { v4 as uuidv4 } from 'uuid'
 
 import { ListItemTag, NgeUiListModule } from '@cisstech/nge/ui/list'
@@ -51,7 +51,7 @@ type Tag = {
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopoverModule,
     NzSpinModule,
     NgeUiListModule,
@@ -170,7 +170,7 @@ export class ResourceItemComponent implements OnChanges {
     try {
       const resource: Resource = await firstValueFrom(this.resourceService.duplicate(this.item.id))
       this.router.navigate(['/resources', resource.id]).catch(console.error)
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error("Une erreur s'est produite lors de la duplication de la ressource.")
     }
   }

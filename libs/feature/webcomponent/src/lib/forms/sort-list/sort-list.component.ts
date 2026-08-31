@@ -8,6 +8,7 @@ import {
   Input,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { SortListComponentDefinition, SortListItem, SortListState } from './sort-list'
@@ -28,10 +29,11 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 })
 @WebComponent(SortListComponentDefinition)
 export class SortListComponent implements WebComponentHooks<SortListState>, OnInit {
+  readonly injector = inject(Injector)
+  private readonly cdr = inject(ChangeDetectorRef)
+
   @Input() state!: SortListState
   @Output() stateChange = new EventEmitter<SortListState>()
-
-  constructor(readonly injector: Injector, private readonly cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.state.isFilled = false

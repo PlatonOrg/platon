@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { CoursePresenter } from '../../../courses/course/course.presenter'
 import { Subscription } from 'rxjs'
 import { Router, RouterModule } from '@angular/router'
@@ -12,7 +12,7 @@ import { CsvImportComponent, CsvImportData } from '@platon/shared/ui'
   templateUrl: './csv-import.page.html',
   styleUrls: ['./csv-import.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, CsvImportComponent, DialogModule],
+  imports: [RouterModule, CsvImportComponent, DialogModule],
 })
 export class CsvImportPage implements OnInit, OnDestroy {
   private readonly presenter = inject(CoursePresenter)

@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
 
@@ -17,23 +16,21 @@ import { getPreviewOverridesStorageKey } from '@platon/feature/resource/browser'
   templateUrl: './preview.page.html',
   styleUrls: ['./preview.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzSpinModule, UiErrorComponent, PlayerWrapperComponent],
+  imports: [NzSpinModule, UiErrorComponent, PlayerWrapperComponent],
 })
 export class PlayerPreviewPage implements OnInit {
+  private readonly playerService = inject(PlayerService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly storageService = inject(StorageService)
+  private readonly authService = inject(AuthService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected player?: Player
   protected loading = true
   protected error?: unknown
 
   private sessionId?: string
   private isFromBuilder = false
-
-  constructor(
-    private readonly playerService: PlayerService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly storageService: StorageService,
-    private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     try {

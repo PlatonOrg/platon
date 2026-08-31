@@ -8,6 +8,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { TimerComponentDefinition, TimerState } from './timer'
@@ -25,6 +26,8 @@ import { TimePipeModule } from '../../shared/pipes/time.pipe'
 })
 @WebComponent(TimerComponentDefinition)
 export class TimerComponent implements AfterViewInit, OnDestroy, WebComponentHooks<TimerState> {
+  readonly injector = inject(Injector)
+
   private readonly webComponentService!: WebComponentService
   private readonly cdr: ChangeDetectorRef
 
@@ -33,7 +36,10 @@ export class TimerComponent implements AfterViewInit, OnDestroy, WebComponentHoo
 
   private intervalId: NodeJS.Timeout | null = null
 
-  constructor(readonly injector: Injector, cdr: ChangeDetectorRef) {
+  constructor() {
+    const injector = this.injector
+    const cdr = inject(ChangeDetectorRef)
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
     this.cdr = cdr

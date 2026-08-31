@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -34,7 +33,6 @@ import { LATEST, Resource } from '@platon/feature/resource/common'
   styleUrls: ['./resource-versioning.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,

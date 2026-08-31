@@ -7,33 +7,35 @@
         <div class="activity-main">
           <div class="activity-header">
             <h3 class="activity-title">{{ activity.title }}</h3>
-            <ng-container *ngIf="activity | courseActivityState as activityState">
-              <span class="activity-state" [ngClass]="activity.state">
-                {{ activityState.label }}
-              </span>
-            </ng-container>
+            @if (activity | courseActivityState; as activityState) {
+            <span class="activity-state" [ngClass]="activity.state">
+              {{ activityState.label }}
+            </span>
+            }
           </div>
           <div class="activity-meta">
             <div><strong>Mis à jour le : </strong>{{ activity.updatedAt | date : 'short' }}</div>
             <div>
               <strong>Ouvre le : </strong>
-              <ng-container *ngIf="activity.openAt; else noOpen">
-                {{ activity.openAt | date : 'short' }}
-              </ng-container>
-              <ng-template #noOpen><span nz-icon nzType="stop" nzTheme="outline"></span></ng-template>
+              @if (activity.openAt) {
+              {{ activity.openAt | date : 'short' }}
+              } @else {
+              <span nz-icon nzType="stop" nzTheme="outline"></span>
+              }
             </div>
             <div>
               <strong>Ferme le : </strong>
-              <ng-container *ngIf="activity.closeAt; else noClose">
-                {{ activity.closeAt | date : 'short' }}
-              </ng-container>
-              <ng-template #noClose><span nz-icon nzType="stop" nzTheme="outline"></span> </ng-template>
+              @if (activity.closeAt) {
+              {{ activity.closeAt | date : 'short' }}
+              } @else {
+              <span nz-icon nzType="stop" nzTheme="outline"></span>
+              }
             </div>
           </div>
         </div>
         <div class="activity-actions">
+          @if (activity.permissions.answer) {
           <a
-            *ngIf="activity.permissions?.answer"
             nz-tooltip="Lancer"
             nz-button
             nzShape="round"
@@ -43,8 +45,8 @@
           >
             <i nz-icon nzType="play-circle" nzTheme="outline"></i>
           </a>
+          } @if (activity.permissions.viewStats) {
           <a
-            *ngIf="activity.permissions?.viewStats"
             nz-tooltip="Suivi des candidats en cours de passage"
             nz-button
             nzShape="round"
@@ -53,8 +55,8 @@
           >
             <i nz-icon nzType="eye" nzTheme="outline"></i>
           </a>
+          } @if (activity.permissions.viewResource) {
           <a
-            *ngIf="activity.permissions?.viewResource"
             nz-tooltip="Ouvrir la ressource associée"
             nz-button
             nzShape="round"
@@ -62,8 +64,8 @@
           >
             <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
           </a>
+          } @if (activity.permissions.update) {
           <a
-            *ngIf="activity.permissions?.update"
             nz-tooltip="Supprimer l'activité"
             nz-button
             nzDanger
@@ -75,6 +77,7 @@
           >
             <i nz-icon nzType="delete" nzTheme="outline"></i>
           </a>
+          }
         </div>
       </div>
       <div class="activity-stats">
@@ -97,10 +100,9 @@
           </div>
         </div>
       </div>
-      } @else {
+      } @else { @if (section) {
       <div
         class="add-activity"
-        *ngIf="section"
         [routerLink]="['/activities/create']"
         [queryParams]="{
           course: section.courseId,
@@ -111,7 +113,7 @@
         <span class="plus-icon">+</span>
         <p class="activity-text">Ajouter une activité</p>
       </div>
-      }
+      } }
     </div>
   </mat-card>
   <div class="right-column">
@@ -119,23 +121,22 @@
       <div class="card-title">Configuration</div>
       <div class="card-content">
         <div class="buttons-list">
-          <button *ngIf="canEdit" nz-button nz-tooltip="Modifier les termes et conditions" (click)="openTermsEditor()">
+          @if (canEdit) {
+          <button nz-button nz-tooltip="Modifier les termes et conditions" (click)="openTermsEditor()">
             <span class="material-symbols-outlined">contract_edit</span>
             <div>Termes et conditions</div>
           </button>
-          <button
-            *ngIf="canEdit"
-            nz-button
-            nz-tooltip="Envoyer le lien d'invitation par mail"
-            (click)="openMailEditor()"
-          >
+          } @if (canEdit) {
+          <button nz-button nz-tooltip="Envoyer le lien d'invitation par mail" (click)="openMailEditor()">
             <span class="material-symbols-outlined">mail</span>
             <div>Mail d'invitation</div>
           </button>
-          <button *ngIf="canEdit" nz-button nz-tooltip="Modifier les paramètres du test" (click)="settingsModal.open()">
+          } @if (canEdit) {
+          <button nz-button nz-tooltip="Modifier les paramètres du test" (click)="settingsModal.open()">
             <span class="material-symbols-outlined">settings</span>
             <div>Paramètres</div>
           </button>
+          }
         </div>
       </div>
     </mat-card>
@@ -143,16 +144,11 @@
       <div class="card-title">
         <div>Enseignants</div>
       </div>
-      <button
-        *ngIf="canEdit"
-        class="add-button"
-        (click)="addModal.open()"
-        nz-button
-        nzType="primary"
-        nz-tooltip="Ajouter"
-      >
+      @if (canEdit) {
+      <button class="add-button" (click)="addModal.open()" nz-button nzType="primary" nz-tooltip="Ajouter">
         <span nz-icon nzType="plus" nzTheme="outline"></span><span>Ajouter un enseignant</span>
       </button>
+      }
       <div class="card-content">
         <course-member-table
           [members]="teachers"

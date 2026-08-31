@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -10,6 +9,7 @@ import {
   Output,
   TemplateRef,
   booleanAttribute,
+  inject,
 } from '@angular/core'
 import { SafePipe } from '@cisstech/nge/pipes'
 import { NzModalModule } from 'ng-zorro-antd/modal'
@@ -21,9 +21,11 @@ export const UI_MODAL_IFRAME_CLOSE = 'UI_MODAL_IFRAME_CLOSE'
   templateUrl: './modal-iframe.component.html',
   styleUrls: ['./modal-iframe.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzModalModule, SafePipe],
+  imports: [NzModalModule, SafePipe],
 })
 export class UiModalIFrameComponent implements OnInit, OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected url?: string
   protected visible = false
 
@@ -37,8 +39,6 @@ export class UiModalIFrameComponent implements OnInit, OnDestroy {
   @Output() closed = new EventEmitter()
   @Output() canceled = new EventEmitter()
   @Output() accepted = new EventEmitter()
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     window.addEventListener('message', this.onMessage.bind(this))
@@ -56,7 +56,11 @@ export class UiModalIFrameComponent implements OnInit, OnDestroy {
 
   protected close(accepted = false): void {
     this.visible = false
-    accepted ? this.accepted.emit() : this.canceled.emit()
+    if (accepted) {
+      this.accepted.emit()
+    } else {
+      this.canceled.emit()
+    }
     this.closed.emit()
     this.changeDetectorRef.markForCheck()
   }

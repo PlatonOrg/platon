@@ -58,7 +58,7 @@ import { NzListModule } from 'ng-zorro-antd/list'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzStepsModule } from 'ng-zorro-antd/steps'
 import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
@@ -112,7 +112,7 @@ interface QueryParams {
     NzListModule,
     NzButtonModule,
     NzIconModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzBreadCrumbModule,
     NzSpinModule,
     NzTypographyModule,
@@ -136,6 +136,8 @@ interface QueryParams {
   ],
 })
 export class PlaEditorComponent implements OnInit, OnDestroy {
+  private http = inject(HttpClient)
+
   private readonly fb = inject(FormBuilder)
   private readonly router = inject(Router)
   private readonly fileService = inject(FileService)
@@ -147,8 +149,6 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   private readonly dialogService = inject(DialogService)
   private readonly editorService = inject(EditorService)
   private readonly resourceFileSystemProvider = inject(ResourceFileSystemProvider)
-
-  constructor(private http: HttpClient) {}
 
   protected readonly searchbar: SearchBar<string> = {
     placeholder: 'Essayez un nom, un topic, un niveau...',
@@ -461,7 +461,11 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   protected getToStep(step: number): void {
     this.step = step
     if (step === 2) {
-      this.exerciseGroups.length === 0 ? this.addGroup() : this.selectGroup(0)
+      if (this.exerciseGroups.length === 0) {
+        this.addGroup()
+      } else {
+        this.selectGroup(0)
+      }
       this.updateConnectedTo()
     }
   }
@@ -734,10 +738,6 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.exerciseGroups = Object.values(this.activity.exerciseGroups)
 
     this.changeDetectorRef.markForCheck()
-  }
-
-  protected trackByIndex(index: number) {
-    return index
   }
 
   protected trackByExerciseId(_: number, exercise: ActivityExercise) {

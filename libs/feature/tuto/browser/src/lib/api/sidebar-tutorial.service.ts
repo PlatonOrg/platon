@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 import { User, UserRoles, isTeacherRole } from '@platon/core/common'
 import { Router } from '@angular/router'
@@ -16,10 +16,12 @@ export interface NavigationChoice {
   providedIn: 'root',
 })
 export class SidebarTutorialService {
+  private shepherdService = inject(ShepherdService)
+  private router = inject(Router)
+  private message = inject(NzMessageService)
+
   private selectedNavigation: string | null = null
   private user: User | null = null
-
-  constructor(private shepherdService: ShepherdService, private router: Router, private message: NzMessageService) {}
 
   startSidebarTutorial(user: User): void {
     this.user = user

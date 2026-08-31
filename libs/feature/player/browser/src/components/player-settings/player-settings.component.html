@@ -15,43 +15,49 @@
         </div>
       </div>
 
-      <div class="info-item" *ngIf="player.settings?.duration">
+      @if (player.settings?.duration) {
+      <div class="info-item">
         <mat-icon class="info-icon">schedule</mat-icon>
         <div class="info-content">
           <span class="info-label">Durée autorisée</span>
           <span class="info-value">{{ player.settings!.duration! | duration : 'seconds' }}</span>
         </div>
       </div>
-
-      <div class="info-item" *ngIf="player.openAt">
+      } @if (player.openAt) {
+      <div class="info-item">
         <mat-icon class="info-icon">event</mat-icon>
         <div class="info-content">
           <span class="info-label">Ouverture</span>
           <span class="info-value">{{ player.openAt | date : 'dd/MM/yyyy à HH:mm' }}</span>
         </div>
       </div>
-
-      <div class="info-item" *ngIf="player.closeAt">
+      } @if (player.closeAt) {
+      <div class="info-item">
         <mat-icon class="info-icon">event_busy</mat-icon>
         <div class="info-content">
           <span class="info-label">Fermeture</span>
           <span class="info-value">{{ player.closeAt | date : 'dd/MM/yyyy à HH:mm' }}</span>
         </div>
       </div>
-
-      <div class="info-item" *ngIf="player.settings?.navigation?.mode">
+      } @if (player.settings?.navigation?.mode) {
+      <div class="info-item">
         <mat-icon class="info-icon">navigation</mat-icon>
         <div class="info-content">
           <span class="info-label">Mode de navigation</span>
           <span class="info-value">
-            <span [ngSwitch]="player.settings?.navigation?.mode">
-              <span *ngSwitchCase="'manual'">Progressive</span>
-              <span *ngSwitchCase="'composed'">Tous les exercices visibles</span>
-              <span *ngSwitchDefault>{{ player.settings?.navigation?.mode }}</span>
+            <span>
+              @switch (player.settings?.navigation?.mode) { @case ('manual') {
+              <span>Progressive</span>
+              } @case ('composed') {
+              <span>Tous les exercices visibles</span>
+              } @default {
+              <span>{{ player.settings?.navigation?.mode }}</span>
+              } }
             </span>
           </span>
         </div>
       </div>
+      }
 
       <div class="info-item">
         <mat-icon class="info-icon">refresh</mat-icon>
@@ -66,96 +72,100 @@
   </section>
 
   <!-- FONCTIONNALITÉS DISPONIBLES -->
-  <section class="settings-section" *ngIf="hasAvailableFeatures">
+  @if (hasAvailableFeatures) {
+  <section class="settings-section">
     <h3 class="section-title">
       <mat-icon>check_circle</mat-icon>
       Fonctionnalités disponibles
     </h3>
-
     <div class="features-grid">
-      <div class="feature-item feature-enabled" *ngIf="player.settings?.feedback?.validation">
+      @if (player.settings?.feedback?.validation) {
+      <div class="feature-item feature-enabled">
         <mat-icon class="feature-icon">feedback</mat-icon>
         <div class="feature-content">
           <span class="feature-label">Feedback immédiat</span>
           <span class="feature-description">Vous recevrez un retour après chaque réponse</span>
         </div>
       </div>
-
-      <div class="feature-item feature-enabled" *ngIf="player.settings?.feedback?.review">
+      } @if (player.settings?.feedback?.review) {
+      <div class="feature-item feature-enabled">
         <mat-icon class="feature-icon">assignment_turned_in</mat-icon>
         <div class="feature-content">
           <span class="feature-label">Résultats détaillés</span>
           <span class="feature-description">Résultats complets disponibles à la fin</span>
         </div>
       </div>
-
-      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.hints">
+      } @if (player.settings?.actions?.hints) {
+      <div class="feature-item feature-enabled">
         <mat-icon class="feature-icon">lightbulb</mat-icon>
         <div class="feature-content">
           <span class="feature-label">Indices disponibles</span>
           <span class="feature-description">Des aides peuvent être demandées</span>
         </div>
       </div>
-
-      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.theories">
+      } @if (player.settings?.actions?.theories) {
+      <div class="feature-item feature-enabled">
         <mat-icon class="feature-icon">menu_book</mat-icon>
         <div class="feature-content">
           <span class="feature-label">Accès aux théories</span>
           <span class="feature-description">Consulter les ressources théoriques</span>
         </div>
       </div>
-
-      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.solution">
+      } @if (player.settings?.actions?.solution) {
+      <div class="feature-item feature-enabled">
         <mat-icon class="feature-icon">key</mat-icon>
         <div class="feature-content">
           <span class="feature-label">Solutions consultables</span>
           <span class="feature-description">Accès aux corrections détaillées</span>
         </div>
       </div>
-
-      <div class="feature-item feature-enabled" *ngIf="player.settings?.actions?.reroll">
+      } @if (player.settings?.actions?.reroll) {
+      <div class="feature-item feature-enabled">
         <mat-icon class="feature-icon">shuffle</mat-icon>
         <div class="feature-content">
           <span class="feature-label">Changement de question</span>
           <span class="feature-description">Possibilité de générer une nouvelle question</span>
         </div>
       </div>
+      }
     </div>
   </section>
+  }
 
   <!-- RESTRICTIONS IMPORTANTES -->
-  <section class="settings-section" *ngIf="hasSecurityRestrictions">
+  @if (hasSecurityRestrictions) {
+  <section class="settings-section">
     <h3 class="section-title warning">
       <mat-icon>warning</mat-icon>
       Restrictions importantes
     </h3>
-
     <div class="restrictions-list">
-      <div class="restriction-item" *ngIf="player.settings?.security?.noCopyPaste">
+      @if (player.settings?.security?.noCopyPaste) {
+      <div class="restriction-item">
         <mat-icon class="restriction-icon">content_paste_off</mat-icon>
         <div class="restriction-content">
           <span class="restriction-label">Copier-coller bloqué</span>
           <span class="restriction-description">Les actions copier, coller et couper sont désactivées</span>
         </div>
       </div>
-
-      <div class="restriction-item" *ngIf="player.settings?.security?.terminateOnLoseFocus">
+      } @if (player.settings?.security?.terminateOnLoseFocus) {
+      <div class="restriction-item">
         <mat-icon class="restriction-icon">visibility_off</mat-icon>
         <div class="restriction-content">
           <span class="restriction-label">Surveillance du focus</span>
           <span class="restriction-description">L'activité se terminera si vous cliquez en dehors de la page</span>
         </div>
       </div>
-
-      <div class="restriction-item" *ngIf="player.settings?.security?.terminateOnLeavePage">
+      } @if (player.settings?.security?.terminateOnLeavePage) {
+      <div class="restriction-item">
         <mat-icon class="restriction-icon">exit_to_app</mat-icon>
         <div class="restriction-content">
           <span class="restriction-label">Surveillance de la page</span>
           <span class="restriction-description">L'activité se terminera si vous changez d'onglet ou de fenêtre</span>
         </div>
       </div>
-
-      <div class="restriction-item" *ngIf="hasRetryLimit">
+      } @if (hasRetryLimit) {
+      <div class="restriction-item">
         <mat-icon class="restriction-icon">block</mat-icon>
         <div class="restriction-content">
           <span class="restriction-label">Essais limités</span>
@@ -164,6 +174,8 @@
           </span>
         </div>
       </div>
+      }
     </div>
   </section>
+  }
 </div>

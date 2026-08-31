@@ -281,7 +281,7 @@ export class ResourceCreationTutorialService {
     checkMenu()
   }
 
-  private waitForResourceSelection(user: User): void {
+  private waitForResourceSelection(_user: User): void {
     // Cette étape reste active jusqu'à ce que l'utilisateur clique sur une ressource
   }
 

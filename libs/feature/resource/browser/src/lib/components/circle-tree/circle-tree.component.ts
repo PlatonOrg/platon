@@ -1,6 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections'
 import { FlatTreeControl } from '@angular/cdk/tree'
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,7 +21,7 @@ import { NzTreeFlatDataSource, NzTreeFlattener, NzTreeViewModule } from 'ng-zorr
   templateUrl: './circle-tree.component.html',
   styleUrls: ['./circle-tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, NzIconModule, NzTreeModule, NzTreeViewModule],
+  imports: [RouterModule, NzIconModule, NzTreeModule, NzTreeViewModule],
 })
 export class CircleTreeComponent implements OnInit {
   @Input() tree!: CircleTree

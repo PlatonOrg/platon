@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { buildHttpParams } from '@platon/core/browser'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import {
@@ -20,9 +20,7 @@ const getId = (course: Course | string): string => {
 
 @Injectable()
 export class RemoteCourseMemberProvider extends CourseMemberProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   create(course: Course, input: CreateCourseMember): Observable<CourseMember> {
     return this.http

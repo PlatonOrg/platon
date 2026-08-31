@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ActivityGroupProvider } from '../models/activity-group.provider'
 import { HttpClient } from '@angular/common/http'
 import { ActivityGroup } from '@platon/feature/course/common'
@@ -7,9 +7,7 @@ import { ListResponse } from '@platon/core/common'
 
 @Injectable()
 export class RemoteActivityGroupProvider extends ActivityGroupProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   create(activityId: string, groupId: string): Observable<ActivityGroup> {
     return this.http.post<ActivityGroup>(`/api/v1/activities/${activityId}/groups`, groupId)

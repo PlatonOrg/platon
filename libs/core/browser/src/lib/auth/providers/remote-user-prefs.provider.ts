@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, UpdateUserPrefs, UserPrefs } from '@platon/core/common'
 import { Observable } from 'rxjs'
 
@@ -8,9 +8,7 @@ import { UserPrefsProvider } from '../models/user-prefs-provider'
 
 @Injectable()
 export class RemoteUserPrefsProvider extends UserPrefsProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   find(username: string): Observable<UserPrefs> {
     return this.http

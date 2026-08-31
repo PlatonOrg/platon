@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { RouterModule } from '@angular/router'
 
@@ -13,6 +12,6 @@ import { UiLayoutTabsComponent, UiLayoutTabDirective } from '@platon/shared/ui'
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, MatIconModule, NzBreadCrumbModule, UiLayoutTabsComponent, UiLayoutTabDirective],
+  imports: [RouterModule, MatIconModule, NzBreadCrumbModule, UiLayoutTabsComponent, UiLayoutTabDirective],
 })
 export class AdminPage {}

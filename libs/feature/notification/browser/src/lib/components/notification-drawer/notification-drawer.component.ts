@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations'
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDrawerModule } from 'ng-zorro-antd/drawer'
@@ -16,7 +16,7 @@ import { NotificationListComponent } from '../notification-list/notification-lis
   templateUrl: './notification-drawer.component.html',
   styleUrls: ['./notification-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzEmptyModule, NzButtonModule, NzDrawerModule, NotificationListComponent],
+  imports: [NzEmptyModule, NzButtonModule, NzDrawerModule, NotificationListComponent],
   animations: [
     trigger('fade', [
       transition(':enter', [style({ opacity: 0 }), animate('200ms ease', style({ opacity: 1 }))]),
@@ -25,6 +25,9 @@ import { NotificationListComponent } from '../notification-list/notification-lis
   ],
 })
 export class NotificationDrawerComponent implements OnInit, OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly notificationSerivce = inject(NotificationService)
+
   private readonly counter = new BehaviorSubject(0)
   private readonly subscriptions: Subscription[] = []
   protected notifications: Notification[] = []
@@ -36,11 +39,6 @@ export class NotificationDrawerComponent implements OnInit, OnDestroy {
   protected deletingAll = false
 
   readonly count = this.counter.asObservable()
-
-  constructor(
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly notificationSerivce: NotificationService
-  ) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

@@ -9,6 +9,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
@@ -44,6 +45,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar'
 })
 @WebComponent(FileUploadComponentDefinition)
 export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks<FileUploadState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+  private readonly fileUploadService = inject(FileUploadService)
+
   private readonly webComponentService!: WebComponentService
 
   @Input() state!: FileUploadState
@@ -57,11 +62,9 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
   private sessionId = ''
   private preloadedFilesCount = 0
 
-  constructor(
-    readonly injector: Injector,
-    readonly changeDetector: WebComponentChangeDetectorService,
-    private readonly fileUploadService: FileUploadService
-  ) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService) ?? undefined
   }
 
@@ -283,7 +286,7 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
         if (!regex.test(nameWithoutExtension)) {
           return `Le nom du fichier ne respecte pas le format requis: ${this.state.fileNameRegex}`
         }
-      } catch (e) {
+      } catch (_error) {
         // Ignorer les erreurs de regex invalide
       }
     }

@@ -6,12 +6,11 @@
     [class.presenter-fs]="fullscreen"
     (click)="toggleFullscreen()"
   >
-    <ng-container *ngIf="fullscreen; else exit">
-      <span nz-icon nzType="fullscreen-exit"></span>
-    </ng-container>
-    <ng-template #exit>
-      <span nz-icon nzType="fullscreen"></span>
-    </ng-template>
+    @if (fullscreen) {
+    <span nz-icon nzType="fullscreen-exit"></span>
+    } @else {
+    <span nz-icon nzType="fullscreen"></span>
+    }
   </button>
   <div
     #revealContainer

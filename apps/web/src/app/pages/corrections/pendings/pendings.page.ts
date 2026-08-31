@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { CorrectionTableComponent, ResultService } from '@platon/feature/result/browser'
 import { ActivityCorrectionSummary } from '@platon/feature/result/common'
@@ -11,7 +10,7 @@ import { firstValueFrom } from 'rxjs'
   templateUrl: './pendings.page.html',
   styleUrls: ['./pendings.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzEmptyModule, CorrectionTableComponent, NzSpinModule],
+  imports: [NzEmptyModule, CorrectionTableComponent, NzSpinModule],
 })
 export class CorrectionsPendingsPage implements OnInit {
   private readonly resultService = inject(ResultService)

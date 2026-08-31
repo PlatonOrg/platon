@@ -1,28 +1,35 @@
 <div class="statistic-card" (click)="onCardClick()" [ngClass]="{ editable: edit }">
-  <div [style.background-color]="ribbonColor" class="ribbon" *ngIf="icon || matIcon || nzIcon">
+  @if (icon || matIcon || nzIcon) {
+  <div [style.background-color]="ribbonColor" class="ribbon">
     <span>
-      <ng-container *ngIf="icon">
-        <ng-container *ngTemplateOutlet="icon"></ng-container>
-      </ng-container>
-      <mat-icon class="ribbon-icon" *ngIf="matIcon">{{ matIcon }}</mat-icon>
-      <span class="ribbon-icon" *ngIf="nzIcon" nz-icon [nzType]="nzIcon" nzTheme="outline"></span>
+      @if (icon) {
+      <ng-container *ngTemplateOutlet="icon"></ng-container>
+      } @if (matIcon) {
+      <mat-icon class="ribbon-icon">{{ matIcon }}</mat-icon>
+      } @if (nzIcon) {
+      <span class="ribbon-icon" nz-icon [nzType]="nzIcon" nzTheme="outline"></span>
+      }
     </span>
   </div>
+  }
   <div class="value" [style.color]="valueColor">
-    <ng-container *ngIf="!isEditing">{{ value }} {{ valueSuffix }}</ng-container>
-    <ng-container *ngIf="isEditing">
-      <nz-input-number
-        (keydown)="onKeydown($event)"
-        nzId="input-edit-value"
-        [(ngModel)]="value"
-        nzMin="0"
-        nzMax="100"
-        (focusout)="onFocusOut()"
-      />
-    </ng-container>
+    @if (!isEditing) {
+    {{ value }} {{ valueSuffix }}
+    } @if (isEditing) {
+    <nz-input-number
+      (keydown)="onKeydown($event)"
+      nzId="input-edit-value"
+      [(ngModel)]="value"
+      nzMin="0"
+      nzMax="100"
+      (focusout)="onFocusOut()"
+    />
+    }
   </div>
   <div class="description">
-    {{ description }} <mat-icon *ngIf="tooltip" [nz-tooltip]="tooltip">info_circle</mat-icon>
+    {{ description }} @if (tooltip) {
+    <mat-icon [nz-tooltip]="tooltip">info_circle</mat-icon>
+    }
   </div>
   <div>
     <ng-content></ng-content>

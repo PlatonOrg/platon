@@ -247,7 +247,7 @@ export class OutcomeService {
       } else {
         return response
       }
-    } catch (err) {
+    } catch (_err) {
       throw new OutcomeResponseError('The server responsed with an invalid XML document')
     }
   }

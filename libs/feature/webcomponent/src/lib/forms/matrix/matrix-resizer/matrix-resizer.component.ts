@@ -1,5 +1,14 @@
-import { Component, EventEmitter, OnDestroy, Output, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import {
+  Component,
+  EventEmitter,
+  OnDestroy,
+  Output,
+  TemplateRef,
+  ViewChild,
+  ViewContainerRef,
+  inject,
+} from '@angular/core'
+
 import { Overlay, OverlayModule, OverlayRef } from '@angular/cdk/overlay'
 import { TemplatePortal } from '@angular/cdk/portal'
 import { MatButtonModule } from '@angular/material/button'
@@ -10,9 +19,12 @@ import { MatTooltipModule } from '@angular/material/tooltip'
   selector: 'wc-matrix-resizer',
   templateUrl: './matrix-resizer.component.html',
   styleUrls: ['./matrix-resizer.component.scss'],
-  imports: [CommonModule, OverlayModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [OverlayModule, MatButtonModule, MatIconModule, MatTooltipModule],
 })
 export class MatrixResizerComponent implements OnDestroy {
+  private readonly overlay = inject(Overlay)
+  private readonly container = inject(ViewContainerRef)
+
   private readonly width = 10
   private resizer?: OverlayRef
 
@@ -31,8 +43,6 @@ export class MatrixResizerComponent implements OnDestroy {
 
   @ViewChild('template', { read: TemplateRef })
   template!: TemplateRef<unknown>
-
-  constructor(private readonly overlay: Overlay, private readonly container: ViewContainerRef) {}
 
   ngOnDestroy() {
     this.resizer?.dispose()
@@ -81,9 +91,5 @@ export class MatrixResizerComponent implements OnDestroy {
   close() {
     this.resizer?.dispose()
     this.resizer = undefined
-  }
-
-  trackBy(index: number) {
-    return index
   }
 }

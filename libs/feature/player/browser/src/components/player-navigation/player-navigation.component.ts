@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core'
 
 import { NzTimelineModule } from 'ng-zorro-antd/timeline'
@@ -17,15 +16,7 @@ import { AnswerStatePipesModule } from '@platon/feature/result/browser'
   templateUrl: './player-navigation.component.html',
   styleUrls: ['./player-navigation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatCardModule,
-    MatButtonModule,
-    NzTimelineModule,
-    DialogModule,
-    AnswerStatePipesModule,
-  ],
+  imports: [MatIconModule, MatCardModule, MatButtonModule, NzTimelineModule, DialogModule, AnswerStatePipesModule],
 })
 export class PlayerNavigationComponent {
   private readonly dialogService = inject(DialogService)

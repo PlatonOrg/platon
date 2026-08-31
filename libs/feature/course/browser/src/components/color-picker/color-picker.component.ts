@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -25,7 +24,7 @@ type ColorSelection = {
   templateUrl: './color-picker.component.html',
   styleUrls: ['./color-picker.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzSliderModule],
+  imports: [FormsModule, NzSliderModule],
 })
 export class CourseColorPickerComponent implements OnInit, AfterViewInit {
   private readonly themeService = inject(ThemeService)

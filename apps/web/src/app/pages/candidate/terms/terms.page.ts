@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { MatCardModule } from '@angular/material/card'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
@@ -19,7 +18,6 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
   styleUrls: ['./terms.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     MatCardModule,
     NgeMarkdownModule,
@@ -31,6 +29,12 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
   ],
 })
 export class TestTermsPage {
+  private route = inject(ActivatedRoute)
+  private readonly testsService = inject(TestsService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly courseService = inject(CourseService)
+  private readonly router = inject(Router)
+
   testId?: string
 
   error?: string
@@ -41,13 +45,7 @@ export class TestTermsPage {
 
   hasReadTerms = false
 
-  constructor(
-    private route: ActivatedRoute,
-    private readonly testsService: TestsService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly courseService: CourseService,
-    private readonly router: Router
-  ) {
+  constructor() {
     this.route.queryParams.subscribe(async (params) => {
       this.testId = params['id']
       if (!this.testId) {

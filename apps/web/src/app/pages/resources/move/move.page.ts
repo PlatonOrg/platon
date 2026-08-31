@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
 
@@ -58,6 +58,13 @@ type TemplateSource = {
   ],
 })
 export class ResourceMovePage implements OnInit {
+  private readonly router = inject(Router)
+  private readonly authService = inject(AuthService)
+  private readonly dialogService = inject(DialogService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly resourceService = inject(ResourceService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected type!: ResourceTypes
   protected resourceId!: string
   protected parentId?: string
@@ -73,14 +80,6 @@ export class ResourceMovePage implements OnInit {
   protected selectedTemplateSources = new SelectionModel<TemplateSource>(true, [])
 
   protected tree!: CircleTree
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly dialogService: DialogService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly resourceService: ResourceService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes

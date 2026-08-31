@@ -4,7 +4,7 @@ import { Editor, FileService, OpenRequest } from '@cisstech/nge-ide/core'
 import { OutputData } from '@editorjs/editorjs'
 import { emptyEditorJsData } from '@platon/shared/ui'
 import { Subscription } from 'rxjs'
-import { CommonModule } from '@angular/common'
+
 import { UiEditorJsModule } from '@platon/shared/ui'
 import { FormsModule } from '@angular/forms'
 @Component({
@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms'
   templateUrl: './plf-editor.component.html',
   styleUrls: ['./plf-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, UiEditorJsModule],
+  imports: [FormsModule, UiEditorJsModule],
 })
 export class PlfEditorComponent implements OnInit, OnDestroy {
   private readonly fileService = inject(FileService)

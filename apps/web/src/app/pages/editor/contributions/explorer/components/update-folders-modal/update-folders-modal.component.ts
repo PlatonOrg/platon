@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { CircleTreeComponent } from '@platon/feature/resource/browser'
 import { NZ_MODAL_DATA } from 'ng-zorro-antd/modal'
@@ -13,7 +12,7 @@ export type UpdateFoldersModalData = {
   templateUrl: './update-folders-modal.component.html',
   styleUrls: ['./update-folders-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CircleTreeComponent],
+  imports: [CircleTreeComponent],
 })
 export class UpdateFoldersModalComponent {
   private readonly presenter = inject(EditorPresenter)

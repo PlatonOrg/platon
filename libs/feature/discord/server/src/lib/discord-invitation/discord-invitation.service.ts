@@ -43,7 +43,7 @@ export class DiscordInvitationService {
       return new ItemResponse({
         resource: (await this.getExistingInvitation(userId)) || (await this.createInvitationLink(userId)),
       })
-    } catch (error) {
+    } catch (_error) {
       throw new ErrorResponse({ status: 500, message: 'Error while creating invitation link' })
     }
   }

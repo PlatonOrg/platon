@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
@@ -7,7 +6,7 @@ import { FormsModule } from '@angular/forms'
   templateUrl: './prompt.component.html',
   styleUrls: ['./prompt.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule],
 })
 export class PromptDialogComponent {
   @Input() value? = ''

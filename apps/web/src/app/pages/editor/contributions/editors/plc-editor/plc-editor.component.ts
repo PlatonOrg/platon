@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { NzListModule } from 'ng-zorro-antd/list'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzSwitchModule } from 'ng-zorro-antd/switch'
 import { PleInputEditorModule } from '../ple-input/ple-input.module'
 
@@ -29,12 +29,14 @@ import { PleInputEditorModule } from '../ple-input/ple-input.module'
     NzListModule,
     NzButtonModule,
     NzIconModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzSwitchModule,
     PleInputEditorModule,
   ],
 })
 export class PlcEditorComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute)
+
   private readonly fileService = inject(FileService)
   private readonly notificationService = inject(NotificationService)
 
@@ -59,7 +61,6 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
 
   resourceId = this.route.snapshot.paramMap.get('id')
   version = this.route.snapshot.queryParamMap.get('version')
-  constructor(private route: ActivatedRoute) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(
@@ -125,10 +126,6 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
     }
 
     this.fileService.update(this.request.uri, JSON.stringify(content, null, 2))
-  }
-
-  protected trackByIndex(index: number) {
-    return index
   }
 
   private async createEditor(): Promise<void> {

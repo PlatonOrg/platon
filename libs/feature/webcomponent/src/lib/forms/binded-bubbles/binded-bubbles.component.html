@@ -1,60 +1,62 @@
 <!-- template.html -->
-<div class="bubbles-items" *ngIf="state.mode === 'ordered'">
+@if (state.mode === 'ordered') {
+<div class="bubbles-items">
   <div class="bubbles-container">
     <div class="column">
-      <ng-container *ngFor="let item of list1; trackBy: trackById">
-        <div class="bubbles-item">
-          <button
-            mat-fab
-            extended
-            (click)="updateClickedList(item, 'list1')"
-            [class.checked]="item.state === 'checked'"
-            [class.unchecked]="item.state === 'unchecked'"
-            [class.error]="item.state === 'error'"
-            [class.disabled]="item.state === 'disabled'"
-            [class.achieved]="item.state === 'achieved'"
-            [style.animation-duration]="item.state === 'achieved' ? state.timeout + 'ms' : ''"
-            (animationend)="onAnimationEnd(item)"
-            [disabled]="item.state === 'disabled'"
+      @for (item of list1; track trackById($index, item)) {
+      <div class="bubbles-item">
+        <button
+          mat-fab
+          extended
+          (click)="updateClickedList(item, 'list1')"
+          [class.checked]="item.state === 'checked'"
+          [class.unchecked]="item.state === 'unchecked'"
+          [class.error]="item.state === 'error'"
+          [class.disabled]="item.state === 'disabled'"
+          [class.achieved]="item.state === 'achieved'"
+          [style.animation-duration]="item.state === 'achieved' ? state.timeout + 'ms' : ''"
+          (animationend)="onAnimationEnd(item)"
+          [disabled]="item.state === 'disabled'"
+        >
+          <span
+            [attr.data-item-id]="item.id"
+            [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
+            #scrollableDiv
           >
-            <span
-              [attr.data-item-id]="item.id"
-              [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
-              #scrollableDiv
-            >
-              <nge-markdown [data]="item.content"></nge-markdown
-            ></span>
-          </button>
-        </div>
-      </ng-container>
+            <nge-markdown [data]="item.content"></nge-markdown
+          ></span>
+        </button>
+      </div>
+      }
     </div>
     <div class="column">
-      <ng-container *ngFor="let item of list2; trackBy: trackById">
-        <div class="bubbles-item">
-          <button
-            mat-fab
-            extended
-            (click)="updateClickedList(item, 'list2')"
-            [class.checked]="item.state === 'checked'"
-            [class.unchecked]="item.state === 'unchecked'"
-            [class.error]="item.state === 'error'"
-            [class.disabled]="item.state === 'disabled'"
-            [class.achieved]="item.state === 'achieved'"
-            [style.animation-duration]="item.state === 'achieved' ? state.timeout + 'ms' : ''"
-            (animationend)="onAnimationEnd(item)"
-            [disabled]="item.state === 'disabled'"
+      @for (item of list2; track trackById($index, item)) {
+      <div class="bubbles-item">
+        <button
+          mat-fab
+          extended
+          (click)="updateClickedList(item, 'list2')"
+          [class.checked]="item.state === 'checked'"
+          [class.unchecked]="item.state === 'unchecked'"
+          [class.error]="item.state === 'error'"
+          [class.disabled]="item.state === 'disabled'"
+          [class.achieved]="item.state === 'achieved'"
+          [style.animation-duration]="item.state === 'achieved' ? state.timeout + 'ms' : ''"
+          (animationend)="onAnimationEnd(item)"
+          [disabled]="item.state === 'disabled'"
+        >
+          <span
+            [attr.data-item-id]="item.id"
+            [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
+            #scrollableDiv
           >
-            <span
-              [attr.data-item-id]="item.id"
-              [class.scroll-arrow-indicator]="needsHorizontalScroll.get(item.id)"
-              #scrollableDiv
-            >
-              <nge-markdown [data]="item.content"></nge-markdown
-            ></span>
-          </button>
-        </div>
-      </ng-container>
+            <nge-markdown [data]="item.content"></nge-markdown
+          ></span>
+        </button>
+      </div>
+      }
     </div>
   </div>
 </div>
+}
 <wc-base [(state)]="state"></wc-base>

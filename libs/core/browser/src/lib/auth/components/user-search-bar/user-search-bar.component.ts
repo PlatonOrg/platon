@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -38,7 +38,7 @@ type Item = User | UserGroup
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UserAvatarComponent, UiSearchBarComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UserAvatarComponent, UiSearchBarComponent],
 })
 export class UserSearchBarComponent implements OnInit, OnChanges, ControlValueAccessor {
   private readonly userService = inject(UserService)

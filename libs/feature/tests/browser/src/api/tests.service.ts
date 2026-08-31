@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CreateTest, CreateTestsCandidates, Test, TestsCandidates } from '@platon/feature/tests/common'
 import { TestsCandidatesProvider } from '../models/tests-candidates.provider'
 import { firstValueFrom, Observable } from 'rxjs'
@@ -9,11 +9,9 @@ import { OutputData } from '@editorjs/editorjs'
 
 @Injectable({ providedIn: 'root' })
 export class TestsService {
-  constructor(
-    private readonly testsCandidatesProvider: TestsCandidatesProvider,
-    private readonly testProvider: TestProvider,
-    private readonly router: Router
-  ) {}
+  private readonly testsCandidatesProvider = inject(TestsCandidatesProvider)
+  private readonly testProvider = inject(TestProvider)
+  private readonly router = inject(Router)
 
   createTest(input: CreateTest): Observable<Test> {
     return this.testProvider.createTest(input)
@@ -51,7 +49,7 @@ export class TestsService {
         replaceUrl: true,
       })
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }

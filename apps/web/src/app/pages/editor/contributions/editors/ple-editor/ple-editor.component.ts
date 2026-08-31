@@ -6,7 +6,7 @@ import { PleInput, Variables } from '@platon/feature/compiler'
 import { ResourceFileService } from '@platon/feature/resource/browser'
 import { editorJsFromRawString, editorJsToRawString } from '@platon/shared/ui'
 import { Subscription, debounceTime, firstValueFrom, skip } from 'rxjs'
-import { CommonModule } from '@angular/common'
+
 import { ReactiveFormsModule } from '@angular/forms'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
 import { NzFormModule } from 'ng-zorro-antd/form'
@@ -14,7 +14,7 @@ import { NzListModule } from 'ng-zorro-antd/list'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { UiEditorJsModule } from '@platon/shared/ui'
 import { PleInputEditorModule } from '../ple-input/ple-input.module'
 
@@ -26,20 +26,15 @@ const HIDDEN_VARIABLES = ['author', 'title', 'statement', 'form', 'builder', 'gr
   styleUrls: ['./ple-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
-
     NzCollapseModule,
-
     NzFormModule,
     NzListModule,
     NzInputModule,
     NzButtonModule,
     NzIconModule,
-    NzToolTipModule,
-
+    NzTooltipModule,
     UiEditorJsModule,
-
     PleInputEditorModule,
   ],
 })

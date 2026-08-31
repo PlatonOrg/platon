@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input, inject } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { firstValueFrom } from 'rxjs'
 
@@ -21,9 +21,12 @@ import { CourseService } from '../../api/course.service'
       multi: true,
     },
   ],
-  imports: [CommonModule, NzButtonModule],
+  imports: [NzButtonModule],
 })
 export class CourseSectionSearchBarComponent implements ControlValueAccessor {
+  private readonly courseService = inject(CourseService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected dataSource: CourseSection[] = []
 
   @Input()
@@ -44,8 +47,6 @@ export class CourseSectionSearchBarComponent implements ControlValueAccessor {
   }
 
   selection: CourseSection[] = []
-
-  constructor(private readonly courseService: CourseService, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   // ControlValueAccessor methods
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, OnDestroy } from '@angular/core'
 import { MonitorPresenter } from './monitor.presenter'
 import { Subscription } from 'rxjs'
-import { CommonModule, Location } from '@angular/common'
+import { Location } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule } from '@angular/router'
 import { DialogModule, DialogService } from '@platon/core/browser'
@@ -22,7 +22,6 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [MonitorPresenter],
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
     DialogModule,
@@ -111,7 +110,7 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
         }
       })
       await Promise.allSettled(promises)
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error("Une erreur est survenue lors de l'ouverture des sessions.")
     }
   }

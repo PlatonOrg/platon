@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { RouterModule } from '@angular/router'
 
@@ -16,7 +15,6 @@ import { TutorialSelectorModalComponent } from '@platon/feature/tuto/browser'
   styleUrls: ['./dashboard.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     MatIconModule,
     MatButtonModule,

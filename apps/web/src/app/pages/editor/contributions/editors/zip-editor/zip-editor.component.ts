@@ -7,7 +7,6 @@ import { ResourceFileImpl } from '../../file-system'
 import { NzFormatEmitEvent, NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown'
 import { ExplorerService } from '@cisstech/nge-ide/explorer'
-import { CommonModule } from '@angular/common'
 
 import { NzTreeModule } from 'ng-zorro-antd/tree'
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -18,9 +17,11 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
   templateUrl: './zip-editor.component.html',
   styleUrls: ['./zip-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzTreeModule, NzIconModule, NzDropDownModule],
+  imports: [NzTreeModule, NzIconModule, NzDropDownModule],
 })
 export class ZipEditorComponent implements OnInit, OnDestroy {
+  private nzContextMenuService = inject(NzContextMenuService)
+
   private readonly resourceFileService = inject(ResourceFileService)
   private readonly subscriptions: Subscription[] = []
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
@@ -33,8 +34,6 @@ export class ZipEditorComponent implements OnInit, OnDestroy {
   @Input()
   protected editor!: Editor
   protected request!: OpenRequest
-
-  constructor(private nzContextMenuService: NzContextMenuService) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(

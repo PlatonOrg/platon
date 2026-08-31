@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 
 import { Player } from '@platon/feature/player/common'
@@ -10,7 +9,7 @@ import { PlayerExerciseComponent } from '../player-exercise/player-exercise.comp
   templateUrl: './player-wrapper.component.html',
   styleUrls: ['./player-wrapper.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, PlayerExerciseComponent, PlayerActivityComponent],
+  imports: [PlayerExerciseComponent, PlayerActivityComponent],
 })
 export class PlayerWrapperComponent {
   @Input({ required: true }) player!: Player

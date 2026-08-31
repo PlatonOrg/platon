@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { EditorjsViewerComponent, emptyEditorJsData, UiEditorJsModule } from '@platon/shared/ui'
 import { NzModalModule } from 'ng-zorro-antd/modal'
@@ -18,7 +17,6 @@ import { AngularSplitModule } from 'angular-split'
   styleUrls: ['./tests-terms-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     NzModalModule,
     UiEditorJsModule,
@@ -30,6 +28,13 @@ import { AngularSplitModule } from 'angular-split'
   ],
 })
 export class TestsTermsEditorComponent implements OnInit, OnDestroy {
+  dialogRef = inject<MatDialogRef<TestsTermsEditorComponent>>(MatDialogRef)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly testsService = inject(TestsService)
+  data = inject<{
+    courseId: string
+  }>(MAT_DIALOG_DATA)
+
   terms: OutputData = emptyEditorJsData()
 
   private testId = ''
@@ -54,13 +59,6 @@ export class TestsTermsEditorComponent implements OnInit, OnDestroy {
     { name: 'date', description: 'Date actuelle au format local (jour/mois/année)' },
     { name: 'time', description: 'Heure actuelle au format local (heure:minute:seconde)' },
   ]
-
-  constructor(
-    public dialogRef: MatDialogRef<TestsTermsEditorComponent>,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly testsService: TestsService,
-    @Inject(MAT_DIALOG_DATA) public data: { courseId: string }
-  ) {}
 
   async ngOnInit(): Promise<void> {
     const test = await firstValueFrom(this.testsService.getTestByCourseId(this.data.courseId))

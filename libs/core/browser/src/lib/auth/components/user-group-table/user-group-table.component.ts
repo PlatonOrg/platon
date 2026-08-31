@@ -10,6 +10,7 @@ import {
   OnInit,
   Output,
   forwardRef,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 
@@ -35,6 +36,8 @@ type Value = string[] | undefined
   imports: [CommonModule, NzTableModule, UserAvatarComponent],
 })
 export class UserGroupTableComponent implements OnInit, OnChanges, ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() groups: UserGroup[] = []
   @Output() groupsChange = new EventEmitter<UserGroup[]>()
 
@@ -55,8 +58,6 @@ export class UserGroupTableComponent implements OnInit, OnChanges, ControlValueA
   protected get canFilterOnServer(): boolean {
     return this.filtersChange.observed
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.columns = [

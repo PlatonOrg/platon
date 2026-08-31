@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, inject } from '@angular/core'
 import { OutputData } from '@editorjs/editorjs'
 import { EditorjsViewerComponent as UiEditorjsViewerComponent } from '@platon/shared/ui'
 
@@ -10,12 +10,10 @@ import { EditorjsViewerComponent as UiEditorjsViewerComponent } from '@platon/sh
   imports: [UiEditorjsViewerComponent],
 })
 export class EditorjsViewerComponent implements OnInit {
-  protected data?: OutputData
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef)
 
-  constructor(
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly elementRef: ElementRef<HTMLElement>
-  ) {}
+  protected data?: OutputData
 
   ngOnInit(): void {
     const id = this.elementRef.nativeElement.getAttribute('id')

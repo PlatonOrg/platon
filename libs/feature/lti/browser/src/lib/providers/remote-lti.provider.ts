@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CreatedResponse, ItemResponse, ListResponse } from '@platon/core/common'
 import { CreateLms, Lms, LmsFilters, UpdateLms } from '@platon/feature/lti/common'
 import { Observable } from 'rxjs'
@@ -8,9 +8,7 @@ import { LTIProvider } from '../models/lms-provider'
 
 @Injectable()
 export class RemoteLTIProvider extends LTIProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   searchLms(filters?: LmsFilters): Observable<ListResponse<Lms>> {
     filters = filters || {}

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 import { ResourceEvent } from '@platon/feature/resource/common'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
@@ -10,7 +9,7 @@ import { NzTimelineModule } from 'ng-zorro-antd/timeline'
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzEmptyModule, NzTimelineModule, ResourceEventItemComponent],
+  imports: [NzEmptyModule, NzTimelineModule, ResourceEventItemComponent],
 })
 export class ResourceEventListComponent {
   @Input()

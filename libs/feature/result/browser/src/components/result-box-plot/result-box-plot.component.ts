@@ -9,7 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core'
 import { ExerciseResults } from '@platon/feature/result/common'
-import { CommonModule } from '@angular/common'
+
 import { CoreEchartsDirective } from '@platon/core/browser'
 import { EChartsOption } from 'echarts'
 
@@ -17,7 +17,7 @@ import { EChartsOption } from 'echarts'
   selector: 'result-box-plot',
   templateUrl: './result-box-plot.component.html',
   styleUrls: ['./result-box-plot.component.scss'],
-  imports: [CommonModule, CoreEchartsDirective],
+  imports: [CoreEchartsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResultBoxPlotComponent implements OnInit, OnChanges {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -40,9 +40,9 @@ export interface ExistingSubmissionsResponse {
   providedIn: 'root',
 })
 export class FileUploadService {
-  private readonly uploadUrl = '/api/v1/sessions/{{SESSION_ID}}/submissions/upload'
+  private http = inject(HttpClient)
 
-  constructor(private http: HttpClient) {}
+  private readonly uploadUrl = '/api/v1/sessions/{{SESSION_ID}}/submissions/upload'
 
   /**
    * Upload un fichier unique

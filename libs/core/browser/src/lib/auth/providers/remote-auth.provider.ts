@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 
 import { JwtHelperService } from '@auth0/angular-jwt'
 import { AuthToken, CreatedResponse, ItemResponse, ResetPasswordInput, SignUpInput, User } from '@platon/core/common'
@@ -9,9 +9,8 @@ import { AuthProvider } from '../models/auth-provider'
 
 @Injectable()
 export class RemoteAuthProvider extends AuthProvider {
-  constructor(private readonly http: HttpClient, private readonly tokenService: TokenService) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
+  private readonly tokenService = inject(TokenService)
 
   async signUp(input: SignUpInput): Promise<CreatedResponse<AuthToken>> {
     const newUser = await lastValueFrom(
@@ -39,7 +38,7 @@ export class RemoteAuthProvider extends AuthProvider {
         return await lastValueFrom(this.http.get<ItemResponse<User>>('/api/v1/users/' + data.username)).then(
           (response) => response.resource
         )
-      } catch (error) {
+      } catch (_error) {
         console.error('Unable to fetch user data, you are probably off line.')
         // this.signOut().catch(console.error)
       }

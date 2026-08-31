@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { FoldableFeedbackComponentDefinition, FoldableFeedbackState } from './foldable-feedback'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
@@ -18,9 +18,9 @@ import { MatIconModule } from '@angular/material/icon'
 })
 @WebComponent(FoldableFeedbackComponentDefinition)
 export class FoldableFeedbackComponent implements WebComponentHooks<FoldableFeedbackState> {
-  @Input() state!: FoldableFeedbackState
+  readonly injector = inject(Injector)
 
-  constructor(readonly injector: Injector) {}
+  @Input() state!: FoldableFeedbackState
 
   formatTextHtml(text: string): string {
     if (!text) return ''

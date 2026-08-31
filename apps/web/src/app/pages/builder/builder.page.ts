@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -52,7 +51,6 @@ type MainViewMode = 'input' | 'setting' | 'history'
   styleUrls: ['./builder.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,

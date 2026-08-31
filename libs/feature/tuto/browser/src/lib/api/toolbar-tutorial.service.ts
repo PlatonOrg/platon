@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 import { User, UserRoles } from '@platon/core/common'
@@ -8,13 +8,11 @@ import { SidebarTutorialService } from './sidebar-tutorial.service'
   providedIn: 'root',
 })
 export class ToolbarTutorialService {
-  private user: User | null = null
+  private shepherdService = inject(ShepherdService)
+  private router = inject(Router)
+  private sidebarTutorialService = inject(SidebarTutorialService)
 
-  constructor(
-    private shepherdService: ShepherdService,
-    private router: Router,
-    private sidebarTutorialService: SidebarTutorialService
-  ) {}
+  private user: User | null = null
 
   startToolbarTutorial(user: User): void {
     this.user = user

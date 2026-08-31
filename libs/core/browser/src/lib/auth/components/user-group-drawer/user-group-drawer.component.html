@@ -20,13 +20,15 @@
   #modal
 >
   <ng-template>
-    <nz-tabset [(nzSelectedIndex)]="activeTabIndex">
-      <nz-tab *ngIf="canEdit" nzTitle="Informations">
+    <nz-tabs [(nzSelectedIndex)]="activeTabIndex">
+      @if (canEdit) {
+      <nz-tab nzTitle="Informations">
         <mat-form-field appearance="fill">
           <mat-label>Nom</mat-label>
           <input [(ngModel)]="groupName" (keyup.enter)="renameGroup()" matInput />
         </mat-form-field>
       </nz-tab>
+      }
       <nz-tab nzTitle="Membres">
         <user-search-bar #searchbar [(ngModel)]="members" [autoSelect]="true" [filters]="filters" />
         <user-table
@@ -38,7 +40,7 @@
           [(ngModel)]="selection"
         />
       </nz-tab>
-    </nz-tabset>
+    </nz-tabs>
   </ng-template>
 </ui-modal-drawer>
 
@@ -54,32 +56,35 @@
 </ng-template>
 
 <ng-template #infoTabFooter>
-  <nz-button-group *ngIf="canEdit">
-    <button nz-button nzType="primary" (click)="renameGroup()" [disabled]="!groupName">Enregistrer</button>
-  </nz-button-group>
+  @if (canEdit) {
+  <button nz-button nzType="primary" (click)="renameGroup()" [disabled]="!groupName">Enregistrer</button>
+  }
 </ng-template>
 
 <ng-template #memberTabFooter>
-  <nz-button-group *ngIf="canEdit">
+  @if (canEdit) {
+  <div>
     <button (click)="search.open()" nz-button nzType="primary" [disabled]="!group">
       <span>Ajouter</span>
     </button>
-    <ng-container *ngIf="selection.length as selectionCount">
-      <nz-badge [nzCount]="selectionCount">
-        <button
-          nz-button
-          nzDanger
-          nz-popconfirm
-          nzOkText="Supprimer"
-          nzOkType="danger"
-          [nzPopconfirmTitle]="removeGuard"
-          [nzPopconfirmPlacement]="'bottom'"
-          [nzPopconfirmOverlayStyle]="{ 'max-width': '300px' }"
-          (nzOnConfirm)="removeMembers()"
-        >
-          <span> Supprimer </span>
-        </button>
-      </nz-badge>
-    </ng-container>
-  </nz-button-group>
+
+    @if (selection.length; as selectionCount) {
+    <nz-badge [nzCount]="selectionCount">
+      <button
+        nz-button
+        nzDanger
+        nz-popconfirm
+        nzOkText="Supprimer"
+        nzOkType="danger"
+        [nzPopconfirmTitle]="removeGuard"
+        [nzPopconfirmPlacement]="'bottom'"
+        [nzPopconfirmOverlayStyle]="{ 'max-width': '300px' }"
+        (nzOnConfirm)="removeMembers()"
+      >
+        <span>Supprimer</span>
+      </button>
+    </nz-badge>
+    }
+  </div>
+  }
 </ng-template>

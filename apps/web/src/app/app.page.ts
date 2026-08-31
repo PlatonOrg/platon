@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { CoreService } from '@platon/core/browser'
@@ -12,9 +12,10 @@ import { UserRoles } from '@platon/core/common'
   styleUrls: ['./app.page.scss'],
 })
 export class AppPage implements OnInit {
-  isAdmin = false
+  private readonly core = inject(CoreService)
+  private authService = inject(AuthService)
 
-  constructor(private readonly core: CoreService, private authService: AuthService) {}
+  isAdmin = false
 
   async ngOnInit() {
     const user = await this.authService.ready()

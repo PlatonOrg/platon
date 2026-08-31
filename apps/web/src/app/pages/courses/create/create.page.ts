@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, ViewChild } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, ViewChild, inject } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { Router, RouterModule } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
@@ -24,7 +23,6 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
   styleUrls: ['./create.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
@@ -42,6 +40,11 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
   ],
 })
 export class CourseCreatePage {
+  private readonly router = inject(Router)
+  private readonly dialogService = inject(DialogService)
+  private readonly courseService = inject(CourseService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected loading = false
   protected creating = false
 
@@ -56,16 +59,13 @@ export class CourseCreatePage {
   @HostListener('window:keydown.meta.enter')
   protected async handleKeyDown(): Promise<void> {
     if (this.stepper.isValid) {
-      this.stepper.isLast ? await this.create() : this.stepper.nextStep()
+      if (this.stepper.isLast) {
+        await this.create()
+      } else {
+        this.stepper.nextStep()
+      }
     }
   }
-
-  constructor(
-    private readonly router: Router,
-    private readonly dialogService: DialogService,
-    private readonly courseService: CourseService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   protected async create(): Promise<void> {
     try {

@@ -15,11 +15,11 @@
   <section id="features" class="smooth-reveal">
     <app-landing-section-features />
   </section>
-  <ng-container *ngIf="demos | async as items">
-    <section *ngIf="items.length" id="demo" class="smooth-reveal">
-      <app-landing-section-demo [demos]="items" />
-    </section>
-  </ng-container>
+  @if (demos | async; as items) { @if (items.length) {
+  <section id="demo" class="smooth-reveal">
+    <app-landing-section-demo [demos]="items" />
+  </section>
+  } }
 </main>
 <footer>
   <app-landing-section-footer />

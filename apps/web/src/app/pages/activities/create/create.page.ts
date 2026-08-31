@@ -198,7 +198,11 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
 
   protected async handleKeyDown() {
     if (this.stepper.isValid) {
-      this.stepper.isLast ? await this.create() : this.stepper.nextStep()
+      if (this.stepper.isLast) {
+        await this.create()
+      } else {
+        this.stepper.nextStep()
+      }
     }
   }
 
@@ -436,7 +440,7 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       this.creating = true
       const { course, section } = this.courseInfo.value
       const { resources } = this.resourceInfo.value
-      const { openAt, closeAt, members, correctors, groups, isChallenge } = this.settingsInfo.value
+      const { openAt, closeAt, isChallenge } = this.settingsInfo.value
 
       console.log("Membres sélectionnés pour l'activité :", this.members)
       const createdActivities = await firstValueFrom(

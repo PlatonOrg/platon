@@ -41,7 +41,7 @@ export async function isFile(path: string): Promise<boolean> {
   try {
     const stat = await fs.promises.stat(path)
     return stat.isFile()
-  } catch (error) {
+  } catch (_error) {
     // If an error occurs, the path probably does not exist or is not accessible
     return false
   }
@@ -51,7 +51,7 @@ export async function isDirectory(path: string): Promise<boolean> {
   try {
     const stat = await fs.promises.stat(path)
     return stat.isDirectory()
-  } catch (error) {
+  } catch (_error) {
     // If an error occurs, the path probably does not exist or is not accessible
     return false
   }

@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon'
 
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzTableModule } from 'ng-zorro-antd/table'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { AnswerStates, ExerciseResults } from '@platon/feature/result/common'
 import { DurationPipe, UiStatisticCardComponent } from '@platon/shared/ui'
@@ -21,7 +21,7 @@ import { AnswerStatePipesModule } from '../../pipes'
     MatIconModule,
     NzGridModule,
     NzTableModule,
-    NzToolTipModule,
+    NzTooltipModule,
     DurationPipe,
     AnswerStatePipesModule,
     UiStatisticCardComponent,

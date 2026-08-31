@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
@@ -6,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { ActivitySettings } from '@platon/feature/compiler'
 
@@ -15,15 +14,7 @@ import { ActivitySettings } from '@platon/feature/compiler'
   templateUrl: './graded-activity-settings.component.html',
   styleUrls: ['./graded-activity-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatIconModule,
-    MatButtonModule,
-    NzInputNumberModule,
-    NzCheckboxModule,
-    NzToolTipModule,
-  ],
+  imports: [FormsModule, MatIconModule, MatButtonModule, NzInputNumberModule, NzCheckboxModule, NzTooltipModule],
 })
 export class GradedActivitySettingsComponent {
   protected readonly durationHours = signal(0)

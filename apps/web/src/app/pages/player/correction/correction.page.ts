@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { PlayerCorrectionComponent } from '@platon/feature/player/browser'
@@ -16,22 +15,20 @@ import { Activity, FindCourse } from '@platon/feature/course/common'
   templateUrl: './correction.page.html',
   styleUrls: ['./correction.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzSpinModule, UiErrorComponent, PlayerCorrectionComponent],
+  imports: [NzSpinModule, UiErrorComponent, PlayerCorrectionComponent],
 })
 export class PlayerCorrectionPage implements OnInit {
+  private readonly resultService = inject(ResultService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly courseService = inject(CourseService)
+
   protected player?: Player
   protected loading = true
   protected error: unknown
   protected correction?: CourseCorrection
   protected mode: 'correction' | 'review' = 'correction'
   private selectedActivityId?: string
-
-  constructor(
-    private readonly resultService: ResultService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly courseService: CourseService
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.loading = true

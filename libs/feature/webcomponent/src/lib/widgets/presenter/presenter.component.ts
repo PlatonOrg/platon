@@ -3,11 +3,12 @@ import {
   AfterViewInit,
   ElementRef,
   OnDestroy,
-  Inject,
   HostListener,
   Input,
   Injector,
   ViewChild,
+  DOCUMENT,
+  inject,
 } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import Reveal from 'reveal.js'
@@ -16,7 +17,7 @@ import RevealMath from 'reveal.js/plugin/math/math.esm.js'
 import RevealHighlight from 'reveal.js/plugin/highlight/highlight.esm.js'
 import { firstValueFrom } from 'rxjs'
 import { ResourceLoaderService } from '@cisstech/nge/services'
-import { DOCUMENT } from '@angular/common'
+
 import { PresenterComponentDefinition, PresenterState } from './presenter'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { BaseModule } from '../../shared/components/base/base.module'
@@ -31,20 +32,18 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 })
 @WebComponent(PresenterComponentDefinition)
 export class PresenterComponent implements AfterViewInit, OnDestroy, WebComponentHooks<PresenterState> {
+  private el = inject(ElementRef)
+  private readonly sanitizer = inject(DomSanitizer)
+  private readonly resourceLoader = inject(ResourceLoaderService)
+  private document = inject<Document>(DOCUMENT)
+  readonly injector = inject(Injector)
+
   fullscreen = false
   content: SafeHtml = ''
   private _reveal: Reveal.Api | undefined
   @Input() state!: PresenterState
   @ViewChild('presenterContainer') presenterContainer!: ElementRef<HTMLElement>
   @ViewChild('revealContainer') revealContainer!: ElementRef<HTMLElement>
-
-  constructor(
-    private el: ElementRef,
-    private readonly sanitizer: DomSanitizer,
-    private readonly resourceLoader: ResourceLoaderService,
-    @Inject(DOCUMENT) private document: Document,
-    readonly injector: Injector
-  ) {}
 
   @HostListener('document:fullscreenchange', ['$event'])
   @HostListener('document:webkitfullscreenchange', ['$event'])

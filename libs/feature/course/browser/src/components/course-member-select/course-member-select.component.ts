@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -7,6 +7,7 @@ import {
   Input,
   forwardRef,
   CUSTOM_ELEMENTS_SCHEMA,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 
@@ -29,10 +30,12 @@ import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
       multi: true,
     },
   ],
-  imports: [CommonModule, FormsModule, NzTreeSelectModule, UserAvatarComponent],
+  imports: [FormsModule, NzTreeSelectModule, UserAvatarComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CourseMemberSelectComponent implements ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected disabled = false
   protected nodes: NzTreeNodeOptions[] = []
   protected selection: string[] = []
@@ -90,8 +93,6 @@ export class CourseMemberSelectComponent implements ControlValueAccessor {
 
     this.nodes = [selectAllNode, ...memberNodes]
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   // ControlValueAccessor methods
 

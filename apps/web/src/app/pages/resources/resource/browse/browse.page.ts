@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { Subscription } from 'rxjs'
 
@@ -20,7 +19,6 @@ import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
   styleUrls: ['./browse.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     NzModalModule,
     NgeUiIconModule,
     UiModalIFrameComponent,

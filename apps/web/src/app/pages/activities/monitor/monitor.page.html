@@ -1,9 +1,11 @@
 <div class="page-header">
   <!-- Bouton retour au cours -->
-  <button class="back-button" nz-button nzType="default" (click)="navigateToCourse()" *ngIf="context.course?.id">
+  @if (context.course?.id) {
+  <button class="back-button" nz-button nzType="default" (click)="navigateToCourse()">
     <i nz-icon nzType="arrow-left"></i>
     Retour au {{ context.isTest ? 'test' : 'cours' }}
   </button>
+  }
 
   <!-- Titre de la page -->
   <h1 class="page-title">Suivi de l'activité</h1>
@@ -19,23 +21,21 @@
   </p>
 </div>
 
-<ng-container *ngIf="context.results">
-  <!-- Composant de modération des utilisateurs -->
-  <div class="content-section">
-    <course-activity-moderation
-      [results]="context.results.users"
-      (moderationAction)="onModerationAction($event)"
-      (regenerateCode)="onRegenerateCode()"
-      [code]="context.activity?.code"
-    />
-  </div>
-
-  <!-- Tableaux de résultats -->
-  <div class="content-section">
-    <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" />
-  </div>
-</ng-container>
-} @else {
+@if (context.results) {
+<!-- Composant de modération des utilisateurs -->
+<div class="content-section">
+  <course-activity-moderation
+    [results]="context.results.users"
+    (moderationAction)="onModerationAction($event)"
+    (regenerateCode)="onRegenerateCode()"
+    [code]="context.activity?.code"
+  />
+</div>
+<!-- Tableaux de résultats -->
+<div class="content-section">
+  <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" />
+</div>
+} } @else {
 <div class="info-banner">
   <i class="info-icon" nz-icon nzType="info-circle"></i>
   <p class="info-text"><strong>Information :</strong> L'activité doit être ouverte pour accéder au suivi.</p>

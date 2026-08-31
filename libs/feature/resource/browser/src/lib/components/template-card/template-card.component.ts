@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   CUSTOM_ELEMENTS_SCHEMA,
   ChangeDetectionStrategy,
@@ -26,7 +25,7 @@ import { Variables } from '@platon/feature/compiler'
   templateUrl: './template-card.component.html',
   styleUrls: ['./template-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatTooltipModule, NzIconModule, UiModalIFrameComponent],
+  imports: [MatIconModule, MatTooltipModule, NzIconModule, UiModalIFrameComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class TemplateCardComponent {

@@ -45,11 +45,12 @@ import { IsUUIDPipe } from '@platon/shared/ui'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
 import { PlayerErrorComponent } from '../player-error/player-error.component'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 type Action = {
   id?: string
@@ -92,7 +93,7 @@ type FullscreenElement = HTMLElement & {
     MatDividerModule,
     NzSpinModule,
     NzAlertModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzSkeletonModule,
     NzStatisticModule,
     NzTabsModule,
@@ -132,7 +133,8 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
     'container',
     { read: ElementRef }
   )
-  protected readonly errorTemplate = viewChild.required<TemplateRef<object>>('errorTemplate')
+  protected readonly errorTemplate =
+    viewChild.required<TemplateRef<{ $implicit: NzNotificationComponent; data: any }>>('errorTemplate')
   protected readonly containerFeedbacks = viewChild<ElementRef<HTMLElement>>('containerFeedbacks')
   protected readonly containerHints = viewChild<ElementRef<HTMLElement>>('containerHints')
   protected readonly containerSolution = viewChild<ElementRef<HTMLElement>>('containerSolution')
@@ -405,17 +407,21 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
     if (this.fullscreen()) {
       this.fullscreen.set(false)
       const element = document as unknown as FullscreenElement
-      element.exitFullscreen?.() ||
-        element.webkitExitFullscreen?.() ||
-        element.mozCancelFullScreen?.() ||
-        element.msExitFullscreen?.()
+      const exitFullscreenFunc =
+        element.exitFullscreen ||
+        element.webkitExitFullscreen ||
+        element.mozCancelFullScreen ||
+        element.msExitFullscreen
+      await exitFullscreenFunc?.()
     } else {
       this.fullscreen.set(true)
       const element = this.container().nativeElement
-      element.requestFullscreen?.() ||
-        element.webkitRequestFullscreen?.() ||
-        element.mozRequestFullScreen?.() ||
-        element.msRequestFullscreen?.()
+      const requestFullscreenFunc =
+        element.requestFullscreen ||
+        element.webkitRequestFullscreen ||
+        element.mozRequestFullScreen ||
+        element.msRequestFullscreen
+      await requestFullscreenFunc?.()
     }
   }
 

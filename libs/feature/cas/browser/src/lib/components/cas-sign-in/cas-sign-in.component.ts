@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, forwardRef } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, forwardRef, inject } from '@angular/core'
 
 import { MatButtonModule } from '@angular/material/button'
 
@@ -15,18 +14,16 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms'
   styleUrls: ['./cas-sign-in.component.scss'],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => CasSignInComponent), multi: true }],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [MatButtonModule, MatProgressSpinnerModule],
 })
 export class CasSignInComponent implements OnInit {
+  private readonly router = inject(Router)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly casService = inject(CasService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected connecting = false
   protected cases: string[] = []
-
-  constructor(
-    private readonly router: Router,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly casService: CasService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   ngOnInit(): void {
     this.casService.listCas().subscribe((cases) => {

@@ -8,6 +8,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  inject,
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 
@@ -45,6 +46,8 @@ import { CoursePipesModule } from '../../pipes'
   ],
 })
 export class CourseFiltersComponent implements OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
 
   protected form = this.createForm()
@@ -52,8 +55,6 @@ export class CourseFiltersComponent implements OnDestroy {
 
   @Input() filters: CourseFilters = {}
   @Output() triggered = new EventEmitter<CourseFilters>()
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())

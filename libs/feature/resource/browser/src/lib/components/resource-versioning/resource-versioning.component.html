@@ -4,13 +4,18 @@
       <mat-form-field appearance="fill" [hideRequiredMarker]="true">
         <mat-label>Tag</mat-label>
         <input matInput formControlName="name" placeholder="v1" />
-        <mat-error *ngIf="controls.name.hasError('required')"> Vous devez saisir un nom de tag. </mat-error>
-        <mat-error *ngIf="controls.name.hasError('name')"> Ce nom de tag n'est pas valide. </mat-error>
+        @if (controls.name.hasError('required')) {
+        <mat-error> Vous devez saisir un nom de tag. </mat-error>
+        } @if (controls.name.hasError('name')) {
+        <mat-error> Ce nom de tag n'est pas valide. </mat-error>
+        }
       </mat-form-field>
       <mat-form-field appearance="fill" [hideRequiredMarker]="true">
         <mat-label>Description</mat-label>
         <textarea cdkTextareaAutosize matInput formControlName="message" cdkAutosizeMinRows="2"></textarea>
-        <mat-error *ngIf="controls.message.hasError('required')"> Vous devez saisir une description. </mat-error>
+        @if (controls.message.hasError('required')) {
+        <mat-error> Vous devez saisir une description. </mat-error>
+        }
       </mat-form-field>
       <p>
         Pour d'informations sur le versioning, veuillez vous rendre

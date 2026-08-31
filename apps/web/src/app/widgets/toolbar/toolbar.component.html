@@ -3,41 +3,41 @@
     <mat-icon class="icon-color">{{ drawerOpened ? 'menu_open' : 'menu' }}</mat-icon>
   </button>
 
+  @if (!drawerOpened) {
   <img
-    *ngIf="!drawerOpened"
     class="logo"
     src="assets/images/logo/platon.svg"
     alt="Logo PLaTon"
     [routerLink]="'/dashboard'"
     title="Retour au tableau de bord"
   />
-
-  <span class="icon-color" *ngIf="!mobile">PLaTon</span>
+  } @if (!mobile) {
+  <span class="icon-color">PLaTon</span>
+  }
   <div class="spacer"></div>
 
-  <ng-container *ngIf="canCreate">
-    <!-- Selectionner un tutoriel nz-tooltip="tutoriels" -->
-    <button id="tuto-help-button" nz-button nzType="text" nzSize="small" (click)="openTutorialSelector()">
-      <mat-icon class="icon-color">play_lesson</mat-icon>
-    </button>
-
-    <button
-      id="tuto-create-menu-container"
-      nz-button
-      nzType="primary"
-      nzShape="round"
-      nzSize="small"
-      (click)="userCharterAccepted ? null : acceptUserCharter()"
-      [matMenuTriggerFor]="userCharterAccepted ? actionMenu : null"
-    >
-      <span nz-icon nzType="plus"></span>
-    </button>
-    <span #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionMenu"></span>
-  </ng-container>
+  @if (canCreate) {
+  <!-- Selectionner un tutoriel nz-tooltip="tutoriels" -->
+  <button id="tuto-help-button" nz-button nzType="text" nzSize="small" (click)="openTutorialSelector()">
+    <mat-icon class="icon-color">play_lesson</mat-icon>
+  </button>
+  <button
+    id="tuto-create-menu-container"
+    nz-button
+    nzType="primary"
+    nzShape="round"
+    nzSize="small"
+    (click)="userCharterAccepted ? null : acceptUserCharter()"
+    [matMenuTriggerFor]="userCharterAccepted ? actionMenu : null"
+  >
+    <span nz-icon nzType="plus"></span>
+  </button>
+  <span #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionMenu"></span>
+  }
 
   <!-- Bouton Discord (désactivé) -->
+  @if (false) {
   <button
-    *ngIf="false"
     id="tuto-discord-button"
     nz-button
     nzType="text"
@@ -47,6 +47,7 @@
   >
     <discord-button class="discord-button" />
   </button>
+  }
 
   <!-- Sélecteur de thème -->
   <button id="tuto-toolbar-theme-button" nz-button nzType="text" nzSize="small" [matMenuTriggerFor]="themeMenu">
@@ -61,8 +62,8 @@
   </button>
 
   <!-- Avatar utilisateur -->
+  @if (user) {
   <user-avatar
-    *ngIf="user"
     id="tuto-user-avatar"
     [user]="user"
     [size]="32"
@@ -70,16 +71,18 @@
     [attr.aria-label]="user.firstName"
     [matMenuTriggerFor]="avatarMenu"
   />
+  }
 </header>
 
 <!-- Menu de création de ressources -->
 <mat-menu #actionMenu="matMenu" id="tuto-action-menu">
-  <button mat-menu-item [routerLink]="['/courses/create']" id="tuto-create-course" *ngIf="canCreateCourse">
+  @if (canCreateCourse) {
+  <button mat-menu-item [routerLink]="['/courses/create']" id="tuto-create-course">
     <mat-icon>local_library</mat-icon>
     <span>Créer un cours</span>
   </button>
+  } @if (canCreateCircle) {
   <button
-    *ngIf="canCreateCircle"
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'CIRCLE', parent: createResourceParentParam }"
@@ -88,8 +91,8 @@
     <mat-icon>{{ 'CIRCLE' | resourceIcon }}</mat-icon>
     <span>Créer un cercle</span>
   </button>
+  } @if (canCreateActivity) {
   <button
-    *ngIf="canCreateActivity"
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'ACTIVITY', parent: createResourceParentParam }"
@@ -98,8 +101,8 @@
     <mat-icon>{{ 'ACTIVITY' | resourceIcon }}</mat-icon>
     <span>Créer une activité</span>
   </button>
+  } @if (canCreateExercise) {
   <button
-    *ngIf="canCreateExercise"
     mat-menu-item
     [routerLink]="['/resources/create']"
     [queryParams]="{ type: 'EXERCISE', parent: createResourceParentParam }"
@@ -108,6 +111,7 @@
     <mat-icon>{{ 'EXERCISE' | resourceIcon }}</mat-icon>
     <span>Créer un exercice</span>
   </button>
+  }
 </mat-menu>
 
 <!-- Menu utilisateur -->
@@ -116,10 +120,12 @@
     <mat-icon>account_circle</mat-icon>
     <span>Mon compte</span>
   </button>
-  <button *ngIf="canCreate" mat-menu-item [routerLink]="'/resources/' + personalCircleId" id="tuto-personal-circle">
+  @if (canCreate) {
+  <button mat-menu-item [routerLink]="'/resources/' + personalCircleId" id="tuto-personal-circle">
     <mat-icon>group_work</mat-icon>
     <span>Mon cercle</span>
   </button>
+  }
   <button mat-menu-item (click)="signOut()" id="tuto-logout">
     <mat-icon>logout</mat-icon>
     <span>Déconnexion</span>

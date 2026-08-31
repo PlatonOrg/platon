@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { BaseValueEditor } from '../../ple-input'
 import { InputNumberOptions } from '../input-number'
-import { CommonModule } from '@angular/common'
+
 import { FormsModule } from '@angular/forms'
 import { NzFormModule } from 'ng-zorro-antd/form'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
@@ -11,7 +11,7 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
   templateUrl: 'value-editor.component.html',
   styleUrls: ['value-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzFormModule, NzInputNumberModule],
+  imports: [FormsModule, NzFormModule, NzInputNumberModule],
 })
 export class ValueEditorComponent extends BaseValueEditor<number, InputNumberOptions> {
   readonly minSafeInteger = Number.MIN_SAFE_INTEGER

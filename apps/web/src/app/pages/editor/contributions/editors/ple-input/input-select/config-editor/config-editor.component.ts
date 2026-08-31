@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { BaseConfigEditor } from '../../ple-input'
 import { InputSelectOptions } from '../input-select'
-import { CommonModule } from '@angular/common'
+
 import { FormsModule } from '@angular/forms'
 import { UiTagListComponent } from '@platon/shared/ui'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
@@ -14,15 +14,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
   templateUrl: 'config-editor.component.html',
   styleUrls: ['config-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    NzFormModule,
-    NzCheckboxModule,
-    NzSelectModule,
-    NzInputModule,
-    UiTagListComponent,
-  ],
+  imports: [FormsModule, NzFormModule, NzCheckboxModule, NzSelectModule, NzInputModule, UiTagListComponent],
 })
 export class ConfigEditorComponent extends BaseConfigEditor<InputSelectOptions> {
   constructor() {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { RouterModule } from '@angular/router'
 import { Subscription } from 'rxjs'
 
@@ -14,14 +14,15 @@ import { ResourcePipesModule } from '@platon/feature/resource/browser'
   templateUrl: './events.page.html',
   styleUrls: ['./events.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ResourceEventListComponent, ResourcePipesModule],
+  imports: [RouterModule, ResourceEventListComponent, ResourcePipesModule],
 })
 export class ResourceEventsPage implements OnInit, OnDestroy {
+  private readonly presenter = inject(ResourcePresenter)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
   protected context = this.presenter.defaultContext()
   protected events: ResourceEvent[] = []
-
-  constructor(private readonly presenter: ResourcePresenter, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

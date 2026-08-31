@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -18,7 +17,7 @@ import { MatInputModule } from '@angular/material/input'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { User, UserFilters, UserGroup } from '@platon/core/common'
 import { UiModalDrawerComponent } from '@platon/shared/ui'
@@ -37,7 +36,6 @@ import { AuthService } from '../../api/auth.service'
   styleUrls: ['./user-group-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     MatInputModule,
     MatFormFieldModule,
@@ -45,7 +43,7 @@ import { AuthService } from '../../api/auth.service'
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopconfirmModule,
     UserTableComponent,
     UserSearchBarComponent,

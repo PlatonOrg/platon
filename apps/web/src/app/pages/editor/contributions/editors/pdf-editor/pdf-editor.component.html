@@ -1,1 +1,3 @@
-<ui-file-preview *ngIf="request?.file?.url" [src]="request!.file!.url!" />
+@if (request?.file?.url) {
+<ui-file-preview [src]="request!.file!.url!" />
+}

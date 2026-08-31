@@ -1,14 +1,4 @@
-import { CommonModule } from '@angular/common'
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  OnDestroy,
-  TemplateRef,
-  ViewChild,
-  inject,
-  computed,
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { NzModalModule } from 'ng-zorro-antd/modal'
@@ -16,7 +6,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { FeatureAnnouncementService } from '../../api/feature-announcement.service'
 import { NotificationCloseReason } from '../../models/data-storage.model'
-import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification'
+import { NzNotificationService } from 'ng-zorro-antd/notification'
 import { Subscription } from 'rxjs'
 import { Announcement } from '@platon/feature/announcement/common'
 
@@ -29,15 +19,7 @@ interface AnnouncementNotification {
 @Component({
   selector: 'lib-feature-announcement-modal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    NzButtonModule,
-    NzIconModule,
-    NzModalModule,
-    NzNotificationModule,
-  ],
+  imports: [MatButtonModule, MatIconModule, NzButtonModule, NzIconModule, NzModalModule],
   templateUrl: './feature-announcement-modal.component.html',
   styleUrls: ['./feature-announcement-modal.component.scss'],
 })
@@ -120,7 +102,7 @@ export class FeatureAnnouncementModalComponent implements OnInit, OnDestroy {
   private repositionNotifications(): void {
     const notificationsToReposition = Array.from(this.activeNotifications.entries())
 
-    notificationsToReposition.forEach(([announcementId, notif]) => {
+    notificationsToReposition.forEach(([_announcementId, notif]) => {
       this.notification.remove(notif.notificationId)
     })
 

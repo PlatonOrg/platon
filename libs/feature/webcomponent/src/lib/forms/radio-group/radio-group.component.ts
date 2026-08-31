@@ -9,6 +9,7 @@ import {
   ViewChild,
   ElementRef,
   AfterViewInit,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
@@ -29,6 +30,9 @@ import { CssPipeModule } from '../../shared/pipes/css.pipe'
 })
 @WebComponent(RadioGroupComponentDefinition)
 export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, OnInit, AfterViewInit {
+  readonly injector = inject(Injector)
+  private readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private readonly webComponentService!: WebComponentService
 
   @ViewChild('focusZone', { static: true }) focusZone!: ElementRef
@@ -83,7 +87,9 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, 
     ],
   ])
 
-  constructor(readonly injector: Injector, private readonly changeDetector: WebComponentChangeDetectorService) {
+  constructor() {
+    const injector = this.injector
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
   }

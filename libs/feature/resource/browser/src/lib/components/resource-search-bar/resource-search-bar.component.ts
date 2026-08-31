@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input, inject } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -27,9 +27,12 @@ import { ResourceItemComponent } from '../resource-item/resource-item.component'
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent, ResourceItemComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent, ResourceItemComponent],
 })
 export class ResourceSearchBarComponent implements ControlValueAccessor {
+  private readonly resourceService = inject(ResourceService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() multi = false
   @Input() filters?: ResourceFilters = { limit: DEFAULT_SEARCH_BAR_LIMIT }
   @Input() disabled = false
@@ -56,11 +59,6 @@ export class ResourceSearchBarComponent implements ControlValueAccessor {
   }
 
   selection: Resource[] = []
-
-  constructor(
-    private readonly resourceService: ResourceService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   // ControlValueAccessor methods
 

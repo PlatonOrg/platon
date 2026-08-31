@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzTableModule } from 'ng-zorro-antd/table'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { UserAvatarComponent } from '@platon/core/browser'
 import { AnswerStates, UserResults } from '@platon/feature/result/common'
@@ -24,7 +24,7 @@ import { AnswerStatePipesModule } from '../../pipes'
     MatIconModule,
     NzGridModule,
     NzTableModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopoverModule,
     DurationPipe,
     UserAvatarComponent,
@@ -33,6 +33,8 @@ import { AnswerStatePipesModule } from '../../pipes'
   ],
 })
 export class ResultByMembersComponent implements OnInit {
+  private route = inject(ActivatedRoute)
+
   @Input({ required: true }) results: UserResults[] = []
   @Input() columnOrder?: string[] = []
 
@@ -40,8 +42,6 @@ export class ResultByMembersComponent implements OnInit {
   private activityId: string | null = null
   private courseId: string | null = null
   protected copyUrl = ''
-
-  constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {

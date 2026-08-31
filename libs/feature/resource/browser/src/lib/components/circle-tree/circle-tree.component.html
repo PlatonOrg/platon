@@ -1,12 +1,13 @@
 <nz-tree-view [nzTreeControl]="$any(treeControl)" [nzDataSource]="dataSource" [trackBy]="trackBy">
   <nz-tree-node *nzTreeNodeDef="let node" nzTreeNodeIndentLine>
+    @if (selectable) {
     <nz-tree-node-checkbox
-      *ngIf="selectable"
       [nzChecked]="checklistSelection.isSelected(node)"
       [nzDisabled]="disabled || node.disabled"
       (nzClick)="selectionToggle(node)"
     >
     </nz-tree-node-checkbox>
+    }
     <nz-tree-node-option
       [nzDisabled]="node.disabled"
       [routerLink]="node.disabled || selectable || clickable ? undefined : ['/resources', node.id]"
@@ -18,13 +19,14 @@
     <nz-tree-node-toggle>
       <i nz-icon nzType="caret-down" nzTreeNodeToggleRotateIcon></i>
     </nz-tree-node-toggle>
+    @if (selectable) {
     <nz-tree-node-checkbox
-      *ngIf="selectable"
       [nzChecked]="checklistSelection.isSelected(node)"
       [nzDisabled]="disabled || node.disabled"
       (nzClick)="selectionToggle(node)"
     >
     </nz-tree-node-checkbox>
+    }
     <nz-tree-node-option
       [nzDisabled]="node.disabled"
       [routerLink]="node.disabled || selectable || clickable ? undefined : ['/resources', node.id, 'overview']"

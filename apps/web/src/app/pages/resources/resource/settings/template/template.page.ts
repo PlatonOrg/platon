@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
@@ -22,7 +21,6 @@ import { RouterModule } from '@angular/router'
   styleUrls: ['./template.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     NzSelectModule,
     NzPopconfirmModule,
@@ -105,7 +103,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
           this.changeDetectorRef.markForCheck()
           return
         }
-      } catch (e) {
+      } catch (_error) {
         this.invalidTemplateId = true
         this.errorMessage = "Cette ressource n'existe pas"
         this.changeDetectorRef.markForCheck()
