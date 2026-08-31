@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'core-testing-server',
   preset: '../../../../jest.preset.js',
   globals: {
