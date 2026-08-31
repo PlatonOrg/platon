@@ -23,3 +23,4 @@ dumps
 apps/docs/.next
 
 /.nx/workspace-data
+.nx/self-healing

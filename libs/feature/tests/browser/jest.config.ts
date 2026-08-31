@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-tests-browser',
   preset: '../../../../jest.preset.js',
   globals: {

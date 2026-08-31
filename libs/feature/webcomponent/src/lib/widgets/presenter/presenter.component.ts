@@ -45,10 +45,10 @@ export class PresenterComponent implements AfterViewInit, OnDestroy, WebComponen
   @ViewChild('presenterContainer') presenterContainer!: ElementRef<HTMLElement>
   @ViewChild('revealContainer') revealContainer!: ElementRef<HTMLElement>
 
-  @HostListener('document:fullscreenchange', ['$event'])
-  @HostListener('document:webkitfullscreenchange', ['$event'])
-  @HostListener('document:mozfullscreenchange', ['$event'])
-  @HostListener('document:MSFullscreenChange', ['$event'])
+  @HostListener('document:fullscreenchange')
+  @HostListener('document:webkitfullscreenchange')
+  @HostListener('document:mozfullscreenchange')
+  @HostListener('document:MSFullscreenChange')
   fullscreenChange() {
     this.fullscreen = this.document.fullscreenElement ? true : false
     this._reveal?.layout()
