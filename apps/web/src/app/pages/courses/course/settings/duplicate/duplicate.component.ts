@@ -1,7 +1,7 @@
 import { Component, inject, input, signal } from '@angular/core'
 import { CourseService, CourseItemComponent } from '@platon/feature/course/browser'
 import { UiSearchBarComponent, SearchBar } from '@platon/shared/ui'
-import { CommonModule } from '@angular/common'
+
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { Course } from '@platon/feature/course/common'
 import Fuse from 'fuse.js'
@@ -15,9 +15,11 @@ import { DialogService } from '@platon/core/browser'
   selector: 'app-course-duplicate',
   templateUrl: './duplicate.component.html',
   styleUrls: ['./duplicate.component.scss'],
-  imports: [CommonModule, UiSearchBarComponent, NzButtonModule, NzPopconfirmModule, NzSpinModule, CourseItemComponent],
+  imports: [UiSearchBarComponent, NzButtonModule, NzPopconfirmModule, NzSpinModule, CourseItemComponent],
 })
 export class CourseDuplicateComponent {
+  private readonly courseService = inject(CourseService)
+
   protected searching = signal(false)
   protected items = signal<Course[]>([])
   protected askToLoad = signal<boolean>(false)
@@ -25,8 +27,6 @@ export class CourseDuplicateComponent {
   protected readonly selectedCourse = signal<Course | null>(null)
   private readonly dialogService = inject(DialogService)
   currentCourse = input.required<Course>()
-
-  constructor(private readonly courseService: CourseService) {}
 
   protected readonly searchbar: SearchBar<string> = {
     placeholder: 'Essayez un nom...',

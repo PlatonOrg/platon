@@ -11,8 +11,6 @@
   "extends": [
     "eslint:recommended",
     "plugin:prettier/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -61,11 +59,13 @@
         "*.tsx"
       ],
       "extends": [
-        "plugin:@nx/typescript"
+        "plugin:@nx/typescript",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/eslint-recommended"
       ],
       "rules": {
-        "@typescript-eslint/no-extra-semi": "error",
-        "no-extra-semi": "off",
+        "no-extra-semi": "error",
+        "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-floating-promises": "error"
       }
     },
@@ -78,8 +78,7 @@
         "plugin:@nx/javascript"
       ],
       "rules": {
-        "@typescript-eslint/no-extra-semi": "error",
-        "no-extra-semi": "off"
+        "no-extra-semi": "error"
       }
     },
     {

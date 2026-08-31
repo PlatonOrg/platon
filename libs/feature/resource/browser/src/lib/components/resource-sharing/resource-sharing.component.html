@@ -1,38 +1,37 @@
-<ng-container *ngIf="versions">
-  <h2>Partager</h2>
-  <div id="tuto-sharing-visibility-select" class="row">
-    <nz-select
-      nzSuffixIcon="global"
-      class="visibility-select"
-      [(ngModel)]="visibility"
-      [disabled]="!canEditSharing"
-      (ngModelChange)="changeVisibility()"
-    >
-      <nz-option nzLabel="Visible en dehors de PLaTon" nzValue="public" />
-      <nz-option nzLabel="Visible uniquement dans PLaTon" nzValue="private" />
-    </nz-select>
-  </div>
-  <ui-qrcode id="tuto-sharing-qrcode" [value]="url"></ui-qrcode>
-
-  <div id="tuto-sharing-version-select" class="row">
-    <nz-select
-      class="version-select"
-      [(ngModel)]="resourceVersion"
-      (ngModelChange)="onResourceVersionChange()"
-      [nzCustomTemplate]="versionTpt"
-    >
-      <ng-template #versionTpt>
-        <i nz-icon nzType="branches" nzTheme="outline"></i>
-        {{ resourceVersion }}
-      </ng-template>
-      <nz-option nzLabel="latest" nzValue="latest" />
-      <nz-option *ngFor="let item of versions" [nzLabel]="item.tag" [nzValue]="item.tag" />
-    </nz-select>
-    <nz-button-group>
-      <button id="tuto-sharing-copy-link-btn" nz-button (click)="share()">
-        <i nz-icon nzType="link" nzTheme="outline"></i>
-        Copier le lien
-      </button>
-    </nz-button-group>
-  </div>
-</ng-container>
+@if (versions) {
+<h2>Partager</h2>
+<div id="tuto-sharing-visibility-select" class="row">
+  <nz-select
+    nzSuffixIcon="global"
+    class="visibility-select"
+    [(ngModel)]="visibility"
+    [disabled]="!canEditSharing"
+    (ngModelChange)="changeVisibility()"
+  >
+    <nz-option nzLabel="Visible en dehors de PLaTon" nzValue="public" />
+    <nz-option nzLabel="Visible uniquement dans PLaTon" nzValue="private" />
+  </nz-select>
+</div>
+<ui-qrcode id="tuto-sharing-qrcode" [value]="url"></ui-qrcode>
+<div id="tuto-sharing-version-select" class="row">
+  <nz-select
+    class="version-select"
+    [(ngModel)]="resourceVersion"
+    (ngModelChange)="onResourceVersionChange()"
+    [nzCustomTemplate]="versionTpt"
+  >
+    <ng-template #versionTpt>
+      <i nz-icon nzType="branches" nzTheme="outline"></i>
+      {{ resourceVersion }}
+    </ng-template>
+    <nz-option nzLabel="latest" nzValue="latest" />
+    @for (item of versions; track item) {
+    <nz-option [nzLabel]="item.tag" [nzValue]="item.tag" />
+    }
+  </nz-select>
+  <button id="tuto-sharing-copy-link-btn" nz-button (click)="share()">
+    <i nz-icon nzType="link" nzTheme="outline"></i>
+    Copier le lien
+  </button>
+</div>
+}

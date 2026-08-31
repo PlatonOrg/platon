@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { NgeMonacoLoaderService } from '@cisstech/nge/monaco'
 import { NgeMonacoThemeService } from '@cisstech/nge/monaco'
 
 @Injectable({ providedIn: 'root' })
 export class ThomasColorizerService {
-  constructor(private readonly loader: NgeMonacoLoaderService, private readonly theming: NgeMonacoThemeService) {}
+  private readonly loader = inject(NgeMonacoLoaderService)
+  private readonly theming = inject(NgeMonacoThemeService)
 
   async colorizeElement(options: NgeMonacoColorizeOptions) {
     await this.loader.loadAsync()

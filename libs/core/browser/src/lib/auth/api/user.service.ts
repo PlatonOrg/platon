@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import {
   CreateUserGroup,
   ListResponse,
@@ -24,15 +24,13 @@ import { UserCharterProvider } from '../models/user-charter-provider'
  */
 @Injectable({ providedIn: 'root' })
 export class UserService {
+  private readonly userProvider = inject(UserProvider)
+  private readonly userGroupProvider = inject(UserGroupProvider)
+  private readonly userPrefsProvider = inject(UserPrefsProvider)
+  private readonly userCharterProvider = inject(UserCharterProvider)
+
   private users = new Map<string, User>()
   private findOneRequests = new Map<string, Observable<User | undefined>>()
-
-  constructor(
-    private readonly userProvider: UserProvider,
-    private readonly userGroupProvider: UserGroupProvider,
-    private readonly userPrefsProvider: UserPrefsProvider,
-    private readonly userCharterProvider: UserCharterProvider
-  ) {}
 
   update(user: string | User, input: UpdateUser): Observable<User> {
     return this.userProvider.update(user, input).pipe(

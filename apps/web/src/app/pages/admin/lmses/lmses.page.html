@@ -1,10 +1,10 @@
 <lms-search-bar #searchbar [(ngModel)]="lmses" [autoSelect]="true" [filters]="filters" />
 
-<nz-button-group>
+<div nz-flex nzGap="small">
   <button (click)="createDrawer.open()" nz-button nzType="primary" nz-tooltip="Ajouter un LMS">
     <span nz-icon nzType="plus" nzTheme="outline"></span>
   </button>
-</nz-button-group>
+</div>
 
 <lms-table
   [total]="searchbar.total"

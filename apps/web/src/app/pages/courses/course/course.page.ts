@@ -46,6 +46,8 @@ import { Title } from '@angular/platform-browser'
   ],
 })
 export class CoursePage implements OnInit, OnDestroy {
+  private titleService = inject(Title)
+
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly router = inject(Router)
@@ -53,9 +55,6 @@ export class CoursePage implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []
 
   protected context = this.presenter.defaultContext()
-
-  // for the tab name
-  constructor(private titleService: Title) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

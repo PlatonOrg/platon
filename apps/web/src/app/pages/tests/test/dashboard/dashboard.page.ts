@@ -13,7 +13,7 @@ import { User, UserGroup } from '@platon/core/common'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { ResultService } from '@platon/feature/result/browser'
 import { ActivityResults, AnswerStates } from '@platon/feature/result/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
@@ -41,7 +41,7 @@ import { UiModalDrawerComponent } from '@platon/shared/ui'
     NzSelectModule,
     NzIconModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     CoursePipesModule,
     DialogModule,
     NzPopconfirmModule,
@@ -50,6 +50,12 @@ import { UiModalDrawerComponent } from '@platon/shared/ui'
   ],
 })
 export class TestDashboardPage implements OnInit, OnDestroy {
+  private readonly courseService = inject(CourseService)
+  private readonly dialogService = inject(DialogService)
+  private readonly resultService = inject(ResultService)
+  private readonly testsService = inject(TestsService)
+  private readonly dialog = inject(MatDialog)
+
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly subscriptions: Subscription[] = []
@@ -70,14 +76,6 @@ export class TestDashboardPage implements OnInit, OnDestroy {
   protected averageScore = 0
 
   protected context = this.presenter.defaultContext()
-
-  constructor(
-    private readonly courseService: CourseService,
-    private readonly dialogService: DialogService,
-    private readonly resultService: ResultService,
-    private readonly testsService: TestsService,
-    private readonly dialog: MatDialog
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(

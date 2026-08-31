@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { FeedbackComponentDefinition, FeedbackState } from './feedback'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
@@ -16,6 +16,7 @@ import { BaseModule } from '../../shared/components/base/base.module'
 })
 @WebComponent(FeedbackComponentDefinition)
 export class FeedbackComponent implements WebComponentHooks<FeedbackState> {
+  readonly injector = inject(Injector)
+
   @Input() state!: FeedbackState
-  constructor(readonly injector: Injector) {}
 }

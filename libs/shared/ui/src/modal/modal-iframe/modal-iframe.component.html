@@ -1,5 +1,5 @@
+@if (visible) {
 <nz-modal
-  *ngIf="visible"
   [(nzVisible)]="visible"
   [nzBodyStyle]="{
     padding: '0',
@@ -19,9 +19,10 @@
   [nzFooter]="footer ?? noFooter"
 >
   <ng-container *nzModalContent>
-    <ng-container *ngIf="visible && url">
-      <iframe #iframe [src]="url | safe : 'resource'" frameborder="0"></iframe>
-    </ng-container>
+    @if (visible && url) {
+    <iframe #iframe [src]="url | safe : 'resource'" frameborder="0"></iframe>
+    }
   </ng-container>
 </nz-modal>
+}
 <ng-template #noFooter />

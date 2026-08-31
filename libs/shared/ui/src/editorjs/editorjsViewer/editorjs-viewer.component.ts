@@ -13,13 +13,14 @@ import { take } from 'rxjs'
   providers: [EditorjsViewerService],
 })
 export class EditorjsViewerComponent implements OnChanges {
+  private editorjsViewerService = inject(EditorjsViewerService)
+  private readonly sanitizer = inject(DomSanitizer)
+
   @Input() data: OutputData | undefined
   protected sanitizedHtml: SafeHtml = ''
 
   private readonly resourceLoader = inject(ResourceLoaderService)
   private hljsStyleLoaded = false
-
-  constructor(private editorjsViewerService: EditorjsViewerService, private readonly sanitizer: DomSanitizer) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {

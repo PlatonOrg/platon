@@ -5,14 +5,12 @@
     </mat-card-header>
     <mat-card-content>
       @if (templateId === '' && !isCreating) {
-        <div class="empty-state">
-          <div class="empty-message">
-            Aucun template n'est actuellement configuré pour cette ressource.
-          </div>
-          <button nz-button nzType="primary" class="add-template-btn" (click)="isCreating = true">
-            <span>Ajouter un template</span>
-          </button>
-        </div>
+      <div class="empty-state">
+        <div class="empty-message">Aucun template n'est actuellement configuré pour cette ressource.</div>
+        <button nz-button nzType="primary" class="add-template-btn" (click)="isCreating = true">
+          <span>Ajouter un template</span>
+        </button>
+      </div>
       } @else {
       <div>
         @if (invalidTemplateId) {
@@ -41,13 +39,15 @@
               {{ templateVersion }}
             </ng-template>
             <nz-option nzLabel="latest" nzValue="latest" />
-            @if (versions) {
-            <nz-option *ngFor="let item of versions.all" [nzLabel]="item.tag" [nzValue]="item.tag" />
-            }
+            @if (versions) { @for (item of versions.all; track item) {
+            <nz-option [nzLabel]="item.tag" [nzValue]="item.tag" />
+            } }
           </nz-select>
         </nz-input-group>
       </div>
-      <resource-version *ngIf="versionInfo" [version]="versionInfo" />
+      @if (versionInfo) {
+      <resource-version [version]="versionInfo" />
+      }
       <div class="button-group">
         <button nz-button nzType="primary" (click)="save()" [disabled]="invalidTemplateId">
           <span>Sauvegarder</span>
@@ -65,11 +65,12 @@
           nzCancelText="Annuler"
           (nzOnConfirm)="removeTemplate()"
           nzOkDanger
-          [disabled]="template === undefined">
+          [disabled]="template === undefined"
+        >
           <span>Supprimer</span>
         </button>
       </div>
-    }
+      }
     </mat-card-content>
   </mat-card>
 </div>

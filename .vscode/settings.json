@@ -1,5 +1,5 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsdk.path": "./node_modules/typescript/lib",
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "editor.codeActionsOnSave": {
@@ -8,6 +8,12 @@
   },
   "eslint.debug": true,
   "eslint.format.enable": true,
+  "eslint.validate": [
+    "typescript",
+    "javascript",
+    "html"
+  ],
+  "eslint.useFlatConfig": false,
   "eslint.workingDirectories": [
     "./apps",
     "./libs"

@@ -1,434 +1,424 @@
-<ng-container *ngIf="context.resource">
-  <nz-row [nzGutter]="[24, 24]" nzAlign="top">
-    <nz-col nzXs="24" nzSm="24" nzMd="20" nzLg="20" nzXl="20">
-      <section *ngIf="context.resource.type === 'CIRCLE'">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Suivi de l'État des Ressources</mat-card-title>
-            <mat-card-subtitle>
-              Tenir à jour les statuts des ressources aide à s'assurer que les enseignants peuvent rapidement trouver
-              des ressources fiables pour leurs cours. Contribuez à la qualité de la plateforme en mettant à jour le
-              statut de vos ressources.
-            </mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <div
-              *ngIf="statusChart"
-              class="echarts"
-              coreEcharts
-              [autoResize]="false"
-              [options]="statusChart"
-              (chartClick)="onClickedStatus($event)"
-            ></div>
-          </mat-card-content>
-        </mat-card>
-      </section>
-      <section *ngIf="dashboard">
-        <nz-row [nzGutter]="[24, 24]" nzAlign="top">
-          <ng-container *ngIf="dashboard.exercise">
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="assessment"
-                ribbonColor="#8e44ad"
-                description="Évaluations"
-                tooltip="Nombre de réponses enregistrées (note > -1)."
-                [value]="dashboard.exercise.totalAttempts"
+@if (context.resource) {
+<nz-row [nzGutter]="[24, 24]" nzAlign="top">
+  <nz-col nzXs="24" nzSm="24" nzMd="20" nzLg="20" nzXl="20">
+    @if (context.resource.type === 'CIRCLE') {
+    <section>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Suivi de l'État des Ressources</mat-card-title>
+          <mat-card-subtitle>
+            Tenir à jour les statuts des ressources aide à s'assurer que les enseignants peuvent rapidement trouver des
+            ressources fiables pour leurs cours. Contribuez à la qualité de la plateforme en mettant à jour le statut de
+            vos ressources.
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (statusChart) {
+          <div
+            class="echarts"
+            coreEcharts
+            [autoResize]="false"
+            [options]="statusChart"
+            (chartClick)="onClickedStatus($event)"
+          ></div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
+    } @if (dashboard) {
+    <section>
+      <nz-row [nzGutter]="[24, 24]" nzAlign="top">
+        @if (dashboard.exercise) {
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="assessment"
+            ribbonColor="#8e44ad"
+            description="Évaluations"
+            tooltip="Nombre de réponses enregistrées (note > -1)."
+            [value]="dashboard.exercise.totalAttempts"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="star"
+            ribbonColor="#7f8c8d"
+            description="Note moyenne"
+            [value]="dashboard.session.averageScore"
+            valueSuffix=" / 100"
+            tooltip="Moyenne de la note des réponses enregistrées (note > -1)."
+            shouldBePositive
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="access_time"
+            ribbonColor="#f39c12"
+            description="Durée moyenne"
+            tooltip="La durée d'une session d'exercice est calculée en additionnant l'intervalle de temps entre chaque réponse. Les intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir la précision."
+            [value]="dashboard.session.averageDuration | duration"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+          <ui-statistic-card
+            matIcon="assignment"
+            ribbonColor="#ff9800"
+            description="Essais par apprenant"
+            tooltip="Nombre de réponses enregistrées (note > -1)."
+            [value]="(dashboard.exercise.averageAttempts | number : '1.0-2')!"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+          <ui-statistic-card
+            matIcon="watch"
+            ribbonColor="#ff9800"
+            description="Délai moyen avant 1ère réponse"
+            tooltip="Temps moyen entre le début de l'exercice et la première réponse enregistrée. À noter que cette durée peut être influencée par les activités avec une navigation composée."
+            [value]="dashboard.exercise.averageTimeToAttempt | duration"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+          <ui-statistic-card
+            matIcon="thumb_up"
+            ribbonColor="#f1c40f"
+            valueSuffix="%"
+            description="Taux de réussite à la 1ère tentative"
+            tooltip="Pourcentage des réponses enregistrées avec une note de 100 dès la première tentative"
+            [value]="(dashboard.exercise.successRateOnFirstAttempt | number : '1.0-0')!"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+          <ui-statistic-card
+            matIcon="trending_up"
+            ribbonColor="#f1c40f"
+            description="Moyenne des tentatives avant succès"
+            tooltip="Nombre moyen de tentatives avant d'obtenir une note de 100"
+            [value]="(dashboard.exercise.averageAttemptsToSuccess | number : '1.0-2')!"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="check_circle"
+            ribbonColor="#8e44ad"
+            valueSuffix="%"
+            description="Taux de réussite"
+            tooltip="Pourcentage des réponses enregistrées avec une note de 100."
+            [value]="(dashboard.session.successRate | number : '1.0-0')!"
+            shouldBePositive
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="done"
+            ribbonColor="#f1c40f"
+            valueSuffix="%"
+            description="Taux de réponses"
+            tooltip="Pourcentage des sessions avec au moins une réponse enregistrée (note > -1)."
+            [value]="(dashboard.exercise.answerRate | number : '1.0-0')!"
+            shouldBePositive
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="clear"
+            ribbonColor="#16a085"
+            valueSuffix="%"
+            description="Taux d'abandon"
+            tooltip="Pourcentage des sessions sans réponse."
+            [value]="(dashboard.exercise.dropoutRate | number : '1.0-0')!"
+            shouldBeZero
+          />
+        </nz-col>
+        } @if (dashboard.activity) {
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="assessment"
+            ribbonColor="#8e44ad"
+            description="Évaluations"
+            tooltip="Activité avec au moins un exercice répondu."
+            [value]="dashboard.activity.totalAttempts"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="star"
+            ribbonColor="#7f8c8d"
+            description="Note moyenne"
+            [value]="dashboard.session.averageScore"
+            valueSuffix=" / 100"
+            tooltip="Moyenne de la note des sessions complétées."
+            shouldBePositive
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="access_time"
+            ribbonColor="#f39c12"
+            description="Durée moyenne"
+            tooltip="La durée d'une session d'activité est l'intervalle de temps entre le début et la fin de la session incluant les pauses prolongées."
+            [value]="dashboard.session.averageDuration | duration"
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="check_circle"
+            ribbonColor="#8e44ad"
+            valueSuffix="%"
+            description="Taux de réussite"
+            tooltip="Pourcentage des sessions complétées avec une note de 100."
+            [value]="(dashboard.session.successRate | number : '1.0-0')!"
+            shouldBePositive
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="done"
+            ribbonColor="#f1c40f"
+            valueSuffix="%"
+            description="Taux de réponses"
+            tooltip="Pourcentage des sessions complétées avec au moins un exercice répondu."
+            [value]="dashboard.activity.answerRate"
+            shouldBePositive
+          />
+        </nz-col>
+        <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
+          <ui-statistic-card
+            matIcon="clear"
+            ribbonColor="#16a085"
+            valueSuffix="%"
+            description="Taux d'abandon"
+            tooltip="Pourcentage des sessions complétées avec au moins un exercice non répondu"
+            [value]="(dashboard.activity.dropoutRate | number : '1.0-0')!"
+            shouldBeZero
+          />
+        </nz-col>
+        <nz-col>
+          <h2>Résultat par exercices</h2>
+        </nz-col>
+        <nz-col nzSpan="24">
+          <result-by-exercises [results]="dashboard.activity.exerciseResults" />
+        </nz-col>
+        }
+        <nz-col nzSpan="24">
+          <h2>Évolution des notes et du temps d'apprentissage</h2>
+        </nz-col>
+        <nz-col nzSpan="24">
+          <mat-card>
+            <mat-card-header>
+              <nz-select [(ngModel)]="learningInsightsOption">
+                <nz-option nzValue="score" nzLabel="Note moyenne" />
+                <nz-option nzValue="duration" nzLabel="Temps d'apprentissage estimée" />
+              </nz-select>
+              <nz-date-picker nzMode="month" [(ngModel)]="learningInsightsDate" />
+            </mat-card-header>
+            <mat-card-content>
+              <br />
+              @if (learningInsightsOption === 'score') {
+              <result-value-distribution
+                legend="Note moyenne"
+                [date]="learningInsightsDate"
+                [distribution]="dashboard.session.scoreDistribution"
               />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="star"
-                ribbonColor="#7f8c8d"
-                description="Note moyenne"
-                [value]="dashboard.session.averageScore"
-                valueSuffix=" / 100"
-                tooltip="Moyenne de la note des réponses enregistrées (note > -1)."
-                shouldBePositive
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="access_time"
-                ribbonColor="#f39c12"
-                description="Durée moyenne"
-                tooltip="La durée d'une session d'exercice est calculée en additionnant l'intervalle de temps entre chaque réponse. Les intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir la précision."
-                [value]="dashboard.session.averageDuration | duration"
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
-              <ui-statistic-card
-                matIcon="assignment"
-                ribbonColor="#ff9800"
-                description="Essais par apprenant"
-                tooltip="Nombre de réponses enregistrées (note > -1)."
-                [value]="(dashboard.exercise.averageAttempts | number : '1.0-2')!"
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
-              <ui-statistic-card
-                matIcon="watch"
-                ribbonColor="#ff9800"
-                description="Délai moyen avant 1ère réponse"
-                tooltip="Temps moyen entre le début de l'exercice et la première réponse enregistrée. À noter que cette durée peut être influencée par les activités avec une navigation composée."
-                [value]="dashboard.exercise.averageTimeToAttempt | duration"
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
-              <ui-statistic-card
-                matIcon="thumb_up"
-                ribbonColor="#f1c40f"
-                valueSuffix="%"
-                description="Taux de réussite à la 1ère tentative"
-                tooltip="Pourcentage des réponses enregistrées avec une note de 100 dès la première tentative"
-                [value]="(dashboard.exercise.successRateOnFirstAttempt | number : '1.0-0')!"
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
-              <ui-statistic-card
-                matIcon="trending_up"
-                ribbonColor="#f1c40f"
-                description="Moyenne des tentatives avant succès"
-                tooltip="Nombre moyen de tentatives avant d'obtenir une note de 100"
-                [value]="(dashboard.exercise.averageAttemptsToSuccess | number : '1.0-2')!"
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="check_circle"
-                ribbonColor="#8e44ad"
-                valueSuffix="%"
-                description="Taux de réussite"
-                tooltip="Pourcentage des réponses enregistrées avec une note de 100."
-                [value]="(dashboard.session.successRate | number : '1.0-0')!"
-                shouldBePositive
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="done"
-                ribbonColor="#f1c40f"
-                valueSuffix="%"
-                description="Taux de réponses"
-                tooltip="Pourcentage des sessions avec au moins une réponse enregistrée (note > -1)."
-                [value]="(dashboard.exercise.answerRate | number : '1.0-0')!"
-                shouldBePositive
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="clear"
-                ribbonColor="#16a085"
-                valueSuffix="%"
-                description="Taux d'abandon"
-                tooltip="Pourcentage des sessions sans réponse."
-                [value]="(dashboard.exercise.dropoutRate | number : '1.0-0')!"
-                shouldBeZero
-              />
-            </nz-col>
-          </ng-container>
-
-          <ng-container *ngIf="dashboard.activity">
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="assessment"
-                ribbonColor="#8e44ad"
-                description="Évaluations"
-                tooltip="Activité avec au moins un exercice répondu."
-                [value]="dashboard.activity.totalAttempts"
-              />
-            </nz-col>
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="star"
-                ribbonColor="#7f8c8d"
-                description="Note moyenne"
-                [value]="dashboard.session.averageScore"
-                valueSuffix=" / 100"
-                tooltip="Moyenne de la note des sessions complétées."
-                shouldBePositive
-              />
-            </nz-col>
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="access_time"
-                ribbonColor="#f39c12"
-                description="Durée moyenne"
-                tooltip="La durée d'une session d'activité est l'intervalle de temps entre le début et la fin de la session incluant les pauses prolongées."
-                [value]="dashboard.session.averageDuration | duration"
-              />
-            </nz-col>
-
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="check_circle"
-                ribbonColor="#8e44ad"
-                valueSuffix="%"
-                description="Taux de réussite"
-                tooltip="Pourcentage des sessions complétées avec une note de 100."
-                [value]="(dashboard.session.successRate | number : '1.0-0')!"
-                shouldBePositive
-              />
-            </nz-col>
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="done"
-                ribbonColor="#f1c40f"
-                valueSuffix="%"
-                description="Taux de réponses"
-                tooltip="Pourcentage des sessions complétées avec au moins un exercice répondu."
-                [value]="dashboard.activity.answerRate"
-                shouldBePositive
-              />
-            </nz-col>
-            <nz-col nzXs="24" nzSm="24" nzMd="8" nzLg="8" nzXl="8">
-              <ui-statistic-card
-                matIcon="clear"
-                ribbonColor="#16a085"
-                valueSuffix="%"
-                description="Taux d'abandon"
-                tooltip="Pourcentage des sessions complétées avec au moins un exercice non répondu"
-                [value]="(dashboard.activity.dropoutRate | number : '1.0-0')!"
-                shouldBeZero
-              />
-            </nz-col>
-
-            <nz-col>
-              <h2>Résultat par exercices</h2>
-            </nz-col>
-            <nz-col nzSpan="24">
-              <result-by-exercises [results]="dashboard.activity.exerciseResults" />
-            </nz-col>
-          </ng-container>
-
-          <nz-col nzSpan="24">
-            <h2>Évolution des notes et du temps d'apprentissage</h2>
-          </nz-col>
-          <nz-col nzSpan="24">
-            <mat-card>
-              <mat-card-header>
-                <nz-select [(ngModel)]="learningInsightsOption">
-                  <nz-option nzValue="score" nzLabel="Note moyenne" />
-                  <nz-option nzValue="duration" nzLabel="Temps d'apprentissage estimée" />
-                </nz-select>
-                <nz-date-picker nzMode="month" [(ngModel)]="learningInsightsDate" />
-              </mat-card-header>
-              <mat-card-content>
-                <br />
-                <result-value-distribution
-                  *ngIf="learningInsightsOption === 'score'"
-                  legend="Note moyenne"
-                  [date]="learningInsightsDate"
-                  [distribution]="dashboard.session.scoreDistribution"
-                />
-                <result-value-distribution
-                  *ngIf="learningInsightsOption === 'duration'"
-                  legend="Temps d'apprentissage estimée"
-                  [date]="learningInsightsDate"
-                  [isTimeValues]="true"
-                  [color]="'#FF0087'"
-                  [colorGradient]="['rgb(255, 0, 135)', 'rgb(135, 0, 157)']"
-                  [distribution]="dashboard.session.durationDistribution"
-                >
-                  @if (dashboard.exercise) {
-                  <p>Estimation du temps total passé par les apprenants sur les exercices durant ce mois.</p>
-                  <p>
-                    La durée d'un exercice est calculée en additionnant l'intervalle de temps entre chaque réponse. Les
-                    intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir
-                    la précision.
-                  </p>
-                  } @else {
-                  <p>Estimation du temps total passé par les apprenants sur cette activité durant ce mois.</p>
-                  <p>
-                    La durée d'une session d'activité est l'intervalle de temps entre le début et la fin de la session
-                    incluant les pauses prolongées.
-                  </p>
-                  }
-                </result-value-distribution>
-              </mat-card-content>
-            </mat-card>
-          </nz-col>
-          <nz-col nzSpan="24">
-            <h2>Répartition des résultats</h2>
-          </nz-col>
-          <nz-col nzSpan="24">
-            <mat-card>
-              <mat-card-content>
-                <result-answer-distribution [distribution]="dashboard.session.answerDistribution" />
-              </mat-card-content>
-            </mat-card>
-          </nz-col>
-        </nz-row>
-      </section>
-      <section>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Tags</mat-card-title>
-            <mat-card-subtitle
-              >Les tags (topics et niveaux) permettent une classification et une organisation plus efficace de vos
-              ressources.</mat-card-subtitle
-            >
-          </mat-card-header>
-          <mat-card-content>
-            <nz-empty
-              *ngIf="!context.resource.levels.length && !context.resource.topics.length"
-              [nzNotFoundContent]="noTags"
-              [nzNotFoundFooter]="noTagsFooter"
-            >
-              <ng-template #noTags>
-                Il est donc important d'ajouter des tags à vos créations pour en faciliter la recherche et la découverte
-                par d'autres enseignants.
-              </ng-template>
-              <ng-template #noTagsFooter>
-                <button
-                  *ngIf="context.resource.permissions?.write"
-                  nz-button
-                  nzType="primary"
-                  [routerLink]="['../settings']"
-                  [queryParams]="{ tab: 'informations' }"
-                >
-                  Ajouter des tags
-                </button>
-              </ng-template>
-            </nz-empty>
-            <mat-chip-set>
-              <ng-container *ngFor="let item of context.resource.levels; trackBy: trackById">
-                <mat-chip
-                  [routerLink]="['/resources']"
-                  [queryParams]="{ q: item.name, parents: context.resource.id }"
-                  [queryParamsHandling]="'merge'"
-                >
-                  {{ item.name }}
-                </mat-chip>
-              </ng-container>
-              <ng-container *ngFor="let item of context.resource.topics; trackBy: trackById">
-                <mat-chip
-                  [routerLink]="['/resources']"
-                  [queryParams]="{ q: item.name, parents: context.resource.id }"
-                  [queryParamsHandling]="'merge'"
-                >
-                  {{ item.name }}
-                </mat-chip>
-              </ng-container>
-            </mat-chip-set>
-          </mat-card-content>
-        </mat-card>
-      </section>
-    </nz-col>
-    <nz-col nzXs="24" nzSm="24" nzMd="4" nzLg="4" nzXl="4">
-      <aside>
-        <nz-row [nzGutter]="[24, 24]">
-          <nz-col nzSpan="24" *ngIf="context.resource.type === 'CIRCLE'">
-            <ui-statistic-card
-              matIcon="settings"
-              ribbonColor="#1990ff"
-              description="Templates"
-              tooltip="Nombre de templates directement liés à ce cercle."
-              [value]="templatesCount"
-            >
-              <a
-                nz-button
-                [routerLink]="['/resources']"
-                [queryParams]="{ types: 'EXERCISE', parents: context.resource.id, configurable: true }"
-                [queryParamsHandling]="'merge'"
+              } @if (learningInsightsOption === 'duration') {
+              <result-value-distribution
+                legend="Temps d'apprentissage estimée"
+                [date]="learningInsightsDate"
+                [isTimeValues]="true"
+                [color]="'#FF0087'"
+                [colorGradient]="['rgb(255, 0, 135)', 'rgb(135, 0, 157)']"
+                [distribution]="dashboard.session.durationDistribution"
               >
-                Afficher la liste
-              </a>
-            </ui-statistic-card>
-          </nz-col>
-          <nz-col nzSpan="24" *ngIf="context.statistic?.circle">
-            <ui-statistic-card
-              matIcon="article"
-              ribbonColor="#c0392b"
-              description="Exercices"
-              tooltip="Nombre d'exercices directement liés à ce cercle."
-              [value]="context.statistic?.circle?.exercises ?? 'Non précisé'"
+                @if (dashboard.exercise) {
+                <p>Estimation du temps total passé par les apprenants sur les exercices durant ce mois.</p>
+                <p>
+                  La durée d'un exercice est calculée en additionnant l'intervalle de temps entre chaque réponse. Les
+                  intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir la
+                  précision.
+                </p>
+                } @else {
+                <p>Estimation du temps total passé par les apprenants sur cette activité durant ce mois.</p>
+                <p>
+                  La durée d'une session d'activité est l'intervalle de temps entre le début et la fin de la session
+                  incluant les pauses prolongées.
+                </p>
+                }
+              </result-value-distribution>
+              }
+            </mat-card-content>
+          </mat-card>
+        </nz-col>
+        <nz-col nzSpan="24">
+          <h2>Répartition des résultats</h2>
+        </nz-col>
+        <nz-col nzSpan="24">
+          <mat-card>
+            <mat-card-content>
+              <result-answer-distribution [distribution]="dashboard.session.answerDistribution" />
+            </mat-card-content>
+          </mat-card>
+        </nz-col>
+      </nz-row>
+    </section>
+    }
+    <section>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Tags</mat-card-title>
+          <mat-card-subtitle
+            >Les tags (topics et niveaux) permettent une classification et une organisation plus efficace de vos
+            ressources.</mat-card-subtitle
+          >
+        </mat-card-header>
+        <mat-card-content>
+          @if (!context.resource.levels.length && !context.resource.topics.length) {
+          <nz-empty [nzNotFoundContent]="noTags" [nzNotFoundFooter]="noTagsFooter">
+            <ng-template #noTags>
+              Il est donc important d'ajouter des tags à vos créations pour en faciliter la recherche et la découverte
+              par d'autres enseignants.
+            </ng-template>
+            <ng-template #noTagsFooter>
+              @if (context.resource.permissions?.write) {
+              <button nz-button nzType="primary" [routerLink]="['../settings']" [queryParams]="{ tab: 'informations' }">
+                Ajouter des tags
+              </button>
+              }
+            </ng-template>
+          </nz-empty>
+          }
+          <mat-chip-set>
+            @for (item of context.resource.levels; track trackById($index, item)) {
+            <mat-chip
+              [routerLink]="['/resources']"
+              [queryParams]="{ q: item.name, parents: context.resource.id }"
+              [queryParamsHandling]="'merge'"
             >
-              <a
-                nz-button
-                [routerLink]="['/resources']"
-                [queryParams]="{ types: 'EXERCISE', parents: context.resource.id }"
-                [queryParamsHandling]="'merge'"
-              >
-                Afficher la liste
-              </a>
-            </ui-statistic-card>
-          </nz-col>
-          <nz-col nzSpan="24" *ngIf="context.statistic?.circle">
-            <ui-statistic-card
-              matIcon="widgets"
-              ribbonColor="#34495e"
-              description="Activités"
-              tooltip="Nombre d'activités directement liées à ce cercle."
-              [value]="context.statistic?.circle?.activities ?? 'Non précisé'"
+              {{ item.name }}
+            </mat-chip>
+            } @for (item of context.resource.topics; track trackById($index, item)) {
+            <mat-chip
+              [routerLink]="['/resources']"
+              [queryParams]="{ q: item.name, parents: context.resource.id }"
+              [queryParamsHandling]="'merge'"
             >
-              <a
-                nz-button
-                [routerLink]="['/resources']"
-                [queryParams]="{ types: 'ACTIVITY', parents: context.resource.id }"
-                [queryParamsHandling]="'merge'"
-              >
-                Afficher la liste
-              </a>
-            </ui-statistic-card>
-          </nz-col>
-          <nz-col nzSpan="24">
-            <ui-statistic-card
-              matIcon="visibility"
-              ribbonColor="#8e44ad"
-              description="Observateurs"
-              tooltip="Nombre de personnes ayant cliqué sur le bouton 'Suivre' de cette ressource."
-              [value]="context.statistic?.watchers ?? 0"
-            />
-          </nz-col>
-          <nz-col nzSpan="24" *ngIf="context.resource.type === 'CIRCLE'">
-            <ui-statistic-card
-              matIcon="group"
-              ribbonColor="#f1c40f"
-              description="Collaborateurs"
-              tooltip="Nombre de personnes ayant étant inscrites comme collaborateurs sur ce cercle."
-              [value]="context.statistic?.members ?? 0"
-            />
-          </nz-col>
-          <ng-container *ngIf="dashboard?.activity">
-            <nz-col nzSpan="24">
-              <ui-statistic-card
-                matIcon="local_library"
-                ribbonColor="#349d55"
-                description="Cours"
-                tooltip="Nombre de cours dans lesquels cette activité est utilisée."
-                [value]="dashboard!.activity!.usedInCoursesCount"
-              />
-            </nz-col>
-          </ng-container>
-          <nz-col nzSpan="24" *ngIf="context.statistic?.circle">
-            <ui-statistic-card
-              matIcon="group_work"
-              ribbonColor="#16a085"
-              description="Cercles enfants"
-              tooltip="Nombre de cercles directement liés à ce cercle."
-              [value]="context.statistic?.circle?.circles ?? 'Non précisé'"
+              {{ item.name }}
+            </mat-chip>
+            }
+          </mat-chip-set>
+        </mat-card-content>
+      </mat-card>
+    </section>
+  </nz-col>
+  <nz-col nzXs="24" nzSm="24" nzMd="4" nzLg="4" nzXl="4">
+    <aside>
+      <nz-row [nzGutter]="[24, 24]">
+        @if (context.resource.type === 'CIRCLE') {
+        <nz-col nzSpan="24">
+          <ui-statistic-card
+            matIcon="settings"
+            ribbonColor="#1990ff"
+            description="Templates"
+            tooltip="Nombre de templates directement liés à ce cercle."
+            [value]="templatesCount"
+          >
+            <a
+              nz-button
+              [routerLink]="['/resources']"
+              [queryParams]="{ types: 'EXERCISE', parents: context.resource.id, configurable: true }"
+              [queryParamsHandling]="'merge'"
             >
-              <a
-                nz-button
-                [routerLink]="['/resources']"
-                [queryParams]="{ types: 'CIRCLE', parents: context.resource.id }"
-                [queryParamsHandling]="'merge'"
-              >
-                Afficher la liste
-              </a>
-            </ui-statistic-card>
-          </nz-col>
-        </nz-row>
-      </aside>
-    </nz-col>
-  </nz-row>
-</ng-container>
+              Afficher la liste
+            </a>
+          </ui-statistic-card>
+        </nz-col>
+        } @if (context.statistic?.circle) {
+        <nz-col nzSpan="24">
+          <ui-statistic-card
+            matIcon="article"
+            ribbonColor="#c0392b"
+            description="Exercices"
+            tooltip="Nombre d'exercices directement liés à ce cercle."
+            [value]="context.statistic?.circle?.exercises ?? 'Non précisé'"
+          >
+            <a
+              nz-button
+              [routerLink]="['/resources']"
+              [queryParams]="{ types: 'EXERCISE', parents: context.resource.id }"
+              [queryParamsHandling]="'merge'"
+            >
+              Afficher la liste
+            </a>
+          </ui-statistic-card>
+        </nz-col>
+        } @if (context.statistic?.circle) {
+        <nz-col nzSpan="24">
+          <ui-statistic-card
+            matIcon="widgets"
+            ribbonColor="#34495e"
+            description="Activités"
+            tooltip="Nombre d'activités directement liées à ce cercle."
+            [value]="context.statistic?.circle?.activities ?? 'Non précisé'"
+          >
+            <a
+              nz-button
+              [routerLink]="['/resources']"
+              [queryParams]="{ types: 'ACTIVITY', parents: context.resource.id }"
+              [queryParamsHandling]="'merge'"
+            >
+              Afficher la liste
+            </a>
+          </ui-statistic-card>
+        </nz-col>
+        }
+        <nz-col nzSpan="24">
+          <ui-statistic-card
+            matIcon="visibility"
+            ribbonColor="#8e44ad"
+            description="Observateurs"
+            tooltip="Nombre de personnes ayant cliqué sur le bouton 'Suivre' de cette ressource."
+            [value]="context.statistic?.watchers ?? 0"
+          />
+        </nz-col>
+        @if (context.resource.type === 'CIRCLE') {
+        <nz-col nzSpan="24">
+          <ui-statistic-card
+            matIcon="group"
+            ribbonColor="#f1c40f"
+            description="Collaborateurs"
+            tooltip="Nombre de personnes ayant étant inscrites comme collaborateurs sur ce cercle."
+            [value]="context.statistic?.members ?? 0"
+          />
+        </nz-col>
+        } @if (dashboard?.activity) {
+        <nz-col nzSpan="24">
+          <ui-statistic-card
+            matIcon="local_library"
+            ribbonColor="#349d55"
+            description="Cours"
+            tooltip="Nombre de cours dans lesquels cette activité est utilisée."
+            [value]="dashboard!.activity!.usedInCoursesCount"
+          />
+        </nz-col>
+        } @if (context.statistic?.circle) {
+        <nz-col nzSpan="24">
+          <ui-statistic-card
+            matIcon="group_work"
+            ribbonColor="#16a085"
+            description="Cercles enfants"
+            tooltip="Nombre de cercles directement liés à ce cercle."
+            [value]="context.statistic?.circle?.circles ?? 'Non précisé'"
+          >
+            <a
+              nz-button
+              [routerLink]="['/resources']"
+              [queryParams]="{ types: 'CIRCLE', parents: context.resource.id }"
+              [queryParamsHandling]="'merge'"
+            >
+              Afficher la liste
+            </a>
+          </ui-statistic-card>
+        </nz-col>
+        }
+      </nz-row>
+    </aside>
+  </nz-col>
+</nz-row>
+}

@@ -33,12 +33,13 @@
     }
 
     <!-- Component propositions (modal/drawer) -->
+    @if (isOpenProposition) {
     <course-propositions
-      *ngIf="isOpenProposition"
       (closeEvent)="closeBottomSheet()"
       (sendEvent)="selectOption($event)"
       [typesRequired]="typesRestrictionPresent"
     ></course-propositions>
+    }
 
     <!-- Bouton d'ajout de critère -->
     @if (!containsCorrectorsAndOthers() && restrictions.length < 4) {

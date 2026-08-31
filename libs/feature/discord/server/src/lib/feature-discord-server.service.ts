@@ -6,7 +6,7 @@ import { ProxyAgent } from 'undici'
 
 const proxy = process.env['PROXY_URL'] as string
 export let agent: ProxyAgent | null = null
-export let httpsproxyagent: HttpsProxyAgent | null = null
+export let httpsproxyagent: HttpsProxyAgent<string> | null = null
 if (proxy) {
   httpsproxyagent = new HttpsProxyAgent(proxy)
   agent = new ProxyAgent({ uri: proxy })

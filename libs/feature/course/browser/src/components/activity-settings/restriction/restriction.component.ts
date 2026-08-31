@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core'
+
 import { Restriction, RestrictionConfig } from '@platon/feature/course/common'
 import { CourseGroup, CourseMember } from '@platon/feature/course/common'
 
@@ -20,7 +20,6 @@ import { DialogService } from '@platon/core/browser'
 @Component({
   selector: 'course-restriction',
   imports: [
-    CommonModule,
     NzDatePickerModule,
     FormsModule,
     NzButtonModule,
@@ -34,14 +33,14 @@ import { DialogService } from '@platon/core/browser'
   styleUrl: './restriction.component.scss',
 })
 export class RestrictionComponent {
+  private dialogService = inject(DialogService)
+
   @Input() restriction!: Restriction
   @Output() remove = new EventEmitter<void>()
   @Output() update = new EventEmitter<Restriction>()
   @Input() courseMembers: CourseMember[] = []
   @Input() courseGroups: CourseGroup[] = []
   @Input() isMainRestriction = false
-
-  constructor(private dialogService: DialogService) {}
 
   protected disabledDateStart = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
 

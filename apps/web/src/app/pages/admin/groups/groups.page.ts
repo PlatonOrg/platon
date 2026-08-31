@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import {
   UserGroupDrawerComponent,
@@ -23,12 +22,11 @@ import { firstValueFrom } from 'rxjs'
   styleUrls: ['./groups.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopconfirmModule,
     UserSearchBarComponent,
     UserGroupTableComponent,
@@ -36,6 +34,9 @@ import { firstValueFrom } from 'rxjs'
   ],
 })
 export class AdminGroupsPage {
+  private readonly userService = inject(UserService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected groups: UserGroup[] = []
   protected selection: string[] = []
 
@@ -43,8 +44,6 @@ export class AdminGroupsPage {
 
   @ViewChild(UserGroupDrawerComponent)
   protected drawer!: UserGroupDrawerComponent
-
-  constructor(private readonly userService: UserService, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   protected async addGroup(): Promise<void> {
     const group = await firstValueFrom(

@@ -1,4 +1,4 @@
-import { Injectable, Provider } from '@angular/core'
+import { Injectable, Provider, inject } from '@angular/core'
 import { AutomatonEditorService } from '../../automaton-editor.service'
 import { AutomatonEditorAction, AutomatonEditorActionContext, AUTOMATON_EDITOR_ACTIONS } from '../action'
 
@@ -7,9 +7,9 @@ import { AutomatonEditorAction, AutomatonEditorActionContext, AUTOMATON_EDITOR_A
  */
 @Injectable()
 export class ActionSetNonAccepting implements AutomatonEditorAction {
-  readonly name = 'Non final'
+  private readonly editor = inject(AutomatonEditorService)
 
-  constructor(private readonly editor: AutomatonEditorService) {}
+  readonly name = 'Non final'
 
   run(context: AutomatonEditorActionContext) {
     if (!context.state) {

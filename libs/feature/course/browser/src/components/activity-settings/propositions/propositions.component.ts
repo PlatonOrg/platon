@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Output, input } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { NzDrawerModule } from 'ng-zorro-antd/drawer'
 import { NzListModule } from 'ng-zorro-antd/list'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 
 @Component({
   selector: 'course-propositions',
-  imports: [CommonModule, NzDrawerModule, NzListModule, NzModalModule],
+  imports: [NzDrawerModule, NzListModule, NzModalModule],
   templateUrl: './propositions.component.html',
   styleUrl: './propositions.component.scss',
 })

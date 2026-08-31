@@ -8,6 +8,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { DragDropComponentDefinition, DragDropState } from './drag-drop'
@@ -26,13 +27,14 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 })
 @WebComponent(DragDropComponentDefinition)
 export class DragDropComponent implements OnInit, OnDestroy, WebComponentHooks<DragDropState> {
+  readonly injector = inject(Injector)
+  readonly dragdrop = inject(DragDropService)
+
   @Input() state!: DragDropState
   @Output() stateChange = new EventEmitter<DragDropState>()
 
   @ViewChild(DragDropDirective, { static: true })
   directive!: DragDropDirective
-
-  constructor(readonly injector: Injector, readonly dragdrop: DragDropService) {}
 
   ngOnInit(): void {
     this.dragdrop.register(this.directive.id, this)

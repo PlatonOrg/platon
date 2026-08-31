@@ -124,7 +124,7 @@
   .copy-code-button {
     // Aligne le bouton sur la taille du pill de code plutôt que sur la zone
     // tactile 40px par défaut de mat-icon-button.
-    --mdc-icon-button-state-layer-size: 28px;
+    --mat-icon-button-state-layer-size: 28px;
     display: flex;
     align-items: center;
     justify-content: center;

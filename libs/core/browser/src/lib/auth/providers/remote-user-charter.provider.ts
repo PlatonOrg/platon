@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { UserCharterProvider } from '../models/user-charter-provider'
 import { ItemResponse, UserCharter } from '@platon/core/common'
@@ -7,9 +7,7 @@ import { map } from 'rxjs/operators'
 
 @Injectable()
 export class RemoteUserCharterProvider extends UserCharterProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   acceptUserCharter(userId: string): Observable<UserCharter> {
     return this.http

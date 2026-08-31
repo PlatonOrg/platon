@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, Output, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, Output, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { EvaluatorComponentDefinition, EvaluatorState } from './evaluator'
@@ -18,12 +18,16 @@ import { MatCardModule } from '@angular/material/card'
 })
 @WebComponent(EvaluatorComponentDefinition)
 export class EvaluatorComponent implements WebComponentHooks<EvaluatorState> {
+  readonly injector = inject(Injector)
+
   private readonly webComponentService!: WebComponentService
 
   @Input() state!: EvaluatorState
   @Output() stateChange = new EventEmitter<EvaluatorState>()
 
-  constructor(readonly injector: Injector) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService)!
   }
 

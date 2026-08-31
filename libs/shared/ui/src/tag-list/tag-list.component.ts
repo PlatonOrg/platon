@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
+
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -47,7 +47,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover'
   `,
   styles: [``],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzTagModule, NzIconModule, NzInputModule, NzPopoverModule],
+  imports: [FormsModule, NzTagModule, NzIconModule, NzInputModule, NzPopoverModule],
 })
 export class TagInputComponent implements AfterViewInit {
   @ViewChild('input', { static: false })
@@ -80,16 +80,7 @@ export class TagInputComponent implements AfterViewInit {
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    DragDropModule,
-    TagInputComponent,
-    NzTagModule,
-    NzIconModule,
-    NzInputModule,
-    NzPopoverModule,
-  ],
+  imports: [FormsModule, DragDropModule, TagInputComponent, NzTagModule, NzIconModule, NzInputModule, NzPopoverModule],
 })
 export class UiTagListComponent {
   @Input() tags?: string[] = []

@@ -1,13 +1,11 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CourseMonitorPresenceProvider } from '../models/course-monitor-presence-provider'
 import { MonitorPresencePayload } from '@platon/feature/course/common'
 
 @Injectable()
 export class RemoteCourseMonitorPresenceProvider extends CourseMonitorPresenceProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   subscribeToMonitorPresence(payload: MonitorPresencePayload): void {
     this.http.post('/api/v1/courses/monitor-presence/subscribe', payload).subscribe({

@@ -4,9 +4,11 @@
   <div style="flex: 1" class="clue-panel" [ngStyle]="state.appearance === 'inline' ? {} : { 'margin-bottom': '30px' }">
     <h3>Définitions</h3>
     <ol>
-      <li *ngFor="let result of results">
+      @for (result of results; track result) {
+      <li>
         <span>{{ result.position }} - </span>{{ result.clue }}
       </li>
+      }
     </ol>
   </div>
   }
@@ -18,30 +20,29 @@
       [style.gridTemplateRows]="'repeat(' + grid.length + ', 1fr)'"
       class="crossword-grid responsive-grid"
     >
-      <ng-container *ngFor="let row of grid; let y = index">
-        <ng-container *ngFor="let cell of row; let x = index">
-          @if(getCharAt(x,y) !== '-') {
-          <div class="cell-wrapper">
-            <input
-              class="cell-square"
-              [ngClass]="getBackgroundColorClasses(x, y)"
-              [attr.data-x]="x"
-              [attr.data-y]="y"
-              (input)="onInput($event, x, y)"
-              (focus)="onFocus($event, x, y)"
-              (keydown)="onKeyDown($event, x, y)"
-              placeholder="{{ getCharAt(x, y) }}"
-              [disabled]="this.state.disabled"
-            />
-            <span *ngFor="let res of getResultsAtCoordinates(x, y)" [ngClass]="res.orientation">
-              {{ res.position }}
-            </span>
-          </div>
-          } @else {
-          <div class="empty-cell"></div>
-          }
-        </ng-container>
-      </ng-container>
+      @for (row of grid; track row; let y = $index) { @for (cell of row; track cell; let x = $index) {
+      @if(getCharAt(x,y) !== '-') {
+      <div class="cell-wrapper">
+        <input
+          class="cell-square"
+          [ngClass]="getBackgroundColorClasses(x, y)"
+          [attr.data-x]="x"
+          [attr.data-y]="y"
+          (input)="onInput($event, x, y)"
+          (focus)="onFocus($event, x, y)"
+          (keydown)="onKeyDown($event, x, y)"
+          placeholder="{{ getCharAt(x, y) }}"
+          [disabled]="this.state.disabled"
+        />
+        @for (res of getResultsAtCoordinates(x, y); track res) {
+        <span [ngClass]="res.orientation">
+          {{ res.position }}
+        </span>
+        }
+      </div>
+      } @else {
+      <div class="empty-cell"></div>
+      } } }
     </div>
   </div>
 </div>

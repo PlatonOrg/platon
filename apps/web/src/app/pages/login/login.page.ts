@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { MatDividerModule } from '@angular/material/divider'
 
@@ -10,6 +9,6 @@ import { CasSignInComponent } from '@platon/feature/cas/browser'
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, AuthSignInComponent, CasSignInComponent, MatDividerModule],
+  imports: [AuthSignInComponent, CasSignInComponent, MatDividerModule],
 })
 export class LoginPage {}

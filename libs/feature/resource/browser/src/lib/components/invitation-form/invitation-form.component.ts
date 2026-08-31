@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 
@@ -15,7 +14,7 @@ import { CreateResourceInvitation } from '@platon/feature/resource/common'
   templateUrl: './invitation-form.component.html',
   styleUrls: ['./invitation-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, NzGridModule, NzFormModule, NzButtonModule, UserSearchBarComponent],
+  imports: [ReactiveFormsModule, NzGridModule, NzFormModule, NzButtonModule, UserSearchBarComponent],
 })
 export class ResourceInvitationFormComponent {
   readonly form = new FormGroup({

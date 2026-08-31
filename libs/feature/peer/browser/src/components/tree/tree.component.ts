@@ -7,6 +7,7 @@ import {
   ViewChild,
   OnInit,
   AfterViewInit,
+  inject,
 } from '@angular/core'
 import * as echart from 'echarts'
 import { PeerProvider } from '../../models/peer-provider'
@@ -23,7 +24,8 @@ import { EChartsOption, SeriesOption } from 'echarts'
   providers: [],
 })
 export class PeerTreeComponent implements OnInit, AfterViewInit {
-  constructor(private readonly peerProvider: PeerProvider) {}
+  private readonly peerProvider = inject(PeerProvider)
+
   @Input() activityId!: string
 
   @ViewChild('chartContainer', { static: true }) chartContainer!: ElementRef

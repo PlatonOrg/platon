@@ -27,43 +27,43 @@
 
 <main [class.sidebar-collapsed]="sidebarCollapsed">
   <article>
-    <ng-container *ngIf="!searching; else spinner">
-      <h2 *ngIf="items.length">Voici ce que nous avons trouvé selon vos critères de recherche...</h2>
-
-      <div class="filter-indicators" id="tuto-resources-filters">
-        <ui-filter-indicators
-          [filters]="filters"
-          (filtersChange)="search($event, $event.search)"
-          [indicators]="filterIndicators"
-        />
-      </div>
-
-      <ng-container [ngPlural]="totalMatches">
-        <ng-template ngPluralCase="=0"></ng-template>
-        <ng-template ngPluralCase="=1">
-          <p class="results-count">1 résultat</p>
-        </ng-template>
-        <ng-template ngPluralCase="other">
-          <p class="results-count">{{ totalMatches }} résultats</p>
-        </ng-template>
-      </ng-container>
-
-      <resource-list
-        id="tuto-resources-list"
-        [items]="items"
-        (levelClicked)="applyTagFilter($event, 'level')"
-        (topicClicked)="applyTagFilter($event, 'topic')"
-      >
-        <h2>Aucune ressource ne correspond à votre recherche</h2>
-        <ul>
-          <li>Vérifiez les termes de votre recherche</li>
-          <li>Essayez d'autres critères de recherche</li>
-        </ul>
-      </resource-list>
-
-      <nz-spin class="spinner-pagination" nzSize="large" [nzTip]="'Chargement...'" [nzSpinning]="paginating" />
-      <div style="height: 8px" *ngIf="hasMore" viewportIntersection (intersected)="loadMore()"></div>
+    @if (!searching) { @if (items.length) {
+    <h2>Voici ce que nous avons trouvé selon vos critères de recherche...</h2>
+    }
+    <div class="filter-indicators" id="tuto-resources-filters">
+      <ui-filter-indicators
+        [filters]="filters"
+        (filtersChange)="search($event, $event.search)"
+        [indicators]="filterIndicators"
+      />
+    </div>
+    <ng-container [ngPlural]="totalMatches">
+      <ng-template ngPluralCase="=0"></ng-template>
+      <ng-template ngPluralCase="=1">
+        <p class="results-count">1 résultat</p>
+      </ng-template>
+      <ng-template ngPluralCase="other">
+        <p class="results-count">{{ totalMatches }} résultats</p>
+      </ng-template>
     </ng-container>
+    <resource-list
+      id="tuto-resources-list"
+      [items]="items"
+      (levelClicked)="applyTagFilter($event, 'level')"
+      (topicClicked)="applyTagFilter($event, 'topic')"
+    >
+      <h2>Aucune ressource ne correspond à votre recherche</h2>
+      <ul>
+        <li>Vérifiez les termes de votre recherche</li>
+        <li>Essayez d'autres critères de recherche</li>
+      </ul>
+    </resource-list>
+    <nz-spin class="spinner-pagination" nzSize="large" [nzTip]="'Chargement...'" [nzSpinning]="paginating" />
+    @if (hasMore) {
+    <div style="height: 8px" viewportIntersection (intersected)="loadMore()"></div>
+    } } @else {
+    <nz-spin class="spinner-main" nzSimple nzSize="large" />
+    }
   </article>
 
   <aside id="tuto-resources-sidebar">
@@ -113,7 +113,9 @@
   <ng-container *nzDrawerContent>
     <section>
       <h2>Mon espace</h2>
-      <resource-item *ngIf="circle" [item]="circle" />
+      @if (circle) {
+      <resource-item [item]="circle" />
+      }
     </section>
     <section>
       <h2>Vu récemment</h2>
@@ -121,10 +123,6 @@
     </section>
   </ng-container>
 </nz-drawer>
-
-<ng-template #spinner>
-  <nz-spin class="spinner-main" nzSimple nzSize="large" />
-</ng-template>
 
 <resource-filters
   #filterDrawer

@@ -16,7 +16,7 @@ import {
 import { MatIconModule } from '@angular/material/icon'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { v4 as uuidv4 } from 'uuid'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
@@ -49,7 +49,7 @@ export const getPreviewOverridesStorageKey = (sessionId: string) => `preview.ove
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopoverModule,
     NzSpinModule,
     NgeUiListModule,

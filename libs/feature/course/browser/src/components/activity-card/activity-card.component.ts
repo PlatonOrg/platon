@@ -21,7 +21,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -47,9 +47,9 @@ import { CourseService } from '../../api/course.service'
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzProgressModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzDropDownModule,
     CoursePipesModule,
     CsvDownloadButtonComponent,
@@ -133,6 +133,6 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
   }
 
   protected isValidDate(date: Date | null | undefined): boolean {
-    return date !== new Date('Invalid Date') && date !== null && date !== undefined
+    return date != null && !isNaN(date.getTime())
   }
 }

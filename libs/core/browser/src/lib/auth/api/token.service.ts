@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { AuthToken } from '@platon/core/common'
 import { TokenProvider } from '../models/token-provider'
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
-  constructor(private readonly provider: TokenProvider) {}
+  private readonly provider = inject(TokenProvider)
 
   tokenSync(): AuthToken | undefined {
     return this.provider.tokenSync()

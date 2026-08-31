@@ -1,5 +1,5 @@
+@if (visible) {
 <nz-drawer
-  *ngIf="visible"
   [nzClosable]="closable"
   [nzVisible]="visible"
   [nzTitle]="title"
@@ -15,4 +15,5 @@
     <ng-container *ngTemplateOutlet="templates.first"></ng-container>
   </ng-container>
 </nz-drawer>
+}
 <ng-template #noFooter />

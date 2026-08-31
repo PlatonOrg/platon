@@ -8,6 +8,7 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { Cas } from '@platon/feature/cas/common'
@@ -34,6 +35,8 @@ type Value = string[] | undefined
   imports: [CommonModule, NzTagModule, NzTableModule, CasDrawerComponent],
 })
 export class CasTableComponent implements OnChanges, ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() cases: Cas[] = []
   @Input() selectable = false
   @Input() lmses: Lms[] = []
@@ -43,8 +46,6 @@ export class CasTableComponent implements OnChanges, ControlValueAccessor {
   protected disabled = false
   protected indeterminate = false
   protected selection = new Set<string>()
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   // ControlValueAccessor methods
 

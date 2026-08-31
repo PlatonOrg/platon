@@ -7,7 +7,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Inject,
   Injector,
   Input,
   OnDestroy,
@@ -15,8 +14,10 @@ import {
   Output,
   Renderer2,
   ViewChild,
+  DOCUMENT,
+  inject,
 } from '@angular/core'
-import { DOCUMENT } from '@angular/common'
+
 import { ACTION_GOTO_LINE, ACTION_INDENT_USING_SPACES, ACTION_QUICK_COMMAND } from '@cisstech/nge/monaco'
 import { NO_COPY_PASTER_CLASS_NAME } from '@platon/feature/player/common'
 import { WebComponent, WebComponentHooks } from '../../web-component'
@@ -24,7 +25,7 @@ import { WebComponentChangeDetectorService } from '../../web-component-change-de
 import { WebComponentService } from '../../web-component.service'
 import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor'
 import { BaseModule } from '../../shared/components/base/base.module'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NgeMonacoModule } from '@cisstech/nge/monaco'
 
 const MIN_EDITOR_HEIGHT_PX = 400
@@ -34,10 +35,17 @@ const MIN_EDITOR_HEIGHT_PX = 400
   templateUrl: 'code-editor.component.html',
   styleUrls: ['code-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BaseModule, NzToolTipModule, NgeMonacoModule],
+  imports: [BaseModule, NzTooltipModule, NgeMonacoModule],
 })
 @WebComponent(CodeEditorComponentDefinition)
 export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, WebComponentHooks<CodeEditorState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+  private readonly cdr = inject(ChangeDetectorRef)
+  private readonly renderer = inject(Renderer2)
+  private readonly document = inject<Document>(DOCUMENT)
+  private readonly webComponentService = inject(WebComponentService)
+
   private readonly disposables: monaco.IDisposable[] = []
   private model?: monaco.editor.ITextModel
   private editor?: monaco.editor.IStandaloneCodeEditor
@@ -67,15 +75,6 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
   private unlistenWindowResize?: () => void
   private rafId?: number
   private pendingClientY?: number
-
-  constructor(
-    readonly injector: Injector,
-    readonly changeDetector: WebComponentChangeDetectorService,
-    private readonly cdr: ChangeDetectorRef,
-    private readonly renderer: Renderer2,
-    @Inject(DOCUMENT) private readonly document: Document,
-    private readonly webComponentService: WebComponentService
-  ) {}
 
   ngAfterViewInit() {
     const onResize = () => {

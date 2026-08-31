@@ -239,6 +239,6 @@
 }
 
 ::ng-deep .mat-mdc-tooltip {
-  --mdc-plain-tooltip-container-color: var(--brand-background-components);
-  --mdc-plain-tooltip-supporting-text-color: var(--brand-text-primary);
+  --mat-tooltip-container-color: var(--brand-background-components);
+  --mat-tooltip-supporting-text-color: var(--brand-text-primary);
 }

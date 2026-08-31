@@ -117,7 +117,7 @@ export const withRenderedTemplates = (variables: ExerciseVariables, reviewMode?:
     if (typeof v === 'string') {
       try {
         return nunjucks.renderString(v, computed).trim()
-      } catch (e) {
+      } catch (_error) {
         return v
       }
     }

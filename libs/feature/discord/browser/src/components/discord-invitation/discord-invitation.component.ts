@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { DiscordService } from '../../api/discord.service'
 import { firstValueFrom } from 'rxjs'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
-import { CommonModule } from '@angular/common'
+
 import { UiError500Component } from '@platon/shared/ui'
 
 @Component({
@@ -10,10 +10,11 @@ import { UiError500Component } from '@platon/shared/ui'
   templateUrl: './discord-invitation.component.html',
   styleUrls: ['./discord-invitation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NgeMarkdownModule, UiError500Component],
+  imports: [NgeMarkdownModule, UiError500Component],
 })
 export class DiscordInvitationComponent implements OnInit {
-  constructor(private readonly discordService: DiscordService, private readonly changeDetectorRef: ChangeDetectorRef) {}
+  private readonly discordService = inject(DiscordService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
 
   protected url?: string
   protected error = false
@@ -22,7 +23,7 @@ export class DiscordInvitationComponent implements OnInit {
     this.resetGif()
     try {
       this.url = await firstValueFrom(this.discordService.getInvitationLink())
-    } catch (error) {
+    } catch (_error) {
       this.error = true
     }
     this.changeDetectorRef.markForCheck()

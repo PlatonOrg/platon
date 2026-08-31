@@ -50,7 +50,7 @@ import {
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
@@ -59,6 +59,7 @@ import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
 import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
 import { PlayerErrorComponent } from '../player-error/player-error.component'
 import { User } from '@platon/core/common'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 type Action = {
   id?: string
@@ -99,7 +100,7 @@ type FullscreenElement = HTMLElement & {
     MatCardModule,
     MatMenuModule,
     MatButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     MatDividerModule,
     NzSkeletonModule,
     NzStatisticModule,
@@ -155,7 +156,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   protected container!: ElementRef<FullscreenElement>
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
-  protected errorTemplate!: TemplateRef<object>
+  protected errorTemplate!: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>
 
   @ViewChild('containerFeedbacks', { read: ElementRef })
   protected containerFeedbacks!: ElementRef<HTMLElement>

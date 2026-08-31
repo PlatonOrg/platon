@@ -1,4 +1,5 @@
-<mat-chip-set *ngIf="!empty">
+@if (!empty) {
+<mat-chip-set>
   @for (match of matches; track $index) {
   <mat-chip [removable]="true" (removed)="onRemoveIndicator(match.indicator)">
     {{ match.label }}
@@ -6,3 +7,4 @@
   </mat-chip>
   }
 </mat-chip-set>
+}

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -24,7 +23,7 @@ interface IndicatorMatch<T> {
   templateUrl: './filter-indicators.component.html',
   styleUrls: ['./filter-indicators.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatChipsModule],
+  imports: [MatIconModule, MatChipsModule],
 })
 export class UiFilterIndicatorComponent<T> implements OnChanges {
   private readonly changeDetectorRef = inject(ChangeDetectorRef)

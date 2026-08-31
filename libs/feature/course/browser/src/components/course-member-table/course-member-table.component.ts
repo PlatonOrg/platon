@@ -10,6 +10,7 @@ import {
   OnChanges,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { NzTableColumn, UserAvatarComponent, UserGroupDrawerComponent, AuthService } from '@platon/core/browser'
@@ -55,6 +56,9 @@ export interface ChangeRoleEvent {
   ],
 })
 export class CourseMemberTableComponent implements OnInit, OnChanges, ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly authService = inject(AuthService)
+
   @Input() members: CourseMember[] = []
   @Input() editable = false
   @Input() selectable = false
@@ -87,8 +91,6 @@ export class CourseMemberTableComponent implements OnInit, OnChanges, ControlVal
   protected get canChangeRole(): boolean {
     return this.editable && this.type === 'cours' && this.changeRole.observed
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef, private readonly authService: AuthService) {}
 
   // ControlValueAccessor methods
 

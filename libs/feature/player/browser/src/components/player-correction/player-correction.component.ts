@@ -206,7 +206,6 @@ export class PlayerCorrectionComponent implements OnInit {
   // === SESSION MANAGEMENT ===
   private getSessionId(): ExerciseGroup | undefined {
     if (!this.sessionId) {
-      console.warn('Session ID is missing in query parameters')
       return undefined
     }
     for (const group of this.listExerciseGroup) {

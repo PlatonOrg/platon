@@ -7,6 +7,7 @@ import {
   Input,
   Output,
   OnInit,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { MatrixComponentDefinition, MatrixState } from './matrix'
@@ -15,7 +16,7 @@ import { FormsModule } from '@angular/forms'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { BaseModule } from '../../shared/components/base/base.module'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { CssPipeModule } from '../../shared/pipes/css.pipe'
 import { MatrixResizerComponent } from './matrix-resizer/matrix-resizer.component'
 
@@ -29,13 +30,16 @@ import { MatrixResizerComponent } from './matrix-resizer/matrix-resizer.componen
     CssPipeModule,
     FormsModule,
     MatIconModule,
-    NzToolTipModule,
+    NzTooltipModule,
     MatButtonModule,
     MatrixResizerComponent,
   ],
 })
 @WebComponent(MatrixComponentDefinition)
 export class MatrixComponent implements WebComponentHooks<MatrixState>, OnInit {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   @Input() state!: MatrixState
   @Output() stateChange = new EventEmitter<MatrixState>()
 
@@ -46,8 +50,6 @@ export class MatrixComponent implements WebComponentHooks<MatrixState>, OnInit {
       '--rows': this.state.rows,
     }
   }
-
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {}
 
   ngOnInit() {
     this.state.isFilled = false
@@ -85,9 +87,5 @@ export class MatrixComponent implements WebComponentHooks<MatrixState>, OnInit {
         this.state.isFilled = true
       })
       .catch(console.error)
-  }
-
-  trackBy(index: number) {
-    return index
   }
 }

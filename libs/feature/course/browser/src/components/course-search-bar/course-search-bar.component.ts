@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input, inject } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -27,9 +27,12 @@ import { CourseItemComponent } from '../course-item/course-item.component'
       multi: true,
     },
   ],
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent, CourseItemComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent, CourseItemComponent],
 })
 export class CourseSearchBarComponent implements ControlValueAccessor {
+  private readonly courseService = inject(CourseService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() multi = false
   @Input() filters?: CourseFilters = { limit: DEFAULT_SEARCH_BAR_LIMIT }
   @Input() disabled = false
@@ -53,8 +56,6 @@ export class CourseSearchBarComponent implements ControlValueAccessor {
   }
 
   selection: Course[] = []
-
-  constructor(private readonly courseService: CourseService, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   // ControlValueAccessor methods
 

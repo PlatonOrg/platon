@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { automatonToDotFormat, parseAutomaton } from '../../forms/automaton-editor/automaton'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { AutomatonViewerComponentDefinition, AutomatonViewerState } from './automaton-viewer'
@@ -14,11 +14,11 @@ import { BaseModule } from '../../shared/components/base/base.module'
 })
 @WebComponent(AutomatonViewerComponentDefinition)
 export class AutomatonViewerComponent implements WebComponentHooks<AutomatonViewerState> {
+  readonly injector = inject(Injector)
+
   @Input() state!: AutomatonViewerState
 
   dot?: string
-
-  constructor(readonly injector: Injector) {}
 
   onChangeState() {
     if (!this.state.automaton) {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -35,7 +35,7 @@ import { LTIService } from '../../api/lti.service'
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent],
 })
 export class LmsSearchBarComponent implements OnChanges, ControlValueAccessor {
   private readonly ltiService = inject(LTIService)

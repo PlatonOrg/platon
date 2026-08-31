@@ -1,8 +1,9 @@
-import { Injectable, TemplateRef } from '@angular/core'
+import { Injectable, TemplateRef, inject } from '@angular/core'
 import { NzMessageService } from 'ng-zorro-antd/message'
 import { ModalOptions, NzModalRef, NzModalService } from 'ng-zorro-antd/modal'
 import { NzNotificationService } from 'ng-zorro-antd/notification'
 import { PromptDialogComponent } from './prompt/prompt.component'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 interface MessageOptions {
   duration?: number
@@ -20,11 +21,9 @@ const DEFAULT_DIALOG_DURATION = 4500
 
 @Injectable({ providedIn: 'root' })
 export class DialogService {
-  constructor(
-    private readonly nzModalService: NzModalService,
-    private readonly nzMessageService: NzMessageService,
-    private readonly nzNotificationService: NzNotificationService
-  ) {}
+  private readonly nzModalService = inject(NzModalService)
+  private readonly nzMessageService = inject(NzMessageService)
+  private readonly nzNotificationService = inject(NzNotificationService)
 
   public static readonly DEFAULT_DIALOG_DURATION: number = 4500
 
@@ -36,9 +35,11 @@ export class DialogService {
         })
       : this.nzMessageService.error(content, { nzDuration: options?.duration })
     return () => {
-      options?.notification
-        ? this.nzNotificationService.remove(ref.messageId)
-        : this.nzMessageService.remove(ref.messageId)
+      if (options?.notification) {
+        this.nzNotificationService.remove(ref.messageId)
+      } else {
+        this.nzMessageService.remove(ref.messageId)
+      }
     }
   }
 
@@ -50,9 +51,11 @@ export class DialogService {
         })
       : this.nzMessageService.info(content, { nzDuration: options?.duration })
     return () => {
-      options?.notification
-        ? this.nzNotificationService.remove(ref.messageId)
-        : this.nzMessageService.remove(ref.messageId)
+      if (options?.notification) {
+        this.nzNotificationService.remove(ref.messageId)
+      } else {
+        this.nzMessageService.remove(ref.messageId)
+      }
     }
   }
 
@@ -64,9 +67,11 @@ export class DialogService {
         })
       : this.nzMessageService.success(content, { nzDuration: options?.duration })
     return () => {
-      options?.notification
-        ? this.nzNotificationService.remove(ref.messageId)
-        : this.nzMessageService.remove(ref.messageId)
+      if (options?.notification) {
+        this.nzNotificationService.remove(ref.messageId)
+      } else {
+        this.nzMessageService.remove(ref.messageId)
+      }
     }
   }
 
@@ -78,9 +83,11 @@ export class DialogService {
         })
       : this.nzMessageService.warning(content, { nzDuration: options?.duration })
     return () => {
-      options?.notification
-        ? this.nzNotificationService.remove(ref.messageId)
-        : this.nzMessageService.remove(ref.messageId)
+      if (options?.notification) {
+        this.nzNotificationService.remove(ref.messageId)
+      } else {
+        this.nzMessageService.remove(ref.messageId)
+      }
     }
   }
 
@@ -94,7 +101,10 @@ export class DialogService {
     })
   }
 
-  notification(template: TemplateRef<object>, options: TemplateOptions = { duration: DEFAULT_DIALOG_DURATION }) {
+  notification(
+    template: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>,
+    options: TemplateOptions = { duration: DEFAULT_DIALOG_DURATION }
+  ) {
     if (options.duration == undefined) options.duration = DEFAULT_DIALOG_DURATION
     const ref = this.nzNotificationService.template(template, {
       nzDuration: options?.duration,

@@ -49,7 +49,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop'
 import { CommonModule } from '@angular/common'
 import { MatIconModule } from '@angular/material/icon'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 @Component({
   selector: 'app-ple-input',
@@ -68,7 +68,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
     MatIconModule,
     NzIconModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     CommonModule,
   ],
   providers: [

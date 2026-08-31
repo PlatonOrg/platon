@@ -1,5 +1,5 @@
 <div class="section-list">
-  <ng-container *ngFor="let section of dataSource">
-    <button nz-button (click)="selectSection(section)">{{ section.name }}</button>
-  </ng-container>
+  @for (section of dataSource; track section) {
+  <button nz-button (click)="selectSection(section)">{{ section.name }}</button>
+  }
 </div>

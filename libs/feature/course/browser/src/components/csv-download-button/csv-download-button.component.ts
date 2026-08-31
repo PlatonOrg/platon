@@ -1,6 +1,5 @@
-import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core'
 
 import { firstValueFrom } from 'rxjs'
 
@@ -20,9 +19,13 @@ import { CourseService } from '../../api/course.service'
   templateUrl: './csv-download-button.component.html',
   styleUrls: ['./csv-download-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzButtonModule, NzIconModule, NzDropDownModule, NzMenuModule, NzCheckboxModule],
+  imports: [FormsModule, NzButtonModule, NzIconModule, NzDropDownModule, NzMenuModule, NzCheckboxModule],
 })
 export class CsvDownloadButtonComponent implements OnInit {
+  private readonly resultService = inject(ResultService)
+  private readonly courseService = inject(CourseService)
+  private changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() courseId!: string
   @Input() activities!: Activity[]
   @Input() type!: 'activity' | 'course' | 'test'
@@ -31,12 +34,6 @@ export class CsvDownloadButtonComponent implements OnInit {
   groups: { id: string; name: string; groupId: string; courseId: string; checked: boolean }[] = []
   activityMembers: ActivityMember[] = []
   hasToCheckGroups = false
-
-  constructor(
-    private readonly resultService: ResultService,
-    private readonly courseService: CourseService,
-    private changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     let groups = (await firstValueFrom(this.courseService.listGroups(this.courseId))).resources

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { TestProvider } from '../models/test.provider'
 import { HttpClient } from '@angular/common/http'
 import { ItemResponse } from '@platon/core/common'
@@ -9,9 +9,7 @@ import { OutputData } from '@editorjs/editorjs'
 
 @Injectable()
 export class RemoteTestProvider extends TestProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   createTest(input: CreateTest): Observable<Test> {
     return this.http.post<ItemResponse<Test>>('/api/v1/test/create', input).pipe(map((response) => response.resource))

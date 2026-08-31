@@ -16,6 +16,7 @@ import {
   TemplateRef,
   ViewChild,
   booleanAttribute,
+  inject,
 } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { Subscription } from 'rxjs'
@@ -47,6 +48,8 @@ const DEFAULT_DEBOUNCE_TIME = 200
   ],
 })
 export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
+  private readonly changeDetector = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
 
   @ViewChild('searchRef', { read: ElementRef })
@@ -72,8 +75,6 @@ export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
   protected get showFilterButton(): boolean {
     return !!this.searchbar?.onFilter || this.filter.observed
   }
-
-  constructor(private readonly changeDetector: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

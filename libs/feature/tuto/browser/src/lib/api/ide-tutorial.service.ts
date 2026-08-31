@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 
 @Injectable({ providedIn: 'root' })
 export class IdeTutorialService {
-  constructor(private readonly shepherd: ShepherdService) {}
+  private readonly shepherd = inject(ShepherdService)
 
   startIdeTutorial(): void {
     const steps = this.buildSteps()

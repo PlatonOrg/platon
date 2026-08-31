@@ -4,7 +4,7 @@
 export function darkTheme() {
   const textColor = '#f2f2f2'
   const backgroundColor = 'rgb(38, 40, 48)'
-  const highlightColor = '#d09000'
+  // const highlightColor = '#d09000'
   return {
     color: ['#fc97af', '#87f7cf', '#f7f494', '#72ccff', '#f7c5a0', '#d4a4eb', '#d2f5a6', '#76f2f2'],
     backgroundColor: backgroundColor,

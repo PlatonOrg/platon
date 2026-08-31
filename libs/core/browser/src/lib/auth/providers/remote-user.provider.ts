@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import {
   CreateUserGroup,
   ItemResponse,
@@ -23,9 +23,7 @@ const getId = (user: User | string): string => {
 
 @Injectable()
 export class RemoteUserProvider extends UserProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   update(user: string | User, input: UpdateUser): Observable<User> {
     return this.http

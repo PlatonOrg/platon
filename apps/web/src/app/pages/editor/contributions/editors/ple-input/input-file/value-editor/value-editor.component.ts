@@ -15,11 +15,11 @@ import { BaseValueEditor } from '../../ple-input'
 import { ActivatedRoute } from '@angular/router'
 import { InputFileService } from '@platon/feature/resource/browser'
 import { UiFilePreviewComponent, EditFilePreviewService, UiModalTemplateComponent } from '@platon/shared/ui'
-import { CommonModule } from '@angular/common'
+
 import { EditorDirectivesModule } from '@cisstech/nge-ide/core'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { MatIconModule } from '@angular/material/icon'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 
@@ -41,10 +41,9 @@ export class HideResourceIdPipe implements PipeTransform {
   styleUrls: ['value-editor.component.scss'],
   imports: [
     HideResourceIdPipe,
-    CommonModule,
     NzButtonModule,
     NzIconModule,
-    NzToolTipModule,
+    NzTooltipModule,
     EditorDirectivesModule,
     UiFilePreviewComponent,
     UiModalTemplateComponent,
@@ -54,6 +53,8 @@ export class HideResourceIdPipe implements PipeTransform {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValueEditorComponent extends BaseValueEditor<string> implements OnDestroy {
+  private route = inject(ActivatedRoute)
+
   private readonly editorService = inject(EditorService, { optional: true })
   private readonly editorPresenter = inject(EditorPresenter, { optional: true })
   private readonly fileSystemProvider = inject(ResourceFileSystemProvider, { optional: true })
@@ -75,7 +76,7 @@ export class ValueEditorComponent extends BaseValueEditor<string> implements OnD
   @ViewChild(UiModalTemplateComponent) modalComponent!: UiModalTemplateComponent
 
   /**  */
-  constructor(private route: ActivatedRoute) {
+  constructor() {
     super()
     this.modeBuilder = this.inputFileService.isModeBuilder()
     this.version = this.inputFileService.resourceVersion()

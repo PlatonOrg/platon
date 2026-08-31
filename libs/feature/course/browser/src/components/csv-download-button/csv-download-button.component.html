@@ -1,6 +1,5 @@
-@if (hasToCheckGroups) {
+@if (hasToCheckGroups) { @if (activities[0]?.permissions?.viewStats) {
 <a
-  *ngIf="activities[0]?.permissions?.viewStats"
   nz-button
   nzShape="round"
   nzType="default"
@@ -12,6 +11,7 @@
 >
   Télécharger les notes au format CSV
 </a>
+}
 
 <nz-dropdown-menu #menu="nzDropdownMenu">
   <div nz-menu class="scrollable-menu">
@@ -26,22 +26,17 @@
         @if (isAllChecked()) { Tout décocher } @else { Tout cocher }
       </button>
     </div>
-    <div nz-menu-item *ngFor="let group of groups">
+    @for (group of groups; track group) {
+    <div nz-menu-item>
       <label nz-checkbox [(ngModel)]="group.checked">
         {{ group.name }}
       </label>
     </div>
+    }
   </div>
 </nz-dropdown-menu>
-} @else {
-<a
-  *ngIf="activities[0]?.permissions?.viewStats"
-  nz-button
-  nzShape="round"
-  nzType="default"
-  (click)="downloadCSV()"
-  [class.activity-type]="type === 'activity'"
->
+} @else { @if (activities[0]?.permissions?.viewStats) {
+<a nz-button nzShape="round" nzType="default" (click)="downloadCSV()" [class.activity-type]="type === 'activity'">
   Télécharger les notes au format CSV
 </a>
-}
+} }

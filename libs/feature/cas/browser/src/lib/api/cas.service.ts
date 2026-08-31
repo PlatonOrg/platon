@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse } from '@platon/core/common'
 import { CreateCas, Cas, CasFilters, UpdateCas } from '@platon/feature/cas/common'
 import { Observable } from 'rxjs'
@@ -6,7 +6,7 @@ import { CasProvider } from '../models/cas-provider'
 
 @Injectable({ providedIn: 'root' })
 export class CasService {
-  constructor(private readonly provider: CasProvider) {}
+  private readonly provider = inject(CasProvider)
 
   searchCas(filters?: CasFilters): Observable<ListResponse<Cas>> {
     return this.provider.searchCas(filters)

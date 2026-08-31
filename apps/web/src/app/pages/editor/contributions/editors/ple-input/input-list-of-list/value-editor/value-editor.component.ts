@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, ViewChild, ElementRef, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'
 import { BaseValueEditor } from '../../ple-input'
 import { InputListOfList } from '../input-list-of-list'
-import { CommonModule } from '@angular/common'
+
 import { FormsModule } from '@angular/forms'
 import { NzFormModule } from 'ng-zorro-antd/form'
 import { NzInputModule } from 'ng-zorro-antd/input'
@@ -14,7 +14,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
   templateUrl: './value-editor.component.html',
   styleUrl: './value-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzFormModule, NzCheckboxModule, NzSelectModule, NzInputModule, NzIconModule],
+  imports: [FormsModule, NzFormModule, NzCheckboxModule, NzSelectModule, NzInputModule, NzIconModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ValueEditorComponent extends BaseValueEditor<InputListOfList[]> {

@@ -1,10 +1,14 @@
 <div class="math-field-box" #box [class.disabled]="state.disabled">
-  <div class="prefix" *ngIf="state.prefix">
+  @if (state.prefix) {
+  <div class="prefix">
     <img [src]="state.prefix | icongr" alt="prefix icon" />
   </div>
+  }
   <div #container></div>
-  <div class="suffix" *ngIf="state.suffix">
+  @if (state.suffix) {
+  <div class="suffix">
     <img [src]="state.suffix | icongr" alt="suffix icon" />
   </div>
+  }
 </div>
 <wc-base [(state)]="state"></wc-base>

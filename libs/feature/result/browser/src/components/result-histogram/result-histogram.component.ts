@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnChanges, OnInit } from '@angular/core'
 import { CoreEchartsDirective } from '@platon/core/browser'
 import { EChartsOption } from 'echarts'
@@ -8,7 +7,7 @@ import type { ECharts } from 'echarts'
   selector: 'result-histogram',
   templateUrl: './result-histogram.component.html',
   styleUrls: ['./result-histogram.component.scss'],
-  imports: [CommonModule, CoreEchartsDirective],
+  imports: [CoreEchartsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResultHistogramComponent implements OnInit, OnChanges {

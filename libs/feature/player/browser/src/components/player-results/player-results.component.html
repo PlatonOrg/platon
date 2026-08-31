@@ -20,58 +20,55 @@
   </tbody>
 </table>
 
-<ng-container *ngIf="results && !results.correcting; else correcting">
-  <h3>Résultats</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Exercice</th>
-        <th>Réponses</th>
-        <th class="th-with-icon">
-          Durée estimée
-          <mat-icon
-            nz-tooltip="La durée estimée est calculée en additionnant l'intervalle de temps entre chaque réponse. Les intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir la précision."
-            >info_circle</mat-icon
-          >
-        </th>
-        <th>État</th>
-        <th>Note</th>
-      </tr>
-    </thead>
-    <tbody>
-      <ng-container *ngFor="let pair of results.exercises | keyvalue : keepOriginalOrder">
-        @if (pair.value.state !== 'NOT_STARTED' || displayAll) {
-        <tr>
-          <td>{{ pair.value.title }}</td>
-          <td>{{ pair.value.attempts }}</td>
-          <td>{{ pair.value.duration | duration }}</td>
-          <td [nz-tooltip]="pair.value.state | answerStateLabel">
-            <mat-icon [style.color]="pair.value.state | answerStateColor">
-              {{ pair.value.state | answerStateIcon }}
-            </mat-icon>
-          </td>
-          <td>{{ pair.value.grade }}</td>
-          <td *ngIf="pair.value.attempts">
-            <button nz-button nzType="primary" [nzShape]="isMobile ? 'circle' : null" (click)="playAnswers(pair.value)">
-              <ng-container *ngIf="!isMobile">Réponses</ng-container>
-              <ng-container *ngIf="isMobile">
-                <mat-icon>play_arrow</mat-icon>
-              </ng-container>
-            </button>
-          </td>
-        </tr>
-        }
-      </ng-container>
-    </tbody>
-  </table>
-  @if (hasNonStartedExercises) {
-  <a (click)="displayAll = !displayAll"> @if (displayAll) { Cacher } @else { Afficher }les exercices non commencés </a>
-  }
-</ng-container>
-
-<ng-template #correcting>
-  <p>Nous vous informerons dès que les résultats seront disponibles. Merci d'avoir participé !</p>
-</ng-template>
+@if (results && !results.correcting) {
+<h3>Résultats</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Exercice</th>
+      <th>Réponses</th>
+      <th class="th-with-icon">
+        Durée estimée
+        <mat-icon
+          nz-tooltip="La durée estimée est calculée en additionnant l'intervalle de temps entre chaque réponse. Les intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir la précision."
+          >info_circle</mat-icon
+        >
+      </th>
+      <th>État</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (pair of results.exercises | keyvalue : keepOriginalOrder; track pair) { @if (pair.value.state !==
+    'NOT_STARTED' || displayAll) {
+    <tr>
+      <td>{{ pair.value.title }}</td>
+      <td>{{ pair.value.attempts }}</td>
+      <td>{{ pair.value.duration | duration }}</td>
+      <td [nz-tooltip]="pair.value.state | answerStateLabel">
+        <mat-icon [style.color]="pair.value.state | answerStateColor">
+          {{ pair.value.state | answerStateIcon }}
+        </mat-icon>
+      </td>
+      <td>{{ pair.value.grade }}</td>
+      @if (pair.value.attempts) {
+      <td>
+        <button nz-button nzType="primary" [nzShape]="isMobile ? 'circle' : null" (click)="playAnswers(pair.value)">
+          @if (!isMobile) { Réponses } @if (isMobile) {
+          <mat-icon>play_arrow</mat-icon>
+          }
+        </button>
+      </td>
+      }
+    </tr>
+    } }
+  </tbody>
+</table>
+@if (hasNonStartedExercises) {
+<a (click)="displayAll = !displayAll"> @if (displayAll) { Cacher } @else { Afficher }les exercices non commencés </a>
+} } @else {
+<p>Nous vous informerons dès que les résultats seront disponibles. Merci d'avoir participé !</p>
+}
 
 <ui-modal-template height="70vh" width="80vw" (accepted)="answers = []" (canceled)="answers = []">
   <ng-template>

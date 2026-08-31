@@ -10,6 +10,7 @@ import {
   OnInit,
   OnChanges,
   Output,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { NzTableColumn } from '@platon/core/browser'
@@ -34,6 +35,8 @@ type Value = string[] | undefined
   imports: [CommonModule, NzTableModule],
 })
 export class LmsTableComponent implements OnInit, OnChanges, ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() total = 0
   @Input() loading = true
   @Input() lmses: Lms[] = []
@@ -52,8 +55,6 @@ export class LmsTableComponent implements OnInit, OnChanges, ControlValueAccesso
   protected get canFilterOnServer(): boolean {
     return this.filtersChange.observed
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.columns = [

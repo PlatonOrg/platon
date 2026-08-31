@@ -9,6 +9,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { FormControl } from '@angular/forms'
 import { Observable, Subscription } from 'rxjs'
@@ -55,6 +56,9 @@ import { CssPipeModule } from '../../shared/pipes/css.pipe'
 })
 @WebComponent(InputBoxComponentDefinition)
 export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<InputBoxState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private readonly webComponentService!: WebComponentService
 
   @Input() state!: InputBoxState
@@ -76,7 +80,9 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
     map((value) => this.getSuggestions(value))
   )
 
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService)!
   }
 

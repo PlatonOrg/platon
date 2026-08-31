@@ -21,12 +21,9 @@
         formControlName="topics"
         [nzDisabled]="!canEdit"
       >
-        <nz-option
-          *ngFor="let item of dataSource?.topics; trackBy: trackByValue"
-          [nzLabel]="item.name"
-          [nzValue]="item.id"
-        >
-        </nz-option>
+        @for (item of dataSource?.topics; track trackByValue($index, item)) {
+        <nz-option [nzLabel]="item.name" [nzValue]="item.id"> </nz-option>
+        }
       </nz-select>
     </nz-form-control>
   </nz-form-item>
@@ -44,19 +41,15 @@
         formControlName="levels"
         [nzDisabled]="!canEdit"
       >
-        <nz-option
-          *ngFor="let item of dataSource?.levels; trackBy: trackByValue"
-          [nzLabel]="item.name"
-          [nzValue]="item.id"
-        >
-        </nz-option>
+        @for (item of dataSource?.levels; track trackByValue($index, item)) {
+        <nz-option [nzLabel]="item.name" [nzValue]="item.id"> </nz-option>
+        }
       </nz-select>
     </nz-form-control>
   </nz-form-item>
-  <ng-container *ngIf="saving; else actions">
-    <nz-spin></nz-spin>
-  </ng-container>
-  <ng-template #actions>
-    <button nz-button nzType="primary" [disabled]="!canSubmit">Sauvegarder</button>
-  </ng-template>
+  @if (saving) {
+  <nz-spin></nz-spin>
+  } @else {
+  <button nz-button nzType="primary" [disabled]="!canSubmit">Sauvegarder</button>
+  }
 </form>

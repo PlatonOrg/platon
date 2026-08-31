@@ -11,13 +11,9 @@
 >
   <thead>
     <tr>
-      <th
-        *ngIf="selectable && !disabled"
-        [nzChecked]="checked"
-        [nzIndeterminate]="indeterminate"
-        (nzCheckedChange)="onAllChecked($event)"
-      ></th>
-      @for (column of columns; track column.key) {
+      @if (selectable && !disabled) {
+      <th [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
+      } @for (column of columns; track column.key) {
       <th
         [nzColumnKey]="column.key"
         [(nzSortOrder)]="column.sortOrder!"
@@ -32,16 +28,16 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let group of nzTable.data">
-      <td
-        *ngIf="selectable && !disabled"
-        [nzChecked]="selection.has(group.id)"
-        (nzCheckedChange)="onItemChecked(group.id, $event)"
-      ></td>
+    @for (group of nzTable.data; track group) {
+    <tr>
+      @if (selectable && !disabled) {
+      <td [nzChecked]="selection.has(group.id)" (nzCheckedChange)="onItemChecked(group.id, $event)"></td>
+      }
       <td>
         <user-avatar #avatar [group]="group" (openGroupDetails)="openDetails.next($event)" />
       </td>
       <td>{{ group.createdAt | date }}</td>
     </tr>
+    }
   </tbody>
 </nz-table>

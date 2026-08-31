@@ -7,6 +7,7 @@ import {
   Input,
   TemplateRef,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
@@ -24,6 +25,8 @@ import { AuthIfDirective } from '../../directives'
   imports: [CommonModule, NzSpinModule, NzSkeletonModule, UiError403Component, UiError404Component, AuthIfDirective],
 })
 export class ProtectedComponent {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @ContentChild(TemplateRef)
   template!: TemplateRef<unknown>
 
@@ -45,8 +48,6 @@ export class ProtectedComponent {
   @Input() unauthorized?: (error?: unknown) => void | Promise<void>
 
   user!: User
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   protected async onConnect(user: User): Promise<void> {
     this.user = user

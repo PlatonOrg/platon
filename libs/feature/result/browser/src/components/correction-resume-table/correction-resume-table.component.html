@@ -22,14 +22,13 @@
   <ng-container matColumnDef="labels">
     <th mat-header-cell *matHeaderCellDef>Labels</th>
     <td mat-cell *matCellDef="let sheet" [ngClass]="getStyle(sheet.correctedGrade ?? sheet.grade)">
-      <ng-container *ngIf="sheet.labels.length > 0; else noLabels">
-        <span *ngFor="let label of sheet.labels" class="label">
-          {{ label.name }}
-        </span>
-      </ng-container>
-      <ng-template #noLabels>
-        <span class="no-labels">Aucun label</span>
-      </ng-template>
+      @if (sheet.labels.length > 0) { @for (label of sheet.labels; track label) {
+      <span class="label">
+        {{ label.name }}
+      </span>
+      } } @else {
+      <span class="no-labels">Aucun label</span>
+      }
     </td>
   </ng-container>
 

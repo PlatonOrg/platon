@@ -8,6 +8,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 import { firstValueFrom } from 'rxjs'
@@ -27,6 +28,10 @@ declare const JXG: any
 })
 @WebComponent(JsxComponentDefinition)
 export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxState> {
+  readonly injector = inject(Injector)
+  readonly resourceLoader = inject(ResourceLoaderService)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private static NEXT_ID = 0
   private board?: any
 
@@ -34,12 +39,6 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxSta
 
   @Input() state!: JsxState
   @Output() stateChange = new EventEmitter<JsxState>()
-
-  constructor(
-    readonly injector: Injector,
-    readonly resourceLoader: ResourceLoaderService,
-    readonly changeDetector: WebComponentChangeDetectorService
-  ) {}
 
   async ngOnInit() {
     this.state.isFilled = false

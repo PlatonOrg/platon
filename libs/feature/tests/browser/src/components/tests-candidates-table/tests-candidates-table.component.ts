@@ -10,6 +10,7 @@ import {
   OnChanges,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { DialogService, NzTableColumn, UserAvatarComponent } from '@platon/core/browser'
@@ -53,6 +54,10 @@ type Value = string[] | undefined
   ],
 })
 export class TestsCandidatesTableComponent implements OnInit, OnChanges, ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly testService = inject(TestsService)
+  private readonly dialogService = inject(DialogService)
+
   @Input() members: CourseMember[] = []
   @Input() editable = false
 
@@ -78,12 +83,6 @@ export class TestsCandidatesTableComponent implements OnInit, OnChanges, Control
   protected get canFilterOnServer(): boolean {
     return this.filtersChange.observed
   }
-
-  constructor(
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly testService: TestsService,
-    private readonly dialogService: DialogService
-  ) {}
 
   // ControlValueAccessor methods
 

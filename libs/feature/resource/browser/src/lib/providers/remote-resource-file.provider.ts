@@ -1,7 +1,7 @@
 import { map, Observable } from 'rxjs'
 
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ActivityExerciseGroup, PLSourceFile } from '@platon/feature/compiler'
 import {
   ExerciseTransformInput,
@@ -21,9 +21,7 @@ import { CreatedResponse } from '@platon/core/common'
 
 @Injectable()
 export class RemoteResourceFileProvider extends ResourceFileProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   compileExercise(resource: string, version?: string): Observable<PLSourceFile> {
     let params = new HttpParams()

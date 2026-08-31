@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Inject,
   Injector,
   Input,
   OnDestroy,
@@ -12,6 +11,7 @@ import {
   ViewChild,
   OnChanges,
   SimpleChanges,
+  inject,
 } from '@angular/core'
 import {
   BrowserJsPlumbInstance,
@@ -82,6 +82,11 @@ const BASIC_CONNECTION = {
 })
 @WebComponent(AutomatonEditorComponentDefinition)
 export class AutomatonEditorComponent implements OnInit, OnDestroy, OnChanges, WebComponentHooks<AutomatonEditorState> {
+  readonly injector = inject(Injector)
+  readonly editor = inject(AutomatonEditorService)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+  readonly editorActions = inject(AUTOMATON_EDITOR_ACTIONS)
+
   private readonly subs: Subscription[] = []
   private readonly context: AutomatonEditorActionContext = {
     state: undefined,
@@ -102,14 +107,6 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, OnChanges, W
   private get canvas() {
     return this.container.nativeElement.querySelector('.automaton-editor-canvas')
   }
-
-  constructor(
-    readonly injector: Injector,
-    readonly editor: AutomatonEditorService,
-    readonly changeDetector: WebComponentChangeDetectorService,
-    @Inject(AUTOMATON_EDITOR_ACTIONS)
-    readonly editorActions: AutomatonEditorAction[]
-  ) {}
 
   ngOnInit() {
     this.jsp = newInstance({

@@ -22,12 +22,14 @@
       >
         {{ column.name }}
       </th>
+      } @if (editable) {
+      <th nzAlign="center">Actions</th>
       }
-      <th *ngIf="editable" nzAlign="center">Actions</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let member of nzTable.data">
+    @for (member of nzTable.data; track member) {
+    <tr>
       <td>
         <user-avatar #avatar [user]="$any(member.user)" />
       </td>
@@ -44,7 +46,8 @@
         </div>
       </td> -->
       <td>Pas commencé</td>
-      <td nzAlign="center" *ngIf="editable && !disabled">
+      @if (editable && !disabled) {
+      <td nzAlign="center">
         <button
           nz-button
           nzShape="circle"
@@ -78,6 +81,8 @@
           <i nz-icon nzType="delete"></i>
         </button>
       </td>
+      }
     </tr>
+    }
   </tbody>
 </nz-table>

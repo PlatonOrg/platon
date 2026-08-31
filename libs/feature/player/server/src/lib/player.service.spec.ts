@@ -15,8 +15,8 @@ import {
   createMockActivitySession,
   createMockActivityEntity,
   createMockAnswer,
-  createMockExercisePlayer,
-  createMockActivityPlayer,
+  // createMockExercisePlayer,
+  // createMockActivityPlayer,
 } from './factories/player.factory'
 
 jest.mock('@platon/feature/compiler', () => ({
@@ -43,8 +43,8 @@ describe('PlayerService', () => {
   let sessionService: jest.Mocked<SessionService>
   let activityService: jest.Mocked<ActivityService>
   let resourceFileService: jest.Mocked<ResourceFileService>
-  let peerService: jest.Mocked<PeerService>
-  let eventService: jest.Mocked<EventService>
+  // let peerService: jest.Mocked<PeerService>
+  // let eventService: jest.Mocked<EventService>
   let dataSource: any
   let mockEntityManager: any
 
@@ -133,8 +133,8 @@ describe('PlayerService', () => {
     sessionService = module.get(SessionService)
     activityService = module.get(ActivityService)
     resourceFileService = module.get(ResourceFileService)
-    peerService = module.get(PeerService)
-    eventService = module.get(EventService)
+    // peerService = module.get(PeerService)
+    // eventService = module.get(EventService)
   })
 
   afterEach(() => {

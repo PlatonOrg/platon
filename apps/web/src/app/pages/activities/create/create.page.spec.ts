@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideNoopAnimations } from '@angular/platform-browser/animations'
 import { ActivatedRoute, Router } from '@angular/router'
-import { NzIconTestModule } from 'ng-zorro-antd/icon/testing'
+import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing'
 import { of } from 'rxjs'
 
 import { AuthService, DialogService, TagService } from '@platon/core/browser'
@@ -50,8 +50,9 @@ describe('ActivityCreatePage', () => {
     router = { navigateByUrl: jest.fn().mockResolvedValue(true) }
 
     await TestBed.configureTestingModule({
-      imports: [ActivityCreatePage, NzIconTestModule],
+      imports: [ActivityCreatePage],
       providers: [
+        provideNzIconsTesting(),
         provideNoopAnimations(),
         { provide: AuthService, useValue: { ready: jest.fn().mockResolvedValue({ id: 'teacher-id' }) } },
         { provide: CourseService, useValue: courseService },

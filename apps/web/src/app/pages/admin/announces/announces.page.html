@@ -32,16 +32,13 @@
           </td>
           <td>{{ item.createdAt | date : 'dd/MM/yyyy HH:mm' }}</td>
           <td>
-            <ng-container *ngIf="item.targetedRoles?.length; else allRoles">
-              @for(role of item.targetedRoles; track role) {
-              <nz-tag [nzColor]="getRoleColor(role)">
-                {{ formatRoleName(role) }}
-              </nz-tag>
-              }
-            </ng-container>
-            <ng-template #allRoles>
-              <nz-tag nzColor="default">Tous les utilisateurs</nz-tag>
-            </ng-template>
+            @if (item.targetedRoles?.length) { @for(role of item.targetedRoles; track role) {
+            <nz-tag [nzColor]="getRoleColor(role)">
+              {{ formatRoleName(role) }}
+            </nz-tag>
+            } } @else {
+            <nz-tag nzColor="default">Tous les utilisateurs</nz-tag>
+            }
           </td>
           <td>
             <!-- Boutons d'actions  -->
@@ -103,10 +100,9 @@
         <div class="info-item">
           <span class="label">Rôles:</span>
           <span>
-            <ng-container *ngIf="item.targetedRoles?.length; else mobileAllRoles">
-              {{ formatRolesList(item.targetedRoles ?? []) }}
-            </ng-container>
-            <ng-template #mobileAllRoles>Tous les utilisateurs</ng-template>
+            @if (item.targetedRoles?.length) {
+            {{ formatRolesList(item.targetedRoles ?? []) }}
+            } @else { Tous les utilisateurs }
           </span>
         </div>
       </div>

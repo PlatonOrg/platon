@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Subscription } from 'rxjs'
 
@@ -6,7 +5,7 @@ import { MatCardModule } from '@angular/material/card'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { DialogService, UserSearchModalComponent } from '@platon/core/browser'
 import { isTeacherRole, isUser, isUserGroup, User, UserFilters, UserGroup, UserRoles } from '@platon/core/common'
@@ -29,12 +28,11 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
   styleUrls: ['./members.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     MatCardModule,
     NzIconModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzSelectModule,
     CoursePipesModule,
     UserSearchModalComponent,
@@ -128,7 +126,7 @@ export class CourseMembersPage implements OnInit, OnDestroy {
     const { member, newRole, previousRole } = event
     try {
       await this.presenter.updateMemberRole(member, newRole)
-    } catch (error) {
+    } catch (_error) {
       const updatedMember = { ...member, role: previousRole }
       this.members = this.members.map((m) => (m.id === member.id ? updatedMember : m))
       this.changeDetectorRef.markForCheck()

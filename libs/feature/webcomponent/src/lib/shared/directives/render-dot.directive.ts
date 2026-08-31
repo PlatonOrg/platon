@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, NgModule, OnChanges, OnInit } from '@angular/core'
+import { Directive, ElementRef, Input, NgModule, OnChanges, OnInit, inject } from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 import { take } from 'rxjs/operators'
 
@@ -12,12 +12,13 @@ declare const d3: any
   selector: '[renderDot]',
 })
 export class RenderDotDirective implements OnInit, OnChanges {
+  private el = inject(ElementRef)
+  private readonly resourceLoader = inject(ResourceLoaderService)
+
   private ready = false
 
   @Input('renderDot')
   dot?: string
-
-  constructor(private el: ElementRef, private readonly resourceLoader: ResourceLoaderService) {}
 
   ngOnInit() {
     this.resourceLoader

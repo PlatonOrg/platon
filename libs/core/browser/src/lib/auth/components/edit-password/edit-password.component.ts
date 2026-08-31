@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -10,6 +10,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import {
   AbstractControl,
@@ -31,7 +32,7 @@ import { debounceTime, Subscription } from 'rxjs'
   templateUrl: './edit-password.component.html',
   styleUrls: ['./edit-password.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, MatInputModule, MatFormFieldModule, NzIconModule, MatIconModule],
+  imports: [ReactiveFormsModule, MatInputModule, MatFormFieldModule, NzIconModule, MatIconModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -41,6 +42,9 @@ import { debounceTime, Subscription } from 'rxjs'
   ],
 })
 export class AuthEditPasswordComponent implements OnInit, OnDestroy, ControlValueAccessor {
+  private readonly formBuilder = inject(FormBuilder)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private subscription?: Subscription
   protected valid = false
   protected passwordRequired = true
@@ -78,8 +82,6 @@ export class AuthEditPasswordComponent implements OnInit, OnDestroy, ControlValu
   get isValid(): boolean {
     return this.valid
   }
-
-  constructor(private readonly formBuilder: FormBuilder, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.subscription = this.form.valueChanges.pipe(debounceTime(300)).subscribe(() => {
@@ -132,7 +134,11 @@ export class AuthEditPasswordComponent implements OnInit, OnDestroy, ControlValu
   }
 
   setDisabledState?(isDisabled: boolean): void {
-    isDisabled ? this.form.disable() : this.form.enable()
+    if (isDisabled) {
+      this.form.disable()
+    } else {
+      this.form.enable()
+    }
   }
 
   passwordMatchingValidator(control: AbstractControl) {

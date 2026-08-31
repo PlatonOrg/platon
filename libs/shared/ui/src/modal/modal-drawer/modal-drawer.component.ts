@@ -23,6 +23,8 @@ import { NzDrawerModule, NzDrawerPlacement, NzDrawerSize } from 'ng-zorro-antd/d
   imports: [CommonModule, NzDrawerModule],
 })
 export class UiModalDrawerComponent {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly breakpointObserver = inject(BreakpointObserver)
   protected visible = false
 
@@ -46,8 +48,6 @@ export class UiModalDrawerComponent {
   get isVisible(): boolean {
     return this.visible
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   open(): void {
     this.visible = true

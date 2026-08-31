@@ -1,5 +1,5 @@
 import { ComponentType } from '@angular/cdk/portal'
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -24,23 +24,20 @@ import {
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { NzTimelineModule } from 'ng-zorro-antd/timeline'
 import { ResourcePipesModule } from '../../pipes'
+import { DatePipe, NgComponentOutlet } from '@angular/common'
 
 const ResourceEventToken = new InjectionToken<ResourceEvent>('ResourceEventToken')
 
 @Component({
   selector: 'resource-event-member-remove',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, UserAvatarComponent],
+  imports: [UserAvatarComponent],
   template: `
-    <ng-container *ngIf="isMe">Vous êtes désormais membre de “{{ event.data.resourceName }}”</ng-container>
-    <ng-container *ngIf="!isMe && !isJoinRequest">
-      <user-avatar showUsername="inline" [userIdOrName]="event.data.userId" />
-      est désormais membre de “{{ event.data.resourceName }}”
-    </ng-container>
-    <ng-container *ngIf="isJoinRequest">
-      <user-avatar showUsername="inline" [userIdOrName]="event.data.userId" />
-      souhaite rejoindre le cercle “{{ event.data.resourceName }}”
-    </ng-container>
+    @if (isMe) { Vous êtes désormais membre de “{{ event.data.resourceName }}” } @if (!isMe && !isJoinRequest) {
+    <user-avatar showUsername="inline" [userIdOrName]="event.data.userId" />
+    est désormais membre de “{{ event.data.resourceName }}” } @if (isJoinRequest) {
+    <user-avatar showUsername="inline" [userIdOrName]="event.data.userId" />
+    souhaite rejoindre le cercle “{{ event.data.resourceName }}” }
     <ng-template #avatar>
       <user-avatar showUsername="inline" [userIdOrName]="event.data.userId" />
       est désormais membre de “{{ event.data.resourceName }}”
@@ -68,14 +65,10 @@ class MemberCreateEventComponent implements OnInit {
 @Component({
   selector: 'resource-event-member-remove',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, UserAvatarComponent],
+  imports: [UserAvatarComponent],
   template: `
-    <ng-container *ngIf="notification; else noNotification">
-      Vous n'êtes plus membre de “{{ event.data.resourceName }}”
-    </ng-container>
-    <ng-template #noNotification>
-      <user-avatar showUsername="inline" [userIdOrName]="event.actorId" /> n'a plus accès à cette ressource
-    </ng-template>
+    @if (notification) { Vous n'êtes plus membre de “{{ event.data.resourceName }}” } @else {
+    <user-avatar showUsername="inline" [userIdOrName]="event.actorId" /> n'a plus accès à cette ressource }
   `,
 })
 class MemberRemoveEventComponent {
@@ -115,7 +108,7 @@ class NewResourceEventComponent {
   templateUrl: './event-item.component.html',
   styleUrls: ['./event-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzEmptyModule, NzTimelineModule, ResourcePipesModule],
+  imports: [NzEmptyModule, NzTimelineModule, ResourcePipesModule, DatePipe, NgComponentOutlet],
 })
 export class ResourceEventItemComponent {
   @Input()

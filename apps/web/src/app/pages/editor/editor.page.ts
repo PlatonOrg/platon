@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 
 import { NgeIdeModule } from '@cisstech/nge-ide'
@@ -44,7 +43,6 @@ import { Resource } from '@platon/feature/resource/common'
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeInOnEnterAnimation(), fadeOutDownOnLeaveAnimation({ duration: 500 })],
   imports: [
-    CommonModule,
     NzSpinModule,
     NzButtonModule,
     NzSkeletonModule,

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, input, output, inject, OnInit } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
@@ -19,7 +18,6 @@ import { HttpClient } from '@angular/common/http'
   styleUrls: ['./version-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
@@ -60,7 +58,7 @@ export class VersionHistoryComponent implements OnInit {
       this.latest = result.latest ? { ...result.latest, tag: 'latest' } : undefined
       this.versions = this.latest ? [this.latest, ...this.versions] : this.versions
       this.currentVersion = result.latest?.tag
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Impossible de charger les versions')
     } finally {
       this.loading = false
@@ -100,7 +98,7 @@ export class VersionHistoryComponent implements OnInit {
         )
 
         overrides = JSON.parse(overridesContent)
-      } catch (error) {
+      } catch (_error) {
         overrides = {}
       }
 
@@ -109,7 +107,7 @@ export class VersionHistoryComponent implements OnInit {
       this.versionChanged.emit({ version: version.tag, overrides })
 
       this.dialogService.success(`Version "${version.tag}" restaurée avec succès`)
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Impossible de restaurer cette version')
     } finally {
       this.loading = false

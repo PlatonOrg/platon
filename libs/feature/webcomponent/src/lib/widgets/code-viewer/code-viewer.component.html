@@ -1,15 +1,13 @@
 <div class="code-container">
   <div class="line-numbers">
-    <ng-container *ngFor="let num of lineNumbers">
-      @if (show.has(num)) {
-      <span class="line-numbers-item">{{num}}</span>
-      } @else {
-      <span class="line-numbers-item">&nbsp;</span>
-      }
-    </ng-container>
+    @for (num of lineNumbers; track num) { @if (show.has(num)) {
+    <span class="line-numbers-item">{{ num }}</span>
+    } @else {
+    <span class="line-numbers-item">&nbsp;</span>
+    } }
   </div>
   <div class="content-wrapper">
-    <nge-markdown data="{{data}}"></nge-markdown>
+    <nge-markdown data="{{ data }}"></nge-markdown>
   </div>
 </div>
 <wc-base [(state)]="state" />

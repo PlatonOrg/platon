@@ -7,19 +7,19 @@
   [class.disabled]="state.disabled"
   [class.horizontal]="state.horizontal"
 >
-  <ng-container *ngFor="let item of state.items; trackBy: trackBy; let i = index">
-    <div
-      class="checkbox-item"
-      [ngClass]="item.css | css : 'class'"
-      [ngStyle]="item.css | css : 'style'"
-      [class.selected]="i === state.selectedIndex"
-      [class.checked]="item.checked"
-      (click)="item.checked = !item.checked; state.isFilled = true; $event.stopPropagation()"
-    >
-      <mat-checkbox color="primary" [checked]="!!item.checked" [disabled]="state.disabled">
-        <nge-markdown [data]="item.content" />
-      </mat-checkbox>
-    </div>
-  </ng-container>
+  @for (item of state.items; track trackBy(i, item); let i = $index) {
+  <div
+    class="checkbox-item"
+    [ngClass]="item.css | css : 'class'"
+    [ngStyle]="item.css | css : 'style'"
+    [class.selected]="i === state.selectedIndex"
+    [class.checked]="item.checked"
+    (click)="item.checked = !item.checked; state.isFilled = true; $event.stopPropagation()"
+  >
+    <mat-checkbox color="primary" [checked]="!!item.checked" [disabled]="state.disabled">
+      <nge-markdown [data]="item.content" />
+    </mat-checkbox>
+  </div>
+  }
 </div>
 <wc-base [(state)]="state"></wc-base>

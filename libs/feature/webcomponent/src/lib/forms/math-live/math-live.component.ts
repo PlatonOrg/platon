@@ -9,6 +9,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { MathfieldElement } from 'mathlive'
 import { WebComponent, WebComponentHooks } from '../../web-component'
@@ -28,6 +29,9 @@ import { IconGrPipeModule } from '@cisstech/nge/pipes'
 })
 @WebComponent(MathLiveComponentDefinition)
 export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveState> {
+  readonly injector = inject(Injector)
+  readonly changeDetection = inject(WebComponentChangeDetectorService)
+
   private mathfield!: MathfieldElement
 
   @Input() state!: MathLiveState
@@ -40,8 +44,6 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
 
   displayMenu = true
   computeEngine = new ComputeEngine()
-
-  constructor(readonly injector: Injector, readonly changeDetection: WebComponentChangeDetectorService) {}
 
   async ngOnInit() {
     this.state.isFilled = false

@@ -1,4 +1,6 @@
-import 'jest-preset-angular/setup-jest'
+import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone'
+
+setupZoneTestEnv()
 
 // Suppress known Angular Material/CDK warnings and ng-zorro-antd errors that don't affect tests
 if (typeof window !== 'undefined') {

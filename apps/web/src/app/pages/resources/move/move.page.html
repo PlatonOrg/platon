@@ -3,38 +3,38 @@
     <ng-template #header>
       Déplacer {{ type | resourceType : true | lowercase }}
       <ng-container> depuis {{ sourceParentName }} </ng-container>
-      <ng-container *ngIf="parentName"> vers {{ parentName }} </ng-container>
+      @if (parentName) { vers {{ parentName }}
+      }
     </ng-template>
   </nz-page-header>
 </header>
 <main>
   <section>
+    @if (type === 'ACTIVITY') {
     <nz-alert
-      *ngIf="type === 'ACTIVITY'"
       nzType="warning"
       nzMessage="Le déplacement d'une activité entraînera automatiquement le déplacement de tous les exercices de votre cercle qui sont utilisés par cette activité vers le même cercle de destination."
       nzShowIcon
       nzBanner
     ></nz-alert>
+    }
     <h4>
       Sélectionnez le cercle dans lequel vous voulez ajouter
       {{ type | resourceType : true | lowercase }}.
     </h4>
+    @if (tree) {
     <resource-circle-tree
-      *ngIf="tree"
       [tree]="tree"
       [selection]="parentId ? [parentId] : []"
       (selectionChange)="onChangeParentId($event[0])"
     />
+    }
   </section>
 </main>
 <footer>
-  <ng-container *ngIf="moving; else showControls">
-    <nz-spin nzTip="Déplacement en cours..."></nz-spin>
-  </ng-container>
-  <ng-template #showControls>
-    <ng-container *ngIf="!loading">
-      <button nz-button nzType="primary" (click)="move()">Déplacer</button>
-    </ng-container>
-  </ng-template>
+  @if (moving) {
+  <nz-spin nzTip="Déplacement en cours..."></nz-spin>
+  } @else { @if (!loading) {
+  <button nz-button nzType="primary" (click)="move()">Déplacer</button>
+  } }
 </footer>

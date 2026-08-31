@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
 import { MatIconModule } from '@angular/material/icon'
 import { RouterModule } from '@angular/router'
@@ -10,7 +10,7 @@ import { Course, CourseFilters, CourseOrderings } from '@platon/feature/course/c
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { firstValueFrom, Subscription } from 'rxjs'
 
 @Component({
@@ -26,10 +26,14 @@ import { firstValueFrom, Subscription } from 'rxjs'
     NzSpinModule,
     MatCardModule,
     MatIconModule,
-    NzToolTipModule,
+    NzTooltipModule,
   ],
 })
 export class TestsPage implements OnInit {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly authService = inject(AuthService)
+  private readonly courseService = inject(CourseService)
+
   private readonly subscriptions: Subscription[] = []
 
   private user?: User
@@ -39,12 +43,6 @@ export class TestsPage implements OnInit {
   protected filters: CourseFilters = {}
   protected items: Course[] = []
   protected totalMatches = 0
-
-  constructor(
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly authService: AuthService,
-    private readonly courseService: CourseService
-  ) {}
 
   async ngOnInit() {
     this.user = (await this.authService.ready()) as User

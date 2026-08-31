@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input, ViewChild, ElementRef } from '@angular/core'
 
 import { NzGridModule } from 'ng-zorro-antd/grid'
@@ -16,7 +15,6 @@ import { CdkDragDrop, CdkDragMove, CdkDragStart, DragDropModule, moveItemInArray
   styleUrls: ['./activity-grid.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     NzGridModule,
     NzTabsModule,
@@ -62,8 +60,6 @@ export class CourseActivityGridComponent {
     event.source.element.nativeElement.style.backgroundColor = 'red'
     event.source.element.nativeElement.style.width = '20px'
     event.source.element.nativeElement.style.maxWidth = '40px'
-
-    event.source.previewContainer
   }
 
   setStyle(event: MouseEvent): void {

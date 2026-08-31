@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, forwardRef } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, forwardRef, inject } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select'
@@ -20,9 +20,11 @@ import { NzTreeNodeOptions } from 'ng-zorro-antd/tree'
       multi: true,
     },
   ],
-  imports: [CommonModule, FormsModule, NzTreeSelectModule],
+  imports: [FormsModule, NzTreeSelectModule],
 })
 export class CourseGroupSelectComponent implements ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected disabled = false
   protected nodes: NzTreeNodeOptions[] = []
   protected selection: string[] = []
@@ -53,8 +55,6 @@ export class CourseGroupSelectComponent implements ControlValueAccessor {
 
     this.nodes = [selectAllNode, ...groupNodes]
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   onTouch: any = () => {
     //

@@ -10,77 +10,68 @@
   <thead>
     <tr>
       <th nzAlign="center" class="limited-width">Membre</th>
-      <th
-        nzAlign="center"
-        *ngFor="let item of nzTable.data[0].exercises | keyvalue : trackByColumnOrder"
-        class="limited-width"
-        [nz-tooltip]="item.value.title"
-      >
+      @for (item of nzTable.data[0].exercises | keyvalue : trackByColumnOrder; track item) {
+      <th nzAlign="center" class="limited-width" [nz-tooltip]="item.value.title">
         {{ item.value.title }}
       </th>
+      }
     </tr>
   </thead>
   <tbody>
-    <ng-container *ngFor="let item of nzTable.data">
-      <tr>
-        <td>
-          <user-avatar [userIdOrName]="item.id" />
-        </td>
-        <ng-container *ngFor="let pair of item.exercises | keyvalue : trackByColumnOrder">
-          <td nzAlign="center">
-            <div class="result-cell">
-              <mat-icon [nz-popover]="popover" [style.color]="pair.value.state | answerStateColor">
-                {{ pair.value.state | answerStateIcon }}
-              </mat-icon>
-              {{ pair.value.grade }}
-            </div>
-          </td>
-          <ng-template #popover>
-            <div nz-row nzType="flex" nzJustify="space-around" nzAlign="top">
-              <ui-statistic-card
-                nz-col
-                class="spacing"
-                matIcon="assessment"
-                ribbonColor="#8e44ad"
-                description="Évaluations"
-                tooltip="Nombre de réponses enregistrées (note > -1)."
-                [value]="pair.value.attempts"
-              />
-
-              <ui-statistic-card
-                nz-col
-                class="spacing"
-                matIcon="access_time"
-                ribbonColor="#f39c12"
-                description="Durée"
-                tooltip="La durée est calculée en additionnant l'intervalle de temps entre chaque réponse. Les intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir la précision."
-                [value]="pair.value.duration | duration"
-              />
-
-              <ui-statistic-card
-                nz-col
-                class="spacing"
-                matIcon="star"
-                ribbonColor="#7f8c8d"
-                description="Note"
-                [value]="pair.value.grade"
-                valueSuffix=" / 100"
-                tooltip="Plus grande note attribuée lors des évaluations. Il est possible que cette dernière soit issue d'une évaluation manuelle si l'activité est corrigeable."
-                shouldBePositive
-              />
-            </div>
-            <a
-              *ngIf="pair.value?.sessionId as sessionId"
-              class="spacing"
-              [href]="buildSessionUrl(sessionId)"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Voir la copie <br />
-            </a>
-          </ng-template>
-        </ng-container>
-      </tr>
-    </ng-container>
+    @for (item of nzTable.data; track item) {
+    <tr>
+      <td>
+        <user-avatar [userIdOrName]="item.id" />
+      </td>
+      @for (pair of item.exercises | keyvalue : trackByColumnOrder; track pair) {
+      <td nzAlign="center">
+        <div class="result-cell">
+          <mat-icon [nz-popover]="popover" [style.color]="pair.value.state | answerStateColor">
+            {{ pair.value.state | answerStateIcon }}
+          </mat-icon>
+          {{ pair.value.grade }}
+        </div>
+      </td>
+      <ng-template #popover>
+        <div nz-row nzType="flex" nzJustify="space-around" nzAlign="top">
+          <ui-statistic-card
+            nz-col
+            class="spacing"
+            matIcon="assessment"
+            ribbonColor="#8e44ad"
+            description="Évaluations"
+            tooltip="Nombre de réponses enregistrées (note > -1)."
+            [value]="pair.value.attempts"
+          />
+          <ui-statistic-card
+            nz-col
+            class="spacing"
+            matIcon="access_time"
+            ribbonColor="#f39c12"
+            description="Durée"
+            tooltip="La durée est calculée en additionnant l'intervalle de temps entre chaque réponse. Les intervalles prolongés de plus de 20 minutes sont remplacés par une durée de 2 minutes pour garantir la précision."
+            [value]="pair.value.duration | duration"
+          />
+          <ui-statistic-card
+            nz-col
+            class="spacing"
+            matIcon="star"
+            ribbonColor="#7f8c8d"
+            description="Note"
+            [value]="pair.value.grade"
+            valueSuffix=" / 100"
+            tooltip="Plus grande note attribuée lors des évaluations. Il est possible que cette dernière soit issue d'une évaluation manuelle si l'activité est corrigeable."
+            shouldBePositive
+          />
+        </div>
+        @if (pair.value.sessionId; as sessionId) {
+        <a class="spacing" [href]="buildSessionUrl(sessionId)" target="_blank" rel="noopener noreferrer">
+          Voir la copie <br />
+        </a>
+        }
+      </ng-template>
+      }
+    </tr>
+    }
   </tbody>
 </nz-table>

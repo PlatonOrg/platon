@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
@@ -12,14 +11,7 @@ import { LayoutState } from '../layout'
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    RouterModule,
-    NzSkeletonModule,
-    UiError403Component,
-    UiError404Component,
-    UiError500Component,
-  ],
+  imports: [RouterModule, NzSkeletonModule, UiError403Component, UiError404Component, UiError500Component],
 })
 export class UiLayoutBlockComponent {
   @Input() state: LayoutState = 'READY'

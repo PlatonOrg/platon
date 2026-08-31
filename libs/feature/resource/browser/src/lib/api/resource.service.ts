@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse, User, UserRoles } from '@platon/core/common'
 import {
   CircleTree,
@@ -27,13 +27,11 @@ import { ResourceWatcherProvider } from '../models/resource-watcher-provider'
 
 @Injectable({ providedIn: 'root' })
 export class ResourceService {
-  constructor(
-    private readonly resourceProvider: ResourceProvider,
-    private readonly resourceEventProvider: ResourceEventProvider,
-    private readonly resourceMemberProvider: ResourceMemberProvider,
-    private readonly resourceWatcherProvider: ResourceWatcherProvider,
-    private readonly resourceInvitationProvider: ResourceInvitationProvider
-  ) {}
+  private readonly resourceProvider = inject(ResourceProvider)
+  private readonly resourceEventProvider = inject(ResourceEventProvider)
+  private readonly resourceMemberProvider = inject(ResourceMemberProvider)
+  private readonly resourceWatcherProvider = inject(ResourceWatcherProvider)
+  private readonly resourceInvitationProvider = inject(ResourceInvitationProvider)
 
   //#region Utils
   canUserCreateResource(user: User, type: ResourceTypes | keyof typeof ResourceTypes): boolean {

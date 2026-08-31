@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component } from '@angular/core'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -13,13 +12,6 @@ import { UiLayoutTabDirective, UiLayoutTabsComponent } from '@platon/shared/ui'
   templateUrl: './corrections.page.html',
   styleUrls: ['./corrections.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    NzAlertModule,
-    NzBreadCrumbModule,
-    UiLayoutTabsComponent,
-    UiLayoutTabDirective,
-  ],
+  imports: [MatIconModule, NzAlertModule, NzBreadCrumbModule, UiLayoutTabsComponent, UiLayoutTabDirective],
 })
 export class CorrectionsPage {}

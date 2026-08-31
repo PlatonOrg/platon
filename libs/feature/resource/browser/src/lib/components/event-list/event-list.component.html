@@ -1,14 +1,13 @@
-<ng-container *ngIf="items.length; else noevent">
-  <nz-timeline>
-    <ng-container *ngFor="let item of items; trackBy: trackById">
-      <nz-timeline-item>
-        <resource-event-item [item]="item" />
-      </nz-timeline-item>
-    </ng-container>
-  </nz-timeline>
-</ng-container>
-<ng-template #noevent>
-  <nz-empty [nzNotFoundContent]="content">
-    <ng-template #content> Il n'y a aucun événement important à signaler ! </ng-template>
-  </nz-empty>
-</ng-template>
+@if (items.length) {
+<nz-timeline>
+  @for (item of items; track trackById($index, item)) {
+  <nz-timeline-item>
+    <resource-event-item [item]="item" />
+  </nz-timeline-item>
+  }
+</nz-timeline>
+} @else {
+<nz-empty [nzNotFoundContent]="content">
+  <ng-template #content> Il n'y a aucun événement important à signaler ! </ng-template>
+</nz-empty>
+}

@@ -13,6 +13,7 @@ import {
   signal,
   ViewChild,
   output,
+  inject,
 } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
@@ -96,6 +97,12 @@ import { ActivitySettings } from '@platon/feature/compiler'
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CourseActivitySettingsComponent implements OnInit {
+  private readonly courseService = inject(CourseService)
+  private readonly dialogService = inject(DialogService)
+  private readonly authService = inject(AuthService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly validatorService = inject(ActivityRestrictionsValidatorService)
+
   @Input() activity!: Activity
   activityChange = output<Activity>()
   @Output() saveRequested = new EventEmitter<void>()
@@ -190,14 +197,6 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   protected activityColors: number[] = []
   private user?: User
-
-  constructor(
-    private readonly courseService: CourseService,
-    private readonly dialogService: DialogService,
-    private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly validatorService: ActivityRestrictionsValidatorService
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.currentHue = this.activity.colorHue ?? 210
@@ -492,7 +491,7 @@ export class CourseActivitySettingsComponent implements OnInit {
 
       this.dialogService.success('Activité mise à jour !')
       this.saveRequested.emit()
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error(
         "Une erreur est survenue lors de la mise à jour de l'activité, veuillez réessayer un peu plus tard !"
       )

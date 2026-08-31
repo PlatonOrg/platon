@@ -57,6 +57,10 @@ import { ResourcePresenter } from '../resource.presenter'
   ],
 })
 export class ResourceOverviewPage implements OnInit, OnDestroy {
+  private readonly router = inject(Router)
+  private readonly presenter = inject(ResourcePresenter)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
 
   protected context = this.presenter.defaultContext()
@@ -66,12 +70,6 @@ export class ResourceOverviewPage implements OnInit, OnDestroy {
   protected learningInsightsOption: 'score' | 'duration' = 'score'
   protected templatesCount = 0
   private readonly resourceService = inject(ResourceService)
-
-  constructor(
-    private readonly router: Router,
-    private readonly presenter: ResourcePresenter,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

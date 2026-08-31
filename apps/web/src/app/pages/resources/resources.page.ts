@@ -12,7 +12,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzDrawerModule } from 'ng-zorro-antd/drawer'
 
 import { ViewportIntersectionDirective } from '@cisstech/nge/directives'
@@ -94,7 +94,7 @@ interface QueryParams {
     NzButtonModule,
     NzPopoverModule,
     NzDividerModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzDrawerModule,
     ViewportIntersectionDirective,
     ResourcePipesModule,

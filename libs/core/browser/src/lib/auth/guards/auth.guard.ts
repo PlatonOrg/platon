@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ActivatedRouteSnapshot, Route, Router, RouterStateSnapshot } from '@angular/router'
 import { UserRoles } from '@platon/core/common'
 import { AuthService } from '../api/auth.service'
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard {
-  constructor(private readonly router: Router, private readonly authService: AuthService) {}
+  private readonly router = inject(Router)
+  private readonly authService = inject(AuthService)
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const user = await this.authService.ready()

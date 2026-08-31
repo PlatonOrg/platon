@@ -1,9 +1,12 @@
-<a *ngIf="canEdit" class="add-button" nz-button nzType="primary" nz-tooltip="Ajouter" [routerLink]="['../csv-import']">
+@if (canEdit) {
+<a class="add-button" nz-button nzType="primary" nz-tooltip="Ajouter" [routerLink]="['../csv-import']">
   <span nz-icon nzType="plus" nzTheme="outline"></span><span>Ajouter des candidats avec un CSV</span>
 </a>
-<a *ngIf="canEdit" class="add-button" nz-button nz-tooltip="Ajouter" (click)="openAddCandidateModal()">
+} @if (canEdit) {
+<a class="add-button" nz-button nz-tooltip="Ajouter" (click)="openAddCandidateModal()">
   <span nz-icon nzType="plus" nzTheme="outline"></span><span>Ajouter un candidat</span>
 </a>
+}
 <mat-card class="member-card">
   <div class="card-title">
     <div>Liste des candidats</div>

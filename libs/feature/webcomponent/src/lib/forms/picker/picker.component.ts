@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, Output, OnInit } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Injector,
+  Input,
+  Output,
+  OnInit,
+  inject,
+} from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { PickerComponentDefinition, PickerState } from './picker'
 import { FormsModule } from '@angular/forms'
@@ -20,10 +29,10 @@ import { IconGrPipeModule } from '@cisstech/nge/pipes'
 })
 @WebComponent(PickerComponentDefinition)
 export class PickerComponent implements WebComponentHooks<PickerState>, OnInit {
+  readonly injector = inject(Injector)
+
   @Input() state!: PickerState
   @Output() stateChange = new EventEmitter<PickerState>()
-
-  constructor(readonly injector: Injector) {}
 
   ngOnInit() {
     this.state.isFilled = false

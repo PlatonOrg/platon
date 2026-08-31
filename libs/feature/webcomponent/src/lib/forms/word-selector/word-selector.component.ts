@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, Injector, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, OnInit, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { WebComponentService } from '../../web-component.service'
 import { WordSelectorComponentDefinition, WordSelectorItem, WordSelectorState } from './word-selector'
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
@@ -8,7 +7,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { BaseModule } from '../../shared/components/base/base.module'
-import { CommonModule } from '@angular/common'
+
 import { NzCardModule } from 'ng-zorro-antd/card'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { NzGridModule } from 'ng-zorro-antd/grid'
@@ -27,24 +26,21 @@ interface InternalWordItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     BaseModule,
-
     FormsModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatFormFieldModule,
     MatAutocompleteModule,
-
     DragDropModule,
-    CommonModule,
     NzCardModule,
-
     NzTagModule,
     NzGridModule,
   ],
 })
 @WebComponent(WordSelectorComponentDefinition)
 export class WordSelectorComponent implements WebComponentHooks<WordSelectorState>, OnInit {
+  readonly injector = inject(Injector)
+
   /**
    * The state of the word selector component.
    */
@@ -53,8 +49,6 @@ export class WordSelectorComponent implements WebComponentHooks<WordSelectorStat
   private idCounter = 0
   localWords: InternalWordItem[] = []
   localSelectedWords: InternalWordItem[] = []
-
-  constructor(readonly injector: Injector) {}
 
   /**
    * Initializes the component.

@@ -7,7 +7,8 @@
   <ng-content></ng-content>
 </div>
 
-<ui-list *ngIf="!autoSelect" [items]="selection" [idField]="'id'">
+@if (!autoSelect) {
+<ui-list [items]="selection" [idField]="'id'">
   <ui-list-template slot="row">
     <ng-template let-item="item">
       <div class="selection-item">
@@ -20,3 +21,4 @@
     </ng-template>
   </ui-list-template>
 </ui-list>
+}

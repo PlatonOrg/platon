@@ -4,12 +4,11 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Inject,
   Injector,
   Input,
   OnChanges,
-  Optional,
   Output,
+  inject,
 } from '@angular/core'
 
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
@@ -27,7 +26,6 @@ import {
   NOTIFICATION,
   NOTIFICATION_PARSER,
   NotificationAction,
-  NotificationParser,
   NotificationRenderer,
 } from '../../models/notification-parser'
 import { RendererTypePipe } from '../../pipes/renderer-type.pipe'
@@ -57,6 +55,11 @@ interface Item {
   ],
 })
 export class NotificationListComponent implements OnChanges {
+  private readonly parsers = inject(NOTIFICATION_PARSER, { optional: true })
+  private readonly injector = inject(Injector)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly notificationSerivce = inject(NotificationService)
+
   @Input() notifications: Notification[] = []
   @Output() notificationsChange = new EventEmitter()
   @Output() closed = new EventEmitter()
@@ -65,15 +68,6 @@ export class NotificationListComponent implements OnChanges {
   @Output() loadMore = new EventEmitter()
 
   protected items: Item[] = []
-
-  constructor(
-    @Optional()
-    @Inject(NOTIFICATION_PARSER)
-    private readonly parsers: NotificationParser[],
-    private readonly injector: Injector,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly notificationSerivce: NotificationService
-  ) {}
 
   ngOnChanges(): void {
     this.items = this.notifications.map((notification) => {

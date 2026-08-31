@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ClipboardService } from '@cisstech/nge/services'
@@ -19,8 +18,6 @@ import { UiQRCodeComponent } from '@platon/shared/ui'
   styleUrls: ['./resource-sharing.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
-    CommonModule,
     FormsModule,
     UiQRCodeComponent,
     NzIconModule,

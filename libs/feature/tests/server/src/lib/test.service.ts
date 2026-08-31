@@ -156,7 +156,7 @@ export class TestService {
       if (typeof obj === 'string') {
         try {
           return nunjucks.renderString(obj, variables).trim()
-        } catch (e) {
+        } catch (_error) {
           return obj
         }
       }

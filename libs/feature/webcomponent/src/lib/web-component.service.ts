@@ -1,4 +1,4 @@
-import { ElementRef, Inject, Injectable, Optional } from '@angular/core'
+import { ElementRef, Injectable, inject } from '@angular/core'
 import {
   WebComponentDefinition,
   WebComponentTypes,
@@ -9,6 +9,8 @@ import { Subject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class WebComponentService {
+  private readonly definitions = inject(WEB_COMPONENT_DEFINITIONS, { optional: true })
+
   private readonly submitEvent = new Subject<string>()
 
   /**
@@ -17,11 +19,9 @@ export class WebComponentService {
   readonly onSubmit = this.submitEvent.asObservable()
   private context: { [key: string]: unknown } = {}
 
-  constructor(
-    @Optional()
-    @Inject(WEB_COMPONENT_DEFINITIONS)
-    private readonly definitions: WebComponentDefinition[]
-  ) {
+  constructor() {
+    const definitions = this.definitions
+
     this.definitions = (definitions || []).sort((a, b) => {
       return a.name.localeCompare(b.name)
     })
@@ -32,7 +32,7 @@ export class WebComponentService {
    * @param type the type to find.
    */
   ofType(type: WebComponentTypes) {
-    return this.definitions.filter((e) => e.type === type)
+    return this.definitions?.filter((e) => e.type === type)
   }
 
   /**
@@ -40,7 +40,7 @@ export class WebComponentService {
    * @param selector the selector to find.
    */
   findBySelector(selector: string): WebComponentDefinition | undefined {
-    return this.definitions.find((e) => e.selector === selector)
+    return this.definitions?.find((e) => e.selector === selector)
   }
 
   linkFromSelector(selector: string) {

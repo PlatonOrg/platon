@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Inject, Injectable, InjectionToken, Optional } from '@angular/core'
+import { Injectable, InjectionToken, inject } from '@angular/core'
 import { StorageMap } from '@ngx-pwa/local-storage'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -10,12 +10,8 @@ export const STORAGE_PREFIX = new InjectionToken<string>('STORAGE_PREFIX')
   providedIn: 'root',
 })
 export class StorageService {
-  constructor(
-    @Optional()
-    @Inject(STORAGE_PREFIX)
-    private readonly prefix: string,
-    private readonly storageMap: StorageMap
-  ) {}
+  private readonly prefix = inject(STORAGE_PREFIX, { optional: true })
+  private readonly storageMap = inject(StorageMap)
 
   set<T>(key: string, value: T): Observable<any> {
     return this.storageMap.set(this.addPrefix(key), value)

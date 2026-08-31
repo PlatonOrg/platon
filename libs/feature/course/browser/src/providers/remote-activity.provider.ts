@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { buildHttpParams } from '@platon/core/browser'
 import { ItemResponse, ListResponse, NoContentResponse } from '@platon/core/common'
 import {
@@ -16,9 +16,7 @@ import { ActivityProvider } from '../models/activity-provider'
 
 @Injectable()
 export class RemoteActivityProvider extends ActivityProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   find(courseId: string, activityId: string): Observable<Activity> {
     return this.http

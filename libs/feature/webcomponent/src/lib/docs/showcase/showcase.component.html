@@ -26,7 +26,7 @@
       arrow_upward
     </mat-icon>
   </div>
-  <ng-container *ngIf="showEditor">
-    <json-editor [options]="options" [data]="component.state"></json-editor>
-  </ng-container>
+  @if (showEditor) {
+  <json-editor [options]="options" [data]="component.state"></json-editor>
+  }
 </section>

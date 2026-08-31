@@ -1,5 +1,7 @@
 <div class="prompt-dialog">
-  <label *ngIf="label" for="input">{{ label }}</label>
+  @if (label) {
+  <label for="input">{{ label }}</label>
+  }
   <input id="input" (keyup.enter)="confirm()" [(ngModel)]="value" />
 </div>
 <div class="prompt-dialog-buttons">

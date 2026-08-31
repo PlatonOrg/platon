@@ -10,6 +10,7 @@ import {
   EventEmitter,
   ViewChild,
   AfterViewInit,
+  inject,
 } from '@angular/core'
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms'
 import { ExerciseCorrection } from '@platon/feature/result/common'
@@ -36,6 +37,9 @@ import { MatSort, MatSortModule } from '@angular/material/sort'
   ],
 })
 export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit {
+  private cdr = inject(ChangeDetectorRef)
+  private fb = inject(FormBuilder)
+
   @ViewChild(MatSort) sort: MatSort = new MatSort()
   @Input()
   data: ExerciseCorrection[] = []
@@ -61,7 +65,7 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
   gradeForm: FormGroup
   protected dataSource: MatTableDataSource<ExerciseCorrection> = new MatTableDataSource<ExerciseCorrection>([])
 
-  constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder) {
+  constructor() {
     this.gradeForm = this.fb.group({})
     this.setupCustomSorting()
   }

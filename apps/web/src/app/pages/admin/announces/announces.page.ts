@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
 
@@ -9,7 +9,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzTagModule } from 'ng-zorro-antd/tag'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzCardModule } from 'ng-zorro-antd/card'
 
 import { MatDialog, MatDialogModule } from '@angular/material/dialog'
@@ -40,7 +40,7 @@ import { firstValueFrom } from 'rxjs'
     NzSpinModule,
     NzTableModule,
     NzTagModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzModalModule,
     NzCardModule,
     MatDialogModule,
@@ -48,16 +48,14 @@ import { firstValueFrom } from 'rxjs'
   ],
 })
 export class AdminAnnouncementsPage implements OnInit {
+  private readonly announcementService = inject(AnnouncementService)
+  private readonly modalService = inject(NzModalService)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly dialog = inject(MatDialog)
+
   protected announcements: Announcement[] = []
   protected loading = true
-
-  constructor(
-    private readonly announcementService: AnnouncementService,
-    private readonly modalService: NzModalService,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly dialog: MatDialog
-  ) {}
 
   ngOnInit(): void {
     void this.loadAnnouncements()
@@ -120,7 +118,7 @@ export class AdminAnnouncementsPage implements OnInit {
       const announcements = await firstValueFrom(this.announcementService.search({}))
 
       this.announcements = announcements.resources
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Erreur lors du chargement des annonces')
     } finally {
       this.loading = false
@@ -179,7 +177,7 @@ export class AdminAnnouncementsPage implements OnInit {
         this.announcements = this.announcements.filter((item) => item.id !== id)
         this.changeDetectorRef.markForCheck()
         this.dialogService.success('Annonce supprimée avec succès')
-      } catch (error) {
+      } catch (_error) {
         this.dialogService.error("Erreur lors de la suppression de l'annonce")
       }
     }

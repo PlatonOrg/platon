@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-extra-semi */
 
 type Obj = Record<string, any>
 
@@ -11,13 +10,14 @@ type Obj = Record<string, any>
  * @returns The merged object
  */
 export const deepMerge = <T extends Obj>(target: T, source: any, replace = false): Obj => {
+  const targetObj = target as any
   for (const key in source) {
     if (typeof source[key] === 'object' && source[key] !== null) {
       if (!(key in target)) {
         Object.assign(target, { [key]: Array.isArray(source[key]) ? [] : {} })
       }
       if (Array.isArray(source[key])) {
-        ;(<any>target)[key] = source[key]
+        targetObj[key] = source[key]
       } else if (!replace) {
         deepMerge(target[key] as any, source[key] as any)
       } else {
@@ -34,11 +34,10 @@ export function deepCopy<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
     return obj
   }
-  const copy = obj instanceof Array ? [] : {}
+  const copy: any = obj instanceof Array ? [] : {}
   for (const key in obj) {
-    // eslint-disable-next-line no-prototype-builtins
-    if ((obj as any).hasOwnProperty(key)) {
-      ;(copy as any)[key] = deepCopy(obj[key])
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      copy[key] = deepCopy(obj[key])
     }
   }
   return copy as T

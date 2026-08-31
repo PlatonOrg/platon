@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { buildExpandableHttpParams, buildHttpParams } from '@platon/core/browser'
 import { ItemResponse, ListResponse, User } from '@platon/core/common'
 import {
@@ -17,9 +17,7 @@ import { map } from 'rxjs/operators'
 import { ResourceProvider } from '../models/resource-provider'
 @Injectable()
 export class RemoteResourceProvider extends ResourceProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   tree(): Observable<CircleTree> {
     return this.http.get<ItemResponse<CircleTree>>('/api/v1/resources/tree').pipe(map((response) => response.resource))

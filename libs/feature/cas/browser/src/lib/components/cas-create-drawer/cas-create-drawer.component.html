@@ -28,7 +28,9 @@
       <mat-form-field appearance="fill">
         <mat-label>LMS</mat-label>
         <mat-select formControlName="lmses" multiple>
-          <mat-option *ngFor="let lms of lmses" [value]="lms.id">{{ lms.name }}</mat-option>
+          @for (lms of lmses; track lms) {
+          <mat-option [value]="lms.id">{{ lms.name }}</mat-option>
+          }
         </mat-select>
         <mat-hint>Le(s) LMS par lequel les utilisateur de ce CAS ont été créés.</mat-hint>
       </mat-form-field>

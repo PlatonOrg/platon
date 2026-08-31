@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse } from '@platon/core/common'
 import {
   ACTIVITY_ANSWER_RATE,
@@ -53,11 +53,9 @@ import { LabelProvider } from '../models/label.provider'
 
 @Injectable({ providedIn: 'root' })
 export class ResultService {
-  constructor(
-    private readonly resultProvider: ResultProvider,
-    private readonly commentProvider: SessionCommentProvider,
-    private readonly labelProvider: LabelProvider
-  ) {}
+  private readonly resultProvider = inject(ResultProvider)
+  private readonly commentProvider = inject(SessionCommentProvider)
+  private readonly labelProvider = inject(LabelProvider)
 
   userDashboard() {
     return this.resultProvider.userDashboard().pipe(

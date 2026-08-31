@@ -3,16 +3,20 @@
     <tr>
       <th>Utilisateur</th>
       <th>Date</th>
-      <th *ngIf="editable"></th>
+      @if (editable) {
+      <th></th>
+      }
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let data of nzTable.data">
+    @for (data of nzTable.data; track data) {
+    <tr>
       <td>
         <user-avatar #avatar [userIdOrName]="data.inviteeId" />
       </td>
       <td>{{ data.createdAt | date }}</td>
-      <td *ngIf="editable">
+      @if (editable) {
+      <td>
         <button
           nz-button
           nzDanger
@@ -27,6 +31,8 @@
           <i nz-icon nzType="delete"></i>
         </button>
       </td>
+      }
     </tr>
+    }
   </tbody>
 </nz-table>

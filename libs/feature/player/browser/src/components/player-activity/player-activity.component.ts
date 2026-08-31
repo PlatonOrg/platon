@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -61,6 +60,7 @@ import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { HttpErrorResponse } from '@angular/common/http'
 import { UI_MODAL_IFRAME_CLOSE } from '@platon/shared/ui'
 import { SixcodeComponent } from '@platon/shared/ui'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 @Component({
   selector: 'player-activity',
@@ -68,7 +68,6 @@ import { SixcodeComponent } from '@platon/shared/ui'
   styleUrls: ['./player-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     MatIconModule,
     MatCardModule,
@@ -90,6 +89,8 @@ import { SixcodeComponent } from '@platon/shared/ui'
   ],
 })
 export class PlayerActivityComponent implements OnInit, OnDestroy {
+  private readonly nzModalService = inject(NzModalService)
+
   private readonly elementRef = inject(ElementRef) as ElementRef<HTMLElement>
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly dialogService = inject(DialogService)
@@ -129,7 +130,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected isCodeError = false
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
-  protected errorTemplate!: TemplateRef<object>
+  protected errorTemplate!: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>
 
   @Input() player!: ActivityPlayer
 
@@ -189,8 +190,6 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   @ViewChild('modalFooter', { static: true }) modalFooter!: TemplateRef<object>
 
   @ViewChildren('playerExercise') playerExerciseComponents!: QueryList<PlayerExerciseComponent>
-
-  constructor(private readonly nzModalService: NzModalService) {}
 
   ngOnInit(): void {
     this.calculateAnswerStates(this.player.navigation)

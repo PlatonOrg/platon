@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 import { CoreEchartsDirective } from '@platon/core/browser'
 import { AnswerStateColors, AnswerStateLabels, AnswerStates } from '@platon/feature/result/common'
@@ -9,7 +8,7 @@ import { EChartsOption } from 'echarts'
   templateUrl: 'answer-distribution.component.html',
   styleUrls: ['./answer-distribution.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CoreEchartsDirective],
+  imports: [CoreEchartsDirective],
 })
 export class ResultAnswerDistributionComponent {
   protected chart?: EChartsOption

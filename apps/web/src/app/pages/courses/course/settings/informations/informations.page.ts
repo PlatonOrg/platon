@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 
 import { MatCheckboxModule } from '@angular/material/checkbox'
@@ -36,6 +36,9 @@ import { CoursePresenter } from '../../course.presenter'
   ],
 })
 export class CourseInformationsPage implements OnInit, OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly presenter = inject(CoursePresenter)
+
   private readonly subscriptions: Subscription[] = []
 
   protected form = new FormGroup({
@@ -57,8 +60,6 @@ export class CourseInformationsPage implements OnInit, OnDestroy {
     if (!user) return false
     return this.form.valid && this.canEdit
   }
-
-  constructor(private readonly presenter: CoursePresenter, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(

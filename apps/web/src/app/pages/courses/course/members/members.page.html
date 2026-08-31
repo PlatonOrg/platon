@@ -1,8 +1,10 @@
 <section>
-  <button *ngIf="canEdit" (click)="addModal.open()" nz-button nzType="primary" nz-tooltip="Ajouter">
+  @if (canEdit) {
+  <button (click)="addModal.open()" nz-button nzType="primary" nz-tooltip="Ajouter">
     <span nz-icon nzType="plus" nzTheme="outline"></span><span>Ajouter un membre</span>
   </button>
-  <mat-card *ngIf="context.course">
+  } @if (context.course) {
+  <mat-card>
     <course-member-search-bar
       #searchbar
       autoSelect
@@ -25,6 +27,7 @@
       />
     </mat-card-content>
   </mat-card>
+  }
 </section>
 <user-search-modal
   #addModal
@@ -39,11 +42,9 @@
   <p>
     Sélectionnez les
     <nz-select [(ngModel)]="role" (ngModelChange)="onRoleChange($event)" nzPlaceHolder="Rôle" nzShowSearch>
-      <nz-option
-        *ngFor="let memberRole of roles"
-        [nzLabel]="(memberRole | displayCourseMemberRole) + 's'"
-        [nzValue]="memberRole"
-      ></nz-option>
+      @for (memberRole of roles; track memberRole) {
+      <nz-option [nzLabel]="(memberRole | displayCourseMemberRole) + 's'" [nzValue]="memberRole"></nz-option>
+      }
     </nz-select>
     que vous souhaitez ajouter
   </p>

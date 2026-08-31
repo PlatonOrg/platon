@@ -9,6 +9,7 @@ import {
   ViewChild,
   AfterViewInit,
   ElementRef,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { CheckboxGroupComponentDefinition, CheckboxGroupState, CheckboxItem } from './checkbox-group'
@@ -26,6 +27,8 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 })
 @WebComponent(CheckboxGroupComponentDefinition)
 export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroupState>, OnInit, AfterViewInit {
+  readonly injector = inject(Injector)
+
   @Input() state!: CheckboxGroupState
   @Output() stateChange = new EventEmitter<CheckboxGroupState>()
 
@@ -37,8 +40,6 @@ export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroupSt
     ['ArrowUp', () => (this.state.selectedIndex = Math.max(this.state.selectedIndex - 1, -1))],
     ['Tab', () => (this.state.selectedIndex = (this.state.selectedIndex + 1) % this.state.items.length)],
   ])
-
-  constructor(readonly injector: Injector) {}
 
   ngAfterViewInit(): void {
     this.focusZone.nativeElement.addEventListener('keydown', this.onKeydown.bind(this))

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import {
   CreatedResponse,
   CreateLevel,
@@ -17,9 +17,7 @@ import { TagProvider } from '../models/tag-provider'
 
 @Injectable()
 export class RemoteTagProvider extends TagProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   listTopics(): Observable<Topic[]> {
     return this.http
