@@ -4,6 +4,7 @@
 @import 'animations';
 @import 'components';
 @import 'css-variables'; // Import des variables CSS centralisées
+@import '@angular/cdk/overlay-prebuilt.css';
 @import './material/base';
 @import './theme-overrides';
 

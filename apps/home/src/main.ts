@@ -1,6 +1,9 @@
-import { provideZoneChangeDetection } from "@angular/core";
+import { provideZoneChangeDetection } from '@angular/core'
 import { bootstrapApplication } from '@angular/platform-browser'
 import { appConfig } from './app/app.config'
 import { AppPage } from './app/app.page'
 
-bootstrapApplication(AppPage, {...appConfig, providers: [provideZoneChangeDetection(), ...appConfig.providers]}).catch((err) => console.error(err))
+bootstrapApplication(AppPage, {
+  ...appConfig,
+  providers: [provideZoneChangeDetection(), ...appConfig.providers],
+}).catch((err) => console.error(err))

@@ -94,7 +94,7 @@ describe('ActivityCreatePage', () => {
   })
 
   const goToConfigurationStep = () => {
-    const stepper = component['stepper']
+    const stepper = component['stepper']()
     // On avance pas à pas jusqu'à l'étape "Configuration" plutôt que de supposer un index fixe :
     // hasFirstStep bascule de façon asynchrone (après plusieurs `await` dans ngOnInit), donc le
     // nombre d'étapes projetées au moment du test n'est pas garanti tant qu'on n'a pas stabilisé.
