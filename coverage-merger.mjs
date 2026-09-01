@@ -1,6 +1,6 @@
-const glob = require('glob')
-const fs = require('fs')
-const path = require('path')
+import { glob } from 'glob'
+import { mkdirSync, readFileSync, writeFile } from 'fs'
+import { resolve as _resolve } from 'path'
 
 const getLcovFiles = function (src) {
   return new Promise((resolve, reject) => {
@@ -12,10 +12,10 @@ const getLcovFiles = function (src) {
 }
 
 ;(async function () {
-  fs.mkdirSync('coverage', { recursive: true })
+  mkdirSync('coverage', { recursive: true })
   const files = await getLcovFiles('coverage')
-  const mergedReport = files.reduce((mergedReport, currFile) => (mergedReport += fs.readFileSync(currFile)), '')
-  await fs.writeFile(path.resolve('./coverage/lcov.info'), mergedReport, (err) => {
+  const mergedReport = files.reduce((mergedReport, currFile) => (mergedReport += readFileSync(currFile)), '')
+  writeFile(_resolve('./coverage/lcov.info'), mergedReport, (err) => {
     if (err) throw err
     console.log('The file has been saved!')
   })

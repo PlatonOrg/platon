@@ -42,29 +42,21 @@
   <!-- Boutons pour les étapes -->
   <div class="button-group">
     <button nz-button nzType="default" (click)="getToStep(0)" [ngClass]="{ active: step === 0 }">
-      <div class="vertical-align">
-        <span nz-icon nzType="info-circle"></span>
-        Informations
-      </div>
+      <span nz-icon nzType="info-circle"></span>
+      <span>Informations</span>
     </button>
     <button nz-button nzType="default" (click)="getToStep(1)" [ngClass]="{ active: step === 1 }">
-      <div class="vertical-align">
-        <span nz-icon nzType="setting"></span>
-        Paramètres
-      </div>
+      <span nz-icon nzType="setting"></span>
+      <span>Paramètres</span>
     </button>
     <button nz-button nzType="default" (click)="getToStep(2)" [ngClass]="{ active: step === 2 }">
-      <div class="vertical-align">
-        <span nz-icon nzType="ordered-list"></span>
-        Exercices
-      </div>
+      <span nz-icon nzType="ordered-list"></span>
+      <span>Exercices</span>
     </button>
     @if (activity.settings?.navigation?.mode === 'next' || activity.settings?.navigation?.mode === 'validation') {
     <button nz-button nzType="default" (click)="getToStep(3)" [ngClass]="{ active: step === 3 }">
-      <div class="vertical-align">
-        <span nz-icon nzType="fast-forward"></span>
-        Next
-      </div>
+      <span nz-icon nzType="fast-forward"></span>
+      <span>Next</span>
     </button>
     }
   </div>

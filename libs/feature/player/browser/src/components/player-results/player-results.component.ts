@@ -1,4 +1,4 @@
-import { CommonModule, KeyValue } from '@angular/common';
+import { CommonModule, KeyValue } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, ViewChild, inject } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
 import { ActivityPlayer, ExercisePlayer } from '@platon/feature/player/common'

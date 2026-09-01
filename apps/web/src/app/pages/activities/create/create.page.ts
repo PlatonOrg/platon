@@ -185,8 +185,7 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
     },
   }
 
-  @ViewChild(UiStepperComponent)
-  protected stepper!: UiStepperComponent
+  protected stepper = viewChild.required<UiStepperComponent>('stepper')
 
   @ViewChild(ResourceFiltersComponent)
   protected filtersComponent!: ResourceFiltersComponent
@@ -197,11 +196,11 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   protected readonly gradedSettings = viewChild.required<GradedActivitySettingsComponent>('gradedSettings')
 
   protected async handleKeyDown() {
-    if (this.stepper.isValid) {
-      if (this.stepper.isLast) {
+    if (this.stepper().isValid) {
+      if (this.stepper().isLast) {
         await this.create()
       } else {
-        this.stepper.nextStep()
+        this.stepper().nextStep()
       }
     }
   }
