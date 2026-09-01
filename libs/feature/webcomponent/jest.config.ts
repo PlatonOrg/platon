@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-webcomponent',
   preset: '../../../jest.preset.js',

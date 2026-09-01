@@ -10,7 +10,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 import { DEFAULT_SEARCH_BAR_LIMIT } from '@platon/core/common'
-import { Resource, ResourceFilters } from '@platon/feature/resource/common'
+import { Resource, type ResourceFilters } from '@platon/feature/resource/common'
 import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { ResourceService } from '../../api/resource.service'
 import { ResourceItemComponent } from '../resource-item/resource-item.component'

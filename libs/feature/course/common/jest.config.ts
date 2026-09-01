@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-course-common',
   preset: '../../../../jest.preset.js',

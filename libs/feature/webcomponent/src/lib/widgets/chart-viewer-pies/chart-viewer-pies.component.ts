@@ -4,7 +4,7 @@ import { EChartsOption } from 'echarts'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import {
   ChartViewerPiesComponentDefinition,
-  ChartViewerPiesState,
+  type ChartViewerPiesState,
   donutChartViewerPiesState,
   halfdonutChartViewerPiesState,
   nightingaleChartViewerPiesState,

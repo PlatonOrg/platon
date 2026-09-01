@@ -9,7 +9,7 @@ import { MatCardModule } from '@angular/material/card'
 import { MatIconModule } from '@angular/material/icon'
 import { CourseMemberTableComponent, CoursePipesModule, CourseService } from '@platon/feature/course/browser'
 import { DialogModule, DialogService, UserSearchModalComponent } from '@platon/core/browser'
-import { User, UserGroup } from '@platon/core/common'
+import { User, UserFilters, UserGroup, UserRoles } from '@platon/core/common'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -69,6 +69,9 @@ export class TestDashboardPage implements OnInit, OnDestroy {
   protected teachers: CourseMember[] = []
   protected nonDeletables: string[] = []
   protected excludes: string[] = []
+  protected modalFilters: UserFilters = {
+    roles: [UserRoles.teacher],
+  }
 
   protected nbParticipants = 0
   protected nbStarted = 0

@@ -28,7 +28,7 @@
           <span
             id="tuto-resource-name"
             nz-typography
-            [nzEditable]="context.resource.permissions?.write"
+            [nzEditable]="$safeNavigationMigration(context.resource.permissions?.write)"
             [nzContent]="context.resource.name"
             (nzContentChange)="updateName($event)"
           ></span>
@@ -40,7 +40,7 @@
   <p
     id="tuto-resource-description"
     nz-typography
-    [nzEditable]="context.resource.permissions?.write"
+    [nzEditable]="$safeNavigationMigration(context.resource.permissions?.write)"
     [nzContent]="context.resource.desc"
     (nzContentChange)="updateDesc($event)"
   ></p>

@@ -7,14 +7,17 @@
       (ngModelChange)="notifyValueChange?.($event)"
       [nzDisabled]="disabled"
     />
-    @if (options?.min !== undefined || options?.max !== undefined) {
+    @if ($safeNavigationMigration(options?.min) !== undefined || $safeNavigationMigration(options?.max) !== undefined) {
     <div class="hint-text" nz-typography>
       <small nz-text nzType="secondary">
-        @if (options?.min !== undefined && options?.max !== undefined) {
+        @if ($safeNavigationMigration(options?.min) !== undefined && $safeNavigationMigration(options?.max) !==
+        undefined) {
         <span> Valeur comprise entre {{ options?.min }} et {{ options?.max }} </span>
-        } @if (options?.min !== undefined && options?.max === undefined) {
+        } @if ($safeNavigationMigration(options?.min) !== undefined && $safeNavigationMigration(options?.max) ===
+        undefined) {
         <span> Valeur minimum : {{ options?.min }} </span>
-        } @if (options?.min === undefined && options?.max !== undefined) {
+        } @if ($safeNavigationMigration(options?.min) === undefined && $safeNavigationMigration(options?.max) !==
+        undefined) {
         <span> Valeur maximum : {{ options?.max }} </span>
         }
       </small>

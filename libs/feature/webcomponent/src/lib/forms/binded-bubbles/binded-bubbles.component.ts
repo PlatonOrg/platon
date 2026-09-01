@@ -15,7 +15,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { BindedBubblesComponentDefinition, BindedBubblesState, BubbleItem, PairBubbleItem } from './binded-bubbles'
+import { BindedBubblesComponentDefinition, type BindedBubblesState, BubbleItem, PairBubbleItem } from './binded-bubbles'
 import { WebComponentService } from '../../web-component.service'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { CssPipeModule } from '../../shared/pipes/css.pipe'
@@ -26,7 +26,7 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
   selector: 'wc-binded-bubbles',
   templateUrl: 'binded-bubbles.component.html',
   styleUrls: ['binded-bubbles.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [BaseModule, CssPipeModule, MatButtonModule, NgeMarkdownModule],
 })
 @WebComponent(BindedBubblesComponentDefinition)

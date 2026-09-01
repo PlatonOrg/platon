@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core'
 import { RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { CoreService } from '@platon/core/browser'
@@ -9,6 +9,7 @@ import { UserRoles } from '@platon/core/common'
   imports: [RouterModule, FeatureWebComponentModule],
   selector: 'app-root',
   templateUrl: './app.page.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./app.page.scss'],
 })
 export class AppPage implements OnInit {

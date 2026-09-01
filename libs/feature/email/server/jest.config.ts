@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-email-server',
   preset: '../../../../jest.preset.js',

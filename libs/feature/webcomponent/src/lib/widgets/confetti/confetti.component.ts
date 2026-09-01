@@ -10,7 +10,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { ConfettiComponentDefinition, ConfettiState } from './confetti'
+import { ConfettiComponentDefinition, type ConfettiState } from './confetti'
 import confetti from 'canvas-confetti'
 import { BaseModule } from '../../shared/components/base/base.module'
 

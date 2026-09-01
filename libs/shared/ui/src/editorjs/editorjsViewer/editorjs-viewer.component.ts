@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChanges, OnChanges, inject } from '@angular/core'
+import { Component, Input, SimpleChanges, OnChanges, inject, ChangeDetectionStrategy } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { OutputData } from '@editorjs/editorjs'
 import { ResourceLoaderService } from '@cisstech/nge/services'
@@ -10,6 +10,7 @@ import { take } from 'rxjs'
   selector: 'ui-editorjs-viewer',
   templateUrl: './editorjs-viewer.component.html',
   styleUrls: ['./editorjs-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [EditorjsViewerService],
 })
 export class EditorjsViewerComponent implements OnChanges {

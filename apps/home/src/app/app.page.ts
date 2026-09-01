@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core'
 import { RouterModule } from '@angular/router'
 import { CoreService } from '@platon/core/browser'
 import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
@@ -7,6 +7,7 @@ import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
   imports: [RouterModule, FeatureWebComponentModule],
   selector: 'app-root',
   templateUrl: './app.page.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.page.scss',
 })
 export class AppPage implements OnInit {

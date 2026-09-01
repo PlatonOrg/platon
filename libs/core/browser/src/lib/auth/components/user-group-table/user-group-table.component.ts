@@ -14,7 +14,7 @@ import {
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 
-import { UserFilters, UserGroup } from '@platon/core/common'
+import { type UserFilters, UserGroup } from '@platon/core/common'
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table'
 import { NzTableColumn } from '../../../vendors/ng-zorro'
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component'

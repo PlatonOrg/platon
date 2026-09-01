@@ -59,7 +59,7 @@
           <ng-template #header>
             <span
               nz-typography
-              [nzEditable]="course.permissions?.update"
+              [nzEditable]="$safeNavigationMigration(course.permissions?.update)"
               [nzContent]="item.section.name"
               (nzContentChange)="renameSection(item.section, $event)"
               (click)="$event.stopPropagation()"

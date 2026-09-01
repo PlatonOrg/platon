@@ -3,7 +3,7 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { EChartsOption } from 'echarts'
 import {
   ChartViewerBarsComponentDefinition,
-  ChartViewerBarsState,
+  type ChartViewerBarsState,
   horizontalChartViewerBarsState,
   verticalChartViewerBarsState,
 } from './chart-viewer-bars'

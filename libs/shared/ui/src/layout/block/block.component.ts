@@ -4,7 +4,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 
 import { RouterModule } from '@angular/router'
 import { UiError403Component, UiError404Component, UiError500Component } from '../../error'
-import { LayoutState } from '../layout'
+import { type LayoutState } from '../layout'
 
 @Component({
   selector: 'ui-layout-block',

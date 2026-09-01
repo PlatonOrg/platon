@@ -1,7 +1,7 @@
 import { CommonModule, KeyValue } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, ViewChild, inject } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
-import { ActivityPlayer, ExercisePlayer } from '@platon/feature/player/common'
+import { type ActivityPlayer, ExercisePlayer } from '@platon/feature/player/common'
 import { AnswerStatePipesModule, ResultService } from '@platon/feature/result/browser'
 import { UserExerciseResults, UserResults } from '@platon/feature/result/common'
 import { DurationPipe, UiModalTemplateComponent } from '@platon/shared/ui'

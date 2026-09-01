@@ -19,7 +19,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
-import { DEFAULT_SEARCH_BAR_LIMIT, User, UserFilters, UserGroup } from '@platon/core/common'
+import { DEFAULT_SEARCH_BAR_LIMIT, User, type UserFilters, UserGroup } from '@platon/core/common'
 import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { UserService } from '../../api/user.service'
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component'

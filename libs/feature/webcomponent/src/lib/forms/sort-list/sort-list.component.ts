@@ -11,7 +11,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { SortListComponentDefinition, SortListItem, SortListState } from './sort-list'
+import { SortListComponentDefinition, SortListItem, type SortListState } from './sort-list'
 import { v4 as uuidv4 } from 'uuid'
 import { deepCopy } from '@cisstech/nge/utils'
 import { DragDropModule } from '@angular/cdk/drag-drop'

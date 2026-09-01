@@ -54,7 +54,6 @@
   cursor: pointer;
 
   &:hover {
-
     opacity: 0.8 !important;
     transform: translate(-50%, -50%) scale(1.1);
     transition: all var(--brand-motion-base) var(--brand-motion-ease);
@@ -70,7 +69,6 @@
     background-color: var(--brand-color-info);
     font-weight: bold;
     color: white;
-
   }
 
   &.deletable-point {

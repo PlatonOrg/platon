@@ -31,7 +31,7 @@ import {
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { DialogModule, DialogService, UserService } from '@platon/core/browser'
-import { CourseCorrection, ExerciseCorrection, Label } from '@platon/feature/result/common'
+import { type CourseCorrection, ExerciseCorrection, Label } from '@platon/feature/result/common'
 import { UiStatisticCardComponent } from '@platon/shared/ui'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { PlayerService } from '../../api/player.service'

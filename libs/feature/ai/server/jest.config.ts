@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-ai-server',
   preset: '../../../../jest.preset.js',

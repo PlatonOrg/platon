@@ -21,7 +21,7 @@ import {
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { Subscription } from 'rxjs'
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators'
-import { SearchBar } from './search-bar'
+import { type SearchBar } from './search-bar'
 
 import { MatIconModule } from '@angular/material/icon'
 import { NgArrayPipesModule } from 'ngx-pipes'

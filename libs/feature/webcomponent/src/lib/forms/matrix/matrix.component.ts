@@ -10,7 +10,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { MatrixComponentDefinition, MatrixState } from './matrix'
+import { MatrixComponentDefinition, type MatrixState } from './matrix'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import { FormsModule } from '@angular/forms'
 import { MatButtonModule } from '@angular/material/button'

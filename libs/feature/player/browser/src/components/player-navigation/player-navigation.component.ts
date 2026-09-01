@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
 import { MatIconModule } from '@angular/material/icon'
 
-import { ActivityPlayer, PlayerExercise } from '@platon/feature/player/common'
+import { type ActivityPlayer, PlayerExercise } from '@platon/feature/player/common'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
 import { AnswerStatePipesModule } from '@platon/feature/result/browser'

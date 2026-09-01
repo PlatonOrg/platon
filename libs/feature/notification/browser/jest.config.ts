@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-notification-browser',
   preset: '../../../../jest.preset.js',

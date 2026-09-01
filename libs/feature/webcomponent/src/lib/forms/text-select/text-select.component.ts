@@ -12,7 +12,7 @@ import {
 } from '@angular/core'
 import { CssPipe } from '../../shared/pipes/css.pipe'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { TextSelectComponentDefinition, TextSelectState } from './text-select'
+import { TextSelectComponentDefinition, type TextSelectState } from './text-select'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { CssPipeModule } from '../../shared/pipes/css.pipe'
 

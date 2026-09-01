@@ -14,9 +14,7 @@
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.15),
-      0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
     border-color: var(--brand-color-primary);
 
     .template-overlay {
@@ -86,10 +84,10 @@
 
   img {
     &:not([src]),
-    &[src=""] {
+    &[src=''] {
       background: var(--brand-background-secondary);
       &::before {
-        content: "📷";
+        content: '📷';
         position: absolute;
         top: 50%;
         left: 50%;

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { NzAvatarModule } from 'ng-zorro-antd/avatar'
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
-import { UserGroup } from '@platon/core/common'
+import { type UserGroup } from '@platon/core/common'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 
 @Component({

@@ -12,7 +12,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { CheckboxGroupComponentDefinition, CheckboxGroupState, CheckboxItem } from './checkbox-group'
+import { CheckboxGroupComponentDefinition, type CheckboxGroupState, CheckboxItem } from './checkbox-group'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { CssPipeModule } from '../../shared/pipes/css.pipe'
 import { MatCheckboxModule } from '@angular/material/checkbox'

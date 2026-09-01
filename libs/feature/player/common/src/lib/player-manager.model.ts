@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ForbiddenResponse, User, UserRoles } from '@platon/core/common'
 import { ActivityVariables, ExerciseVariables, patchExerciseMeta } from '@platon/feature/compiler'
 import { Activity } from '@platon/feature/course/common'

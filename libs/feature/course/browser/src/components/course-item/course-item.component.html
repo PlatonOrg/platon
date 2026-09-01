@@ -60,7 +60,7 @@
 <ng-template #ribbon>
   <nz-progress
     nz-tooltip="Votre avancement sur les activités"
-    [nzPercent]="item.statistic?.progression"
+    [nzPercent]="$safeNavigationMigration(item.statistic?.progression)"
     [nzSteps]="5"
     nzSize="small"
   />

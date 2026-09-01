@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-player-browser',
   preset: '../../../../jest.preset.js',

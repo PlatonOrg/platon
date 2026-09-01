@@ -1,4 +1,4 @@
-import { Component, inject, input, signal } from '@angular/core'
+import { Component, inject, input, signal, ChangeDetectionStrategy } from '@angular/core'
 import { CourseService, CourseItemComponent } from '@platon/feature/course/browser'
 import { UiSearchBarComponent, SearchBar } from '@platon/shared/ui'
 
@@ -15,6 +15,7 @@ import { DialogService } from '@platon/core/browser'
   selector: 'app-course-duplicate',
   templateUrl: './duplicate.component.html',
   styleUrls: ['./duplicate.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [UiSearchBarComponent, NzButtonModule, NzPopconfirmModule, NzSpinModule, CourseItemComponent],
 })
 export class CourseDuplicateComponent {

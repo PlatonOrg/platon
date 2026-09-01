@@ -24,7 +24,7 @@ import {
 } from '@jsplumb/browser-ui'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { MatchListComponentDefinition, MatchListItem, MatchListState } from './match-list'
+import { MatchListComponentDefinition, MatchListItem, type MatchListState } from './match-list'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 

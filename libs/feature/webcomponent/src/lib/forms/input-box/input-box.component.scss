@@ -5,15 +5,15 @@ mat-form-field {
 .ghost-input {
   display: inline-flex;
   width: 100%;
-  font-weight:300;
-  border:0px;
+  font-weight: 300;
+  border: 0px;
   outline: none;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   color: #4b545f;
   background: #fff;
-  font-family: Open Sans,Verdana;
+  font-family: Open Sans, Verdana;
   padding: 10px 15px;
   padding-left: 0.25rem;
   margin: 30px 0px;
@@ -22,11 +22,11 @@ mat-form-field {
   -ms-transition: all 0.1s ease-in-out;
   -o-transition: all 0.1s ease-in-out;
   transition: all 0.1s ease-in-out;
-  border-bottom:1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
 .ghost-input:focus {
-  border-bottom:1px solid #171c8f;
+  border-bottom: 1px solid #171c8f;
 }
 
 .prefix {
@@ -70,7 +70,6 @@ mat-form-field {
 }
 
 .special-characters {
-
   .characters-line {
     display: flex;
     justify-content: left;
@@ -137,7 +136,6 @@ mat-form-field {
   position: absolute;
   height: 0;
   overflow: hidden;
-
 }
 
 ::ng-deep mat-label {

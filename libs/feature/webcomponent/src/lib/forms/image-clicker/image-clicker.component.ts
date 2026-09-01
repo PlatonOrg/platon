@@ -14,7 +14,7 @@ import {
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { ImageClickerComponentDefinition, ImageClickerState, ClickPoint } from './image-clicker'
+import { ImageClickerComponentDefinition, type ImageClickerState, ClickPoint } from './image-clicker'
 import { deepCopy } from '@cisstech/nge/utils'
 import { BaseModule } from '../../shared/components/base/base.module'
 

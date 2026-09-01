@@ -17,7 +17,7 @@
             <span
               (click)="$event.stopPropagation()"
               nz-typography
-              [nzEditable]="context.course?.permissions?.update"
+              [nzEditable]="$safeNavigationMigration(context.course?.permissions?.update)"
               [nzContent]="group.courseGroup.name"
               (nzContentChange)="updateGroupName($event, group.courseGroup.groupId)"
             ></span>

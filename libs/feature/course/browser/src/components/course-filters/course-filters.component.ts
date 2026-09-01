@@ -21,7 +21,7 @@ import { MatRadioModule } from '@angular/material/radio'
 import { NzDrawerModule } from 'ng-zorro-antd/drawer'
 
 import { OrderingDirections } from '@platon/core/common'
-import { CourseFilters, CourseOrderings } from '@platon/feature/course/common'
+import { type CourseFilters, CourseOrderings } from '@platon/feature/course/common'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { Subscription } from 'rxjs'
 import { CoursePipesModule } from '../../pipes'

@@ -22,7 +22,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
 
 import {
-  ActivityPlayer,
+  type ActivityPlayer,
   ExercisePlayer,
   getClosingTime,
   isTimeouted,

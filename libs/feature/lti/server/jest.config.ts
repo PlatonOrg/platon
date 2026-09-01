@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-lti-server',
   preset: '../../../../jest.preset.js',

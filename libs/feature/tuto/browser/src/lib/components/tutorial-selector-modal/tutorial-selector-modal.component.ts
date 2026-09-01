@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core'
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core'
 
 import { TutorialSelectorService, TutorialOption } from '../../api/tutorial-selector.service'
 import { MatIconModule } from '@angular/material/icon'
@@ -8,6 +8,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid'
   selector: 'tutorial-selector-modal',
   imports: [MatIconModule, NzGridModule],
   templateUrl: './tutorial-selector-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tutorial-selector-modal.component.scss',
 })
 export class TutorialSelectorModalComponent {

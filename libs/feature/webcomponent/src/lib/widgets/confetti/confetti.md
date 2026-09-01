@@ -6,11 +6,11 @@ Le composant **Confetti** permet d'afficher des effets de confettis animés à l
 
 ## Propriétés (`state`)
 
-| Propriété | Type | Description | Par défaut |
-|-----------|------|-------------|------------|
-| `trigger` | `boolean` | Déclenche l'animation des confettis lorsqu'il passe à `true`. | `false` |
-| `mode`    | `"canon" \| "pride" \| "snowfall" \| "fireworks"` | Mode d'animation des confettis. | `"canon"` |
-| `colors`  | `string[]` | Tableau de couleurs hexadécimales utilisées pour les confettis. | `['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']` |
+| Propriété | Type                                              | Description                                                     | Par défaut                                                           |
+| --------- | ------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `trigger` | `boolean`                                         | Déclenche l'animation des confettis lorsqu'il passe à `true`.   | `false`                                                              |
+| `mode`    | `"canon" \| "pride" \| "snowfall" \| "fireworks"` | Mode d'animation des confettis.                                 | `"canon"`                                                            |
+| `colors`  | `string[]`                                        | Tableau de couleurs hexadécimales utilisées pour les confettis. | `['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']` |
 
 ---
 

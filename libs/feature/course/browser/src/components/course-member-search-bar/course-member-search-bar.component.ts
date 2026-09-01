@@ -23,7 +23,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 import { UserAvatarComponent } from '@platon/core/browser'
 import { DEFAULT_SEARCH_BAR_LIMIT } from '@platon/core/common'
-import { CourseMember, CourseMemberFilters } from '@platon/feature/course/common'
+import { CourseMember, type CourseMemberFilters } from '@platon/feature/course/common'
 import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { CourseService } from '../../api/course.service'
 

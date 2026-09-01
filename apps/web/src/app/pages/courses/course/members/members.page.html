@@ -42,7 +42,7 @@
   <p>
     Sélectionnez les
     <nz-select [(ngModel)]="role" (ngModelChange)="onRoleChange($event)" nzPlaceHolder="Rôle" nzShowSearch>
-      @for (memberRole of roles; track memberRole) {
+      @for (memberRole of memberRoles; track memberRole) {
       <nz-option [nzLabel]="(memberRole | displayCourseMemberRole) + 's'" [nzValue]="memberRole"></nz-option>
       }
     </nz-select>

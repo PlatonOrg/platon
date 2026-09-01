@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-tuto-browser',
   preset: '../../../../jest.preset.js',

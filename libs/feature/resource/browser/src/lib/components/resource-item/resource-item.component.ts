@@ -17,14 +17,14 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { v4 as uuidv4 } from 'uuid'
 
 import { ListItemTag, NgeUiListModule } from '@cisstech/nge/ui/list'
-import { ExerciseResourceMeta, Resource } from '@platon/feature/resource/common'
+import { ExerciseResourceMeta, type Resource } from '@platon/feature/resource/common'
 
 import { UiModalIFrameComponent, positiveGreenColor } from '@platon/shared/ui'
 
 import { Router, RouterModule } from '@angular/router'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { DialogService, StorageService } from '@platon/core/browser'
-import { Variables } from '@platon/feature/compiler'
+import { type Variables } from '@platon/feature/compiler'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSpinModule } from 'ng-zorro-antd/spin'

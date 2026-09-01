@@ -14,7 +14,7 @@ import {
 import { MathfieldElement } from 'mathlive'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { MathLiveComponentDefinition, MathLiveState } from './math-live'
+import { MathLiveComponentDefinition, type MathLiveState } from './math-live'
 import { ComputeEngine } from '@cortex-js/compute-engine'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { IconGrPipeModule } from '@cisstech/nge/pipes'
@@ -87,7 +87,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
     if (this.state.config) {
       Object.keys(this.state.config).forEach((key) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, prettier/prettier
-        (this.mathfield as any)[key] = this.state.config[key]
+        ;(this.mathfield as any)[key] = this.state.config[key]
       })
     }
     if (this.mathfield.menuItems?.length == 0) {

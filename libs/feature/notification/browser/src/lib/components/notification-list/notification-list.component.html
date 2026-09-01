@@ -5,7 +5,7 @@
     <nz-list-item-meta [nzAvatar]="avatar">
       <ng-template #avatar>
         @if (item.renderer?.icon) {
-        <ui-icon class="notification-item-avatar" [icon]="item.renderer?.icon" />
+        <ui-icon class="notification-item-avatar" [icon]="$safeNavigationMigration(item.renderer?.icon)" />
         } @else {
         <nz-avatar nzIcon="info" [nzShape]="'circle'" nzSize="small"></nz-avatar>
         }

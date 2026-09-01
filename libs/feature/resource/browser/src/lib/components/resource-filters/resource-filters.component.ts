@@ -26,7 +26,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
 import { Level, OrderingDirections, Topic, User } from '@platon/core/common'
 import {
   CircleTree,
-  ResourceFilters,
+  type ResourceFilters,
   ResourceOrderings,
   ResourceStatus,
   ResourceTypes,
