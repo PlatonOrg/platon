@@ -10,6 +10,14 @@
   box-sizing: border-box;
 }
 
+
+:host.embedded {
+  width: 100%;
+  height: auto;
+  overflow-y: visible;
+  padding: 0;
+}
+
 // Centre verticalement le contenu court (margin auto) sans jamais couper le
 // contenu plus grand que l'écran : contrairement à `justify-content: center`,
 // les marges auto se résolvent à 0 quand il n'y a pas de place, donc le haut

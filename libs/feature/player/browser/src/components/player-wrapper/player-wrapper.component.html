@@ -1,6 +1,6 @@
-<ng-container *ngIf="player.type === 'exercise'; else activity">
-  <player-exercise [player]="$any(player)" />
+<ng-container *ngIf="player().type === 'exercise'; else activity">
+  <player-exercise [player]="$any(player())" />
 </ng-container>
 <ng-template #activity>
-  <player-activity [player]="$any(player)" />
+  <player-activity [player]="$any(player())" [embedded]="embedded()" />
 </ng-template>
