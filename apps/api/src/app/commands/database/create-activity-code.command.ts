@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Command, CommandRunner } from 'nest-commander'
-// eslint-disable-next-line @nx/enforce-module-boundaries
+
 import { ActivityEntity } from '@platon/feature/course/server'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'

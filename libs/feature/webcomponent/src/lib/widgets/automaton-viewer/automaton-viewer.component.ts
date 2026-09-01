@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { automatonToDotFormat, parseAutomaton } from '../../forms/automaton-editor/automaton'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { AutomatonViewerComponentDefinition, AutomatonViewerState } from './automaton-viewer'
+import { AutomatonViewerComponentDefinition, type AutomatonViewerState } from './automaton-viewer'
 import { RenderDotModule } from '../../shared/directives/render-dot.directive'
 import { BaseModule } from '../../shared/components/base/base.module'
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
 import { RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
@@ -18,6 +18,7 @@ type NavLink = {
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, RouterModule, MatIconModule, NzModalModule],
 })
 export class SidebarComponent implements OnInit {

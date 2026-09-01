@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 
-import { Player } from '@platon/feature/player/common'
+import { type Player } from '@platon/feature/player/common'
 import { PlayerActivityComponent } from '../player-activity/player-activity.component'
 import { PlayerExerciseComponent } from '../player-exercise/player-exercise.component'
 

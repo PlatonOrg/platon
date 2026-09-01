@@ -51,7 +51,8 @@
   }
 
   @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {
@@ -216,8 +217,6 @@
         color: var(--brand-text-primary);
       }
     }
-
-
 
     nz-spin {
       display: flex;

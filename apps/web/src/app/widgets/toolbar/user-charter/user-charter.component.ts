@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core'
 
 import { UserService } from '@platon/core/browser'
 import { NzModalModule } from 'ng-zorro-antd/modal'
-import { User, UserCharter } from '@platon/core/common'
+import { type User, type UserCharter } from '@platon/core/common'
 import { ChangeDetectorRef, EventEmitter, Input, Output } from '@angular/core'
 import { Router } from '@angular/router'
 import { firstValueFrom } from 'rxjs'

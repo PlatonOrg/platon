@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-announcement-server',
   preset: '../../../../jest.preset.js',

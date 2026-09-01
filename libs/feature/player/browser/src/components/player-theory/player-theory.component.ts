@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 
-import { ExerciseTheory } from '@platon/feature/compiler'
+import { type ExerciseTheory } from '@platon/feature/compiler'
 import { UiFilePreviewComponent } from '@platon/shared/ui'
 
 @Component({

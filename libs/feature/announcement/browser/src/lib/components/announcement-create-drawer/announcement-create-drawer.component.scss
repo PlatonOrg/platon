@@ -68,7 +68,6 @@ ui-editorjs {
   gap: 10px;
   margin-left: 2px;
 
-
   label {
     display: flex;
     align-items: center;
@@ -80,8 +79,6 @@ ui-editorjs {
     }
   }
 }
-
-
 
 nz-radio-group {
   display: flex;
@@ -99,14 +96,14 @@ nz-radio-group {
   }
 }
 
-
 .action-buttons {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.save-state, .preview-button {
+.save-state,
+.preview-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,7 +111,8 @@ nz-radio-group {
   height: 32px;
 }
 
-.save-state mat-icon, .preview-button span[nz-icon] {
+.save-state mat-icon,
+.preview-button span[nz-icon] {
   font-size: 25px;
 }
 

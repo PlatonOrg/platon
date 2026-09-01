@@ -11,7 +11,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { TimerComponentDefinition, TimerState } from './timer'
+import { TimerComponentDefinition, type TimerState } from './timer'
 import { WebComponentService } from '../../web-component.service'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'

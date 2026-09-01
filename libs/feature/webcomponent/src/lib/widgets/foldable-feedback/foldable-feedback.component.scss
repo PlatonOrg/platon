@@ -5,12 +5,12 @@
   border-radius: 5px;
   cursor: text;
   pointer-events: visibleFill;
-  font-family: "Fira Code", monospace;
+  font-family: 'Fira Code', monospace;
   tab-size: 2;
 }
 
 .code::after {
-  content: "\A";
+  content: '\A';
   white-space: pre;
 }
 

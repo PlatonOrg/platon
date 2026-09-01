@@ -44,7 +44,7 @@ describe('ValueEditorComponent', () => {
 
   beforeEach(async () => {
     // eslint-disable-next-line prettier/prettier
-    (global as any).monaco = {
+    ;(global as any).monaco = {
       Uri: {
         parse: jest.fn().mockReturnValue({
           authority: 'test:latest',

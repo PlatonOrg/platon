@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-discord-server',
   preset: '../../../../jest.preset.js',

@@ -20,7 +20,7 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 
 import { Router, RouterModule } from '@angular/router'
-import { Course } from '@platon/feature/course/common'
+import { type Course } from '@platon/feature/course/common'
 import { antTagColorFromPercentage } from '@platon/shared/ui'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 

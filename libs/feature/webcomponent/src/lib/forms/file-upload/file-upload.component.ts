@@ -14,7 +14,7 @@ import {
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { FileUploadComponentDefinition, FileUploadState, UploadedFile } from './file-upload'
+import { FileUploadComponentDefinition, type FileUploadState, UploadedFile } from './file-upload'
 import { FileUploadService, SubmissionReadDTO, UploadResponse } from './file-upload.service'
 import { Subscription } from 'rxjs'
 import { HttpEvent, HttpEventType, HttpErrorResponse } from '@angular/common/http'

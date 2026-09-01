@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-cas-server',
   preset: '../../../../jest.preset.js',

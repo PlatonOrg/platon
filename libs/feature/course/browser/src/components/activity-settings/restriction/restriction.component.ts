@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core'
+import { Component, EventEmitter, Input, Output, inject, ChangeDetectionStrategy } from '@angular/core'
 
-import { Restriction, RestrictionConfig } from '@platon/feature/course/common'
+import { type Restriction, RestrictionConfig } from '@platon/feature/course/common'
 import { CourseGroup, CourseMember } from '@platon/feature/course/common'
 
 import { CourseMemberSelectComponent } from '../../course-member-select/course-member-select.component'
@@ -30,6 +30,7 @@ import { DialogService } from '@platon/core/browser'
     CourseGroupSelectComponent,
   ],
   templateUrl: './restriction.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './restriction.component.scss',
 })
 export class RestrictionComponent {
@@ -59,8 +60,8 @@ export class RestrictionComponent {
       if (differenceInMilliseconds(end, start) >= 0) {
         return true
       }
-      // eslint-disable-next-line prettier/prettier
-      (this.restriction.config as RestrictionConfig['DateRange']).end = undefined
+
+      ;(this.restriction.config as RestrictionConfig['DateRange']).end = undefined
       this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
       return false
     }

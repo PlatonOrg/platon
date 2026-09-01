@@ -21,7 +21,8 @@ describe('EditFilePreviewService', () => {
   }
   beforeEach(() => {
     // eslint-disable-next-line prettier/prettier
-    (global as any).monaco = {// disable prettier otherwise ask to add ';' before "(global ..." but not happy to start the function with ';'
+    ;(global as any).monaco = {
+      // disable prettier otherwise ask to add ';' before "(global ..." but not happy to start the function with ';'
       editor: {
         createModel: jest.fn().mockReturnValue(mockEditor),
       },

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, Input,
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import {
   ChartViewerRadarComponentDefinition,
-  ChartViewerRadarState,
+  type ChartViewerRadarState,
   filledChartViewerRadarState,
   simpleChartViewerRadarState,
 } from './chart-viewer-radar'

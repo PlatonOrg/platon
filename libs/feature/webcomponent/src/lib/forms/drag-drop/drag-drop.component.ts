@@ -11,7 +11,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { DragDropComponentDefinition, DragDropState } from './drag-drop'
+import { DragDropComponentDefinition, type DragDropState } from './drag-drop'
 import { DragDropDirective, DragDropEvent } from './drag-drop.directive'
 import { DragDropService } from './drag-drop.service'
 import { BaseModule } from '../../shared/components/base/base.module'

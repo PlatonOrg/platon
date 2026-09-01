@@ -13,13 +13,13 @@
     background-color: var(--brand-color-primary-shade);
   }
 
-  button[nzType="default"] {
+  button[nzType='default'] {
     background-color: var(--brand-background-lighter-5);
     color: var(--brand-color-primary);
     border: 1px solid var(--brand-color-primary);
   }
 
-  button[nzType="default"]:hover {
+  button[nzType='default']:hover {
     background-color: var(--brand-background-darker-10);
   }
 }

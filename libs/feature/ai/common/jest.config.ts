@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-ai-common',
   preset: '../../../../jest.preset.js',

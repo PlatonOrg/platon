@@ -13,7 +13,7 @@ import {
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { RadioGroupComponentDefinition, RadioGroupItem, RadioGroupState } from './radio-group'
+import { RadioGroupComponentDefinition, RadioGroupItem, type RadioGroupState } from './radio-group'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import { FormsModule } from '@angular/forms'
 import { MatRadioModule } from '@angular/material/radio'

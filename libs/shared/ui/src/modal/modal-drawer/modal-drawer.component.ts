@@ -13,7 +13,7 @@ import {
   booleanAttribute,
   inject,
 } from '@angular/core'
-import { NzDrawerModule, NzDrawerPlacement, NzDrawerSize } from 'ng-zorro-antd/drawer'
+import { NzDrawerModule, type NzDrawerPlacement, type NzDrawerSize } from 'ng-zorro-antd/drawer'
 
 @Component({
   selector: 'ui-modal-drawer',

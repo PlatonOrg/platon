@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseEntity } from '@platon/core/server'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { CourseEntity } from '../entites/course.entity'

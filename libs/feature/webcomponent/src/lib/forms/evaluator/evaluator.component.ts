@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Injector, Input, Output, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { EvaluatorComponentDefinition, EvaluatorState } from './evaluator'
+import { EvaluatorComponentDefinition, type EvaluatorState } from './evaluator'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { CssPipeModule } from '../../shared/pipes/css.pipe'
 import { NzRateModule } from 'ng-zorro-antd/rate'

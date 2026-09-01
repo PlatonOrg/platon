@@ -10,7 +10,7 @@ import {
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { CrosswordComponentDefinition, CrosswordState } from './crossword'
+import { CrosswordComponentDefinition, type CrosswordState } from './crossword'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import CellActive from './model/cell-active'
 import { CellActiveInterface } from './model/cell-active-interface'
@@ -321,7 +321,7 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
     if (key === 'Backspace') {
       if (this.getCharAt(x, y) !== '') {
         // eslint-disable-next-line prettier/prettier
-        (event.target as HTMLInputElement).value = '' // prettier ask for ; at the start of the line, then ask to remove it
+        ;(event.target as HTMLInputElement).value = '' // prettier ask for ; at the start of the line, then ask to remove it
         this.updateValueUserAnswer('', x, y)
         return
       }

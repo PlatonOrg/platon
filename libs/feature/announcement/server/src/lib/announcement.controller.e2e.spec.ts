@@ -1,6 +1,6 @@
 import { UserRoles } from '@platon/core/common'
 import { createE2EApp, E2EContext, TestUser } from '@platon/core/testing/server'
-// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+
 const request = require('supertest')
 import { Repository } from 'typeorm'
 import { AnnouncementEntity } from './announcement.entity'

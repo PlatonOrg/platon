@@ -11,9 +11,8 @@
     background-color: inherit;
     color: white;
     font-size: medium;
-  };
+  }
 }
-
 
 mat-drawer {
   width: 220px;
@@ -30,8 +29,6 @@ nav {
     color: white !important;
   }
 }
-
-
 
 main {
   padding: 2rem;
@@ -68,7 +65,7 @@ nz-segmented {
 }
 
 .nav-link {
-  height:max-content;
+  height: max-content;
   width: 100%;
   color: white !important;
   &.active {
@@ -90,7 +87,6 @@ nz-segmented {
       border-bottom-left-radius: 0;
     }
   }
-
 
   mat-icon {
     display: block;
@@ -187,10 +183,9 @@ mat-toolbar {
 //   padding-inline: 1rem;
 // }
 
-
 .button-wrapper {
   display: flex;
-  flex-direction: column-reverse ;
+  flex-direction: column-reverse;
   align-items: baseline;
 }
 
@@ -200,7 +195,7 @@ mat-toolbar {
 }
 
 .mid-col-wrapper {
-  display:flex;
+  display: flex;
   flex-direction: column;
   gap: 0.5rem;
   padding: 0 0.5rem 0.5rem 0.5rem;
@@ -218,7 +213,6 @@ mat-toolbar {
   min-width: 100px;
   text-align: center;
 }
-
 
 #downloadFilesButton {
   height: 30px;

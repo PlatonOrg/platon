@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'feature-resource-common',
   preset: '../../../../jest.preset.js',

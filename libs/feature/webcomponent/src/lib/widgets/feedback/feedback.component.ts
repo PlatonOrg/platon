@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { FeedbackComponentDefinition, FeedbackState } from './feedback'
+import { FeedbackComponentDefinition, type FeedbackState } from './feedback'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 import { NzAlertModule } from 'ng-zorro-antd/alert'

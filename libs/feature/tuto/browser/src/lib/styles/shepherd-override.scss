@@ -108,7 +108,8 @@
         background-color: var(--brand-color-primary);
         color: var(--brand-color-primary-contrast);
 
-        &:hover, &:focus {
+        &:hover,
+        &:focus {
           background-color: var(--brand-color-primary-tint);
         }
       }
@@ -118,7 +119,8 @@
         border: 1px solid var(--brand-border-color);
         color: var(--brand-text-primary);
 
-        &:hover, &:focus {
+        &:hover,
+        &:focus {
           border-color: var(--brand-color-primary);
           color: var(--brand-color-primary);
         }
@@ -162,7 +164,8 @@
     .shepherd-header {
       color: var(--brand-text-primary);
 
-      .shepherd-title, .shepherd-cancel-icon {
+      .shepherd-title,
+      .shepherd-cancel-icon {
         color: var(--brand-background-components); // S'assurer que le texte et les icônes sont visibles
       }
     }

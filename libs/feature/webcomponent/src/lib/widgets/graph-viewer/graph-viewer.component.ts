@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { GraphViewerComponentDefinition, GraphViewerState } from './graph-viewer'
+import { GraphViewerComponentDefinition, type GraphViewerState } from './graph-viewer'
 import { RenderDotModule } from '../../shared/directives/render-dot.directive'
 import { BaseModule } from '../../shared/components/base/base.module'
 

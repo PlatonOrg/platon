@@ -1,4 +1,13 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core'
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core'
 
 import { FormsModule } from '@angular/forms'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -9,7 +18,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid'
 
 import { PropositionsComponent } from '../propositions/propositions.component'
 import { RestrictionComponent } from '../restriction/restriction.component'
-import { Activity, CourseGroup, CourseMember, Restriction } from '@platon/feature/course/common'
+import { type Activity, CourseGroup, CourseMember, Restriction } from '@platon/feature/course/common'
 
 @Component({
   selector: 'course-restriction-manager',
@@ -24,6 +33,7 @@ import { Activity, CourseGroup, CourseMember, Restriction } from '@platon/featur
     RestrictionComponent,
   ],
   templateUrl: './restriction-manager.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './restriction-manager.component.scss',
 })
 export class RestrictionManagerComponent implements OnInit {

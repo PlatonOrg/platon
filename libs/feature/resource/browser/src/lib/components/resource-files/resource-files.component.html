@@ -1,6 +1,6 @@
 @if (!loading) {
 <div class="files">
-  <div class="row" [ngClass]="{ 'has-exercises': exerciseTree?.length }">
+  <div class="row" [ngClass]="{ 'has-exercises': $safeNavigationMigration(exerciseTree?.length) }">
     <mat-card>
       <mat-card-header>
         <mat-card-title>

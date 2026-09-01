@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Injector, Input, OnInit, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { CodeViewerComponentDefinition, CodeViewerState } from './code-viewer'
+import { CodeViewerComponentDefinition, type CodeViewerState } from './code-viewer'
 import { NgeMonacoModule } from '@cisstech/nge/monaco'
 
 import { BaseModule } from '../../shared/components/base/base.module'

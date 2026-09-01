@@ -43,7 +43,7 @@ import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
 
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import {
-  Activity,
+  type Activity,
   calculateActivityOpenState,
   CourseGroup,
   CourseMember,

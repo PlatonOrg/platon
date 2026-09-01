@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config({ path: '.env.local' })
 
 import { CommandFactory } from 'nest-commander'

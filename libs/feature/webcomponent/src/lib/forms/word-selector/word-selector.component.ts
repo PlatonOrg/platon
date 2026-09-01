@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Injector, Input, OnInit, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { WordSelectorComponentDefinition, WordSelectorItem, WordSelectorState } from './word-selector'
+import { WordSelectorComponentDefinition, WordSelectorItem, type WordSelectorState } from './word-selector'
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { MatAutocompleteModule } from '@angular/material/autocomplete'

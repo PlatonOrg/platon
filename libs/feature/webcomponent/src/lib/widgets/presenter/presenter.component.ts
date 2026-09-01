@@ -9,6 +9,7 @@ import {
   ViewChild,
   DOCUMENT,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import Reveal from 'reveal.js'
@@ -18,7 +19,7 @@ import RevealHighlight from 'reveal.js/plugin/highlight/highlight.esm.js'
 import { firstValueFrom } from 'rxjs'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 
-import { PresenterComponentDefinition, PresenterState } from './presenter'
+import { PresenterComponentDefinition, type PresenterState } from './presenter'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -28,6 +29,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
   selector: 'wc-presenter',
   templateUrl: 'presenter.component.html',
   styleUrls: ['presenter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [BaseModule, NzButtonModule, NzIconModule],
 })
 @WebComponent(PresenterComponentDefinition)

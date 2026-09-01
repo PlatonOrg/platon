@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { FoldableFeedbackComponentDefinition, FoldableFeedbackState } from './foldable-feedback'
+import { FoldableFeedbackComponentDefinition, type FoldableFeedbackState } from './foldable-feedback'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 import { NzAlertModule } from 'ng-zorro-antd/alert'

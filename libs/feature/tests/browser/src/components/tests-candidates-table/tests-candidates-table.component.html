@@ -34,7 +34,9 @@
         <user-avatar #avatar [user]="$any(member.user)" />
       </td>
       <td>
-        <a [href]="'mailto:' + member.user?.email" class="user-email">{{ member.user?.email }}</a>
+        <a [href]="'mailto:' + $safeNavigationMigration(member.user?.email)" class="user-email">{{
+          member.user?.email
+        }}</a>
       </td>
       <td>{{ member.createdAt | date }}</td>
       <!-- <td>
@@ -56,9 +58,9 @@
           nzOkType="primary"
           [nzPopconfirmTitle]="
             'Voulez-vous vraiment envoyer le mail d\'invitation au candidat “' +
-            member.user?.firstName +
+            $safeNavigationMigration(member.user?.firstName) +
             ' ' +
-            member.user?.lastName +
+            $safeNavigationMigration(member.user?.lastName) +
             '“ ?'
           "
           (nzOnConfirm)="sendMailToCandidate(member.id)"
@@ -74,7 +76,11 @@
           nzOkText="Retirer"
           nzOkType="danger"
           [nzPopconfirmTitle]="
-            'Voulez-vous vraiment retirer le candidat “' + member.user?.firstName + ' ' + member.user?.lastName + '“ ?'
+            'Voulez-vous vraiment retirer le candidat “' +
+            $safeNavigationMigration(member.user?.firstName) +
+            ' ' +
+            $safeNavigationMigration(member.user?.lastName) +
+            '“ ?'
           "
           (nzOnConfirm)="deleted.emit(member)"
         >

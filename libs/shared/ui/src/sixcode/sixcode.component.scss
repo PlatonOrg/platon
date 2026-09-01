@@ -3,7 +3,6 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
-
 }
 
 .code-inputs {
@@ -45,7 +44,7 @@
   }
 
   // Style pour les navigateurs qui supportent les inputs de type password
-  &[type="password"] {
+  &[type='password'] {
     letter-spacing: 0.1em;
   }
 
@@ -63,13 +62,21 @@
 }
 
 @keyframes inputShake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0) scale(1);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-4px) scale(1.02);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(4px) scale(1.02);
   }
 }
@@ -87,13 +94,21 @@
   }
 
   @keyframes inputShake {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateX(0) scale(1);
     }
-    10%, 30%, 50%, 70%, 90% {
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
       transform: translateX(-2px) scale(1.02);
     }
-    20%, 40%, 60%, 80% {
+    20%,
+    40%,
+    60%,
+    80% {
       transform: translateX(2px) scale(1.02);
     }
   }

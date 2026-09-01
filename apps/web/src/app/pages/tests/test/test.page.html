@@ -7,7 +7,7 @@
           <nz-breadcrumb-item>
             <span
               nz-typography
-              [nzEditable]="course.permissions?.update"
+              [nzEditable]="$safeNavigationMigration(course.permissions?.update)"
               [nzContent]="course.name"
               (nzContentChange)="updateName($event)"
               class="title"
@@ -20,7 +20,7 @@
   </header>
   <p
     nz-typography
-    [nzEditable]="course.permissions?.update"
+    [nzEditable]="$safeNavigationMigration(course.permissions?.update)"
     [nzContent]="course.desc"
     (nzContentChange)="updateDesc($event)"
   ></p>

@@ -28,7 +28,7 @@
     [results]="context.results.users"
     (moderationAction)="onModerationAction($event)"
     (regenerateCode)="onRegenerateCode()"
-    [code]="context.activity?.code"
+    [code]="$safeNavigationMigration(context.activity?.code)"
   />
 </div>
 <!-- Tableaux de résultats -->

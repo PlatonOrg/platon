@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Fuse from 'fuse.js'
 
 import { CommonModule } from '@angular/common'

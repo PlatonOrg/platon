@@ -64,7 +64,8 @@
 
 // Keyframes pour l'animation du texte
 @keyframes text-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -74,7 +75,8 @@
 
 // Keyframes pour l'animation critique
 @keyframes timer-critical {
-  0%, 100% {
+  0%,
+  100% {
     background-color: transparent;
     color: var(--brand-text-primary);
   }

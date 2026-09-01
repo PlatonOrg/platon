@@ -7,6 +7,7 @@ import {
   ViewChild,
   ViewContainerRef,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core'
 
 import { Overlay, OverlayModule, OverlayRef } from '@angular/cdk/overlay'
@@ -19,6 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
   selector: 'wc-matrix-resizer',
   templateUrl: './matrix-resizer.component.html',
   styleUrls: ['./matrix-resizer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [OverlayModule, MatButtonModule, MatIconModule, MatTooltipModule],
 })
 export class MatrixResizerComponent implements OnDestroy {

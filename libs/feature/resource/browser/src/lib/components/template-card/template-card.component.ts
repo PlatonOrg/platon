@@ -7,7 +7,7 @@ import {
   Output,
   inject,
 } from '@angular/core'
-import { Resource } from '@platon/feature/resource/common'
+import { type Resource } from '@platon/feature/resource/common'
 import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { NzIconModule } from 'ng-zorro-antd/icon'

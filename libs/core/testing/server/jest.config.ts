@@ -1,4 +1,3 @@
-/* eslint-disable */
 module.exports = {
   displayName: 'core-testing-server',
   preset: '../../../../jest.preset.js',

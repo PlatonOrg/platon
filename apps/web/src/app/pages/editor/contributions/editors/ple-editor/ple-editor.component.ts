@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormBuilder } from '@angular/forms'
 import { Editor, FileService, OpenRequest } from '@cisstech/nge-ide/core'

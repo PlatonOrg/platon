@@ -62,7 +62,7 @@
           <section>
             @if (player()?.statement) {
             <div class="exercise-statement">
-              <nge-markdown [data]="player()?.statement" />
+              <nge-markdown [data]="$safeNavigationMigration(player()?.statement)" />
             </div>
             }
           </section>

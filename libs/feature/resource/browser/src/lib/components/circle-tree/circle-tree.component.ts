@@ -11,7 +11,7 @@ import {
   booleanAttribute,
 } from '@angular/core'
 import { RouterModule } from '@angular/router'
-import { CircleTree } from '@platon/feature/resource/common'
+import { type CircleTree } from '@platon/feature/resource/common'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzTreeModule } from 'ng-zorro-antd/tree'
 import { NzTreeFlatDataSource, NzTreeFlattener, NzTreeViewModule } from 'ng-zorro-antd/tree-view'

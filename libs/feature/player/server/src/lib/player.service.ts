@@ -158,7 +158,7 @@ export class PlayerService extends PlayerManager {
       'settings' in session.variables
     ) {
       // eslint-disable-next-line prettier/prettier
-      (session.variables as ActivityVariables).settings = session.activity.source.variables.settings
+      ;(session.variables as ActivityVariables).settings = session.activity.source.variables.settings
     } else if (session?.parent) {
       await this.updateSettingsSession(session.parent)
     }

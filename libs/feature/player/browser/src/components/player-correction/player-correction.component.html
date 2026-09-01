@@ -40,7 +40,7 @@
         </button>
         <nz-select
           class="student-name"
-          [ngModel]="currentUser?.id"
+          [ngModel]="$safeNavigationMigration(currentUser?.id)"
           (ngModelChange)="loadUserExercise($event)"
           [nzOptions]="userOptions"
           [@swipeAnimation]="animationState"
@@ -137,7 +137,7 @@
               [answers]="answers"
               [activityId]="currentActivityId"
               [currentExercise]="currentExercise"
-              [navigationExerciseId]="currentGroup?.exerciseId"
+              [navigationExerciseId]="$safeNavigationMigration(currentGroup?.exerciseId)"
               (currentLabelsChange)="onCurrentLabelsChange($event)"
               (totalGradeChange)="onTotalGradeChange($event)"
             />
@@ -290,7 +290,7 @@
               [activityId]="currentActivityId"
               [resumeMode]="true"
               [currentExercise]="currentExercise"
-              [navigationExerciseId]="currentGroup?.exerciseId"
+              [navigationExerciseId]="$safeNavigationMigration(currentGroup?.exerciseId)"
               (totalGradeChange)="onTotalGradeChange($event)"
               (labelGradeChange)="onLabelGradeChange($event)"
             />

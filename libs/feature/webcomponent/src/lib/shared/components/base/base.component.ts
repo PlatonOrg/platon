@@ -1,5 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core'
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { NgeMonacoModule } from '@cisstech/nge/monaco'
 import { WebComponentDefinition } from '../../../web-component'
@@ -10,6 +21,7 @@ import { v4 as uuidv4 } from 'uuid'
   selector: 'wc-base',
   templateUrl: './base.component.html',
   styleUrls: ['./base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, NgeMonacoModule],
 })
 export class BaseComponent implements OnInit, OnDestroy {

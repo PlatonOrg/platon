@@ -7,9 +7,5 @@
     "sourceMap": false,
     "declaration": false
   },
-  "include": [
-    "tools/migrate.ts",
-    "tools/datasource.prod.ts",
-    "migrations/**/*.ts"
-  ]
+  "include": ["tools/migrate.ts", "tools/datasource.prod.ts", "migrations/**/*.ts"]
 }

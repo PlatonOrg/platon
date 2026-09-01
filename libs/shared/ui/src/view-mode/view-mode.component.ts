@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { FormsModule } from '@angular/forms'
 import { NzSegmentedModule, NzSegmentedOption } from 'ng-zorro-antd/segmented'
 import { Subscription } from 'rxjs'
-import { ViewModes, viewModeIcons, viewModes } from './view-mode'
+import { type ViewModes, viewModeIcons, viewModes } from './view-mode'
 
 @Component({
   selector: 'ui-view-mode',

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ForbiddenResponse, NotFoundResponse, User, deepMerge } from '@platon/core/common'
 import {
   ActivitySettings,

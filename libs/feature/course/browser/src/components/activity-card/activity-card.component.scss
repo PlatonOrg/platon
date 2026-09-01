@@ -28,7 +28,7 @@ mat-card {
 
   &:hover {
     box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+      0px 1px 10px 0px rgba(0, 0, 0, 0.12);
   }
 
   border-radius: 5px;
@@ -122,7 +122,6 @@ mat-icon {
   color: var(--brand-text-secondary);
 }
 
-
 .save-btn {
   min-width: 160px;
   font-weight: 500;
@@ -142,7 +141,6 @@ mat-icon {
     }
   }
 }
-
 
 ::ng-deep .access-warning-modal {
   .ant-modal-header {
@@ -197,7 +195,6 @@ mat-icon {
     }
   }
 }
-
 
 .access-warning-content {
   font-family: var(--brand-font);

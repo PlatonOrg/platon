@@ -2,7 +2,10 @@
   @if (hasErrors()) {
   <player-error
     [player]="player!!"
-    [user]="{ firstName: user?.firstName, lastName: user?.lastName }"
+    [user]="{
+      firstName: $safeNavigationMigration(user?.firstName),
+      lastName: $safeNavigationMigration(user?.lastName)
+    }"
     [execRetryExercise]="execRetryExercise"
     [execGoToNextPlayer]="execGoToNextPlayer"
     [hasNext]="hasNext"
@@ -50,7 +53,7 @@
       <section>
         @if (player?.statement) {
         <div class="exercise-statement animate__animated animate__fadeIn">
-          <nge-markdown [data]="player?.statement" />
+          <nge-markdown [data]="$safeNavigationMigration(player?.statement)" />
         </div>
         }
       </section>
@@ -79,7 +82,7 @@
       <section>
         <mat-divider />
         <div id="form" class="exercise-form animate__animated animate__fadeIn">
-          <nge-markdown [data]="player?.form" (render)="onRender()" />
+          <nge-markdown [data]="$safeNavigationMigration(player?.form)" (render)="onRender()" />
         </div>
       </section>
       <!-- TERMINAL LOGS -->
@@ -156,7 +159,11 @@
 
 <ui-modal-drawer #commentDrawer title="Commentaires">
   <ng-template>
-    <player-comments [canComment]="canComment" [answers]="players" [sessionId]="player?.sessionId" />
+    <player-comments
+      [canComment]="canComment"
+      [answers]="players"
+      [sessionId]="$safeNavigationMigration(player?.sessionId)"
+    />
   </ng-template>
 </ui-modal-drawer>
 
@@ -206,7 +213,7 @@
     } }
   </ng-template>
   <ng-template>
-    <a mat-button [href]="selectedTheory?.url" target="_blank">
+    <a mat-button [href]="$safeNavigationMigration(selectedTheory?.url)" target="_blank">
       <mat-icon>download</mat-icon>
       Télécharger</a
     >

@@ -25,7 +25,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { firstValueFrom } from 'rxjs'
 import { ResourceFileService } from '../../api/file.service'
-import { LATEST, Resource } from '@platon/feature/resource/common'
+import { LATEST, type Resource } from '@platon/feature/resource/common'
 
 @Component({
   selector: 'resource-versioning',

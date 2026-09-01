@@ -14,7 +14,7 @@ import { ResourceLoaderService } from '@cisstech/nge/services'
 import { firstValueFrom } from 'rxjs'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { JsxComponentDefinition, JsxState } from './jsx'
+import { JsxComponentDefinition, type JsxState } from './jsx'
 import { BaseModule } from '../../shared/components/base/base.module'
 
 declare const JXG: any

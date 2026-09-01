@@ -59,8 +59,8 @@ export class PLObject implements PLValue {
 
   async toObject(visitor: PLVisitor) {
     // do not use promise.all to allow cache file operations (@copyurl, @copycontent...)
-    let result: any = {}
-    for (let key in this.value) {
+    const result: any = {}
+    for (const key in this.value) {
       result[key] = await this.value[key].toObject(visitor)
     }
     return result
@@ -541,7 +541,7 @@ export class PLParser extends JisonParser implements JisonParserApi {
     _$: any /* lstack */
   ): any {
     /* this == yyval */
-    var $0 = $$.length - 1
+    const $0 = $$.length - 1
     switch (yystate) {
       case 1:
         return $$[$0 - 1]
@@ -703,7 +703,7 @@ export class PLLexer extends JisonLexer implements JisonLexerApi {
     },
   }
   performAction(yy: any, yy_: any, $avoiding_name_collisions: any, YY_START: any): any {
-    var YYSTATE = YY_START
+    const YYSTATE = YY_START
     switch ($avoiding_name_collisions) {
       case 0 /* ignore whitespace */:
         break

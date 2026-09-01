@@ -15,7 +15,7 @@ import { NOTIFICATION } from '@platon/feature/notification/browser'
 import { Notification } from '@platon/feature/notification/common'
 import {
   ResourceCreateEvent,
-  ResourceEvent,
+  type ResourceEvent,
   ResourceEventNotification,
   ResourceMemberCreateEvent,
   ResourceMemberRemoveEvent,

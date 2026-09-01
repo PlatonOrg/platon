@@ -9,7 +9,7 @@ import {
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { PickerComponentDefinition, PickerState } from './picker'
+import { PickerComponentDefinition, type PickerState } from './picker'
 import { FormsModule } from '@angular/forms'
 import { MatSelectModule } from '@angular/material/select'
 import { MatFormFieldModule } from '@angular/material/form-field'

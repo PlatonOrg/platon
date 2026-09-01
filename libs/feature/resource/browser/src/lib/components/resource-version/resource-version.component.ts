@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
-import { FileVersion } from '@platon/feature/resource/common'
+import { type FileVersion } from '@platon/feature/resource/common'
 
 @Component({
   selector: 'resource-version',

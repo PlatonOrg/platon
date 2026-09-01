@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CreatedResponse, ItemResponse, UserRoles } from '@platon/core/common'
 import { AuthTokenDTO, ResetPasswordInputDTO, SignInInputDTO, SignUpInputDTO } from './auth.dto'
 import { AuthService } from './auth.service'
-import { IRequest } from './auth.types'
+import type { IRequest } from './auth.types'
 import { Public } from './decorators/public.decorator'
 import { Roles } from './decorators/roles.decorator'
 
@@ -28,11 +28,10 @@ export class AuthController {
     })
   }
 
-  @Public()
   @Post('reset-password')
-  async resetPassword(@Body() input: ResetPasswordInputDTO): Promise<ItemResponse<AuthTokenDTO>> {
+  async resetPassword(@Body() input: ResetPasswordInputDTO, @Req() req: IRequest): Promise<ItemResponse<AuthTokenDTO>> {
     return new ItemResponse({
-      resource: await this.authService.resetPassword(input),
+      resource: await this.authService.resetPassword(input, req),
     })
   }
 

@@ -1,4 +1,4 @@
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http'
 import { ApplicationConfig, importProvidersFrom } from '@angular/core'
 import { provideAnimations } from '@angular/platform-browser/animations'
 import {
@@ -16,7 +16,7 @@ import { appRoutes } from './app.routes'
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
     importProvidersFrom(CoreBrowserModule, FeatureWebComponentModule),
     ResourceLoaderConfigProvider({
       useDocumentBaseURI: true,

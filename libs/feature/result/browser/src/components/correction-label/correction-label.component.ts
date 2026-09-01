@@ -9,7 +9,7 @@ import {
   OnChanges,
   Output,
 } from '@angular/core'
-import { ExerciseCorrection, Label } from '@platon/feature/result/common'
+import { type ExerciseCorrection, Label } from '@platon/feature/result/common'
 import { firstValueFrom } from 'rxjs'
 import { ResultService } from '../../api/result.service'
 import { ExercisePlayer } from '@platon/feature/player/common'

@@ -34,7 +34,7 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
 import { DialogModule, DialogService, UserAvatarComponent, AuthService } from '@platon/core/browser'
-import { ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
+import { type ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'

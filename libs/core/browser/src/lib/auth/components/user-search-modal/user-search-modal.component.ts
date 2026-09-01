@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 
-import { User, UserFilters, UserGroup } from '@platon/core/common'
+import { User, type UserFilters, UserGroup } from '@platon/core/common'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
 
 import { UserSearchBarComponent } from '../user-search-bar/user-search-bar.component'
