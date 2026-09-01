@@ -8,6 +8,13 @@
   transition: all 0.3s;
 }
 
+
+:host.embedded {
+  width: 100%;
+  padding: 0;
+  position: relative;
+}
+
 :host.no-copy-paste {
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */
@@ -162,6 +169,16 @@ footer {
   button {
     width: 100%;
   }
+}
+
+// `fixed` se positionnerait par rapport à la fenêtre entière et chevaucherait la page hôte (ex: le
+// footer de navigation entre chapitres de course-reader) : `sticky` le garde atteignable en scrollant
+// dans le contenu, sans sortir de la zone de l'activité. Suppose que l'ancêtre scrollable de la page
+// hôte n'a pas d'`overflow` conflictuel entre lui et ce `footer`.
+:host.embedded footer {
+  position: sticky;
+  align-self: flex-end;
+  right: unset;
 }
 
 footer.glass {
