@@ -5,11 +5,14 @@ import { firstValueFrom } from 'rxjs'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { Activity, Course, CourseSection } from '@platon/feature/course/common'
 import { CourseService } from '@platon/feature/course/browser'
 import { EditorjsViewerComponent } from '@platon/shared/ui'
+import { PlayerService, PlayerWrapperComponent } from '@platon/feature/player/browser'
+import { ActivityPlayer } from '@platon/feature/player/common'
 
 interface ReaderItem {
   readonly activity: Activity
@@ -23,18 +26,31 @@ interface ReaderItem {
   templateUrl: './course-reader.page.html',
   styleUrls: ['./course-reader.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, NzButtonModule, NzIconModule, NzSpinModule, EditorjsViewerComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NzButtonModule,
+    NzIconModule,
+    NzProgressModule,
+    NzSpinModule,
+    EditorjsViewerComponent,
+    PlayerWrapperComponent,
+  ],
 })
 export class CourseReaderPage implements OnInit {
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly courseService = inject(CourseService)
+  private readonly playerService = inject(PlayerService)
 
   protected readonly loading = signal(true)
   protected readonly course = signal<Course | undefined>(undefined)
   protected readonly sections = signal<CourseSection[]>([])
   protected readonly items = signal<ReaderItem[]>([])
   protected readonly currentIndex = signal(0)
+  protected readonly embeddedActivityPlayer = signal<ActivityPlayer | undefined>(undefined)
+  protected readonly startingActivity = signal(false)
+  protected readonly sidebarOpen = signal(true)
 
   protected readonly currentItem = computed<ReaderItem | undefined>(() => this.items()[this.currentIndex()])
   protected readonly hasPrevious = computed(() => this.currentIndex() > 0)
@@ -42,7 +58,7 @@ export class CourseReaderPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const courseId = this.route.snapshot.paramMap.get('courseId') as string
-    const course = await firstValueFrom(this.courseService.find({ id: courseId }))
+    const course = await firstValueFrom(this.courseService.find({ id: courseId, expands: ['statistic'] }))
     this.course.set(course)
 
     const [sectionsResponse, activitiesResponse] = await Promise.all([
@@ -81,6 +97,7 @@ export class CourseReaderPage implements OnInit {
       return
     }
     this.currentIndex.set(index)
+    this.embeddedActivityPlayer.set(undefined)
     this.router
       .navigate([], {
         relativeTo: this.route,
@@ -114,5 +131,19 @@ export class CourseReaderPage implements OnInit {
           : existing
       )
     )
+  }
+
+  protected async startActivity(item: ReaderItem): Promise<void> {
+    if (this.startingActivity()) {
+      return
+    }
+
+    this.startingActivity.set(true)
+    try {
+      const output = await firstValueFrom(this.playerService.playActivity({ activityId: item.activity.id }))
+      this.embeddedActivityPlayer.set(output.activity)
+    } finally {
+      this.startingActivity.set(false)
+    }
   }
 }

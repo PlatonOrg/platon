@@ -17,20 +17,109 @@
   width: 280px;
   flex-shrink: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 0;
   border-right: 1px solid var(--brand-border-color);
-  background: var(--brand-background-components);
+  background: var(--brand-background-primary);
+  transition: width 0.25s ease, opacity 0.2s ease, border-color 0.25s ease;
+
+  &.collapsed {
+    width: 0;
+    opacity: 0;
+    border-color: transparent;
+    pointer-events: none;
+  }
+}
+
+.toc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--brand-border-color);
+  margin-bottom: 8px;
 }
 
 .back-link {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px 16px;
   font-weight: 600;
   color: var(--brand-text-primary);
-  border-bottom: 1px solid var(--brand-border-color);
-  margin-bottom: 8px;
+  min-width: 0;
+
+  // Le nom du cours peut être long : ne pousse pas l'anneau de progression hors de la sidebar.
+  span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.toc-progress {
+  flex-shrink: 0;
+}
+
+.toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--brand-text-secondary);
+}
+
+.toc-collapse-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--brand-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--brand-background-hover);
+  }
+}
+
+.toc-reopen-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: flex-start;
+  width: 0;
+  height: 40px;
+  margin: 16px 0 0 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--brand-background-components);
+  color: var(--brand-text-primary);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.25s ease, margin 0.25s ease, opacity 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+
+  &.visible {
+    width: 40px;
+    margin: 16px 0 0 16px;
+    opacity: 1;
+    pointer-events: auto;
+    border-color: var(--brand-border-color);
+    box-shadow: var(--brand-shadow-sm);
+  }
+
+  &:hover {
+    background: var(--brand-background-hover);
+  }
 }
 
 .toc-section {
@@ -47,6 +136,13 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    border: 1px solid var(--brand-border-color);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  li:not(:last-child) .toc-item {
+    border-bottom: 1px solid var(--brand-border-color);
   }
 }
 
@@ -56,9 +152,8 @@
   gap: 8px;
   width: 100%;
   text-align: left;
-  padding: 8px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 6px;
   background: transparent;
   color: var(--brand-text-primary);
   cursor: pointer;
@@ -76,10 +171,23 @@
 
 .toc-item-icon {
   color: var(--brand-text-tertiary);
+  flex-shrink: 0;
 
   &.done {
     color: var(--brand-color-success);
   }
+}
+
+.toc-item-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--brand-border-color);
+  font-size: 0.8rem;
+  flex-shrink: 0;
 }
 
 main {
@@ -88,6 +196,21 @@ main {
   display: flex;
   flex-direction: column;
   padding: 32px 48px;
+  background: var(--brand-background-primary);
+}
+
+.completed-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto 24px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--brand-pastel-green);
+  color: var(--brand-color-success);
+  font-weight: 600;
 }
 
 .content-header {
@@ -124,7 +247,7 @@ main {
   padding: 48px;
   border: 1px dashed var(--brand-border-color);
   border-radius: 8px;
-  background: var(--brand-background-components);
+  background: var(--brand-background-primary);
 }
 
 .exercise-icon {

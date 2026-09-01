@@ -3,11 +3,28 @@
   <nz-spin nzTip="Chargement du cours..."></nz-spin>
 </div>
 } @else {
-<aside class="toc">
-  <a [routerLink]="['/courses', course()?.id, 'dashboard']" class="back-link">
-    <span nz-icon nzType="arrow-left"></span>
-    {{ course()?.name }}
-  </a>
+<aside class="toc" [class.collapsed]="!sidebarOpen()">
+  <div class="toc-top">
+    <a [routerLink]="['/courses', course()?.id, 'dashboard']" class="back-link">
+      <span nz-icon nzType="arrow-left"></span>
+      {{ course()?.name }}
+    </a>
+    <nz-progress
+      class="toc-progress"
+      [nzPercent]="course()?.statistic?.progression ?? 0"
+      nzType="circle"
+      [nzWidth]="40"
+      nzStrokeColor="var(--brand-color-primary)"
+    />
+  </div>
+
+  <div class="toc-header">
+    <span>Table des matières</span>
+    <button type="button" class="toc-collapse-button" (click)="sidebarOpen.set(false)">
+      <span nz-icon nzType="close"></span>
+    </button>
+  </div>
+
   @for (section of sections(); track section.id) {
   <div class="toc-section">
     <h4>{{ section.name }}</h4>
@@ -23,7 +40,7 @@
           @if (item.activity.kind === 'lesson' && item.activity.progression === 100) {
           <span nz-icon nzType="check-circle" nzTheme="fill" class="toc-item-icon done"></span>
           } @else {
-          <span nz-icon nzType="file-text" class="toc-item-icon"></span>
+          <span class="toc-item-number">{{ i + 1 }}</span>
           }
           {{ item.activity.title }}
         </button>
@@ -34,8 +51,18 @@
   }
 </aside>
 
+<button type="button" class="toc-reopen-button" [class.visible]="!sidebarOpen()" (click)="sidebarOpen.set(true)">
+  <span nz-icon nzType="menu"></span>
+</button>
+
 <main>
-  @if (currentItem(); as item) {
+  @if (currentItem(); as item) { @if (item.activity.kind === 'lesson' && item.activity.progression === 100) {
+  <div class="completed-banner">
+    <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+    Chapitre terminé
+  </div>
+  }
+
   <div class="content-header">
     <p class="section-label">{{ item.sectionName }}</p>
     <h1>{{ item.activity.title }}</h1>
@@ -43,15 +70,17 @@
 
   @if (item.activity.kind === 'lesson') {
   <ui-editorjs-viewer [data]="$any(item.activity.content)" class="lesson-content"></ui-editorjs-viewer>
+  } @else { @if (embeddedActivityPlayer(); as activityPlayer) {
+  <player-wrapper [player]="activityPlayer" [embedded]="true" />
   } @else {
   <div class="exercise-card">
     <span nz-icon nzType="edit" class="exercise-icon"></span>
     <p>Cette étape est un exercice à réaliser.</p>
-    <a nz-button nzType="primary" nzShape="round" target="_blank" [routerLink]="['/player/activity', item.activity.id]">
+    <button nz-button nzType="primary" nzShape="round" [disabled]="startingActivity()" (click)="startActivity(item)">
       Commencer l'exercice
-    </a>
+    </button>
   </div>
-  }
+  } }
 
   <footer class="reader-footer">
     <button nz-button [disabled]="!hasPrevious()" (click)="previous()">
