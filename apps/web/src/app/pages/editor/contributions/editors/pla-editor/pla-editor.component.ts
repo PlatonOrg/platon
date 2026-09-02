@@ -801,6 +801,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     }
 
     this.exerciseGroups = Object.values(this.activity.exerciseGroups)
+    this.updateConnectedTo()
     this.changeDetectorRef.markForCheck()
   }
 
