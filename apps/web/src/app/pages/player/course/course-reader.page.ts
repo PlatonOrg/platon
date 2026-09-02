@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
 
+import { MatIconModule } from '@angular/material/icon'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
@@ -13,6 +14,7 @@ import { CourseService } from '@platon/feature/course/browser'
 import { EditorjsViewerComponent } from '@platon/shared/ui'
 import { PlayerService, PlayerWrapperComponent } from '@platon/feature/player/browser'
 import { ActivityPlayer } from '@platon/feature/player/common'
+import { ThemeService } from '@platon/core/browser'
 
 interface ReaderItem {
   readonly activity: Activity
@@ -29,6 +31,7 @@ interface ReaderItem {
   imports: [
     CommonModule,
     RouterModule,
+    MatIconModule,
     NzButtonModule,
     NzIconModule,
     NzProgressModule,
@@ -42,6 +45,7 @@ export class CourseReaderPage implements OnInit {
   private readonly router = inject(Router)
   private readonly courseService = inject(CourseService)
   private readonly playerService = inject(PlayerService)
+  protected readonly themeService = inject(ThemeService)
 
   protected readonly loading = signal(true)
   protected readonly course = signal<Course | undefined>(undefined)

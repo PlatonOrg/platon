@@ -1,8 +1,12 @@
 import { Routes } from '@angular/router'
+import { alwaysLightTheme } from '@platon/core/browser'
 
 export default [
   {
     path: 'preview',
+    data: {
+      ...alwaysLightTheme,
+    },
     loadChildren: () =>
       import(
         /* webpackChunkName: "player-preview" */
@@ -11,6 +15,9 @@ export default [
   },
   {
     path: 'activity',
+    data: {
+      ...alwaysLightTheme,
+    },
     loadChildren: () =>
       import(
         /* webpackChunkName: "player-activity" */
@@ -19,6 +26,9 @@ export default [
   },
   {
     path: 'correction',
+    data: {
+      ...alwaysLightTheme,
+    },
     loadChildren: () =>
       import(
         /* webpackChunkName: "player-correction" */

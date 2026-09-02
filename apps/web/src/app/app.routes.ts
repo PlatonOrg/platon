@@ -44,9 +44,6 @@ export const appRoutes: Route[] = [
   {
     path: 'player',
     title: 'PLaTon - Player',
-    data: {
-      ...alwaysLightTheme,
-    },
     loadChildren: () =>
       import(
         /* webpackChunkName: "player" */
