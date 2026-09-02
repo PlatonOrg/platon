@@ -67,7 +67,7 @@ export class ChallengesPage implements OnInit, OnDestroy {
           this.courseLeaderboard = await this.presenter.courseLeaderboard()
         }
 
-        const activity = this.challenges.find((a) => a.id === this.activatedRoute.snapshot.queryParams.activity)
+        const activity = this.challenges.find((a) => a.id === this.activatedRoute.snapshot.queryParams['activity'])
 
         await this.onChooseActivity(activity)
       }),

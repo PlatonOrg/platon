@@ -85,6 +85,11 @@ export class CourseService {
     return this.courseProvider.create(input)
   }
 
+  /** duplicate the sourceCourse sections and activities in the targetCourseId */
+  duplicate(sourceCourseId: string, targetCourseId: string): Observable<Course> {
+    return this.courseProvider.duplicate(sourceCourseId, targetCourseId)
+  }
+
   //#endregion
 
   //#region Courses Demo
@@ -199,6 +204,10 @@ export class CourseService {
 
   reopenActivity(activity: Activity): Observable<Activity> {
     return this.activityProvider.reopen(activity)
+  }
+
+  regenerateActivityCode(activity: Activity): Observable<Activity> {
+    return this.activityProvider.regenerateCode(activity)
   }
 
   getCourseColors(courseId: string): Observable<number[]> {

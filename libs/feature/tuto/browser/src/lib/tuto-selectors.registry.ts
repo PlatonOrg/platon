@@ -111,10 +111,10 @@ export const COURSES_PAGE_SELECTORS = [
 /** Sélecteurs utilisés par le tutoriel page de cours */
 export const COURSE_PAGE_SELECTORS = [
   'tuto-course-header',
-  'tuto-course-title',
-  'tuto-course-description',
+  'tuto-course-header-group',
   'tuto-course-toolbar',
   'tuto-course-share-button',
+  'tuto-course-tabs',
   'tuto-course-tab-dashboard',
   'tuto-course-tab-challenges',
   'tuto-course-tab-members',
@@ -168,6 +168,8 @@ export const COURSE_MANAGEMENT_SELECTORS = [
   'tuto-course-no-activities',
   'tuto-course-no-sections',
   'tuto-course-add-first-section-button',
+  'tuto-course-read-button',
+  'tuto-course-add-lesson-button',
   'tuto-course-statistics',
   'tuto-course-stat-progression',
   'tuto-course-stat-time',

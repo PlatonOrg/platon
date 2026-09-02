@@ -11,7 +11,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app/app.module'
 
 const LOG_LEVELS: LogLevel[] =
-  process.env.NODE_ENV === 'development' ? ['debug', 'error', 'log', 'verbose', 'warn'] : ['error', 'warn']
+  process.env['NODE_ENV'] === 'development' ? ['debug', 'error', 'log', 'verbose', 'warn'] : ['error', 'warn']
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -50,7 +50,7 @@ async function bootstrap() {
     })
   )
 
-  const port = process.env.PORT || 4201
+  const port = process.env['PORT'] || 4201
   process.on('uncaughtException', function (err) {
     logger.error(err, 'Uncaught exception')
   })

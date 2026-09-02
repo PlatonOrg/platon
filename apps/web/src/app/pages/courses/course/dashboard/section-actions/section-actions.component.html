@@ -37,6 +37,7 @@
         nz-popconfirm
         nzOkText="Supprimer"
         nzOkType="danger"
+        nzPopconfirmPlacement="left"
         [nzPopconfirmTitle]="removeGuard"
         (nzOnConfirm)="remove.emit()"
       >
@@ -51,7 +52,8 @@
   </ng-template>
 </nz-space>
 <ng-template #removeGuard>
-  <h2>Voulez-vous vraiment supprimer la section “{{ section.name }}”?</h2>
-  <br />
-  <p>En supprimant cette section, vous supprimer aussi toutes les activités et données liées.</p>
+  <div>
+    <h2>Voulez-vous vraiment supprimer la section “{{ section.name }}”?</h2>
+    <p>En supprimant cette section, vous supprimer aussi toutes les activités et données liées.</p>
+  </div>
 </ng-template>

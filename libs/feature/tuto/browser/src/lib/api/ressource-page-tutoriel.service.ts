@@ -215,7 +215,7 @@ export class ResourcePageTutorialService {
                  </div>
                </div>`,
         attachTo: {
-          element: '#tuto-resource-tabs',
+          element: '#tuto-resource-tabs .ant-tabs-nav',
           on: 'bottom',
         },
         when: {},

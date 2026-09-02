@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output, computed, input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { UserResults } from '@platon/feature/result/common'
 import { CommonModule } from '@angular/common'
@@ -45,7 +45,8 @@ export class ActivityModerationComponent {
   readonly results = input.required<UserResults[]>()
   readonly code = input<string | undefined>(undefined)
 
-  @Output() moderationAction = new EventEmitter<ActivityModerationEvent>()
+  readonly moderationAction = output<ActivityModerationEvent>()
+  readonly regenerateCode = output<void>()
 
   protected selectedUsers = new Map<string, string>() // Map<userId, sessionId>
   protected isCodeRevealed = false

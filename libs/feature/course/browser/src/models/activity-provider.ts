@@ -20,6 +20,7 @@ export abstract class ActivityProvider {
   abstract delete(activity: Activity, version?: string): Observable<void>
   abstract close(activity: Activity): Observable<Activity>
   abstract reopen(activity: Activity): Observable<Activity>
+  abstract regenerateCode(activity: Activity): Observable<Activity>
   abstract updateRestrictions(activity: Activity, restrictions: RestrictionList[]): Observable<Activity>
   abstract getCourseColors(courseId: string): Observable<number[]>
   abstract markLessonCompleted(activity: Activity): Observable<void>

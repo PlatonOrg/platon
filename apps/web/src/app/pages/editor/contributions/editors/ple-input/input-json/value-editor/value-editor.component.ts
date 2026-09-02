@@ -57,6 +57,6 @@ export class ValueEditorComponent extends BaseValueEditor<Record<string, unknown
   }
 
   private isComponent(): boolean {
-    return !!this.value && !!this.value.cid && !!this.value.selector
+    return !!this.value && !!this.value['cid'] && !!this.value['selector']
   }
 }

@@ -56,7 +56,7 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Post('fav/:labelId')
   async favLabel(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const label = await this.labelService.findById(req.params.labelId)
+    const label = await this.labelService.findById(req.params['labelId'])
     const labels = Mapper.mapAll(await this.labelService.favLabel(label.get(), req.user.id), LabelDTO)
     return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
   }
@@ -64,7 +64,7 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Post('unfav/:labelId')
   async unfavLabel(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const label = await this.labelService.findById(req.params.labelId)
+    const label = await this.labelService.findById(req.params['labelId'])
     const labels = Mapper.mapAll(await this.labelService.unfavLabel(label.get(), req.user.id), LabelDTO)
     return new ListResponse<LabelDTO>({ resources: labels, total: labels.length })
   }
@@ -80,7 +80,7 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Get('list/:navigationExerciseId')
   async list(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const navigationExerciseId = req.params.navigationExerciseId
+    const navigationExerciseId = req.params['navigationExerciseId']
     const resourceLabels = await this.resourceLabelService.list(navigationExerciseId)
     const labels = Mapper.mapAll(await this.labelService.list(navigationExerciseId), LabelDTO)
 
@@ -98,8 +98,8 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Post('create/:activityId/:navigationExerciseId')
   async create(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const activityId = req.params.activityId
-    const navigationExerciseId = req.params.navigationExerciseId
+    const activityId = req.params['activityId']
+    const navigationExerciseId = req.params['navigationExerciseId']
     const createdLabel = {
       name: req.body.name,
       color: req.body.color,
@@ -115,12 +115,12 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Get('list-correction/:sessionId/:answerId')
   async listCorrectionLabels(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    if (!req.params.sessionId || !req.params.answerId) {
+    if (!req.params['sessionId'] || !req.params['answerId']) {
       return new ListResponse<LabelDTO>({ resources: [], total: 0 })
     }
     const labels = await Promise.all(
       (
-        await this.correctionLabelService.list(req.params.sessionId, req.params.answerId)
+        await this.correctionLabelService.list(req.params['sessionId'], req.params['answerId'])
       ).map(async (label: CorrectionLabel) => {
         const labelEntity = (await this.labelService.findById(label.labelId)).get()
         const labelDTO = Mapper.map(labelEntity, LabelDTO)
@@ -133,7 +133,7 @@ export class LabelController {
   @Roles(UserRoles.admin, UserRoles.teacher)
   @Delete('delete/:labelId')
   async deleteLabel(@Req() req: IRequest): Promise<ListResponse<LabelDTO>> {
-    const labelId = req.params.labelId
+    const labelId = req.params['labelId']
     const label = await this.labelService.findById(labelId)
 
     if (!label.isPresent()) {
@@ -172,7 +172,7 @@ export class LabelController {
     label.color = req.body.color
 
     try {
-      await this.resourceLabelService.update(label.id, req.params.navigationExerciseId, req.body.gradeChange)
+      await this.resourceLabelService.update(label.id, req.params['navigationExerciseId'], req.body.gradeChange)
       return await this.labelService.update(label.id, label)
     } catch (error: any) {
       throw new ErrorResponse({

@@ -363,7 +363,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     )
 
     this.activatedRoute.params.subscribe(async (params) => {
-      const resource = await firstValueFrom(this.resourceService.find({ id: params.id }))
+      const resource = await firstValueFrom(this.resourceService.find({ id: params['id'] }))
       const parent = resource.parentId
       this.filters = {
         ...this.filters,
@@ -731,6 +731,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     }
 
     this.exerciseGroups = Object.values(this.activity.exerciseGroups)
+    this.updateConnectedTo()
     this.changeDetectorRef.markForCheck()
   }
 

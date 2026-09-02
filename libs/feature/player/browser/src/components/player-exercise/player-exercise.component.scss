@@ -50,6 +50,8 @@ mat-card {
 }
 
 mat-card-header {
+  background: var(--brand-background-secondary);
+  border-bottom: 1px solid var(--brand-border-color-light);
   padding-bottom: 1rem;
 
   > div {

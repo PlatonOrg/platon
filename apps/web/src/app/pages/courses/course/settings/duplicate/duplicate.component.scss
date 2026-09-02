@@ -1,0 +1,85 @@
+:host{
+  display: block;
+}
+
+.duplication-search-container,
+.courses-content {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 ;
+}
+
+.duplication-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.5rem 0 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem
+  }
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 920px){
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  @media (max-width: 768px){
+    grid-template-columns: 1fr;
+  }
+}
+
+.spinner-wrapper {
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.selectable-card {
+  position: relative;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .disabled-course-item {
+    pointer-events: none;
+  }
+
+  &:hover {
+    border-color: var(--brand-color-primary-light, #c0c0c0);
+  }
+
+  .card-actions {
+    display: flex;
+    width: 100%;
+    margin-right: 0.5rem;
+
+    a,
+    button {
+      flex: 1;
+      border-radius: 0;
+      display:inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}

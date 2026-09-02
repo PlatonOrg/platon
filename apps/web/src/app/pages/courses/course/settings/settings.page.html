@@ -63,6 +63,21 @@
         </ng-template>
       </mat-card-content>
     </mat-card>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Charger un cours</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Importer les sections et activités d'un cours existant dans lequel vous êtes enseignant.
+          <br />
+          Les dates d'ouverture et de fermeture seront automatiquement repositionnées pour l'année scolaire suivante.
+          <br />
+          Les sections importées seront mises après les sections existantes.
+        </p>
+        <app-course-duplicate [currentCourse]="context.course" />
+      </mat-card-content>
+    </mat-card>
     <mat-card class="danger-zone">
       <mat-card-header>
         <mat-card-title>Zone de danger</mat-card-title>

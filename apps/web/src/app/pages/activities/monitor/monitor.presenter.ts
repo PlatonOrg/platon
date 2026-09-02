@@ -106,7 +106,7 @@ export class MonitorPresenter implements OnDestroy {
         const exerciseChangeNotifications = pagination.notifications.filter((notification) => {
           const data = notification.data as Record<string, unknown>
           // Filter out notifications we've already processed
-          return data.type === EXERCISE_CHANGES_NOTIFICATION && !this.processedNotifications.has(notification.id)
+          return data['type'] === EXERCISE_CHANGES_NOTIFICATION && !this.processedNotifications.has(notification.id)
         })
 
         if (exerciseChangeNotifications.length === 0) return
@@ -117,23 +117,43 @@ export class MonitorPresenter implements OnDestroy {
           this.processedNotifications.add(notification.id)
 
           const notificationData = notification.data as Record<string, unknown>
-          const changes = notificationData.changes as PlayerExercise
+          const changes = notificationData['changes'] as PlayerExercise
+          const userId = notificationData['userId'] as string
 
           // Check if we have valid changes
           if (changes) {
-            // Forward the notification to components that are listening
+            // Delete the notification so it doesn't accumulate in the UI
+            firstValueFrom(this.notificationService.deleteNotification(notification.id)).catch((error) => {
+              console.warn('Failed to delete notification:', error)
+            })
+            const oldUserResults = context.results?.users.find((user) => user.id === userId)
+            if (oldUserResults) {
+              const userResults = await firstValueFrom(
+                this.resultService.sessionResults(oldUserResults.activitySessionId)
+              )
+              // Re-read the latest context here to avoid clobbering updates made concurrently during the await above.
+              const latestContext = this.context.value as Required<Context>
+              this.context.next({
+                ...latestContext,
+                results: {
+                  ...latestContext.results,
+                  users: latestContext.results.users.map((user) => (user.id === userId ? userResults : user)),
+                },
+              })
+            } else {
+              const results = await firstValueFrom(this.resultService.activityResults(context.activity.id))
+              // Re-read the latest context here to avoid clobbering updates made concurrently during the await above.
+              const latestContext = this.context.value as Required<Context>
+              this.context.next({
+                ...latestContext,
+                results,
+              })
+            }
             this.exerciseChanges.next({
-              userId: notificationData.userId as string,
-              userName: notificationData.userName as string | undefined,
+              userId: userId as string,
+              userName: notificationData['userName'] as string | undefined,
               changes,
             })
-
-            // Delete the notification so it doesn't accumulate in the UI
-            try {
-              await firstValueFrom(this.notificationService.deleteNotification(notification.id))
-            } catch (error) {
-              console.warn('Failed to delete notification:', error)
-            }
           }
         }
       },
@@ -151,6 +171,13 @@ export class MonitorPresenter implements OnDestroy {
 
   async closeActivityForUser(sessionId: string): Promise<void> {
     await firstValueFrom(this.playerService.terminate(sessionId))
+  }
+
+  async regenerateActivityCode(): Promise<void> {
+    const { activity } = this.context.value
+    if (!activity) return
+    await firstValueFrom(this.courseService.regenerateActivityCode(activity))
+    await this.refresh(activity.courseId, activity.id)
   }
 }
 

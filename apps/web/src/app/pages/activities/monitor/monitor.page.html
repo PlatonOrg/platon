@@ -25,6 +25,7 @@
     <course-activity-moderation
       [results]="context.results.users"
       (moderationAction)="onModerationAction($event)"
+      (regenerateCode)="onRegenerateCode()"
       [code]="context.activity?.code"
     />
   </div>

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Logger, Patch, Post, Put, Query, Req } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Patch, Post, Put, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ItemResponse, ListResponse, NoContentResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
@@ -185,6 +185,21 @@ export class ActivityController {
     @UUIDParam('activityId') activityId: string
   ): Promise<ItemResponse<ActivityDTO>> {
     const activity = await this.activityService.reopen(courseId, activityId, (activity) =>
+      this.permissionsService.ensureActivityWritePermission(activity, req)
+    )
+    return new ItemResponse({
+      resource: Mapper.map(activity, ActivityDTO),
+    })
+  }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Post('/:activityId/regenerate-code')
+  async regenerateCode(
+    @Req() req: IRequest,
+    @UUIDParam('courseId') courseId: string,
+    @UUIDParam('activityId') activityId: string
+  ): Promise<ItemResponse<ActivityDTO>> {
+    const activity = await this.activityService.regenerateCode(courseId, activityId, (activity) =>
       this.permissionsService.ensureActivityWritePermission(activity, req)
     )
     return new ItemResponse({

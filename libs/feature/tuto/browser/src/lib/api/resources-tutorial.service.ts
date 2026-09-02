@@ -727,8 +727,8 @@ export class ResourcesTutorialService {
     const links = titleResource.querySelectorAll('a[href*="/resources/"]') as NodeListOf<HTMLAnchorElement>
 
     links.forEach((link) => {
-      if (!link.dataset.originalHref) {
-        link.dataset.originalHref = link.href
+      if (!link.dataset['originalHref']) {
+        link.dataset['originalHref'] = link.href
       }
 
       const url = new URL(link.href)

@@ -64,7 +64,7 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
     }
 
     const context = this.webComponentService.getContext() as Record<string, string>
-    this.sessionId = context?.sessionId || ''
+    this.sessionId = context?.['sessionId'] || ''
 
     if (!this.sessionId) {
       this.errors.push('Erreur: sessionId manquant. Ce composant ne peut pas fonctionner sans sessionId.')

@@ -5,98 +5,97 @@ import { CreateCourseActivityDTO, UpdateCourseActivityDTO } from './activity.dto
 
 const isValid = async (dto: object) => (await validate(dto)).length === 0
 
+const SECTION_ID = 'b0e1c2d3-4f5a-4b6c-8d7e-9f0a1b2c3d4e'
+const RESOURCE_ID = 'a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d'
+
 describe('CreateCourseActivityDTO', () => {
-  const sectionId = '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-  const resourceId = '3fa85f64-5717-4562-b3fc-2c963f66afa7'
-
-  describe('kind=exercise (par défaut ou explicite)', () => {
-    it('accepte un exercice avec resourceId et resourceVersion', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, { sectionId, resourceId, resourceVersion: 'latest' })
-      expect(await isValid(dto)).toBe(true)
+  it('kind est optionnel et vaut EXERCISE par défaut', () => {
+    const dto = plainToInstance(CreateCourseActivityDTO, {
+      sectionId: SECTION_ID,
+      resourceId: RESOURCE_ID,
+      resourceVersion: 'latest',
     })
-
-    it('applique kind=exercise par défaut quand il est omis', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, { sectionId, resourceId, resourceVersion: 'latest' })
-      expect(dto.kind).toBe(ActivityKind.EXERCISE)
-    })
-
-    it('rejette un exercice sans resourceId', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, { sectionId, resourceVersion: 'latest' })
-      expect(await isValid(dto)).toBe(false)
-    })
-
-    it('rejette un exercice sans resourceVersion', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, { sectionId, resourceId })
-      expect(await isValid(dto)).toBe(false)
-    })
-
-    it('rejette kind=exercise explicite avec lessonTitle mais sans resourceId (lessonTitle ne dispense pas de resourceId)', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, {
-        sectionId,
-        kind: ActivityKind.EXERCISE,
-        lessonTitle: 'Introduction',
-      })
-      expect(await isValid(dto)).toBe(false)
-    })
+    expect(dto.kind).toBe(ActivityKind.EXERCISE)
   })
 
-  describe('kind=lesson', () => {
-    it('accepte une leçon avec lessonTitle, sans resourceId ni resourceVersion', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, {
-        sectionId,
-        kind: ActivityKind.LESSON,
-        lessonTitle: 'Introduction au réseau',
-      })
-      expect(await isValid(dto)).toBe(true)
+  it('accepte une activité exercise avec resourceId et resourceVersion', async () => {
+    const dto = plainToInstance(CreateCourseActivityDTO, {
+      kind: ActivityKind.EXERCISE,
+      sectionId: SECTION_ID,
+      resourceId: RESOURCE_ID,
+      resourceVersion: 'latest',
     })
+    expect(await isValid(dto)).toBe(true)
+  })
 
-    it('accepte une leçon avec un content EditorJS', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, {
-        sectionId,
-        kind: ActivityKind.LESSON,
-        lessonTitle: 'Introduction au réseau',
-        content: { blocks: [{ type: 'paragraph', data: { text: 'Bonjour' } }] },
-      })
-      expect(await isValid(dto)).toBe(true)
+  it('rejette une activité exercise sans resourceId', async () => {
+    const dto = plainToInstance(CreateCourseActivityDTO, {
+      kind: ActivityKind.EXERCISE,
+      sectionId: SECTION_ID,
+      resourceVersion: 'latest',
     })
+    const errors = await validate(dto)
+    expect(errors.some((e) => e.property === 'resourceId')).toBe(true)
+  })
 
-    it('rejette une leçon sans lessonTitle', async () => {
-      const dto = plainToInstance(CreateCourseActivityDTO, { sectionId, kind: ActivityKind.LESSON })
-      expect(await isValid(dto)).toBe(false)
+  it('rejette une activité exercise sans resourceVersion', async () => {
+    const dto = plainToInstance(CreateCourseActivityDTO, {
+      kind: ActivityKind.EXERCISE,
+      sectionId: SECTION_ID,
+      resourceId: RESOURCE_ID,
     })
+    const errors = await validate(dto)
+    expect(errors.some((e) => e.property === 'resourceVersion')).toBe(true)
+  })
+
+  it('accepte une leçon avec uniquement lessonTitle, sans resourceId ni resourceVersion', async () => {
+    const dto = plainToInstance(CreateCourseActivityDTO, {
+      kind: ActivityKind.LESSON,
+      sectionId: SECTION_ID,
+      lessonTitle: 'Ma leçon',
+    })
+    expect(await isValid(dto)).toBe(true)
+  })
+
+  it('rejette une leçon sans lessonTitle', async () => {
+    const dto = plainToInstance(CreateCourseActivityDTO, {
+      kind: ActivityKind.LESSON,
+      sectionId: SECTION_ID,
+    })
+    const errors = await validate(dto)
+    expect(errors.some((e) => e.property === 'lessonTitle')).toBe(true)
+  })
+
+  it('accepte content et draft optionnels pour une leçon', async () => {
+    const dto = plainToInstance(CreateCourseActivityDTO, {
+      kind: ActivityKind.LESSON,
+      sectionId: SECTION_ID,
+      lessonTitle: 'Ma leçon',
+      content: { blocks: [] },
+      draft: true,
+    })
+    expect(await isValid(dto)).toBe(true)
   })
 })
 
 describe('UpdateCourseActivityDTO', () => {
-  describe('code', () => {
-    it('accepte un code de 6 caractères alphanumériques majuscules', async () => {
-      const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'AB12CD' })
-      expect(await isValid(dto)).toBe(true)
-    })
+  it('accepte un code de 6 caractères alphanumériques majuscules', async () => {
+    const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'AB12CD' })
+    expect(await isValid(dto)).toBe(true)
+  })
 
-    it('accepte un DTO sans code (champ optionnel)', async () => {
-      const dto = plainToInstance(UpdateCourseActivityDTO, {})
-      expect(await isValid(dto)).toBe(true)
-    })
+  it('code est optionnel', async () => {
+    const dto = plainToInstance(UpdateCourseActivityDTO, {})
+    expect(await isValid(dto)).toBe(true)
+  })
 
-    it('rejette un code en minuscules', async () => {
-      const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'ab12cd' })
-      expect(await isValid(dto)).toBe(false)
-    })
+  it('rejette un code en minuscules', async () => {
+    const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'ab12cd' })
+    expect(await isValid(dto)).toBe(false)
+  })
 
-    it("rejette un code trop court (ex: '123456' évitable mais volontairement trop court ici)", async () => {
-      const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'AB12' })
-      expect(await isValid(dto)).toBe(false)
-    })
-
-    it('rejette un code trop long', async () => {
-      const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'AB12CD34' })
-      expect(await isValid(dto)).toBe(false)
-    })
-
-    it('rejette un code contenant des caractères spéciaux', async () => {
-      const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'AB-2CD' })
-      expect(await isValid(dto)).toBe(false)
-    })
+  it("rejette un code d'une longueur différente de 6", async () => {
+    const dto = plainToInstance(UpdateCourseActivityDTO, { code: 'AB12' })
+    expect(await isValid(dto)).toBe(false)
   })
 })

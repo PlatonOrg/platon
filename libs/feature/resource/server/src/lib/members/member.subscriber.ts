@@ -66,20 +66,20 @@ export class ResourceMemberSubscriber implements EntitySubscriberInterface<Resou
       const [resource, watcher] = await Promise.all([
         event.manager.findOne(ResourceEntity, {
           where: {
-            id: event.entity.resourceId,
+            id: event.entity['resourceId'],
           },
         }),
         event.manager.findOne(ResourceWatcherEntity, {
           where: {
-            resourceId: event.entity.resourceId,
-            userId: event.entity.userId,
+            resourceId: event.entity['resourceId'],
+            userId: event.entity['userId'],
           },
         }),
       ])
 
       if (resource) {
         const data: ResourceMemberCreateEventData = {
-          userId: event.entity.userId,
+          userId: event.entity['userId'],
           resourceId: resource.id,
           resourceName: resource.name,
           resourceType: resource.type,
@@ -88,16 +88,16 @@ export class ResourceMemberSubscriber implements EntitySubscriberInterface<Resou
 
         await event.manager.save([
           event.manager.create(ResourceEventEntity, {
-            actorId: event.entity.inviterId,
-            resourceId: event.entity.resourceId,
+            actorId: event.entity['inviterId'],
+            resourceId: event.entity['resourceId'],
             type: ResourceEventTypes.MEMBER_CREATE,
             data,
           }),
-          ...(!watcher && event.entity.waiting
+          ...(!watcher && event.entity['waiting']
             ? [
                 event.manager.create(ResourceWatcherEntity, {
-                  resourceId: event.entity.resourceId,
-                  userId: event.entity.userId,
+                  resourceId: event.entity['resourceId'],
+                  userId: event.entity['userId'],
                 }),
               ]
             : []),

@@ -193,7 +193,7 @@ export class ActivityExerciseResults implements SessionDataAggregator<ExerciseRe
         const variables = exercise.source.variables as ExerciseVariables
         this.exerciseResults.set(
           exercise.id,
-          emptyExerciseResults({ id: exercise.id, title: exercise.overrides?.title ?? variables.title })
+          emptyExerciseResults({ id: exercise.id, title: exercise.overrides?.['title'] ?? variables.title })
         )
       })
     }

@@ -51,6 +51,9 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   private readonly dialogService = inject(DialogService)
 
   private readonly subscriptions: Subscription[] = []
+  // Activité actuellement suivie par CETTE page (la route étant réutilisée entre activités,
+  // ngOnDestroy ne suffit pas pour détecter un changement d'activité en cours de session).
+  private subscribedActivityId?: string
 
   protected context = this.presenter.defaultContext()
   protected columnOrder?: string[] = []
@@ -62,32 +65,38 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
         this.columnOrder = context.results?.exercises.map((e) => e.title)
         this.changeDetectorRef.markForCheck()
         if (context.state === 'READY' && context.activity && context.course) {
-          await this.monitorPresenceService
-            .subscribeToMonitorPresence(context.activity.id, context.course.id)
-            .catch(console.error)
+          await this.switchMonitoredActivity(context.activity.id)
           this.updateGradeList()
         }
       })
     )
 
     this.subscriptions.push(this.presenter.onDeletedActivity.subscribe(() => this.location.back()))
-
-    this.subscriptions.push(
-      this.presenter.onExerciseChanges.subscribe(async () => {
-        if (this.context.activity && this.context.course) {
-          await this.presenter.refresh(this.context.course.id, this.context.activity.id)
-        }
-        this.changeDetectorRef.markForCheck()
-      })
-    )
   }
 
   ngOnDestroy(): void {
     // Unsubscribe from monitor presence when leaving the page
-    this.monitorPresenceService.unsubscribeFromMonitorPresence()
+    if (this.subscribedActivityId) {
+      this.monitorPresenceService.unsubscribeFromMonitorPresence(this.subscribedActivityId).catch(console.error)
+    }
 
     // Unsubscribe from all observables
     this.subscriptions.forEach((s) => s.unsubscribe())
+  }
+
+  /**
+   * Bascule l'abonnement de présence de l'ancienne activité (le cas échéant) vers la nouvelle.
+   * Nécessaire car la route ':courseId/:activityId' réutilise cette page entre deux activités.
+   */
+  private async switchMonitoredActivity(activityId: string): Promise<void> {
+    if (this.subscribedActivityId === activityId) {
+      return
+    }
+    if (this.subscribedActivityId) {
+      await this.monitorPresenceService.unsubscribeFromMonitorPresence(this.subscribedActivityId).catch(console.error)
+    }
+    await this.monitorPresenceService.subscribeToMonitorPresence(activityId).catch(console.error)
+    this.subscribedActivityId = activityId
   }
 
   private updateGradeList(): void {
@@ -133,6 +142,24 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Erreur lors de la fermeture des sessions:', error)
       this.dialogService.error('Une erreur est survenue lors de la fermeture des sessions.')
+    }
+  }
+
+  protected async onRegenerateCode(): Promise<void> {
+    const confirmed = await this.dialogService.confirm({
+      nzTitle: 'Régénérer le code',
+      nzContent: "L'ancien code ne fonctionnera plus, continuer ?",
+      nzOkText: 'Oui',
+      nzCancelText: 'Non',
+    })
+    if (!confirmed) return
+
+    try {
+      await this.presenter.regenerateActivityCode()
+      this.dialogService.success('Le code a été régénéré.')
+    } catch (error) {
+      console.error('Erreur lors de la régénération du code:', error)
+      this.dialogService.error('Une erreur est survenue lors de la régénération du code.')
     }
   }
 
