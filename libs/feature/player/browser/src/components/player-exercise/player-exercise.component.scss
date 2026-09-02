@@ -100,7 +100,7 @@ mat-card-content {
 pre {
   overflow-y: auto;
   max-height: 75vh;
-  color: red;
+  color: var(--brand-color-danger);
   margin: 2rem 0;
 }
 
@@ -228,12 +228,12 @@ button.primary {
 }
 
 #next-exercise-button {
-  background: linear-gradient(to right, #171c8f 50%, transparent 50%);
+  background: linear-gradient(to right, var(--brand-color-primary) 50%, transparent 50%);
   background-size: 200% 100%;
   background-position: 100% 0%;
   transition: background-position 0s;
   mat-icon {
-    background: linear-gradient(to right, white 50%, black 50%);
+    background: linear-gradient(to right, var(--brand-color-primary-contrast) 50%, var(--brand-text-secondary) 50%);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;

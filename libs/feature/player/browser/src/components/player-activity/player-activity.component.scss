@@ -38,7 +38,7 @@ main {
 mat-card {
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--brand-border-color);
 
   mat-card-content {
     padding: 2rem;
@@ -57,10 +57,10 @@ mat-card {
   align-items: center;
   justify-content: center;
   max-width: 970px;
-  background: white;
+  background: var(--brand-background-components);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--brand-border-color);
   margin: 0 auto 1.5rem auto;
 }
 
@@ -75,10 +75,10 @@ mat-card {
 .introduction-section,
 .conclusion-section {
   max-width: 970px;
-  background: #fafafa;
+  background: var(--brand-background-components);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--brand-border-color);
   margin: 0 auto 1.5rem auto;
 }
 
@@ -90,20 +90,20 @@ mat-card {
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: var(--brand-text-primary);
 
   mat-icon {
-    color: #2196f3;
+    color: var(--brand-color-info);
     font-size: 1.3rem;
   }
 }
 
 .introduction-content,
 .conclusion-content {
-  background: white;
+  background: var(--brand-background-components);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--brand-border-color-light);
   line-height: 1.6;
 }
 
@@ -205,7 +205,7 @@ footer.glass {
 .terminate-button {
   margin: 1rem;
   color: white !important;
-  background-color: #ff4d4f !important;
+  background-color: var(--brand-color-danger) !important;
 }
 
 .modalButtons {
@@ -227,18 +227,18 @@ nz-progress {
 .countdown-section {
   width: 100%;
   max-width: 970px;
-  background: #fafafa;
+  background: var(--brand-background-components);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--brand-border-color);
   margin: 0 auto 1.5rem auto;
 }
 
 .countdown-content {
-  background: white;
+  background: var(--brand-background-components);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--brand-border-color-light);
   line-height: 1.6;
   text-align: center;
 
@@ -252,7 +252,7 @@ nz-progress {
         .ant-statistic-title {
           font-size: 0.9rem;
           font-weight: 500;
-          color: #666;
+          color: var(--brand-text-secondary);
           margin-bottom: 0.75rem;
           line-height: 1.4;
         }
@@ -260,8 +260,8 @@ nz-progress {
         .ant-statistic-content {
           font-size: 1.8rem;
           font-weight: 600;
-          color: #2196f3;
-          text-shadow: 0 1px 3px rgba(33, 150, 243, 0.1);
+          color: var(--brand-color-info);
+          text-shadow: 0 1px 3px rgba(var(--brand-color-info-rgb), 0.1);
           line-height: 1.2;
         }
       }
@@ -380,7 +380,7 @@ pre {
 .leave-warning-frame {
   position: relative;
   z-index: 11;
-  border: 5px dashed #000000;
+  border: 5px dashed var(--brand-color-warning);
   border-radius: 8px;
   padding: 0.5rem;
 }
@@ -392,10 +392,10 @@ pre {
   padding: 0.875rem 1.25rem;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
-  background-color: #fff3cd;
-  border: 1px solid #ffeeba;
+  background-color: rgba(var(--brand-color-warning-rgb), 0.12);
+  border: 1px solid var(--brand-color-warning);
   border-radius: 6px;
-  color: #856404;
+  color: var(--brand-color-warning);
 
   .leave-warning-icon {
     display: flex;
@@ -404,11 +404,11 @@ pre {
     flex-shrink: 0;
     width: 2rem;
     height: 2rem;
-    background: #856404;
+    background: var(--brand-color-warning);
     border-radius: 50%;
 
     mat-icon {
-      color: #fff3cd;
+      color: var(--brand-background-components);
       font-size: 1.1rem;
       width: 1.1rem;
       height: 1.1rem;
@@ -480,23 +480,23 @@ pre {
   margin: 0 auto 1.5rem auto;
 
   .custom-alert {
-    border: 1px solid #ff4d4f;
-    background: #fff2f0;
+    border: 1px solid var(--brand-color-danger);
+    background: rgba(var(--brand-color-danger-rgb), 0.08);
     margin-bottom: 1rem;
 
     ::ng-deep {
       .ant-alert-message {
         font-weight: 600;
-        color: #a8071a;
+        color: var(--brand-color-danger);
       }
 
       .ant-alert-description {
-        color: #cf1322;
+        color: var(--brand-color-danger);
         line-height: 1.6;
       }
 
       .ant-alert-icon {
-        color: #ff4d4f;
+        color: var(--brand-color-danger);
       }
     }
   }
@@ -505,17 +505,17 @@ pre {
 .unlock-section {
   width: 100%;
   max-width: 970px;
-  background: #fff7e6;
+  background: rgba(var(--brand-color-warning-rgb), 0.1);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #ffd591;
+  border: 1px solid var(--brand-color-warning);
   margin: 0 auto 1.5rem auto;
 }
 
 .unlock-content {
-  background: white;
+  background: var(--brand-background-components);
   border-radius: 8px;
-  border: 1px solid #ffe7ba;
+  border: 1px solid rgba(var(--brand-color-warning-rgb), 0.3);
   line-height: 1.6;
   text-align: center;
 
@@ -523,7 +523,7 @@ pre {
     margin: 0;
     margin-top: 1rem;
     font-weight: 500;
-    color: #d46b08;
+    color: var(--brand-color-warning);
   }
 
   ui-sixcode {
