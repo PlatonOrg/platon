@@ -154,7 +154,7 @@ export class ResourceFileController {
   }
 
   @Public()
-  @Get('/:resourceId/:path(*)')
+  @Get('/:resourceId/*path')
   async get(
     @Req() request: IRequest,
     @Res({ passthrough: true }) res: Response,
@@ -291,7 +291,7 @@ export class ResourceFileController {
     return node
   }
 
-  @Put('/:resourceId/:path(*)')
+  @Put('/:resourceId/*path')
   @UseInterceptors(
     FileInterceptor('bundle', {
       dest: './resources/bundles',
@@ -341,7 +341,7 @@ export class ResourceFileController {
     return new SuccessResponse()
   }
 
-  @Post('/:resourceId/:path(*)')
+  @Post('/:resourceId/*path')
   @UseInterceptors(
     FileInterceptor('file', {
       dest: './resources/uploads',
@@ -397,7 +397,7 @@ export class ResourceFileController {
     return new SuccessResponse()
   }
 
-  @Patch('/:resourceId/:path(*)')
+  @Patch('/:resourceId/*path')
   async patch(
     @Req() request: IRequest,
     @Param('resourceId') resourceId: string,
@@ -443,7 +443,7 @@ export class ResourceFileController {
     return new SuccessResponse()
   }
 
-  @Delete('/:resourceId/:path(*)')
+  @Delete('/:resourceId/*path')
   async delete(@Req() request: IRequest, @Param('resourceId') resourceId: string, @Param('path') path: string) {
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
