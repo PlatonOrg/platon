@@ -74,9 +74,7 @@ type NotificationChange {
   notifications: [Notification!]
 }
 
-"""
-Date custom scalar type
-"""
+"""Date custom scalar type"""
 scalar Date
 
 type Query {
