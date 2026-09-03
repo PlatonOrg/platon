@@ -292,21 +292,21 @@ export class ShepherdService {
    * Passe à l'étape suivante
    */
   next(): void {
-    this.currentTour?.next()
+    void this.currentTour?.next()
   }
 
   /**
    * Revient à l'étape précédente
    */
   previous(): void {
-    this.currentTour?.back()
+    void this.currentTour?.back()
   }
 
   /**
    * Complète le tutoriel
    */
   complete(): void {
-    this.currentTour?.complete()
+    void this.currentTour?.complete()
   }
 
   /**
@@ -335,7 +335,7 @@ export class ShepherdService {
   goToStep(stepId: string): void {
     const step: Step | undefined = this.currentTour?.steps?.find((s: Step) => s.id === stepId)
     if (step) {
-      this.currentTour?.show(stepId)
+      void this.currentTour?.show(stepId)
     }
   }
 
