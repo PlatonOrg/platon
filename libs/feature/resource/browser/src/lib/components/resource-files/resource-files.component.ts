@@ -120,7 +120,7 @@ export class ResourceFilesComponent implements OnInit, OnChanges {
   }
 
   download(target?: ResourceFile): void {
-    const file = target ?? this.root
+    const file = target ?? this.selection ?? this.root
     if (file) {
       window.open(file.downloadUrl)
     }

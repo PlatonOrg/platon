@@ -46,16 +46,6 @@ export function mapKeysToLowerCase(inputObject: Readonly<any>): Record<string, a
             extra.headers = headers
           },
         },
-
-        // subscription used by graphql playground
-        'subscriptions-transport-ws': {
-          onConnect: (connectionParams: any) => {
-            const headers = mapKeysToLowerCase(connectionParams)
-            return {
-              req: { headers },
-            }
-          },
-        },
       },
       useGlobalPrefix: true,
       // pass the original req and res object into the graphql context,
@@ -72,9 +62,6 @@ export function mapKeysToLowerCase(inputObject: Readonly<any>): Record<string, a
 
               // return headers from onConnect function of graphql-ws subscription defined above
               ...extra?.headers,
-
-              // return headers from onConnect function of subscriptions-transport-ws subscription defined above
-              ...connection?.context?.headers,
             },
           },
           res,
