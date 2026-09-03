@@ -20,7 +20,6 @@ describe('EditFilePreviewService', () => {
     dispose: jest.fn(),
   }
   beforeEach(() => {
-    // eslint-disable-next-line prettier/prettier
     ;(global as any).monaco = {
       // disable prettier otherwise ask to add ';' before "(global ..." but not happy to start the function with ';'
       editor: {

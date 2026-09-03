@@ -27,7 +27,7 @@ import { CdkDragDrop, CdkDragMove, CdkDragStart, DragDropModule, moveItemInArray
 export class CourseActivityGridComponent {
   protected tabs: Tab[] = []
   protected empty = false
-  protected tabTitles: Array<{ label: string; value: string | number}> = []
+  protected tabTitles: Array<{ label: string; value: string | number }> = []
   protected selectedIndex = 0
   protected state = {
     words: ['Hello', 'World'],
@@ -49,7 +49,7 @@ export class CourseActivityGridComponent {
     for (let i = 0; i < this.tabs.length; i++) {
       this.tabTitles.push({
         label: this.tabs[i].title,
-        value: i
+        value: i,
       })
     }
 

@@ -86,7 +86,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
     this.mathfield.disabled = this.state.disabled
     if (this.state.config) {
       Object.keys(this.state.config).forEach((key) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, prettier/prettier
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(this.mathfield as any)[key] = this.state.config[key]
       })
     }
