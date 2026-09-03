@@ -162,7 +162,6 @@ export class ResourceFileController {
     @Param('path') path?: string,
     @Query() query?: FileRetrieveDTO
   ): Promise<unknown> {
-    console.error('path', path)
     const cacheLifetime = this.configService.get<number>('cache.filesLifetime', { infer: true })
 
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
