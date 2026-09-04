@@ -3,17 +3,21 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { EChartsOption } from 'echarts'
 import {
   ChartViewerBarsComponentDefinition,
-  ChartViewerBarsState,
+  type ChartViewerBarsState,
   horizontalChartViewerBarsState,
   verticalChartViewerBarsState,
 } from './chart-viewer-bars'
 import { deepCopy } from '@cisstech/nge/utils'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgxEchartsModule } from 'ngx-echarts'
 
 @Component({
   selector: 'wc-chart-viewer-bars, wc-cv-bars',
   templateUrl: './chart-viewer-bars.component.html',
   styleUrls: ['chart-viewer-bars.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMonacoModule, NgxEchartsModule],
 })
 @WebComponent(ChartViewerBarsComponentDefinition)
 export class ChartViewerBarsComponent implements WebComponentHooks<ChartViewerBarsState> {

@@ -209,7 +209,7 @@ export class ActivityDatesService {
   /**
    * Retourne les dates pour un utilisateur sans accès
    */
-  private getNoAccessDates(activity: ActivityEntity): { start: Date | undefined; end: Date | undefined } {
+  private getNoAccessDates(_activity: ActivityEntity): { start: Date | undefined; end: Date | undefined } {
     const pastDate = new Date('Invalid Date')
     return {
       start: pastDate,

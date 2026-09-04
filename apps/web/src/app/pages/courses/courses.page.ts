@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
 import Fuse from 'fuse.js'
 import { Subscription, firstValueFrom, of, shareReplay } from 'rxjs'
@@ -37,7 +37,6 @@ import { CourseManagementTutorialService } from '@platon/feature/tuto/browser'
 type ActiveTab = 'current' | 'archived'
 
 @Component({
-  standalone: true,
   selector: 'app-courses',
   templateUrl: './courses.page.html',
   styleUrls: ['./courses.page.scss'],
@@ -45,24 +44,27 @@ type ActiveTab = 'current' | 'archived'
   imports: [
     CommonModule,
     RouterModule,
-
     MatCardModule,
     MatIconModule,
-
     NzSpinModule,
     NzIconModule,
     NzButtonModule,
     NzTabsModule,
-
     CoursePipesModule,
     CourseListComponent,
     CourseFiltersComponent,
-
     UiSearchBarComponent,
     UiFilterIndicatorComponent,
   ],
 })
 export class CoursesPage implements OnInit, OnDestroy {
+  private readonly router = inject(Router)
+  private readonly authService = inject(AuthService)
+  private readonly courseService = inject(CourseService)
+  private readonly courseManagementTutorialService = inject(CourseManagementTutorialService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
   protected readonly indicators: FilterIndicator<CourseFilters>[] = [
     ...Object.values(CourseOrderings).map(CourseOrderingFilterIndicator),
@@ -103,15 +105,6 @@ export class CoursesPage implements OnInit, OnDestroy {
   protected items: Course[] = []
   protected totalMatches = 0
   protected displayShowAllButton = false
-
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly courseService: CourseService,
-    private readonly courseManagementTutorialService: CourseManagementTutorialService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User

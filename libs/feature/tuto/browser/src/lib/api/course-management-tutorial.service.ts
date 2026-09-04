@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { NavigationStart, Router } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { filter, take } from 'rxjs/operators'
@@ -11,6 +11,10 @@ import { Course } from '@platon/feature/course/common'
   providedIn: 'root',
 })
 export class CourseManagementTutorialService {
+  private shepherdService = inject(ShepherdService)
+  private router = inject(Router)
+  private resourceCreationTutorialService = inject(ResourceCreationTutorialService)
+
   private isResearchActivity = true
   private navigationSub: Subscription | null = null
 
@@ -23,12 +27,6 @@ export class CourseManagementTutorialService {
   resetTutorialFlag(): void {
     this._isFromTutorial = false
   }
-
-  constructor(
-    private shepherdService: ShepherdService,
-    private router: Router,
-    private resourceCreationTutorialService: ResourceCreationTutorialService
-  ) {}
 
   startCourseManagementTutorial(user: User, courses: Course[] = []): void {
     if (!courses.length) {

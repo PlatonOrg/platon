@@ -61,7 +61,7 @@
   padding: 40px 20px;
   text-align: center;
   background-color: #f9f9f9;
-  transition: .3s;
+  transition: 0.3s;
   cursor: pointer;
   min-height: 200px;
   display: flex;
@@ -80,7 +80,7 @@
 
 .upload-zone.drag-active {
   background-color: #e3f2fd;
-  box-shadow: 0 4px 12px rgba(25,118,210,.15);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
 }
 
 .upload-zone.disabled {
@@ -173,7 +173,7 @@
   background-color: #fff;
   border-radius: 8px;
   border-left: 4px solid #1976d2;
-  transition: .2s;
+  transition: 0.2s;
 }
 
 .file-item:hover {
@@ -281,12 +281,12 @@
 
 .file-actions .download-btn:hover:not(:disabled) {
   color: #1565c0;
-  background-color: rgba(25,118,210,.08);
+  background-color: rgba(25, 118, 210, 0.08);
 }
 
 .file-actions .delete-btn:hover:not(:disabled) {
   color: #c62828;
-  background-color: rgba(211,47,47,.08);
+  background-color: rgba(211, 47, 47, 0.08);
 }
 
 .file-actions .delete-btn:disabled {

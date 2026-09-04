@@ -249,7 +249,7 @@ export class ResourceCreationTutorialService {
 
   private verifyMenuOpenedAndAdvance(): void {
     const menu = document.querySelector('#tuto-action-menu')
-    const menuPanel = document.querySelector('.mat-menu-panel')
+    const menuPanel = document.querySelector('.mat-mdc-menu-panel')
 
     if ((menu && this.isElementVisible(menu)) || (menuPanel && this.isElementVisible(menuPanel))) {
       this.shepherdService.next()
@@ -273,7 +273,7 @@ export class ResourceCreationTutorialService {
   private waitForMenuToOpen(): void {
     const checkMenu = () => {
       const menu = document.querySelector('#tuto-action-menu')
-      if (menu && menu.classList.contains('mat-menu-panel')) {
+      if (menu && menu.classList.contains('mat-mdc-menu-panel')) {
         return
       }
       setTimeout(checkMenu, 100)
@@ -281,7 +281,7 @@ export class ResourceCreationTutorialService {
     checkMenu()
   }
 
-  private waitForResourceSelection(user: User): void {
+  private waitForResourceSelection(_user: User): void {
     // Cette étape reste active jusqu'à ce que l'utilisateur clique sur une ressource
   }
 

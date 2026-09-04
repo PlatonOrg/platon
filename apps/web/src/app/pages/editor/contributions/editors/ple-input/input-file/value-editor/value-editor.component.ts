@@ -16,7 +16,16 @@ import { ActivatedRoute } from '@angular/router'
 import { InputFileService } from '@platon/feature/resource/browser'
 import { UiFilePreviewComponent, EditFilePreviewService, UiModalTemplateComponent } from '@platon/shared/ui'
 
-@Pipe({ name: 'hideResourceId' })
+import { EditorDirectivesModule } from '@cisstech/nge-ide/core'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { MatIconModule } from '@angular/material/icon'
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
+
+@Pipe({
+  name: 'hideResourceId',
+})
 export class HideResourceIdPipe implements PipeTransform {
   transform(value?: string | null): string | null | undefined {
     if (!value) {
@@ -30,9 +39,22 @@ export class HideResourceIdPipe implements PipeTransform {
   selector: 'app-input-file-value-editor',
   templateUrl: 'value-editor.component.html',
   styleUrls: ['value-editor.component.scss'],
+  imports: [
+    HideResourceIdPipe,
+    NzButtonModule,
+    NzIconModule,
+    NzTooltipModule,
+    EditorDirectivesModule,
+    UiFilePreviewComponent,
+    UiModalTemplateComponent,
+    MatIconModule,
+    NzSkeletonModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValueEditorComponent extends BaseValueEditor<string> implements OnDestroy {
+  private route = inject(ActivatedRoute)
+
   private readonly editorService = inject(EditorService, { optional: true })
   private readonly editorPresenter = inject(EditorPresenter, { optional: true })
   private readonly fileSystemProvider = inject(ResourceFileSystemProvider, { optional: true })
@@ -54,7 +76,7 @@ export class ValueEditorComponent extends BaseValueEditor<string> implements OnD
   @ViewChild(UiModalTemplateComponent) modalComponent!: UiModalTemplateComponent
 
   /**  */
-  constructor(private route: ActivatedRoute) {
+  constructor() {
     super()
     this.modeBuilder = this.inputFileService.isModeBuilder()
     this.version = this.inputFileService.resourceVersion()

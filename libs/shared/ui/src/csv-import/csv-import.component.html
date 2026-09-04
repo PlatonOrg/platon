@@ -2,11 +2,11 @@
 <div class="confirm-loading-container">
   <nz-spin nzSimple></nz-spin>
 </div>
-} @else {
-<a *ngIf="hasFile" class="confirm-button" nz-button nzType="primary" nz-tooltip="Ajouter" (click)="confirmImport()">
+} @else { @if (hasFile) {
+<a class="confirm-button" nz-button nzType="primary" nz-tooltip="Ajouter" (click)="confirmImport()">
   <span nz-icon nzType="check" nzTheme="outline"></span><span>{{ confirmButtonText }}</span>
 </a>
-}
+} }
 <mat-card>
   @if (!hasFile) { @if (csvLoading) {
   <div class="csv-loading-container">
@@ -30,7 +30,8 @@
     <table>
       <thead>
         <tr>
-          <th *ngFor="let _ of tableData[0]; let i = index" [class]="tableHeaders[i]">
+          @for (_ of tableData[0]; track _; let i = $index) {
+          <th [class]="tableHeaders[i]">
             <mat-select [(ngModel)]="tableHeaders[i]" canSelectNullableOptions panelWidth="fit-content">
               @for (option of headersOptions; track option) {
               <mat-option [value]="option.value" (click)="onColumnSelect(i, option.value)">
@@ -39,17 +40,21 @@
               }
             </mat-select>
           </th>
+          }
           <th class="actions-col"></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let row of paginatedTableData; let i = index" [ngClass]="{ 'header-row': hasHeader && i === 0 }">
-          <td *ngFor="let cell of row; let j = index" [class]="tableHeaders[j]">
+        @for (row of paginatedTableData; track row; let i = $index) {
+        <tr [ngClass]="{ 'header-row': hasHeader && i === 0 }">
+          @for (cell of row; track cell; let j = $index) {
+          <td [class]="tableHeaders[j]">
             {{ cell }}
           </td>
+          }
           <td class="actions-col">
+            @if (i === 0) {
             <button
-              *ngIf="i === 0"
               nz-button
               [nzType]="hasHeader ? 'default' : 'primary'"
               nzShape="circle"
@@ -60,6 +65,7 @@
             >
               <span nz-icon nzType="insert-row-above" nzTheme="outline"></span>
             </button>
+            }
             <button
               nz-button
               nzDanger
@@ -78,11 +84,14 @@
             </button>
           </td>
         </tr>
+        }
       </tbody>
     </table>
-    <div *ngIf="scrollLoading" style="text-align: center; margin: 16px 0">
+    @if (scrollLoading) {
+    <div style="text-align: center; margin: 16px 0">
       <nz-spin nzSimple></nz-spin>
     </div>
+    }
   </div>
   }
 </mat-card>

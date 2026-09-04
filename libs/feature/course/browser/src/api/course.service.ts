@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse, ItemResponse } from '@platon/core/common'
 import {
   Activity,
@@ -39,9 +39,21 @@ import { CourseDemoProvider } from '../models/course-demo-provider'
 import { Optional } from 'typescript-optional'
 import { CourseGroupProvider } from '../models/course-group-provider'
 import { ActivityGroupProvider } from '../models/activity-group.provider'
+import { CourseFileProvider, CourseFileUploadResponse } from '../models/course-file-provider'
 
 @Injectable({ providedIn: 'root' })
 export class CourseService {
+  private readonly courseProvider = inject(CourseProvider)
+  private readonly courseMemberProvider = inject(CourseMemberProvider)
+  private readonly courseSectionProvider = inject(CourseSectionProvider)
+  private readonly courseDemoProvider = inject(CourseDemoProvider)
+  private readonly courseGroupProvider = inject(CourseGroupProvider)
+  private readonly activityProvider = inject(ActivityProvider)
+  private readonly activityMemberProvider = inject(ActivityMemberProvider)
+  private readonly activityCorrectorProvider = inject(ActivityCorrectorProvider)
+  private readonly activityGroupProvider = inject(ActivityGroupProvider)
+  private readonly courseFileProvider = inject(CourseFileProvider)
+
   private readonly deleteActivityEvent = new Subject<Activity>()
   private readonly addMemberEvent = new Subject<CourseMember>()
   private readonly deleteMemberEvent = new Subject<CourseMember>()
@@ -49,18 +61,6 @@ export class CourseService {
   readonly onAddedMember = this.addMemberEvent.asObservable()
   readonly onDeletedMember = this.deleteMemberEvent.asObservable()
   readonly onDeletedActivity = this.deleteActivityEvent.asObservable()
-
-  constructor(
-    private readonly courseProvider: CourseProvider,
-    private readonly courseMemberProvider: CourseMemberProvider,
-    private readonly courseSectionProvider: CourseSectionProvider,
-    private readonly courseDemoProvider: CourseDemoProvider,
-    private readonly courseGroupProvider: CourseGroupProvider,
-    private readonly activityProvider: ActivityProvider,
-    private readonly activityMemberProvider: ActivityMemberProvider,
-    private readonly activityCorrectorProvider: ActivityCorrectorProvider,
-    private readonly activityGroupProvider: ActivityGroupProvider
-  ) {}
 
   //#region Courses
   search(filters?: CourseFilters): Observable<ListResponse<Course>> {
@@ -210,6 +210,18 @@ export class CourseService {
 
   getCourseColors(courseId: string): Observable<number[]> {
     return this.activityProvider.getCourseColors(courseId)
+  }
+
+  markLessonCompleted(activity: Activity): Observable<void> {
+    return this.activityProvider.markLessonCompleted(activity)
+  }
+
+  uploadFile(
+    courseId: string,
+    file: File,
+    onProgress?: (percent: number) => void
+  ): Observable<CourseFileUploadResponse> {
+    return this.courseFileProvider.upload(courseId, file, onProgress)
   }
 
   //#endregion

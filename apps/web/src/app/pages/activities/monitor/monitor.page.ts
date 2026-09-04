@@ -1,15 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, OnDestroy } from '@angular/core'
 import { MonitorPresenter } from './monitor.presenter'
 import { Subscription } from 'rxjs'
-import { CommonModule, Location } from '@angular/common'
+import { Location } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule } from '@angular/router'
 import { DialogModule, DialogService } from '@platon/core/browser'
-import {
-  ResultBoxPlotComponent,
-  ResultByMembersComponent,
-  ResultHistogramComponent,
-} from '@platon/feature/result/browser'
+import { ResultByMembersComponent } from '@platon/feature/result/browser'
 import {
   CourseMonitorPresenceService,
   ActivityModerationComponent,
@@ -20,25 +16,19 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 
 @Component({
-  standalone: true,
   selector: 'app-course-activity-monitor',
   templateUrl: 'monitor.page.html',
   styleUrls: ['monitor.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [MonitorPresenter],
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
-
     DialogModule,
     MatCardModule,
     NzButtonModule,
     NzIconModule,
-
     ResultByMembersComponent,
-    ResultHistogramComponent,
-    ResultBoxPlotComponent,
     ActivityModerationComponent,
   ],
 })
@@ -120,7 +110,7 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
         }
       })
       await Promise.allSettled(promises)
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error("Une erreur est survenue lors de l'ouverture des sessions.")
     }
   }

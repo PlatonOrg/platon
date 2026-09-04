@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { AuthService, DialogService } from '@platon/core/browser'
@@ -16,13 +15,11 @@ import { User } from '@platon/core/common'
 import { createExerciseBuilderDefaultName } from '@platon/feature/builder/browser'
 
 @Component({
-  standalone: true,
   selector: 'resource-template-selection',
   templateUrl: './template-selection.component.html',
   styleUrls: ['./template-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     NzIconModule,
     NzTableModule,
     NzButtonModule,
@@ -93,7 +90,7 @@ export class TemplateSelectionComponent implements OnInit {
         })
       )
       await this.router.navigate(['/builder', resource.id])
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Une erreur est survenue lors de la création de la ressource')
 
       this.router

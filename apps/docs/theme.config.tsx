@@ -14,7 +14,11 @@ const config: DocsThemeConfig = {
   },
   search: {
     placeholder: 'Rechercher...',
-    emptyResult: <center><p className="nx-text-gray-600">Aucun résultat</p></center>,
+    emptyResult: (
+      <center>
+        <p className="nx-text-gray-600">Aucun résultat</p>
+      </center>
+    ),
   },
   toc: {
     title: 'Sur cette page',

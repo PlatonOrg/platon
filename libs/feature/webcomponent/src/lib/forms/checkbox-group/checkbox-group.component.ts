@@ -9,18 +9,26 @@ import {
   ViewChild,
   AfterViewInit,
   ElementRef,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { CheckboxGroupComponentDefinition, CheckboxGroupState, CheckboxItem } from './checkbox-group'
+import { CheckboxGroupComponentDefinition, type CheckboxGroupState, CheckboxItem } from './checkbox-group'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { MatCheckboxModule } from '@angular/material/checkbox'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-checkbox-group',
   templateUrl: 'checkbox-group.component.html',
   styleUrls: ['checkbox-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, CssPipeModule, MatCheckboxModule, NgeMarkdownModule],
 })
 @WebComponent(CheckboxGroupComponentDefinition)
 export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroupState>, OnInit, AfterViewInit {
+  readonly injector = inject(Injector)
+
   @Input() state!: CheckboxGroupState
   @Output() stateChange = new EventEmitter<CheckboxGroupState>()
 
@@ -32,8 +40,6 @@ export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroupSt
     ['ArrowUp', () => (this.state.selectedIndex = Math.max(this.state.selectedIndex - 1, -1))],
     ['Tab', () => (this.state.selectedIndex = (this.state.selectedIndex + 1) % this.state.items.length)],
   ])
-
-  constructor(readonly injector: Injector) {}
 
   ngAfterViewInit(): void {
     this.focusZone.nativeElement.addEventListener('keydown', this.onKeydown.bind(this))

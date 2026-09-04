@@ -34,7 +34,7 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
 import { DialogModule, DialogService, UserAvatarComponent, AuthService } from '@platon/core/browser'
-import { ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
+import { type ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
@@ -50,15 +50,16 @@ import {
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
-import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
+import { PLAYER_EDITOR_PREVIEW, PLAYER_HIDE_EXERCISE_META } from '../../models/player.model'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
 import { PlayerQuestionFeedbackComponent } from '../player-question-feedback/player-question-feedback.component'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
 import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
 import { PlayerErrorComponent } from '../player-error/player-error.component'
 import { User } from '@platon/core/common'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 type Action = {
   id?: string
@@ -87,26 +88,23 @@ type FullscreenElement = HTMLElement & {
 }
 
 @Component({
-  standalone: true,
   selector: 'player-exercise',
   templateUrl: './player-exercise.component.html',
   styleUrls: ['./player-exercise.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     NzSpinModule,
     NzAlertModule,
     MatIconModule,
     MatCardModule,
     MatMenuModule,
     MatButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     MatDividerModule,
     NzSkeletonModule,
     NzStatisticModule,
     MatExpansionModule,
-
     IsUUIDPipe,
     DialogModule,
     UserAvatarComponent,
@@ -158,7 +156,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   protected container!: ElementRef<FullscreenElement>
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
-  protected errorTemplate!: TemplateRef<object>
+  protected errorTemplate!: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>
 
   @ViewChild('containerFeedbacks', { read: ElementRef })
   protected containerFeedbacks!: ElementRef<HTMLElement>
@@ -357,6 +355,10 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
 
   get editorPreview(): boolean {
     return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  }
+
+  get hideMeta(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_HIDE_EXERCISE_META)
   }
 
   protected isFeedbackContentAnObject(feedback: ExerciseFeedback): boolean {

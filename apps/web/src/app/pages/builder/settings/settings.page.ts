@@ -9,7 +9,7 @@ import {
   OnInit,
   CUSTOM_ELEMENTS_SCHEMA,
 } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatFormFieldModule } from '@angular/material/form-field'
@@ -33,9 +33,7 @@ export interface SettingItem {
 
 @Component({
   selector: 'app-builder-settings',
-  standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
@@ -69,7 +67,6 @@ export class SettingsPage implements OnInit {
   protected saving = signal(false)
   protected hasFormChanges = signal(false)
 
-  protected close = output<void>()
   protected resourceUpdated = output<Resource>()
 
   readonly isDarkTheme = computed(() => this.themeService.isDark)
@@ -126,7 +123,7 @@ export class SettingsPage implements OnInit {
         })
         setTimeout(() => this.hasFormChanges.set(false), 0)
       }
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Erreur lors du chargement des données')
     } finally {
       this.loading.set(false)
@@ -155,7 +152,7 @@ export class SettingsPage implements OnInit {
       const updatedResource = await firstValueFrom(this.resourceService.update(currentResource.id, update))
       this.resourceUpdated.emit(updatedResource)
       this.hasFormChanges.set(false)
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Erreur lors de la sauvegarde des informations')
     } finally {
       this.saving.set(false)

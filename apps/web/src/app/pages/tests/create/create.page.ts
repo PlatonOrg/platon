@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, ViewChild } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, ViewChild, inject } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { Router, RouterModule } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
@@ -20,33 +19,34 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { TestsService } from '@platon/feature/tests/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-tests-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSelectModule,
     NzSkeletonModule,
     NzPageHeaderModule,
-
     UiStepDirective,
     UiStepperComponent,
     DialogModule,
   ],
 })
 export class TestCreatePage {
+  private readonly router = inject(Router)
+  private readonly dialogService = inject(DialogService)
+  private readonly courseService = inject(CourseService)
+  private readonly testsService = inject(TestsService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected loading = false
   protected creating = false
 
@@ -61,17 +61,13 @@ export class TestCreatePage {
   @HostListener('window:keydown.meta.enter')
   protected async handleKeyDown(): Promise<void> {
     if (this.stepper.isValid) {
-      this.stepper.isLast ? await this.create() : this.stepper.nextStep()
+      if (this.stepper.isLast) {
+        await this.create()
+      } else {
+        this.stepper.nextStep()
+      }
     }
   }
-
-  constructor(
-    private readonly router: Router,
-    private readonly dialogService: DialogService,
-    private readonly courseService: CourseService,
-    private readonly testsService: TestsService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   protected async create(): Promise<void> {
     try {

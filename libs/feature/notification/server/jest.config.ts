@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-notification-server',
   preset: '../../../../jest.preset.js',
   globals: {

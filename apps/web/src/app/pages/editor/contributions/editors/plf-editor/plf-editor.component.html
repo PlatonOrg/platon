@@ -1,1 +1,3 @@
-<ui-editorjs *ngIf="data" [disabled]="disabled" [ngModel]="data" (ngModelChange)="onChangeData($event)" />
+@if (data) {
+<ui-editorjs [disabled]="disabled" [ngModel]="data" (ngModelChange)="onChangeData($event)" />
+}

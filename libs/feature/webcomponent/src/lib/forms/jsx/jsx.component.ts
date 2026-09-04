@@ -8,12 +8,14 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 import { firstValueFrom } from 'rxjs'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { JsxComponentDefinition, JsxState } from './jsx'
+import { JsxComponentDefinition, type JsxState } from './jsx'
+import { BaseModule } from '../../shared/components/base/base.module'
 
 declare const JXG: any
 
@@ -22,9 +24,14 @@ declare const JXG: any
   templateUrl: 'jsx.component.html',
   styleUrls: ['jsx.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule],
 })
 @WebComponent(JsxComponentDefinition)
 export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxState> {
+  readonly injector = inject(Injector)
+  readonly resourceLoader = inject(ResourceLoaderService)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private static NEXT_ID = 0
   private board?: any
 
@@ -32,12 +39,6 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxSta
 
   @Input() state!: JsxState
   @Output() stateChange = new EventEmitter<JsxState>()
-
-  constructor(
-    readonly injector: Injector,
-    readonly resourceLoader: ResourceLoaderService,
-    readonly changeDetector: WebComponentChangeDetectorService
-  ) {}
 
   async ngOnInit() {
     this.state.isFilled = false

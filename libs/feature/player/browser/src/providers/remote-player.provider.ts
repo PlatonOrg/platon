@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import {
   EvalExerciseInput,
   EvalExerciseOutput,
@@ -19,9 +19,7 @@ import { PlayerProvider } from '../models/player-provider'
 
 @Injectable()
 export class RemotePlayerService extends PlayerProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   get(sessionId: string): Observable<PlayExerciseOuput> {
     return this.http.get<PlayExerciseOuput>('/api/v1/player/' + sessionId)

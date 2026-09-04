@@ -1,8 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { UserService } from '@platon/core/browser'
 import { NzModalModule } from 'ng-zorro-antd/modal'
-import { User, UserCharter } from '@platon/core/common'
+import { type User, type UserCharter } from '@platon/core/common'
 import { ChangeDetectorRef, EventEmitter, Input, Output } from '@angular/core'
 import { Router } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
@@ -10,14 +10,15 @@ import { inject } from '@angular/core'
 
 @Component({
   selector: 'app-user-charter',
-  standalone: true,
-  imports: [CommonModule, NzModalModule],
+  imports: [NzModalModule],
   templateUrl: './user-charter.component.html',
   styleUrl: './user-charter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [UserService],
 })
 export class UserCharterComponent {
+  private readonly userService = inject(UserService)
+
   @Input() user?: User
   @Input() userCharter?: UserCharter
   @Input() userCharterModalVisible = false
@@ -26,8 +27,6 @@ export class UserCharterComponent {
 
   private readonly router = inject(Router)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
-
-  constructor(private readonly userService: UserService) {}
 
   async showUserCharterModal(): Promise<void> {
     if (!this.userCharter?.acceptedUserCharter) {
@@ -53,7 +52,7 @@ export class UserCharterComponent {
         this.userCharterModalVisible = false
         this.userCharterModalVisibleChange.emit(false)
         this.changeDetectorRef.markForCheck()
-      } catch (error) {
+      } catch (_error) {
         /* empty block */
       }
     }

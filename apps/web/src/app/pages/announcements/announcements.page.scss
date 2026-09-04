@@ -196,7 +196,6 @@
     width: 0px;
   }
 
-
   .announcement-detail-card {
     border-radius: 0;
     box-shadow: none;
@@ -295,8 +294,12 @@
 }
 
 @keyframes pulse {
-  from { opacity: 0.6; }
-  to { opacity: 0.3; }
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 0.3;
+  }
 }
 
 // Responsive

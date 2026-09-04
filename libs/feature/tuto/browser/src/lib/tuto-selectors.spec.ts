@@ -175,9 +175,7 @@ describe('Tuto selectors registry', () => {
       }
 
       const details = missing.map((m) => `  - "${m.id}" dans ${m.file}`).join('\n')
-      expect(missing).toEqual(
-        expect.objectContaining({ length: 0 }) // message ci-dessous si échec
-      )
+      expect(missing).toHaveLength(0)
       if (missing.length > 0) {
         throw new Error(
           `${missing.length} ID(s) tuto-* trouvé(s) dans les templates mais absent(s) du registre :\n${details}\n\n` +

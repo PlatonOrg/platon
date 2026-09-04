@@ -61,7 +61,7 @@
     color: var(--brand-text-primary);
     display: flex;
     align-items: center;
-    gap: 0.02rem;//0.25rem;
+    gap: 0.02rem; //0.25rem;
 
     .title-text {
       cursor: pointer;
@@ -159,11 +159,9 @@
     gap: 0.25rem;
 
     .label {
-
       mat-icon {
         color: var(--brand-color-primary);
       }
-
 
       &:hover {
         border-color: var(--brand-color-primary);
@@ -174,7 +172,6 @@
           color: var(--brand-color-primary);
         }
       }
-
     }
   }
 }
@@ -352,7 +349,6 @@
     padding: 0.5rem;
   }
 
-
   .content-item,
   .setting-item,
   .history-item {
@@ -441,8 +437,6 @@
       color: var(--brand-color-primary);
     }
   }
-
-
 }
 
 // Animation pour le slide down
@@ -524,7 +518,6 @@
     }
   }
 }
-
 
 // === PREVIEW DROITE ===
 .builder-preview {

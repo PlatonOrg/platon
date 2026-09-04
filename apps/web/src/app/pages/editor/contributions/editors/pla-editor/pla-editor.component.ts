@@ -41,6 +41,34 @@ import { Subscription, debounceTime, firstValueFrom, map, shareReplay, skip } fr
 import { v4 as uuidv4 } from 'uuid'
 import { ResourceFileImpl, ResourceFileSystemProvider } from '../../file-system'
 import { HttpClient } from '@angular/common/http'
+import { CommonModule } from '@angular/common'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { DragDropModule } from '@angular/cdk/drag-drop'
+import { MatIconModule } from '@angular/material/icon'
+import { MatExpansionModule } from '@angular/material/expansion'
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
+import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzStepsModule } from 'ng-zorro-antd/steps'
+import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzTypographyModule } from 'ng-zorro-antd/typography'
+import { NzModalModule } from 'ng-zorro-antd/modal'
+import { CircleTreeComponent, ResourceFiltersComponent, ResourcePipesModule } from '@platon/feature/resource/browser'
+import { PleInputEditorModule } from '../ple-input/ple-input.module'
+import { PlaExerciseEditorComponent } from './exercise-editor/exercise-editor.component'
+import { UiFilterIndicatorComponent, UiSearchBarComponent } from '@platon/shared/ui'
+import { ViewportIntersectionDirective } from '@cisstech/nge/directives'
+import { ExerciseListComponent } from './exercise-list/exercise-list.component'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
@@ -64,8 +92,52 @@ interface QueryParams {
   templateUrl: './pla-editor.component.html',
   styleUrls: ['./pla-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatIconModule,
+    DragDropModule,
+    MatExpansionModule,
+
+    NzCollapseModule,
+    NzInputModule,
+    NzInputNumberModule,
+    NzSelectModule,
+    NzStepsModule,
+    NzFormModule,
+    NzCheckboxModule,
+    NzTimePickerModule,
+    NzListModule,
+    NzButtonModule,
+    NzIconModule,
+    NzTooltipModule,
+    NzBreadCrumbModule,
+    NzSpinModule,
+    NzTypographyModule,
+
+    ViewportIntersectionDirective,
+    NzAlertModule,
+
+    ResourcePipesModule,
+    ResourceFiltersComponent,
+
+    CircleTreeComponent,
+    UiSearchBarComponent,
+    UiFilterIndicatorComponent,
+
+    ExerciseListComponent,
+
+    PleInputEditorModule,
+    PlaExerciseEditorComponent,
+
+    NzModalModule,
+  ],
 })
 export class PlaEditorComponent implements OnInit, OnDestroy {
+  private http = inject(HttpClient)
+
   private readonly fb = inject(FormBuilder)
   private readonly router = inject(Router)
   private readonly fileService = inject(FileService)
@@ -77,8 +149,6 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   private readonly dialogService = inject(DialogService)
   private readonly editorService = inject(EditorService)
   private readonly resourceFileSystemProvider = inject(ResourceFileSystemProvider)
-
-  constructor(private http: HttpClient) {}
 
   protected readonly searchbar: SearchBar<string> = {
     placeholder: 'Essayez un nom, un topic, un niveau...',
@@ -391,7 +461,11 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   protected getToStep(step: number): void {
     this.step = step
     if (step === 2) {
-      this.exerciseGroups.length === 0 ? this.addGroup() : this.selectGroup(0)
+      if (this.exerciseGroups.length === 0) {
+        this.addGroup()
+      } else {
+        this.selectGroup(0)
+      }
       this.updateConnectedTo()
     }
   }
@@ -664,10 +738,6 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.exerciseGroups = Object.values(this.activity.exerciseGroups)
 
     this.changeDetectorRef.markForCheck()
-  }
-
-  protected trackByIndex(index: number) {
-    return index
   }
 
   protected trackByExerciseId(_: number, exercise: ActivityExercise) {

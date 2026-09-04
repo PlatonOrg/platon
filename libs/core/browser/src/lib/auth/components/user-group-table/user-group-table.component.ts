@@ -10,10 +10,11 @@ import {
   OnInit,
   Output,
   forwardRef,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 
-import { UserFilters, UserGroup } from '@platon/core/common'
+import { type UserFilters, UserGroup } from '@platon/core/common'
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table'
 import { NzTableColumn } from '../../../vendors/ng-zorro'
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component'
@@ -21,7 +22,6 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component'
 type Value = string[] | undefined
 
 @Component({
-  standalone: true,
   selector: 'user-group-table',
   templateUrl: './user-group-table.component.html',
   styleUrls: ['./user-group-table.component.scss'],
@@ -36,6 +36,8 @@ type Value = string[] | undefined
   imports: [CommonModule, NzTableModule, UserAvatarComponent],
 })
 export class UserGroupTableComponent implements OnInit, OnChanges, ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() groups: UserGroup[] = []
   @Output() groupsChange = new EventEmitter<UserGroup[]>()
 
@@ -56,8 +58,6 @@ export class UserGroupTableComponent implements OnInit, OnChanges, ControlValueA
   protected get canFilterOnServer(): boolean {
     return this.filtersChange.observed
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.columns = [

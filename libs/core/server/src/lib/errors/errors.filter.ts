@@ -18,9 +18,12 @@ export class ErrorsFilter implements ExceptionFilter {
     if (exception instanceof ErrorResponse) {
       error = exception
     } else if (exception instanceof HttpException) {
+      const body = exception.getResponse()
+      const message =
+        body && typeof body === 'object' && 'message' in body ? (body.message as string | string[]) : exception.message
       error = new ErrorResponse({
         status: exception.getStatus(),
-        message: exception.message,
+        message,
       })
     } else {
       error = new ErrorResponse({
@@ -41,7 +44,7 @@ export class ErrorsFilter implements ExceptionFilter {
       return
     }
 
-    return new GraphQLError(error.message, {
+    return new GraphQLError(Array.isArray(error.message) ? error.message.join(', ') : error.message, {
       extensions: {
         code: error.statusCode,
       },

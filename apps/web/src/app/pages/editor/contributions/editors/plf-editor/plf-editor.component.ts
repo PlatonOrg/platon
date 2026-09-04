@@ -1,15 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Editor, FileService, OpenRequest } from '@cisstech/nge-ide/core'
 import { OutputData } from '@editorjs/editorjs'
 import { emptyEditorJsData } from '@platon/shared/ui'
 import { Subscription } from 'rxjs'
 
+import { UiEditorJsModule } from '@platon/shared/ui'
+import { FormsModule } from '@angular/forms'
 @Component({
   selector: 'app-plf-editor',
   templateUrl: './plf-editor.component.html',
   styleUrls: ['./plf-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, UiEditorJsModule],
 })
 export class PlfEditorComponent implements OnInit, OnDestroy {
   private readonly fileService = inject(FileService)

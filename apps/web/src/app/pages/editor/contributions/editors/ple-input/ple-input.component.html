@@ -1,71 +1,63 @@
 <!-- CONFIG -->
-<ng-container *ngIf="mode === 'config' || mode === 'ple'">
-  <form class="config-editor" [formGroup]="form">
-    <h3>Informations</h3>
-    <nz-form-item style="display: flex; flex-wrap: wrap; align-items: center">
-      <nz-form-label nzLabelAlign="left" for="name" style="flex: 0 0 110px; width: 110px; padding: 0"
-        >Nom</nz-form-label
-      >
-      <nz-form-control [nzValidateStatus]="hasNameError ? 'error' : 'success'" nzErrorTip="Ce nom est réservé">
-        <input nz-input id="name" formControlName="name" />
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item style="display: flex; flex-wrap: wrap; align-items: center">
-      <nz-form-label nzLabelAlign="left" for="type" style="flex: 0 0 110px; width: 110px; padding: 0"
-        >Type</nz-form-label
-      >
-      <nz-form-control style="flex: 1; min-width: 250px">
-        <nz-select id="type" formControlName="type">
-          <nz-option
-            *ngFor="let provider of sortedProviders; trackBy: trackProvider"
-            [nzValue]="provider.type"
-            [nzLabel]="provider.label"
-          ></nz-option>
-        </nz-select>
-      </nz-form-control>
-    </nz-form-item>
-    <ng-container *ngIf="mode === 'config'">
-      <nz-form-item style="display: flex; flex-wrap: wrap; align-items: flex-start">
-        <nz-form-label
-          nzLabelAlign="left"
-          for="description"
-          style="flex: 0 0 110px; width: 110px; padding: 0; white-space: nowrap"
-          >Description</nz-form-label
-        >
-        <nz-form-control style="flex: 1; min-width: 250px">
-          <textarea nz-input formControlName="description" id="description"></textarea>
-          <p>
-            Décrivez (en markdown) ce que représente cette variable et énumérez les hypothèses formulées quant à sa
-            valeur.
-          </p>
-        </nz-form-control>
-      </nz-form-item>
-      <ng-container *ngIf="selectedProvider?.configEditor">
-        <h3>Options</h3>
-        <ng-container *ngComponentOutlet="$any(selectedProvider!.configEditor!); injector: configEditorInjector" />
-      </ng-container>
-    </ng-container>
-  </form>
-</ng-container>
-<ng-container *ngIf="mode === 'plo' && form.value.description">
-  <h3>Description</h3>
-  <nge-markdown [data]="form.value.description" />
-</ng-container>
+@if (mode === 'config' || mode === 'ple') {
+<form class="config-editor" [formGroup]="form">
+  <h3>Informations</h3>
+  <nz-form-item style="display: flex; flex-wrap: wrap; align-items: center">
+    <nz-form-label nzLabelAlign="left" for="name" style="flex: 0 0 110px; width: 110px; padding: 0">Nom</nz-form-label>
+    <nz-form-control [nzValidateStatus]="hasNameError ? 'error' : 'success'" nzErrorTip="Ce nom est réservé">
+      <input nz-input id="name" formControlName="name" />
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item style="display: flex; flex-wrap: wrap; align-items: center">
+    <nz-form-label nzLabelAlign="left" for="type" style="flex: 0 0 110px; width: 110px; padding: 0">Type</nz-form-label>
+    <nz-form-control style="flex: 1; min-width: 250px">
+      <nz-select id="type" formControlName="type">
+        @for (provider of sortedProviders; track trackProvider($index, provider)) {
+        <nz-option [nzValue]="provider.type" [nzLabel]="provider.label"></nz-option>
+        }
+      </nz-select>
+    </nz-form-control>
+  </nz-form-item>
+  @if (mode === 'config') {
+  <nz-form-item style="display: flex; flex-wrap: wrap; align-items: flex-start">
+    <nz-form-label
+      nzLabelAlign="left"
+      for="description"
+      style="flex: 0 0 110px; width: 110px; padding: 0; white-space: nowrap"
+      >Description</nz-form-label
+    >
+    <nz-form-control style="flex: 1; min-width: 250px">
+      <textarea nz-input formControlName="description" id="description"></textarea>
+      <p>
+        Décrivez (en markdown) ce que représente cette variable et énumérez les hypothèses formulées quant à sa valeur.
+      </p>
+    </nz-form-control>
+  </nz-form-item>
+  @if (selectedProvider?.configEditor) {
+  <h3>Options</h3>
+  <ng-container *ngComponentOutlet="$any(selectedProvider!.configEditor!); injector: configEditorInjector" />
+  } }
+</form>
+} @if (mode === 'plo' && form.value.description) {
+<h3>Description</h3>
+<nge-markdown [data]="form.value.description" />
+}
 <!-- VALUE -->
 <ng-container>
-  <h3 *ngIf="mode === 'ple' || mode === 'plo'">Valeur</h3>
-  <h3 *ngIf="mode === 'config'">Valeur par défaut</h3>
-</ng-container>
-<ng-container *ngIf="selectedProvider?.valueEditor">
-  @if(selectedProvider?.type === 'file') {
-  <ng-container
-    *ngComponentOutlet="
-      $any(selectedProvider!.valueEditor!);
-      injector: valueEditorInjector;
-      inputs: { inputId: input.name }
-    "
-  />
-  } @else {
-  <ng-container *ngComponentOutlet="$any(selectedProvider!.valueEditor!); injector: valueEditorInjector" />
+  @if (mode === 'ple' || mode === 'plo') {
+  <h3>Valeur</h3>
+  } @if (mode === 'config') {
+  <h3>Valeur par défaut</h3>
   }
 </ng-container>
+@if (selectedProvider?.valueEditor) { @if(selectedProvider?.type === 'file') {
+<ng-container
+  *ngComponentOutlet="
+    $any(selectedProvider!.valueEditor!);
+    injector: valueEditorInjector;
+    inputs: { inputId: input.name }
+  "
+/>
+} @else {
+<ng-container *ngComponentOutlet="$any(selectedProvider!.valueEditor!); injector: valueEditorInjector" />
+} }

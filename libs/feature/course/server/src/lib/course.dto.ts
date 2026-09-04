@@ -1,7 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { MAX_PAGE_SIZE, MIN_PAGE_OFFSET, MIN_PAGE_SIZE, OrderingDirections } from '@platon/core/common'
 import { BaseDTO, toArray, toNumber } from '@platon/core/server'
-import { Course, CourseFilters, CourseOrderings, CreateCourse, UpdateCourse } from '@platon/feature/course/common'
+import {
+  Course,
+  CourseFilters,
+  CourseFormat,
+  CourseOrderings,
+  CreateCourse,
+  UpdateCourse,
+} from '@platon/feature/course/common'
 import { Transform, Type } from 'class-transformer'
 import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator'
 import { CourseStatisticDTO } from './course-statistic/course-statistic.dto'
@@ -23,6 +30,10 @@ export class CourseDTO extends BaseDTO implements Course {
 
   @ApiProperty()
   readonly isTest!: boolean
+
+  @IsEnum(CourseFormat)
+  @ApiProperty()
+  readonly format!: CourseFormat
 
   @IsOptional()
   @ApiProperty({ type: CourseStatisticDTO })
@@ -49,6 +60,11 @@ export class CreateCourseDTO implements CreateCourse {
   @IsOptional()
   @ApiProperty()
   readonly desc?: string
+
+  @IsEnum(CourseFormat)
+  @IsOptional()
+  @ApiProperty()
+  readonly format?: CourseFormat
 }
 
 export class UpdateCourseDTO implements UpdateCourse {

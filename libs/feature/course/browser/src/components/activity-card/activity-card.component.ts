@@ -21,7 +21,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -29,13 +29,11 @@ import { Activity } from '@platon/feature/course/common'
 import { ThemeService } from '@platon/core/browser'
 import { ResourceService } from '@platon/feature/resource/browser'
 import { CoursePipesModule } from '../../pipes'
-import { CourseItemComponent } from '../course-item/course-item.component'
 import { CsvDownloadButtonComponent } from '../csv-download-button/csv-download-button.component'
 import { CourseActivitySettingsDrawerComponent } from '../activity-settings-drawer/activity-settings-drawer.component'
 import { CourseService } from '../../api/course.service'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-card',
   templateUrl: './activity-card.component.html',
   styleUrls: ['./activity-card.component.scss'],
@@ -43,23 +41,18 @@ import { CourseService } from '../../api/course.service'
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
     MatCardModule,
-
     NzGridModule,
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzProgressModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzDropDownModule,
-
     CoursePipesModule,
-    CourseItemComponent,
     CsvDownloadButtonComponent,
-
     CourseActivitySettingsDrawerComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -140,6 +133,6 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
   }
 
   protected isValidDate(date: Date | null | undefined): boolean {
-    return date !== new Date('Invalid Date') && date !== null && date !== undefined
+    return date != null && !isNaN(date.getTime())
   }
 }

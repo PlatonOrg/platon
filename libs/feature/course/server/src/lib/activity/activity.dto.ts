@@ -4,13 +4,25 @@ import { ActivitySettings } from '@platon/feature/compiler'
 import {
   Activity,
   ActivityFilters,
+  ActivityKind,
   ActivityOpenStates,
-  CreateActivity,
+  LessonContent,
   ReloadActivity,
   UpdateActivity,
 } from '@platon/feature/course/common'
 import { Exclude, Transform, Type } from 'class-transformer'
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, IsUUID, Matches } from 'class-validator'
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsNumber,
+  IsString,
+  IsUUID,
+  Matches,
+  ValidateIf,
+} from 'class-validator'
 import { ActivityPermissionsDTO } from '../permissions/permissions.dto'
 import { RestrictionListDTO } from './activity-restriction.dto'
 
@@ -35,6 +47,10 @@ export class ActivityDTO extends BaseDTO implements Activity {
   @ApiProperty()
   @IsBoolean()
   readonly isChallenge!: boolean
+
+  @IsEnum(ActivityKind)
+  @ApiProperty()
+  readonly kind!: ActivityKind
 
   @IsString()
   readonly title!: string
@@ -88,6 +104,20 @@ export class ActivityDTO extends BaseDTO implements Activity {
 
   @IsString()
   readonly code!: string
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty()
+  readonly lessonTitle?: string
+
+  @IsOptional()
+  @IsObject()
+  @ApiProperty()
+  readonly content?: LessonContent | null
+
+  @IsBoolean()
+  @ApiProperty()
+  readonly draft!: boolean
 }
 
 export class ActivityFiltersDTO implements ActivityFilters {
@@ -103,18 +133,44 @@ export class ActivityFiltersDTO implements ActivityFilters {
   challenge?: boolean | null
 }
 
-export class CreateCourseActivityDTO implements CreateActivity {
+export class CreateCourseActivityDTO {
+  @IsEnum(ActivityKind)
+  @IsOptional()
+  @ApiProperty()
+  readonly kind: ActivityKind = ActivityKind.EXERCISE
+
   @IsUUID()
   @ApiProperty()
   readonly sectionId!: string
 
+  // Requis uniquement pour kind === 'exercise' (comportement historique).
+  @ValidateIf((o) => o.kind !== ActivityKind.LESSON)
   @IsUUID()
   @ApiProperty()
   readonly resourceId!: string
 
+  @ValidateIf((o) => o.kind !== ActivityKind.LESSON)
   @IsString()
   @ApiProperty()
   readonly resourceVersion!: string
+
+  // Requis uniquement pour kind === 'lesson'.
+  @ValidateIf((o) => o.kind === ActivityKind.LESSON)
+  @IsString()
+  @ApiProperty()
+  readonly lessonTitle!: string
+
+  @ValidateIf((o) => o.kind === ActivityKind.LESSON)
+  @IsOptional()
+  @IsObject()
+  @ApiProperty()
+  readonly content?: LessonContent
+
+  @ValidateIf((o) => o.kind === ActivityKind.LESSON)
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty()
+  readonly draft?: boolean
 
   @Transform(({ value }) => toDate(value))
   @IsDate()
@@ -175,6 +231,22 @@ export class UpdateCourseActivityDTO implements UpdateActivity {
   @Matches(/^[A-Z0-9]{6}$/)
   @ApiProperty()
   readonly code?: string
+
+  // kind est volontairement absent : immuable après création.
+  @IsOptional()
+  @IsString()
+  @ApiProperty()
+  readonly lessonTitle?: string
+
+  @IsOptional()
+  @IsObject()
+  @ApiProperty()
+  readonly content?: LessonContent
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty()
+  readonly draft?: boolean
 }
 
 export class ReloadCourseActivityDTO implements ReloadActivity {

@@ -1,212 +1,194 @@
 <ui-layout-tabs id="tuto-resource-tabs" [state]="context.state">
-  <ng-container *ngIf="context.resource">
-    <nz-page-header [nzSubtitle]="header" nzBackIcon>
-      <ng-template #header>
-        <nz-breadcrumb id="tuto-breadcrumb" nzSeparator="" nzRouteLabel="breadcrumb">
-          <button
-            id="tuto-tree-button"
-            *ngIf="context.circles"
-            class="hide-on-mobile"
-            nz-button
-            nzType="text"
-            nzSize="small"
-            [nz-popover]
-            [nzPopoverContent]="circleTreePopover"
-          >
-            <mat-icon>account_tree</mat-icon>
-            <ng-template #circleTreePopover>
-              <resource-circle-tree [tree]="context.circles" />
-            </ng-template>
-          </button>
-          <nz-breadcrumb-item class="hide-on-mobile" *ngIf="context.parent">
-            <a [routerLink]="['/resources', context.parent.id]">{{ context.parent.name }}</a>
-          </nz-breadcrumb-item>
-          <nz-breadcrumb-item id="tuto-resource-name-item">
-            <mat-icon>{{ context.resource.type | resourceIcon }}</mat-icon>
-            <span
-              id="tuto-resource-name"
-              nz-typography
-              [nzEditable]="context.resource.permissions?.write"
-              [nzContent]="context.resource.name"
-              (nzContentChange)="updateName($event)"
-            ></span>
-          </nz-breadcrumb-item>
-        </nz-breadcrumb>
-      </ng-template>
-    </nz-page-header>
-    <p
-      id="tuto-resource-description"
-      nz-typography
-      *ngIf="!isOtherPersonal"
-      [nzEditable]="context.resource.permissions?.write"
-      [nzContent]="context.resource.desc"
-      (nzContentChange)="updateDesc($event)"
-    ></p>
-    <div class="container-toolbar">
-      <nz-button-group>
-        <nz-select
-          id="tuto-status"
-          name="status"
-          nzShowSearch
-          [ngModel]="context.resource.status"
-          (ngModelChange)="updateStatus($event)"
-          [nzDisabled]="!context.resource.permissions?.write"
-        >
-          <nz-option
-            *ngFor="let item of status; trackBy: trackByValue"
-            [nzLabel]="item | resourceStatus"
-            [nzValue]="item"
-          />
-        </nz-select>
-      </nz-button-group>
-      <nz-button-group>
+  @if (context.resource) {
+  <nz-page-header [nzSubtitle]="header" nzBackIcon>
+    <ng-template #header>
+      <nz-breadcrumb id="tuto-breadcrumb" nzSeparator="" nzRouteLabel="breadcrumb">
+        @if (context.circles) {
         <button
-          id="tuto-watch-button"
-          nz-tooltip="Suivre une ressource vous permet notamment de l'ajouter dans vos cours/activités et de recevoir des notifications lorsqu'elle est mise à jour."
+          id="tuto-tree-button"
+          class="hide-on-mobile"
           nz-button
-          nzType="default"
-          [nzLoading]="isChangingWatchingState"
-          (click)="changeWatchingState()"
-        >
-          <i nz-icon nzType="eye" nzTheme="outline"></i>
-          <span class="hide-on-mobile">{{ context.resource.permissions?.watcher ? 'Ne plus suivre' : 'Suivre' }}</span>
-        </button>
-        <button
-          id="tuto-join-button"
-          *ngIf="
-            context.user?.role !== 'admin' &&
-            context.resource.type === 'CIRCLE' &&
-            !context.resource.permissions?.member &&
-            !context.resource.permissions?.waiting &&
-            context.resource.ownerId !== context.user?.id
-          "
-          nz-button
-          nzType="default"
-          (click)="join()"
-        >
-          <i nz-icon nzType="user-add" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Demander à rejoindre</span>
-        </button>
-        <button
-          id="tuto-cancel-join-button"
-          *ngIf="context.resource.permissions?.waiting"
-          nz-button
-          nzDanger
-          nzType="default"
-          (click)="unjoin()"
-        >
-          <i nz-icon nzType="user-add" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Annuler la demande de rejoindre</span>
-        </button>
-      </nz-button-group>
-      <div class="spacer"></div>
-      <nz-button-group id="tuto-resource-actions">
-        @if (isAdmin() && configurable) { @if (certifiedTemplate) {
-        <button
-          nz-button
-          nzType="primary"
-          (click)="updateCertification(false)"
-          nz-tooltip
-          nzTooltipTitle="Retirer le statut de template certifié"
-        >
-          <i nz-icon nzType="safety-certificate" nzTheme="outline"></i>
-        </button>
-        } @else {
-        <button
-          nz-button
-          nzType="default"
-          (click)="updateCertification(true)"
-          nz-tooltip
-          nzTooltipTitle="Marquer comme template certifié"
-        >
-          <i nz-icon nzType="safety-certificate" nzTheme="fill"></i>
-        </button>
-
-        } }
-        <button
-          id="tuto-move-to-owner-button"
-          *ngIf="isAdmin() && context.resource.type !== 'CIRCLE' && !context.resource.parent?.personal!"
-          nz-button
-          nzType="primary"
-          nzDanger
-          nz-tooltip
-          nzTooltipTitle="Renvoyer dans le cercle du créateur"
-          nz-popconfirm
-          nzOkText="Retirer"
-          nzOkType="danger"
-          [nzPopconfirmTitle]="moveToOwnerCircleMessage"
-          (nzOnConfirm)="moveToOwnerCircle()"
-        >
-          <i nz-icon nzType="logout" nzTheme="outline"></i>
-        </button>
-        <button
-          id="tuto-delete-button"
-          *ngIf="context.resource.type !== 'CIRCLE' && context.resource.parent?.personal!"
-          nz-button
-          nzType="primary"
-          nzDanger
-          nz-popconfirm
-          nzOkText="Supprimer"
-          nzOkType="danger"
-          [nzPopconfirmTitle]="resourceDeleteConfirmMessage"
-          (nzOnConfirm)="delete()"
-          [nzOkDisabled]="referencesNumber() !== 0"
-        >
-          <i nz-icon nzType="delete" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Supprimer</span>
-        </button>
-        <button
-          id="tuto-move-button"
-          *ngIf="context.resource.type !== 'CIRCLE' && canMove()"
-          nz-button
-          [routerLink]="['/resources/move']"
-          [queryParams]="{ type: context.resource.type, id: context.resource.id, parent: context.resource.parentId }"
-        >
-          <i nz-icon nzType="export" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Déplacer</span>
-        </button>
-        <!-- TODO: add tutorial for duplication -->
-        <button id="tuto-duplicate-button" *ngIf="context.resource.type !== 'CIRCLE'" nz-button (click)="duplicate()">
-          <i nz-icon nzType="copy" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Dupliquer</span>
-        </button>
-        <a
-          id="tuto-editor-button"
-          nz-button
-          [routerLink]="urlPath(context.editorUrl!)"
-          [queryParams]="{ version: context.version }"
-        >
-          <i nz-icon nzType="edit" nzTheme="outline"></i>
-          @if (context.resource.templateId) {
-          <span class="hide-on-mobile">Paramétrer</span>
-          } @else {<span class="hide-on-mobile">Éditer</span>
-          }
-        </a>
-        <button
-          id="tuto-share-button"
-          *ngIf="context.resource.type !== 'CIRCLE'"
-          nz-button
+          nzType="text"
+          nzSize="small"
           [nz-popover]
-          nzPopoverPlacement="left"
-          [nzPopoverTrigger]="'click'"
-          [nzPopoverContent]="sharingPopover"
+          [nzPopoverContent]="circleTreePopover"
         >
-          <i nz-icon nzType="link" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Partager</span>
+          <mat-icon>account_tree</mat-icon>
+          <ng-template #circleTreePopover>
+            <resource-circle-tree [tree]="context.circles" />
+          </ng-template>
         </button>
-        <button
-          id="tuto-preview-button"
-          *ngIf="context.resource.type !== 'CIRCLE'"
-          nz-button
-          nzType="primary"
-          (click)="iframe.open(context.previewUrl!)"
-        >
-          <i nz-icon nzType="play-circle" nzTheme="outline"></i>
-          <span class="hide-on-mobile">Prévisualiser</span>
-        </button>
-      </nz-button-group>
+        } @if (context.parent) {
+        <nz-breadcrumb-item class="hide-on-mobile">
+          <a [routerLink]="['/resources', context.parent.id]">{{ context.parent.name }}</a>
+        </nz-breadcrumb-item>
+        }
+        <nz-breadcrumb-item id="tuto-resource-name-item">
+          <mat-icon>{{ context.resource.type | resourceIcon }}</mat-icon>
+          <span
+            id="tuto-resource-name"
+            nz-typography
+            [nzEditable]="$safeNavigationMigration(context.resource.permissions?.write)"
+            [nzContent]="context.resource.name"
+            (nzContentChange)="updateName($event)"
+          ></span>
+        </nz-breadcrumb-item>
+      </nz-breadcrumb>
+    </ng-template>
+  </nz-page-header>
+  @if (!isOtherPersonal) {
+  <p
+    id="tuto-resource-description"
+    nz-typography
+    [nzEditable]="$safeNavigationMigration(context.resource.permissions?.write)"
+    [nzContent]="context.resource.desc"
+    (nzContentChange)="updateDesc($event)"
+  ></p>
+  }
+  <div class="container-toolbar">
+    <nz-select
+      id="tuto-status"
+      name="status"
+      nzShowSearch
+      [ngModel]="context.resource.status"
+      (ngModelChange)="updateStatus($event)"
+      [nzDisabled]="!context.resource.permissions?.write"
+    >
+      @for (item of status; track trackByValue($index, item)) {
+      <nz-option [nzLabel]="item | resourceStatus" [nzValue]="item" />
+      }
+    </nz-select>
+    <div nz-flex nzGap="small">
+      <button
+        id="tuto-watch-button"
+        nz-tooltip="Suivre une ressource vous permet notamment de l'ajouter dans vos cours/activités et de recevoir des notifications lorsqu'elle est mise à jour."
+        nz-button
+        nzType="default"
+        [nzLoading]="isChangingWatchingState"
+        (click)="changeWatchingState()"
+      >
+        <i nz-icon nzType="eye" nzTheme="outline"></i>
+        <span class="hide-on-mobile">{{ context.resource.permissions?.watcher ? 'Ne plus suivre' : 'Suivre' }}</span>
+      </button>
+      @if ( context.user?.role !== 'admin' && context.resource.type === 'CIRCLE' &&
+      !context.resource.permissions?.member && !context.resource.permissions?.waiting && context.resource.ownerId !==
+      context.user?.id ) {
+      <button id="tuto-join-button" nz-button nzType="default" (click)="join()">
+        <i nz-icon nzType="user-add" nzTheme="outline"></i>
+        <span class="hide-on-mobile">Demander à rejoindre</span>
+      </button>
+      } @if (context.resource.permissions?.waiting) {
+      <button id="tuto-cancel-join-button" nz-button nzDanger nzType="default" (click)="unjoin()">
+        <i nz-icon nzType="user-add" nzTheme="outline"></i>
+        <span class="hide-on-mobile">Annuler la demande de rejoindre</span>
+      </button>
+      }
     </div>
-  </ng-container>
+    <div class="spacer"></div>
+    <div nz-flex nzGap="small" id="tuto-resource-actions">
+      @if (isAdmin() && configurable) { @if (certifiedTemplate) {
+      <button
+        nz-button
+        nzType="primary"
+        (click)="updateCertification(false)"
+        nz-tooltip
+        nzTooltipTitle="Retirer le statut de template certifié"
+      >
+        <i nz-icon nzType="safety-certificate" nzTheme="outline"></i>
+      </button>
+      } @else {
+      <button
+        nz-button
+        nzType="default"
+        (click)="updateCertification(true)"
+        nz-tooltip
+        nzTooltipTitle="Marquer comme template certifié"
+      >
+        <i nz-icon nzType="safety-certificate" nzTheme="fill"></i>
+      </button>
+      } } @if (isAdmin() && context.resource.type !== 'CIRCLE' && !context.resource.parent?.personal!) {
+      <button
+        id="tuto-move-to-owner-button"
+        nz-button
+        nzType="primary"
+        nzDanger
+        nz-tooltip
+        nzTooltipTitle="Renvoyer dans le cercle du créateur"
+        nz-popconfirm
+        nzOkText="Retirer"
+        nzOkType="danger"
+        [nzPopconfirmTitle]="moveToOwnerCircleMessage"
+        (nzOnConfirm)="moveToOwnerCircle()"
+      >
+        <i nz-icon nzType="logout" nzTheme="outline"></i>
+      </button>
+      } @if (context.resource.type !== 'CIRCLE' && context.resource.parent?.personal!) {
+      <button
+        id="tuto-delete-button"
+        nz-button
+        nzType="primary"
+        nzDanger
+        nz-popconfirm
+        nzOkText="Supprimer"
+        nzOkType="danger"
+        [nzPopconfirmTitle]="resourceDeleteConfirmMessage"
+        (nzOnConfirm)="delete()"
+        [nzOkDisabled]="referencesNumber() !== 0"
+      >
+        <i nz-icon nzType="delete" nzTheme="outline"></i>
+        <span class="hide-on-mobile">Supprimer</span>
+      </button>
+      } @if (context.resource.type !== 'CIRCLE' && canMove()) {
+      <button
+        id="tuto-move-button"
+        nz-button
+        [routerLink]="['/resources/move']"
+        [queryParams]="{ type: context.resource.type, id: context.resource.id, parent: context.resource.parentId }"
+      >
+        <i nz-icon nzType="export" nzTheme="outline"></i>
+        <span class="hide-on-mobile">Déplacer</span>
+      </button>
+      }
+      <!-- TODO: add tutorial for duplication -->
+      @if (context.resource.type !== 'CIRCLE') {
+      <button id="tuto-duplicate-button" nz-button (click)="duplicate()">
+        <i nz-icon nzType="copy" nzTheme="outline"></i>
+        <span class="hide-on-mobile">Dupliquer</span>
+      </button>
+      }
+      <a
+        id="tuto-editor-button"
+        nz-button
+        [routerLink]="urlPath(context.editorUrl!)"
+        [queryParams]="{ version: context.version }"
+      >
+        <i nz-icon nzType="edit" nzTheme="outline"></i>
+        @if (context.resource.templateId) {
+        <span class="hide-on-mobile">Paramétrer</span>
+        } @else {<span class="hide-on-mobile">Éditer</span>
+        }
+      </a>
+      @if (context.resource.type !== 'CIRCLE') {
+      <button
+        id="tuto-share-button"
+        nz-button
+        [nz-popover]
+        nzPopoverPlacement="left"
+        [nzPopoverTrigger]="'click'"
+        [nzPopoverContent]="sharingPopover"
+      >
+        <i nz-icon nzType="link" nzTheme="outline"></i>
+        <span class="hide-on-mobile">Partager</span>
+      </button>
+      } @if (context.resource.type !== 'CIRCLE') {
+      <button id="tuto-preview-button" nz-button nzType="primary" (click)="iframe.open(context.previewUrl!)">
+        <i nz-icon nzType="play-circle" nzTheme="outline"></i>
+        <span class="hide-on-mobile">Prévisualiser</span>
+      </button>
+      }
+    </div>
+  </div>
+  }
 
   <ui-layout-tab id="tuto-overview-tab" [link]="['overview']">
     <ng-template>

@@ -11,13 +11,9 @@
 >
   <thead>
     <tr>
-      <th
-        *ngIf="selectable && !disabled"
-        [nzChecked]="checked"
-        [nzIndeterminate]="indeterminate"
-        (nzCheckedChange)="onAllChecked($event)"
-      ></th>
-      @for (column of columns; track column.key) {
+      @if (selectable && !disabled) {
+      <th [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
+      } @for (column of columns; track column.key) {
       <th
         [nzColumnKey]="column.key"
         [(nzSortOrder)]="column.sortOrder!"
@@ -28,17 +24,17 @@
       >
         {{ column.name }}
       </th>
+      } @if (editable) {
+      <th nzAlign="center">Actions</th>
       }
-      <th *ngIf="editable" nzAlign="center">Actions</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let member of nzTable.data">
-      <td
-        *ngIf="selectable && !disabled"
-        [nzChecked]="selection.has(member.id)"
-        (nzCheckedChange)="onItemChecked(member.id, $event)"
-      ></td>
+    @for (member of nzTable.data; track member) {
+    <tr>
+      @if (selectable && !disabled) {
+      <td [nzChecked]="selection.has(member.id)" (nzCheckedChange)="onItemChecked(member.id, $event)"></td>
+      }
       <td>
         <user-avatar
           #avatar
@@ -47,7 +43,9 @@
           lastNameFirst
           (openGroupDetails)="groupDrawer.open($event)"
         />
-        <span *ngIf="isCurrentUser(member)" class="current-user-label">(vous)</span>
+        @if (isCurrentUser(member)) {
+        <span class="current-user-label">(vous)</span>
+        }
       </td>
       <td>{{ member.createdAt | date }}</td>
       <td>
@@ -63,10 +61,8 @@
         {{ member.role | displayCourseMemberRole }}
         }
       </td>
-      <td
-        nzAlign="center"
-        *ngIf="editable && !disabled && !nonDeletables.includes($any(member.user?.id || member.group?.id))"
-      >
+      @if (editable && !disabled && !nonDeletables.includes($any(member.user?.id || member.group?.id))) {
+      <td nzAlign="center">
         <button
           nz-button
           nzDanger
@@ -83,7 +79,9 @@
           <i nz-icon nzType="delete"></i>
         </button>
       </td>
+      }
     </tr>
+    }
   </tbody>
 </nz-table>
 <user-group-drawer #groupDrawer />

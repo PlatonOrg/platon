@@ -1,10 +1,10 @@
-import { Pipe, PipeTransform, SecurityContext } from '@angular/core'
+import { Pipe, PipeTransform, SecurityContext, inject } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 
 /** syntaxic color for json file preview */
 @Pipe({ name: 'jsonSyntaxHighlight', standalone: true })
 export class JsonSyntaxHighlightPipe implements PipeTransform {
-  constructor(private sanitizer: DomSanitizer) {}
+  private sanitizer = inject(DomSanitizer)
 
   transform(json: string): SafeHtml {
     const highlighted = json.replace(

@@ -1,10 +1,15 @@
 import { ExpandContext, Expander } from '@cisstech/nestjs-expand'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { isTeacherRole } from '@platon/core/common'
 import { IRequest } from '@platon/core/server'
-import { CourseStatistic } from '@platon/feature/course/common'
-import { ActivityEntity, ActivityMemberView, CourseDTO, CourseMemberService } from '@platon/feature/course/server'
+import { ActivityKind, CourseStatistic } from '@platon/feature/course/common'
+import {
+  ActivityEntity,
+  ActivityMemberView,
+  CourseDTO,
+  CourseMemberService,
+  LessonProgressService,
+} from '@platon/feature/course/server'
 import { PlayerActivityVariables } from '@platon/feature/player/common'
 import differenceInSeconds from 'date-fns/differenceInSeconds'
 import { IsNull, Repository } from 'typeorm'
@@ -15,6 +20,7 @@ import { SessionEntity } from '../sessions/session.entity'
 export class CourseExpander {
   constructor(
     private readonly courseMemberService: CourseMemberService,
+    private readonly lessonProgressService: LessonProgressService,
     @InjectRepository(ActivityEntity)
     private readonly activityRepository: Repository<ActivityEntity>,
     @InjectRepository(SessionEntity)
@@ -39,7 +45,7 @@ export class CourseExpander {
         .leftJoin(ActivityMemberView, 'member', 'member.activity_id = activity.id AND member.id = :userId', {
           userId: user.id,
         })
-        .select(['activity.courseId', 'activity.isChallenge'])
+        .select(['activity.id', 'activity.courseId', 'activity.isChallenge', 'activity.kind'])
         .where('activity.course_id = :courseId', { courseId: parent.id })
         .andWhere(`(activity.creator_id = :userId OR member.id IS NOT NULL)`, { userId: user.id })
         .getMany(),
@@ -62,6 +68,18 @@ export class CourseExpander {
         progressionSum += (100 * graded + 10 * (started - graded)) / exercises.length
       }
     })
+
+    // Les leçons (cours OpenClass) ne produisent pas de session : leur progression
+    // (0 ou 100) est ajoutée séparément pour ne pas fausser la moyenne globale, dont
+    // le dénominateur (`activities.length`) compte déjà exercices et leçons ensemble.
+    const lessonActivities = activities.filter((activity) => activity.kind === ActivityKind.LESSON)
+    if (lessonActivities.length) {
+      const completedLessonIds = await this.lessonProgressService.findCompletedActivityIds(
+        lessonActivities.map((activity) => activity.id),
+        user.id
+      )
+      progressionSum += completedLessonIds.size * 100
+    }
 
     return {
       studentCount: members.filter((member) => member.role === 'student').length,

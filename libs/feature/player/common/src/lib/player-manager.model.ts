@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ForbiddenResponse, User, UserRoles } from '@platon/core/common'
 import { ActivityVariables, ExerciseVariables, patchExerciseMeta } from '@platon/feature/compiler'
 import { Activity } from '@platon/feature/course/common'
@@ -377,8 +376,9 @@ export abstract class PlayerManager {
 
       let peerActivityNavigation: PlayerNavigation | undefined
       if (activitySession?.variables.settings?.navigation?.mode === 'peer') {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[exoPlayer, peerActivityNavigation] = await this.nextPeerExercise(exerciseSession, activityNavigation, answer)
+        const playerAndNavigation = await this.nextPeerExercise(exerciseSession, activityNavigation, answer)
+        exoPlayer = playerAndNavigation[0]
+        peerActivityNavigation = playerAndNavigation[1]
       }
 
       if (activitySession?.variables.settings?.navigation?.mode === 'peer') {

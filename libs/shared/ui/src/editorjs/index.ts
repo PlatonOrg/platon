@@ -1,4 +1,7 @@
 export * from './editorjs'
+export * from './editorjs-exercise-picker'
+export * from './editorjs-file-uploader'
+export * from './exercise-preview-resize'
 export * from './editorjs.component'
 export * from './editorjs.module'
 export * from './editorjs.service'

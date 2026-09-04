@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'feature-announcement-server-integration',
   preset: '../../../../jest.preset.js',

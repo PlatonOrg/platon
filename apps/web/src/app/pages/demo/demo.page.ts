@@ -1,23 +1,21 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { CourseService } from '@platon/feature/course/browser'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-course-demo',
   templateUrl: './demo.page.html',
   styleUrls: ['./demo.page.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [],
 })
 export class CourseDemoPage implements OnInit {
-  constructor(
-    private readonly router: Router,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly courseService: CourseService,
-    private readonly authService: AuthService
-  ) {}
+  private readonly router = inject(Router)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly courseService = inject(CourseService)
+  private readonly authService = inject(AuthService)
 
   async ngOnInit(): Promise<void> {
     this.activatedRoute.paramMap.subscribe(async (params) => {

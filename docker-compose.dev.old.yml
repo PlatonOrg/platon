@@ -1,0 +1,82 @@
+services:
+  redis:
+    image: redis:6
+    container_name: platon_redis
+    ports:
+      - '${REDIS_PORT}:6379'
+    volumes:
+      - redisdata:/data
+    networks:
+      - platon-network
+
+  postgres:
+    build:
+      context: .
+      dockerfile: .docker/db/Dockerfile
+    image: platon/postgres
+    container_name: platon_postgres
+    ports:
+      - '${DB_PORT}:5432'
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+    networks:
+      - platon-network
+    env_file:
+      - .env
+
+  maildev:
+    image: maildev/maildev
+    container_name: platon_maildev
+    ports:
+      - '1080:1080' # web UI to view captured emails
+      - '1025:1025' # SMTP server
+    networks:
+      - platon-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: platon_pgadmin
+    volumes:
+      - ~/data/pgadmin:/root/.pgadmin
+      - .docker/db/servers.json:/pgadmin4/servers.json
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - platon-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: .docker/nginx/Dockerfile.dev
+    image: platon/nginx
+    container_name: platon_nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      # NGINX CONFIG
+      - .docker/nginx/nginx.dev.conf:/etc/nginx/nginx.conf
+
+      # SELF SIGNED SSL CERTS
+      - .docker/nginx/ssl/dhparam/dhparam.pem:/etc/nginx/dhparam.pem
+      - .docker/nginx/ssl/certs/localhost.crt:/etc/nginx/ssl/localhost.crt
+      - .docker/nginx/ssl/certs/localhost.key:/etc/nginx/ssl/localhost.key
+      - ./dist/apps/docs:/usr/share/nginx/dist/apps/docs
+
+    networks:
+      - platon-network
+    extra_hosts: # https://stackoverflow.com/a/43541732
+      - 'host.docker.internal:host-gateway'
+    links:
+      - pgadmin:pgadmin
+    depends_on:
+      - pgadmin
+volumes:
+  redisdata:
+  postgresdata:
+
+networks:
+  platon-network:
+    driver: bridge

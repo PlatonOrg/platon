@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   ElementRef,
   EventEmitter,
   Injector,
@@ -8,21 +9,29 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { MathfieldElement } from 'mathlive'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { MathLiveComponentDefinition, MathLiveState } from './math-live'
+import { MathLiveComponentDefinition, type MathLiveState } from './math-live'
 import { ComputeEngine } from '@cortex-js/compute-engine'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { IconGrPipeModule } from '@cisstech/nge/pipes'
 
 @Component({
   selector: 'wc-math-live',
   templateUrl: 'math-live.component.html',
   styleUrls: ['math-live.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, IconGrPipeModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 @WebComponent(MathLiveComponentDefinition)
 export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveState> {
+  readonly injector = inject(Injector)
+  readonly changeDetection = inject(WebComponentChangeDetectorService)
+
   private mathfield!: MathfieldElement
 
   @Input() state!: MathLiveState
@@ -35,8 +44,6 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
 
   displayMenu = true
   computeEngine = new ComputeEngine()
-
-  constructor(readonly injector: Injector, readonly changeDetection: WebComponentChangeDetectorService) {}
 
   async ngOnInit() {
     this.state.isFilled = false
@@ -80,7 +87,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
     if (this.state.config) {
       Object.keys(this.state.config).forEach((key) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, prettier/prettier
-        (this.mathfield as any)[key] = this.state.config[key]
+        ;(this.mathfield as any)[key] = this.state.config[key]
       })
     }
     if (this.mathfield.menuItems?.length == 0) {

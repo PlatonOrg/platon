@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { AuthToken, ErrorResponse, TOKEN_EXPIRED_ERROR_CODE } from '@platon/core/common'
 
 import { BehaviorSubject, from, Observable, throwError } from 'rxjs'
@@ -13,10 +13,10 @@ import { TokenService } from '../api/token.service'
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private readonly tokenService = inject(TokenService)
+
   private isRefreshing = false
   private readonly token$ = new BehaviorSubject<AuthToken | undefined>(undefined)
-
-  constructor(private readonly tokenService: TokenService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return from(this.tokenService.token()).pipe(

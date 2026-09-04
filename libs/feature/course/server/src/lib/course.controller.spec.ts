@@ -9,12 +9,12 @@ import { IRequest, UserEntity } from '@platon/core/server'
 import { NotFoundResponse, ForbiddenResponse } from '@platon/core/common'
 import { v4 as uuidv4 } from 'uuid'
 import { CourseEntity } from './entites/course.entity'
+import { CourseFormat } from '@platon/feature/course/common'
 import { Optional } from 'typescript-optional'
 
 describe('CourseController', () => {
   let controller: CourseController
   let courseService: CourseService
-  let permissionsService: CoursePermissionsService
   let courseMemberService: CourseMemberService
 
   beforeEach(async () => {
@@ -49,7 +49,6 @@ describe('CourseController', () => {
 
     controller = module.get<CourseController>(CourseController)
     courseService = module.get<CourseService>(CourseService)
-    permissionsService = module.get<CoursePermissionsService>(CoursePermissionsService)
     courseMemberService = module.get<CourseMemberService>(CourseMemberService)
   })
 
@@ -87,6 +86,7 @@ describe('CourseController', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           isTest: false,
+          format: CourseFormat.CLASSIC,
           hasId: () => true,
           save: jest.fn(),
           remove: jest.fn(),
@@ -133,6 +133,7 @@ describe('CourseController', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         isTest: false,
+        format: CourseFormat.CLASSIC,
         hasId: () => true,
         save: jest.fn(),
         remove: jest.fn(),
@@ -185,6 +186,7 @@ describe('CourseController', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         isTest: false,
+        format: CourseFormat.CLASSIC,
         hasId: () => true,
         save: jest.fn(),
         remove: jest.fn(),
@@ -220,6 +222,7 @@ describe('CourseController', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         isTest: false,
+        format: CourseFormat.CLASSIC,
         hasId: jest.fn(),
         save: jest.fn(),
         remove: jest.fn(),

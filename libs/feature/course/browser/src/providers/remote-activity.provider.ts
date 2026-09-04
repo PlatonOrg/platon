@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { buildHttpParams } from '@platon/core/browser'
 import { ItemResponse, ListResponse, NoContentResponse } from '@platon/core/common'
 import {
@@ -16,9 +16,7 @@ import { ActivityProvider } from '../models/activity-provider'
 
 @Injectable()
 export class RemoteActivityProvider extends ActivityProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   find(courseId: string, activityId: string): Observable<Activity> {
     return this.http
@@ -106,5 +104,11 @@ export class RemoteActivityProvider extends ActivityProvider {
     return this.http
       .get<ItemResponse<number[]>>(`/api/v1/courses/${courseId}/activities/colors`)
       .pipe(map((response) => response.resource))
+  }
+
+  markLessonCompleted(activity: Activity): Observable<void> {
+    return this.http
+      .post<NoContentResponse>(`/api/v1/courses/${activity.courseId}/activities/${activity.id}/lesson-progress`, {})
+      .pipe(map(() => undefined))
   }
 }

@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, ViewChild } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, ViewChild, inject } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { Router, RouterModule } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
@@ -14,38 +13,41 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
+import { CourseFormat } from '@platon/feature/course/common'
 import { CourseService } from '@platon/feature/course/browser'
 import { UiStepDirective, UiStepperComponent } from '@platon/shared/ui'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 
 @Component({
-  standalone: true,
   selector: 'app-course-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSelectModule,
     NzSkeletonModule,
     NzPageHeaderModule,
-
     UiStepDirective,
     UiStepperComponent,
     DialogModule,
   ],
 })
 export class CourseCreatePage {
+  protected readonly CourseFormat = CourseFormat
+
+  private readonly router = inject(Router)
+  private readonly dialogService = inject(DialogService)
+  private readonly courseService = inject(CourseService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected loading = false
   protected creating = false
 
@@ -54,22 +56,27 @@ export class CourseCreatePage {
     desc: new FormControl('', [Validators.required]),
   })
 
+  // Choix figé à la création : le format n'est jamais proposé dans un formulaire d'édition du cours.
+  protected format = new FormGroup({
+    format: new FormControl<CourseFormat>(CourseFormat.CLASSIC, {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+  })
+
   @ViewChild(UiStepperComponent)
   protected stepper!: UiStepperComponent
 
   @HostListener('window:keydown.meta.enter')
   protected async handleKeyDown(): Promise<void> {
     if (this.stepper.isValid) {
-      this.stepper.isLast ? await this.create() : this.stepper.nextStep()
+      if (this.stepper.isLast) {
+        await this.create()
+      } else {
+        this.stepper.nextStep()
+      }
     }
   }
-
-  constructor(
-    private readonly router: Router,
-    private readonly dialogService: DialogService,
-    private readonly courseService: CourseService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   protected async create(): Promise<void> {
     try {
@@ -81,6 +88,7 @@ export class CourseCreatePage {
           name: infos.name as string,
           desc: infos.desc as string,
           isTest: false,
+          format: this.format.value.format,
         })
       )
 

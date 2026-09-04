@@ -10,10 +10,11 @@ import {
   OnChanges,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { NzTableColumn, UserAvatarComponent, UserGroupDrawerComponent, AuthService } from '@platon/core/browser'
-import { CourseMember, CourseMemberFilters, CourseMemberRoles } from '@platon/feature/course/common'
+import { CourseMember, type CourseMemberFilters, CourseMemberRoles } from '@platon/feature/course/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
@@ -30,7 +31,6 @@ export interface ChangeRoleEvent {
 }
 
 @Component({
-  standalone: true,
   selector: 'course-member-table',
   templateUrl: './course-member-table.component.html',
   styleUrls: ['./course-member-table.component.scss'],
@@ -44,20 +44,21 @@ export interface ChangeRoleEvent {
   ],
   imports: [
     CommonModule,
-
     NzIconModule,
     NzTableModule,
     NzButtonModule,
     NzPopconfirmModule,
     NzSelectModule,
     FormsModule,
-
     UserAvatarComponent,
     UserGroupDrawerComponent,
     CoursePipesModule,
   ],
 })
 export class CourseMemberTableComponent implements OnInit, OnChanges, ControlValueAccessor {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly authService = inject(AuthService)
+
   @Input() members: CourseMember[] = []
   @Input() editable = false
   @Input() selectable = false
@@ -90,8 +91,6 @@ export class CourseMemberTableComponent implements OnInit, OnChanges, ControlVal
   protected get canChangeRole(): boolean {
     return this.editable && this.type === 'cours' && this.changeRole.observed
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef, private readonly authService: AuthService) {}
 
   // ControlValueAccessor methods
 

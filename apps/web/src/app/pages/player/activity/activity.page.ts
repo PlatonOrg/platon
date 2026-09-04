@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
 
@@ -10,23 +9,20 @@ import { Player } from '@platon/feature/player/common'
 import { UiErrorComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'app-player-activity',
   templateUrl: './activity.page.html',
   styleUrls: ['./activity.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzSpinModule, UiErrorComponent, PlayerWrapperComponent],
+  imports: [NzSpinModule, UiErrorComponent, PlayerWrapperComponent],
 })
 export class PlayerActivityPage implements OnInit {
+  private readonly playerService = inject(PlayerService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected player?: Player
   protected loading = true
   protected error: unknown
-
-  constructor(
-    private readonly playerService: PlayerService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     try {

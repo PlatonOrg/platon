@@ -1,0 +1,50 @@
+<ng-container *ngIf="!loading(); else loadingTemplate">
+  <header>
+    <button nz-button nzType="text" nzShape="circle" (click)="back()" aria-label="Retour au tableau de bord">
+      <span nz-icon nzType="arrow-left"></span>
+    </button>
+    <form [formGroup]="form" class="title-form">
+      <input
+        formControlName="lessonTitle"
+        class="title-input"
+        placeholder="Titre de la leçon"
+        aria-label="Titre de la leçon"
+      />
+    </form>
+    <div class="header-actions">
+      <span *ngIf="hasUnsavedChanges()" class="unsaved-indicator">Non sauvegardé</span>
+      <button nz-button nzType="primary" [disabled]="saving() || !form.valid" (click)="save()">
+        <span nz-icon nzType="save"></span>
+        {{ saving() ? 'Sauvegarde...' : 'Sauvegarder' }}
+      </button>
+    </div>
+  </header>
+
+  <main [formGroup]="form">
+    <ui-editorjs formControlName="content" class="lesson-content-editor"></ui-editorjs>
+  </main>
+</ng-container>
+
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <nz-spin nzTip="Chargement de la leçon..."></nz-spin>
+  </div>
+</ng-template>
+
+<ng-template #exercisePickerTemplate>
+  <p class="exercise-picker-hint">
+    L'exercice choisi sera rendu accessible en aperçu public (lien testable par n'importe qui, sans compte), sans note
+    ni suivi de progression pour les étudiants.
+  </p>
+  <resource-search-bar
+    [filters]="{ types: ['EXERCISE'] }"
+    [(ngModel)]="exercisePickerSelection"
+    [ngModelOptions]="{ standalone: true }"
+  ></resource-search-bar>
+  <div class="exercise-picker-actions">
+    <button nz-button (click)="cancelExercisePick()">Annuler</button>
+    <button nz-button nzType="primary" [disabled]="!exercisePickerSelection" (click)="confirmExercisePick()">
+      Insérer
+    </button>
+  </div>
+</ng-template>

@@ -1,21 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Inject, Injectable, Optional } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 
 import DragDrop from 'editorjs-drag-drop'
 import Undo from 'editorjs-undo'
 
-import { EDITOR_JS_EXTENSION, EditorJsExtension } from './editorjs'
+import { EDITOR_JS_EXTENSION } from './editorjs'
 
 @Injectable()
 export class EditorJsService {
-  constructor(
-    @Optional()
-    @Inject(EDITOR_JS_EXTENSION)
-    private readonly extensions: EditorJsExtension[] = []
-  ) {}
+  private readonly extensions = inject(EDITOR_JS_EXTENSION, { optional: true }) ?? []
 
   newInstance(options: {
     data?: OutputData

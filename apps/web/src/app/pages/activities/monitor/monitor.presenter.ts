@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Injectable, OnDestroy } from '@angular/core'
+import { Injectable, OnDestroy, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { AuthService, DialogService } from '@platon/core/browser'
 import { User } from '@platon/core/common'
@@ -16,6 +15,14 @@ import { PlayerService } from '@platon/feature/player/browser'
 
 @Injectable()
 export class MonitorPresenter implements OnDestroy {
+  private readonly authService = inject(AuthService)
+  private readonly dialogService = inject(DialogService)
+  private readonly resultService = inject(ResultService)
+  private readonly courseService = inject(CourseService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly notificationService = inject(NotificationService)
+  private readonly playerService = inject(PlayerService)
+
   private readonly subscriptions: Subscription[] = []
   private isTest = false
   private readonly context = new BehaviorSubject<Context>(this.defaultContext())
@@ -26,15 +33,7 @@ export class MonitorPresenter implements OnDestroy {
   readonly onDeletedActivity = this.courseService.onDeletedActivity
   readonly onExerciseChanges = this.exerciseChanges.asObservable()
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly dialogService: DialogService,
-    private readonly resultService: ResultService,
-    private readonly courseService: CourseService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly notificationService: NotificationService,
-    private readonly playerService: PlayerService
-  ) {
+  constructor() {
     this.subscriptions.push(
       this.activatedRoute.paramMap.subscribe((params) => {
         this.onChangeRoute(params.get('courseId') as string, params.get('activityId') as string).catch(console.error)

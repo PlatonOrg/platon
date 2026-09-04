@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { Activity, ActivityMember, CreateActivityMember } from '@platon/feature/course/common'
 import { Observable, map } from 'rxjs'
@@ -7,9 +7,7 @@ import { ActivityMemberProvider } from '../models/activity-member.provider'
 
 @Injectable()
 export class RemoteActivityMemberProvider extends ActivityMemberProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   create(activity: Activity, input: CreateActivityMember): Observable<ActivityMember> {
     return this.http

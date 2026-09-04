@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 export const positiveGreenColor = (value: number) => {
   if (value >= 80) return '#52C41A'
@@ -29,11 +29,10 @@ export const positiveRedColor = (value: number) => {
 }
 
 @Component({
-  standalone: true,
   selector: 'ui-statistic-card',
   templateUrl: 'statistic-card.component.html',
   styleUrls: ['./statistic-card.component.scss'],
-  imports: [CommonModule, MatIconModule, NzIconModule, NzToolTipModule, NzInputNumberModule, FormsModule],
+  imports: [CommonModule, MatIconModule, NzIconModule, NzTooltipModule, NzInputNumberModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UiStatisticCardComponent implements OnChanges {

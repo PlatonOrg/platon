@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -7,6 +6,7 @@ import {
   Output,
   TemplateRef,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 
@@ -15,7 +15,7 @@ import { MatInputModule } from '@angular/material/input'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { DialogService, UserSearchBarComponent, UserTableComponent } from '@platon/core/browser'
 import { User, UserFilters } from '@platon/core/common'
@@ -26,31 +26,30 @@ import { firstValueFrom } from 'rxjs'
 import { LTIService } from '../../api/lti.service'
 
 @Component({
-  standalone: true,
   selector: 'lms-drawer',
   templateUrl: './lms-drawer.component.html',
   styleUrls: ['./lms-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatFormFieldModule,
-
     NzIconModule,
     NzTabsModule,
     NzButtonModule,
-    NzToolTipModule,
-
+    NzTooltipModule,
     UserTableComponent,
     UserSearchBarComponent,
-
     UiModalDrawerComponent,
   ],
 })
 export class LmsDrawerComponent {
+  private readonly ltiService = inject(LTIService)
+  private readonly formBuilder = inject(FormBuilder)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected form = this.createForm()
   protected lms?: Lms
   protected members: User[] = []
@@ -62,13 +61,6 @@ export class LmsDrawerComponent {
 
   @ViewChild(UiModalDrawerComponent, { static: true })
   protected modal!: UiModalDrawerComponent
-
-  constructor(
-    private readonly ltiService: LTIService,
-    private readonly formBuilder: FormBuilder,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   open(lms: Lms): void {
     this.lms = lms

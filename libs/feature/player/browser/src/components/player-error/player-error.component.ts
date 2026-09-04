@@ -1,28 +1,17 @@
 import { ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, input, output } from '@angular/core'
-import { CommonModule } from '@angular/common'
 
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
 import { MatDividerModule } from '@angular/material/divider'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatIconModule } from '@angular/material/icon'
-import { MatMenu, MatMenuModule } from '@angular/material/menu'
+import { MatMenuModule } from '@angular/material/menu'
 
 import { ExercisePlayer, LogType, PlatonLog } from '@platon/feature/player/common'
 
 @Component({
   selector: 'player-error',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatIconModule,
-    MatMenu,
-    MatMenuModule,
-  ],
+  imports: [MatButtonModule, MatCardModule, MatDividerModule, MatExpansionModule, MatIconModule, MatMenuModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './player-error.component.html',
   styleUrl: './player-error.component.scss',

@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core'
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 
@@ -21,28 +20,29 @@ import { HTTP_STATUS_CODE, User } from '@platon/core/common'
 import { HttpErrorResponse } from '@angular/common/http'
 
 @Component({
-  standalone: true,
   selector: 'app-account-security',
   templateUrl: './security.page.html',
   styleUrls: ['./security.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     ReactiveFormsModule,
-
     MatCardModule,
     MatInputModule,
     MatFormFieldModule,
-
     NzButtonModule,
-
     DialogModule,
     ProtectedComponent,
     AuthEditPasswordComponent,
   ],
 })
 export class AcccountSecurityPage {
+  private readonly fb = inject(FormBuilder)
+  private readonly authService = inject(AuthService)
+  private readonly userService = inject(UserService)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private user!: User
   protected readonly form = this.fb.group(
     {
@@ -50,14 +50,6 @@ export class AcccountSecurityPage {
     },
     { validators: [passwordMatches()] }
   )
-
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   protected async onConnect(user: User): Promise<void> {
     this.user = user

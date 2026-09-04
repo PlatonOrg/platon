@@ -44,9 +44,6 @@ export const appRoutes: Route[] = [
   {
     path: 'player',
     title: 'PLaTon - Player',
-    data: {
-      ...alwaysLightTheme,
-    },
     loadChildren: () =>
       import(
         /* webpackChunkName: "player" */
@@ -84,6 +81,18 @@ export const appRoutes: Route[] = [
         import(
           /* webpackChunkName: "resource-builder" */
           './pages/builder/builder.routes'
+        ),
+    },
+    [UserRoles.teacher, UserRoles.admin]
+  ),
+
+  withAuthGuard(
+    {
+      path: 'lessons',
+      loadChildren: () =>
+        import(
+          /* webpackChunkName: "lesson-editor" */
+          './pages/lesson-editor/lesson-editor.routes'
         ),
     },
     [UserRoles.teacher, UserRoles.admin]

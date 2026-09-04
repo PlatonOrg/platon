@@ -19,7 +19,7 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { ClipboardService, PickerBrowserService } from '@cisstech/nge/services'
 import { NgeUiIconModule } from '@cisstech/nge/ui/icon'
 import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
-import { GitLogResult, ResourceFile } from '@platon/feature/resource/common'
+import { GitLogResult, type ResourceFile } from '@platon/feature/resource/common'
 import { NzContextMenuService, NzDropDownModule, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown'
 import { NzEmptyModule } from 'ng-zorro-antd/empty'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
@@ -29,7 +29,6 @@ import { ResourceFileService } from '../../api/file.service'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 
 @Component({
-  standalone: true,
   selector: 'resource-files',
   templateUrl: './resource-files.component.html',
   styleUrls: ['./resource-files.component.scss'],
@@ -38,19 +37,15 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
     CommonModule,
     FormsModule,
     RouterModule,
-
     MatCardModule,
-
     NzTreeModule,
     NzEmptyModule,
     NzSpinModule,
     NzDropDownModule,
     NzButtonModule,
-
     DialogModule,
     NgeUiIconModule,
     NgeMarkdownModule,
-
     UserAvatarComponent,
   ],
 })

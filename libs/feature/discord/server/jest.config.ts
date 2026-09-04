@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-discord-server',
   preset: '../../../../jest.preset.js',
   testEnvironment: 'node',

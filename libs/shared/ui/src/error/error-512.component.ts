@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { NzResultModule } from 'ng-zorro-antd/result'
 
 @Component({
-  standalone: true,
   selector: 'ui-error-512',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NzResultModule],

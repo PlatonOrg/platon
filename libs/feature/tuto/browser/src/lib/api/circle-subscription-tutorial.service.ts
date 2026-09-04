@@ -15,6 +15,8 @@ import { NzMessageService } from 'ng-zorro-antd/message'
   providedIn: 'root',
 })
 export class CircleSubscriptionTutorialService {
+  private readonly toolbarTutorialService = inject(ToolbarTutorialService)
+
   private readonly shepherdService = inject(ShepherdService)
   private readonly router = inject(Router)
   private readonly resourceService = inject(ResourceService)
@@ -26,8 +28,6 @@ export class CircleSubscriptionTutorialService {
   private selectedCircles = signal<string>('')
   private readonly availableCircles = signal<CircleTree[]>([])
   private circleChoise = signal<string>('')
-
-  constructor(private readonly toolbarTutorialService: ToolbarTutorialService) {}
 
   private async loadCircles(): Promise<void> {
     this.selectedCircles.set('')
@@ -71,7 +71,7 @@ export class CircleSubscriptionTutorialService {
     })
   }
 
-  private buildCircleSubscriptionSteps(user: User): TutorialStep[] {
+  private buildCircleSubscriptionSteps(_user: User): TutorialStep[] {
     return [
       {
         id: 'welcome-circles',
@@ -328,7 +328,7 @@ export class CircleSubscriptionTutorialService {
     try {
       await firstValueFrom(this.resourceService.autoJoin(this.selectedCircles()))
       this.dialogService.success(`Vous avez été inscrit au cercle "${this.circleChoise()}" avec succès !`)
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error(
         'Une erreur est survenue lors de votre inscription au cercle. Veuillez réessayer plus tard.'
       )

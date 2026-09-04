@@ -168,6 +168,8 @@ export const COURSE_MANAGEMENT_SELECTORS = [
   'tuto-course-no-activities',
   'tuto-course-no-sections',
   'tuto-course-add-first-section-button',
+  'tuto-course-read-button',
+  'tuto-course-add-lesson-button',
   'tuto-course-statistics',
   'tuto-course-stat-progression',
   'tuto-course-stat-time',

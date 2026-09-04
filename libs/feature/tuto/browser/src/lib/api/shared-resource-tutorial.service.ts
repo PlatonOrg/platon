@@ -4,8 +4,9 @@ import { NzMessageService } from 'ng-zorro-antd/message'
 
 @Injectable({ providedIn: 'root' })
 export class SharedResourceTutorialService {
+  private readonly shepherd = inject(ShepherdService)
+
   private readonly message = inject(NzMessageService)
-  constructor(private readonly shepherd: ShepherdService) {}
 
   startSharedResourceTutorial(): void {
     const steps = this.buildSteps()

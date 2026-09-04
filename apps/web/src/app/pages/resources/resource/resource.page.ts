@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule, ActivatedRoute } from '@angular/router'
@@ -21,48 +20,43 @@ import { CircleTreeComponent, ResourcePipesModule, ResourceSharingComponent } fr
 import { ExerciseResourceMeta, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 import { UiLayoutTabDirective, UiLayoutTabsComponent, UiModalIFrameComponent } from '@platon/shared/ui'
 
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { ResourcePresenter } from './resource.presenter'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { ResourcePageTutorialService, ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-resource',
   templateUrl: './resource.page.html',
   styleUrls: ['./resource.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ResourcePresenter],
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
-
     MatIconModule,
     MatChipsModule,
-
     NzIconModule,
     NzSelectModule,
     NzButtonModule,
     NzPopoverModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzBreadCrumbModule,
     NzTypographyModule,
     NzPageHeaderModule,
     NzPopconfirmModule,
-
     DialogModule,
-
     UiLayoutTabsComponent,
     UiModalIFrameComponent,
     UiLayoutTabDirective,
-
     CircleTreeComponent,
     ResourcePipesModule,
     ResourceSharingComponent,
   ],
 })
 export class ResourcePage implements OnInit, OnDestroy {
+  private titleService = inject(Title)
+
   private readonly subscriptions: Subscription[] = []
   private readonly presenter = inject(ResourcePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
@@ -80,9 +74,6 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected configurable = false
   protected certifiedTemplate = false
-
-  // for the tab name
-  constructor(private titleService: Title) {}
 
   get isOtherPersonal(): boolean {
     return this.context.resource!.personal && this.context.resource!.ownerId !== this.context.user!.id

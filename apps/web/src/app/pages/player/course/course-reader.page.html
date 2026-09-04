@@ -1,0 +1,118 @@
+@if (loading()) {
+<div class="loading-container">
+  <nz-spin nzSimple nzSize="large"></nz-spin>
+</div>
+} @else {
+<header class="reader-topbar">
+  <a [routerLink]="['/courses', course()?.id, 'dashboard']" class="back-link">
+    <span nz-icon nzType="arrow-left"></span>
+    {{ course()?.name }}
+  </a>
+  <div class="topbar-right">
+    <nz-progress
+      class="topbar-progress"
+      [nzPercent]="course()?.statistic?.progression ?? 0"
+      nzType="circle"
+      [nzWidth]="32"
+      nzStrokeColor="var(--brand-color-primary)"
+    />
+    <button type="button" class="topbar-theme-button" (click)="themeService.switchTheme()">
+      <mat-icon>{{ themeService.themeIcon }}</mat-icon>
+    </button>
+  </div>
+</header>
+
+<div class="reader-body">
+  <aside class="toc" [class.collapsed]="!sidebarOpen()">
+    <div class="toc-header">
+      <span>Table des matières</span>
+      <button type="button" class="toc-collapse-button" (click)="sidebarOpen.set(false)">
+        <span nz-icon nzType="close"></span>
+      </button>
+    </div>
+
+    @for (section of sections(); track section.id) {
+    <div class="toc-section">
+      <h4>{{ section.name }}</h4>
+      <ul>
+        @for (item of itemsForSection(section.id); track item.activity.id; let i = $index) {
+        <li>
+          <button
+            type="button"
+            class="toc-item"
+            [class.active]="currentItem()?.activity?.id === item.activity.id"
+            (click)="goToIndex(items().indexOf(item))"
+          >
+            @if (item.activity.progression === 100) {
+            <span nz-icon nzType="check-circle" nzTheme="fill" class="toc-item-icon done"></span>
+            } @else {
+            <span class="toc-item-number">{{ i + 1 }}</span>
+            }
+            {{ item.activity.title }}
+          </button>
+        </li>
+        }
+      </ul>
+    </div>
+    }
+  </aside>
+
+  <button type="button" class="toc-reopen-button" [class.visible]="!sidebarOpen()" (click)="sidebarOpen.set(true)">
+    <span nz-icon nzType="menu"></span>
+  </button>
+
+  <main>
+    @if (currentItem(); as item) { @if (item.activity.kind === 'lesson' && item.activity.progression === 100) {
+    <div class="completed-banner">
+      <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+      Chapitre terminé
+    </div>
+    }
+
+    <div class="content-header">
+      <p class="section-label">{{ item.sectionName }}</p>
+      <h1>{{ item.activity.title }}</h1>
+    </div>
+
+    @if (item.activity.kind === 'lesson') {
+    <ui-editorjs-viewer [data]="$any(item.activity.content)" class="lesson-content"></ui-editorjs-viewer>
+    } @else { @if (embeddedActivityPlayer(); as activityPlayer) {
+    <player-wrapper [player]="activityPlayer" [embedded]="true" />
+    } @else {
+    <div class="exercise-card">
+      <span nz-icon nzType="edit" class="exercise-icon"></span>
+      <p>Cette étape est un exercice à réaliser.</p>
+      <button nz-button nzType="primary" nzShape="round" [disabled]="startingActivity()" (click)="startActivity(item)">
+        Commencer l'exercice
+      </button>
+    </div>
+    } }
+
+    <footer class="reader-footer">
+      <button nz-button [disabled]="!hasPrevious()" (click)="previous()">
+        <span nz-icon nzType="arrow-left"></span>
+        Chapitre précédent
+      </button>
+      @if (hasNext()) {
+      <button nz-button nzType="primary" (click)="next()">
+        Chapitre suivant
+        <span nz-icon nzType="arrow-right"></span>
+      </button>
+      } @else if (item.activity.kind === 'lesson' && item.activity.progression !== 100) {
+      <button nz-button nzType="primary" (click)="markCurrentLessonCompleted()">
+        <span nz-icon nzType="check-circle"></span>
+        Marquer cette leçon comme terminée
+      </button>
+      } @else {
+      <button nz-button nzType="primary" disabled>
+        <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+        Cours terminé
+      </button>
+      }
+    </footer>
+    } @else {
+    <div class="empty-course">Ce cours ne contient encore aucun contenu.</div>
+    }
+  </main>
+</div>
+}

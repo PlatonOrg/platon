@@ -10,12 +10,20 @@ import {
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { CrosswordComponentDefinition, CrosswordState } from './crossword'
+import { CrosswordComponentDefinition, type CrosswordState } from './crossword'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
 import CellActive from './model/cell-active'
 import { CellActiveInterface } from './model/cell-active-interface'
 import { Result } from './model/result'
 import { CrossWordService } from './service/cross-word-service'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { MatAutocompleteModule } from '@angular/material/autocomplete'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { MatIconModule } from '@angular/material/icon'
+import { NzPopoverModule } from 'ng-zorro-antd/popover'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 @Component({
   selector: 'wc-crossword',
@@ -25,9 +33,27 @@ import { CrossWordService } from './service/cross-word-service'
     '[style.display]': `state.appearance === 'inline' ? 'inline' : 'outline'`,
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BaseModule,
+
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatInputModule,
+    MatFormFieldModule,
+    MatAutocompleteModule,
+    MatIconModule,
+
+    CssPipeModule,
+
+    NzPopoverModule,
+  ],
 })
 @WebComponent(CrosswordComponentDefinition)
 export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   @Input() state!: CrosswordState
   @Output() stateChange = new EventEmitter<CrosswordState>()
 
@@ -49,7 +75,9 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
 
   private readonly webComponentService!: WebComponentService
 
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService)!
   }
 
@@ -293,7 +321,7 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
     if (key === 'Backspace') {
       if (this.getCharAt(x, y) !== '') {
         // eslint-disable-next-line prettier/prettier
-        (event.target as HTMLInputElement).value = '' // prettier ask for ; at the start of the line, then ask to remove it
+        ;(event.target as HTMLInputElement).value = '' // prettier ask for ; at the start of the line, then ask to remove it
         this.updateValueUserAnswer('', x, y)
         return
       }

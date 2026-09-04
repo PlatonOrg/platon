@@ -1,6 +1,8 @@
-<div class="foldable-feedback" *ngFor="let item of state.content; let index = index">
+@for (item of state.content; track $index; let index = $index) {
+<div class="foldable-feedback">
   <ng-container *ngTemplateOutlet="feedback; context: { item: item, indexes: '' + index }"> </ng-container>
 </div>
+}
 <wc-base [(state)]="state"></wc-base>
 
 <ng-template #feedback let-item="item" let-indexes="indexes">
@@ -19,23 +21,26 @@
       </mat-icon>
     </h2>
     <div [class]="item.display ? 'show' : 'hide'">
-      @if (item.feedbacks && item.feedbacks.length > 0){
-      <div *ngIf="item.description" class="description">
+      @if (item.feedbacks && item.feedbacks.length > 0){ @if (item.description) {
+      <div class="description">
         <pre>{{ item.description }}</pre>
       </div>
-      <div *ngFor="let child of item.feedbacks; let index = index">
+      } @for (child of item.feedbacks; track $index; let index = $index) {
+      <div>
         <ng-container *ngTemplateOutlet="feedback; context: { item: child, indexes: indexes + '-' + index }">
         </ng-container>
       </div>
-      } @else {
-      <div *ngIf="item.description">
+      } } @else { @if (item.description) {
+      <div>
         <pre>{{ item.description }}</pre>
       </div>
-      <div *ngIf="item.arguments">
+      } @if (item.arguments) {
+      <div>
         <h3>Arguments :</h3>
         <pre class="args" (mousedown)="$event.stopPropagation()">{{ item.arguments }}</pre>
       </div>
-      <div *ngIf="item.expected">
+      } @if (item.expected) {
+      <div>
         <h3>Attendu :</h3>
         <pre
           class="code"
@@ -43,7 +48,8 @@
           [innerHTML]="item.showHiddenCharacters ? formatTextHtml(item.expected) : item.expected"
         ></pre>
       </div>
-      <div *ngIf="item.obtained">
+      } @if (item.obtained) {
+      <div>
         <h3>Obtenu :</h3>
         <pre
           class="code"
@@ -51,7 +57,7 @@
           [innerHTML]="item.showHiddenCharacters ? formatTextHtml(item.obtained) : item.obtained"
         ></pre>
       </div>
-      }
+      } }
     </div>
   </div>
 </ng-template>

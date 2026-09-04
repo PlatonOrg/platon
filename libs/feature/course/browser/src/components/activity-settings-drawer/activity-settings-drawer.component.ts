@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -19,11 +18,10 @@ import { UiModalDrawerComponent } from '@platon/shared/ui'
 import { CourseActivitySettingsComponent } from '../activity-settings/activity-settings.component'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-settings-drawer',
   templateUrl: './activity-settings-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzButtonModule, NzIconModule, UiModalDrawerComponent, CourseActivitySettingsComponent],
+  imports: [NzButtonModule, NzIconModule, UiModalDrawerComponent, CourseActivitySettingsComponent],
 })
 export class CourseActivitySettingsDrawerComponent {
   private readonly cdr = inject(ChangeDetectorRef)

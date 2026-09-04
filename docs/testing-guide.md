@@ -197,22 +197,22 @@ Tout est importé depuis `@platon/core/testing/server`.
 
 ### Tests unitaires
 
-| Utilitaire | Usage |
-|---|---|
-| `mockRepository<T>()` | Crée un mock de `Repository<T>` avec `find`, `findOne`, `save`, `create`, `update`, `delete`, `createQueryBuilder` |
-| `mockSelectQueryBuilder<T>()` | Crée un mock de `SelectQueryBuilder` avec les méthodes chaînables (`where`, `andWhere`, `leftJoinAndSelect`...) |
-| `createUserEntity(overrides?)` | Factory qui retourne un `UserEntity` avec des valeurs par défaut |
+| Utilitaire                     | Usage                                                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `mockRepository<T>()`          | Crée un mock de `Repository<T>` avec `find`, `findOne`, `save`, `create`, `update`, `delete`, `createQueryBuilder` |
+| `mockSelectQueryBuilder<T>()`  | Crée un mock de `SelectQueryBuilder` avec les méthodes chaînables (`where`, `andWhere`, `leftJoinAndSelect`...)    |
+| `createUserEntity(overrides?)` | Factory qui retourne un `UserEntity` avec des valeurs par défaut                                                   |
 
 ### Tests intégration
 
-| Utilitaire | Usage |
-|---|---|
+| Utilitaire                     | Usage                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
 | `createTestDatabase(entities)` | Démarre un container PostgreSQL réel via testcontainers. Retourne `{ dataSource, container, teardown }` |
 
 ### Tests E2E
 
-| Utilitaire | Usage |
-|---|---|
+| Utilitaire              | Usage                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `createE2EApp(options)` | Crée une app NestJS complète avec base de données, auth, guards. Retourne `{ app, db, createUser, getRepository }` |
 
 ---
@@ -236,10 +236,7 @@ describe('MonService', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [
-        MonService,
-        { provide: getRepositoryToken(MonEntity), useValue: mockRepository<MonEntity>() },
-      ],
+      providers: [MonService, { provide: getRepositoryToken(MonEntity), useValue: mockRepository<MonEntity>() }],
     }).compile()
 
     service = module.get(MonService)
@@ -338,6 +335,7 @@ it('should return 200 with admin token', async () => {
 ```
 
 `createE2EApp` s'occupe de :
+
 - Démarrer le container PostgreSQL
 - Configurer TypeORM avec les entités auth + vos entités
 - Enregistrer `TestAuthModule` (AuthGuard, RolesGuard, JwtStrategy, UserService)
@@ -368,10 +366,10 @@ yarn affected:build --parallel --base=develop
 
 ## 5. Conventions de nommage
 
-| Type | Fichier | Pattern Jest |
-|---|---|---|
-| Unitaire | `*.spec.ts` | Exclu par les autres configs via `testPathIgnorePatterns` |
-| Intégration | `*.integration.spec.ts` | Matché par `testMatch: ['**/*.integration.spec.ts']` |
-| E2E | `*.e2e.spec.ts` | Matché par `testMatch: ['**/*.e2e.spec.ts']` |
+| Type        | Fichier                 | Pattern Jest                                              |
+| ----------- | ----------------------- | --------------------------------------------------------- |
+| Unitaire    | `*.spec.ts`             | Exclu par les autres configs via `testPathIgnorePatterns` |
+| Intégration | `*.integration.spec.ts` | Matché par `testMatch: ['**/*.integration.spec.ts']`      |
+| E2E         | `*.e2e.spec.ts`         | Matché par `testMatch: ['**/*.e2e.spec.ts']`              |
 
 Les conventions de nommage sont ce qui permet à chaque config Jest de cibler les bons fichiers. Ne pas les changer.

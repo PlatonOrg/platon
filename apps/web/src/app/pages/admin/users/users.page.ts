@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core'
 import { FormBuilder, FormGroup, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms' // ADD
@@ -15,22 +14,15 @@ import { firstValueFrom } from 'rxjs'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 
 @Component({
-  standalone: true,
   selector: 'app-admin-users',
   templateUrl: './users.page.html',
   styleUrls: ['./users.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    UserTableComponent,
-    UserSearchBarComponent,
-    DialogModule,
-    ReactiveFormsModule,
-    NzButtonModule,
-  ],
+  imports: [FormsModule, UserTableComponent, UserSearchBarComponent, DialogModule, ReactiveFormsModule, NzButtonModule],
 })
 export class AdminUsersPage implements OnInit {
+  private form = inject(FormBuilder)
+
   private readonly userService = inject(UserService)
   private readonly dialogService = inject(DialogService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
@@ -52,9 +44,7 @@ export class AdminUsersPage implements OnInit {
 
   userForm!: FormGroup
   showFields = false
-  roles = ['Enseignant', 'Élève', 'Admin', 'Démo'] // use to display as options for the select
-
-  constructor(private form: FormBuilder) {}
+  roles = ['Enseignant', 'Élève', 'Admin', 'Démo']
 
   ngOnInit(): void {
     this.userForm = this.form.group({

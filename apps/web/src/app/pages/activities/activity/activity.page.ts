@@ -29,7 +29,6 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { PeerTreeComponent } from '@platon/feature/peer/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-course-activity',
   templateUrl: './activity.page.html',
   styleUrls: ['./activity.page.scss'],
@@ -39,10 +38,8 @@ import { PeerTreeComponent } from '@platon/feature/peer/browser'
     CommonModule,
     FormsModule,
     RouterModule,
-
     MatIconModule,
     MatCardModule,
-
     NzGridModule,
     NzBreadCrumbModule,
     NzTypographyModule,
@@ -51,10 +48,8 @@ import { PeerTreeComponent } from '@platon/feature/peer/browser'
     NzSelectModule,
     NzSliderModule,
     NzInputNumberModule,
-
     DialogModule,
     DurationPipe,
-
     CourseActivityCardComponent,
     ResultByMembersComponent,
     ResultByExercisesComponent,
@@ -62,7 +57,6 @@ import { PeerTreeComponent } from '@platon/feature/peer/browser'
     KCileComponent,
     ResultBoxPlotComponent,
     PeerTreeComponent,
-
     UiStatisticCardComponent,
     UiLayoutBlockComponent,
   ],
