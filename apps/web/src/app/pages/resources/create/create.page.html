@@ -1,8 +1,8 @@
 <header>
   <nz-page-header [nzTitle]="header" nzBackIcon>
     <ng-template #header>
-      Créer {{ type | resourceType : true | lowercase }}
-      <ng-container *ngIf="parentName"> dans {{ parentName }} </ng-container>
+      Créer {{ type | resourceType : true | lowercase }} @if (parentName) { dans {{ parentName }}
+      }
     </ng-template>
   </nz-page-header>
 </header>
@@ -32,12 +32,13 @@
             Sélectionnez le cercle dans lequel vous voulez ajouter
             {{ type | resourceType : true | lowercase }}.
           </h4>
+          @if (tree) {
           <resource-circle-tree
-            *ngIf="tree"
             [tree]="tree"
             [selection]="parentId ? [parentId] : []"
             (selectionChange)="onChangeParentId($event[0])"
           />
+          }
         </section>
       </ng-template>
       <ng-template uiStepperStep stepTitle="Informations" stepIcon="info-circle" [stepValidator]="!!infos.valid">
@@ -48,15 +49,19 @@
               <mat-label>Nom</mat-label>
               <input matInput formControlName="name" />
             </mat-form-field>
-            <mat-form-field *ngIf="type === 'CIRCLE'" appearance="fill">
+            @if (type === 'CIRCLE') {
+            <mat-form-field appearance="fill">
               <mat-label>Code</mat-label>
               <input matInput formControlName="code" />
               <mat-hint>
                 Choisissez un code unique (<b>non modifiable par la suite</b>) permettant de faire référence aux
                 fichiers de ce cercle.
               </mat-hint>
-              <mat-error *ngIf="infos.controls.code.hasError('code')">Ce code est déjà utilisé</mat-error>
+              @if (infos.controls.code.hasError('code')) {
+              <mat-error>Ce code est déjà utilisé</mat-error>
+              }
             </mat-form-field>
+            }
             <mat-form-field appearance="fill">
               <mat-label>Description</mat-label>
               <textarea cdkTextareaAutosize matInput formControlName="desc"></textarea>
@@ -99,13 +104,8 @@
           </form>
         </section>
       </ng-template>
-      <ng-template
-        *ngIf="type === 'EXERCISE' && this.template === undefined"
-        uiStepperStep
-        stepTitle="Mode d'édition"
-        stepIcon="edit"
-        [stepValidator]="!!editionMode"
-      >
+      @if (type === 'EXERCISE' && this.template === undefined) {
+      <ng-template uiStepperStep stepTitle="Mode d'édition" stepIcon="edit" [stepValidator]="!!editionMode">
         <section>
           <h4>Choisissez le mode d'édition de votre exercice :</h4>
           <div class="edition-modes" (click)="selectEditionMode('template', stepper)">
@@ -141,23 +141,18 @@
           </div>
         </section>
       </ng-template>
-      <ng-template
-        *ngIf="editionMode === 'template'"
-        uiStepperStep
-        stepTitle="Template"
-        stepIcon="snippets"
-        [stepValidator]="!!template"
-      >
+      } @if (editionMode === 'template') {
+      <ng-template uiStepperStep stepTitle="Template" stepIcon="snippets" [stepValidator]="!!template">
         <section class="section-template">
-          @if (loadingTemplates) {
-          <nz-spin *ngIf="loadingTemplates" nzTip="Chargement des templates..." />
-          } @else { @if (templateSources.length > 0) {
+          @if (loadingTemplates) { @if (loadingTemplates) {
+          <nz-spin nzTip="Chargement des templates..." />
+          } } @else { @if (templateSources.length > 0) {
           <h4>Sélectionnez un template puis cliquez sur créer.</h4>
           }
           <div class="template-circle-filter">
-            @if (templateSources.length > 0) { @for (source of templateSources; track source.circle.id) {
+            @if (templateSources.length > 0) { @for (source of templateSources; track source.circle.id) { @if
+            (source.count > 0) {
             <nz-tag
-              *ngIf="source.count > 0"
               nzMode="checkable"
               [nzChecked]="selectedTemplateSources.isSelected(source)"
               (nzCheckedChange)="selectedTemplateSources.toggle(source)"
@@ -169,7 +164,7 @@
                 >
               </ng-container>
             </nz-tag>
-            }
+            } }
             <button
               nz-button
               nzShape="circle"
@@ -195,8 +190,8 @@
           </div>
           @if (loadingAdditionalTemplates) {
           <nz-spin nzTip="Chargement des templates..." />
-          }
-          <nz-collapse [nzBordered]="false" *ngIf="!loadingTemplates">
+          } @if (!loadingTemplates) {
+          <nz-collapse [nzBordered]="false">
             @for (source of selectedTemplateSources.selected; track source.circle.id) {
             <nz-collapse-panel [nzHeader]="source.circle.name" [nzActive]="source.count > 0">
               <div class="template-grid">
@@ -222,18 +217,19 @@
             </nz-collapse-panel>
             }
           </nz-collapse>
-          }
-          <div *ngIf="!this.template">
+          } } @if (!this.template) {
+          <div>
             <span> Vous ne trouvez pas un template ? </span>
             <span> Cliquez sur <b>+</b> pour explorer les cercles et ajouter des sources de templates.</span>
           </div>
-          <ng-container *ngIf="template">
-            <br />
-            <h4>Votre nouvel exercice sera créé à partir du template suivant :</h4>
-            <resource-item [item]="template" editable="false" simple />
-          </ng-container>
+          } @if (template) {
+          <br />
+          <h4>Votre nouvel exercice sera créé à partir du template suivant :</h4>
+          <resource-item [item]="template" editable="false" simple />
+          }
         </section>
       </ng-template>
+      }
       <ng-template uiStepperStep stepTitle="Terminé" stepIcon="check" [stepValidator]="true">
         <div class="final-step"><h2>Création de la ressource en cours...</h2></div>
         {{ endStep(stepper) }}
@@ -243,23 +239,19 @@
   }
 </main>
 <footer>
-  <ng-container *ngIf="creating; else showControls">
-    <nz-spin nzTip="Création en cours..."></nz-spin>
-  </ng-container>
-  <ng-template #showControls>
-    <ng-container *ngIf="!loading">
-      <button *ngIf="!stepper.isFirst" nz-button [disabled]="stepper.isFirst" (click)="stepper.prevStep()">
-        Précedent
-      </button>
-      <button
-        nz-button
-        nzType="primary"
-        [disabled]="!stepper.isValid"
-        (click)="infos.markAllAsTouched(); stepper.nextStep()"
-      >
-        {{ stepper.isLast ? 'Créer' : 'Suivant' }}
-      </button>
-    </ng-container>
-  </ng-template>
+  @if (creating) {
+  <nz-spin nzTip="Création en cours..."></nz-spin>
+  } @else { @if (!loading) { @if (!stepper.isFirst) {
+  <button nz-button [disabled]="stepper.isFirst" (click)="stepper.prevStep()">Précedent</button>
+  }
+  <button
+    nz-button
+    nzType="primary"
+    [disabled]="!stepper.isValid"
+    (click)="infos.markAllAsTouched(); stepper.nextStep()"
+  >
+    {{ stepper.isLast ? 'Créer' : 'Suivant' }}
+  </button>
+  } }
 </footer>
 }

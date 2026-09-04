@@ -1,28 +1,28 @@
 <user-search-bar #searchbar [(ngModel)]="groups" [onlyGroups]="true" [autoSelect]="true" [filters]="filters" />
 
-<nz-button-group>
+<div nz-flex nzGap="small">
   <button (click)="addGroup()" nz-button nzType="primary" nz-tooltip="Ajouter un groupe">
     <span nz-icon nzType="plus" nzTheme="outline"></span>
   </button>
-  <ng-container *ngIf="selection.length as selectionCount">
-    <nz-badge [nzCount]="selectionCount">
-      <button
-        [nz-tooltip]="selectionCount > 1 ? 'Supprimer les groupes sélectionnés' : 'Supprimer le groupe sélectionné'"
-        nz-button
-        nzDanger
-        nz-popconfirm
-        nzOkText="Supprimer"
-        nzOkType="danger"
-        [nzPopconfirmTitle]="removeGuard"
-        [nzPopconfirmPlacement]="'bottom'"
-        [nzPopconfirmOverlayStyle]="{ 'max-width': '300px' }"
-        (nzOnConfirm)="deleteGroups()"
-      >
-        <div nz-icon nzType="close" nzTheme="outline"></div>
-      </button>
-    </nz-badge>
-  </ng-container>
-</nz-button-group>
+  @if (selection.length; as selectionCount) {
+  <nz-badge [nzCount]="selectionCount">
+    <button
+      [nz-tooltip]="selectionCount > 1 ? 'Supprimer les groupes sélectionnés' : 'Supprimer le groupe sélectionné'"
+      nz-button
+      nzDanger
+      nz-popconfirm
+      nzOkText="Supprimer"
+      nzOkType="danger"
+      [nzPopconfirmTitle]="removeGuard"
+      [nzPopconfirmPlacement]="'bottom'"
+      [nzPopconfirmOverlayStyle]="{ 'max-width': '300px' }"
+      (nzOnConfirm)="deleteGroups()"
+    >
+      <div nz-icon nzType="close" nzTheme="outline"></div>
+    </button>
+  </nz-badge>
+  }
+</div>
 
 <user-group-table
   [total]="searchbar.total"

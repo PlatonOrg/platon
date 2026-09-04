@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Fuse from 'fuse.js'
 
 import { CommonModule } from '@angular/common'
@@ -30,11 +29,10 @@ import {
   UiStatisticCardComponent,
   UiViewModeComponent,
 } from '@platon/shared/ui'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { CoursePresenter } from '../course.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-course-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
@@ -42,21 +40,18 @@ import { CoursePresenter } from '../course.presenter'
   imports: [
     CommonModule,
     RouterModule,
-
     NzIconModule,
     NzGridModule,
     NzEmptyModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzCollapseModule,
     NzSegmentedModule,
     NzTypographyModule,
-
     CourseActivityGridComponent,
     CourseActivityTableComponent,
     CourseSectionActionsComponent,
     CsvDownloadButtonComponent,
-
     DurationPipe,
     UiViewModeComponent,
     UiSearchBarComponent,
@@ -64,6 +59,8 @@ import { CoursePresenter } from '../course.presenter'
   ],
 })
 export class CourseDashboardPage implements OnInit, OnDestroy {
+  private readonly courseManagementTutorialService = inject(CourseManagementTutorialService)
+
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly subscriptions: Subscription[] = []
@@ -109,8 +106,6 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
     },
     onSearch: this.search.bind(this),
   }
-
-  constructor(private readonly courseManagementTutorialService: CourseManagementTutorialService) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

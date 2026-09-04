@@ -27,7 +27,7 @@ describe('MemoizedPromise', () => {
     const executor = jest.fn().mockRejectedValue(error)
     const memoizedPromise = new MemoizedPromise(executor)
 
-    await expect(memoizedPromise.execute()).rejects.toThrowError(error)
+    await expect(memoizedPromise.execute()).rejects.toThrow(error)
   })
 
   it('should handle concurrent calls', async () => {

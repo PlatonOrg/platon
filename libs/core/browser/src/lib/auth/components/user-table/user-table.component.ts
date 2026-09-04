@@ -16,7 +16,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table'
 
-import { UpdateUser, User, UserFilters, UserRoles } from '@platon/core/common'
+import { UpdateUser, User, type UserFilters, UserRoles } from '@platon/core/common'
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
@@ -28,7 +28,6 @@ import { AuthService } from '../../api/auth.service'
 type Value = string[] | undefined
 
 @Component({
-  standalone: true,
   selector: 'user-table',
   templateUrl: './user-table.component.html',
   styleUrls: ['./user-table.component.scss'],

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core'
+import { Injectable, signal, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { ShepherdService } from './shepherd/shepherd.service'
 import { ToolbarTutorialService } from './toolbar-tutorial.service'
@@ -21,19 +21,19 @@ export interface TutorialOption {
   providedIn: 'root',
 })
 export class TutorialSelectorService {
+  private readonly authService = inject(AuthService)
+  private readonly router = inject(Router)
+  private readonly shepherdService = inject(ShepherdService)
+  private readonly toolbarTutorialService = inject(ToolbarTutorialService)
+  private readonly resourceCreationTutorialService = inject(ResourceCreationTutorialService)
+  private readonly ideTutorialService = inject(IdeTutorialService)
+  private readonly sharedResourceTutorialService = inject(SharedResourceTutorialService)
+  private readonly circleSubscriptionTutorialService = inject(CircleSubscriptionTutorialService)
+  private readonly builderTutorialService = inject(BuilderTutorialService)
+
   public isModalOpen = signal(false)
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router,
-    private readonly shepherdService: ShepherdService,
-    private readonly toolbarTutorialService: ToolbarTutorialService,
-    private readonly resourceCreationTutorialService: ResourceCreationTutorialService,
-    private readonly ideTutorialService: IdeTutorialService,
-    private readonly sharedResourceTutorialService: SharedResourceTutorialService,
-    private readonly circleSubscriptionTutorialService: CircleSubscriptionTutorialService,
-    private readonly builderTutorialService: BuilderTutorialService
-  ) {
+  constructor() {
     this.initUser().catch(() => {
       console.error("Erreur lors de l'initialisation de l'utilisateur dans le service de sélection de tutoriel.")
     })

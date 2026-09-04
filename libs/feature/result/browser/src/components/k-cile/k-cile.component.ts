@@ -216,7 +216,6 @@ export class KCileComponent implements AfterViewInit {
         type: 'category',
         data: bars.map((_, i) => i),
         axisLabel: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           formatter: (value: any) => {
             return `${value * this.selectedBucket} - ${(parseInt(value) + 1) * this.selectedBucket}`
           },
@@ -248,7 +247,7 @@ export class KCileComponent implements AfterViewInit {
           label: {
             show: true,
             position: 'inside',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             formatter: (params: any) => {
               const value = params.value.toFixed(1)
               return `+${value}`
@@ -267,7 +266,7 @@ export class KCileComponent implements AfterViewInit {
           label: {
             show: true,
             position: 'top',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             formatter: (params: any) => {
               const value = params.value.toFixed(1)
               return `+${value}`

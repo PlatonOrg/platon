@@ -38,7 +38,6 @@ mat-card {
   }
 }
 
-
 .title-section {
   margin-bottom: 2rem;
   text-align: center;
@@ -63,7 +62,6 @@ mat-card {
   font-weight: 600;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 
 .introduction-section,
 .conclusion-section {
@@ -99,7 +97,6 @@ mat-card {
   border: 1px solid #e8e8e8;
   line-height: 1.6;
 }
-
 
 .action-buttons {
   display: flex;
@@ -405,7 +402,6 @@ pre {
     line-height: 1.4;
   }
 }
-
 
 @media (max-width: 768px) {
   :host {

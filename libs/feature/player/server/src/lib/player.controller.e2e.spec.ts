@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
 const request = require('supertest')
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'

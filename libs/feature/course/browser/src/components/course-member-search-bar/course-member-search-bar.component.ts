@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
+
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -23,12 +23,11 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 import { UserAvatarComponent } from '@platon/core/browser'
 import { DEFAULT_SEARCH_BAR_LIMIT } from '@platon/core/common'
-import { CourseMember, CourseMemberFilters } from '@platon/feature/course/common'
+import { CourseMember, type CourseMemberFilters } from '@platon/feature/course/common'
 import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { CourseService } from '../../api/course.service'
 
 @Component({
-  standalone: true,
   selector: 'course-member-search-bar',
   templateUrl: './course-member-search-bar.component.html',
   styleUrls: ['./course-member-search-bar.component.scss'],
@@ -40,7 +39,7 @@ import { CourseService } from '../../api/course.service'
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UserAvatarComponent, UiSearchBarComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UserAvatarComponent, UiSearchBarComponent],
 })
 export class CourseMemberSearchBarComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
   private readonly courseService = inject(CourseService)

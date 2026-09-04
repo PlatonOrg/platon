@@ -3,7 +3,7 @@
 </nz-badge>
 <div>
   <span>{{ group.name }}</span>
-  <ng-container *ngIf="canShowMembers">
-    <span (click)="showMembers.emit()">Ouvrir les détails</span>
-  </ng-container>
+  @if (canShowMembers) {
+  <span (click)="showMembers.emit()">Ouvrir les détails</span>
+  }
 </div>

@@ -21,10 +21,14 @@
     <nz-switch [(ngModel)]="debug"></nz-switch>
     <br /><br />
     <div>
-      <pre *ngIf="debug">{{ overrides | json }}</pre>
+      @if (debug) {
+      <pre>{{ overrides | json }}</pre>
+      }
     </div>
   </div>
-  <div class="container-selection" *ngIf="selection">
+  @if (selection) {
+  <div class="container-selection">
     <app-ple-input mode="plo" [disabled]="readOnly" [(input)]="selection" (inputChange)="onChangeInput($event)" />
   </div>
+  }
 </div>

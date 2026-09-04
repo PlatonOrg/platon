@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { UserResults } from '@platon/feature/result/common'
-import { CommonModule } from '@angular/common'
+
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 import { MatTooltipModule } from '@angular/material/tooltip'
@@ -22,13 +22,11 @@ export interface ActivityModerationEvent {
 }
 
 @Component({
-  standalone: true,
   selector: 'course-activity-moderation',
   templateUrl: './activity-moderation.component.html',
   styleUrls: ['./activity-moderation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,

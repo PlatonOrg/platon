@@ -6,7 +6,6 @@ import { Resource } from '@platon/feature/resource/common'
 import { ActivityCardComponent } from '../activity-card/activity-card.component'
 
 @Component({
-  standalone: true,
   selector: 'app-activity-list',
   templateUrl: './activity-list.component.html',
   styleUrls: ['./activity-list.component.scss'],

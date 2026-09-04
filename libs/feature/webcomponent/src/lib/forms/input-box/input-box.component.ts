@@ -9,14 +9,24 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { FormControl } from '@angular/forms'
 import { Observable, Subscription } from 'rxjs'
 import { debounceTime, map, startWith } from 'rxjs/operators'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { InputBoxComponentDefinition, InputBoxState } from './input-box'
+import { InputBoxComponentDefinition, type InputBoxState } from './input-box'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { MatAutocompleteModule } from '@angular/material/autocomplete'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { IconGrPipe } from '@cisstech/nge/pipes'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { MatIconModule } from '@angular/material/icon'
+import { NzPopoverModule } from 'ng-zorro-antd/popover'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 @Component({
   selector: 'wc-input-box',
@@ -27,9 +37,28 @@ import { WebComponentChangeDetectorService } from '../../web-component-change-de
     '[style.width]': `state.width !== 'auto' ? (state.width ? state.width : '100%') : ''`,
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BaseModule,
+    IconGrPipe,
+
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatInputModule,
+    MatFormFieldModule,
+    MatAutocompleteModule,
+    MatIconModule,
+
+    CssPipeModule,
+
+    NzPopoverModule,
+  ],
 })
 @WebComponent(InputBoxComponentDefinition)
 export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<InputBoxState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private readonly webComponentService!: WebComponentService
 
   @Input() state!: InputBoxState
@@ -51,7 +80,9 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
     map((value) => this.getSuggestions(value))
   )
 
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService)!
   }
 

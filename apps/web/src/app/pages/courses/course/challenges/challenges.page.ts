@@ -6,7 +6,6 @@ import { UserAvatarComponent } from '@platon/core/browser'
 import { CourseActivityCardComponent } from '@platon/feature/course/browser'
 import { Activity } from '@platon/feature/course/common'
 import { ActivityLeaderboardEntry, CourseLeaderboardEntry } from '@platon/feature/result/common'
-import { DurationPipe } from '@platon/shared/ui'
 import { NzEmptyComponent } from 'ng-zorro-antd/empty'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzSelectModule } from 'ng-zorro-antd/select'
@@ -17,7 +16,6 @@ import { Subscription } from 'rxjs'
 import { CoursePresenter } from '../course.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-course-challenges',
   templateUrl: './challenges.page.html',
   styleUrls: ['./challenges.page.scss'],
@@ -26,15 +24,12 @@ import { CoursePresenter } from '../course.presenter'
     CommonModule,
     RouterModule,
     FormsModule,
-
     NzGridModule,
     NzEmptyComponent,
     NzSelectModule,
     NzTimelineModule,
     NzTypographyModule,
     NzSkeletonComponent,
-
-    DurationPipe,
     UserAvatarComponent,
     CourseActivityCardComponent,
   ],

@@ -214,7 +214,7 @@ export class PeerService {
    * @param level
    * @returns {Promise<PeerMatchEntity[]>} The pending matches created
    */
-  async createMatchs(activityId: string, level?: number): Promise<PeerMatchEntity[]> {
+  async createMatchs(activityId: string, _level?: number): Promise<PeerMatchEntity[]> {
     // For each level of the activity, get players that have not been matched yet
     // Get all winners of each level
     const winnersByLevel: { winnerIdsMatchIds: string[]; level: number }[] = await this.matchRepository

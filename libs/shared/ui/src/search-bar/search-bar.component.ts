@@ -16,11 +16,12 @@ import {
   TemplateRef,
   ViewChild,
   booleanAttribute,
+  inject,
 } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { Subscription } from 'rxjs'
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators'
-import { SearchBar } from './search-bar'
+import { type SearchBar } from './search-bar'
 
 import { MatIconModule } from '@angular/material/icon'
 import { NgArrayPipesModule } from 'ngx-pipes'
@@ -31,7 +32,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 const DEFAULT_DEBOUNCE_TIME = 200
 @Component({
-  standalone: true,
   selector: 'ui-search-bar',
   templateUrl: './search-bar.component.html',
   styleUrls: ['./search-bar.component.scss'],
@@ -40,17 +40,16 @@ const DEFAULT_DEBOUNCE_TIME = 200
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatIconModule,
     MatButtonModule,
-
     NzSpinModule,
     NzAutocompleteModule,
-
     NgArrayPipesModule,
   ],
 })
 export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
+  private readonly changeDetector = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
 
   @ViewChild('searchRef', { read: ElementRef })
@@ -62,7 +61,6 @@ export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
   @ContentChild(TemplateRef)
   suggestionTemplate?: TemplateRef<any>
 
-  @Output() search = new EventEmitter<string>()
   @Output() filter = new EventEmitter<void>()
 
   protected control = new FormControl()
@@ -77,8 +75,6 @@ export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
   protected get showFilterButton(): boolean {
     return !!this.searchbar?.onFilter || this.filter.observed
   }
-
-  constructor(private readonly changeDetector: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -122,7 +118,6 @@ export class UiSearchBarComponent implements OnInit, OnChanges, OnDestroy {
 
   protected onTrigger(): void {
     this.searchbar?.onSearch?.(this.control.value)
-    this.search.next(this.control.value)
   }
 
   protected onSelect(event: NzOptionSelectionChange, item: any): void {

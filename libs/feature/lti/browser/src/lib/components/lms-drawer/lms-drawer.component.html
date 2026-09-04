@@ -7,7 +7,7 @@
   #modal
 >
   <ng-template>
-    <nz-tabset [(nzSelectedIndex)]="activeTabIndex">
+    <nz-tabs [(nzSelectedIndex)]="activeTabIndex">
       <nz-tab nzTitle="Informations">
         <form [formGroup]="form">
           <mat-form-field appearance="fill">
@@ -46,7 +46,7 @@
         <user-search-bar #searchbar [(ngModel)]="members" [autoSelect]="true" [filters]="filters" />
         <user-table [total]="searchbar.total" [users]="members" [loading]="searchbar.searching" [(filters)]="filters" />
       </nz-tab>
-    </nz-tabset>
+    </nz-tabs>
   </ng-template>
 </ui-modal-drawer>
 

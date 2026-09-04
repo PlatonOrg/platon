@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, ViewChild } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  OnInit,
+  ViewChild,
+  inject,
+} from '@angular/core'
 import {
   AbstractControl,
   FormControl,
@@ -22,7 +30,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { SelectionModel } from '@angular/cdk/collections'
 import { AuthService, DialogModule, DialogService, TagService, UserService } from '@platon/core/browser'
@@ -31,7 +39,6 @@ import {
   CircleTreeComponent,
   ResourceItemComponent,
   ResourcePipesModule,
-  ResourceSearchBarComponent,
   ResourceService,
 } from '@platon/feature/resource/browser'
 import {
@@ -58,7 +65,6 @@ type TemplateSource = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-resource-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
@@ -68,11 +74,9 @@ type TemplateSource = {
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzTagModule,
     NzSpinModule,
     NzIconModule,
@@ -82,20 +86,26 @@ type TemplateSource = {
     NzSkeletonModule,
     NzPageHeaderModule,
     NzPopoverModule,
-    NzToolTipModule,
-
+    NzTooltipModule,
     UiStepDirective,
     UiStepperComponent,
     DialogModule,
-
     CircleTreeComponent,
     ResourcePipesModule,
     ResourceItemComponent,
-    ResourceSearchBarComponent,
     UserCharterComponent,
   ],
 })
 export class ResourceCreatePage implements OnInit {
+  private readonly router = inject(Router)
+  private readonly authService = inject(AuthService)
+  private readonly tagService = inject(TagService)
+  private readonly dialogService = inject(DialogService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly resourceService = inject(ResourceService)
+  private readonly userService = inject(UserService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected type!: ResourceTypes
   protected parentId?: string
   protected parentName?: string
@@ -137,20 +147,13 @@ export class ResourceCreatePage implements OnInit {
   @HostListener('window:keydown.meta.enter')
   protected async handleKeyDown(): Promise<void> {
     if (this.stepper.isValid) {
-      this.stepper.isLast ? await this.create() : this.stepper.nextStep()
+      if (this.stepper.isLast) {
+        await this.create()
+      } else {
+        this.stepper.nextStep()
+      }
     }
   }
-
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly tagService: TagService,
-    private readonly dialogService: DialogService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly resourceService: ResourceService,
-    private readonly userService: UserService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes

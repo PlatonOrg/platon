@@ -29,7 +29,7 @@
     align-items: center;
     padding-right: 5px;
     p {
-      margin:0px;
+      margin: 0px;
       width: 85%;
       overflow: hidden;
       white-space: nowrap;
@@ -48,14 +48,13 @@
   .ant-ribbon {
     color: white;
     display: flex;
-    float:left;
+    float: left;
     mat-icon {
       width: 18px;
       height: 18px;
       font-size: 18px;
     }
   }
-
 }
 
 .spacer {
@@ -97,16 +96,14 @@ ui-list-item-article {
   height: 100%;
   text-overflow: ellipsis;
   border-radius: 0.5rem;
-  border: 1px solid #DDDDDD;
+  border: 1px solid #dddddd;
   background-color: #f6f8fa;
   // add an other specific background color for the selected item
   &.is-configurable {
-    border: 1px solid #DDDDFF;
+    border: 1px solid #ddddff;
     background-color: #f6f8ff;
   }
-
 }
-
 
 .right-button {
   margin-left: auto;

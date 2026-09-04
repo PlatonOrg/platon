@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import {
   ActivityCorrection,
@@ -21,9 +21,7 @@ import { ResultProvider } from '../models/result-provider'
 
 @Injectable()
 export class RemoteResultProvider extends ResultProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   userDashboard(): Observable<DashboardOutput> {
     return this.http.get<DashboardOutput>(`/api/v1/results/dashboard`)

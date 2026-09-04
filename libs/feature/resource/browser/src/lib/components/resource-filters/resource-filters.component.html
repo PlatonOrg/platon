@@ -12,49 +12,52 @@
   </ng-container>
   <ng-template #footer>
     <button mat-stroked-button (click)="close()">Annuler</button>&nbsp;
-    <button id="tuto-apply-filters" mat-raised-button color="primary" (click)="triggered.emit(this.filters); close()">Appliquer</button>
+    <button id="tuto-apply-filters" mat-raised-button color="primary" (click)="triggered.emit(this.filters); close()">
+      Appliquer
+    </button>
   </ng-template>
 </nz-drawer>
 
 <ng-template #content>
   <form [formGroup]="form">
     <!-- TYPE -->
-    <section id="tuto-types-recourses" *ngIf="!disableTypesField" formGroupName="types">
+    @if (!disableTypesField) {
+    <section id="tuto-types-recourses" formGroupName="types">
       <mat-label id="type-label">Qu'est-ce que vous recherchez ?</mat-label>
       <div class="checkbox-group">
-        <ng-container *ngFor="let item of form.get('types')!.value | keyvalue">
-          <mat-checkbox [formControlName]="item.key">{{ $any(item.key) | resourceType }}</mat-checkbox>
-        </ng-container>
+        @for (item of form.get('types')!.value | keyvalue; track item) {
+        <mat-checkbox [formControlName]="item.key">{{ $any(item.key) | resourceType }}</mat-checkbox>
+        }
       </div>
     </section>
-    <mat-divider *ngIf="!disableTypesField" />
-
-    <ng-container *ngIf="form.get('types')!.value.EXERCISE">
-      <section>
-        <mat-label id="exercise-specific">Appliquer des filtres aux exercices ?</mat-label>
-        <mat-checkbox formControlName="configurable">
-          <mat-chip>Configurable</mat-chip>
-        </mat-checkbox>
-      </section>
-      <mat-divider />
-    </ng-container>
+    } @if (!disableTypesField) {
+    <mat-divider />
+    } @if (form.get('types')!.value.EXERCISE) {
+    <section>
+      <mat-label id="exercise-specific">Appliquer des filtres aux exercices ?</mat-label>
+      <mat-checkbox formControlName="configurable">
+        <mat-chip>Configurable</mat-chip>
+      </mat-checkbox>
+    </section>
+    <mat-divider />
+    }
 
     <!-- STATUS -->
     <section formGroupName="status">
       <mat-label id="status-label">Quel est son statut ?</mat-label>
       <div class="checkbox-group">
-        <ng-container *ngFor="let item of form.get('status')!.value | keyvalue">
-          <mat-checkbox [formControlName]="item.key">
-            <mat-chip>
-              <div class="status">
-                {{ $any(item.key) | resourceStatus }}
-                <div class="status-icons" [class]="$any(item.key) | resourceStatusColor">
-                  <mat-icon>{{ $any(item.key) | resourceStatusIcon }}</mat-icon>
-                </div>
+        @for (item of form.get('status')!.value | keyvalue; track item) {
+        <mat-checkbox [formControlName]="item.key">
+          <mat-chip>
+            <div class="status">
+              {{ $any(item.key) | resourceStatus }}
+              <div class="status-icons" [class]="$any(item.key) | resourceStatusColor">
+                <mat-icon>{{ $any(item.key) | resourceStatusIcon }}</mat-icon>
               </div>
-            </mat-chip>
-          </mat-checkbox>
-        </ng-container>
+            </div>
+          </mat-chip>
+        </mat-checkbox>
+        }
       </div>
     </section>
     <mat-divider />
@@ -68,7 +71,9 @@
         formControlName="parents"
         aria-labelledby="parents"
       >
-        <nz-option *ngFor="let option of circles" [nzLabel]="option.name" [nzValue]="option.id" />
+        @for (option of circles; track option) {
+        <nz-option [nzLabel]="option.name" [nzValue]="option.id" />
+        }
       </nz-select>
     </section>
     <mat-divider />
@@ -82,7 +87,9 @@
         formControlName="topics"
         aria-labelledby="topics"
       >
-        <nz-option *ngFor="let option of topics" [nzLabel]="option.name" [nzValue]="option.id" />
+        @for (option of topics; track option) {
+        <nz-option [nzLabel]="option.name" [nzValue]="option.id" />
+        }
       </nz-select>
     </section>
     <mat-divider />
@@ -95,7 +102,9 @@
         formControlName="antiTopics"
         aria-labelledby="antiTopics"
       >
-        <nz-option *ngFor="let option of topics" [nzLabel]="option.name" [nzValue]="option.id" />
+        @for (option of topics; track option) {
+        <nz-option [nzLabel]="option.name" [nzValue]="option.id" />
+        }
       </nz-select>
     </section>
     <mat-divider />
@@ -109,12 +118,15 @@
         formControlName="levels"
         aria-labelledby="levels"
       >
-        <nz-option *ngFor="let option of levels" [nzLabel]="option.name" [nzValue]="option.id" />
+        @for (option of levels; track option) {
+        <nz-option [nzLabel]="option.name" [nzValue]="option.id" />
+        }
       </nz-select>
     </section>
     <mat-divider />
     <!-- OWNER -->
-    <section *ngIf="owners.length > 0">
+    @if (owners.length > 0) {
+    <section>
       <mat-label id="owner-label">Elle appartient à un utilisateur ?</mat-label>
       <nz-select
         [nzMaxTagCount]="3"
@@ -123,15 +135,17 @@
         formControlName="owners"
         [nzCustomTemplate]="userSelectionTemplate"
       >
-        <nz-option *ngFor="let option of owners" nzCustomContent [nzLabel]="option.username" [nzValue]="option.id">
+        @for (option of owners; track option) {
+        <nz-option nzCustomContent [nzLabel]="option.username" [nzValue]="option.id">
           <user-avatar [user]="option" />
         </nz-option>
+        }
       </nz-select>
-
       <ng-template #userSelectionTemplate let-selectedUser>
         <user-avatar [userIdOrName]="selectedUser.nzValue" />
       </ng-template>
     </section>
+    }
 
     <mat-divider />
     <!-- ORDER -->

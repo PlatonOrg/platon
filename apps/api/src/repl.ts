@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config({ path: '.env.local' })
 
 import { repl } from '@nestjs/core'

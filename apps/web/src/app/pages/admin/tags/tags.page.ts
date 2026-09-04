@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { DialogModule, DialogService, TagListComponent, TagService } from '@platon/core/browser'
 import { Level, Topic } from '@platon/core/common'
@@ -7,23 +6,20 @@ import { NzModalService } from 'ng-zorro-antd/modal'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   selector: 'app-admin-tags',
   templateUrl: './tags.page.html',
   styleUrls: ['./tags.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, DialogModule, TagListComponent],
+  imports: [FormsModule, DialogModule, TagListComponent],
 })
 export class AdminTagsPage implements OnInit {
+  private readonly tagService = inject(TagService)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly modal = inject(NzModalService)
+
   protected topics: Topic[] = []
   protected levels: Level[] = []
-
-  constructor(
-    private readonly tagService: TagService,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly modal: NzModalService
-  ) {}
 
   async ngOnInit(): Promise<void> {
     const [topics, levels] = await Promise.all([

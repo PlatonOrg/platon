@@ -16,12 +16,8 @@
       [nzDataSource]="inputs()"
       nzBordered
     >
-      <nz-list-item
-        cdkDrag
-        [class.selected]="selectionIndex() === i"
-        *ngFor="let input of inputs(); trackBy: trackByIndex; index as i"
-        (click)="selectInput(i)"
-      >
+      @for (input of inputs(); track $index; let i = $index) {
+      <nz-list-item cdkDrag [class.selected]="selectionIndex() === i" (click)="selectInput(i)">
         <b>{{ input.name }}</b>
         <ul nz-list-item-actions>
           <nz-list-item-action>
@@ -38,6 +34,7 @@
           </nz-list-item-action>
         </ul>
       </nz-list-item>
+      }
     </nz-list>
     <button class="btn-add-input" nz-button nzType="primary" [disabled]="readOnly()" (click)="addInput()">+</button>
     <br />
@@ -49,12 +46,16 @@
     <nz-switch [(ngModel)]="debug"></nz-switch>
     <br /><br />
     <div>
-      <pre *ngIf="debug">{{ inputs() | json }}</pre>
+      @if (debug) {
+      <pre>{{ inputs() | json }}</pre>
+      }
     </div>
   </div>
-  <div class="container-selection" *ngIf="selection()">
+  @if (selection()) {
+  <div class="container-selection">
     @if (selection(); as selectedInput) { @for (key of [selectionIndex()]; track key) {
     <app-ple-input [disabled]="readOnly()" [input]="selectedInput" (inputChange)="onChangeInput($event)" />
     } }
   </div>
+  }
 </div>

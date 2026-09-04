@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CourseDemoProvider } from '../models/course-demo-provider'
 import { HttpClient } from '@angular/common/http'
 import { Observable, map } from 'rxjs'
@@ -8,9 +8,7 @@ import { Optional } from 'typescript-optional'
 
 @Injectable()
 export class RemoteCourseDemoProvider extends CourseDemoProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   override access(uri: string): Observable<CourseDemoAccessResponse> {
     return this.http

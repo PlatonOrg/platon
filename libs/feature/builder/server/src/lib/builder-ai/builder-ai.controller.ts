@@ -16,10 +16,10 @@ export class BuilderAiController {
     @Headers('x-ai-api-key') apiKey: string
   ): Promise<AITransformOutput> {
     throw new ForbiddenResponse('Fonctionnalité AI désactivée pour le moment')
-    // if (!apiKey) {
-    //   throw new UnauthorizedException('Clé API manquante')
-    // }
+    if (!apiKey) {
+      throw new UnauthorizedException('Clé API manquante')
+    }
 
-    // return this.builderAiService.transformInputsWithAI(input, apiKey)
+    return this.builderAiService.transformInputsWithAI(input, apiKey)
   }
 }

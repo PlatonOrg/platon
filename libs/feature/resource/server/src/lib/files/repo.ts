@@ -457,10 +457,11 @@ export class Repo {
 
   async archive(path = ROOT, version = LATEST) {
     version = version === LATEST ? 'HEAD' : version
+    const treeish = path === ROOT ? version : `${version}:${path}`
     return withTempFile(
       async (tmppath) => {
         const client = await this.gitClient(this.repo.dir)
-        await client.raw(['archive', '-o', tmppath, `${version}:${path}`])
+        await client.raw(['archive', '-o', tmppath, treeish])
         return tmppath
       },
       { prefix: 'archives', suffix: '.zip', cleanup: false }

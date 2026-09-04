@@ -8,6 +8,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  inject,
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 
@@ -20,13 +21,12 @@ import { MatRadioModule } from '@angular/material/radio'
 import { NzDrawerModule } from 'ng-zorro-antd/drawer'
 
 import { OrderingDirections } from '@platon/core/common'
-import { CourseFilters, CourseOrderings } from '@platon/feature/course/common'
+import { type CourseFilters, CourseOrderings } from '@platon/feature/course/common'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { Subscription } from 'rxjs'
 import { CoursePipesModule } from '../../pipes'
 
 @Component({
-  standalone: true,
   selector: 'course-filters',
   templateUrl: './course-filters.component.html',
   styleUrls: ['./course-filters.component.scss'],
@@ -35,20 +35,19 @@ import { CoursePipesModule } from '../../pipes'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatRadioModule,
     MatButtonModule,
     MatDividerModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzDrawerModule,
     NzSelectModule,
-
     CoursePipesModule,
   ],
 })
 export class CourseFiltersComponent implements OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
 
   protected form = this.createForm()
@@ -56,8 +55,6 @@ export class CourseFiltersComponent implements OnDestroy {
 
   @Input() filters: CourseFilters = {}
   @Output() triggered = new EventEmitter<CourseFilters>()
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())

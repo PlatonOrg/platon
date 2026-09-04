@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse } from '@platon/core/common'
 import { CreateLms, Lms, LmsFilters, UpdateLms } from '@platon/feature/lti/common'
 import { Observable } from 'rxjs'
@@ -6,7 +6,7 @@ import { LTIProvider } from '../models/lms-provider'
 
 @Injectable({ providedIn: 'root' })
 export class LTIService {
-  constructor(private readonly provider: LTIProvider) {}
+  private readonly provider = inject(LTIProvider)
 
   searchLms(filters?: LmsFilters): Observable<ListResponse<Lms>> {
     return this.provider.searchLms(filters)

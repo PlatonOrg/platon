@@ -1,7 +1,6 @@
 import { ExpandContext, Expander } from '@cisstech/nestjs-expand'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { isTeacherRole } from '@platon/core/common'
 import { IRequest } from '@platon/core/server'
 import { CourseStatistic } from '@platon/feature/course/common'
 import { ActivityEntity, ActivityMemberView, CourseDTO, CourseMemberService } from '@platon/feature/course/server'

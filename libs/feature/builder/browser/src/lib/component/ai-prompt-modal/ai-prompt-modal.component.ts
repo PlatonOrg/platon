@@ -6,7 +6,7 @@ import {
   inject,
   OnInit,
 } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { FormsModule } from '@angular/forms'
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog'
 import { MatFormFieldModule } from '@angular/material/form-field'
@@ -26,9 +26,7 @@ export interface AIPromptModalData {
 
 @Component({
   selector: 'lib-ai-prompt-modal',
-  standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatDialogModule,
     MatButtonModule,

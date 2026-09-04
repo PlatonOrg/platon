@@ -11,6 +11,7 @@
     }
   ],
   "compilerOptions": {
-    "module": "commonjs"
+    "module": "commonjs",
+    "ignoreDeprecations": "6.0"
   }
 }

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { JwtHelperService } from '@auth0/angular-jwt'
 import { AuthToken, ItemResponse } from '@platon/core/common'
 import { firstValueFrom, lastValueFrom } from 'rxjs'
@@ -13,9 +13,8 @@ const KEY = 'auth-token'
  */
 @Injectable()
 export class RemoteTokenProvider extends TokenProvider {
-  constructor(private readonly http: HttpClient, private readonly storage: StorageService) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
+  private readonly storage = inject(StorageService)
 
   tokenSync(): AuthToken | undefined {
     try {

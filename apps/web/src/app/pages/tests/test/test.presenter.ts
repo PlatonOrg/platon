@@ -12,7 +12,7 @@ export class TestPresenter {
   async createManyTestsCandidates(input: CreateTestsCandidates[]): Promise<void> {
     try {
       await firstValueFrom(this.testsService.createManyTestsCandidates(input))
-    } catch (error) {
+    } catch (_error) {
       this.alertError()
     }
   }

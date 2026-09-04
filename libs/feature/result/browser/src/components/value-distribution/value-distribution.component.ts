@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core'
 import { DurationPipe } from '@platon/shared/ui'
 import addWeeks from 'date-fns/addWeeks'
@@ -11,12 +10,11 @@ import { EChartsOption } from 'echarts'
 import * as echarts from 'echarts/core'
 
 @Component({
-  standalone: true,
   selector: 'result-value-distribution',
   templateUrl: 'value-distribution.component.html',
   styleUrls: ['./value-distribution.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CoreEchartsDirective, DurationPipe],
+  imports: [CoreEchartsDirective],
   providers: [DurationPipe],
 })
 export class ResultValueDistributionComponent {

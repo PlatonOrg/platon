@@ -8,24 +8,32 @@ import {
   Input,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { SortListComponentDefinition, SortListItem, SortListState } from './sort-list'
+import { SortListComponentDefinition, SortListItem, type SortListState } from './sort-list'
 import { v4 as uuidv4 } from 'uuid'
 import { deepCopy } from '@cisstech/nge/utils'
+import { DragDropModule } from '@angular/cdk/drag-drop'
+import { MatIconModule } from '@angular/material/icon'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-sort-list',
   templateUrl: 'sort-list.component.html',
   styleUrls: ['sort-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, MatIconModule, DragDropModule, CssPipeModule, NgeMarkdownModule],
 })
 @WebComponent(SortListComponentDefinition)
 export class SortListComponent implements WebComponentHooks<SortListState>, OnInit {
+  readonly injector = inject(Injector)
+  private readonly cdr = inject(ChangeDetectorRef)
+
   @Input() state!: SortListState
   @Output() stateChange = new EventEmitter<SortListState>()
-
-  constructor(readonly injector: Injector, private readonly cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.state.isFilled = false

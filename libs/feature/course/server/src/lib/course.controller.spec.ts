@@ -14,7 +14,6 @@ import { Optional } from 'typescript-optional'
 describe('CourseController', () => {
   let controller: CourseController
   let courseService: CourseService
-  let permissionsService: CoursePermissionsService
   let courseMemberService: CourseMemberService
 
   beforeEach(async () => {
@@ -49,7 +48,6 @@ describe('CourseController', () => {
 
     controller = module.get<CourseController>(CourseController)
     courseService = module.get<CourseService>(CourseService)
-    permissionsService = module.get<CoursePermissionsService>(CoursePermissionsService)
     courseMemberService = module.get<CourseMemberService>(CourseMemberService)
   })
 

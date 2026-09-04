@@ -9,29 +9,31 @@
 <main>
   <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
     <ui-stepper #stepper (finished)="create()" (changed)="$event > 1 && loadMembers()">
-      <ng-container *ngIf="hasFirstStep">
-        <!-- STEP 1 -->
-        <ng-template #icon1>
-          <mat-icon>local_library</mat-icon>
-        </ng-template>
-        <ng-template
-          uiStepperStep
-          stepTitle="Section"
-          [stepIcon]="icon1"
-          [stepValidator]="!!courseInfo.valid || courseInfo.disabled"
-        >
-          <section *ngIf="user">
-            <form [formGroup]="courseInfo">
-              <h4 id="section">Dans quelle section du cours l'activité doit-elle être ajoutée ?</h4>
-              <course-section-search-bar
-                [course]="courseInfo.value.course"
-                aria-labelledby="section"
-                formControlName="section"
-              />
-            </form>
-          </section>
-        </ng-template>
-      </ng-container>
+      @if (hasFirstStep) {
+      <!-- STEP 1 -->
+      <ng-template #icon1>
+        <mat-icon>local_library</mat-icon>
+      </ng-template>
+      <ng-template
+        uiStepperStep
+        stepTitle="Section"
+        [stepIcon]="icon1"
+        [stepValidator]="!!courseInfo.valid || courseInfo.disabled"
+      >
+        @if (user) {
+        <section>
+          <form [formGroup]="courseInfo">
+            <h4 id="section">Dans quelle section du cours l'activité doit-elle être ajoutée ?</h4>
+            <course-section-search-bar
+              [course]="courseInfo.value.course"
+              aria-labelledby="section"
+              formControlName="section"
+            />
+          </form>
+        </section>
+        }
+      </ng-template>
+      }
       <!-- STEP 2 -->
       <ng-template #icon2>
         <mat-icon>widgets</mat-icon>
@@ -100,41 +102,33 @@
             }
 
             <!-- Résultats de recherche -->
-            <ng-container *ngIf="!searching(); else spinner">
-              <ng-container [ngPlural]="totalMatches()">
-                <ng-template ngPluralCase="=0"></ng-template>
-                <ng-template ngPluralCase="=1">
-                  <p class="results-count">1 activité trouvée</p>
-                </ng-template>
-                <ng-template ngPluralCase="other">
-                  <p class="results-count">{{ totalMatches() }} activités trouvées</p>
-                </ng-template>
-              </ng-container>
-
-              <app-activity-list
-                [items]="items()"
-                [selectedIds]="getSelectedResourceIds"
-                (activityClicked)="selectActivity($event)"
-              >
-                <h2>Aucune activité ne correspond à votre recherche</h2>
-                <ul>
-                  <li>Vérifiez les termes de votre recherche</li>
-                  <li>Essayez d'autres critères de recherche</li>
-                </ul>
-              </app-activity-list>
-
-              <nz-spin
-                class="spinner-pagination"
-                nzSize="large"
-                [nzTip]="'Chargement...'"
-                [nzSpinning]="paginating()"
-              />
-              <div style="height: 8px" *ngIf="hasMore()" viewportIntersection (intersected)="loadMore()"></div>
+            @if (!searching()) {
+            <ng-container [ngPlural]="totalMatches()">
+              <ng-template ngPluralCase="=0"></ng-template>
+              <ng-template ngPluralCase="=1">
+                <p class="results-count">1 activité trouvée</p>
+              </ng-template>
+              <ng-template ngPluralCase="other">
+                <p class="results-count">{{ totalMatches() }} activités trouvées</p>
+              </ng-template>
             </ng-container>
-
-            <ng-template #spinner>
-              <nz-spin class="spinner-main" nzSimple nzSize="large" />
-            </ng-template>
+            <app-activity-list
+              [items]="items()"
+              [selectedIds]="getSelectedResourceIds"
+              (activityClicked)="selectActivity($event)"
+            >
+              <h2>Aucune activité ne correspond à votre recherche</h2>
+              <ul>
+                <li>Vérifiez les termes de votre recherche</li>
+                <li>Essayez d'autres critères de recherche</li>
+              </ul>
+            </app-activity-list>
+            <nz-spin class="spinner-pagination" nzSize="large" [nzTip]="'Chargement...'" [nzSpinning]="paginating()" />
+            @if (hasMore()) {
+            <div style="height: 8px" viewportIntersection (intersected)="loadMore()"></div>
+            } } @else {
+            <nz-spin class="spinner-main" nzSimple nzSize="large" />
+            }
           </form>
 
           <!-- Bouton flottant pour scroller en haut -->
@@ -145,54 +139,49 @@
           }
         </section>
       </ng-template>
-      <ng-container *ngIf="!isTest">
-        <!-- STEP 3 -->
-        <ng-template #iconFunction>
-          <mat-icon>category</mat-icon>
-        </ng-template>
-        <ng-template
-          uiStepperStep
-          stepTitle="Fonction"
-          [stepIcon]="iconFunction"
-          [stepValidator]="!!activityFunction()"
-        >
-          <section>
-            <h4>Quelle est la fonction de cette activité ?</h4>
-            <p>Choisissez le type d'activité que vous souhaitez ajouter, cela adaptera les étapes suivantes.</p>
-            <div class="activity-function-cards">
-              <div
-                class="activity-function-card"
-                [class.selected]="activityFunction() === 'training'"
-                (click)="selectActivityFunction('training')"
-              >
-                <mat-icon>fitness_center</mat-icon>
-                <h3>Entraînement</h3>
-                <p>Une activité simple, sans notation, pour permettre aux élèves de s'entraîner librement.</p>
-              </div>
-              <div
-                class="activity-function-card"
-                [class.selected]="activityFunction() === 'graded'"
-                (click)="selectActivityFunction('graded')"
-              >
-                <mat-icon>fact_check</mat-icon>
-                <h3>TP noté / Examen</h3>
-                <p>Une activité évaluée dont les résultats sont corrigés et notés.</p>
-              </div>
-              <div
-                class="activity-function-card"
-                [class.selected]="activityFunction() === 'challenge'"
-                (click)="selectActivityFunction('challenge')"
-              >
-                <mat-icon>emoji_events</mat-icon>
-                <h3>Challenge</h3>
-                <p>
-                  Une activité réalisable uniquement par les élèves du cours, dont les résultats sont visibles par tous.
-                </p>
-              </div>
+      @if (!isTest) {
+      <!-- STEP 3 -->
+      <ng-template #iconFunction>
+        <mat-icon>category</mat-icon>
+      </ng-template>
+      <ng-template uiStepperStep stepTitle="Fonction" [stepIcon]="iconFunction" [stepValidator]="!!activityFunction()">
+        <section>
+          <h4>Quelle est la fonction de cette activité ?</h4>
+          <p>Choisissez le type d'activité que vous souhaitez ajouter, cela adaptera les étapes suivantes.</p>
+          <div class="activity-function-cards">
+            <div
+              class="activity-function-card"
+              [class.selected]="activityFunction() === 'training'"
+              (click)="selectActivityFunction('training')"
+            >
+              <mat-icon>fitness_center</mat-icon>
+              <h3>Entraînement</h3>
+              <p>Une activité simple, sans notation, pour permettre aux élèves de s'entraîner librement.</p>
             </div>
-          </section>
-        </ng-template>
-      </ng-container>
+            <div
+              class="activity-function-card"
+              [class.selected]="activityFunction() === 'graded'"
+              (click)="selectActivityFunction('graded')"
+            >
+              <mat-icon>fact_check</mat-icon>
+              <h3>TP noté / Examen</h3>
+              <p>Une activité évaluée dont les résultats sont corrigés et notés.</p>
+            </div>
+            <div
+              class="activity-function-card"
+              [class.selected]="activityFunction() === 'challenge'"
+              (click)="selectActivityFunction('challenge')"
+            >
+              <mat-icon>emoji_events</mat-icon>
+              <h3>Challenge</h3>
+              <p>
+                Une activité réalisable uniquement par les élèves du cours, dont les résultats sont visibles par tous.
+              </p>
+            </div>
+          </div>
+        </section>
+      </ng-template>
+      }
       <!-- STEP 4 -->
       <ng-template #icon3>
         <mat-icon>settings</mat-icon>
@@ -235,17 +224,15 @@
   </nz-skeleton>
 </main>
 <footer>
-  <ng-container *ngIf="creating; else showControls">
-    <nz-spin nzTip="Création de l'activité..."></nz-spin>
-  </ng-container>
-  <ng-template #showControls>
-    <button *ngIf="!stepper.isFirst" nz-button [disabled]="stepper.isFirst" (click)="stepper.prevStep()">
-      Précedent
-    </button>
-    <button nz-button nzType="primary" [disabled]="!stepper.isValid" (click)="stepper.nextStep()">
-      {{ stepper.isLast ? 'Créer' : 'Suivant' }}
-    </button>
-  </ng-template>
+  @if (creating) {
+  <nz-spin nzTip="Création de l'activité..."></nz-spin>
+  } @else { @if (!stepper.isFirst) {
+  <button nz-button [disabled]="stepper.isFirst" (click)="stepper.prevStep()">Précedent</button>
+  }
+  <button nz-button nzType="primary" [disabled]="!stepper.isValid" (click)="stepper.nextStep()">
+    {{ stepper.isLast ? 'Créer' : 'Suivant' }}
+  </button>
+  }
 </footer>
 
 <resource-filters

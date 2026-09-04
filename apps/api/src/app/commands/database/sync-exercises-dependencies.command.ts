@@ -117,7 +117,7 @@ export class SyncExercisesDependencies extends CommandRunner {
     const templateDependency = await this.dependencyService.getTemplateDependency(resource.id, tag)
 
     // Get the file content
-    const [file, buffer] = await repo.read(EXERCISE_MAIN_FILE, tag)
+    const [_file, buffer] = await repo.read(EXERCISE_MAIN_FILE, tag)
     if (!buffer) {
       this.logger.error(`File not found: ${EXERCISE_MAIN_FILE}`)
       return null

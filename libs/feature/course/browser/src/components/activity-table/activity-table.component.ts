@@ -23,7 +23,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag'
 import { Activity, CourseSection } from '@platon/feature/course/common'
 import { antTagColorFromPercentage } from '@platon/shared/ui'
 
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { CoursePipesModule } from '../../pipes'
 import { CourseActivitySettingsDrawerComponent } from '../activity-settings-drawer/activity-settings-drawer.component'
 
@@ -35,7 +35,6 @@ type Model = {
 }
 
 @Component({
-  standalone: true,
   selector: 'course-activity-table',
   templateUrl: './activity-table.component.html',
   styleUrls: ['./activity-table.component.scss'],
@@ -50,16 +49,13 @@ type Model = {
   imports: [
     CommonModule,
     RouterModule,
-
     NzIconModule,
     NzTagModule,
     NzTableModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopconfirmModule,
-
     CoursePipesModule,
-
     CourseActivitySettingsDrawerComponent,
   ],
 })

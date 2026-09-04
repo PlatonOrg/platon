@@ -1,7 +1,6 @@
-@import 'shepherd.js/dist/css/shepherd.css';
+@use 'shepherd.js/dist/css/shepherd.css';
 
-@import './libs/feature/tuto/browser/src/lib/styles/shepherd-override.scss';
-
+@use '../../../libs/feature/tuto/browser/src/lib/styles/shepherd-override.scss';
 
 mat-drawer-container {
   width: 100vw;
@@ -25,4 +24,13 @@ mat-toolbar {
     display: block;
     width: 100%;
   }
+}
+
+ide-root,
+.ide-theme-light {
+  --titleBar-background: rgb(59, 66, 82) !important;
+  --titleBar-foreground: rgb(216, 222, 233) !important;
+  --statusBar-background: rgb(59, 66, 82) !important;
+  --statusBar-foreground: rgb(216, 222, 233) !important;
+  --statusBarItem-hoverBackground: rgba(216, 222, 233, 0.2) !important;
 }

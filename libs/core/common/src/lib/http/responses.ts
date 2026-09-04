@@ -56,9 +56,9 @@ export class ErrorResponse implements HttpResponse<null> {
   statusCode: number
   message: string
 
-  constructor(options: { status: number; message: string }) {
+  constructor(options: { status: number; message: string | string[] }) {
     this.statusCode = options.status
-    this.message = options.message
+    this.message = Array.isArray(options.message) ? options.message.join(', ') : options.message
   }
 }
 

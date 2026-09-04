@@ -1,18 +1,17 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
-import { CommonModule } from '@angular/common'
+
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { NzSegmentedModule, NzSegmentedOption } from 'ng-zorro-antd/segmented'
 import { Subscription } from 'rxjs'
-import { ViewModes, viewModeIcons, viewModes } from './view-mode'
+import { type ViewModes, viewModeIcons, viewModes } from './view-mode'
 
 @Component({
-  standalone: true,
   selector: 'ui-view-mode',
   templateUrl: './view-mode.component.html',
   styleUrls: ['./view-mode.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzSegmentedModule],
+  imports: [FormsModule, NzSegmentedModule],
 })
 export class UiViewModeComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []
@@ -26,7 +25,7 @@ export class UiViewModeComponent implements OnInit, OnDestroy {
     icon: viewModeIcons[mode],
   }))
 
-  protected selectionIndex = 0
+  protected selectionMode: ViewModes = 'list'
 
   @Input() storageKey = 'view-mode'
   @Input() defaultMode: ViewModes = 'list'
@@ -41,21 +40,21 @@ export class UiViewModeComponent implements OnInit, OnDestroy {
   }
 
   get mode(): ViewModes {
-    return (this.options[this.selectionIndex]?.value as ViewModes) || this.defaultMode
+    return this.selectionMode
   }
 
   ngOnInit(): void {
     const mode = localStorage.getItem(this.storageKey)
     if (mode && viewModes.includes(mode as ViewModes)) {
-      this.selectionIndex = this.options.findIndex((o) => o.value === mode) || 0
+      this.selectionMode = mode as ViewModes
     } else {
-      this.selectionIndex = this.options.findIndex((o) => o.value === this.defaultMode) || 0
+      this.selectionMode = this.defaultMode
     }
 
     this.subscriptions.push(
       this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small]).subscribe((state) => {
         if (state.matches && this.mode === 'table') {
-          this.onChangeMode(this.options.findIndex((option) => option.value !== 'table'))
+          this.onChangeMode(this.mode)
         }
       }),
 
@@ -75,9 +74,9 @@ export class UiViewModeComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach((s) => s.unsubscribe())
   }
 
-  protected onChangeMode(index: number): void {
-    this.selectionIndex = index
-    localStorage.setItem(this.storageKey, this.options[index].value as string)
+  protected onChangeMode(mode: ViewModes): void {
+    this.selectionMode = mode
+    localStorage.setItem(this.storageKey, mode)
     this.changeDetectorRef.markForCheck()
   }
 }

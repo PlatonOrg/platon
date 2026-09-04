@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ApolloCache } from '@apollo/client/cache'
 import { Notification } from '@platon/feature/notification/common'
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs'
@@ -20,14 +20,12 @@ import { NotificationPagination } from '../models/notification.model'
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  constructor(
-    private readonly markAsReadGQL: MarkAsReadGQL,
-    private readonly markAllAsReadGQL: MarkAllAsReadGQL,
-    private readonly listNotificationsGQL: ListNotificationsGQL,
-    private readonly deleteNotificationGQL: DeleteNotificationGQL,
-    private readonly onChangeNotificationsGQL: OnChangeNotificationsGQL,
-    private readonly deleteAllNotificationsGQL: DeleteAllNotificationsGQL
-  ) {}
+  private readonly markAsReadGQL = inject(MarkAsReadGQL)
+  private readonly markAllAsReadGQL = inject(MarkAllAsReadGQL)
+  private readonly listNotificationsGQL = inject(ListNotificationsGQL)
+  private readonly deleteNotificationGQL = inject(DeleteNotificationGQL)
+  private readonly onChangeNotificationsGQL = inject(OnChangeNotificationsGQL)
+  private readonly deleteAllNotificationsGQL = inject(DeleteAllNotificationsGQL)
 
   /**
    * List the `limit` most recent notifications and subscribe to new notifications.

@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChanges, OnChanges, inject } from '@angular/core'
+import { Component, Input, SimpleChanges, OnChanges, inject, ChangeDetectionStrategy } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { OutputData } from '@editorjs/editorjs'
 import { ResourceLoaderService } from '@cisstech/nge/services'
@@ -10,16 +10,18 @@ import { take } from 'rxjs'
   selector: 'ui-editorjs-viewer',
   templateUrl: './editorjs-viewer.component.html',
   styleUrls: ['./editorjs-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [EditorjsViewerService],
 })
 export class EditorjsViewerComponent implements OnChanges {
+  private editorjsViewerService = inject(EditorjsViewerService)
+  private readonly sanitizer = inject(DomSanitizer)
+
   @Input() data: OutputData | undefined
   protected sanitizedHtml: SafeHtml = ''
 
   private readonly resourceLoader = inject(ResourceLoaderService)
   private hljsStyleLoaded = false
-
-  constructor(private editorjsViewerService: EditorjsViewerService, private readonly sanitizer: DomSanitizer) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {

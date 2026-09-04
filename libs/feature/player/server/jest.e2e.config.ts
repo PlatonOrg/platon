@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'feature-player-server-e2e',
   preset: '../../../../jest.preset.js',

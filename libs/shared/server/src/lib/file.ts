@@ -4,8 +4,8 @@ import * as Path from 'path'
 import { v4 as uuid } from 'uuid'
 
 // This is a hack to make Multer available in the Express namespace
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export { Multer } from 'multer'
+
+export type { Multer } from 'multer'
 
 export class FileExistsError extends Error {
   constructor(filename: string) {
@@ -41,7 +41,7 @@ export async function isFile(path: string): Promise<boolean> {
   try {
     const stat = await fs.promises.stat(path)
     return stat.isFile()
-  } catch (error) {
+  } catch (_error) {
     // If an error occurs, the path probably does not exist or is not accessible
     return false
   }
@@ -51,7 +51,7 @@ export async function isDirectory(path: string): Promise<boolean> {
   try {
     const stat = await fs.promises.stat(path)
     return stat.isDirectory()
-  } catch (error) {
+  } catch (_error) {
     // If an error occurs, the path probably does not exist or is not accessible
     return false
   }

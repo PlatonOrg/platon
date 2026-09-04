@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
-import { Router, RouterModule } from '@angular/router'
+import { RouterModule } from '@angular/router'
 import { AuthService } from '@platon/core/browser'
 import { User, UserRoles, isTeacherRole } from '@platon/core/common'
-import { SidebarTutorialService } from '@platon/feature/tuto/browser'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 
 type NavLink = {
@@ -16,21 +15,22 @@ type NavLink = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, RouterModule, MatIconModule, NzModalModule],
 })
 export class SidebarComponent implements OnInit {
+  private readonly authService = inject(AuthService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected readonly topLinks: NavLink[] = []
   protected readonly bottomLinks: NavLink[] = []
   protected readonly expandedLinks = new Set<string>()
   protected readonly asNavLink = (o: unknown) => o as NavLink
 
   protected user?: User
-
-  constructor(private readonly authService: AuthService, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   async ngOnInit(): Promise<void> {
     this.user = await this.authService.ready()

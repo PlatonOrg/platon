@@ -13,18 +13,18 @@ import {
 import { MatIconModule } from '@angular/material/icon'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { v4 as uuidv4 } from 'uuid'
 
 import { ListItemTag, NgeUiListModule } from '@cisstech/nge/ui/list'
-import { ExerciseResourceMeta, Resource } from '@platon/feature/resource/common'
+import { ExerciseResourceMeta, type Resource } from '@platon/feature/resource/common'
 
 import { UiModalIFrameComponent, positiveGreenColor } from '@platon/shared/ui'
 
 import { Router, RouterModule } from '@angular/router'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { DialogService, StorageService } from '@platon/core/browser'
-import { Variables } from '@platon/feature/compiler'
+import { type Variables } from '@platon/feature/compiler'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
@@ -40,7 +40,6 @@ type Tag = {
 }
 
 @Component({
-  standalone: true,
   selector: 'resource-item',
   templateUrl: './resource-item.component.html',
   styleUrls: ['./resource-item.component.scss'],
@@ -48,20 +47,16 @@ type Tag = {
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
-
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopoverModule,
     NzSpinModule,
-
     NgeUiListModule,
     NgeMarkdownModule,
     UiModalIFrameComponent,
-
     ResourcePipesModule,
   ],
 })
@@ -175,7 +170,7 @@ export class ResourceItemComponent implements OnChanges {
     try {
       const resource: Resource = await firstValueFrom(this.resourceService.duplicate(this.item.id))
       this.router.navigate(['/resources', resource.id]).catch(console.error)
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error("Une erreur s'est produite lors de la duplication de la ressource.")
     }
   }

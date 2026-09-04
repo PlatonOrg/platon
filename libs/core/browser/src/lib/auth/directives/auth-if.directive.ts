@@ -6,6 +6,7 @@ import {
   SimpleChanges,
   TemplateRef,
   ViewContainerRef,
+  inject,
 } from '@angular/core'
 import { User } from '@platon/core/common'
 import { AuthService } from '../api/auth.service'
@@ -20,6 +21,11 @@ interface AuthContext {
   exportAs: 'authIf',
 })
 export class AuthIfDirective implements OnChanges {
+  private readonly authService = inject(AuthService)
+  private readonly templateRef = inject<TemplateRef<AuthContext>>(TemplateRef)
+  private readonly viewContainerRef = inject(ViewContainerRef)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input()
   authIf: string | string[] = []
 
@@ -35,16 +41,9 @@ export class AuthIfDirective implements OnChanges {
   @Input()
   authIfAuthorized?: (user: User) => void | Promise<void>
 
-  static ngTemplateContextGuard(dir: AuthIfDirective, ctx: unknown): ctx is AuthContext {
+  static ngTemplateContextGuard(dir: AuthIfDirective, _ctx: unknown): _ctx is AuthContext {
     return true
   }
-
-  constructor(
-    private readonly authService: AuthService,
-    private readonly templateRef: TemplateRef<AuthContext>,
-    private readonly viewContainerRef: ViewContainerRef,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['authIf']) {

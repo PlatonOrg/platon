@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { RouterModule } from '@angular/router'
 
@@ -11,15 +10,12 @@ import { SidebarComponent } from '../../widgets/sidebar/sidebar.component'
 import { ToolbarComponent } from '../../widgets/toolbar/toolbar.component'
 import { TutorialSelectorModalComponent } from '@platon/feature/tuto/browser'
 @Component({
-  standalone: true,
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
-
     MatIconModule,
     MatButtonModule,
     MatToolbarModule,

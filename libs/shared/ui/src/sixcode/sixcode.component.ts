@@ -12,7 +12,6 @@ import {
 
 @Component({
   selector: 'ui-sixcode',
-  standalone: true,
   imports: [],
   templateUrl: './sixcode.component.html',
   styleUrls: ['./sixcode.component.scss'],

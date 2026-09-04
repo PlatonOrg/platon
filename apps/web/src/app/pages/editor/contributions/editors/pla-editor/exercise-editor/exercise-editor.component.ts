@@ -14,11 +14,19 @@ import { ExerciseResourceMeta, Resource } from '@platon/feature/resource/common'
 import { NzModalService } from 'ng-zorro-antd/modal'
 import { firstValueFrom } from 'rxjs'
 
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { PleInputEditorModule } from '../../ple-input/ple-input.module'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { ExerciseCardComponent } from '../exercise-card/exercise-card.component'
+
 @Component({
   selector: 'app-pla-exercise-editor',
   templateUrl: './exercise-editor.component.html',
   styleUrls: ['./exercise-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NzButtonModule, NzIconModule, NzTooltipModule, PleInputEditorModule, NzListModule, ExerciseCardComponent],
 })
 export class PlaExerciseEditorComponent {
   private readonly resourceService = inject(ResourceService)

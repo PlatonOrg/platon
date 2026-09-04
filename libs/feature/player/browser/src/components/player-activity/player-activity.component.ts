@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -22,9 +21,8 @@ import { MatCardModule } from '@angular/material/card'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
 
-import { SafePipe } from '@cisstech/nge/pipes'
 import {
-  ActivityPlayer,
+  type ActivityPlayer,
   ExercisePlayer,
   getClosingTime,
   isTimeouted,
@@ -35,7 +33,7 @@ import {
   PlatonLog,
 } from '@platon/feature/player/common'
 
-import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
+import { DialogModule, DialogService } from '@platon/core/browser'
 import {
   ActivityClosedNotification,
   ActivityOpenStates,
@@ -62,35 +60,27 @@ import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { HttpErrorResponse } from '@angular/common/http'
 import { UI_MODAL_IFRAME_CLOSE } from '@platon/shared/ui'
 import { SixcodeComponent } from '@platon/shared/ui'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 @Component({
-  standalone: true,
   selector: 'player-activity',
   templateUrl: './player-activity.component.html',
   styleUrls: ['./player-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
-
     MatIconModule,
     MatCardModule,
     MatButtonModule,
-
     NzAlertModule,
     NzBadgeModule,
     NzPopoverModule,
     NzStatisticModule,
     NzButtonModule,
     NzProgressModule,
-
-    SafePipe,
     DialogModule,
-    UserAvatarComponent,
     NgeMarkdownModule,
-
     SixcodeComponent,
-
     PlayerResultsComponent,
     PlayerExerciseComponent,
     PlayerSettingsComponent,
@@ -99,6 +89,8 @@ import { SixcodeComponent } from '@platon/shared/ui'
   ],
 })
 export class PlayerActivityComponent implements OnInit, OnDestroy {
+  private readonly nzModalService = inject(NzModalService)
+
   private readonly elementRef = inject(ElementRef) as ElementRef<HTMLElement>
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly dialogService = inject(DialogService)
@@ -138,7 +130,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected isCodeError = false
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
-  protected errorTemplate!: TemplateRef<object>
+  protected errorTemplate!: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>
 
   @Input() player!: ActivityPlayer
 
@@ -198,8 +190,6 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   @ViewChild('modalFooter', { static: true }) modalFooter!: TemplateRef<object>
 
   @ViewChildren('playerExercise') playerExerciseComponents!: QueryList<PlayerExerciseComponent>
-
-  constructor(private readonly nzModalService: NzModalService) {}
 
   ngOnInit(): void {
     this.calculateAnswerStates(this.player.navigation)

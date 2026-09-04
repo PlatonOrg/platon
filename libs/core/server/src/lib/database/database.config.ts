@@ -1,6 +1,4 @@
 import 'dotenv/config'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import pgvector from 'pgvector' // https://github.com/pgvector/pgvector-node?tab=readme-ov-file#typeorm
 
 import { DataSourceOptions } from 'typeorm'
 

@@ -10,6 +10,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import {
   BrowserJsPlumbInstance,
@@ -23,16 +24,22 @@ import {
 } from '@jsplumb/browser-ui'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { MatchListComponentDefinition, MatchListItem, MatchListState } from './match-list'
+import { MatchListComponentDefinition, MatchListItem, type MatchListState } from './match-list'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-match-list',
   templateUrl: 'match-list.component.html',
   styleUrls: ['match-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMarkdownModule],
 })
 @WebComponent(MatchListComponentDefinition)
 export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, WebComponentHooks<MatchListState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   @Input() state!: MatchListState
   @Output() stateChange = new EventEmitter<MatchListState>()
 
@@ -51,8 +58,6 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
   get targets() {
     return this.state.nodes.filter((e) => e.type === 'target')
   }
-
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {}
 
   async ngOnInit() {
     this.state.isFilled = false

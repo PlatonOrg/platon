@@ -155,5 +155,7 @@
     </nz-form-item>
   </form>
   <h2>Contenu de l'annonce</h2>
-  <ui-editorjs *ngIf="terms" [ngModel]="terms" (ngModelChange)="onChangeData($event)" class="ui-editorjs"></ui-editorjs>
+  @if (terms) {
+  <ui-editorjs [ngModel]="terms" (ngModelChange)="onChangeData($event)" class="ui-editorjs"></ui-editorjs>
+  }
 </div>

@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-webcomponent',
   preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],

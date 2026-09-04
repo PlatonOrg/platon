@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-peer-common',
   preset: '../../../../jest.preset.js',
   globals: {

@@ -116,12 +116,11 @@
         </div>
 
         <div class="exam-settings-actions">
-          <ng-container *ngIf="savingActivitySettings; else examSettingsActions">
-            <nz-spin></nz-spin>
-          </ng-container>
-          <ng-template #examSettingsActions>
-            <button nz-button nzType="primary" type="submit" [disabled]="!canEdit">Enregistrer</button>
-          </ng-template>
+          @if (savingActivitySettings) {
+          <nz-spin></nz-spin>
+          } @else {
+          <button nz-button nzType="primary" type="submit" [disabled]="!canEdit">Enregistrer</button>
+          }
         </div>
       </form>
     </div>
@@ -140,12 +139,11 @@
           <mat-label>Description</mat-label>
           <textarea cdkTextareaAutosize formControlName="desc" matInput></textarea>
         </mat-form-field>
-        <ng-container *ngIf="savingDesc; else actions">
-          <nz-spin></nz-spin>
-        </ng-container>
-        <ng-template #actions>
-          <button nz-button nzType="primary" type="submit" [disabled]="!canSubmit">Mettre à jour</button>
-        </ng-template>
+        @if (savingDesc) {
+        <nz-spin></nz-spin>
+        } @else {
+        <button nz-button nzType="primary" type="submit" [disabled]="!canSubmit">Mettre à jour</button>
+        }
       </form>
     </div>
     <div class="settings-item-danger">

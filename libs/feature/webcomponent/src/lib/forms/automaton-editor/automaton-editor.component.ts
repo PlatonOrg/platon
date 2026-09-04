@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Inject,
   Injector,
   Input,
   OnDestroy,
@@ -12,6 +11,7 @@ import {
   ViewChild,
   OnChanges,
   SimpleChanges,
+  inject,
 } from '@angular/core'
 import {
   BrowserJsPlumbInstance,
@@ -38,8 +38,12 @@ import { ActionSetNonInitialProvider } from './actions/states/set-non-initial'
 import { ActionDeleteTransitionProvider } from './actions/transitions/delete-transition'
 import { ActionRenameTransitionProvider } from './actions/transitions/rename-transition'
 import { State, Transition } from './automaton'
-import { AutomatonEditorComponentDefinition, AutomatonEditorState } from './automaton-editor'
+import { AutomatonEditorComponentDefinition, type AutomatonEditorState } from './automaton-editor'
 import { AutomatonEditorService } from './automaton-editor.service'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { DialogModule } from '@platon/core/browser'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 
 declare type Connection = JsPlumbConnection & { canvas?: HTMLElement }
 
@@ -63,6 +67,7 @@ const BASIC_CONNECTION = {
   templateUrl: 'automaton-editor.component.html',
   styleUrls: ['automaton-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, DialogModule, NzIconModule, NzButtonModule],
   providers: [
     AutomatonEditorService,
     ActionSetInitialProvider,
@@ -77,6 +82,11 @@ const BASIC_CONNECTION = {
 })
 @WebComponent(AutomatonEditorComponentDefinition)
 export class AutomatonEditorComponent implements OnInit, OnDestroy, OnChanges, WebComponentHooks<AutomatonEditorState> {
+  readonly injector = inject(Injector)
+  readonly editor = inject(AutomatonEditorService)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+  readonly editorActions = inject(AUTOMATON_EDITOR_ACTIONS)
+
   private readonly subs: Subscription[] = []
   private readonly context: AutomatonEditorActionContext = {
     state: undefined,
@@ -97,14 +107,6 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, OnChanges, W
   private get canvas() {
     return this.container.nativeElement.querySelector('.automaton-editor-canvas')
   }
-
-  constructor(
-    readonly injector: Injector,
-    readonly editor: AutomatonEditorService,
-    readonly changeDetector: WebComponentChangeDetectorService,
-    @Inject(AUTOMATON_EDITOR_ACTIONS)
-    readonly editorActions: AutomatonEditorAction[]
-  ) {}
 
   ngOnInit() {
     this.jsp = newInstance({

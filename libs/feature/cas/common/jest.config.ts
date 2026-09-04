@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-cas-common',
   preset: '../../../../jest.preset.js',
   testEnvironment: 'node',

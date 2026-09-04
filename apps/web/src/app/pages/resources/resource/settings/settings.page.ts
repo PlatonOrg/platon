@@ -9,7 +9,6 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
 import { ResourceTemplatePage } from './template/template.page'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],

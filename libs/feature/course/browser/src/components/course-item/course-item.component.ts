@@ -1,22 +1,30 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, input, output } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnChanges,
+  input,
+  output,
+  inject,
+} from '@angular/core'
 
 import { MatIconModule } from '@angular/material/icon'
 
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 
 import { Router, RouterModule } from '@angular/router'
-import { Course } from '@platon/feature/course/common'
+import { type Course } from '@platon/feature/course/common'
 import { antTagColorFromPercentage } from '@platon/shared/ui'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 
 @Component({
-  standalone: true,
   selector: 'course-item',
   templateUrl: './course-item.component.html',
   styleUrls: ['./course-item.component.scss'],
@@ -29,12 +37,15 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
     NzButtonModule,
     NzBadgeModule,
     NzBadgeModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzProgressModule,
     NgeUiListModule,
   ],
 })
 export class CourseItemComponent implements OnChanges {
+  private readonly cdr = inject(ChangeDetectorRef)
+  private readonly router = inject(Router)
+
   @Input() item!: Course
   @Input() simple = false
 
@@ -46,8 +57,6 @@ export class CourseItemComponent implements OnChanges {
   protected desc = ''
   protected progressColor = 'primary'
   protected isTitleTruncated = false
-
-  constructor(private readonly cdr: ChangeDetectorRef, private readonly router: Router) {}
 
   ngOnChanges(): void {
     this.name = this.item.name

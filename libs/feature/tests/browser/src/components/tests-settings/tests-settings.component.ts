@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -9,6 +8,7 @@ import {
   OnInit,
   Output,
   signal,
+  inject,
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { NzModalModule } from 'ng-zorro-antd/modal'
@@ -32,29 +32,23 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { MatInputModule } from '@angular/material/input'
-import { UiError403Component } from '@platon/shared/ui'
 import { DialogService } from '@platon/core/browser'
 import { Router } from '@angular/router'
 import { ActivitySettings } from '@platon/feature/compiler'
 
 @Component({
-  standalone: true,
   selector: 'tests-settings',
   templateUrl: './tests-settings.component.html',
   styleUrls: ['./tests-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
-    UiError403Component,
     ReactiveFormsModule,
-
     MatIconModule,
     MatCardModule,
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzDatePickerModule,
     NzModalModule,
     NzFormModule,
@@ -69,6 +63,11 @@ import { ActivitySettings } from '@platon/feature/compiler'
   ],
 })
 export class TestsSettingsComponent implements OnInit {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly courseService = inject(CourseService)
+  private readonly dialogService = inject(DialogService)
+  private readonly router = inject(Router)
+
   @Input() activity?: Activity
 
   @Output() activityChange = new EventEmitter<Activity>()
@@ -114,13 +113,6 @@ export class TestsSettingsComponent implements OnInit {
     name: new FormControl('', [Validators.required]),
     desc: new FormControl('', [Validators.required]),
   })
-
-  constructor(
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly courseService: CourseService,
-    private readonly dialogService: DialogService,
-    private readonly router: Router
-  ) {}
 
   async ngOnInit(): Promise<void> {
     if (!this.course) {

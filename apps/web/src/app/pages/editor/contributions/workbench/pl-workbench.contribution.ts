@@ -1,5 +1,5 @@
 import { Injectable, Injector, NgModule } from '@angular/core'
-import { CONTRIBUTION, EditorService, FileService, IContribution, NotificationService } from '@cisstech/nge-ide/core'
+import { CONTRIBUTION, EditorService, FileService, IContribution, NotificationService, THEME_CONTAINER_ID, ThemeService, ViewContainerService } from '@cisstech/nge-ide/core'
 import { EditorPresenter } from '../../editor.presenter'
 
 @Injectable()
@@ -10,6 +10,14 @@ export class Contribution implements IContribution {
     const editorService = injector.get(EditorService)
     const fileService = injector.get(FileService)
     const notificationService = injector.get(NotificationService)
+
+    // Disable the dark theme mode because some elements don't havne dark theme css implemented
+    const themeService = injector.get(ThemeService);
+    const viewContainerService = injector.get(ViewContainerService)
+
+    themeService.setMode('light')
+    viewContainerService.unregister(THEME_CONTAINER_ID)
+
     editorService.registerDropInEditorHandler(async (uri) => {
       const presenter = injector.get(EditorPresenter)
       const { activeResource } = editorService
