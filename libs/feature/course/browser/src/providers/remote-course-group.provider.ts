@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CourseGroupProvider } from '../models/course-group-provider'
 import { CourseGroup, CourseMember } from '@platon/feature/course/common'
 import { map, Observable } from 'rxjs'
@@ -7,9 +7,7 @@ import { ItemResponse, ListResponse } from '@platon/core/common'
 
 @Injectable()
 export class RemoteCourseGroupProvider extends CourseGroupProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   list(courseId: string): Observable<ListResponse<CourseGroup>> {
     return this.http.get<ListResponse<CourseGroup>>(`/api/v1/courseGroups/${courseId}`)

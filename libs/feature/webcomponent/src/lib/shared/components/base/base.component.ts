@@ -1,5 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
 import { WebComponentDefinition } from '../../../web-component'
 import { WebComponentService } from '../../../web-component.service'
 import { v4 as uuidv4 } from 'uuid'
@@ -8,8 +21,13 @@ import { v4 as uuidv4 } from 'uuid'
   selector: 'wc-base',
   templateUrl: './base.component.html',
   styleUrls: ['./base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule, NgeMonacoModule],
 })
 export class BaseComponent implements OnInit, OnDestroy {
+  private readonly api = inject(WebComponentService)
+  private readonly elementRef = inject(ElementRef)
+
   @ViewChild('container') container!: ElementRef
 
   @Input() state: any
@@ -17,8 +35,6 @@ export class BaseComponent implements OnInit, OnDestroy {
 
   private observer?: MutationObserver
   private definition?: WebComponentDefinition
-
-  constructor(private readonly api: WebComponentService, private readonly elementRef: ElementRef) {}
 
   ngOnInit() {
     const native: HTMLElement = this.elementRef.nativeElement

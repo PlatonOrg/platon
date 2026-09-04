@@ -2,11 +2,14 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core'
 import { BaseValueEditor } from '../../ple-input'
 import { InputCodeOptions } from '../input-code'
 
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
+
 @Component({
   selector: 'app-input-code-value-editor',
   templateUrl: 'value-editor.component.html',
   styleUrls: ['value-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgeMonacoModule],
 })
 export class ValueEditorComponent extends BaseValueEditor<string, InputCodeOptions> implements OnDestroy {
   private readonly disposables: monaco.IDisposable[] = []

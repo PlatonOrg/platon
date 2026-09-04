@@ -1,227 +1,220 @@
 <main>
-  <mat-card *ngIf="!exercises; else showExercices">
+  @if (!exercises) {
+  <mat-card>
     <mat-card-content>
       <!-- TITRE ET INTRODUCTION -->
-      <ng-container *ngIf="showIntroduction">
-        <!-- TITRE DE L'ACTIVITÉ -->
-        <section *ngIf="player.title" class="title-section">
+      @if (showIntroduction) {
+      <!-- TITRE DE L'ACTIVITÉ -->
+      @if (player.title) {
+      <section class="title-section">
+        <div class="title-container">
+          <h1 class="activity-title">{{ player.title }}</h1>
+        </div>
+      </section>
+      }
+      <!-- INTRODUCTION -->
+      @if (player.introduction) {
+      <section class="introduction-section">
+        <h3 class="section-title">
+          <mat-icon>description</mat-icon>
+          Description de l'activité
+        </h3>
+        <div class="introduction-content">
+          <nge-markdown [data]="player.introduction" />
+        </div>
+      </section>
+      }
+      <!-- PARAMÈTRES DE L'ACTIVITÉ -->
+      <player-settings [player]="player" />
+      <!-- BOUTONS D'ACTION -->
+      <div class="action-buttons">
+        @if (canGoDashboard && !embedded()) {
+        <button mat-raised-button (click)="back()">
+          <mat-icon>arrow_back</mat-icon>
+          Retour
+        </button>
+        }
+        <button mat-raised-button color="primary" [disabled]="empty" (click)="start()">
+          <mat-icon>play_arrow</mat-icon>
+          Commencer
+        </button>
+      </div>
+      }
+      <!-- CONCLUSION -->
+      <div class="centered">
+        @if (showConclusion) {
+        <!-- TITRE DE CONCLUSION -->
+        @if (player.title) {
+        <section class="title-section">
           <div class="title-container">
             <h1 class="activity-title">{{ player.title }}</h1>
           </div>
         </section>
-
-        <!-- INTRODUCTION -->
-        <section class="introduction-section" *ngIf="player.introduction">
+        } @if ((terminatedAfterLoseFocus && !terminatedAfterLeavePage) || terminatedAfterLeavePage) {
+        <section class="alert-section">
+          @if (terminatedAfterLoseFocus && !terminatedAfterLeavePage) {
+          <nz-alert
+            nzShowIcon
+            nzType="error"
+            nzMessage="Activité auto terminée"
+            nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de cliquer en dehors de la page."
+            class="custom-alert"
+          />
+          } @if (terminatedAfterLeavePage) {
+          <nz-alert
+            nzShowIcon
+            nzType="error"
+            nzMessage="Activité auto terminée"
+            nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de changer de page."
+            class="custom-alert"
+          />
+          }
+        </section>
+        }
+        <!-- CODE DE DÉBLOCAGE -->
+        <section class="unlock-section">
           <h3 class="section-title">
-            <mat-icon>description</mat-icon>
-            Description de l'activité
+            <mat-icon>lock_open</mat-icon>
+            Code de déblocage
           </h3>
-          <div class="introduction-content">
-            <nge-markdown [data]="player.introduction" />
+          <div class="unlock-content">
+            <p>Demande le code à ton enseignant pour te débloquer !</p>
+            <ui-sixcode (codeComplete)="onCodeComplete($event)" [error]="isCodeError" />
           </div>
         </section>
-
-        <!-- PARAMÈTRES DE L'ACTIVITÉ -->
-        <player-settings [player]="player" />
-
-        <!-- BOUTONS D'ACTION -->
-        <div class="action-buttons">
-          <button *ngIf="canGoDashboard && !embedded()" mat-raised-button (click)="back()">
-            <mat-icon>arrow_back</mat-icon>
-            Retour
-          </button>
-          <button mat-raised-button color="primary" [disabled]="empty" (click)="start()">
-            <mat-icon>play_arrow</mat-icon>
-            Commencer
-          </button>
-        </div>
-      </ng-container>
-
-      <!-- CONCLUSION -->
-      <div class="centered">
-        <ng-container *ngIf="showConclusion">
-          <!-- TITRE DE CONCLUSION -->
-          <section *ngIf="player.title" class="title-section">
-            <div class="title-container">
-              <h1 class="activity-title">{{ player.title }}</h1>
-            </div>
-          </section>
-
-          <section
-            class="alert-section"
-            *ngIf="(terminatedAfterLoseFocus && !terminatedAfterLeavePage) || terminatedAfterLeavePage"
-          >
-            <nz-alert
-              *ngIf="terminatedAfterLoseFocus && !terminatedAfterLeavePage"
-              nzShowIcon
-              nzType="error"
-              nzMessage="Activité auto terminée"
-              nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de cliquer en dehors de la page."
-              class="custom-alert"
-            />
-
-            <nz-alert
-              *ngIf="terminatedAfterLeavePage"
-              nzShowIcon
-              nzType="error"
-              nzMessage="Activité auto terminée"
-              nzDescription="Cette activité s'est automatiquement terminée en raison de ses paramètres de sécurité, qui interdisent de changer de page."
-              class="custom-alert"
-            />
-          </section>
-
-          <!-- CODE DE DÉBLOCAGE -->
-          <section class="unlock-section">
-            <h3 class="section-title">
-              <mat-icon>lock_open</mat-icon>
-              Code de déblocage
-            </h3>
-            <div class="unlock-content">
-              <p>Demande le code à ton enseignant pour te débloquer !</p>
-              <ui-sixcode (codeComplete)="onCodeComplete($event)" [error]="isCodeError" />
-            </div>
-          </section>
-
-          <!-- CONCLUSION -->
-          <section class="conclusion-section" *ngIf="player.conclusion">
-            <h3 class="section-title">
-              <mat-icon>check_circle</mat-icon>
-              Conclusion de l'activité
-            </h3>
-            <div class="conclusion-content">
-              <nge-markdown [data]="player.conclusion" />
-            </div>
-          </section>
-
-          <player-results [player]="player" />
-
-          <div class="action-buttons">
-            <button *ngIf="canGoDashboard && !embedded()" mat-raised-button color="primary" (click)="back()">
-              <mat-icon>home</mat-icon>
-              Retourner sur PLaTon
-            </button>
+        <!-- CONCLUSION -->
+        @if (player.conclusion) {
+        <section class="conclusion-section">
+          <h3 class="section-title">
+            <mat-icon>check_circle</mat-icon>
+            Conclusion de l'activité
+          </h3>
+          <div class="conclusion-content">
+            <nge-markdown [data]="player.conclusion" />
           </div>
-        </ng-container>
-
+        </section>
+        }
+        <player-results [player]="player" />
+        <div class="action-buttons">
+          @if (canGoDashboard && !embedded()) {
+          <button mat-raised-button color="primary" (click)="back()">
+            <mat-icon>home</mat-icon>
+            Retourner sur PLaTon
+          </button>
+          }
+        </div>
+        }
         <!-- PLANNING -->
-        <ng-container *ngIf="state === 'planned'">
-          <!-- TITRE EN ATTENTE -->
-          <section *ngIf="player.title" class="title-section">
-            <div class="title-container">
-              <h1 class="activity-title">{{ player.title }}</h1>
-            </div>
-          </section>
-
-          <!-- BLOC CHRONO -->
-          <section class="countdown-section">
-            <h3 class="section-title">
-              <mat-icon>schedule</mat-icon>
-              Ouverture de l'activité
-            </h3>
-            <div class="countdown-content">
-              <nz-countdown
-                *ngIf="countdown"
-                nzTitle="Temps restant avant ouverture"
-                [nzValue]="countdown"
-                (nzCountdownFinish)="onFinishCountdown()"
-              />
-            </div>
-          </section>
-
-          <player-settings [player]="player" />
-        </ng-container>
+        @if (state === 'planned') {
+        <!-- TITRE EN ATTENTE -->
+        @if (player.title) {
+        <section class="title-section">
+          <div class="title-container">
+            <h1 class="activity-title">{{ player.title }}</h1>
+          </div>
+        </section>
+        }
+        <!-- BLOC CHRONO -->
+        <section class="countdown-section">
+          <h3 class="section-title">
+            <mat-icon>schedule</mat-icon>
+            Ouverture de l'activité
+          </h3>
+          <div class="countdown-content">
+            @if (countdown) {
+            <nz-countdown
+              nzTitle="Temps restant avant ouverture"
+              [nzValue]="countdown"
+              (nzCountdownFinish)="onFinishCountdown()"
+            />
+            }
+          </div>
+        </section>
+        <player-settings [player]="player" />
+        }
       </div>
-
       <!-- TERMINAL PLATON : visible en preview next quand le next ne renvoie pas d'exercice -->
       @if (canShowTerminalLogs()) {
       <player-terminal-logs [logs]="activityLogs" title="Terminal Next" />
       }
     </mat-card-content>
   </mat-card>
-  <ng-template #showExercices>
-    <div [class.leave-warning-frame]="showLeaveWarning()">
-      @if (showLeaveWarning()) {
-      <div class="leave-warning-banner" role="alert" aria-live="polite">
-        <span class="leave-warning-icon" aria-hidden="true"><mat-icon>info</mat-icon></span>
-        <p>
-          Vous n'êtes pas autorisé à quitter cette page. Si vous quittez, votre activité sera automatiquement terminée.
-        </p>
-      </div>
-      }
-      <section>
-        <ng-container *ngFor="let exercise of exercises; trackBy: trackBySessionId; let i = index">
-          <nz-ribbon [nzText]="ribbon">
-            <ng-template #ribbon>
-              @if (nextNavigation) { Exercice {{ player.navigation.nextExercisesHistoryPosition + 1 }}
-              } @else {
-              {{ composed ? i + 1 : position + 1 }} / {{ navExerciceCount }}
-              }
-            </ng-template>
-            <player-exercise
-              #playerExercise
-              [id]="exercise.sessionId"
-              [player]="exercise"
-              [state]="answerStates[exercise.sessionId]"
-              (evaluated)="onChangeNavigation($event)"
-              [hasPrev]="hasPrev"
-              [hasNext]="hasNext"
-              (goToPrevPlayer)="play(player.navigation.exercises[position - 1], true)"
-              (goToNextPlayer)="play(player.navigation.exercises[position + 1])"
-            />
-          </nz-ribbon>
-        </ng-container>
-      </section>
-
-      @if(canShowTerminalLogs()) {
-      <player-terminal-logs [logs]="activityLogs" title="Terminal Next" />
-      }
+  } @else {
+  <div [class.leave-warning-frame]="showLeaveWarning()">
+    @if (showLeaveWarning()) {
+    <div class="leave-warning-banner" role="alert" aria-live="polite">
+      <span class="leave-warning-icon" aria-hidden="true"><mat-icon>info</mat-icon></span>
+      <p>
+        Vous n'êtes pas autorisé à quitter cette page. Si vous quittez, votre activité sera automatiquement terminée.
+      </p>
     </div>
-  </ng-template>
+    }
+    <section>
+      @for (exercise of exercises; track trackBySessionId(i, exercise); let i = $index) {
+      <nz-ribbon [nzText]="ribbon">
+        <ng-template #ribbon>
+          @if (nextNavigation) { Exercice {{ player.navigation.nextExercisesHistoryPosition + 1 }}
+          } @else {
+          {{ composed ? i + 1 : position + 1 }} / {{ navExerciceCount }}
+          }
+        </ng-template>
+        <player-exercise
+          #playerExercise
+          [id]="exercise.sessionId"
+          [player]="exercise"
+          [state]="answerStates[exercise.sessionId]"
+          (evaluated)="onChangeNavigation($event)"
+          [hasPrev]="hasPrev"
+          [hasNext]="hasNext"
+          (goToPrevPlayer)="play(player.navigation.exercises[position - 1], true)"
+          (goToNextPlayer)="play(player.navigation.exercises[position + 1])"
+        />
+      </nz-ribbon>
+      }
+    </section>
+    @if(canShowTerminalLogs()) {
+    <player-terminal-logs [logs]="activityLogs" title="Terminal Next" />
+    }
+  </div>
+  }
 </main>
 
 @if (showLeaveWarning()) {
 <div class="leave-warning-overlay" aria-hidden="true"></div>
-}
-<footer [class.glass]="countdown" *ngIf="exercises">
+} @if (exercises) {
+<footer [class.glass]="countdown">
+  @if (countdown) {
   <nz-countdown
-    *ngIf="countdown"
     nzTitle="Temps restant"
     [nzValue]="countdown"
     [nzValueStyle]="{ color: countdownColor }"
     (nzCountdownFinish)="onFinishCountdown()"
   />
-  <button
-    mat-fab
-    extended
-    color="primary"
-    [nz-popover]="navigation"
-    nzPopoverPlacement="topRight"
-    *ngIf="!peerComparison && !nextNavigation"
-  >
-    Navigation
-  </button>
+  } @if (!peerComparison && !nextNavigation) {
+  <button mat-fab extended color="primary" [nz-popover]="navigation" nzPopoverPlacement="topRight">Navigation</button>
+  }
 </footer>
+}
 <ng-template #navigation>
   <player-navigation [player]="player" (navigate)="play($event)" [terminate]="terminate.bind(this)" />
 </ng-template>
-<ng-container *ngFor="let breakpoint of countdownBreakpoints">
-  <nz-countdown
-    [style.visibility]="'hidden'"
-    [style.height]="0"
-    [style.width]="0"
-    [nzValue]="breakpoint.time"
-    (nzCountdownFinish)="breakpoint.action()"
-  />
-</ng-container>
+@for (breakpoint of countdownBreakpoints; track breakpoint) {
+<nz-countdown
+  [style.visibility]="'hidden'"
+  [style.height]="0"
+  [style.width]="0"
+  [nzValue]="breakpoint.time"
+  (nzCountdownFinish)="breakpoint.action()"
+/>
+}
 <ng-template #modalFooter>
   <div class="modalButtons">
     <button nz-button nzType="primary" (click)="modalConfirm()" [nzLoading]="isModalLoading">
       Valider tous les exercices et terminer l'activité
     </button>
     <button nz-button nzType="primary" nzDanger (click)="modalCancel()">
-      Terminer l'activité sans valider les exercices
+      Terminer l'activité sans valider les exercices @if (isModalForceChoice) {
       <nz-progress
-        *ngIf="isModalForceChoice"
         [nzPercent]="modalForceChoiceProgress"
         nzType="circle"
         [nzShowInfo]="false"
@@ -229,6 +222,7 @@
         [nzStrokeWidth]="25"
         nzStrokeColor="#171c8f"
       ></nz-progress>
+      }
     </button>
   </div>
 </ng-template>

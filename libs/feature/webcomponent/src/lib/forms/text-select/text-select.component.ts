@@ -8,10 +8,13 @@ import {
   Input,
   Output,
   OnInit,
+  inject,
 } from '@angular/core'
 import { CssPipe } from '../../shared/pipes/css.pipe'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { TextSelectComponentDefinition, TextSelectState } from './text-select'
+import { TextSelectComponentDefinition, type TextSelectState } from './text-select'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 // https://javascript.info/selection-range
 
@@ -23,9 +26,14 @@ const HIGHLIGHT = 'highlight-state'
   templateUrl: 'text-select.component.html',
   styleUrls: ['text-select.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, CssPipeModule],
 })
 @WebComponent(TextSelectComponentDefinition)
 export class TextSelectComponent implements WebComponentHooks<TextSelectState>, OnInit {
+  readonly injector = inject(Injector)
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef)
+  private readonly cssPipe = inject(CssPipe)
+
   @Input() state!: TextSelectState
   @Output() stateChange = new EventEmitter<TextSelectState>()
 
@@ -43,12 +51,6 @@ export class TextSelectComponent implements WebComponentHooks<TextSelectState>, 
     container.className += this.state.disabled ? ' disabled' : ''
     return container
   }
-
-  constructor(
-    readonly injector: Injector,
-    private readonly el: ElementRef<HTMLElement>,
-    private readonly cssPipe: CssPipe
-  ) {}
 
   ngOnInit() {
     this.state.isFilled = false

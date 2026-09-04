@@ -1,14 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component, ElementRef, Input, OnInit, ViewChild, inject, AfterViewInit, OnDestroy } from '@angular/core'
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  ViewChild,
+  inject,
+  AfterViewInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 import { JsonEditorComponent, JsonEditorOptions, JsonEditorTreeNode } from 'ang-jsoneditor'
 import { firstValueFrom } from 'rxjs'
-import { WebComponentDefinition } from '../../web-component'
+import { type WebComponentDefinition } from '../../web-component'
+
+import { MatButtonModule } from '@angular/material/button'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
+import { NgJsonEditorModule } from 'ang-jsoneditor'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { MatIconModule } from '@angular/material/icon'
 
 @Component({
   selector: 'wc-showcase',
   templateUrl: './showcase.component.html',
   styleUrls: ['./showcase.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [MatButtonModule, NzTooltipModule, NgeMarkdownModule, NgJsonEditorModule, MatIconModule],
 })
 export class ShowcaseComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly elementRef = inject(ElementRef) as ElementRef<HTMLElement>

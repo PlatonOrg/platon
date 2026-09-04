@@ -9,24 +9,46 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { FileUploadComponentDefinition, FileUploadState, UploadedFile } from './file-upload'
+import { FileUploadComponentDefinition, type FileUploadState, UploadedFile } from './file-upload'
 import { FileUploadService, SubmissionReadDTO, UploadResponse } from './file-upload.service'
 import { Subscription } from 'rxjs'
 import { HttpEvent, HttpEventType, HttpErrorResponse } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { MatButtonModule } from '@angular/material/button'
+import { MatIconModule } from '@angular/material/icon'
+import { MatProgressBarModule } from '@angular/material/progress-bar'
 
 @Component({
   selector: 'wc-file-upload',
   templateUrl: 'file-upload.component.html',
   styleUrls: ['file-upload.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BaseModule,
+    CssPipeModule,
+
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+  ],
 })
 @WebComponent(FileUploadComponentDefinition)
 export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks<FileUploadState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+  private readonly fileUploadService = inject(FileUploadService)
+
   private readonly webComponentService!: WebComponentService
 
   @Input() state!: FileUploadState
@@ -40,11 +62,9 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
   private sessionId = ''
   private preloadedFilesCount = 0
 
-  constructor(
-    readonly injector: Injector,
-    readonly changeDetector: WebComponentChangeDetectorService,
-    private readonly fileUploadService: FileUploadService
-  ) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService) ?? undefined
   }
 
@@ -266,7 +286,7 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
         if (!regex.test(nameWithoutExtension)) {
           return `Le nom du fichier ne respecte pas le format requis: ${this.state.fileNameRegex}`
         }
-      } catch (e) {
+      } catch (_error) {
         // Ignorer les erreurs de regex invalide
       }
     }

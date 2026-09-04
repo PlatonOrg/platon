@@ -1,26 +1,25 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, input, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, OnInit, signal, inject } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { AuthService, DialogService } from '@platon/core/browser'
 import { LogType, PlatonLog } from '@platon/feature/player/common'
 import { User, UserRoles } from '@platon/core/common'
 
 @Component({
-  standalone: true,
   selector: 'player-terminal-logs',
   templateUrl: './player-terminal-logs.component.html',
   styleUrls: ['./player-terminal-logs.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatButtonModule, NzToolTipModule],
+  imports: [MatIconModule, MatButtonModule, NzTooltipModule],
 })
 export class PlayerTerminalLogsComponent implements OnInit {
+  private readonly dialogService = inject(DialogService)
+  private readonly authService = inject(AuthService)
+
   readonly logs = input<PlatonLog[]>([])
   readonly title = input('Terminal PlaTon')
   protected readonly isTeacherOrAdmin = signal(false)
-
-  constructor(private readonly dialogService: DialogService, private readonly authService: AuthService) {}
 
   async ngOnInit(): Promise<void> {
     const user = (await this.authService.ready()) as User

@@ -3,22 +3,27 @@
     <tr>
       <th>Utilisateur</th>
       <th>Date d'ajout</th>
-      <th *ngIf="canDelete || canAccept"></th>
+      @if (canDelete || canAccept) {
+      <th></th>
+      }
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let data of nzTable.data">
+    @for (data of nzTable.data; track data) {
+    <tr>
       <td>
         <user-avatar #avatar [userIdOrName]="data.userId" />
       </td>
       <td>{{ data.createdAt | date }}</td>
-      <td nzAlign="center" *ngIf="(canDelete && !excludeFromDelete.includes(data.userId)) || canAccept">
-        <nz-button-group>
-          <button *ngIf="canAccept" nz-button nzType="primary" nzOkText="Accepter" (click)="accept.emit(data)">
-            <i nz-icon nzType="check-circle"></i>
+      @if ((canDelete && !excludeFromDelete.includes(data.userId)) || canAccept) {
+      <td nzAlign="center">
+        <div nz-flex nzGap="small">
+          @if (canAccept) {
+          <button nz-button nzType="primary" nzOkText="Accepter" (click)="accept.emit(data)">
+            <nz-icon nzType="check-circle" />
           </button>
+          } @if (canDelete) {
           <button
-            *ngIf="canDelete"
             nz-button
             nzDanger
             nzType="primary"
@@ -27,15 +32,18 @@
             nzOkType="danger"
             [nzPopconfirmTitle]="
               !data.waiting
-                ? 'Voulez-vous vraiment retirer “' + avatar.displayName + '” des membres du cercle?'
+                ? 'Voulez-vous vraiment retirer “' + avatar.displayName + '” des membres du cercle ?'
                 : 'Voulez-vous vraiment refuser la requête de ' + avatar.displayName
             "
             (nzOnConfirm)="deleted.emit(data)"
           >
-            <i nz-icon nzType="delete"></i>
+            <nz-icon nzType="delete" />
           </button>
-        </nz-button-group>
+          }
+        </div>
       </td>
+      }
     </tr>
+    }
   </tbody>
 </nz-table>

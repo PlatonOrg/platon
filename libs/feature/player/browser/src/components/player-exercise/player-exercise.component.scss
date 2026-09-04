@@ -253,9 +253,9 @@ button.primary {
   }
 }
 
-
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -264,8 +264,6 @@ button.primary {
     opacity: 0.8;
   }
 }
-
-
 
 @media (max-width: 768px) {
   .custom-error-page {

@@ -7,7 +7,8 @@
   </mat-card-header>
   <mat-card-content>
     <nz-list nzBordered class="label-wrapper" nzItemLayout="horizontal">
-      <nz-list-item class="button-wrapper" *ngFor="let label of labels; let i = index; trackBy: trackByLabelId">
+      @for (label of labels; track trackByLabelId(i, label); let i = $index) {
+      <nz-list-item class="button-wrapper">
         <div style="width: 50px">
           <button nz-button nzType="default" nzSize="small" [ngStyle]="getLabelStyles(label)" (click)="labelize(label)">
             {{ i + 1 }}
@@ -24,19 +25,18 @@
               [ngStyle]="getLabelInputStyles(label)"
               (blur)="saveEditLabel(label); $event.stopPropagation()"
             />
-            <div
-              *ngIf="
-                labelForms[label.id].get('gradeChange')?.invalid &&
-                (labelForms[label.id].get('gradeChange')?.dirty || labelForms[label.id].get('gradeChange')?.touched)
-              "
-              class="error-message"
-            >
-              <ng-container *ngIf="labelForms[label.id].get('gradeChange')?.errors as errors">
-                <span *ngIf="errors['required']">Champ obligatoire.</span>
-                <span *ngIf="errors['maxlength']">Maximum 4 caractères.</span>
-                <span *ngIf="errors['pattern']">Format invalide (ex: +1, -2, 50).</span>
-              </ng-container>
+            @if ( labelForms[label.id].get('gradeChange')?.invalid && (labelForms[label.id].get('gradeChange')?.dirty ||
+            labelForms[label.id].get('gradeChange')?.touched) ) {
+            <div class="error-message">
+              @if (labelForms[label.id].get('gradeChange')?.errors; as errors) { @if (errors['required']) {
+              <span>Champ obligatoire.</span>
+              } @if (errors['maxlength']) {
+              <span>Maximum 4 caractères.</span>
+              } @if (errors['pattern']) {
+              <span>Format invalide (ex: +1, -2, 50).</span>
+              } }
             </div>
+            }
           </div>
         </form>
         <div
@@ -44,56 +44,51 @@
           [ngStyle]="getLabelStyles(label)"
           (click)="startEditLabel(label); $event.stopPropagation()"
         >
-          <ng-container *ngIf="editingLabelId !== label.id; else editMode">
-            {{ label.name }}
-            <br />
-            <span *ngIf="label.description" class="label-description">
-              {{ label.description }}
-            </span>
-          </ng-container>
-          <ng-template #editMode>
-            <form [formGroup]="labelForms[label.id]" style="display: flex; flex-direction: column; gap: 4px">
-              <input nz-input formControlName="name" style="margin-bottom: 4px" (click)="$event.stopPropagation()" />
-              <textarea
-                nz-input
-                formControlName="description"
-                rows="2"
-                style="margin-bottom: 4px"
-                (click)="$event.stopPropagation()"
-              ></textarea>
-            </form>
-            <div class="horizontal-button">
-              <button
-                nz-button
-                nzType="primary"
-                nzSize="small"
-                (click)="saveEditLabel(label); $event.stopPropagation()"
-              >
-                💾
-              </button>
-              <button nz-button nzType="default" nzSize="small" (click)="cancelEditLabel(); $event.stopPropagation()">
-                ✖️
-              </button>
-              <button
-                nz-button
-                nzDanger
-                nzType="primary"
-                nzSize="small"
-                (click)="deleteLabel(label); $event.stopPropagation()"
-              >
-                🗑️
-              </button>
-            </div>
-          </ng-template>
+          @if (editingLabelId !== label.id) {
+          {{ label.name }}
+          <br />
+          @if (label.description) {
+          <span class="label-description">
+            {{ label.description }}
+          </span>
+          } } @else {
+          <form [formGroup]="labelForms[label.id]" style="display: flex; flex-direction: column; gap: 4px">
+            <input nz-input formControlName="name" style="margin-bottom: 4px" (click)="$event.stopPropagation()" />
+            <textarea
+              nz-input
+              formControlName="description"
+              rows="2"
+              style="margin-bottom: 4px"
+              (click)="$event.stopPropagation()"
+            ></textarea>
+          </form>
+          <div class="horizontal-button">
+            <button nz-button nzType="primary" nzSize="small" (click)="saveEditLabel(label); $event.stopPropagation()">
+              💾
+            </button>
+            <button nz-button nzType="default" nzSize="small" (click)="cancelEditLabel(); $event.stopPropagation()">
+              ✖️
+            </button>
+            <button
+              nz-button
+              nzDanger
+              nzType="primary"
+              nzSize="small"
+              (click)="deleteLabel(label); $event.stopPropagation()"
+            >
+              🗑️
+            </button>
+          </div>
+          }
         </div>
-
         <!-- <span
           [ngClass]="isLabelFav(label) ? 'favorite-label' : 'unfavorite-label'"
           (click)="addOrRemoveToFav(label, $event)"
-        >
+          >
           ★
         </span> -->
       </nz-list-item>
+      }
     </nz-list>
 
     <button id="createbutton" nz-button nzType="primary" nzSize="small" (click)="showCreateLabelModal()">

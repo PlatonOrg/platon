@@ -4,13 +4,12 @@
     {{ showFields ? '- Annuler' : '+ Ajouter utilisateur' }}
   </button>
 
-  <div *ngIf="showFields">
+  @if (showFields) {
+  <div>
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
       <div class="Add-inline">
         <input formControlName="firstname" placeholder="Prénom" nz-button nzType="primary" nzTheme="outline" />
-
         <input formControlName="lastname" placeholder="Nom" nz-button nzType="primary" nzTheme="outline" />
-
         <input
           formControlName="username"
           placeholder="Nom d'utilisateur"
@@ -18,12 +17,12 @@
           nzType="primary"
           nzTheme="outline"
         />
-
         <input formControlName="email" type="email" placeholder="Email" nz-button nzType="primary" nzTheme="outline" />
-
         <select formControlName="role">
           <option value="" disabled>Choisir un rôle</option>
-          <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+          @for (role of roles; track role) {
+          <option [value]="role">{{ role }}</option>
+          }
         </select>
       </div>
       <div>
@@ -36,7 +35,6 @@
           nzTheme="outline"
           class="Add-password"
         />
-
         <button type="button" (click)="generatePassword()" nz-button nzType="primary" nzTheme="outline">
           Régénérer
         </button>
@@ -44,6 +42,7 @@
       <button type="submit" [disabled]="userForm.invalid" nz-button nzType="primary" nzTheme="outline">Ajouter</button>
     </form>
   </div>
+  }
 </div>
 
 <user-table

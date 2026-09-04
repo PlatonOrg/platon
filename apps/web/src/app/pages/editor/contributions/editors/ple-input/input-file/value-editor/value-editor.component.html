@@ -19,21 +19,23 @@
 </div>
 <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
 
-<ng-container *ngIf="value">
-  <button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="eyeButton()">
-    <span nz-icon nzType="eye" nzTheme="outline"></span>
-  </button>
-  <button *ngIf="isContent" nz-button nzType="text" nz-tooltip="Changer en url" (click)="switchToUrl()">
-    <span nz-icon nzType="link" nzTheme="outline"></span>
-  </button>
-  <button *ngIf="isUrl" nz-button nzType="text" nz-tooltip="Changer en contenu" (click)="switchToContent()">
-    <span nz-icon nzType="file-text" nzTheme="outline"></span>
-  </button>
-  <button nz-button nzType="text" nz-tooltip="Supprimer" (click)="changeValue('')">
-    <span nz-icon nzType="close" nzTheme="outline"></span>
-  </button>
-</ng-container>
-@if (this.modeBuilder && watchContent) {
+@if (value) {
+<button nz-button nzType="text" nz-tooltip="Ouvrir" (click)="eyeButton()">
+  <span nz-icon nzType="eye" nzTheme="outline"></span>
+</button>
+@if (isContent) {
+<button nz-button nzType="text" nz-tooltip="Changer en url" (click)="switchToUrl()">
+  <span nz-icon nzType="link" nzTheme="outline"></span>
+</button>
+} @if (isUrl) {
+<button nz-button nzType="text" nz-tooltip="Changer en contenu" (click)="switchToContent()">
+  <span nz-icon nzType="file-text" nzTheme="outline"></span>
+</button>
+}
+<button nz-button nzType="text" nz-tooltip="Supprimer" (click)="changeValue('')">
+  <span nz-icon nzType="close" nzTheme="outline"></span>
+</button>
+} @if (this.modeBuilder && watchContent) {
 <ui-modal-template
   closable
   height="70vh"
@@ -43,9 +45,9 @@
   [footer]="modalFooter"
 >
   <ng-template>
-    <ng-container *ngIf="watchContent">
-      <ui-file-preview #editorPreview [src]="getUrl()" (saveCmd)="saveChange(true)"></ui-file-preview>
-    </ng-container>
+    @if (watchContent) {
+    <ui-file-preview #editorPreview [src]="getUrl()" (saveCmd)="saveChange(true)"></ui-file-preview>
+    }
     <div></div>
   </ng-template>
   <ng-template #modalFooter>

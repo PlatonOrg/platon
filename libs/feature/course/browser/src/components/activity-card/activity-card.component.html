@@ -1,169 +1,162 @@
-<ng-container *ngIf="activity() | courseActivityState as activityState">
-  <mat-card>
-    <div class="card-header" [style.background-color]="color"></div>
-    <mat-card-header>
-      <mat-card-title>
-        <a
-          *ngIf="activity().isChallenge"
-          nz-button
-          nzType="link"
-          [routerLink]="['/courses', activity().courseId, 'challenges']"
-          [queryParams]="{
-            activity: activity().id
-          }"
-          queryParamsHandling="merge"
-        >
-          <span nz-tooltip="Afficher les résultats du challenge" nz-icon nzType="trophy" nzTheme="twotone"></span>
-        </a>
-        {{ activity().title }}
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="ribbon-container">
-        <nz-ribbon [nzText]="activityState.label" [nzColor]="activityState.color"></nz-ribbon>
+@if (activity() | courseActivityState; as activityState) {
+<mat-card>
+  <div class="card-header" [style.background-color]="color"></div>
+  <mat-card-header>
+    <mat-card-title>
+      @if (activity().isChallenge) {
+      <a
+        nz-button
+        nzType="link"
+        [routerLink]="['/courses', activity().courseId, 'challenges']"
+        [queryParams]="{
+          activity: activity().id
+        }"
+        queryParamsHandling="merge"
+      >
+        <span nz-tooltip="Afficher les résultats du challenge" nz-icon nzType="trophy" nzTheme="twotone"></span>
+      </a>
+      }
+      {{ activity().title }}
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="ribbon-container">
+      <nz-ribbon [nzText]="activityState.label" [nzColor]="activityState.color"></nz-ribbon>
+    </div>
+    <div class="card-content">
+      <div class="circle-progression-container">
+        @if (activity().permissions.answer) {
+        <nz-progress
+          [nz-tooltip]="activity().kind === 'lesson' ? 'Avancement sur la lecture' : 'Avancement sur les exercices'"
+          [nzPercent]="activity().progression"
+          nzType="circle"
+          nzStrokeWidth="8"
+          [nzWidth]="150"
+          [nzStrokeColor]="color"
+          [nzFormat]="activity().kind === 'lesson' ? lessonProgressionTemplate : progressionTemplate"
+          nzStatus="normal"
+        />
+        }
       </div>
-      <div class="card-content">
-        <div class="circle-progression-container">
-          <nz-progress
-            *ngIf="activity().permissions.answer"
-            [nz-tooltip]="activity().kind === 'lesson' ? 'Avancement sur la lecture' : 'Avancement sur les exercices'"
-            [nzPercent]="activity().progression"
-            nzType="circle"
-            nzStrokeWidth="8"
-            [nzWidth]="150"
-            [nzStrokeColor]="color"
-            [nzFormat]="activity().kind === 'lesson' ? lessonProgressionTemplate : progressionTemplate"
-            nzStatus="normal"
-          />
+      <div class="dates-container">
+        <div class="date-item">
+          <span>
+            @if (isValidDate(activity().openAt)) {
+            {{ activity().openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+            } @else { Non définie }
+          </span>
+          <span class="date-label"> Ouverture </span>
         </div>
-        <div class="dates-container">
-          <div class="date-item">
-            <span>
-              <ng-container *ngIf="isValidDate(activity().openAt); else noDate">
-                {{ activity().openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-              </ng-container>
-              <ng-template #noDate>Non définie</ng-template>
-            </span>
-            <span class="date-label"> Ouverture </span>
-          </div>
-          <div class="separator"></div>
-          <div class="date-item">
-            <span>
-              <ng-container *ngIf="isValidDate(activity().closeAt); else noDate">
-                {{ activity().closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-              </ng-container>
-              <ng-template #noDate>Non définie</ng-template>
-            </span>
-            <span class="date-label"> Fermeture </span>
-          </div>
+        <div class="separator"></div>
+        <div class="date-item">
+          <span>
+            @if (isValidDate(activity().closeAt)) {
+            {{ activity().closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
+            } @else { Non définie }
+          </span>
+          <span class="date-label"> Fermeture </span>
         </div>
       </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <div>
-        <a
-          *ngIf="activity().permissions.answer && activity().kind !== 'lesson'"
-          [nz-tooltip]="activity().state === 'closed' ? 'Voir mes résultats' : 'Lancer l\'activité'"
-          nz-button
-          nzShape="round"
-          nzType="primary"
-          target="_blank"
-          [routerLink]="['/player/activity', activity().id]"
-          class="action-button"
-        >
-          <mat-icon fontSet="material-icons">{{ activity().state === 'closed' ? 'bar_chart' : 'play_arrow' }}</mat-icon>
-          {{ activity().state === 'closed' ? 'Voir mes résultats' : 'Lancer' }}
-        </a>
-        <a
-          *ngIf="activity().permissions.answer && activity().kind === 'lesson'"
-          nz-tooltip="Lire la leçon"
-          nz-button
-          nzShape="round"
-          nzType="primary"
-          [routerLink]="['/player/course', activity().courseId]"
-          [queryParams]="{ item: activity().id }"
-          class="action-button"
-        >
-          <mat-icon fontSet="material-icons">menu_book</mat-icon>
-          Lire
-        </a>
-        <button
-          *ngIf="activity().permissions.viewResource"
-          nz-tooltip="Ouvrir l'éditeur de l'activité"
-          nz-button
-          nzShape="round"
-          (click)="openTab(editorUrl)"
-          class="action-button"
-        >
-          <mat-icon>edit</mat-icon>
-          Editer
-        </button>
-        <a
-          *ngIf="activity().kind === 'lesson' && activity().permissions.update"
-          nz-tooltip="Éditer le contenu de la leçon"
-          nz-button
-          nzShape="round"
-          [routerLink]="['/lessons', activity().courseId, activity().id]"
-          class="action-button"
-        >
-          <mat-icon>edit</mat-icon>
-          Éditer
-        </a>
-      </div>
-      <div>
-        <button
-          *ngIf="activity().permissions.update || activity().permissions.viewStats"
-          class="more-button"
-          nz-button
-          nzType="text"
-          nzShape="round"
-          (click)="$event.stopPropagation()"
-          nz-dropdown
-          nzTrigger="click"
-          [nzDropdownMenu]="moreActions"
-          nzPlacement="topLeft"
-        >
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <nz-dropdown-menu #moreActions="nzDropdownMenu">
-          <ul nz-menu>
-            <li
-              nz-menu-item
-              *ngIf="activity().permissions.viewStats && activity().kind !== 'lesson'"
-              [routerLink]="['/activities/monitor', activity().courseId, activity().id]"
-            >
-              Suivi de l'activité
-            </li>
-            <li
-              nz-menu-item
-              *ngIf="activity().permissions.viewStats && activity().kind !== 'lesson'"
-              [routerLink]="['/activities', activity().courseId, activity().id]"
-            >
-              Statistiques
-            </li>
-            <li nz-menu-item *ngIf="activity().kind !== 'lesson'">
-              <course-csv-download-button
-                *ngIf="activity().permissions.update"
-                [activities]="[activity()]"
-                [name]="activity().title"
-                type="activity"
-                [courseId]="activity().courseId"
-              />
-            </li>
-            <li
-              nz-menu-item
-              *ngIf="activity().permissions.viewResource"
-              [routerLink]="['/resources', activity().resourceId]"
-            >
-              Ouvrir la ressource associée
-            </li>
-            <li nz-menu-item *ngIf="activity().permissions.update" (click)="settingsDrawer.open()">Paramètres</li>
-          </ul>
-        </nz-dropdown-menu>
-      </div>
-    </mat-card-actions>
-  </mat-card>
-</ng-container>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <div>
+      @if (activity().permissions.answer && activity().kind !== 'lesson') {
+      <a
+        [nz-tooltip]="activity().state === 'closed' ? 'Voir mes résultats' : 'Lancer l\'activité'"
+        nz-button
+        nzShape="round"
+        nzType="primary"
+        target="_blank"
+        [routerLink]="['/player/activity', activity().id]"
+        class="action-button"
+      >
+        <mat-icon fontSet="material-icons">{{ activity().state === 'closed' ? 'bar_chart' : 'play_arrow' }}</mat-icon>
+        {{ activity().state === 'closed' ? 'Voir mes résultats' : 'Lancer' }}
+      </a>
+      } @if (activity().permissions.answer && activity().kind === 'lesson') {
+      <a
+        nz-tooltip="Lire la leçon"
+        nz-button
+        nzShape="round"
+        nzType="primary"
+        [routerLink]="['/player/course', activity().courseId]"
+        [queryParams]="{ item: activity().id }"
+        class="action-button"
+      >
+        <mat-icon fontSet="material-icons">menu_book</mat-icon>
+        Lire
+      </a>
+      } @if (activity().permissions.viewResource) {
+      <button
+        nz-tooltip="Ouvrir l'éditeur de l'activité"
+        nz-button
+        nzShape="round"
+        (click)="openTab(editorUrl)"
+        class="action-button"
+      >
+        <mat-icon>edit</mat-icon>
+        Editer
+      </button>
+      } @if (activity().kind === 'lesson' && activity().permissions.update) {
+      <a
+        nz-tooltip="Éditer le contenu de la leçon"
+        nz-button
+        nzShape="round"
+        [routerLink]="['/lessons', activity().courseId, activity().id]"
+        class="action-button"
+      >
+        <mat-icon>edit</mat-icon>
+        Éditer
+      </a>
+      }
+    </div>
+    <div>
+      @if (activity().permissions.update || activity().permissions.viewStats) {
+      <button
+        class="more-button"
+        nz-button
+        nzType="text"
+        nzShape="round"
+        (click)="$event.stopPropagation()"
+        nz-dropdown
+        nzTrigger="click"
+        [nzDropdownMenu]="moreActions"
+        nzPlacement="topLeft"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      }
+      <nz-dropdown-menu #moreActions="nzDropdownMenu">
+        <ul nz-menu>
+          @if (activity().permissions.viewStats && activity().kind !== 'lesson') {
+          <li nz-menu-item [routerLink]="['/activities/monitor', activity().courseId, activity().id]">
+            Suivi de l'activité
+          </li>
+          } @if (activity().permissions.viewStats && activity().kind !== 'lesson') {
+          <li nz-menu-item [routerLink]="['/activities', activity().courseId, activity().id]">Statistiques</li>
+          } @if (activity().kind !== 'lesson') {
+          <li nz-menu-item>
+            @if (activity().permissions.update) {
+            <course-csv-download-button
+              [activities]="[activity()]"
+              [name]="activity().title"
+              type="activity"
+              [courseId]="activity().courseId"
+            />
+            }
+          </li>
+          } @if (activity().permissions.viewResource) {
+          <li nz-menu-item [routerLink]="['/resources', activity().resourceId]">Ouvrir la ressource associée</li>
+          } @if (activity().permissions.update) {
+          <li nz-menu-item (click)="settingsDrawer.open()">Paramètres</li>
+          }
+        </ul>
+      </nz-dropdown-menu>
+    </div>
+  </mat-card-actions>
+</mat-card>
+}
 <course-activity-settings-drawer [activity]="activity()" (activityChange)="onActivityChange($event)" #settingsDrawer />
 <ng-template #lessonProgressionTemplate>
   <div class="progression">

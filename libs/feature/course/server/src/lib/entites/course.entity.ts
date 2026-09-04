@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseEntity, UserEntity } from '@platon/core/server'
 import { CourseFormat } from '@platon/feature/course/common'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'

@@ -1,29 +1,11 @@
-import { CommonModule } from '@angular/common'
 import { NgModule, Provider } from '@angular/core'
-import { EditorDirectivesModule } from '@cisstech/nge-ide/core'
-import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
 import { PLE_INPUT_PROVIDERS, PleInputProvider } from '../ple-input'
 import { HideResourceIdPipe, ValueEditorComponent } from './value-editor/value-editor.component'
-import { UiFilePreviewComponent, UiModalTemplateComponent } from '@platon/shared/ui'
-import { MatIconModule } from '@angular/material/icon'
-import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 
 @NgModule({
-  imports: [
-    CommonModule,
-    NzButtonModule,
-    NzIconModule,
-    NzToolTipModule,
-    EditorDirectivesModule,
-    UiFilePreviewComponent,
-    UiModalTemplateComponent,
-    MatIconModule,
-    NzSkeletonModule,
-  ],
+  imports: [ValueEditorComponent, HideResourceIdPipe],
   exports: [ValueEditorComponent],
-  declarations: [ValueEditorComponent, HideResourceIdPipe],
+  declarations: [],
 })
 export class InputFileModule {}
 

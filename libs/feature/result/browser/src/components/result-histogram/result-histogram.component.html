@@ -1,6 +1,5 @@
-
+@if (chart) {
 <div
-  *ngIf="chart"
   class="echarts"
   coreEcharts
   [autoResize]="false"
@@ -8,3 +7,4 @@
   (chartInit)="onChartInit($event)"
   (chartClick)="onChartClick($event)"
 ></div>
+}

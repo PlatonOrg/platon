@@ -1,4 +1,13 @@
-import { Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+  inject,
+} from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { OutputData } from '@editorjs/editorjs'
 import { ResourceLoaderService } from '@cisstech/nge/services'
@@ -11,9 +20,13 @@ import { isExercisePreviewResizeMessage } from '../exercise-preview-resize'
   selector: 'ui-editorjs-viewer',
   templateUrl: './editorjs-viewer.component.html',
   styleUrls: ['./editorjs-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [EditorjsViewerService],
 })
 export class EditorjsViewerComponent implements OnChanges, OnDestroy {
+  private editorjsViewerService = inject(EditorjsViewerService)
+  private readonly sanitizer = inject(DomSanitizer)
+
   @Input() data: OutputData | undefined
   protected sanitizedHtml: SafeHtml = ''
 
@@ -22,7 +35,7 @@ export class EditorjsViewerComponent implements OnChanges, OnDestroy {
   private hljsStyleLoaded = false
   private readonly resizeListener = (event: MessageEvent) => this.onResizeMessage(event)
 
-  constructor(private editorjsViewerService: EditorjsViewerService, private readonly sanitizer: DomSanitizer) {
+  constructor() {
     window.addEventListener('message', this.resizeListener)
   }
 

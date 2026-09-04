@@ -5,14 +5,38 @@ import { PleInput } from '@platon/feature/compiler'
 import { Subscription } from 'rxjs'
 import { ActivatedRoute } from '@angular/router'
 import { InputFileService } from '@platon/feature/resource/browser'
+import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
+import { DragDropModule } from '@angular/cdk/drag-drop'
+import { MatIconModule } from '@angular/material/icon'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { NzSwitchModule } from 'ng-zorro-antd/switch'
+import { PleInputEditorModule } from '../ple-input/ple-input.module'
 
 @Component({
   selector: 'app-plc-editor',
   templateUrl: './plc-editor.component.html',
   styleUrls: ['./plc-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    DragDropModule,
+    MatIconModule,
+    NzListModule,
+    NzButtonModule,
+    NzIconModule,
+    NzTooltipModule,
+    NzSwitchModule,
+    PleInputEditorModule,
+  ],
 })
 export class PlcEditorComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute)
+
   private readonly fileService = inject(FileService)
   private readonly notificationService = inject(NotificationService)
 
@@ -37,7 +61,6 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
 
   resourceId = this.route.snapshot.paramMap.get('id')
   version = this.route.snapshot.queryParamMap.get('version')
-  constructor(private route: ActivatedRoute) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(
@@ -103,10 +126,6 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
     }
 
     this.fileService.update(this.request.uri, JSON.stringify(content, null, 2))
-  }
-
-  protected trackByIndex(index: number) {
-    return index
   }
 
   private async createEditor(): Promise<void> {

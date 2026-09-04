@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CreatedResponse, ItemResponse, ListResponse } from '@platon/core/common'
 import { CreateCas, Cas, CasFilters, UpdateCas } from '@platon/feature/cas/common'
 import { Observable } from 'rxjs'
@@ -8,9 +8,7 @@ import { CasProvider } from '../models/cas-provider'
 
 @Injectable()
 export class RemoteCasProvider extends CasProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   listCas(): Observable<ListResponse<string>> {
     return this.http.get<ListResponse<string>>('/api/v1/cas/casnames')

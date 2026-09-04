@@ -1,16 +1,13 @@
-import { CommonModule } from '@angular/common'
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule, Provider } from '@angular/core'
-import { FormsModule } from '@angular/forms'
+import { NgModule, Provider } from '@angular/core'
 import { emptyAutomaton } from '@platon/feature/webcomponent'
-import { NzFormModule } from 'ng-zorro-antd/form'
+
 import { PLE_INPUT_PROVIDERS, PleInputProvider } from '../ple-input'
 import { ValueEditorComponent } from './value-editor/value-editor.component'
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NzFormModule],
+  imports: [ValueEditorComponent],
   exports: [ValueEditorComponent],
-  declarations: [ValueEditorComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  declarations: [],
 })
 export class InputAutomatonModule {}
 

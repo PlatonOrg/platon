@@ -9,23 +9,24 @@
   <source [src]="src" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
-} @else if (isText){
-<nge-markdown *ngIf="this.isMd" [data]="editService.getCurrentFileContent(this.src)" />
-<pre *ngIf="!this.isMd">{{ editService.getCurrentFileContent(this.src) }}</pre>
-} @else if (isPdf) {
+} @else if (isText){ @if (this.isMd) {
+<nge-markdown [data]="editService.getCurrentFileContent(this.src)" />
+} @if (!this.isMd) {
+<pre>{{ editService.getCurrentFileContent(this.src) }}</pre>
+} } @else if (isPdf) {
 <div class="pdf-navigation">
   <button nz-button (click)="onPrevPage()" [disabled]="currentPage <= 1">
     <span nz-icon nzType="left" nzTheme="outline"></span>
   </button>
-  <nz-input-number-group [nzAddOnAfter]="' / ' + totalPages">
-    <nz-input-number
-      [nzMin]="1"
-      [nzMax]="totalPages"
-      [(ngModel)]="currentPage"
-      (ngModelChange)="goToPage($event)"
-      [nzStep]="1"
-    />
-  </nz-input-number-group>
+  <nz-input-number
+    [nzMin]="1"
+    [nzMax]="totalPages"
+    [(ngModel)]="currentPage"
+    (ngModelChange)="goToPage($event)"
+    [nzStep]="1"
+  >
+    <span nzInputSuffix>/ {{ totalPages }}</span>
+  </nz-input-number>
   <button nz-button (click)="onNextPage()" [disabled]="currentPage >= totalPages">
     <span nz-icon nzType="right" nzTheme="outline"></span>
   </button>
@@ -48,8 +49,8 @@
   {{ message }}
   }
 </div>
-} @else if (isCsv){ @if (dataValid) {
-<div class="csv-container" *ngIf="isCsv">
+} @else if (isCsv){ @if (dataValid) { @if (isCsv) {
+<div class="csv-container">
   <nz-table
     #csvTable
     [nzData]="csvRows"
@@ -61,17 +62,23 @@
   >
     <thead>
       <tr>
-        <th *ngFor="let header of csvHeaders">{{ header }}</th>
+        @for (header of csvHeaders; track header) {
+        <th>{{ header }}</th>
+        }
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of csvTable.data">
-        <td *ngFor="let cell of row">{{ cell }}</td>
+      @for (row of csvTable.data; track row) {
+      <tr>
+        @for (cell of row; track cell) {
+        <td>{{ cell }}</td>
+        }
       </tr>
+      }
     </tbody>
   </nz-table>
 </div>
-} @else {
+} } @else {
 <div class="error-message">
   {{ message }}
 </div>

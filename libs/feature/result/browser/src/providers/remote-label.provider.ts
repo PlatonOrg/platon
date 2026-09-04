@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { LabelProvider } from '../models/label.provider'
 import { HttpClient } from '@angular/common/http'
 import { CreateLabel, Label } from '@platon/feature/result/common'
@@ -7,9 +7,8 @@ import { ListResponse } from '@platon/core/common'
 
 @Injectable()
 export class RemoteLabelProvider extends LabelProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
+
   listLabels(navigationExerciseId: string): Observable<Label[]> {
     return this.http.get<ListResponse<Label>>(`/api/v1/results/labels/list/${navigationExerciseId}`).pipe(
       map((response: ListResponse<Label>) => {

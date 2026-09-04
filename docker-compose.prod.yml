@@ -19,7 +19,7 @@ services:
     ports:
       - '${DB_PORT}:5432'
     volumes:
-      - postgresdata:/var/lib/postgresql/data
+      - postgresdata_v18:/var/lib/postgresql
     networks:
       - platon-network
     env_file:
@@ -109,7 +109,7 @@ services:
 volumes:
   dist:
   redisdata:
-  postgresdata:
+  postgresdata_v18:
 
 networks:
   platon-network:

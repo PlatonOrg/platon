@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-peer-server',
   preset: '../../../../jest.preset.js',
   testEnvironment: 'node',

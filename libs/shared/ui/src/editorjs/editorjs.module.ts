@@ -3,8 +3,7 @@ import { NgModule } from '@angular/core'
 
 import { EditorJsComponent } from './editorjs.component'
 @NgModule({
-  imports: [CommonModule],
+  imports: [CommonModule, EditorJsComponent],
   exports: [EditorJsComponent],
-  declarations: [EditorJsComponent],
 })
 export class UiEditorJsModule {}

@@ -40,7 +40,6 @@ import { FeatureAnnouncementService, FeatureAnnouncementModalComponent } from '@
 import { MatDividerModule } from '@angular/material/divider'
 
 @Component({
-  standalone: true,
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],
@@ -69,6 +68,8 @@ import { MatDividerModule } from '@angular/material/divider'
   ],
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
+  private readonly userService = inject(UserService)
+
   @Input() drawerOpened = false
   @Output() drawerOpenedChange = new EventEmitter<boolean>()
 
@@ -126,8 +127,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   get tabletOrBelow(): boolean {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
   }
-
-  constructor(private readonly userService: UserService) {}
 
   async ngOnInit(): Promise<void> {
     this.drawerOpened = !this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])

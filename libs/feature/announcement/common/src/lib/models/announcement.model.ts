@@ -2,7 +2,7 @@ import { User, UserRoles } from '@platon/core/common'
 
 // On recreer les interfaces d'editorJs nous-même car on ne pas utiliser les siennes dans NestJs car ça vient d'Angular.
 export interface BlockToolData<Data extends object = any> {
-  [key: string]: any
+  [key: string]: Data
 }
 
 export interface BlockTuneData {

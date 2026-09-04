@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { UiError403Component, UiQRCodeComponent } from '@platon/shared/ui'
 import { Subscription } from 'rxjs'
@@ -22,23 +21,19 @@ import { Router } from '@angular/router'
 import { CourseDuplicateComponent } from './duplicate/duplicate.component'
 
 @Component({
-  standalone: true,
   selector: 'app-course-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     UiError403Component,
     ReactiveFormsModule,
     UiQRCodeComponent,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
     MatCardModule,
-
     NzFormModule,
     NzSpinModule,
     NzButtonModule,
@@ -50,6 +45,10 @@ import { CourseDuplicateComponent } from './duplicate/duplicate.component'
   ],
 })
 export class CourseSettingsPage implements OnInit, OnDestroy {
+  private readonly presenter = inject(CoursePresenter)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly clipboard = inject(Clipboard)
+
   private readonly subscriptions: Subscription[] = []
   private readonly breakpointObserver = inject(BreakpointObserver)
   private readonly router = inject(Router)
@@ -81,12 +80,6 @@ export class CourseSettingsPage implements OnInit, OnDestroy {
     if (!user) return false
     return this.form.valid && this.canEdit
   }
-
-  constructor(
-    private readonly presenter: CoursePresenter,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly clipboard: Clipboard
-  ) {}
 
   ngOnInit(): void {
     this.subscriptions.push(

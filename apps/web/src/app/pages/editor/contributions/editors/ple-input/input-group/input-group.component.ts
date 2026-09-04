@@ -2,13 +2,29 @@ import { ChangeDetectionStrategy, Component, Input, booleanAttribute, forwardRef
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { PleInput } from '@platon/feature/compiler'
 import { PleInputMode } from '../ple-input'
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
+import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop'
+
+import { MatIconModule } from '@angular/material/icon'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { PleInputComponent } from '../ple-input.component'
 
 @Component({
   selector: 'app-editor-input-group',
   templateUrl: 'input-group.component.html',
   styleUrls: ['input-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DragDropModule,
+    MatIconModule,
+    NzButtonModule,
+    NzIconModule,
+    NzListModule,
+    NzTooltipModule,
+    PleInputComponent,
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

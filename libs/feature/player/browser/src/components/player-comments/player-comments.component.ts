@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { firstValueFrom } from 'rxjs'
 
@@ -23,7 +23,6 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 
 @Component({
-  standalone: true,
   selector: 'player-comments',
   templateUrl: './player-comments.component.html',
   styleUrls: ['./player-comments.component.scss'],
@@ -35,7 +34,6 @@ import { MatButtonModule } from '@angular/material/button'
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
-
     NzFormModule,
     NzListModule,
     NzInputModule,
@@ -43,12 +41,16 @@ import { MatButtonModule } from '@angular/material/button'
     NzCommentModule,
     NzEmptyModule,
     NzSpinModule,
-
     DialogModule,
     UserAvatarComponent,
   ],
 })
 export class PlayerCommentsComponent implements OnInit, OnChanges {
+  private readonly authService = inject(AuthService)
+  private readonly dialogService = inject(DialogService)
+  private readonly resultService = inject(ResultService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() answers: ExercisePlayer[] = []
   @Input() canComment = false
 
@@ -61,13 +63,6 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
   protected isLoading = true
   protected previousComments: SessionComment[] = []
   protected showSuggestions = false
-
-  constructor(
-    private readonly authService: AuthService,
-    private readonly dialogService: DialogService,
-    private readonly resultService: ResultService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User

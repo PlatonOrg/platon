@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-result-server',
   preset: '../../../../jest.preset.js',
   globals: {

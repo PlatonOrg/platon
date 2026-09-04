@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Injectable, OnDestroy } from '@angular/core'
+import { Injectable, OnDestroy, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { AuthService, DialogService } from '@platon/core/browser'
 import { ListResponse, User } from '@platon/core/common'
@@ -19,19 +18,19 @@ import { BehaviorSubject, Subscription, firstValueFrom } from 'rxjs'
 
 @Injectable()
 export class ActivityPresenter implements OnDestroy {
+  private readonly authService = inject(AuthService)
+  private readonly dialogService = inject(DialogService)
+  private readonly resultService = inject(ResultService)
+  private readonly courseService = inject(CourseService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+
   private readonly subscriptions: Subscription[] = []
   private readonly context = new BehaviorSubject<Context>(this.defaultContext())
 
   readonly contextChange = this.context.asObservable()
   readonly onDeletedActivity = this.courseService.onDeletedActivity
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly dialogService: DialogService,
-    private readonly resultService: ResultService,
-    private readonly courseService: CourseService,
-    private readonly activatedRoute: ActivatedRoute
-  ) {
+  constructor() {
     this.subscriptions.push(
       this.activatedRoute.paramMap.subscribe((params) => {
         this.onChangeRoute(params.get('courseId') as string, params.get('activityId') as string).catch(console.error)

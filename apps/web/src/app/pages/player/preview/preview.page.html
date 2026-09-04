@@ -1,11 +1,7 @@
-<ng-container *ngIf="!loading; else spinner">
-  <ng-container *ngIf="player">
-    <player-wrapper [player]="player" />
-  </ng-container>
-  <ng-container *ngIf="error">
-    <ui-error [error]="error" [showMessage]="true" [showButtons]="false" />
-  </ng-container>
-</ng-container>
-<ng-template #spinner>
-  <nz-spin *ngIf="loading" nzSimple nzSize="large" nzTip="Chargement..." />
-</ng-template>
+@if (!loading) { @if (player) {
+<player-wrapper [player]="player" />
+} @if (error) {
+<ui-error [error]="error" [showMessage]="true" [showButtons]="false" />
+} } @else { @if (loading) {
+<nz-spin nzSimple nzSize="large" nzTip="Chargement..." />
+} }

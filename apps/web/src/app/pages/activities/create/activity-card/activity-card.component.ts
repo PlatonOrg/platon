@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router'
 
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzRibbonComponent } from 'ng-zorro-antd/badge'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
@@ -13,7 +13,6 @@ import { Resource } from '@platon/feature/resource/common'
 import { ResourcePipesModule } from '@platon/feature/resource/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-activity-card',
   templateUrl: './activity-card.component.html',
   styleUrls: ['./activity-card.component.scss'],
@@ -24,7 +23,7 @@ import { ResourcePipesModule } from '@platon/feature/resource/browser'
     MatIconModule,
     NzIconModule,
     NzBadgeModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzRibbonComponent,
     NgeUiListModule,
     ResourcePipesModule,

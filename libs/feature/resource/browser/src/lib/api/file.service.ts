@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs'
 
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ActivityExerciseGroup, PLSourceFile } from '@platon/feature/compiler'
 import {
   ExerciseTransformInput,
@@ -20,7 +20,7 @@ import { CreatedResponse } from '@platon/core/common'
 
 @Injectable({ providedIn: 'root' })
 export class ResourceFileService {
-  constructor(private readonly provider: ResourceFileProvider) {}
+  private readonly provider = inject(ResourceFileProvider)
 
   compileExercise(resource: string, version?: string): Observable<PLSourceFile> {
     return this.provider.compileExercise(resource, version)

@@ -15,7 +15,8 @@
         />
         <mat-error>Un nom d'utilisateur valide est requis!</mat-error>
       </mat-form-field>
-      <mat-form-field *ngIf="!user" appearance="fill">
+      @if (!user) {
+      <mat-form-field appearance="fill">
         <mat-label>Mot de passe</mat-label>
         <input
           name="password"
@@ -27,14 +28,18 @@
         />
         <mat-error>Un mot de passe est requis !</mat-error>
       </mat-form-field>
+      }
     </mat-card-content>
     <mat-card-actions>
-      <mat-spinner *ngIf="connecting" [diameter]="32" [mode]="'indeterminate'"> </mat-spinner>
-      @if (user) {
+      @if (connecting) {
+      <mat-spinner [diameter]="32" [mode]="'indeterminate'"> </mat-spinner>
+      } @if (user) {
       <button mat-raised-button (click)="signOut()">Se deconnecter</button>
-      <button *ngIf="callbackTitle" mat-raised-button (click)="signInToExternalApp()">
+      @if (callbackTitle) {
+      <button mat-raised-button (click)="signInToExternalApp()">
         Continuer sur {{ callbackTitle }} en tant que "{{ user.username | uppercase }}"
       </button>
+      }
       <button mat-raised-button type="submit" color="primary">
         Continuer sur PLaTon en tant que "{{ user.username | uppercase }}"
       </button>

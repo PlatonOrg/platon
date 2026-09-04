@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ShepherdService, TutorialStep } from './shepherd/shepherd.service'
 import { Resource, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 
@@ -6,7 +6,7 @@ import { Resource, ResourceStatus, ResourceTypes } from '@platon/feature/resourc
   providedIn: 'root',
 })
 export class ResourcePageTutorialService {
-  constructor(private shepherdService: ShepherdService) {}
+  private shepherdService = inject(ShepherdService)
 
   startResourcePageTutorial(resource: Resource, isOwner: boolean, isMember: boolean, isWatcher: boolean): void {
     const steps = this.buildTutorialSteps(resource, isOwner, isMember, isWatcher)

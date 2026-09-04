@@ -5,8 +5,7 @@ import {
   Component,
   OnInit,
   CUSTOM_ELEMENTS_SCHEMA,
-  ElementRef,
-  ViewChild,
+  inject,
 } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, RouterModule } from '@angular/router'
@@ -27,32 +26,23 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzTagModule } from 'ng-zorro-antd/tag'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
 
-import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
-import { Announcement, AnnouncementFilters } from '@platon/feature/announcement/common'
+import { DialogModule, DialogService } from '@platon/core/browser'
+import { Announcement } from '@platon/feature/announcement/common'
 import { AnnouncementService } from '@platon/feature/announcement/browser'
 import { UiEditorJsModule, EditorjsViewerComponent } from '@platon/shared/ui'
 
-import { OutputData } from '@editorjs/editorjs'
-
 import { firstValueFrom } from 'rxjs'
 import { NzCardModule } from 'ng-zorro-antd/card'
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
-import { UiLayoutTabDirective, UiLayoutTabsComponent } from '@platon/shared/ui'
-
-import { NzSpaceComponent } from 'ng-zorro-antd/space'
-
 @Component({
   selector: 'app-announcements',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatIconModule,
     MatIconModule,
     MatFormFieldModule,
@@ -61,7 +51,6 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
     MatDividerModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-
     NzButtonModule,
     NzCardModule,
     NzDividerModule,
@@ -71,9 +60,8 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
     NzSkeletonModule,
     NzSpinModule,
     NzTagModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzTypographyModule,
-
     DialogModule,
     UiEditorJsModule,
     EditorjsViewerComponent,
@@ -84,19 +72,16 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AnnouncementsPage implements OnInit {
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly announcementService = inject(AnnouncementService)
+  private readonly route = inject(ActivatedRoute)
+
   protected announcements: Announcement[] = []
   protected filteredAnnouncements: Announcement[] = []
   protected loading = true
   protected searchText = ''
   protected selectedAnnouncement: Announcement | null = null
-
-  constructor(
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly announcementService: AnnouncementService,
-    private readonly authService: AuthService,
-    private readonly route: ActivatedRoute
-  ) {}
 
   ngOnInit(): void {
     void this.loadAnnouncements()
@@ -128,13 +113,13 @@ export class AnnouncementsPage implements OnInit {
               this.announcementService.findByIdForUser(this.announcements[0].id)
             )
           }
-        } catch (error) {
+        } catch (_error) {
           this.dialogService.error("Erreur lors du chargement de l'annonce")
         } finally {
           this.changeDetectorRef.markForCheck()
         }
       })
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Erreur lors du chargement des annonces')
     } finally {
       this.loading = false

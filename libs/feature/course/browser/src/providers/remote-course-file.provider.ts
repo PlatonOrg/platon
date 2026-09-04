@@ -1,14 +1,12 @@
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Observable } from 'rxjs'
 import { filter, map, tap } from 'rxjs/operators'
 import { CourseFileProvider, CourseFileUploadResponse } from '../models/course-file-provider'
 
 @Injectable()
 export class RemoteCourseFileProvider extends CourseFileProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   upload(courseId: string, file: File, onProgress?: (percent: number) => void): Observable<CourseFileUploadResponse> {
     const formData = new FormData()

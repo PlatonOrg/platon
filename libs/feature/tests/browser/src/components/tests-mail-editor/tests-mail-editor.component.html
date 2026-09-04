@@ -26,17 +26,16 @@
               placeholder="Objet du mail"
             />
           </div>
-          <ui-editorjs *ngIf="mail" [ngModel]="mail" (ngModelChange)="onChangeData($event)"></ui-editorjs>
+          @if (mail) {
+          <ui-editorjs [ngModel]="mail" (ngModelChange)="onChangeData($event)"></ui-editorjs>
+          }
         </as-split-area>
         <as-split-area size="30">
           <div class="variables-list">
             <h2>Liste des variables</h2>
             <ul>
-              <li
-                *ngFor="let variable of variables; trackBy: trackByVariableName"
-                (click)="copyVariableToClipboard(variable.name)"
-                [class.copied]="copiedVariable === variable.name"
-              >
+              @for (variable of variables; track trackByVariableName($index, variable)) {
+              <li (click)="copyVariableToClipboard(variable.name)" [class.copied]="copiedVariable === variable.name">
                 <div class="variable-content">
                   <div class="variable-name-container">
                     <span class="variable-name">{{ '{{ ' + variable.name + ' }}'}}</span>
@@ -47,6 +46,7 @@
                   <span class="variable-description">{{ variable.description }}</span>
                 </div>
               </li>
+              }
             </ul>
           </div>
         </as-split-area>

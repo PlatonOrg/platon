@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { MatButtonModule } from '@angular/material/button'
@@ -19,20 +18,16 @@ import { TagService } from '@platon/core/browser'
 import { NzModalService } from 'ng-zorro-antd/modal'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-informations',
   templateUrl: './informations.page.html',
   styleUrls: ['./informations.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatButtonModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzSpinModule,
     NzFormModule,
     NzButtonModule,
@@ -41,12 +36,12 @@ import { NzModalService } from 'ng-zorro-antd/modal'
   providers: [NzModalService],
 })
 export class ResourceInformationsPage implements OnInit, OnDestroy {
+  private modal = inject(NzModalService)
+
   private readonly subscriptions: Subscription[] = []
   private readonly presenter = inject(ResourcePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly tagService = inject(TagService)
-
-  constructor(private modal: NzModalService) {}
 
   protected dataSource?: DataSource
   protected listOfTagOptions: string[] = []

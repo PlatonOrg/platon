@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -47,13 +46,11 @@ interface SidebarSection {
 type MainViewMode = 'input' | 'setting' | 'history'
 
 @Component({
-  standalone: true,
   selector: 'app-builder',
   templateUrl: './builder.page.html',
   styleUrls: ['./builder.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -67,7 +64,6 @@ type MainViewMode = 'input' | 'setting' | 'history'
     UiModalIFrameComponent,
     VersionHistoryComponent,
     UiErrorComponent,
-
     NgeIdeModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

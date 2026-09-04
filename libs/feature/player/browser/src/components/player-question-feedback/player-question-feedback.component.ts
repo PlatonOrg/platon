@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, signal, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -12,18 +11,17 @@ import { firstValueFrom } from 'rxjs'
 
 @Component({
   selector: 'player-question-feedback',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, MatIconModule, NzButtonModule, NzInputModule, NzSelectModule],
+  imports: [FormsModule, MatIconModule, NzButtonModule, NzInputModule, NzSelectModule],
   templateUrl: './player-question-feedback.component.html',
   styleUrl: './player-question-feedback.component.scss',
 })
 export class PlayerQuestionFeedbackComponent {
+  private readonly playerService = inject(PlayerService)
+
   readonly sessionId = input<string | undefined>(undefined)
   readonly exerciseTitle = input<string | undefined>(undefined)
   readonly author = input<string | null | undefined>(undefined)
-
-  constructor(private readonly playerService: PlayerService) {}
 
   protected readonly maxLength = 10000
 

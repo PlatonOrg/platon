@@ -1,3 +1,4 @@
+import { Injector, runInInjectionContext } from '@angular/core'
 import { ActivatedRoute, ParamMap, convertToParamMap } from '@angular/router'
 import { AuthService, DialogService } from '@platon/core/browser'
 import { User } from '@platon/core/common'
@@ -89,15 +90,18 @@ describe('MonitorPresenter', () => {
       queryParamMap: queryParamMap$.asObservable(),
     } as unknown as ActivatedRoute
 
-    presenter = new MonitorPresenter(
-      authService as unknown as AuthService,
-      dialogService as unknown as DialogService,
-      resultService as unknown as ResultService,
-      { ...courseService, onDeletedActivity: EMPTY } as unknown as CourseService,
-      activatedRoute,
-      notificationService as unknown as NotificationService,
-      playerService as unknown as PlayerService
-    )
+    const injector = Injector.create({
+      providers: [
+        { provide: AuthService, useValue: authService },
+        { provide: DialogService, useValue: dialogService },
+        { provide: ResultService, useValue: resultService },
+        { provide: CourseService, useValue: { ...courseService, onDeletedActivity: EMPTY } },
+        { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: NotificationService, useValue: notificationService },
+        { provide: PlayerService, useValue: playerService },
+      ],
+    })
+    presenter = runInInjectionContext(injector, () => new MonitorPresenter())
 
     presenter.contextChange.subscribe((c) => (latestContext = c))
   })

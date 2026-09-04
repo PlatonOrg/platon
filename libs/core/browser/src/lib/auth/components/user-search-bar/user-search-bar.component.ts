@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -19,7 +19,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
-import { DEFAULT_SEARCH_BAR_LIMIT, User, UserFilters, UserGroup } from '@platon/core/common'
+import { DEFAULT_SEARCH_BAR_LIMIT, User, type UserFilters, UserGroup } from '@platon/core/common'
 import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { UserService } from '../../api/user.service'
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component'
@@ -27,7 +27,6 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component'
 type Item = User | UserGroup
 
 @Component({
-  standalone: true,
   selector: 'user-search-bar',
   templateUrl: './user-search-bar.component.html',
   styleUrls: ['./user-search-bar.component.scss'],
@@ -39,7 +38,7 @@ type Item = User | UserGroup
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UserAvatarComponent, UiSearchBarComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UserAvatarComponent, UiSearchBarComponent],
 })
 export class UserSearchBarComponent implements OnInit, OnChanges, ControlValueAccessor {
   private readonly userService = inject(UserService)

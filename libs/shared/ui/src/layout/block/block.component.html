@@ -5,19 +5,14 @@
 </nz-skeleton>
 <nz-skeleton [nzActive]="state === 'LOADING'" [nzLoading]="state === 'LOADING'">
   <section>
-    <ng-container [ngSwitch]="state">
-      <ng-container *ngSwitchCase="'READY'">
-        <router-outlet />
-      </ng-container>
-      <ng-container *ngSwitchCase="'SERVER_ERROR'">
-        <ui-error-500 />
-      </ng-container>
-      <ng-container *ngSwitchCase="'FORBIDDEN'">
-        <ui-error-403 />
-      </ng-container>
-      <ng-container *ngSwitchCase="'NOT_FOUND'">
-        <ui-error-404 />
-      </ng-container>
-    </ng-container>
+    @switch (state) { @case ('READY') {
+    <router-outlet />
+    } @case ('SERVER_ERROR') {
+    <ui-error-500 />
+    } @case ('FORBIDDEN') {
+    <ui-error-403 />
+    } @case ('NOT_FOUND') {
+    <ui-error-404 />
+    } }
   </section>
 </nz-skeleton>

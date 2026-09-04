@@ -16,6 +16,7 @@ import { Configuration } from '../config/configuration'
 import { UserService } from '../users/user.service'
 import { UserRoles } from '@platon/core/common'
 import { randomUUID } from 'crypto'
+import { IRequest } from './auth.types'
 
 @Injectable()
 export class AuthService {
@@ -68,8 +69,12 @@ export class AuthService {
     }
   }
 
-  async resetPassword(input: ResetPasswordInput): Promise<AuthToken> {
+  async resetPassword(input: ResetPasswordInput, req: IRequest): Promise<AuthToken> {
+    const reqUser = req.user
     const user = (await this.userService.findByUsername(input.username)).get()
+    if (reqUser.username !== user.username && reqUser.role !== UserRoles.admin) {
+      throw new ForbiddenResponse('You are not allowed to reset this password')
+    }
     if (user.password && !(await bcrypt.compare(input.password || '', user.password))) {
       throw new ForbiddenResponse('Password is incorrect')
     }

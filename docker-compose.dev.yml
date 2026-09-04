@@ -10,15 +10,12 @@ services:
       - platon-network
 
   postgres:
-    build:
-      context: .
-      dockerfile: .docker/db/Dockerfile
-    image: platon/postgres
+    image: pgvector/pgvector:0.8.6-pg18-trixie
     container_name: platon_postgres
     ports:
       - '${DB_PORT}:5432'
     volumes:
-      - postgresdata:/var/lib/postgresql/data
+      - postgresdata_v18:/var/lib/postgresql
     networks:
       - platon-network
     env_file:
@@ -75,7 +72,7 @@ services:
       - pgadmin
 volumes:
   redisdata:
-  postgresdata:
+  postgresdata_v18:
 
 networks:
   platon-network:

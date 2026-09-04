@@ -4,7 +4,6 @@
 }
 
 :host::ng-deep {
-
   .margin-bottom-5 {
     margin-bottom: 5px;
   }
@@ -12,8 +11,8 @@
   .ant-list-item-action {
     position: relative;
     display: flex;
-    justify-content:flex-end;
-    gap:5px;
+    justify-content: flex-end;
+    gap: 5px;
     height: 0;
     top: -5vh;
     & > li {

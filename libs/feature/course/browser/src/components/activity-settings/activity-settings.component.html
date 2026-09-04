@@ -1,4 +1,4 @@
-<nz-tabset nzType="card" class="activity-settings-tabs">
+<nz-tabs nzType="card" class="activity-settings-tabs">
   <!-- Onglet 1: Apparence & Restrictions -->
   <nz-tab nzTitle="Restrictions">
     <div class="tab-content">
@@ -28,14 +28,17 @@
                     <span class="date-label">Ouverture</span>
 
                     <!-- Mode affichage -->
-                    <span class="date-value" *ngIf="!editOpenDate">
+                    @if (!editOpenDate) {
+                    <span class="date-value">
                       {{ tempOpenDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-                      <ng-container *ngIf="!tempOpenDate">Aucune date définie</ng-container>
+                      @if (!tempOpenDate) { Aucune date définie }
                       <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                     </span>
+                    }
 
                     <!-- Mode édition -->
-                    <div class="date-edit" *ngIf="editOpenDate">
+                    @if (editOpenDate) {
+                    <div class="date-edit">
                       <nz-date-picker
                         [nzShowTime]="true"
                         [(ngModel)]="tempOpenDate"
@@ -46,6 +49,7 @@
                         #openDatePicker
                       />
                     </div>
+                    }
                   </div>
                 </div>
 
@@ -57,14 +61,17 @@
                     <span class="date-label">Fermeture</span>
 
                     <!-- Mode affichage -->
-                    <span class="date-value" *ngIf="!editCloseDate">
+                    @if (!editCloseDate) {
+                    <span class="date-value">
                       {{ tempCloseDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-                      <ng-container *ngIf="!tempCloseDate">Aucune date définie</ng-container>
+                      @if (!tempCloseDate) { Aucune date définie }
                       <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                     </span>
+                    }
 
                     <!-- Mode édition -->
-                    <div class="date-edit" *ngIf="editCloseDate">
+                    @if (editCloseDate) {
+                    <div class="date-edit">
                       <nz-date-picker
                         [nzShowTime]="true"
                         [(ngModel)]="tempCloseDate"
@@ -75,6 +82,7 @@
                         #closeDatePicker
                       />
                     </div>
+                    }
                   </div>
                 </div>
               </div>
@@ -411,7 +419,7 @@
       </div>
     </div>
   </nz-tab>
-</nz-tabset>
+</nz-tabs>
 
 <!-- Templates de confirmation -->
 <ng-template #confirmClose>
@@ -457,7 +465,7 @@
           <span class="date-label">Ouverture : </span>
           <span class="date-value">
             {{ activity.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-            <ng-container *ngIf="!activity.openAt">Aucune date définie</ng-container>
+            @if (!activity.openAt) { Aucune date définie }
           </span>
         </div>
       </div>
@@ -468,7 +476,7 @@
           <span class="date-label">Fermeture : </span>
           <span class="date-value">
             {{ activity.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-            <ng-container *ngIf="!activity.closeAt">Aucune date définie</ng-container>
+            @if (!activity.closeAt) { Aucune date définie }
           </span>
         </div>
       </div>

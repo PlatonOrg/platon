@@ -35,7 +35,8 @@ const buildPreviewUrl = (uri: monaco.Uri, params?: string[]) => {
 }
 
 const buildPreview = (uri: monaco.Uri): Preview => ({
-  type: PreviewTypes.URL,
+  // Cast avoids a direct value access of the ambient const enum, which `isolatedModules` forbids.
+  type: 'URL' as PreviewTypes,
   data: buildPreviewUrl(uri, [`timestamp=${Date.now()}`, PLAYER_EDITOR_PREVIEW]), // Add timestamp to avoid cache, might be changed later
 })
 

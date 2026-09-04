@@ -6,6 +6,7 @@ import {
   OnDestroy,
   ViewEncapsulation,
   forwardRef,
+  inject,
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
@@ -51,6 +52,8 @@ import { VideoExtension } from './extensions/video.extension'
   ],
 })
 export class EditorJsComponent implements AfterViewInit, OnDestroy, ControlValueAccessor {
+  private readonly editorJsService = inject(EditorJsService)
+
   private data?: OutputData
   private editor!: EditorJS
   private _disabled?: boolean | null
@@ -68,8 +71,6 @@ export class EditorJsComponent implements AfterViewInit, OnDestroy, ControlValue
     this._disabled = value
     this.refreshReadOnly()
   }
-
-  constructor(private readonly editorJsService: EditorJsService) {}
 
   async ngAfterViewInit(): Promise<void> {
     // Ewww hack to ensure the editor is initialized after the view is ready

@@ -5,6 +5,6 @@ import { AnswerStateLabelPipe } from './answer-state-label.pipe'
 
 @NgModule({
   exports: [AnswerStateColorPipe, AnswerStateIconPipe, AnswerStateLabelPipe],
-  declarations: [AnswerStateColorPipe, AnswerStateIconPipe, AnswerStateLabelPipe],
+  imports: [AnswerStateColorPipe, AnswerStateIconPipe, AnswerStateLabelPipe],
 })
 export class AnswerStatePipesModule {}

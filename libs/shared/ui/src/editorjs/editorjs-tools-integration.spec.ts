@@ -1,3 +1,5 @@
+import { Injector, runInInjectionContext } from '@angular/core'
+import { EDITOR_JS_EXTENSION } from './editorjs'
 import { EditorJsService } from './editorjs.service'
 import { CalloutExtension } from './extensions/callout.extension'
 import { DelimiterExtension } from './extensions/delimiter.extension'
@@ -31,7 +33,7 @@ describe('EditorJS tools integration', () => {
     }
     const uploader = new RichUploader()
 
-    const service = new EditorJsService([
+    const extensions = [
       (CalloutExtension as any).useValue,
       (DelimiterExtension as any).useValue,
       (EmbedExtension as any).useValue,
@@ -41,7 +43,11 @@ describe('EditorJS tools integration', () => {
       (TextExtension as any).useValue,
       buildImageExtension(uploader),
       buildVideoExtension(uploader),
-    ])
+    ]
+    const injector = Injector.create({
+      providers: extensions.map((extension) => ({ provide: EDITOR_JS_EXTENSION, useValue: extension, multi: true })),
+    })
+    const service = runInInjectionContext(injector, () => new EditorJsService())
 
     const editor = service.newInstance({
       data: {

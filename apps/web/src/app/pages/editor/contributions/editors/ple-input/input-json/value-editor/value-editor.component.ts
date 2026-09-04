@@ -4,11 +4,14 @@ import { JsonEditorComponent, JsonEditorOptions, JsonEditorTreeNode } from 'ang-
 import { firstValueFrom } from 'rxjs'
 import { BaseValueEditor } from '../../ple-input'
 
+import { NgJsonEditorModule } from 'ang-jsoneditor'
+
 @Component({
   selector: 'app-input-json-value-editor',
   templateUrl: 'value-editor.component.html',
   styleUrls: ['value-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgJsonEditorModule],
 })
 export class ValueEditorComponent extends BaseValueEditor<Record<string, unknown>> implements OnInit {
   private readonly resourceLoader = inject(ResourceLoaderService)

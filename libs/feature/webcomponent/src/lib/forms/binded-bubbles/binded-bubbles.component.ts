@@ -12,19 +12,28 @@ import {
   QueryList,
   ViewChildren,
   AfterViewInit,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { BindedBubblesComponentDefinition, BindedBubblesState, BubbleItem, PairBubbleItem } from './binded-bubbles'
+import { BindedBubblesComponentDefinition, type BindedBubblesState, BubbleItem, PairBubbleItem } from './binded-bubbles'
 import { WebComponentService } from '../../web-component.service'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
+import { MatButtonModule } from '@angular/material/button'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-binded-bubbles',
   templateUrl: 'binded-bubbles.component.html',
   styleUrls: ['binded-bubbles.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [BaseModule, CssPipeModule, MatButtonModule, NgeMarkdownModule],
 })
 @WebComponent(BindedBubblesComponentDefinition)
 export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesState>, OnInit, AfterViewInit {
+  readonly injector = inject(Injector)
+  private cd = inject(ChangeDetectorRef)
+
   @Input() state!: BindedBubblesState
   @Output() stateChange = new EventEmitter<BindedBubblesState>()
 
@@ -39,7 +48,9 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   achieveList: PairBubbleItem[] = []
   timeoutID: NodeJS.Timeout | undefined
 
-  constructor(readonly injector: Injector, private cd: ChangeDetectorRef) {
+  constructor() {
+    const injector = this.injector
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
   }
@@ -317,7 +328,7 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event: Event) {
+  onResize(_event: Event) {
     this.checkAllHorizontalOverflows()
   }
 
