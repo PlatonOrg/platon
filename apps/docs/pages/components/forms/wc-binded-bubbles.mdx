@@ -52,22 +52,23 @@ Cette fonctionnalité est particulièrement utile pour identifier les associatio
 
 Pour optimiser l'expérience d'apprentissage, gardez un bon équilibre dans le nombre de paires affichées: trop peu rend l'exercice trop simple, trop nombreuses peuvent surcharger cognitivement l'apprenant. 3 à 5 paires simultanées offrent généralement un bon équilibre.
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-binded-bubbles',
     },
     ...[
-      {
-        name: 'Exemple: Traductions',
-        url: '/playground/exercises/binded-bubbles/translation.ple',
-        code: 'sandbox = "node"\n\nbubbles = :wc-binded-bubbles\nbubbles.items = [\n  { item1: { content: "Bonjour" }, item2: { content: "Hello" } },\n  { item1: { content: "Au revoir" }, item2: { content: "Goodbye" } },\n  { item1: { content: "Merci" }, item2: { content: "Thank you" } }\n]\n\ntitle ==\nMemory de traductions\n==\n\nstatement ==\nAssociez les mots français à leur traduction anglaise.\n==\n\nform ==\n{{ bubbles }}\n==\n\ngrader == #!lang=js\ngrade = 0\nfeedback.type = "error"\nfeedback.content = "Mauvaise réponse"\nif (bubbles.nbError == 0) {\n  grade = 100\n  feedback.type = "success"\n  feedback.content = "Bravo !"\n}\n==\n',
-      },
-    ],
+  {
+    "name": "Exemple: Traductions",
+    "url": "/playground/exercises/binded-bubbles/translation.ple",
+    "code": "sandbox = \"node\"\n\nbubbles = :wc-binded-bubbles\nbubbles.items = [\n  { item1: { content: \"Bonjour\" }, item2: { content: \"Hello\" } },\n  { item1: { content: \"Au revoir\" }, item2: { content: \"Goodbye\" } },\n  { item1: { content: \"Merci\" }, item2: { content: \"Thank you\" } }\n]\n\ntitle ==\nMemory de traductions\n==\n\nstatement ==\nAssociez les mots français à leur traduction anglaise.\n==\n\nform ==\n{{ bubbles }}\n==\n\ngrader == #!lang=js\ngrade = 0\nfeedback.type = \"error\"\nfeedback.content = \"Mauvaise réponse\"\nif (bubbles.nbError == 0) {\n  grade = 100\n  feedback.type = \"success\"\n  feedback.content = \"Bravo !\"\n}\n==\n"
+  }
+]
   ]}
 />
 
