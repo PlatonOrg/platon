@@ -58,22 +58,23 @@ Activez la validation automatique avec `autoValidation: true` pour que l'exercic
 - Utilisez le markdown pour enrichir vos options avec des images, des formules ou du texte formaté
 - Si vous avez besoin de sélections multiples, utilisez plutôt le composant CheckboxGroup
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-radio-group',
     },
     ...[
-      {
-        name: 'Exemple: Système solaire',
-        url: '/playground/exercises/radio-group/solar-system.ple',
-        code: '# Définition de la sandbox\nsandbox = "node"\n\n# Initialisation du composant RadioGroup\nradioGroup = :wc-radio-group\nradioGroup.items = [\n  "La Terre",\n  "Mars",\n  "Pluton",\n  "Jupiter",\n  "Venus"\n]\n\n# Titre de l\'exercice\ntitle ==\nQCM : Quelles sont les planètes du système solaire ?\n==\n\n# Énoncé de l\'exercice\nstatement ==\nVeuillez sélectionner la planète qui fait partie de notre système solaire.\n==\n\n# Formulaire de l\'exercice\nform ==\n{{ radioGroup }}\n==\n\nhint = ["Un des choix n\'est plus une planète depuis 2006"]\n\n# Builder\nbuilder == #!lang=js\n// Mélangement aléatoire des choix\nradioGroup.items = radioGroup.items.sort(() => Math.random() - 0.5);\n==\n\n\n# Grader\ngrader == #!lang=js\n\ngrade = 0;\nfeedback.type = "error";\nfeedback.content = "Veuillez sélectionner une réponse.";\n\n// Réponse correcte\nconst correctAnswer = "Pluton";\n\n// Vérifier si une réponse a été sélectionnée\nif (radioGroup.selection == correctAnswer) {\n  grade = 100;\n  feedback.type = "success";\n  feedback.content = "Félicitations ! Vous avez correctement identifié le bon choix.";\n}\n\n==\n',
-      },
-    ],
+  {
+    "name": "Exemple: Système solaire",
+    "url": "/playground/exercises/radio-group/solar-system.ple",
+    "code": "# Définition de la sandbox\nsandbox = \"node\"\n\n# Initialisation du composant RadioGroup\nradioGroup = :wc-radio-group\nradioGroup.items = [\n  \"La Terre\",\n  \"Mars\",\n  \"Pluton\",\n  \"Jupiter\",\n  \"Venus\"\n]\n\n# Titre de l'exercice\ntitle ==\nQCM : Quelles sont les planètes du système solaire ?\n==\n\n# Énoncé de l'exercice\nstatement ==\nVeuillez sélectionner la planète qui fait partie de notre système solaire.\n==\n\n# Formulaire de l'exercice\nform ==\n{{ radioGroup }}\n==\n\nhint = [\"Un des choix n'est plus une planète depuis 2006\"]\n\n# Builder\nbuilder == #!lang=js\n// Mélangement aléatoire des choix\nradioGroup.items = radioGroup.items.sort(() => Math.random() - 0.5);\n==\n\n\n# Grader\ngrader == #!lang=js\n\ngrade = 0;\nfeedback.type = \"error\";\nfeedback.content = \"Veuillez sélectionner une réponse.\";\n\n// Réponse correcte\nconst correctAnswer = \"Pluton\";\n\n// Vérifier si une réponse a été sélectionnée\nif (radioGroup.selection == correctAnswer) {\n  grade = 100;\n  feedback.type = \"success\";\n  feedback.content = \"Félicitations ! Vous avez correctement identifié le bon choix.\";\n}\n\n==\n"
+  }
+]
   ]}
 />
 
