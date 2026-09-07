@@ -91,6 +91,9 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
         args.nextUrl = `/courses/${courseId}`
         this.logger.log(`[LTI COURSE INTERCEPTOR] URL mise à jour: ${args.nextUrl}`)
       }
+    } else {
+      args.nextUrl = `/courses/${courseId}`
+      this.logger.log(`[LTI COURSE INTERCEPTOR] URL mise à jour: ${args.nextUrl}`)
     }
 
     this.logger.log(`[LTI COURSE INTERCEPTOR] Vérification de l'adhésion au cours pour l'utilisateur: ${user.id}`)
