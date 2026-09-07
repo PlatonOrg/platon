@@ -33,6 +33,7 @@ import {
   OnChangeFileEventPayload,
   OnReleaseRepoEventPayload,
 } from './file.event'
+import { JoinPathPipe } from './path.pipe'
 import { ResourceFileService } from './file.service'
 import { RESOURCES_DIR } from './repo'
 import { ResourceDependencyService } from '../dependency'
@@ -159,15 +160,16 @@ export class ResourceFileController {
     @Req() request: IRequest,
     @Res({ passthrough: true }) res: Response,
     @Param('resourceId') resourceId: string,
-    @Param('path') path?: string,
     @Query() query?: FileRetrieveDTO
   ): Promise<unknown> {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const cacheLifetime = this.configService.get<number>('cache.filesLifetime', { infer: true })
 
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
 
     if (query?.zipList) {
-      return await repo.listZipFiles(path!)
+      return await repo.listZipFiles(path)
     }
 
     const version = query?.version || LATEST
@@ -301,10 +303,11 @@ export class ResourceFileController {
   async put(
     @Req() request: IRequest,
     @Param('resourceId') resourceId: string,
-    @Param('path') path: string,
     @Body() input: FileUpdateDTO,
     @UploadedFile() bundle: Express.Multer.File
   ) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')
@@ -352,16 +355,17 @@ export class ResourceFileController {
     @Req() request: IRequest,
     @Param('resourceId') resourceId: string,
     @Body() input: FileCreateDTO[],
-    @UploadedFile() file: Express.Multer.File,
-    @Param('path') path?: string
+    @UploadedFile() file: Express.Multer.File
   ) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')
     }
 
     if (file) {
-      const dstpath = join(path || '', basename(file.originalname))
+      const dstpath = join(path, basename(file.originalname))
       const newName = await repo.upload(file.path, dstpath)
       this.eventService.emit<OnChangeFileEventPayload>(ON_CHANGE_FILE_EVENT, {
         repo,
@@ -401,9 +405,10 @@ export class ResourceFileController {
   async patch(
     @Req() request: IRequest,
     @Param('resourceId') resourceId: string,
-    @Param('path') path: string,
     @Body() input: FileMoveDTO
   ) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')
@@ -444,7 +449,12 @@ export class ResourceFileController {
   }
 
   @Delete('/:resourceId/{*path}')
-  async delete(@Req() request: IRequest, @Param('resourceId') resourceId: string, @Param('path') path: string) {
+  async delete(
+    @Req() request: IRequest,
+    @Param('resourceId') resourceId: string,
+  ) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')
