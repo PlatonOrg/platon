@@ -4,10 +4,17 @@ module.exports = {
   testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$', '\\.e2e\\.spec\\.ts$'],
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]s$': [
+    '^.+\\.ts$': [
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
+      },
+    ],
+    '^.+\\.js$': [
+      '@swc/jest',
+      {
+        jsc: { target: 'es2022', parser: { syntax: 'ecmascript' } },
+        module: { type: 'commonjs' },
       },
     ],
   },
