@@ -20,6 +20,9 @@ WORKDIR /src
 COPY --chown=node:node package.json yarn.lock ./
 COPY --chown=node:node shared ./shared
 
+# Install yarn
+RUN npm install -g yarn@1
+
 # Install dependencies
 RUN yarn install --frozen-lockfile --non-interactive --network-timeout 600000
 
