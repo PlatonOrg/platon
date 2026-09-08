@@ -10,9 +10,6 @@ on:
       - 'develop'
   workflow_dispatch:
 
-env:
-  NODE_VERSION: 22
-
 jobs:
   prepare:
       name: Prepare
@@ -24,8 +21,6 @@ jobs:
             fetch-depth: 0
 
         - uses: ./.github/actions/yarn-setup
-          with:
-            node-version: ${{ env.NODE_VERSION }}
 
   build:
     name: Build
@@ -38,8 +33,6 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn-setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3
@@ -63,8 +56,6 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn-setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3
@@ -84,8 +75,6 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn-setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3
@@ -112,8 +101,6 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn-setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3
@@ -134,8 +121,6 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn-setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: 'NX: SHAs for affected'
         uses: nrwl/nx-set-shas@v3

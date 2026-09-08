@@ -1,6 +1,6 @@
 ### STAGE 1: Build ###
 
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 
 # Install python3, make, g++, Git, and NodeGit dependencies
 RUN apk add --no-cache --update \
@@ -57,12 +57,12 @@ RUN yarn install --frozen-lockfile --non-interactive --production
 USER node
 
 ### STAGE 2: Frontend Extractor (pour extraction externe) ###
-FROM node:22-alpine AS frontend-extractor
+FROM node:26-alpine AS frontend-extractor
 WORKDIR /src
 COPY --chown=node:node --from=build /src/dist ./dist
 
 ### STAGE 3: Production API Only ###
-FROM node:22-alpine AS production
+FROM node:26-alpine AS production
 RUN apk add --no-cache --update \
   bash \
   openssh \
