@@ -20,8 +20,20 @@ WORKDIR /src
 COPY --chown=node:node package.json yarn.lock ./
 COPY --chown=node:node shared ./shared
 
+RUN apk add --no-cache \
+  build-base \
+  g++ \
+  cairo-dev \
+  jpeg-dev \
+  pango-dev \
+  giflib-dev \
+  librsvg-dev \
+  pixman-dev
+
 # Install yarn
-RUN npm install -g yarn@1
+RUN npm install -g corepack \
+  && corepack enable \
+  && corepack prepare yarn@1.22.22 --activate
 
 # Install dependencies
 RUN yarn install --frozen-lockfile --non-interactive --network-timeout 600000
@@ -43,7 +55,7 @@ COPY --chown=node:node bin/cli/wc-docs.sh ./bin/cli/wc-docs.sh
 RUN yarn graphql:generate
 
 # Build NestJS API, Angular web app and docs
-RUN yarn build:web
+RUN NODE_OPTIONS="--max-old-space-size=8192" yarn build:web
 # Increase memory limit and disable daemon for API build
 RUN NODE_OPTIONS="--max-old-space-size=4096" NX_DAEMON=false yarn build:api --verbose
 RUN yarn build:docs
