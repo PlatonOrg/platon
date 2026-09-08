@@ -402,11 +402,7 @@ export class ResourceFileController {
   }
 
   @Patch('/:resourceId/{*path}')
-  async patch(
-    @Req() request: IRequest,
-    @Param('resourceId') resourceId: string,
-    @Body() input: FileMoveDTO
-  ) {
+  async patch(@Req() request: IRequest, @Param('resourceId') resourceId: string, @Body() input: FileMoveDTO) {
     const path = new JoinPathPipe().transform(request.params['path'])
 
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
@@ -449,10 +445,7 @@ export class ResourceFileController {
   }
 
   @Delete('/:resourceId/{*path}')
-  async delete(
-    @Req() request: IRequest,
-    @Param('resourceId') resourceId: string,
-  ) {
+  async delete(@Req() request: IRequest, @Param('resourceId') resourceId: string) {
     const path = new JoinPathPipe().transform(request.params['path'])
 
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
