@@ -25,3 +25,12 @@ mat-toolbar {
     width: 100%;
   }
 }
+
+ide-root,
+.ide-theme-light {
+  --titleBar-background: rgb(59, 66, 82) !important;
+  --titleBar-foreground: rgb(216, 222, 233) !important;
+  --statusBar-background: rgb(59, 66, 82) !important;
+  --statusBar-foreground: rgb(216, 222, 233) !important;
+  --statusBarItem-hoverBackground: rgba(216, 222, 233, 0.2) !important;
+}

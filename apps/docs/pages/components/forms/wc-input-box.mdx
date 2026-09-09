@@ -135,22 +135,23 @@ Adaptez le style visuel du champ à vos besoins:
 - `placeholder`: Ajoutez un texte indicatif qui s'affiche quand le champ est vide
 - `hint`: Fournissez une indication supplémentaire sous le champ
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-input-box',
     },
     ...[
-      {
-        name: 'Exemple: Addition',
-        url: '/playground/exercises/input-box/sum.ple',
-        code: 'sandbox = "node"\n\ninput = :wc-input-box\ninput.type = "number"\ninput.placeholder = "Entrez votre réponse ici"\n\ntitle ==\nCalcul numérique\n==\n\nstatement ==\nRésolvez le problème suivant et entrez la réponse sous forme de nombre.\n\n\\( 2 + 2 = \\)\n==\n\nform ==\n{{ input }}\n==\n\ngrader == #!lang=js\ngrade = 0\nfeedback.type = "error"\nfeedback.content = "Mauvaise réponse"\nif (input.value == 4) {\n  grade = 100\n  feedback.type = "success"\n  feedback.content = "Bonne réponse !"\n}\n==\n',
-      },
-    ],
+  {
+    "name": "Exemple: Addition",
+    "url": "/playground/exercises/input-box/sum.ple",
+    "code": "sandbox = \"node\"\n\ninput = :wc-input-box\ninput.type = \"number\"\ninput.placeholder = \"Entrez votre réponse ici\"\n\ntitle ==\nCalcul numérique\n==\n\nstatement ==\nRésolvez le problème suivant et entrez la réponse sous forme de nombre.\n\n\\( 2 + 2 = \\)\n==\n\nform ==\n{{ input }}\n==\n\ngrader == #!lang=js\ngrade = 0\nfeedback.type = \"error\"\nfeedback.content = \"Mauvaise réponse\"\nif (input.value == 4) {\n  grade = 100\n  feedback.type = \"success\"\n  feedback.content = \"Bonne réponse !\"\n}\n==\n"
+  }
+]
   ]}
 />
 

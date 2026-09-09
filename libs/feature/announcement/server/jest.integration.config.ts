@@ -5,10 +5,12 @@ export default {
   testTimeout: 60_000,
   testEnvironment: 'node',
   transform: {
-    '^.+\\.(ts|js)$': [
-      'ts-jest',
+    '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.integration.json' }],
+    '^.+\\.js$': [
+      '@swc/jest',
       {
-        tsconfig: '<rootDir>/tsconfig.integration.json',
+        jsc: { target: 'es2022', parser: { syntax: 'ecmascript' } },
+        module: { type: 'commonjs' },
       },
     ],
   },

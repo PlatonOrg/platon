@@ -1,14 +1,16 @@
 module.exports = {
   displayName: 'feature-result-server',
   preset: '../../../../jest.preset.js',
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-    },
-  },
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]s$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
+    '^.+\\.js$': [
+      '@swc/jest',
+      {
+        jsc: { target: 'es2022', parser: { syntax: 'ecmascript' } },
+        module: { type: 'commonjs' },
+      },
+    ],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../../../coverage/libs/feature/result/server',

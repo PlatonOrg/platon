@@ -306,7 +306,7 @@ export class ShepherdService {
    * Complète le tutoriel
    */
   complete(): void {
-    this.currentTour?.complete()
+    void this.currentTour?.complete()
   }
 
   /**
