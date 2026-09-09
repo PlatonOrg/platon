@@ -90,7 +90,6 @@ export class BuilderPage implements OnInit {
   private readonly inputFileService = inject(InputFileService)
 
   protected readonly resource = signal<Resource | undefined>(undefined)
-  protected readonly template = signal<Resource | undefined>(undefined)
   protected readonly isTemplateCreator = signal(false)
   protected readonly inputs = signal<PleInput[]>([])
   protected readonly overrides = signal<Variables>({})
@@ -230,8 +229,6 @@ export class BuilderPage implements OnInit {
           statusText: 'Bad Request',
         })
       }
-
-      this.template.set(await firstValueFrom(this.resourceService.find({ id: resource.templateId })))
 
       const configFile = await firstValueFrom(
         this.resourceFileService.read(resource.templateId, 'main.plc', resource.templateVersion)
