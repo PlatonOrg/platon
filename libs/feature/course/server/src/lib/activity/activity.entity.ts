@@ -73,8 +73,8 @@ export class ActivityEntity extends BaseEntity implements Activity {
   @Column({ type: 'enum', enum: ActivityKind, default: ActivityKind.EXERCISE })
   kind!: ActivityKind
 
-  @Column({ name: 'lesson_title', nullable: true })
-  lessonTitle?: string
+  @Column({ name: 'activity_title', nullable: true })
+  activityTitle?: string
 
   // Contenu narratif (blocs EditorJS) d'une activité de type "lesson".
   @Column({ type: 'jsonb', nullable: true })

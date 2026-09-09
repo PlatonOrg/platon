@@ -108,7 +108,7 @@ export class ActivityDTO extends BaseDTO implements Activity {
   @IsOptional()
   @IsString()
   @ApiProperty()
-  readonly lessonTitle?: string
+  readonly activityTitle?: string
 
   @IsOptional()
   @IsObject()
@@ -154,11 +154,10 @@ export class CreateCourseActivityDTO {
   @ApiProperty()
   readonly resourceVersion!: string
 
-  // Requis uniquement pour kind === 'lesson'.
   @ValidateIf((o) => o.kind === ActivityKind.LESSON)
   @IsString()
   @ApiProperty()
-  readonly lessonTitle!: string
+  readonly activityTitle!: string
 
   @ValidateIf((o) => o.kind === ActivityKind.LESSON)
   @IsOptional()
@@ -236,7 +235,7 @@ export class UpdateCourseActivityDTO implements UpdateActivity {
   @IsOptional()
   @IsString()
   @ApiProperty()
-  readonly lessonTitle?: string
+  readonly activityTitle?: string
 
   @IsOptional()
   @IsObject()

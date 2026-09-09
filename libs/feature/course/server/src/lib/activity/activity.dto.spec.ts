@@ -48,29 +48,29 @@ describe('CreateCourseActivityDTO', () => {
     expect(errors.some((e) => e.property === 'resourceVersion')).toBe(true)
   })
 
-  it('accepte une leçon avec uniquement lessonTitle, sans resourceId ni resourceVersion', async () => {
+  it('accepte une leçon avec uniquement activityTitle, sans resourceId ni resourceVersion', async () => {
     const dto = plainToInstance(CreateCourseActivityDTO, {
       kind: ActivityKind.LESSON,
       sectionId: SECTION_ID,
-      lessonTitle: 'Ma leçon',
+      activityTitle: 'Ma leçon',
     })
     expect(await isValid(dto)).toBe(true)
   })
 
-  it('rejette une leçon sans lessonTitle', async () => {
+  it('rejette une leçon sans activityTitle', async () => {
     const dto = plainToInstance(CreateCourseActivityDTO, {
       kind: ActivityKind.LESSON,
       sectionId: SECTION_ID,
     })
     const errors = await validate(dto)
-    expect(errors.some((e) => e.property === 'lessonTitle')).toBe(true)
+    expect(errors.some((e) => e.property === 'activityTitle')).toBe(true)
   })
 
   it('accepte content et draft optionnels pour une leçon', async () => {
     const dto = plainToInstance(CreateCourseActivityDTO, {
       kind: ActivityKind.LESSON,
       sectionId: SECTION_ID,
-      lessonTitle: 'Ma leçon',
+      activityTitle: 'Ma leçon',
       content: { blocks: [] },
       draft: true,
     })

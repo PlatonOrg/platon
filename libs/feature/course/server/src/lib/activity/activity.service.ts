@@ -13,6 +13,7 @@ import {
   RestrictionList,
   UpdateActivity,
   calculateActivityOpenState,
+  resolveActivityTitle,
 } from '@platon/feature/course/common'
 import { ResourceEntity, ResourceFileService, ResourceService } from '@platon/feature/resource/server'
 import { CLS_REQ } from 'nestjs-cls'
@@ -433,7 +434,7 @@ export class ActivityService {
 
     await Promise.all(
       exerciseActivities.map(async (activity) => {
-        const title = activity.source.variables.title as string
+        const plTitle = activity.source.variables.title as string
         const exerciseGroups = (activity.source.variables.exerciseGroups as Record<string, ActivityExerciseGroup>) || {}
         const hasWritePermission = await this.courseMemberService.hasWritePermission(
           activity.courseId,
@@ -441,7 +442,11 @@ export class ActivityService {
         )
         Object.assign(activity, {
           state: calculateActivityOpenState(activity),
-          title: title?.trim() || resources.find((r) => r.id === activity.source.resource)?.name,
+          title: resolveActivityTitle(
+            activity.activityTitle,
+            plTitle,
+            resources.find((r) => r.id === activity.source.resource)?.name
+          ),
           resourceId: activity.source.resource,
           exerciseCount: Object.keys(exerciseGroups).reduce(
             (acc, group) => acc + exerciseGroups[group].exercises.length,
@@ -466,7 +471,7 @@ export class ActivityService {
         )
         Object.assign(activity, {
           state: calculateActivityOpenState(activity),
-          title: activity.lessonTitle ?? '',
+          title: resolveActivityTitle(activity.activityTitle),
           resourceId: '',
           exerciseCount: 0,
           progression: completedLessonIds.has(activity.id) ? 100 : 0,

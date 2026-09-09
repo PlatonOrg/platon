@@ -207,7 +207,7 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
       this.courseService.createActivity(course, {
         kind: ActivityKind.LESSON,
         sectionId: section.id,
-        lessonTitle: 'Nouvelle leçon',
+        activityTitle: 'Nouvelle leçon',
       })
     )
     await this.router.navigate(['/lessons', course.id, activity.id])

@@ -47,7 +47,7 @@ export interface Activity {
   readonly progression: number
   readonly permissions: ActivityPermissions
 
-  readonly lessonTitle?: string
+  readonly activityTitle?: string
   readonly content?: LessonContent | null
   readonly draft: boolean
 
@@ -81,7 +81,7 @@ export interface CreateLessonActivity {
   readonly kind: ActivityKind.LESSON
   readonly sectionId: string
 
-  readonly lessonTitle: string
+  readonly activityTitle: string
   readonly content?: LessonContent
   readonly draft?: boolean
 
@@ -99,13 +99,27 @@ export interface UpdateActivity {
   readonly activitySettings?: ActivitySettings
   readonly code?: string
 
-  readonly lessonTitle?: string
+  readonly activityTitle?: string
   readonly content?: LessonContent
   readonly draft?: boolean
 }
 
 export interface ReloadActivity {
   readonly version?: string
+}
+
+/**
+ * Résout le titre affiché d'une activité : le premier candidat non vide, une fois trimé.
+ * `activityTitle` (override choisi par l'enseignant) doit toujours être passé en premier.
+ */
+export const resolveActivityTitle = (...candidates: (string | undefined | null)[]): string => {
+  for (const candidate of candidates) {
+    const trimmed = candidate?.trim()
+    if (trimmed) {
+      return trimmed
+    }
+  }
+  return ''
 }
 
 export type ActivityOpenStates = 'opened' | 'closed' | 'planned'

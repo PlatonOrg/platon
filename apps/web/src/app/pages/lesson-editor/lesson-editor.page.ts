@@ -76,7 +76,7 @@ export class LessonEditorPage implements OnInit, EditorJsFileUploader, EditorJsE
   protected readonly activity = signal<Activity | undefined>(undefined)
 
   protected readonly form = new FormGroup({
-    lessonTitle: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    activityTitle: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     content: new FormControl<LessonContent>(emptyEditorJsData() as LessonContent, { nonNullable: true }),
   })
 
@@ -92,7 +92,7 @@ export class LessonEditorPage implements OnInit, EditorJsFileUploader, EditorJsE
       this.course.set(course)
       this.activity.set(activity)
       this.form.reset({
-        lessonTitle: activity.lessonTitle ?? '',
+        activityTitle: activity.activityTitle ?? '',
         content: (activity.content as LessonContent) ?? (emptyEditorJsData() as LessonContent),
       })
       this.form.valueChanges.subscribe(() => this.hasUnsavedChanges.set(true))
@@ -113,8 +113,8 @@ export class LessonEditorPage implements OnInit, EditorJsFileUploader, EditorJsE
     this.saving.set(true)
 
     try {
-      const { lessonTitle, content } = this.form.getRawValue()
-      this.activity.set(await firstValueFrom(this.courseService.updateActivity(activity, { lessonTitle, content })))
+      const { activityTitle, content } = this.form.getRawValue()
+      this.activity.set(await firstValueFrom(this.courseService.updateActivity(activity, { activityTitle, content })))
       this.hasUnsavedChanges.set(false)
       this.dialogService.success('Leçon enregistrée.')
     } catch {

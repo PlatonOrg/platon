@@ -336,6 +336,26 @@
     <div class="tab-content">
       <div class="color-section">
         <div class="section-header">
+          <i nz-icon nzType="edit" nzTheme="outline"></i>
+          <h3>Nom de l'activité</h3>
+          <span class="section-subtitle">Personnalisez le nom affiché aux étudiants pour ce cours</span>
+        </div>
+        <nz-form-item>
+          <nz-form-control>
+            <input
+              nz-input
+              type="text"
+              name="activityTitle"
+              [ngModel]="activityTitleInput()"
+              (ngModelChange)="activityTitleInput.set($event)"
+              [placeholder]="activity.title"
+              maxlength="255"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div class="color-section">
+        <div class="section-header">
           <i nz-icon nzType="bg-colors" nzTheme="outline"></i>
           <h3>Apparence de l'activité</h3>
         </div>
