@@ -17,8 +17,10 @@ export const mockSelectQueryBuilder = <T extends ObjectLiteral>() => {
     limit: jest.fn().mockReturnThis(),
     take: jest.fn().mockReturnThis(),
     skip: jest.fn().mockReturnThis(),
+    distinct: jest.fn().mockReturnThis(),
     getMany: jest.fn(),
     getOne: jest.fn(),
+    getOneOrFail: jest.fn(),
     getCount: jest.fn(),
     getManyAndCount: jest.fn().mockResolvedValue([[], 0] as [T[], number]),
   }
