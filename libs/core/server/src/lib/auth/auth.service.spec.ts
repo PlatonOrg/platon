@@ -16,7 +16,6 @@ describe('AuthService', () => {
   let service: AuthService
   let userService: jest.Mocked<UserService>
   let jwtService: jest.Mocked<JwtService>
-  let configService: jest.Mocked<ConfigService>
 
   const config: Record<string, unknown> = {
     secret: 'test-secret',
@@ -55,7 +54,6 @@ describe('AuthService', () => {
     service = module.get(AuthService)
     userService = module.get(UserService)
     jwtService = module.get(JwtService)
-    configService = module.get(ConfigService)
   })
 
   describe('signIn', () => {

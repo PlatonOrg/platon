@@ -1,13 +1,21 @@
 import { ObjectLiteral, Repository } from 'typeorm'
 
-// On the one hand, we want to be able to mock the repository methods,
-// but on the other hand, we don't want to mock the entire repository,
-// as it would be too much work and would not be maintainable. Therefore,
-// we only mock the methods that we need for our tests.
+// Local à core-server : voir users/factories/user.factory.ts pour l'explication (core-testing-server
+// dépend de core-server via son harnais e2e, donc l'inverse créerait un cycle). Ce fichier est
+// identique à libs/core/testing/server/src/lib/mocks/repository.mock.ts.
 export type MockRepository<T extends ObjectLiteral = ObjectLiteral> = jest.Mocked<
   Pick<
     Repository<T>,
-    'find' | 'findOne' | 'findOneBy' | 'save' | 'create' | 'update' | 'delete' | 'remove' | 'query' | 'createQueryBuilder'
+    | 'find'
+    | 'findOne'
+    | 'findOneBy'
+    | 'save'
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'remove'
+    | 'query'
+    | 'createQueryBuilder'
   >
 >
 

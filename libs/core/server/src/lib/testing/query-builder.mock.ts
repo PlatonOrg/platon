@@ -1,5 +1,7 @@
 import { ObjectLiteral, SelectQueryBuilder } from 'typeorm'
 
+// Local à core-server : voir users/factories/user.factory.ts pour l'explication. Identique à
+// libs/core/testing/server/src/lib/mocks/query-builder.mock.ts.
 export const mockSelectQueryBuilder = <T extends ObjectLiteral>() => {
   const qb = {
     leftJoin: jest.fn().mockReturnThis(),

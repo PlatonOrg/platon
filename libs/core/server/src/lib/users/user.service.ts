@@ -78,7 +78,7 @@ export class UserService {
 
     const order = filters.order || UserOrderings.NAME
     const direction = filters.direction || USER_ORDERING_DIRECTIONS[order]
-    if (filters.order === UserOrderings.NAME) {
+    if (order === UserOrderings.NAME) {
       query
         .orderBy('user.last_name', direction)
         .addOrderBy('user.first_name', direction)
