@@ -75,8 +75,7 @@ describe('ResourceSubscriber', () => {
       expect(manager.save).not.toHaveBeenCalled()
     })
 
-    it('devrait créer un événement de changement de statut', async () => {
-      resourceService.getById.mockResolvedValue({ name: 'Parent circle' } as never)
+    it("devrait créer un événement de changement de statut sans appeler getById si la ressource n'a pas de parent", async () => {
       const manager = buildManager()
       const event = {
         entity: { id: 'res-1', type: 'EXERCISE', name: 'Exo', status: 'READY', parentId: undefined },
@@ -86,6 +85,9 @@ describe('ResourceSubscriber', () => {
 
       await subscriber.afterUpdate(event as never)
 
+      // Régression : getById(undefined) fait un WHERE id = NULL en base réelle, qui échoue
+      // toujours avec EntityNotFoundError (getOneOrFail) — donc ne doit jamais être appelé ici.
+      expect(resourceService.getById).not.toHaveBeenCalled()
       expect(manager.save).toHaveBeenCalledTimes(1)
       expect(manager.create).toHaveBeenCalledWith(
         expect.anything(),
