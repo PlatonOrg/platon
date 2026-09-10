@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm'
 import { NotFoundResponse } from '@platon/core/common'
 import { MockRepository, mockRepository } from '@platon/core/testing/server'
 import { EventService } from '../events'
-import { StringUtilsService } from '../utils'
+import { NameSimilarityService } from '../utils'
 import { TopicEntity } from './topic.entity'
 import { ON_TOPIC_FUSION_EVENT } from './topic.event'
 import { TopicService } from './topic.service'
@@ -12,7 +12,7 @@ describe('TopicService', () => {
   let service: TopicService
   let repository: MockRepository<TopicEntity>
   let eventService: jest.Mocked<EventService>
-  let stringUtils: jest.Mocked<StringUtilsService>
+  let nameSimilarity: jest.Mocked<NameSimilarityService>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,7 +21,7 @@ describe('TopicService', () => {
         { provide: getRepositoryToken(TopicEntity), useValue: mockRepository<TopicEntity>() },
         { provide: EventService, useValue: { emit: jest.fn() } },
         {
-          provide: StringUtilsService,
+          provide: NameSimilarityService,
           useValue: { normalizeString: jest.fn((s) => s), calculateSimilarity: jest.fn() },
         },
       ],
@@ -30,7 +30,7 @@ describe('TopicService', () => {
     service = module.get(TopicService)
     repository = module.get(getRepositoryToken(TopicEntity))
     eventService = module.get(EventService)
-    stringUtils = module.get(StringUtilsService)
+    nameSimilarity = module.get(NameSimilarityService)
   })
 
   describe('findById', () => {
@@ -78,7 +78,7 @@ describe('TopicService', () => {
     it('devrait retourner le topic existant si un topic similaire est trouvé', async () => {
       const similar = { id: 'topic-1', name: 'Topic I' } as TopicEntity
       repository.findAndCount.mockResolvedValue([[similar], 1])
-      stringUtils.calculateSimilarity.mockReturnValue(0.9)
+      nameSimilarity.calculateSimilarity.mockReturnValue(0.9)
 
       const result = await service.create({ name: 'Topic 1' }, false)
 
@@ -89,7 +89,7 @@ describe('TopicService', () => {
     it("devrait créer un nouveau topic si aucun topic similaire n'est trouvé", async () => {
       const other = { id: 'topic-1', name: 'Autre topic' } as TopicEntity
       repository.findAndCount.mockResolvedValue([[other], 1])
-      stringUtils.calculateSimilarity.mockReturnValue(0.2)
+      nameSimilarity.calculateSimilarity.mockReturnValue(0.2)
       const created = { id: 'topic-2', name: 'Topic 1' } as TopicEntity
       repository.save.mockResolvedValue(created)
 

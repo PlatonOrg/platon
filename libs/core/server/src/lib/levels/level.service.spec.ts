@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm'
 import { NotFoundResponse } from '@platon/core/common'
 import { MockRepository, mockRepository } from '@platon/core/testing/server'
 import { EventService } from '../events'
-import { StringUtilsService } from '../utils'
+import { NameSimilarityService } from '../utils'
 import { LevelEntity } from './level.entity'
 import { ON_LEVEL_FUSION_EVENT } from './level.event'
 import { LevelService } from './level.service'
@@ -12,7 +12,7 @@ describe('LevelService', () => {
   let service: LevelService
   let repository: MockRepository<LevelEntity>
   let eventService: jest.Mocked<EventService>
-  let stringUtils: jest.Mocked<StringUtilsService>
+  let nameSimilarity: jest.Mocked<NameSimilarityService>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,7 +21,7 @@ describe('LevelService', () => {
         { provide: getRepositoryToken(LevelEntity), useValue: mockRepository<LevelEntity>() },
         { provide: EventService, useValue: { emit: jest.fn() } },
         {
-          provide: StringUtilsService,
+          provide: NameSimilarityService,
           useValue: { normalizeString: jest.fn((s) => s), calculateSimilarity: jest.fn() },
         },
       ],
@@ -30,7 +30,7 @@ describe('LevelService', () => {
     service = module.get(LevelService)
     repository = module.get(getRepositoryToken(LevelEntity))
     eventService = module.get(EventService)
-    stringUtils = module.get(StringUtilsService)
+    nameSimilarity = module.get(NameSimilarityService)
   })
 
   describe('findById', () => {
@@ -77,7 +77,7 @@ describe('LevelService', () => {
     it('devrait retourner le niveau existant si un niveau similaire est trouvé', async () => {
       const similar = { id: 'level-1', name: 'Niveau I' } as LevelEntity
       repository.findAndCount.mockResolvedValue([[similar], 1])
-      stringUtils.calculateSimilarity.mockReturnValue(0.9)
+      nameSimilarity.calculateSimilarity.mockReturnValue(0.9)
 
       const result = await service.create({ name: 'Niveau 1' }, false)
 
@@ -88,7 +88,7 @@ describe('LevelService', () => {
     it("devrait créer un nouveau niveau si aucun niveau similaire n'est trouvé", async () => {
       const other = { id: 'level-1', name: 'Autre niveau' } as LevelEntity
       repository.findAndCount.mockResolvedValue([[other], 1])
-      stringUtils.calculateSimilarity.mockReturnValue(0.2)
+      nameSimilarity.calculateSimilarity.mockReturnValue(0.2)
       const created = { id: 'level-2', name: 'Niveau 1' } as LevelEntity
       repository.save.mockResolvedValue(created)
 
@@ -104,7 +104,7 @@ describe('LevelService', () => {
 
       const result = await service.create({}, false)
 
-      expect(stringUtils.calculateSimilarity).not.toHaveBeenCalled()
+      expect(nameSimilarity.calculateSimilarity).not.toHaveBeenCalled()
       expect(result).toEqual({ level: created, existing: false })
     })
   })

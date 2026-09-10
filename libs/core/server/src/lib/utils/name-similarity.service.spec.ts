@@ -1,10 +1,10 @@
-import { StringUtilsService } from './string-utils.service'
+import { NameSimilarityService } from './name-similarity.service'
 
-describe('StringUtilsService', () => {
-  let service: StringUtilsService
+describe('NameSimilarityService', () => {
+  let service: NameSimilarityService
 
   beforeEach(() => {
-    service = new StringUtilsService()
+    service = new NameSimilarityService()
   })
 
   describe('normalizeString', () => {

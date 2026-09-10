@@ -6,7 +6,7 @@ import { Optional } from 'typescript-optional'
 import { LevelEntity } from './level.entity'
 import { EventService } from '../events'
 import { ON_LEVEL_FUSION_EVENT, OnLevelFusionEventPayload } from './level.event'
-import { StringUtilsService } from '../utils'
+import { NameSimilarityService } from '../utils'
 
 @Injectable()
 export class LevelService {
@@ -16,7 +16,7 @@ export class LevelService {
     @InjectRepository(LevelEntity)
     private readonly repository: Repository<LevelEntity>,
     private readonly eventService: EventService,
-    private readonly stringUtils: StringUtilsService
+    private readonly nameSimilarity: NameSimilarityService
   ) {}
 
   async findById(id: string): Promise<Optional<LevelEntity>> {
@@ -28,12 +28,12 @@ export class LevelService {
   }
 
   private async findSimilarLevel(newName: string, existingLevels: LevelEntity[]): Promise<LevelEntity | null> {
-    const normalizedNewName = this.stringUtils.normalizeString(newName)
+    const normalizedNewName = this.nameSimilarity.normalizeString(newName)
 
     for (const level of existingLevels) {
-      const similarity = this.stringUtils.calculateSimilarity(
+      const similarity = this.nameSimilarity.calculateSimilarity(
         normalizedNewName,
-        this.stringUtils.normalizeString(level.name)
+        this.nameSimilarity.normalizeString(level.name)
       )
 
       if (similarity >= this.SIMILARITY_THRESHOLD) {
