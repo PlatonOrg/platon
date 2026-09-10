@@ -1,5 +1,5 @@
 import { UserRoles } from '@platon/core/common'
-import { createE2EApp, E2EContext, TestUser } from '@platon/core/testing/server'
+import { createE2EApp, E2EContext, TestUser } from '@platon/core/testing/e2e-server'
 
 const request = require('supertest')
 import { Repository } from 'typeorm'

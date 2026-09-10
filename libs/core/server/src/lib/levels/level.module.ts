@@ -3,11 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { LevelController } from './level.controller'
 import { LevelEntity } from './level.entity'
 import { LevelService } from './level.service'
-import { StringUtilsService } from '../utils'
+import { NameSimilarityService } from '../utils'
 
 @Module({
   controllers: [LevelController],
-  providers: [LevelService, StringUtilsService],
+  providers: [LevelService, NameSimilarityService],
   imports: [TypeOrmModule.forFeature([LevelEntity])],
   exports: [LevelService],
 })

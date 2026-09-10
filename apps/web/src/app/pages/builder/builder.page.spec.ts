@@ -190,7 +190,7 @@ describe('BuilderPage', () => {
       expect(mocks.title.setTitle).toHaveBeenCalledWith('Mon exercice')
     })
 
-    it('erreur 400 si l\'identifiant de ressource est manquant dans la route', async () => {
+    it("erreur 400 si l'identifiant de ressource est manquant dans la route", async () => {
       const resource = baseResource()
       const mocks = createMocks(resource)
 
@@ -409,7 +409,7 @@ describe('BuilderPage', () => {
       expect(mocks.resourceService.delete).toHaveBeenCalled()
     })
 
-    it("ne supprime pas la ressource dès lors que des overrides ont été personnalisés", async () => {
+    it('ne supprime pas la ressource dès lors que des overrides ont été personnalisés', async () => {
       const { component, mocks } = await init()
       component['overrides'].set({ level: 'expert' })
 
