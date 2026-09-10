@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { IRequest } from './auth.types'
-import { createUserEntity } from './../users/factories/user.factory'
+import { createUserEntity } from '@platon/core/testing/server'
 
 describe('AuthController', () => {
   let controller: AuthController

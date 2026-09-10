@@ -3,12 +3,12 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
 import { ForbiddenResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
+import { createUserEntity } from '@platon/core/testing/server'
 import * as bcrypt from 'bcrypt'
 import { Optional } from 'typescript-optional'
 import { AuthService } from './auth.service'
 import { IRequest } from './auth.types'
 import { UserService } from '../users/user.service'
-import { createUserEntity } from '../users/factories/user.factory'
 
 jest.mock('bcrypt')
 

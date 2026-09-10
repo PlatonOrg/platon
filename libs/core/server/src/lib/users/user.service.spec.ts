@@ -2,11 +2,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { NotFoundResponse, UserOrderings, UserRoles } from '@platon/core/common'
+import { MockRepository, mockRepository, mockSelectQueryBuilder, createUserEntity } from '@platon/core/testing/server'
 import { UserEntity } from './user.entity'
 import { UserService } from './user.service'
-import { createUserEntity } from './factories/user.factory'
-import { MockRepository, mockRepository } from '../testing/repository.mock'
-import { mockSelectQueryBuilder } from '../testing/query-builder.mock'
 
 const UUID = '123e4567-e89b-42d3-a456-556642440001'
 

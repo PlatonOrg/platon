@@ -7,7 +7,16 @@ import { ObjectLiteral, Repository } from 'typeorm'
 export type MockRepository<T extends ObjectLiteral = ObjectLiteral> = jest.Mocked<
   Pick<
     Repository<T>,
-    'find' | 'findOne' | 'findOneBy' | 'save' | 'create' | 'update' | 'delete' | 'remove' | 'query' | 'createQueryBuilder'
+    | 'find'
+    | 'findOne'
+    | 'findOneBy'
+    | 'save'
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'remove'
+    | 'query'
+    | 'createQueryBuilder'
   >
 >
 

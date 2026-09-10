@@ -1,9 +1,9 @@
 import { UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { createUserEntity } from '@platon/core/testing/server'
 import { Optional } from 'typescript-optional'
 import { JwtStrategy } from './jwt.strategy'
 import { UserService } from '../../users/user.service'
-import { createUserEntity } from '../../users/factories/user.factory'
 import { Configuration } from '../../config/configuration'
 
 describe('JwtStrategy', () => {

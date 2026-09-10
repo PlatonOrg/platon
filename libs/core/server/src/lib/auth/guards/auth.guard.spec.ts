@@ -2,10 +2,10 @@ import { ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { User, UnauthorizedResponse } from '@platon/core/common'
+import { createUserEntity } from '@platon/core/testing/server'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { of } from 'rxjs'
 import { AuthGuard } from './auth.guard'
-import { createUserEntity } from '../../users/factories/user.factory'
 
 jest.mock('@nestjs/graphql', () => ({
   GqlExecutionContext: { create: jest.fn() },
