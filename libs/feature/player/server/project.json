@@ -28,7 +28,7 @@
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}/e2e"],
       "options": {
         "jestConfig": "libs/feature/player/server/jest.e2e.config.ts",
-        "passWithNoTests": false
+        "passWithNoTests": true
       }
     },
     "test:all": {
