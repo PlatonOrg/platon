@@ -10,6 +10,7 @@ export type MockRepository<T extends ObjectLiteral = ObjectLiteral> = jest.Mocke
     | 'find'
     | 'findOne'
     | 'findOneBy'
+    | 'findAndCount'
     | 'save'
     | 'create'
     | 'update'
@@ -24,6 +25,7 @@ export const mockRepository = <T extends ObjectLiteral>(): MockRepository<T> => 
   find: jest.fn(),
   findOne: jest.fn(),
   findOneBy: jest.fn(),
+  findAndCount: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
