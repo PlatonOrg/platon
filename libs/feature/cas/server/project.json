@@ -25,6 +25,21 @@
           "codeCoverage": true
         }
       }
+    },
+    "test:integration": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}/integration"],
+      "options": {
+        "jestConfig": "libs/feature/cas/server/jest.integration.config.ts",
+        "passWithNoTests": false
+      }
+    },
+    "test:all": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["nx run feature-cas-server:test", "nx run feature-cas-server:test:integration"],
+        "parallel": false
+      }
     }
   }
 }

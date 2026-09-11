@@ -37,7 +37,7 @@ export class CasService {
     if (filters.search) {
       query.andWhere(
         `(
-        name ILIKE :search
+        cas.name ILIKE :search
       )`,
         { search: `%${filters.search}%` }
       )
@@ -45,9 +45,9 @@ export class CasService {
 
     if (filters.order) {
       const fields: Record<CasOrdering, string> = {
-        NAME: 'name',
-        CREATED_AT: 'created_at',
-        UPDATED_AT: 'updated_at',
+        NAME: 'cas.name',
+        CREATED_AT: 'cas.created_at',
+        UPDATED_AT: 'cas.updated_at',
       }
 
       const orderings: Record<CasOrdering, keyof typeof OrderingDirections> = {
