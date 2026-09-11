@@ -17,7 +17,6 @@ import { CasService } from './cas.service'
 import { CasDTO, CasFiltersDTO } from './cas.dto'
 import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse, NotFoundResponse } from '@platon/core/common'
 import { Request } from 'express'
-import { of } from 'rxjs'
 import { CasServiceValidateResponse } from './payloads'
 import { AxiosError, AxiosResponse } from 'axios'
 import { Optional } from 'typescript-optional'
@@ -46,11 +45,11 @@ export class CasController {
         },
       })
       .catch((_error: AxiosError) => {
-        return of<CasServiceValidateResponse>({
+        return {
           serviceResponse: {
             authenticationFailure: { code: 'NO_RESPONSE', description: 'Your CAS provider is not accessible' },
           },
-        })
+        }
       })
 
     let response: CasServiceValidateResponse
