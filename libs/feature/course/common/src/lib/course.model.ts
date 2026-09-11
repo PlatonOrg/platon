@@ -10,6 +10,17 @@ export enum CourseOrderings {
   UPDATED_AT = 'UPDATED_AT',
 }
 
+/**
+ * Format d'un cours, choisi à la création et figé (non modifiable ensuite).
+ * - `CLASSIC` : le cours n'est qu'une compilation d'activités (comportement historique).
+ * - `OPENCLASS` : les sections mélangent des leçons (contenu narratif) et des activités,
+ *   consultées en lecture séquentielle façon OpenClassrooms.
+ */
+export enum CourseFormat {
+  CLASSIC = 'classic',
+  OPENCLASS = 'openclass',
+}
+
 export interface Course {
   readonly id: string
   readonly createdAt: Date
@@ -18,6 +29,7 @@ export interface Course {
   readonly desc?: string
   readonly ownerId: string
   readonly isTest: boolean
+  readonly format: CourseFormat
 
   readonly statistic?: CourseStatistic
   readonly permissions?: CoursePermissions
@@ -32,6 +44,7 @@ export interface CreateCourse extends ExpandableModel<CourseExpandableFields> {
   readonly code?: string
   readonly desc?: string
   readonly isTest?: boolean
+  readonly format?: CourseFormat
 }
 
 export interface UpdateCourse extends ExpandableModel<CourseExpandableFields> {

@@ -21,6 +21,32 @@
           </form>
         </section>
       </ng-template>
+      <ng-template uiStepperStep stepTitle="Format" stepIcon="layout" [stepValidator]="!!format.valid">
+        <section [formGroup]="format">
+          <h4>Choisissez le format de votre cours.</h4>
+          <p class="format-warning">Ce choix ne pourra plus être modifié une fois le cours créé.</p>
+          <div class="format-options">
+            <button
+              type="button"
+              class="format-option"
+              [class.selected]="format.value.format === CourseFormat.CLASSIC"
+              (click)="format.controls.format.setValue(CourseFormat.CLASSIC)"
+            >
+              <h5>Cours classique</h5>
+              <p>Une compilation d'activités (exercices, tests) organisées en sections.</p>
+            </button>
+            <button
+              type="button"
+              class="format-option"
+              [class.selected]="format.value.format === CourseFormat.OPENCLASS"
+              (click)="format.controls.format.setValue(CourseFormat.OPENCLASS)"
+            >
+              <h5>Cours OpenClass</h5>
+              <p>Des leçons (contenu de cours) et des activités mélangées, consultées en lecture séquentielle.</p>
+            </button>
+          </div>
+        </section>
+      </ng-template>
     </ui-stepper>
   </nz-skeleton>
 </main>

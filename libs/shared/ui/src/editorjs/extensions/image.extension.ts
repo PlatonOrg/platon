@@ -1,16 +1,39 @@
-import Image from '@editorjs/simple-image'
+import { Optional } from '@angular/core'
+import SimpleImage from '@editorjs/simple-image'
+import ImageTool from '@editorjs/image'
 import { EditorJsExtension, EDITOR_JS_EXTENSION } from '../editorjs'
+import { EditorJsFileUploader } from '../editorjs-file-uploader'
 
-const Extension: EditorJsExtension = {
-  tools: {
-    image: {
-      class: Image,
+export const buildImageExtension = (uploader: EditorJsFileUploader | null): EditorJsExtension => {
+  if (!uploader) {
+    return {
+      tools: {
+        image: {
+          class: SimpleImage,
+        },
+      },
+    }
+  }
+
+  return {
+    tools: {
+      image: {
+        class: ImageTool,
+        config: {
+          endpoints: {},
+          uploader: {
+            uploadByFile: (file: Blob) => uploader.uploadByFile(file),
+            uploadByUrl: (url: string) => uploader.uploadByUrl(url),
+          },
+        },
+      },
     },
-  },
+  }
 }
 
 export const ImageExtension = {
   provide: EDITOR_JS_EXTENSION,
   multi: true,
-  useValue: Extension,
+  useFactory: buildImageExtension,
+  deps: [[new Optional(), EditorJsFileUploader]],
 }

@@ -1,4 +1,4 @@
-<ui-modal-drawer size="large" [title]="localActivity()?.title || ''" [nzExtra]="drawerAction" #modal>
+<ui-modal-drawer size="large" [title]="drawerTitle" [nzExtra]="drawerAction" #modal>
   <ng-template>
     <course-activity-settings
       #settingsComponent
@@ -8,6 +8,37 @@
     />
   </ng-template>
 </ui-modal-drawer>
+
+<ng-template #drawerTitle>
+  <div class="drawer-title" style="display: flex; align-items: center; gap: 8px">
+    @if (!editingTitle()) {
+    <span>{{ titleDraft() }}</span>
+    <button
+      nz-button
+      nzType="text"
+      nzShape="circle"
+      nzSize="small"
+      (click)="startEditingTitle()"
+      aria-label="Modifier le nom de l'activité"
+    >
+      <i nz-icon nzType="edit" nzTheme="outline"></i>
+    </button>
+    } @else {
+    <input
+      nz-input
+      type="text"
+      name="drawerTitle"
+      [ngModel]="titleDraft()"
+      (ngModelChange)="titleDraft.set($event)"
+      (keydown.enter)="confirmTitleEdit()"
+      (blur)="confirmTitleEdit()"
+      (click)="$event.stopPropagation()"
+      maxlength="255"
+      style="max-width: 320px"
+    />
+    }
+  </div>
+</ng-template>
 
 <ng-template #drawerAction>
   <button nz-button nzType="primary" nzSize="default" (click)="saveSettings()" class="save-btn">

@@ -5,6 +5,7 @@ import {
   ElementRef,
   inject,
   Input,
+  input,
   OnDestroy,
   OnInit,
   QueryList,
@@ -67,6 +68,7 @@ import { NzNotificationComponent } from 'ng-zorro-antd/notification'
   templateUrl: './player-activity.component.html',
   styleUrls: ['./player-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.embedded]': 'embedded()' },
   imports: [
     RouterModule,
     MatIconModule,
@@ -133,6 +135,8 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected errorTemplate!: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>
 
   @Input() player!: ActivityPlayer
+
+  readonly embedded = input(false)
 
   protected get composed(): boolean {
     return this.player.settings?.navigation?.mode === 'composed'

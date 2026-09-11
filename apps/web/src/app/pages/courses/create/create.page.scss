@@ -84,3 +84,46 @@ nz-spin {
 .spacer {
   flex: 1;
 }
+
+.format-warning {
+  color: var(--brand-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.format-options {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.format-option {
+  flex: 1;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid var(--brand-border-color);
+  border-radius: 8px;
+  padding: 16px;
+  background: transparent;
+  transition: border-color var(--brand-motion-base) var(--brand-motion-ease);
+
+  h5 {
+    margin: 0 0 8px 0;
+    text-align: left;
+  }
+
+  p {
+    margin: 0;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  &:hover {
+    border-color: var(--brand-color-primary);
+  }
+
+  &.selected {
+    border-color: var(--brand-color-primary);
+    background: var(--brand-color-primary-soft);
+  }
+}

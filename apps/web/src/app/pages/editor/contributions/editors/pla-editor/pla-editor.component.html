@@ -84,7 +84,7 @@
     </nz-form-item>
     } @if (step === 1) {
     <nz-collapse>
-      <nz-collapse-panel nzHeader="Temps" nzExpandedIcon="clock-circle" nzActive>
+      <!-- <nz-collapse-panel nzHeader="Temps" nzExpandedIcon="clock-circle" nzActive>
         <nz-form-item>
           <nz-form-label
             [nzSpan]="3"
@@ -104,8 +104,8 @@
             <ng-template #suffix>hh:mm:ss</ng-template>
           </nz-form-control>
         </nz-form-item>
-      </nz-collapse-panel>
-      <nz-collapse-panel nzHeader="Aléatoire" nzExpandedIcon="question-circle" nzActive>
+      </nz-collapse-panel> -->
+      <!-- <nz-collapse-panel nzHeader="Aléatoire" nzExpandedIcon="question-circle" nzActive>
         <nz-form-item>
           <nz-form-label
             [nzSpan]="3"
@@ -118,7 +118,7 @@
             <label nz-checkbox formControlName="seedPerExercise" id="seedPerExercise"></label>
           </nz-form-control>
         </nz-form-item>
-      </nz-collapse-panel>
+      </nz-collapse-panel> -->
       <nz-collapse-panel formGroupName="navigation" nzHeader="Navigation" nzExpandedIcon="compass" nzActive>
         <nz-form-item>
           <nz-form-label [nzSpan]="3" nzLabelAlign="left" for="navigationMode">Mode</nz-form-label>
@@ -166,7 +166,7 @@
         </nz-form-item>
         }
       </nz-collapse-panel>
-      <nz-collapse-panel formGroupName="actions" nzHeader="Actions" nzExpandedIcon="play-circle" nzActive>
+      <!-- <nz-collapse-panel formGroupName="actions" nzHeader="Actions" nzExpandedIcon="play-circle" nzActive>
         <nz-form-item>
           <nz-form-label
             [nzSpan]="3"
@@ -227,8 +227,8 @@
             <label nz-checkbox formControlName="solution" id="solution"></label>
           </nz-form-control>
         </nz-form-item>
-      </nz-collapse-panel>
-      <nz-collapse-panel formGroupName="feedback" nzHeader="Feedback" nzExpandedIcon="message" nzActive>
+      </nz-collapse-panel> -->
+      <!-- <nz-collapse-panel formGroupName="feedback" nzHeader="Feedback" nzExpandedIcon="message" nzActive>
         <nz-form-item>
           <nz-form-label
             [nzSpan]="3"
@@ -291,7 +291,7 @@
             <label nz-checkbox formControlName="terminateOnLeavePage" id="terminateOnLeavePage"></label>
           </nz-form-control>
         </nz-form-item>
-      </nz-collapse-panel>
+      </nz-collapse-panel>  -->
     </nz-collapse>
     } @if (step === 2) {
     <div class="exercise-group-container">

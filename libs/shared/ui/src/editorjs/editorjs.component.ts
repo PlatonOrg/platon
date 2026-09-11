@@ -12,13 +12,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { v4 as uuidv4 } from 'uuid'
 import { EditorJsService } from './editorjs.service'
+import { CalloutExtension } from './extensions/callout.extension'
 import { CodeExtension } from './extensions/code.extension'
 import { DelimiterExtension } from './extensions/delimiter.extension'
+import { EmbedExtension } from './extensions/embed.extension'
+import { ExerciseExtension } from './extensions/exercise.extension'
 import { ImageExtension } from './extensions/image.extension'
 import { ListExtension } from './extensions/list.extension'
 import { RawExtension } from './extensions/raw.extension'
 import { TableExtension } from './extensions/table.extension'
 import { TextExtension } from './extensions/text.extension'
+import { VideoExtension } from './extensions/video.extension'
 
 @Component({
   selector: 'ui-editorjs',
@@ -28,13 +32,18 @@ import { TextExtension } from './extensions/text.extension'
   encapsulation: ViewEncapsulation.None,
   providers: [
     EditorJsService,
+    CalloutExtension,
     CodeExtension,
     DelimiterExtension,
+    EmbedExtension,
     ListExtension,
     RawExtension,
     TableExtension,
     TextExtension,
     ImageExtension,
+    VideoExtension,
+    ExerciseExtension,
+
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => EditorJsComponent),

@@ -17,3 +17,4 @@ export * from './course-member-search-modal/course-member-search-modal.component
 export * from './course-group-select/course-group-select.component'
 export * from './activity-settings/activity-settings.component'
 export * from './activity-settings-drawer/activity-settings-drawer.component'
+export * from './course-student-overview/course-student-overview.component'
