@@ -15,8 +15,13 @@ export interface TestDatabase {
  * Appeler `teardown()` dans `afterAll` pour nettoyer.
  *
  * @param entities - Liste des entités TypeORM à synchroniser dans la base de test
+ * @param setupSql - Instructions SQL brutes à exécuter après la synchronisation du schéma (ex: extensions,
+ *   fonctions ou vues matérialisées définies par migration, absentes du `synchronize: true`)
  */
-export const createTestDatabase = async (entities: EntityTarget<ObjectLiteral>[]): Promise<TestDatabase> => {
+export const createTestDatabase = async (
+  entities: EntityTarget<ObjectLiteral>[],
+  setupSql: string[] = []
+): Promise<TestDatabase> => {
   const container = await new PostgreSqlContainer('postgres:16-alpine')
     .withDatabase('platon_test')
     .withUsername('test')
@@ -38,6 +43,10 @@ export const createTestDatabase = async (entities: EntityTarget<ObjectLiteral>[]
   })
 
   await dataSource.initialize()
+
+  for (const sql of setupSql) {
+    await dataSource.query(sql)
+  }
 
   const teardown = async () => {
     await dataSource.destroy()

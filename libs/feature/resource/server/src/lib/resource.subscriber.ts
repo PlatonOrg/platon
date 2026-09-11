@@ -59,7 +59,9 @@ export class ResourceSubscriber implements EntitySubscriberInterface<ResourceEnt
         resourceId: event.entity['id'],
         resourceType: event.entity['type'],
         resourceName: event.entity['name'],
-        parentName: (await this.resourceService.getById(event.entity['parentId'])).name || 'Inconnu',
+        parentName: event.entity['parentId']
+          ? (await this.resourceService.getById(event.entity['parentId'])).name || 'Inconnu'
+          : 'Inconnu',
         newStatus: event.entity['status'],
       }
       await event.manager.save(
