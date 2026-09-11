@@ -44,8 +44,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
 
   displayMenu = true
   computeEngine = new ComputeEngine()
-
-  async ngOnInit() {
+    async ngOnInit() {
     this.state.isFilled = false
     this.mathfield = new MathfieldElement()
     this.mathfield.value = this.state.value
@@ -56,13 +55,13 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveStat
     this.mathfield.oninput = () => {
       this.changeDetection
         .ignore(this, () => {
-          this.state.value = this.computeEngine
-            .parse(this.mathfield.getValue('latex-expanded'), {
-              canonical: false,
-            })
-            .toLatex({
-              invisiblePlus: '+',
-            })
+          const rawLatex = this.mathfield.getValue('latex-expanded')
+          const expr = this.computeEngine.parse(rawLatex, {
+            canonical: false,
+          })
+          this.state.value = expr.isValid
+            ? expr.toLatex({ invisiblePlus: '+', prettify: false })
+            : rawLatex
           this.state.isFilled = true
         })
         .catch(console.error)
