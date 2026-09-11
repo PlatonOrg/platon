@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 @Injectable()
-export class StringUtilsService {
+export class NameSimilarityService {
   normalizeString(str: string): string {
     return str
       .toLowerCase()

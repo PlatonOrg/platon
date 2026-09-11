@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import type { UserEntity as UserEntityType } from '@platon/core/server'
 import { UserRoles } from '@platon/core/common'
 import { EntityTarget, ObjectLiteral, Repository } from 'typeorm'
-import { createTestDatabase, TestDatabase } from '../database/test-database'
+import { createTestDatabase, TestDatabase } from '@platon/core/testing/server'
 import { createAuthenticatedUser, getAuthEntities, TestAuthModule, TestUser } from './test-auth.module'
 
 export interface CreateE2EAppOptions {

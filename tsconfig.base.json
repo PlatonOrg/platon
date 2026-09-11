@@ -33,6 +33,7 @@
       "@platon/core/common": ["./libs/core/common/src/index.ts"],
       "@platon/core/server": ["./libs/core/server/src/index.ts"],
       "@platon/core/testing/common": ["./libs/core/testing/common/src/index.ts"],
+      "@platon/core/testing/e2e-server": ["./libs/core/testing/e2e-server/src/index.ts"],
       "@platon/core/testing/server": ["./libs/core/testing/server/src/index.ts"],
       "@platon/feature/ai/browser": ["./libs/feature/ai/browser/src/index.ts"],
       "@platon/feature/ai/common": ["./libs/feature/ai/common/src/index.ts"],

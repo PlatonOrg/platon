@@ -1,3 +1,7 @@
+// Teste la couche HTTP (ValidationPipe, codes de statut) avec PlayerService mocké.
+// PAS un test e2e : pas de DB réelle ni d'auth (voir player.controller.spec.ts pour les tests
+// unitaires de délégation, et player.service.integration.spec.ts / feedback.service.integration.spec.ts
+// pour les tests avec DB réelle).
 const request = require('supertest')
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
