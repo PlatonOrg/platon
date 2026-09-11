@@ -320,7 +320,6 @@ export class CrosswordComponent implements OnInit, WebComponentHooks<CrosswordSt
     this.color = false
     if (key === 'Backspace') {
       if (this.getCharAt(x, y) !== '') {
-        // eslint-disable-next-line prettier/prettier
         ;(event.target as HTMLInputElement).value = '' // prettier ask for ; at the start of the line, then ask to remove it
         this.updateValueUserAnswer('', x, y)
         return
