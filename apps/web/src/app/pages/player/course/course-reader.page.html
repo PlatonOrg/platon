@@ -2,6 +2,10 @@
 <div class="loading-container">
   <nz-spin nzSimple nzSize="large"></nz-spin>
 </div>
+} @else if (error(); as error) {
+<div class="error-container">
+  <ui-error [error]="error" [showMessage]="true" [showButtons]="false" />
+</div>
 } @else {
 <header class="reader-topbar">
   <a [routerLink]="['/courses', course()?.id, 'dashboard']" class="back-link">

@@ -38,6 +38,14 @@
   width: 100%;
 }
 
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
 .toc {
   width: 280px;
   flex-shrink: 0;

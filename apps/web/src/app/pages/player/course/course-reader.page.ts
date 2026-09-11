@@ -11,7 +11,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { Activity, Course, CourseSection } from '@platon/feature/course/common'
 import { CourseService } from '@platon/feature/course/browser'
-import { EditorjsViewerComponent } from '@platon/shared/ui'
+import { EditorjsViewerComponent, UiErrorComponent } from '@platon/shared/ui'
 import { PlayerService, PlayerWrapperComponent } from '@platon/feature/player/browser'
 import { ActivityPlayer } from '@platon/feature/player/common'
 import { ThemeService } from '@platon/core/browser'
@@ -37,6 +37,7 @@ interface ReaderItem {
     NzProgressModule,
     NzSpinModule,
     EditorjsViewerComponent,
+    UiErrorComponent,
     PlayerWrapperComponent,
   ],
 })
@@ -48,6 +49,7 @@ export class CourseReaderPage implements OnInit {
   protected readonly themeService = inject(ThemeService)
 
   protected readonly loading = signal(true)
+  protected readonly error = signal<unknown>(undefined)
   protected readonly course = signal<Course | undefined>(undefined)
   protected readonly sections = signal<CourseSection[]>([])
   protected readonly items = signal<ReaderItem[]>([])
@@ -61,35 +63,39 @@ export class CourseReaderPage implements OnInit {
   protected readonly hasNext = computed(() => this.currentIndex() < this.items().length - 1)
 
   async ngOnInit(): Promise<void> {
-    const courseId = this.route.snapshot.paramMap.get('courseId') as string
-    const course = await firstValueFrom(this.courseService.find({ id: courseId, expands: ['statistic'] }))
-    this.course.set(course)
+    try {
+      const courseId = this.route.snapshot.paramMap.get('courseId') as string
+      const course = await firstValueFrom(this.courseService.find({ id: courseId, expands: ['statistic'] }))
+      this.course.set(course)
 
-    const [sectionsResponse, activitiesResponse] = await Promise.all([
-      firstValueFrom(this.courseService.listSections(course)),
-      firstValueFrom(this.courseService.listActivities(course)),
-    ])
+      const [sectionsResponse, activitiesResponse] = await Promise.all([
+        firstValueFrom(this.courseService.listSections(course)),
+        firstValueFrom(this.courseService.listActivities(course)),
+      ])
 
-    const sections = [...sectionsResponse.resources].sort((a, b) => a.order - b.order)
-    this.sections.set(sections)
+      const sections = [...sectionsResponse.resources].sort((a, b) => a.order - b.order)
+      this.sections.set(sections)
 
-    const items: ReaderItem[] = []
-    for (const section of sections) {
-      const sectionActivities = activitiesResponse.resources
-        .filter((activity) => activity.sectionId === section.id)
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      for (const activity of sectionActivities) {
-        items.push({ activity, sectionId: section.id, sectionName: section.name })
+      const items: ReaderItem[] = []
+      for (const section of sections) {
+        const sectionActivities = activitiesResponse.resources
+          .filter((activity) => activity.sectionId === section.id)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        for (const activity of sectionActivities) {
+          items.push({ activity, sectionId: section.id, sectionName: section.name })
+        }
       }
+      this.items.set(items)
+
+      const requestedItemId = this.route.snapshot.queryParamMap.get('item')
+      const requestedIndex = requestedItemId ? items.findIndex((item) => item.activity.id === requestedItemId) : -1
+      const firstIncompleteIndex = items.findIndex((item) => item.activity.progression < 100)
+      this.currentIndex.set(requestedIndex >= 0 ? requestedIndex : firstIncompleteIndex >= 0 ? firstIncompleteIndex : 0)
+    } catch (error) {
+      this.error.set(error)
+    } finally {
+      this.loading.set(false)
     }
-    this.items.set(items)
-
-    const requestedItemId = this.route.snapshot.queryParamMap.get('item')
-    const requestedIndex = requestedItemId ? items.findIndex((item) => item.activity.id === requestedItemId) : -1
-    const firstIncompleteIndex = items.findIndex((item) => item.activity.progression < 100)
-    this.currentIndex.set(requestedIndex >= 0 ? requestedIndex : firstIncompleteIndex >= 0 ? firstIncompleteIndex : 0)
-
-    this.loading.set(false)
   }
 
   protected itemsForSection(sectionId: string): ReaderItem[] {
