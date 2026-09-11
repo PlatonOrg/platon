@@ -321,6 +321,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     maxAttempts: 5,
   }
 
+  protected neverEnter = () => false
+
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User
     const direction = localStorage.getItem('order-direction') as OrderingDirections

@@ -575,7 +575,15 @@
       <nz-breadcrumb-item>Exercices</nz-breadcrumb-item>
     </nz-breadcrumb>
   </h3>
-
+  <div
+    cdkDropList
+    id="itemList"
+    [cdkDropListData]="items"
+    [cdkDropListConnectedTo]="allConnectedTo"
+    [cdkDropListSortingDisabled]="true"
+    [cdkDropListEnterPredicate]="neverEnter"
+    [cdkDropListHasAnchor]="true"
+  >
   @if (!readOnly) {
   <div class="add-exercise">
     <ui-search-bar [searchbar]="searchbar" (filter)="filterDrawer.open()">
@@ -599,20 +607,9 @@
   </div>
   } @if (!readOnly) {
   <app-exercise-list
-    cdkDropList
-    id="itemList"
-    cdkDropListSortingDisabled
-    [cdkDropListDisabled]="readOnly"
-    [cdkDropListConnectedTo]="allConnectedTo"
-    [cdkDropListData]="items"
     (exerciseClicked)="handleExerciseClicked($event)"
     [items]="items"
   >
-    <h2>Aucune ressource ne correspond à votre recherche</h2>
-    <ul>
-      <li>Vérifiez les termes de votre recherche</li>
-      <li>Essayez d'autres critères de recherche</li>
-    </ul>
   </app-exercise-list>
   }
   <nz-spin class="spinner-pagination" nzSize="large" [nzTip]="'Chargement...'" [nzSpinning]="paginating" />
@@ -624,6 +621,7 @@
     <span>({{ nbFilters }} filtres actifs)</span>
   </div>
   }
+</div>
 </ng-template>
 
 <ng-template #treeTemplate>
