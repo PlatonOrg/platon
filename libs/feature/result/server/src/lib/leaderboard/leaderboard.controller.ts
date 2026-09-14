@@ -23,7 +23,7 @@ export class LeaderboardController {
     @UUIDParam('id') id: string,
     @Query('limit', { transform: (value: string) => toNumber(value) }) limit?: number
   ): Promise<ListResponse<CourseLeaderboardEntryDTO>> {
-    const isMember = this.courseMemberService.isMember(id, req.user.id)
+    const isMember = await this.courseMemberService.isMember(id, req.user.id)
     if (!isMember) {
       throw new ForbiddenResponse('You are not a member of this course')
     }
