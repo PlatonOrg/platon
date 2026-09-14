@@ -92,7 +92,7 @@ export class TestService {
     currentUser: UserEntity
   ): Promise<void> {
     const testMember = await this.courseMemberService.findById(testId, courseMemberId)
-    if (!testMember) {
+    if (testMember.isEmpty()) {
       throw new Error(`Test member not found for course member ID: ${courseMemberId}`)
     }
 
