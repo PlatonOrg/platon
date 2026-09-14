@@ -5,7 +5,7 @@ import { CourseEntity } from './entites/course.entity'
 import { CourseSubscriber } from './course.subscriber'
 
 describe('CourseSubscriber', () => {
-  it('devrait s\'enregistrer auprès du dataSource à la construction', () => {
+  it("devrait s'enregistrer auprès du dataSource à la construction", () => {
     const dataSource = { subscribers: [] as unknown[] } as never
     const subscriber = new CourseSubscriber(dataSource)
 
@@ -19,7 +19,7 @@ describe('CourseSubscriber', () => {
   })
 
   describe('afterInsert', () => {
-    it("devrait ajouter le propriétaire comme membre enseignant du cours créé", async () => {
+    it('devrait ajouter le propriétaire comme membre enseignant du cours créé', async () => {
       const subscriber = new CourseSubscriber({ subscribers: [] } as never)
       const created = { userId: 'owner-1', courseId: 'course-1', role: CourseMemberRoles.teacher }
       const manager = {

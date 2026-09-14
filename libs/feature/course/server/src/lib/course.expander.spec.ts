@@ -28,7 +28,7 @@ describe('CourseExpander', () => {
     expect(courseMemberService.hasWritePermission).not.toHaveBeenCalled()
   })
 
-  it("devrait déléguer à hasWritePermission pour un non-propriétaire", async () => {
+  it('devrait déléguer à hasWritePermission pour un non-propriétaire', async () => {
     courseMemberService.hasWritePermission.mockResolvedValue(true)
     const context = buildContext('teacher-1', 'owner-1')
 
