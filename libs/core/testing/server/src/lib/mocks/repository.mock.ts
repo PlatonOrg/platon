@@ -19,6 +19,7 @@ export type MockRepository<T extends ObjectLiteral = ObjectLiteral> = jest.Mocke
     | 'delete'
     | 'remove'
     | 'query'
+    | 'count'
     | 'createQueryBuilder'
   >
 >
@@ -36,5 +37,6 @@ export const mockRepository = <T extends ObjectLiteral>(): MockRepository<T> => 
   delete: jest.fn(),
   remove: jest.fn(),
   query: jest.fn(),
+  count: jest.fn(),
   createQueryBuilder: jest.fn(),
 })
