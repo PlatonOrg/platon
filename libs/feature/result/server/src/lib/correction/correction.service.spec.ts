@@ -137,7 +137,7 @@ describe('CorrectionService', () => {
       expect(queryText).toContain('HAVING COUNT(exercise_session.id) = COUNT(correction.id)')
     })
 
-    it("ne devrait ajouter aucune clause HAVING sans statut", async () => {
+    it('ne devrait ajouter aucune clause HAVING sans statut', async () => {
       await service.listSummary('corrector-1')
 
       const [queryText] = sessionRepository.query.mock.calls[0]
@@ -202,10 +202,7 @@ describe('CorrectionService', () => {
         correction: { id: 'c1', grade: 5 },
         parent: { id: 'parent-1' },
       } as never)
-      sessionRepository.find.mockResolvedValue([
-        { correction: { grade: 5 } },
-        { correction: null },
-      ] as never)
+      sessionRepository.find.mockResolvedValue([{ correction: { grade: 5 } }, { correction: null }] as never)
       correctionRepository.save.mockResolvedValue({ id: 'c1', grade: 8 } as CorrectionEntity)
 
       await service.upsert('session-1', { grade: 8 })
@@ -222,10 +219,7 @@ describe('CorrectionService', () => {
         activity: { id: 'activity-1' },
         userId: 'user-1',
       } as never)
-      sessionRepository.find.mockResolvedValue([
-        { correction: { grade: 6 } },
-        { correction: { grade: 10 } },
-      ] as never)
+      sessionRepository.find.mockResolvedValue([{ correction: { grade: 6 } }, { correction: { grade: 10 } }] as never)
       correctionRepository.save.mockResolvedValue({ id: 'c1', grade: 8 } as CorrectionEntity)
       sessionRepository.save.mockImplementation(async (s) => s as SessionEntity)
 

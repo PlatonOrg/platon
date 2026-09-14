@@ -18,6 +18,7 @@ export const mockSelectQueryBuilder = <T extends ObjectLiteral>() => {
     take: jest.fn().mockReturnThis(),
     skip: jest.fn().mockReturnThis(),
     distinct: jest.fn().mockReturnThis(),
+    setParameters: jest.fn().mockReturnThis(),
     getMany: jest.fn(),
     getOne: jest.fn(),
     getOneOrFail: jest.fn(),
