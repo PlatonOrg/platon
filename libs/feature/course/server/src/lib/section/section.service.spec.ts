@@ -53,7 +53,10 @@ describe('CourseSectionService', () => {
 
   describe('create', () => {
     it('devrait décaler les sections existantes avec un ordre >= et créer la nouvelle', async () => {
-      const existing = [{ id: 's1', order: 1 }, { id: 's2', order: 2 }] as CourseSectionEntity[]
+      const existing = [
+        { id: 's1', order: 1 },
+        { id: 's2', order: 2 },
+      ] as CourseSectionEntity[]
       const manager = {
         find: jest.fn().mockResolvedValue(existing),
         save: jest.fn(),
@@ -75,9 +78,7 @@ describe('CourseSectionService', () => {
       const manager = { findOne: jest.fn().mockResolvedValue(null) }
       dataSource.transaction.mockImplementation((fn) => fn(manager))
 
-      await expect(service.update('course-1', 'section-1', { name: 'New' })).rejects.toBeInstanceOf(
-        NotFoundResponse
-      )
+      await expect(service.update('course-1', 'section-1', { name: 'New' })).rejects.toBeInstanceOf(NotFoundResponse)
     })
 
     it("ne devrait pas réordonner si l'ordre ne change pas", async () => {
@@ -92,7 +93,10 @@ describe('CourseSectionService', () => {
 
     it("devrait décrémenter les sections entre l'ancien et le nouvel ordre quand on avance la section", async () => {
       const section = { id: 'section-1', order: 1 } as CourseSectionEntity
-      const between = [{ id: 's2', order: 2 }, { id: 's3', order: 3 }] as CourseSectionEntity[]
+      const between = [
+        { id: 's2', order: 2 },
+        { id: 's3', order: 3 },
+      ] as CourseSectionEntity[]
       const manager = {
         findOne: jest.fn().mockResolvedValue(section),
         find: jest.fn().mockResolvedValue(between),
@@ -110,7 +114,10 @@ describe('CourseSectionService', () => {
 
     it("devrait incrémenter les sections entre le nouvel et l'ancien ordre quand on recule la section", async () => {
       const section = { id: 'section-1', order: 3 } as CourseSectionEntity
-      const between = [{ id: 's1', order: 1 }, { id: 's2', order: 2 }] as CourseSectionEntity[]
+      const between = [
+        { id: 's1', order: 1 },
+        { id: 's2', order: 2 },
+      ] as CourseSectionEntity[]
       const manager = {
         findOne: jest.fn().mockResolvedValue(section),
         find: jest.fn().mockResolvedValue(between),
@@ -137,7 +144,10 @@ describe('CourseSectionService', () => {
 
     it('devrait réindexer les sections restantes puis supprimer la section', async () => {
       const section = { id: 'section-1', order: 1 } as CourseSectionEntity
-      const others = [{ id: 's2', order: 0 }, { id: 's3', order: 2 }] as CourseSectionEntity[]
+      const others = [
+        { id: 's2', order: 0 },
+        { id: 's3', order: 2 },
+      ] as CourseSectionEntity[]
       const manager = {
         findOne: jest.fn().mockResolvedValue(section),
         find: jest.fn().mockResolvedValue(others),

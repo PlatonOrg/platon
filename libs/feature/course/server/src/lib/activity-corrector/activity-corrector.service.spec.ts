@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { MockRepository, mockRepository, mockSelectQueryBuilder } from '@platon/core/testing/server'
-import { DataSource, SelectQueryBuilder } from 'typeorm'
+import { DataSource } from 'typeorm'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
 import { ActivityCorrectorEntity } from './activity-corrector.entity'
 import { ActivityCorrectorService } from './activity-corrector.service'

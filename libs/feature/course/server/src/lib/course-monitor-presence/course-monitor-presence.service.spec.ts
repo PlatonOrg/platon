@@ -1,6 +1,10 @@
 import { Test } from '@nestjs/testing'
 import { PubSubService } from '@platon/core/server'
-import { MONITOR_PRESENCE_SUBSCRIBE, MONITOR_PRESENCE_UNSUBSCRIBE, MonitorPresencePayload } from '@platon/feature/course/common'
+import {
+  MONITOR_PRESENCE_SUBSCRIBE,
+  MONITOR_PRESENCE_UNSUBSCRIBE,
+  MonitorPresencePayload,
+} from '@platon/feature/course/common'
 import { CourseMonitorPresenceService } from './course-monitor-presence.service'
 
 describe('CourseMonitorPresenceService', () => {
@@ -28,12 +32,12 @@ describe('CourseMonitorPresenceService', () => {
     jest.clearAllMocks()
   })
 
-  it('devrait s\'abonner aux canaux subscribe et unsubscribe à la construction', () => {
+  it("devrait s'abonner aux canaux subscribe et unsubscribe à la construction", () => {
     expect(pubSubService.subscribe).toHaveBeenCalledWith(MONITOR_PRESENCE_SUBSCRIBE, expect.any(Function))
     expect(pubSubService.subscribe).toHaveBeenCalledWith(MONITOR_PRESENCE_UNSUBSCRIBE, expect.any(Function))
   })
 
-  it("devrait retourner un tableau vide sans monitor actif", () => {
+  it('devrait retourner un tableau vide sans monitor actif', () => {
     expect(service.getActiveMonitoringUsers('activity-1')).toEqual([])
   })
 

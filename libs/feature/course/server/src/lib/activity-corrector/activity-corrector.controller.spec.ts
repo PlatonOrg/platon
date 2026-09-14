@@ -25,7 +25,13 @@ describe('ActivityCorrectorController', () => {
 
   beforeEach(async () => {
     activityService = { withActivity: jest.fn() }
-    correctorService = { search: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(), findById: jest.fn() }
+    correctorService = {
+      search: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      findById: jest.fn(),
+    }
     courseMemberService = { hasWritePermission: jest.fn() }
 
     const module = await Test.createTestingModule({
@@ -63,25 +69,21 @@ describe('ActivityCorrectorController', () => {
       )
     })
 
-    it("devrait lever une ForbiddenResponse pour un challenge", async () => {
+    it('devrait lever une ForbiddenResponse pour un challenge', async () => {
       activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: true }))
 
       await expect(controller.create(req, 'activity-1', {} as never)).rejects.toBeInstanceOf(ForbiddenResponse)
     })
 
     it("devrait lever une ForbiddenResponse sans permission d'écriture", async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(false)
 
       await expect(controller.create(req, 'activity-1', {} as never)).rejects.toBeInstanceOf(ForbiddenResponse)
     })
 
     it('devrait créer le correcteur', async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(true)
       correctorService.create.mockResolvedValue({ id: 'c1' } as ActivityCorrectorEntity)
       correctorService.findById.mockResolvedValue(Optional.of({ id: 'c1' } as ActivityCorrectorEntity))
@@ -94,9 +96,7 @@ describe('ActivityCorrectorController', () => {
 
   describe('update', () => {
     it('devrait mettre à jour et retourner la nouvelle liste', async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(true)
       correctorService.search.mockResolvedValue([[], 0])
 
@@ -108,9 +108,7 @@ describe('ActivityCorrectorController', () => {
 
   describe('delete', () => {
     it('devrait supprimer le correcteur', async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(true)
 
       await controller.delete(req, 'activity-1', 'c1')

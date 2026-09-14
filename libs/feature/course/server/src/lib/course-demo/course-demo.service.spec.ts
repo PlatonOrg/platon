@@ -68,7 +68,10 @@ describe('CourseDemoService', () => {
   describe('registerToDemo', () => {
     it("devrait connecter un utilisateur anonyme et l'ajouter comme étudiant", async () => {
       const demo = { course: { id: 'course-1' } } as CourseDemoEntity
-      authService.signInDemo.mockResolvedValue({ authToken: { accessToken: 'a', refreshToken: 'r' }, userId: 'u1' } as never)
+      authService.signInDemo.mockResolvedValue({
+        authToken: { accessToken: 'a', refreshToken: 'r' },
+        userId: 'u1',
+      } as never)
 
       const token = await service.registerToDemo(demo)
 

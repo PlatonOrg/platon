@@ -81,25 +81,21 @@ describe('CoursePermissionsService', () => {
     it("devrait lever une NotFoundResponse si l'activité (passée par id) est introuvable", async () => {
       activityService.findByActivityId.mockResolvedValue(Optional.empty())
 
-      await expect(service.ensureActivityReadPermission('activity-1', req)).rejects.toBeInstanceOf(
-        NotFoundResponse
-      )
+      await expect(service.ensureActivityReadPermission('activity-1', req)).rejects.toBeInstanceOf(NotFoundResponse)
     })
 
-    it('devrait résoudre l\'activité par id si une string est passée', async () => {
+    it("devrait résoudre l'activité par id si une string est passée", async () => {
       activityService.findByActivityId.mockResolvedValue(Optional.of(activity))
       activityMemberService.isPrivateMember.mockResolvedValue(false)
       activityGroupService.isUserInActivityGroup.mockResolvedValue(false)
       activityMemberService.isMember.mockResolvedValue(false)
       activityGroupService.numberOfGroups.mockResolvedValue(0)
 
-      await expect(service.ensureActivityReadPermission('activity-1', req)).rejects.toBeInstanceOf(
-        ForbiddenResponse
-      )
+      await expect(service.ensureActivityReadPermission('activity-1', req)).rejects.toBeInstanceOf(ForbiddenResponse)
       expect(activityService.findByActivityId).toHaveBeenCalledWith('activity-1')
     })
 
-    it("devrait passer pour un enseignant même si les autres vérifications échouent (toutes calculées, mais court-circuitées par isTeacher)", async () => {
+    it('devrait passer pour un enseignant même si les autres vérifications échouent (toutes calculées, mais court-circuitées par isTeacher)', async () => {
       const teacherReq = { user: { id: 'u1', role: 'teacher' } } as IRequest
       activityMemberService.isPrivateMember.mockResolvedValue(false)
       activityGroupService.isUserInActivityGroup.mockResolvedValue(false)
@@ -158,7 +154,7 @@ describe('CoursePermissionsService', () => {
       expect(courseMemberService.hasWritePermission).not.toHaveBeenCalled()
     })
 
-    it("devrait déléguer à ensureCourseWritePermission si pas créateur", async () => {
+    it('devrait déléguer à ensureCourseWritePermission si pas créateur', async () => {
       const activity = { id: 'activity-1', courseId: 'course-1', creatorId: 'someone-else' } as ActivityEntity
       courseMemberService.hasWritePermission.mockResolvedValue(true)
 
@@ -171,9 +167,7 @@ describe('CoursePermissionsService', () => {
       activityService.findByActivityId.mockResolvedValue(Optional.of(activity))
       courseMemberService.hasWritePermission.mockResolvedValue(false)
 
-      await expect(service.ensureActivityWritePermission('activity-1', req)).rejects.toBeInstanceOf(
-        ForbiddenResponse
-      )
+      await expect(service.ensureActivityWritePermission('activity-1', req)).rejects.toBeInstanceOf(ForbiddenResponse)
     })
   })
 })

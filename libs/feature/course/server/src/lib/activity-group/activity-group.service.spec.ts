@@ -86,7 +86,7 @@ describe('ActivityGroupService', () => {
       await expect(service.isUserInActivityGroup('a1', 'u1')).resolves.toBe(false)
     })
 
-    it("devrait retourner false sans aucun groupe associé", async () => {
+    it('devrait retourner false sans aucun groupe associé', async () => {
       repository.find.mockResolvedValue([])
 
       await expect(service.isUserInActivityGroup('a1', 'u1')).resolves.toBe(false)

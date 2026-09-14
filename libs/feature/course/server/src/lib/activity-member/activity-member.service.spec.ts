@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { MockRepository, mockRepository, mockSelectQueryBuilder } from '@platon/core/testing/server'
-import { DataSource, SelectQueryBuilder } from 'typeorm'
+import { DataSource } from 'typeorm'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
 import { ActivityMemberEntity } from './activity-member.entity'
 import { ActivityMemberService } from './activity-member.service'
@@ -140,7 +140,7 @@ describe('ActivityMemberService', () => {
       await expect(service.isPrivateMember('activity-1', 'u1')).resolves.toBe(true)
     })
 
-    it("devrait retourner false si memberId est absent (membre via groupe)", async () => {
+    it('devrait retourner false si memberId est absent (membre via groupe)', async () => {
       view.findOne.mockResolvedValue({ memberId: null } as unknown as ActivityMemberView)
 
       await expect(service.isPrivateMember('activity-1', 'u1')).resolves.toBe(false)

@@ -7,7 +7,9 @@ import { CourseGroupService } from './course-group.service'
 
 describe('CourseGroupController', () => {
   let controller: CourseGroupController
-  let groupService: jest.Mocked<Pick<CourseGroupService, 'listCourseGroups' | 'update' | 'addCourseGroup' | 'delete' | 'isMember'>>
+  let groupService: jest.Mocked<
+    Pick<CourseGroupService, 'listCourseGroups' | 'update' | 'addCourseGroup' | 'delete' | 'isMember'>
+  >
   let groupMemberService: jest.Mocked<Pick<CourseGroupMemberService, 'deleteAllMembersFromGroup'>>
   const req = { user: { id: 'user-1' } } as IRequest
 

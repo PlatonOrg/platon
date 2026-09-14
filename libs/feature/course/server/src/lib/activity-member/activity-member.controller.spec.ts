@@ -66,18 +66,14 @@ describe('ActivityMemberController', () => {
     })
 
     it("devrait lever une ForbiddenResponse sans permission d'écriture", async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(false)
 
       await expect(controller.create(req, 'activity-1', {} as never)).rejects.toBeInstanceOf(ForbiddenResponse)
     })
 
     it('devrait créer le membre', async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(true)
       memberService.create.mockResolvedValue({ id: 'm1' } as ActivityMemberEntity)
       memberService.findById.mockResolvedValue(Optional.of({ id: 'm1' } as ActivityMemberEntity))
@@ -90,9 +86,7 @@ describe('ActivityMemberController', () => {
 
   describe('update', () => {
     it('devrait mettre à jour et retourner la nouvelle liste', async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(true)
       memberService.search.mockResolvedValue([[], 0])
 
@@ -104,9 +98,7 @@ describe('ActivityMemberController', () => {
 
   describe('delete', () => {
     it('devrait supprimer le membre', async () => {
-      activityService.withActivity.mockImplementation(
-        withActivityMock({ isChallenge: false, courseId: 'course-1' })
-      )
+      activityService.withActivity.mockImplementation(withActivityMock({ isChallenge: false, courseId: 'course-1' }))
       courseMemberService.hasWritePermission.mockResolvedValue(true)
 
       await controller.delete(req, 'activity-1', 'm1')

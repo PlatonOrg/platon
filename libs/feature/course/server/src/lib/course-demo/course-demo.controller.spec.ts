@@ -49,9 +49,9 @@ describe('CourseDemoController', () => {
     it("devrait lever une NotFoundResponse si le demo n'existe pas", async () => {
       demoService.findByUri.mockResolvedValue(Optional.empty())
 
-      await expect(
-        controller.accessDemo({ uri: 'demo-uri' }, { user: undefined } as never)
-      ).rejects.toBeInstanceOf(NotFoundResponse)
+      await expect(controller.accessDemo({ uri: 'demo-uri' }, { user: undefined } as never)).rejects.toBeInstanceOf(
+        NotFoundResponse
+      )
     })
 
     it("devrait ajouter l'utilisateur connecté comme membre s'il ne l'est pas déjà", async () => {
@@ -67,7 +67,7 @@ describe('CourseDemoController', () => {
       expect(demoService.registerToDemo).not.toHaveBeenCalled()
     })
 
-    it("ne devrait pas ré-ajouter un utilisateur déjà membre", async () => {
+    it('ne devrait pas ré-ajouter un utilisateur déjà membre', async () => {
       const demo = { id: 'demo-1', course: { id: 'course-1' } } as CourseDemoEntity
       demoService.findByUri.mockResolvedValue(Optional.of(demo))
       courseMemberService.isMember.mockResolvedValue(true)
@@ -110,15 +110,12 @@ describe('CourseDemoController', () => {
     })
 
     it('devrait retourner le demo pour un admin même non membre', async () => {
-      demoService.findByCourseId.mockResolvedValue(
-        Optional.of({ id: 'demo-uri', course: { id: 'course-1' } } as never)
-      )
+      demoService.findByCourseId.mockResolvedValue(Optional.of({ id: 'demo-uri', course: { id: 'course-1' } } as never))
       courseMemberService.isMember.mockResolvedValue(false)
 
-      const result = await controller.getDemo(
-        { user: { id: 'u1', role: UserRoles.admin } } as IRequest,
-        { courseId: 'course-1' }
-      )
+      const result = await controller.getDemo({ user: { id: 'u1', role: UserRoles.admin } } as IRequest, {
+        courseId: 'course-1',
+      })
 
       expect(result.resource.demoExists).toBe(true)
     })
