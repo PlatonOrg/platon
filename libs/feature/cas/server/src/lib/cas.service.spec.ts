@@ -86,7 +86,7 @@ describe('CasService', () => {
 
       await service.searchCas({ order: CasOrdering.CREATED_AT })
 
-      expect(qb.orderBy).toHaveBeenCalledWith('created_at', 'DESC')
+      expect(qb.orderBy).toHaveBeenCalledWith('cas.created_at', 'DESC')
     })
 
     it('devrait appliquer offset et limit', async () => {

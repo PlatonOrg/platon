@@ -112,6 +112,7 @@ export class BuilderPage implements OnInit {
   protected readonly previewWidth = signal(850)
 
   private readonly isFirstSave = signal(true)
+  private readonly hasInfoBeenDisplayed = signal(false)
   private debounceTimeout?: ReturnType<typeof setTimeout>
   private reloadGeneration = 0
 
@@ -344,7 +345,8 @@ export class BuilderPage implements OnInit {
     const hasDefaultName = this.hasDefaultResourceName(resource.name)
     const isDraft = resource.status === 'DRAFT'
 
-    if (!hasDefaultName && !isDraft) return
+    if ((!hasDefaultName && !isDraft) || this.hasInfoBeenDisplayed()) return
+    this.hasInfoBeenDisplayed.set(true)
 
     let content = '<div style="line-height: 1.8; padding: 8px 0;">'
 

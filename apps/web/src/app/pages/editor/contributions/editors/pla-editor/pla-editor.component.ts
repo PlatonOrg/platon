@@ -321,6 +321,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     maxAttempts: 5,
   }
 
+  protected neverEnter = () => false
+
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User
     const direction = localStorage.getItem('order-direction') as OrderingDirections
@@ -355,7 +357,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         this.form.get('nextSettings.hasExercisesVariables')?.setValue(true, { emitEvent: false })
         this.exerciseGroups.forEach((group) => {
           if (!group.grader || group.grader.type === 'empty') {
-            group.grader = this.defaultGrader
+            group.grader = { ...this.defaultGrader }
           }
         })
       }
@@ -554,7 +556,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
 
   protected addGroup(name?: string): void {
     const initialGrader: GroupGrader =
-      this.activity?.settings?.navigation?.mode === 'validation' ? this.defaultGrader : { type: 'empty' }
+      this.activity?.settings?.navigation?.mode === 'validation' ? { ...this.defaultGrader } : { type: 'empty' }
     if (name) {
       if (this.exerciseGroups.find((group) => group.name === name)) {
         return // prevent adding a group with the same name
@@ -833,7 +835,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     if (type === 'empty') {
       group.grader = { type: 'empty' }
     } else if (type === 'mean' || type === 'success') {
-      group.grader = this.defaultGrader
+      group.grader = { ...group.grader, type }
     }
     this.onChangeData()
   }
