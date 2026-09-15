@@ -13,12 +13,12 @@ export enum CourseOrderings {
 /**
  * Format d'un cours, choisi à la création et figé (non modifiable ensuite).
  * - `CLASSIC` : le cours n'est qu'une compilation d'activités (comportement historique).
- * - `OPENCLASS` : les sections mélangent des leçons (contenu narratif) et des activités,
+ * - `PLATONCLASS` : les sections mélangent des leçons (contenu narratif) et des activités,
  *   consultées en lecture séquentielle façon OpenClassrooms.
  */
 export enum CourseFormat {
   CLASSIC = 'classic',
-  OPENCLASS = 'openclass',
+  PLATONCLASS = 'platonclass',
 }
 
 export interface Course {

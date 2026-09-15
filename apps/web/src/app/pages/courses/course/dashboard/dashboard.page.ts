@@ -287,10 +287,8 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
     return this.sectionWithActivities.flatMap((item) => item.activities)
   }
 
-  // Un étudiant sur un cours OpenClass voit la page d'accueil de lecture (façon OpenClassrooms),
-  // pas la grille de gestion réservée aux enseignants (réordonnancement, ajout de sections...).
-  protected get isStudentOpenClassView(): boolean {
-    return this.context.course?.format === 'openclass' && !this.context.course?.permissions?.update
+  protected get isStudentPlatonClassView(): boolean {
+    return this.context.course?.format === 'platonclass' && !this.context.course?.permissions?.update
   }
 }
 

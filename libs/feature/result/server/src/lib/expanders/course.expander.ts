@@ -69,7 +69,7 @@ export class CourseExpander {
       }
     })
 
-    // Les leçons (cours OpenClass) ne produisent pas de session : leur progression
+    // Les leçons (cours PlatonClass) ne produisent pas de session : leur progression
     // (0 ou 100) est ajoutée séparément pour ne pas fausser la moyenne globale, dont
     // le dénominateur (`activities.length`) compte déjà exercices et leçons ensemble.
     const lessonActivities = activities.filter((activity) => activity.kind === ActivityKind.LESSON)

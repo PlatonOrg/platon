@@ -1,4 +1,4 @@
-@if (context.course; as course) { @if (isStudentOpenClassView) {
+@if (context.course; as course) { @if (isStudentPlatonClassView) {
 <course-student-overview [course]="course" [sections]="sections" [activities]="activities" />
 } @else {
 <nz-row [nzGutter]="[24, 24]" nzAlign="top">
@@ -29,7 +29,7 @@
       >
         Ajouter une activité
       </button>
-      } @if (course.format === 'openclass') {
+      } @if (course.format === 'platonclass') {
       <a nz-button nzShape="round" [routerLink]="['/player/course', course.id]" id="tuto-course-read-button">
         <span nz-icon nzType="read"></span>
         Lire le cours
@@ -92,7 +92,7 @@
             >
               Ajouter une activité
             </button>
-            } @if (course.permissions?.update && course.format === 'openclass') {
+            } @if (course.permissions?.update && course.format === 'platonclass') {
             <button
               class="add-lesson"
               nz-button

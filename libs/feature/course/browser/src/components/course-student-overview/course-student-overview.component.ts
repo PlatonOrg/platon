@@ -13,9 +13,6 @@ interface SectionItems {
   readonly activities: Activity[]
 }
 
-// Page d'accueil d'un cours OpenClass pour un étudiant : mise en avant de la progression
-// et d'un bouton "Commencer/Continuer" plutôt que la grille de gestion réservée aux enseignants
-// (voir `course-activity-grid`/`course-activity-table`, utilisées elles dans le dashboard enseignant).
 @Component({
   standalone: true,
   selector: 'course-student-overview',

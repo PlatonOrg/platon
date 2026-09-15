@@ -5,7 +5,7 @@ import { ActivitySettings } from '@platon/feature/compiler'
 /**
  * Nature d'un item de section de cours :
  * - `EXERCISE` : activité classique liée à une Resource compilée (comportement historique).
- * - `LESSON` : contenu narratif (blocs EditorJS), utilisé par le format de cours OpenClass.
+ * - `LESSON` : contenu narratif (blocs EditorJS), utilisé par le format de cours PlatonClass.
  */
 export enum ActivityKind {
   EXERCISE = 'exercise',
