@@ -377,7 +377,7 @@ pre {
 .leave-warning-frame {
   position: relative;
   z-index: 11;
-  border: 5px dashed var(--brand-color-warning);
+  border: 5px dashed #000000;
   border-radius: 8px;
   padding: 0.5rem;
 }
@@ -389,10 +389,10 @@ pre {
   padding: 0.875rem 1.25rem;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
-  background-color: rgba(var(--brand-color-warning-rgb), 0.12);
-  border: 1px solid var(--brand-color-warning);
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
   border-radius: 6px;
-  color: var(--brand-color-warning);
+  color: #856404;
 
   .leave-warning-icon {
     display: flex;
@@ -401,11 +401,11 @@ pre {
     flex-shrink: 0;
     width: 2rem;
     height: 2rem;
-    background: var(--brand-color-warning);
+    background: #856404;
     border-radius: 50%;
 
     mat-icon {
-      color: var(--brand-background-components);
+      color: #fff3cd;
       font-size: 1.1rem;
       width: 1.1rem;
       height: 1.1rem;
