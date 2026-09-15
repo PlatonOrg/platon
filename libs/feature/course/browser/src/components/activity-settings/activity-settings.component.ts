@@ -176,6 +176,7 @@ export class CourseActivitySettingsComponent implements OnInit {
   }
 
   currentHue = 210
+  readonly activityTitleInput = signal('')
 
   protected editOpenDate = false
   protected editCloseDate = false
@@ -200,6 +201,7 @@ export class CourseActivitySettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.currentHue = this.activity.colorHue ?? 210
+    this.activityTitleInput.set(this.activity.activityTitle ?? '')
 
     this.activityColors = await firstValueFrom(this.courseService.getCourseColors(this.activity.courseId))
 
@@ -402,6 +404,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.updatingSignal.set(true)
     try {
       const settingsToSend = JSON.parse(JSON.stringify(this.activitySettings))
+      const activityTitle = this.activityTitleInput().trim()
 
       const periods = this.accessPeriods()
       if (this.activity.ignoreRestrictions && periods.length > 0) {
@@ -410,6 +413,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             colorHue: this.currentHue,
             ignoreRestrictions: false,
             activitySettings: settingsToSend,
+            activityTitle,
           })
         )
       } else if (!this.activity.ignoreRestrictions && periods.length === 0) {
@@ -420,6 +424,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             closeAt: this.tempCloseDate,
             ignoreRestrictions: true,
             activitySettings: settingsToSend,
+            activityTitle,
           })
         )
       } else if (this.activity.ignoreRestrictions) {
@@ -432,6 +437,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
             activitySettings: settingsToSend,
+            activityTitle,
           })
         )
       } else {
@@ -441,6 +447,7 @@ export class CourseActivitySettingsComponent implements OnInit {
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
             activitySettings: settingsToSend,
+            activityTitle,
           })
         )
       }

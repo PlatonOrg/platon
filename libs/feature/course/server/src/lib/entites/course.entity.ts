@@ -1,4 +1,5 @@
 import { BaseEntity, UserEntity } from '@platon/core/server'
+import { CourseFormat } from '@platon/feature/course/common'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 
 @Entity('Courses')
@@ -20,4 +21,8 @@ export class CourseEntity extends BaseEntity {
 
   @Column({ name: 'is_test', default: false })
   isTest!: boolean
+
+  // Choisi à la création, jamais exposé dans UpdateCourse : figé pour la durée de vie du cours.
+  @Column({ type: 'enum', enum: CourseFormat, default: CourseFormat.CLASSIC })
+  format!: CourseFormat
 }
