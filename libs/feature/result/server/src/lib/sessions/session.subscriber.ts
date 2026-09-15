@@ -111,7 +111,7 @@ export class SessionSubscriber implements EntitySubscriberInterface<SessionEntit
 `,
       [sessionId]
     )
-    if (!result) {
+    if (!result || result.length === 0) {
       return undefined
     }
 

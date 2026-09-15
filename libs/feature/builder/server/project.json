@@ -2,7 +2,6 @@
   "name": "feature-builder-server",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/feature/builder/server/src",
-  "prefix": "lib",
   "projectType": "library",
   "tags": [],
   "targets": {

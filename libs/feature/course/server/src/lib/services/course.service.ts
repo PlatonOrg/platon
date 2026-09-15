@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { NotFoundResponse, OrderingDirections } from '@platon/core/common'
+import { NotFoundResponse } from '@platon/core/common'
 import { CourseFilters, CourseOrderings, COURSE_ORDERING_DIRECTIONS } from '@platon/feature/course/common'
 import { DataSource, Repository } from 'typeorm'
 import { Optional } from 'typescript-optional'
@@ -33,7 +33,6 @@ export class CourseService {
     filters = {
       ...filters,
       order: filters.order || CourseOrderings.UPDATED_AT,
-      direction: filters.direction || OrderingDirections.DESC,
       isTest: filters.isTest || false,
     }
 

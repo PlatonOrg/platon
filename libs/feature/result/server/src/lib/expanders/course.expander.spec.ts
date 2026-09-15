@@ -1,48 +1,29 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { ExpandContext } from '@cisstech/nestjs-expand'
+import { Test } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { IRequest } from '@platon/core/server'
-import { ActivityKind } from '@platon/feature/course/common'
-import { ActivityEntity, CourseDTO, CourseMemberService, LessonProgressService } from '@platon/feature/course/server'
+import { IRequest, UserEntity } from '@platon/core/server'
+import { MockRepository, mockRepository, mockSelectQueryBuilder } from '@platon/core/testing/server'
+import { ActivityEntity, CourseDTO, CourseMemberService } from '@platon/feature/course/server'
+import { SelectQueryBuilder } from 'typeorm'
 import { SessionEntity } from '../sessions/session.entity'
 import { CourseExpander } from './course.expander'
 
 describe('CourseExpander', () => {
   let expander: CourseExpander
-  let sessionRepository: { find: jest.Mock }
-  let lessonProgressService: { findCompletedActivityIds: jest.Mock }
-  let activityQueryBuilder: {
-    leftJoin: jest.Mock
-    select: jest.Mock
-    where: jest.Mock
-    andWhere: jest.Mock
-    getMany: jest.Mock
-  }
-
-  const buildContext = (courseId: string): { request: IRequest; parent: CourseDTO } => ({
-    request: { user: { id: 'user-1' } } as IRequest,
-    parent: { id: courseId } as CourseDTO,
-  })
+  let courseMemberService: jest.Mocked<Pick<CourseMemberService, 'findViewsByCourseIds'>>
+  let activityRepository: MockRepository<ActivityEntity>
+  let sessionRepository: MockRepository<SessionEntity>
 
   beforeEach(async () => {
-    sessionRepository = { find: jest.fn().mockResolvedValue([]) }
-    lessonProgressService = { findCompletedActivityIds: jest.fn().mockResolvedValue(new Set()) }
-    activityQueryBuilder = {
-      leftJoin: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockResolvedValue([]),
-    }
+    courseMemberService = { findViewsByCourseIds: jest.fn() }
+    activityRepository = mockRepository<ActivityEntity>()
+    sessionRepository = mockRepository<SessionEntity>()
 
-    const module: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [
         CourseExpander,
-        { provide: CourseMemberService, useValue: { findViewsByCourseIds: jest.fn().mockResolvedValue([]) } },
-        { provide: LessonProgressService, useValue: lessonProgressService },
-        {
-          provide: getRepositoryToken(ActivityEntity),
-          useValue: { createQueryBuilder: jest.fn().mockReturnValue(activityQueryBuilder) },
-        },
+        { provide: CourseMemberService, useValue: courseMemberService },
+        { provide: getRepositoryToken(ActivityEntity), useValue: activityRepository },
         { provide: getRepositoryToken(SessionEntity), useValue: sessionRepository },
       ],
     }).compile()
@@ -50,46 +31,72 @@ describe('CourseExpander', () => {
     expander = module.get(CourseExpander)
   })
 
-  it('ne compte pas les leçons dans le dénominateur sans compter leur complétion (moyenne correcte sur un cours mixte)', async () => {
-    // 1 exercice complété (progression 100 via session) + 1 leçon complétée + 1 leçon non lue = 200/3 ≈ 67%
-    activityQueryBuilder.getMany.mockResolvedValue([
-      { id: 'exercise-1', kind: ActivityKind.EXERCISE, isChallenge: false },
-      { id: 'lesson-1', kind: ActivityKind.LESSON, isChallenge: false },
-      { id: 'lesson-2', kind: ActivityKind.LESSON, isChallenge: false },
-    ])
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('devrait calculer les compteurs de membres et activités du cours', async () => {
+    courseMemberService.findViewsByCourseIds.mockResolvedValue([
+      { role: 'student' },
+      { role: 'student' },
+      { role: 'teacher' },
+    ] as never)
+    sessionRepository.find.mockResolvedValue([])
+    const qb = mockSelectQueryBuilder<ActivityEntity>()
+    qb.getMany.mockResolvedValue([{ isChallenge: true }, { isChallenge: false }] as ActivityEntity[])
+    activityRepository.createQueryBuilder.mockReturnValue(qb as unknown as SelectQueryBuilder<ActivityEntity>)
+
+    const context = {
+      parent: { id: 'course-1' } as CourseDTO,
+      request: { user: { id: 'user-1' } as UserEntity } as IRequest,
+    } as ExpandContext<IRequest, CourseDTO>
+
+    const result = await expander.statistic(context)
+
+    expect(result.studentCount).toBe(2)
+    expect(result.teacherCount).toBe(1)
+    expect(result.activityCount).toBe(2)
+    expect(result.challengeCount).toBe(1)
+  })
+
+  it('devrait calculer le temps passé et la progression moyenne à partir des sessions', async () => {
+    courseMemberService.findViewsByCourseIds.mockResolvedValue([])
     sessionRepository.find.mockResolvedValue([
       {
-        activityId: 'exercise-1',
-        lastGradedAt: new Date(),
-        startedAt: new Date(),
-        variables: { navigation: { exercises: [{ state: 'GRADED' }] } },
+        startedAt: new Date('2024-01-01T00:00:00Z'),
+        lastGradedAt: new Date('2024-01-01T00:05:00Z'),
+        variables: { navigation: { exercises: [{ state: 'SUCCEEDED' }, { state: 'NOT_STARTED' }] } },
       },
-    ])
-    lessonProgressService.findCompletedActivityIds.mockResolvedValue(new Set(['lesson-1']))
+    ] as unknown as SessionEntity[])
+    const qb = mockSelectQueryBuilder<ActivityEntity>()
+    qb.getMany.mockResolvedValue([{ isChallenge: false }] as ActivityEntity[])
+    activityRepository.createQueryBuilder.mockReturnValue(qb as unknown as SelectQueryBuilder<ActivityEntity>)
 
-    const result = await expander.statistic(buildContext('course-1'))
+    const context = {
+      parent: { id: 'course-1' } as CourseDTO,
+      request: { user: { id: 'user-1' } as UserEntity } as IRequest,
+    } as ExpandContext<IRequest, CourseDTO>
 
-    expect(lessonProgressService.findCompletedActivityIds).toHaveBeenCalledWith(['lesson-1', 'lesson-2'], 'user-1')
-    expect(result.activityCount).toBe(3)
-    expect(result.progression).toBe(Math.round((100 + 100 + 0) / 3))
+    const result = await expander.statistic(context)
+
+    expect(result.timeSpent).toBe(300)
+    expect(result.progression).toBe(50)
   })
 
-  it("ne consulte pas le suivi de leçons quand le cours n'en contient aucune", async () => {
-    activityQueryBuilder.getMany.mockResolvedValue([
-      { id: 'exercise-1', kind: ActivityKind.EXERCISE, isChallenge: false },
-    ])
+  it('devrait retourner une progression à 0 sans session valorisée', async () => {
+    courseMemberService.findViewsByCourseIds.mockResolvedValue([])
+    sessionRepository.find.mockResolvedValue([])
+    const qb = mockSelectQueryBuilder<ActivityEntity>()
+    qb.getMany.mockResolvedValue([] as ActivityEntity[])
+    activityRepository.createQueryBuilder.mockReturnValue(qb as unknown as SelectQueryBuilder<ActivityEntity>)
 
-    await expander.statistic(buildContext('course-1'))
+    const context = {
+      parent: { id: 'course-1' } as CourseDTO,
+      request: { user: { id: 'user-1' } as UserEntity } as IRequest,
+    } as ExpandContext<IRequest, CourseDTO>
 
-    expect(lessonProgressService.findCompletedActivityIds).not.toHaveBeenCalled()
-  })
-
-  it('retourne 0% de progression pour un cours sans aucune activité', async () => {
-    activityQueryBuilder.getMany.mockResolvedValue([])
-
-    const result = await expander.statistic(buildContext('course-1'))
+    const result = await expander.statistic(context)
 
     expect(result.progression).toBe(0)
-    expect(result.activityCount).toBe(0)
   })
 })

@@ -575,55 +575,49 @@
       <nz-breadcrumb-item>Exercices</nz-breadcrumb-item>
     </nz-breadcrumb>
   </h3>
-
-  @if (!readOnly) {
-  <div class="add-exercise">
-    <ui-search-bar [searchbar]="searchbar" (filter)="filterDrawer.open()">
-      <ng-template let-context> {{ context }}</ng-template>
-    </ui-search-bar>
-    <span>Liste des exercices disponibles</span>
-    <div class="indicators">
-      <ui-filter-indicators
-        [filters]="filters"
-        (filtersChange)="search($event, $event.search)"
-        [indicators]="filterIndicators"
-      />
-    </div>
-  </div>
-  } @if (readOnly) {
-  <div class="add-exercise">
-    <span class="no-permission"
-      >Vous n'avez pas les droits pour éditer cet exercice, vous pouvez cependant consulter les exercices utilisés par
-      cette activité en cliquant sur les groupes.</span
-    >
-  </div>
-  } @if (!readOnly) {
-  <app-exercise-list
+  <div
     cdkDropList
     id="itemList"
-    cdkDropListSortingDisabled
-    [cdkDropListDisabled]="readOnly"
-    [cdkDropListConnectedTo]="allConnectedTo"
     [cdkDropListData]="items"
-    (exerciseClicked)="handleExerciseClicked($event)"
-    [items]="items"
+    [cdkDropListConnectedTo]="allConnectedTo"
+    [cdkDropListSortingDisabled]="true"
+    [cdkDropListEnterPredicate]="neverEnter"
+    [cdkDropListHasAnchor]="true"
   >
-    <h2>Aucune ressource ne correspond à votre recherche</h2>
-    <ul>
-      <li>Vérifiez les termes de votre recherche</li>
-      <li>Essayez d'autres critères de recherche</li>
-    </ul>
-  </app-exercise-list>
-  }
-  <nz-spin class="spinner-pagination" nzSize="large" [nzTip]="'Chargement...'" [nzSpinning]="paginating" />
-  @if (hasMore) {
-  <div style="height: 8px" viewportIntersection (intersected)="loadMore()"></div>
-  } @if (!hasMore && nbFilters > 1) {
-  <div class="no-result">
-    <span>Plus aucun résultat ne correspond à votre recherche. Essayez d'enlever des filtres...</span>
-    <span>({{ nbFilters }} filtres actifs)</span>
+    @if (!readOnly) {
+    <div class="add-exercise">
+      <ui-search-bar [searchbar]="searchbar" (filter)="filterDrawer.open()">
+        <ng-template let-context> {{ context }}</ng-template>
+      </ui-search-bar>
+      <span>Liste des exercices disponibles</span>
+      <div class="indicators">
+        <ui-filter-indicators
+          [filters]="filters"
+          (filtersChange)="search($event, $event.search)"
+          [indicators]="filterIndicators"
+        />
+      </div>
+    </div>
+    } @if (readOnly) {
+    <div class="add-exercise">
+      <span class="no-permission"
+        >Vous n'avez pas les droits pour éditer cet exercice, vous pouvez cependant consulter les exercices utilisés par
+        cette activité en cliquant sur les groupes.</span
+      >
+    </div>
+    } @if (!readOnly) {
+    <app-exercise-list (exerciseClicked)="handleExerciseClicked($event)" [items]="items"> </app-exercise-list>
+    }
+    <nz-spin class="spinner-pagination" nzSize="large" [nzTip]="'Chargement...'" [nzSpinning]="paginating" />
+    @if (hasMore) {
+    <div style="height: 8px" viewportIntersection (intersected)="loadMore()"></div>
+    } @if (!hasMore && nbFilters > 1) {
+    <div class="no-result">
+      <span>Plus aucun résultat ne correspond à votre recherche. Essayez d'enlever des filtres...</span>
+      <span>({{ nbFilters }} filtres actifs)</span>
+    </div>
+    }
   </div>
-  }
 </ng-template>
 
 <ng-template #treeTemplate>

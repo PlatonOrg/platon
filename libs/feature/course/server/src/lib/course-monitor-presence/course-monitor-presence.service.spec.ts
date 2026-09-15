@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { PubSubService } from '@platon/core/server'
 import {
   MONITOR_PRESENCE_SUBSCRIBE,
@@ -9,73 +9,77 @@ import { CourseMonitorPresenceService } from './course-monitor-presence.service'
 
 describe('CourseMonitorPresenceService', () => {
   let service: CourseMonitorPresenceService
+  let handlers: Record<string, (payload: MonitorPresencePayload) => void>
   let pubSubService: jest.Mocked<Pick<PubSubService, 'subscribe'>>
-  let subscribeHandler: (payload: MonitorPresencePayload) => void
-  let unsubscribeHandler: (payload: MonitorPresencePayload) => void
 
   beforeEach(async () => {
-    pubSubService = { subscribe: jest.fn() }
-    pubSubService.subscribe.mockImplementation(((
-      channel: string,
-      onMessage: (payload: MonitorPresencePayload) => void
-    ) => {
-      if (channel === MONITOR_PRESENCE_SUBSCRIBE) subscribeHandler = onMessage
-      if (channel === MONITOR_PRESENCE_UNSUBSCRIBE) unsubscribeHandler = onMessage
-      return Promise.resolve(1)
-    }) as PubSubService['subscribe'])
+    handlers = {}
+    pubSubService = {
+      subscribe: jest.fn((channel: string, handler: (payload: MonitorPresencePayload) => void) => {
+        handlers[channel] = handler
+        return Promise.resolve(1)
+      }) as never,
+    }
 
-    const module: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [CourseMonitorPresenceService, { provide: PubSubService, useValue: pubSubService }],
     }).compile()
 
     service = module.get(CourseMonitorPresenceService)
   })
 
-  it("s'abonne aux canaux subscribe et unsubscribe à la construction", () => {
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it("devrait s'abonner aux canaux subscribe et unsubscribe à la construction", () => {
     expect(pubSubService.subscribe).toHaveBeenCalledWith(MONITOR_PRESENCE_SUBSCRIBE, expect.any(Function))
     expect(pubSubService.subscribe).toHaveBeenCalledWith(MONITOR_PRESENCE_UNSUBSCRIBE, expect.any(Function))
   })
 
-  it('retourne un tableau vide pour une activité sans observateur', () => {
+  it('devrait retourner un tableau vide sans monitor actif', () => {
     expect(service.getActiveMonitoringUsers('activity-1')).toEqual([])
   })
 
-  it('ajoute un utilisateur comme observateur actif', () => {
-    subscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
+  it('devrait ajouter un utilisateur comme monitor actif via le canal subscribe', () => {
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-1', userId: 'user-1' })
+
     expect(service.getActiveMonitoringUsers('activity-1')).toEqual(['user-1'])
   })
 
-  it('ne duplique pas un même utilisateur observant deux fois la même activité', () => {
-    subscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
-    subscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
-    expect(service.getActiveMonitoringUsers('activity-1')).toEqual(['user-1'])
+  it('devrait accumuler plusieurs utilisateurs sur la même activité', () => {
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-1', userId: 'user-1' })
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-1', userId: 'user-2' })
+
+    expect(service.getActiveMonitoringUsers('activity-1').sort()).toEqual(['user-1', 'user-2'])
   })
 
-  it('garde les observateurs de plusieurs activités isolés les uns des autres', () => {
-    subscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
-    subscribeHandler({ activityId: 'activity-2', userId: 'user-2' })
-    expect(service.getActiveMonitoringUsers('activity-1')).toEqual(['user-1'])
-    expect(service.getActiveMonitoringUsers('activity-2')).toEqual(['user-2'])
-  })
+  it('devrait retirer un utilisateur via le canal unsubscribe sans affecter les autres', () => {
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-1', userId: 'user-1' })
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-1', userId: 'user-2' })
 
-  it("retire un utilisateur quand il arrête d'observer", () => {
-    subscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
-    subscribeHandler({ activityId: 'activity-1', userId: 'user-2' })
-
-    unsubscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
+    handlers[MONITOR_PRESENCE_UNSUBSCRIBE]({ activityId: 'activity-1', userId: 'user-1' })
 
     expect(service.getActiveMonitoringUsers('activity-1')).toEqual(['user-2'])
   })
 
-  it("nettoie l'entrée de l'activité quand le dernier observateur se désabonne", () => {
-    subscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
+  it('devrait nettoyer une activité quand plus aucun monitor ne reste', () => {
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-1', userId: 'user-1' })
 
-    unsubscribeHandler({ activityId: 'activity-1', userId: 'user-1' })
+    handlers[MONITOR_PRESENCE_UNSUBSCRIBE]({ activityId: 'activity-1', userId: 'user-1' })
 
     expect(service.getActiveMonitoringUsers('activity-1')).toEqual([])
   })
 
-  it("un désabonnement sans abonnement préalable ne lève pas d'erreur", () => {
-    expect(() => unsubscribeHandler({ activityId: 'activite-inconnue', userId: 'user-1' })).not.toThrow()
+  it('ne devrait pas planter en retirant un utilisateur sur une activité inconnue', () => {
+    expect(() => handlers[MONITOR_PRESENCE_UNSUBSCRIBE]({ activityId: 'unknown', userId: 'user-1' })).not.toThrow()
+  })
+
+  it('devrait isoler les monitors par activité', () => {
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-1', userId: 'user-1' })
+    handlers[MONITOR_PRESENCE_SUBSCRIBE]({ activityId: 'activity-2', userId: 'user-2' })
+
+    expect(service.getActiveMonitoringUsers('activity-1')).toEqual(['user-1'])
+    expect(service.getActiveMonitoringUsers('activity-2')).toEqual(['user-2'])
   })
 })

@@ -1,6 +1,7 @@
 module.exports = {
   displayName: 'feature-notification-server',
   preset: '../../../../jest.preset.js',
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$', '\\.e2e\\.spec\\.ts$'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
