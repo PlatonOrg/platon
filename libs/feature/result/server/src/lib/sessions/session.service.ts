@@ -69,7 +69,7 @@ export class SessionService {
   }
 
   async findUserActivity(activityId: string, userId: string): Promise<SessionEntity | null> {
-    const session = this.repository.findOne({
+    const session = await this.repository.findOne({
       where: { parentId: IsNull(), activityId, userId },
       relations: {
         activity: true,
@@ -145,9 +145,9 @@ export class SessionService {
   async update(id: string, changes: PartialDeep<Session>, entityManager?: EntityManager): Promise<void> {
     if (entityManager) {
       await entityManager.update(this.repository.target, { id }, changes as QueryDeepPartialEntity<SessionEntity>)
+    } else {
+      await this.repository.update({ id }, changes as QueryDeepPartialEntity<SessionEntity>)
     }
-
-    await this.repository.update({ id }, changes as QueryDeepPartialEntity<SessionEntity>)
     //////////////////////// UPDATE SESSIONDATA ////////////////////////////////////
     const sessionDatasNewValues: SessionDataEntity[] = await this.retrieveSessionDataWithoutManager(id)
     const sessionDatasToUpdate: SessionDataEntity[] = await this.repositoryData.findBy({ id: id })
