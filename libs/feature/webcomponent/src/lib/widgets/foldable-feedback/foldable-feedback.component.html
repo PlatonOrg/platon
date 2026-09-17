@@ -9,7 +9,7 @@
   <div
     class="feedback"
     [class]="(item.type ? item.type : 'info') + ' ' + (item.display ? 'opened' : 'closed')"
-    (click)="onClick(indexes)"
+    (click)="onClick(indexes); $event.stopPropagation()"
   >
     <h2>
       <mat-icon>

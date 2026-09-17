@@ -203,7 +203,8 @@ export class CoursesPage implements OnInit, OnDestroy {
     const shouldArchive = this.activeTab === 'current'
     try {
       await firstValueFrom(this.courseService.archiveMember(course.id, shouldArchive))
-      await this.loadCourses()
+      this.items = this.items.filter((item) => item.id !== course.id)
+      this.totalMatches -= 1
     } finally {
       this.archiving = false
       this.changeDetectorRef.markForCheck()
