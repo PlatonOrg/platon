@@ -1,6 +1,13 @@
 import { Body, Controller, Delete, Get, Patch, Post, Put, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ItemResponse, ListResponse, NoContentResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
+import {
+  ItemResponse,
+  ListResponse,
+  NoContentResponse,
+  NotFoundResponse,
+  UserRoles,
+  isTeacherRole,
+} from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
 import { CoursePermissionsService } from '../permissions/permissions.service'
 import {
@@ -25,13 +32,16 @@ export class ActivityController {
 
   @Get()
   async search(
+    @Req() req: IRequest,
     @UUIDParam('courseId') courseId: string,
     @Query() filters?: ActivityFiltersDTO
   ): Promise<ListResponse<ActivityDTO>> {
     const [items, total] = await this.activityService.search(courseId, filters)
+    const resources = Mapper.mapAll(items, ActivityDTO)
+    this.hideCodeFromNonTeachers(resources, req)
     return new ListResponse({
       total,
-      resources: Mapper.mapAll(items, ActivityDTO),
+      resources,
     })
   }
 
@@ -57,7 +67,15 @@ export class ActivityController {
     const activity = optional.orElseThrow(() => new NotFoundResponse(`CourseActivity not found: ${activityId}`))
 
     await this.permissionsService.ensureActivityReadPermission(activity, req)
-    return new ItemResponse({ resource: Mapper.map(activity, ActivityDTO) })
+    const resource = Mapper.map(activity, ActivityDTO)
+    this.hideCodeFromNonTeachers([resource], req)
+    return new ItemResponse({ resource })
+  }
+
+  // ensureActivityReadPermission autorise aussi les étudiants membres : le code de déblocage doit rester caché pour eux.
+  private hideCodeFromNonTeachers(resources: ActivityDTO[], req: IRequest): void {
+    if (isTeacherRole(req.user.role)) return
+    resources.forEach((resource) => delete (resource as { code?: string }).code)
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)

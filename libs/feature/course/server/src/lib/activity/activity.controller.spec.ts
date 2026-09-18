@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing'
-import { NotFoundResponse } from '@platon/core/common'
+import { NotFoundResponse, UserRoles } from '@platon/core/common'
 import { IRequest } from '@platon/core/server'
 import { Optional } from 'typescript-optional'
 import { CoursePermissionsService } from '../permissions/permissions.service'
@@ -34,7 +34,8 @@ describe('ActivityController', () => {
       'ensureActivityReadPermission' | 'ensureCourseWritePermission' | 'ensureActivityWritePermission'
     >
   >
-  const req = { user: { id: 'teacher-1' } } as IRequest
+  const req = { user: { id: 'teacher-1', role: UserRoles.teacher } } as IRequest
+  const studentReq = { user: { id: 'student-1', role: UserRoles.student } } as IRequest
 
   beforeEach(async () => {
     activityService = {
@@ -77,9 +78,25 @@ describe('ActivityController', () => {
   it('search devrait retourner la liste mappée', async () => {
     activityService.search.mockResolvedValue([[{ id: 'a1' } as ActivityEntity], 1])
 
-    const result = await controller.search('course-1')
+    const result = await controller.search(req, 'course-1')
 
     expect(result.total).toBe(1)
+  })
+
+  it('search devrait masquer le code de déblocage pour un étudiant', async () => {
+    activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
+
+    const result = await controller.search(studentReq, 'course-1')
+
+    expect(result.resources[0].code).toBeUndefined()
+  })
+
+  it('search devrait conserver le code de déblocage pour un professeur', async () => {
+    activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
+
+    const result = await controller.search(req, 'course-1')
+
+    expect(result.resources[0].code).toBe('ABC123')
   })
 
   it('getCourseColors devrait retourner les couleurs', async () => {
@@ -105,6 +122,24 @@ describe('ActivityController', () => {
 
       expect(permissionsService.ensureActivityReadPermission).toHaveBeenCalledWith(activity, req)
       expect(result.resource.id).toBe('activity-1')
+    })
+
+    it('devrait masquer le code de déblocage pour un étudiant', async () => {
+      const activity = { id: 'activity-1', code: 'ABC123' } as ActivityEntity
+      activityService.findByCourseId.mockResolvedValue(Optional.of(activity))
+
+      const result = await controller.find(studentReq, 'course-1', 'activity-1')
+
+      expect(result.resource.code).toBeUndefined()
+    })
+
+    it('devrait conserver le code de déblocage pour un professeur', async () => {
+      const activity = { id: 'activity-1', code: 'ABC123' } as ActivityEntity
+      activityService.findByCourseId.mockResolvedValue(Optional.of(activity))
+
+      const result = await controller.find(req, 'course-1', 'activity-1')
+
+      expect(result.resource.code).toBe('ABC123')
     })
   })
 
