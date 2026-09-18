@@ -15,6 +15,7 @@ import { ActivityEntity } from './activity.entity'
 import { ActivityService } from './activity.service'
 import { ON_RELOAD_ACTIVITY_EVENT } from './activity.event'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
+import { LessonProgressService } from '../lesson-progress/lesson-progress.service'
 
 describe('ActivityService', () => {
   let service: ActivityService
@@ -32,6 +33,7 @@ describe('ActivityService', () => {
   >
   let activityGroupService: jest.Mocked<Pick<ActivityGroupService, 'isUserInActivityGroup' | 'numberOfGroups'>>
   let resourceService: jest.Mocked<Pick<ResourceService, 'findByIdOrCode'>>
+  let lessonProgressService: jest.Mocked<Pick<LessonProgressService, 'findCompletedActivityIds'>>
   let request: { user: User }
 
   const buildActivity = (overrides: Partial<ActivityEntity> = {}): ActivityEntity =>
@@ -61,6 +63,7 @@ describe('ActivityService', () => {
     }
     activityGroupService = { isUserInActivityGroup: jest.fn(), numberOfGroups: jest.fn() }
     resourceService = { findByIdOrCode: jest.fn() }
+    lessonProgressService = { findCompletedActivityIds: jest.fn().mockResolvedValue(new Set()) }
     request = { user: { id: 'user-1', role: 'student' } as User }
 
     const module = await Test.createTestingModule({
@@ -79,6 +82,7 @@ describe('ActivityService', () => {
         { provide: getRepositoryToken(CourseGroupMemberEntity), useValue: courseGroupMemberRepository },
         { provide: ActivityGroupService, useValue: activityGroupService },
         { provide: ResourceService, useValue: resourceService },
+        { provide: LessonProgressService, useValue: lessonProgressService },
       ],
     }).compile()
 

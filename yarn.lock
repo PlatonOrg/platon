@@ -3402,7 +3402,7 @@
   dependencies:
     "@editorjs/helpers" "^1.2.0"
 
-"@editorjs/editorjs@2.31.6", "@editorjs/editorjs@^2.30.7":
+"@editorjs/editorjs@2.31.6", "@editorjs/editorjs@^2.29.1", "@editorjs/editorjs@^2.30.7":
   version "2.31.6"
   resolved "https://registry.yarnpkg.com/@editorjs/editorjs/-/editorjs-2.31.6.tgz#1468aeda08d2cfa2eab9412927cd118e6a472d2a"
   integrity sha512-j2nxuFCD3DnoJDUD0hPO5tirpuQ6sWmmuHATl3EI7fG1it3Ml7jk0WJtu3E+TRLBd7zfNeJhDThbP3LnBEn2GA==
@@ -3410,6 +3410,13 @@
     "@editorjs/caret" "^1.0.1"
     codex-notifier "^1.1.2"
     codex-tooltip "^1.0.5"
+
+"@editorjs/embed@2.7.7":
+  version "2.7.7"
+  resolved "https://registry.yarnpkg.com/@editorjs/embed/-/embed-2.7.7.tgz#356b77498e73f2b759145f7a5a77abcf25fd173b"
+  integrity sha512-2IFBdYmiKnJImCW4XajOcsymKIncdcQ1J+RVJ+eXHoaOZ4d1R35GQbhr/OnGeCrVxFbOKgm21653AUz4J418tw==
+  dependencies:
+    "@editorjs/editorjs" "^2.29.1"
 
 "@editorjs/header@^2.8.9":
   version "2.8.9"

@@ -33,7 +33,7 @@ export class UiModalDrawerComponent {
 
   @Output() closed = new EventEmitter()
 
-  @Input() title = ''
+  @Input() title: string | TemplateRef<NonNullable<unknown>> = ''
   @Input() bodyStyle: Record<string, string> = {}
   @Input() nzExtra?: string | TemplateRef<NonNullable<unknown>>
   @Input() size: NzDrawerSize = 'default'

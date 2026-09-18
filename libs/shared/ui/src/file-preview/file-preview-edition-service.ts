@@ -1,12 +1,13 @@
 import { Injectable, signal } from '@angular/core'
+import type * as Monaco from 'monaco-editor'
 import { extractSupportedExtension } from './file-preview'
 
-declare const monaco: any
+declare const monaco: typeof Monaco
 
 /** service for file editing for the build page */
 @Injectable({ providedIn: 'root' })
 export class EditFilePreviewService {
-  private models = new Map<string, monaco.editor.ITextModel>() // Maintain an editor per component to enable Ctrl-Z. (the key is the url of the file)
+  private models = new Map<string, Monaco.editor.ITextModel>() // Maintain an editor per component to enable Ctrl-Z. (the key is the url of the file)
 
   isEditing = signal<boolean>(false)
   private currentFileContents = new Map<string, string>() // must correspond to the last saved content of each file edited
@@ -41,7 +42,7 @@ export class EditFilePreviewService {
    * @param id file url
    * @return editor model if exist
    */
-  getModel(id: string): monaco.editor.ITextModel | undefined {
+  getModel(id: string): Monaco.editor.ITextModel | undefined {
     return this.models.get(id)
   }
 

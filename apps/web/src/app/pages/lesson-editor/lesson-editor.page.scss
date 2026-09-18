@@ -1,0 +1,79 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--brand-background-primary);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--brand-border-color);
+  background: var(--brand-background-components);
+}
+
+.title-form {
+  flex: 1;
+}
+
+.title-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--brand-text-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &:focus {
+    outline: none;
+    background: var(--brand-background-hover);
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.unsaved-indicator {
+  color: var(--brand-color-warning);
+  font-size: 0.85rem;
+}
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 24px;
+}
+
+.lesson-content-editor {
+  display: block;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.exercise-picker-hint {
+  color: var(--brand-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.exercise-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 1rem;
+}
