@@ -60,6 +60,16 @@ export interface Activity {
   readonly code: string
 }
 
+/**
+ * "TP noté" : un exercice surveillé (fin d'activité forcée si l'étudiant change d'onglet
+ * ou perd le focus). Ces activités sortent du parcours de lecture séquentiel PlatonClass
+ * (progression, table des matières) et s'ouvrent directement dans le player plein écran.
+ */
+export const isGradedActivity = (activity: { kind: ActivityKind; activitySettings?: ActivitySettings }): boolean =>
+  activity.kind === ActivityKind.EXERCISE &&
+  !!activity.activitySettings?.security?.terminateOnLeavePage &&
+  !!activity.activitySettings?.security?.terminateOnLoseFocus
+
 export interface ActivityFilters {
   readonly sectionId?: string | null
   readonly challenge?: boolean | null

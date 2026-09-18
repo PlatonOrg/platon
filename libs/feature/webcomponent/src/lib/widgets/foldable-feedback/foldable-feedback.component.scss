@@ -58,23 +58,45 @@
 }
 
 .success {
-  background-color: rgba(var(--brand-color-success-rgb), 0.15);
-  border: 1px solid var(--brand-color-success);
+  background-color: #dff9df;
+  border: 1px solid #00cc00;
 }
 
 .warning {
-  background-color: rgba(var(--brand-color-warning-rgb), 0.15);
-  border: 1px solid var(--brand-color-warning);
+  background-color: #ffefdf;
+  border: 1px solid #ff8000;
 }
 
 .error {
-  background-color: rgba(var(--brand-color-danger-rgb), 0.15);
-  border: 1px solid var(--brand-color-danger);
+  background-color: #ffdfdf;
+  border: 1px solid #ff0000;
 }
 
 .info {
-  background-color: rgba(var(--brand-color-info-rgb), 0.15);
-  border: 1px solid var(--brand-color-info);
+  background-color: #dfdfff;
+  border: 1px solid #0000ff;
+}
+
+:host-context(.dark-theme) {
+  .success {
+    background-color: rgba(var(--brand-color-success-rgb), 0.15);
+    border: 1px solid var(--brand-color-success);
+  }
+
+  .warning {
+    background-color: rgba(var(--brand-color-warning-rgb), 0.15);
+    border: 1px solid var(--brand-color-warning);
+  }
+
+  .error {
+    background-color: rgba(var(--brand-color-danger-rgb), 0.15);
+    border: 1px solid var(--brand-color-danger);
+  }
+
+  .info {
+    background-color: rgba(var(--brand-color-info-rgb), 0.15);
+    border: 1px solid var(--brand-color-info);
+  }
 }
 
 h2 {
@@ -142,19 +164,37 @@ pre {
 }
 
 .feedback-type-icon.success {
-  color: var(--brand-color-success);
+  color: #00cc00;
 }
 
 .feedback-type-icon.warning {
-  color: var(--brand-color-warning);
+  color: #ff8000;
 }
 
 .feedback-type-icon.error {
-  color: var(--brand-color-danger);
+  color: #ff0000;
 }
 
 .feedback-type-icon.info {
-  color: var(--brand-color-info);
+  color: #0000ff;
+}
+
+:host-context(.dark-theme) {
+  .feedback-type-icon.success {
+    color: var(--brand-color-success);
+  }
+
+  .feedback-type-icon.warning {
+    color: var(--brand-color-warning);
+  }
+
+  .feedback-type-icon.error {
+    color: var(--brand-color-danger);
+  }
+
+  .feedback-type-icon.info {
+    color: var(--brand-color-info);
+  }
 }
 
 /* fallback */

@@ -2,7 +2,7 @@ import { ExpandContext, Expander } from '@cisstech/nestjs-expand'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { IRequest } from '@platon/core/server'
-import { ActivityKind, CourseStatistic } from '@platon/feature/course/common'
+import { ActivityKind, CourseStatistic, isGradedActivity } from '@platon/feature/course/common'
 import {
   ActivityEntity,
   ActivityMemberView,
@@ -45,7 +45,7 @@ export class CourseExpander {
         .leftJoin(ActivityMemberView, 'member', 'member.activity_id = activity.id AND member.id = :userId', {
           userId: user.id,
         })
-        .select(['activity.id', 'activity.courseId', 'activity.isChallenge', 'activity.kind'])
+        .select(['activity.id', 'activity.courseId', 'activity.isChallenge', 'activity.kind', 'activity.source'])
         .where('activity.course_id = :courseId', { courseId: parent.id })
         .andWhere(`(activity.creator_id = :userId OR member.id IS NOT NULL)`, { userId: user.id })
         .getMany(),
@@ -54,10 +54,23 @@ export class CourseExpander {
     let timeSpent = 0
     let progressionSum = 0
 
+    // Les TP notés (cf. `isGradedActivity`) sortent du parcours de lecture séquentiel PlatonClass :
+    // un étudiant peut légitimement ne jamais les terminer (durée dépassée, absence...), ils ne
+    // doivent donc pas empêcher le cours d'atteindre 100% de progression.
     sessions.forEach((session: SessionEntity<PlayerActivityVariables>) => {
       const { lastGradedAt, startedAt } = session
       if (lastGradedAt && startedAt) {
         timeSpent += differenceInSeconds(lastGradedAt, startedAt)
+      }
+
+      if (
+        session.activity &&
+        isGradedActivity({
+          kind: session.activity.kind,
+          activitySettings: session.activity.source?.variables?.settings,
+        })
+      ) {
+        return
       }
 
       const { navigation } = session.variables
@@ -69,10 +82,13 @@ export class CourseExpander {
       }
     })
 
-    // Les leçons (cours PlatonClass) ne produisent pas de session : leur progression
-    // (0 ou 100) est ajoutée séparément pour ne pas fausser la moyenne globale, dont
-    // le dénominateur (`activities.length`) compte déjà exercices et leçons ensemble.
-    const lessonActivities = activities.filter((activity) => activity.kind === ActivityKind.LESSON)
+    // Les leçons (cours PlatonClass) ne produisent pas de session : leur progression (0 ou 100)
+    // est ajoutée séparément pour ne pas fausser la moyenne globale, dont le dénominateur
+    // (`progressActivities.length`) compte déjà exercices et leçons ensemble (hors TP notés).
+    const progressActivities = activities.filter(
+      (activity) => !isGradedActivity({ kind: activity.kind, activitySettings: activity.source?.variables?.settings })
+    )
+    const lessonActivities = progressActivities.filter((activity) => activity.kind === ActivityKind.LESSON)
     if (lessonActivities.length) {
       const completedLessonIds = await this.lessonProgressService.findCompletedActivityIds(
         lessonActivities.map((activity) => activity.id),
@@ -84,7 +100,7 @@ export class CourseExpander {
     return {
       studentCount: members.filter((member) => member.role === 'student').length,
       teacherCount: members.filter((member) => member.role === 'teacher').length,
-      progression: Math.round(progressionSum ? progressionSum / activities.length : 0),
+      progression: Math.round(progressionSum ? progressionSum / progressActivities.length : 0),
       activityCount: activities.length,
       challengeCount: activities.filter((activity) => activity.isChallenge).length,
       timeSpent,

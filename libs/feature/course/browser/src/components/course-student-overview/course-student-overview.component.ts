@@ -6,7 +6,10 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
 
-import { Activity, Course, CourseSection } from '@platon/feature/course/common'
+import { Activity, Course, CourseSection, isGradedActivity } from '@platon/feature/course/common'
+import { DurationPipe } from '@platon/shared/ui'
+import { buildGradedActivities } from '../../utils/graded-activities.util'
+import { CoursePipesModule } from '../../pipes'
 
 interface SectionItems {
   readonly section: CourseSection
@@ -19,24 +22,39 @@ interface SectionItems {
   templateUrl: './course-student-overview.component.html',
   styleUrls: ['./course-student-overview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, NzButtonModule, NzIconModule, NzProgressModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NzButtonModule,
+    NzIconModule,
+    NzProgressModule,
+    DurationPipe,
+    CoursePipesModule,
+  ],
 })
 export class CourseStudentOverviewComponent {
   readonly course = input.required<Course>()
   readonly sections = input.required<CourseSection[]>()
   readonly activities = input.required<Activity[]>()
 
-  protected readonly sectionItems = computed<SectionItems[]>(() =>
+  private readonly sortedSections = computed(() =>
     this.sections()
       .slice()
       .sort((a, b) => a.order - b.order)
-      .map((section) => ({
-        section,
-        activities: this.activities()
-          .filter((activity) => activity.sectionId === section.id)
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
-      }))
   )
+
+  // Les TP notés (cf. `isGradedActivity`) sortent du parcours de lecture séquentiel : ils ne
+  // figurent ni dans la table des matières ni dans la progression du cours (voir `gradedActivities`).
+  protected readonly sectionItems = computed<SectionItems[]>(() =>
+    this.sortedSections().map((section) => ({
+      section,
+      activities: this.activities()
+        .filter((activity) => activity.sectionId === section.id && !isGradedActivity(activity))
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    }))
+  )
+
+  protected readonly gradedActivities = computed(() => buildGradedActivities(this.sections(), this.activities()))
 
   protected readonly hasStarted = computed(() => (this.course().statistic?.progression ?? 0) > 0)
 

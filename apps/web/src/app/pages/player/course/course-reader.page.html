@@ -58,6 +58,25 @@
         }
       </ul>
     </div>
+    } @if (gradedActivities().length) {
+    <div class="toc-section graded-toc-section">
+      <h4>
+        <span nz-icon nzType="safety-certificate"></span>
+        Travaux notés
+      </h4>
+      <ul>
+        @for (item of gradedActivities(); track item.activity.id) { @if (item.activity | courseActivityState; as
+        activityState) {
+        <li>
+          <a class="toc-item graded-toc-item" [routerLink]="['/player/activity', item.activity.id]">
+            <span nz-icon nzType="lock" class="toc-item-icon"></span>
+            <span class="graded-toc-item-title">{{ item.activity.title }}</span>
+            <span class="graded-toc-item-meta" [style.color]="activityState.color">{{ activityState.label }}</span>
+          </a>
+        </li>
+        } }
+      </ul>
+    </div>
     }
   </aside>
 

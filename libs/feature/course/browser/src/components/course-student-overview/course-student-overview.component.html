@@ -47,3 +47,38 @@
   </div>
   }
 </section>
+
+@if (gradedActivities().length) {
+<section class="graded-section">
+  <h2>
+    <span nz-icon nzType="safety-certificate" class="graded-section-icon"></span>
+    Travaux notés
+  </h2>
+  <p class="graded-section-desc">
+    Ces activités sont surveillées (changement d'onglet ou perte de focus mettent fin à la tentative) et s'ouvrent dans
+    un environnement dédié. Elles ne comptent pas dans la progression du cours.
+  </p>
+  <ul class="graded-list">
+    @for (item of gradedActivities(); track item.activity.id) { @if (item.activity | courseActivityState; as
+    activityState) {
+    <li>
+      <a class="graded-item" [routerLink]="['/player/activity', item.activity.id]">
+        <span nz-icon nzType="lock" class="graded-item-icon"></span>
+        <div class="graded-item-body">
+          <span class="graded-item-title">{{ item.activity.title }}</span>
+          <span class="graded-item-meta">
+            <span [style.color]="activityState.color">{{ activityState.label }}</span>
+            @if (item.duration) {
+            <span>{{ item.duration | duration }}</span>
+            } @if (item.attempts) {
+            <span>{{ item.attempts }} tentative{{ item.attempts > 1 ? 's' : '' }}</span>
+            }
+          </span>
+        </div>
+        <span nz-icon nzType="arrow-right" class="graded-item-arrow"></span>
+      </a>
+    </li>
+    } }
+  </ul>
+</section>
+}

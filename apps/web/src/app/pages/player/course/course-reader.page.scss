@@ -244,6 +244,30 @@
   flex-shrink: 0;
 }
 
+.graded-toc-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.graded-toc-item {
+  border-left: 3px solid var(--brand-color-warning);
+}
+
+.graded-toc-item-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graded-toc-item-meta {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 main {
   flex: 1;
   overflow-y: auto;

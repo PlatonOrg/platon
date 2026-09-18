@@ -9,9 +9,14 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzProgressModule } from 'ng-zorro-antd/progress'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 
-import { Activity, Course, CourseSection } from '@platon/feature/course/common'
-import { CourseService } from '@platon/feature/course/browser'
-import { EditorjsViewerComponent, UiErrorComponent } from '@platon/shared/ui'
+import { Activity, Course, CourseSection, isGradedActivity } from '@platon/feature/course/common'
+import {
+  buildGradedActivities,
+  CoursePipesModule,
+  CourseService,
+  GradedActivityItem,
+} from '@platon/feature/course/browser'
+import { DurationPipe, EditorjsViewerComponent, UiErrorComponent } from '@platon/shared/ui'
 import { PlayerService, PlayerWrapperComponent } from '@platon/feature/player/browser'
 import { ActivityPlayer } from '@platon/feature/player/common'
 import { ThemeService } from '@platon/core/browser'
@@ -39,6 +44,8 @@ interface ReaderItem {
     EditorjsViewerComponent,
     UiErrorComponent,
     PlayerWrapperComponent,
+    DurationPipe,
+    CoursePipesModule,
   ],
 })
 export class CourseReaderPage implements OnInit {
@@ -53,6 +60,7 @@ export class CourseReaderPage implements OnInit {
   protected readonly course = signal<Course | undefined>(undefined)
   protected readonly sections = signal<CourseSection[]>([])
   protected readonly items = signal<ReaderItem[]>([])
+  protected readonly gradedActivities = signal<GradedActivityItem[]>([])
   protected readonly currentIndex = signal(0)
   protected readonly embeddedActivityPlayer = signal<ActivityPlayer | undefined>(undefined)
   protected readonly startingActivity = signal(false)
@@ -76,16 +84,20 @@ export class CourseReaderPage implements OnInit {
       const sections = [...sectionsResponse.resources].sort((a, b) => a.order - b.order)
       this.sections.set(sections)
 
+      // Les TP notés (cf. `isGradedActivity`) sortent du parcours de lecture séquentiel : ils ne
+      // figurent pas dans `items` (sidebar, prev/next, progression) mais dans `gradedActivities`,
+      // affichés à part et ouverts directement dans le player plein écran (voir `course-student-overview`).
       const items: ReaderItem[] = []
       for (const section of sections) {
         const sectionActivities = activitiesResponse.resources
-          .filter((activity) => activity.sectionId === section.id)
+          .filter((activity) => activity.sectionId === section.id && !isGradedActivity(activity))
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         for (const activity of sectionActivities) {
           items.push({ activity, sectionId: section.id, sectionName: section.name })
         }
       }
       this.items.set(items)
+      this.gradedActivities.set(buildGradedActivities(sections, activitiesResponse.resources))
 
       const requestedItemId = this.route.snapshot.queryParamMap.get('item')
       const requestedIndex = requestedItemId ? items.findIndex((item) => item.activity.id === requestedItemId) : -1
