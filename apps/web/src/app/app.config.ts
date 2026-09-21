@@ -1,5 +1,5 @@
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http'
-import { ApplicationConfig, importProvidersFrom } from '@angular/core'
+import { provideAppInitializer, ApplicationConfig, importProvidersFrom, inject } from '@angular/core'
 import { provideAnimations } from '@angular/platform-browser/animations'
 import {
   PreloadAllModules,
@@ -8,7 +8,7 @@ import {
   withEnabledBlockingInitialNavigation,
   withPreloading,
 } from '@angular/router'
-import { CoreBrowserModule, TAG_PROVIDERS } from '@platon/core/browser'
+import { CoreBrowserModule, CoreService, TAG_PROVIDERS } from '@platon/core/browser'
 import { CAS_PROVIDERS } from '@platon/feature/cas/browser'
 import { COURSE_PROVIDERS } from '@platon/feature/course/browser'
 import { LTI_PROVIDERS } from '@platon/feature/lti/browser'
@@ -48,5 +48,9 @@ export const appConfig: ApplicationConfig = {
     ANNOUNCEMENT_PROVIDERS,
     TUTO_PROVIDERS,
     BUILDER_PROVIDERS,
+    provideAppInitializer(() => {
+      const core = inject(CoreService)
+      return core.init()
+    }),
   ],
 }

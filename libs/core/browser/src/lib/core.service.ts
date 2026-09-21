@@ -11,7 +11,7 @@ export class CoreService {
 
   init() {
     this.themeService.loadTheme().catch(console.error)
-    this.nzIconService.changeAssetsSource('assets/vendors/@ant-design')
+    this.nzIconService.changeAssetsSource('/assets/vendors/@ant-design')
     this.iconRegistry.setDefaultFontSetClass('material-icons-outlined')
   }
 }

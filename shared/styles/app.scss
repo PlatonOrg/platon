@@ -38,6 +38,12 @@ nge-markdown {
   padding: 0 !important;
 }
 
+// Preview icon
+
+.preview-icon svg {
+  width: 1.5em !important;
+  height: 1.5em !important;
+}
 // CDK DRAG DROP PREVIEW STATE
 
 .cdk-drag {
