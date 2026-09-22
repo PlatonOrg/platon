@@ -124,6 +124,8 @@ export class BuilderPage implements OnInit {
 
   protected readonly previewSessionId = uuidv4()
 
+  private resourceId: string | null = null
+
   protected readonly settingItems: SettingItem[] = [
     { id: 'save', label: 'Option sauvegarde', icon: 'save', type: 'save' },
     { id: 'developer', label: 'Mode développeur', icon: 'code', type: 'developer' },
@@ -209,9 +211,9 @@ export class BuilderPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
-      const resourceId = this.activatedRoute.snapshot.paramMap.get('id')
+      this.resourceId = this.activatedRoute.snapshot.paramMap.get('id')
       const version = this.activatedRoute.snapshot.queryParamMap.get('version') || 'latest'
-      if (!resourceId) {
+      if (!this.resourceId) {
         throw new HttpErrorResponse({
           error: { message: 'ID de ressource manquant' },
           status: 400,
@@ -219,7 +221,7 @@ export class BuilderPage implements OnInit {
         })
       }
 
-      const resource = await firstValueFrom(this.resourceService.find({ id: resourceId }))
+      const resource = await firstValueFrom(this.resourceService.find({ id: this.resourceId }))
       this.resource.set(resource)
       this.title.setTitle(resource.name)
 
@@ -326,6 +328,10 @@ export class BuilderPage implements OnInit {
       this.hasUnsavedChanges.set(false)
       await this.inputFileService.save()
       this.dialogService.success('Sauvegardé avec succès')
+      if (this.resourceId) {
+        const resource = await firstValueFrom(this.resourceService.find({ id: this.resourceId }))
+        this.resource.set(resource)
+      }
       if (showFirstSaveInfo) this.showFirstSaveInfo()
     } catch {
       this.dialogService.error('Erreur lors de la sauvegarde')
@@ -669,8 +675,8 @@ export class BuilderPage implements OnInit {
         console.error
       )
     }
-    if (JSON.stringify(this.overridesTemplateBase()) === JSON.stringify(this.overrides())) {
-      await this.deleteResource()
+    if (this.resource()?.createdAt && this.resource()?.updatedAt) {
+      if (this.resource()?.createdAt.getTime() === this.resource()?.updatedAt.getTime()) await this.deleteResource()
     }
     return true
   }
