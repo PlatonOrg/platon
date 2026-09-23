@@ -16,6 +16,7 @@ import { BuilderService } from '@platon/feature/builder/browser'
 import { PleInput } from '@platon/feature/compiler'
 
 import { BuilderPage } from './builder.page'
+import { WritableSignal } from '@angular/core'
 
 // BuilderPage importe (directement ou via un enfant standalone qu'il importe) un module ng-zorro
 // qui fournit lui-même NzModalService dans ses `providers`, ce qui masque tout override de
@@ -398,23 +399,26 @@ describe('BuilderPage', () => {
       })
     }
 
-    it("supprime automatiquement la ressource si aucune personnalisation n'a été faite", async () => {
-      // Comportement non trivial : overridesTemplateBase et overrides sont initialisés à la même
-      // valeur au chargement. Tant que l'utilisateur n'a rien personnalisé, quitter le builder
-      // supprime la ressource brouillon plutôt que de laisser un exercice vide traîner.
+    it("supprime automatiquement la ressource si aucune sauvegarde n'a été faite", async () => {
+      // Si, après la création d'un exercice, l'utilisateur quitte sans avoir sauvegardé, la ressource est supprimée.
+      // Sauvegarder doit mettre à jour le champ updatedAt de la ressource.
       const { component, mocks } = await init()
+      const date = new Date()
+      const currentResource = component['resource'] as WritableSignal<Resource | undefined>
+      currentResource.set({ ...currentResource()!, createdAt: date, updatedAt: date })
 
       await expect(component.canDeactivate()).resolves.toBe(true)
-
       expect(mocks.resourceService.delete).toHaveBeenCalled()
     })
 
-    it('ne supprime pas la ressource dès lors que des overrides ont été personnalisés', async () => {
+    it('ne supprime pas la ressource si la date de modification est différende de la date de création', async () => {
       const { component, mocks } = await init()
-      component['overrides'].set({ level: 'expert' })
+      const creation = new Date('2026-09-21T08:49:00Z')
+      const update = new Date('2026-09-23T09:49:00Z')
+      const currentResource = component['resource'] as WritableSignal<Resource | undefined>
+      currentResource.set({ ...currentResource()!, createdAt: creation, updatedAt: update })
 
       await expect(component.canDeactivate()).resolves.toBe(true)
-
       expect(mocks.resourceService.delete).not.toHaveBeenCalled()
     })
 
