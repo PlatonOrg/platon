@@ -59,6 +59,7 @@ export class InputFileService implements OnDestroy {
       }
       const [resourceId, versionAndName] = reference.split(':') // resource id, version/file name
       const url = reference === '' ? '' : path + resourceId + '/' + versionAndName.split('/')[1]
+      console.log("url is :",url)
       this.files.set(name, new Info(url))
     }
   }
@@ -101,7 +102,6 @@ export class InputFileService implements OnDestroy {
       return // skip the openDialogue below
     }
     info.currentUrl = ''
-    this.openDialogue('Sauvegarder pour supprimer définitivement le fichier.')
   }
 
   /** to call when a file from oustide platon is drop
@@ -171,24 +171,16 @@ export class InputFileService implements OnDestroy {
     if (splitName[0] === 'main') {
       const extension = ['ple', 'plo', 'plc']
       if (extension.includes(splitName[1])) {
-        this.openDialogue('Le fichier ' + name + " n'est pas supprimable.", true)
         return false
       }
     }
     if (splitName[0] === 'readme' && splitName[1] === 'md') {
-      this.openDialogue('Le fichier ' + name + " n'est pas supprimable.", true)
       return false
     }
     if (oldResourceId != this.resourceId) {
-      this.openDialogue("Vous ne pouvez pas supprimer le fichier d'une autre ressource.", true)
-      console.log("Pour supprimer le fichier aller à la ressource d'id : " + oldResourceId)
       return false
     }
     if (this.version != 'latest') {
-      this.openDialogue(
-        "Vous ne pouvez pas supprimer de fichier dans une ressource dont la version est différente de 'latest'.",
-        true
-      )
       return false
     }
     return true
