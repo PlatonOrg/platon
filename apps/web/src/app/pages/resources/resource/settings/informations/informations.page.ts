@@ -34,6 +34,9 @@ import { NzModalService } from 'ng-zorro-antd/modal'
     NzSelectModule,
   ],
   providers: [NzModalService],
+  host: {
+    '(window:keydown)': 'onKeyDown($event)',
+  },
 })
 export class ResourceInformationsPage implements OnInit, OnDestroy {
   private modal = inject(NzModalService)
@@ -248,6 +251,13 @@ export class ResourceInformationsPage implements OnInit, OnDestroy {
 
   protected trackByValue(_: number, item: unknown): unknown {
     return item
+  }
+
+  protected async onKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault()
+      await this.saveChanges()
+    }
   }
 }
 
