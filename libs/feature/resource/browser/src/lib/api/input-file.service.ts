@@ -59,7 +59,6 @@ export class InputFileService implements OnDestroy {
       }
       const [resourceId, versionAndName] = reference.split(':') // resource id, version/file name
       const url = reference === '' ? '' : path + resourceId + '/' + versionAndName.split('/')[1]
-      console.log("url is :",url)
       this.files.set(name, new Info(url))
     }
   }

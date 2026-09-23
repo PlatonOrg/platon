@@ -108,7 +108,6 @@ export class TemplateSelectionComponent implements OnInit {
   }
 
   protected async selectTemplate(template: Resource): Promise<void> {
-    console.log(template)
     await this.createQuickResource(template)
   }
 }
