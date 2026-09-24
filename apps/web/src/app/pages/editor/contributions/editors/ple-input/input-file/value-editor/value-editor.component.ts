@@ -75,7 +75,6 @@ export class ValueEditorComponent extends BaseValueEditor<string> implements OnD
 
   @ViewChild(UiModalTemplateComponent) modalComponent!: UiModalTemplateComponent
 
-  /**  */
   constructor() {
     super()
     this.modeBuilder = this.inputFileService.isModeBuilder()
@@ -260,7 +259,9 @@ export class ValueEditorComponent extends BaseValueEditor<string> implements OnD
     }
 
     // first element is empty string since the string starts with a slash
-    const [, authority, path] = reference.split('/')
+    const segments = reference.slice(1).split('/')
+    const authority = segments[0]
+    const path = segments.slice(1).join('/')
     const [resource, _] = authority.split(':') // version is alway latest so doesn't work for other version
     const uri = this.fileSystemProvider.buildUri(resource, this.version, path)
     this.editorService.open(uri).catch(console.error)
