@@ -39,6 +39,7 @@ import { CourseDemoProvider } from '../models/course-demo-provider'
 import { Optional } from 'typescript-optional'
 import { CourseGroupProvider } from '../models/course-group-provider'
 import { ActivityGroupProvider } from '../models/activity-group.provider'
+import { CourseFileProvider, CourseFileUploadResponse } from '../models/course-file-provider'
 
 @Injectable({ providedIn: 'root' })
 export class CourseService {
@@ -51,6 +52,7 @@ export class CourseService {
   private readonly activityMemberProvider = inject(ActivityMemberProvider)
   private readonly activityCorrectorProvider = inject(ActivityCorrectorProvider)
   private readonly activityGroupProvider = inject(ActivityGroupProvider)
+  private readonly courseFileProvider = inject(CourseFileProvider)
 
   private readonly deleteActivityEvent = new Subject<Activity>()
   private readonly addMemberEvent = new Subject<CourseMember>()
@@ -208,6 +210,18 @@ export class CourseService {
 
   getCourseColors(courseId: string): Observable<number[]> {
     return this.activityProvider.getCourseColors(courseId)
+  }
+
+  markLessonCompleted(activity: Activity): Observable<void> {
+    return this.activityProvider.markLessonCompleted(activity)
+  }
+
+  uploadFile(
+    courseId: string,
+    file: File,
+    onProgress?: (percent: number) => void
+  ): Observable<CourseFileUploadResponse> {
+    return this.courseFileProvider.upload(courseId, file, onProgress)
   }
 
   //#endregion

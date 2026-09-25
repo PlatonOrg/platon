@@ -1,4 +1,4 @@
-import { calculateActivityOpenState } from './activity.model'
+import { ActivityKind, calculateActivityOpenState, isGradedActivity, resolveActivityTitle } from './activity.model'
 
 describe('calculateActivityOpenState', () => {
   it('should return "planned" when openAt is in the future and closeAt is defined', () => {
@@ -60,5 +60,72 @@ describe('calculateActivityOpenState', () => {
     const result = calculateActivityOpenState(value)
 
     expect(result).toBe('opened')
+  })
+})
+
+describe('resolveActivityTitle', () => {
+  it('should return the teacher override when it is defined', () => {
+    expect(resolveActivityTitle('Titre personnalisé', 'Titre du PL', 'Nom de la ressource')).toBe('Titre personnalisé')
+  })
+
+  it('should fall back to the next candidate when the override is empty or blank', () => {
+    expect(resolveActivityTitle('', 'Titre du PL', 'Nom de la ressource')).toBe('Titre du PL')
+    expect(resolveActivityTitle('   ', 'Titre du PL', 'Nom de la ressource')).toBe('Titre du PL')
+    expect(resolveActivityTitle(undefined, 'Titre du PL', 'Nom de la ressource')).toBe('Titre du PL')
+  })
+
+  it('should skip blank candidates and use the first non-empty one', () => {
+    expect(resolveActivityTitle(undefined, '', 'Nom de la ressource')).toBe('Nom de la ressource')
+    expect(resolveActivityTitle(undefined, undefined, 'Nom de la ressource')).toBe('Nom de la ressource')
+  })
+
+  it('should trim the resolved title', () => {
+    expect(resolveActivityTitle('  Titre avec espaces  ')).toBe('Titre avec espaces')
+  })
+
+  it('should return an empty string when every candidate is empty or missing', () => {
+    expect(resolveActivityTitle()).toBe('')
+    expect(resolveActivityTitle(undefined, null, '   ')).toBe('')
+  })
+})
+
+describe('isGradedActivity', () => {
+  it('devrait retourner false pour une leçon, même avec les réglages de sécurité activés', () => {
+    const result = isGradedActivity({
+      kind: ActivityKind.LESSON,
+      activitySettings: { security: { terminateOnLeavePage: true, terminateOnLoseFocus: true } },
+    })
+
+    expect(result).toBe(false)
+  })
+
+  it('devrait retourner false pour un exercice sans réglages de sécurité', () => {
+    const result = isGradedActivity({ kind: ActivityKind.EXERCISE })
+
+    expect(result).toBe(false)
+  })
+
+  it('devrait retourner false pour un exercice avec un seul des deux flags activé', () => {
+    expect(
+      isGradedActivity({
+        kind: ActivityKind.EXERCISE,
+        activitySettings: { security: { terminateOnLeavePage: true, terminateOnLoseFocus: false } },
+      })
+    ).toBe(false)
+    expect(
+      isGradedActivity({
+        kind: ActivityKind.EXERCISE,
+        activitySettings: { security: { terminateOnLeavePage: false, terminateOnLoseFocus: true } },
+      })
+    ).toBe(false)
+  })
+
+  it('devrait retourner true pour un exercice avec les deux flags de sécurité activés', () => {
+    const result = isGradedActivity({
+      kind: ActivityKind.EXERCISE,
+      activitySettings: { security: { terminateOnLeavePage: true, terminateOnLoseFocus: true } },
+    })
+
+    expect(result).toBe(true)
   })
 })

@@ -9,8 +9,10 @@ import {
   signal,
   effect,
 } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzModalService } from 'ng-zorro-antd/modal'
 
 import { Activity } from '@platon/feature/course/common'
@@ -21,7 +23,14 @@ import { CourseActivitySettingsComponent } from '../activity-settings/activity-s
   selector: 'course-activity-settings-drawer',
   templateUrl: './activity-settings-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NzButtonModule, NzIconModule, UiModalDrawerComponent, CourseActivitySettingsComponent],
+  imports: [
+    FormsModule,
+    NzButtonModule,
+    NzIconModule,
+    NzInputModule,
+    UiModalDrawerComponent,
+    CourseActivitySettingsComponent,
+  ],
 })
 export class CourseActivitySettingsDrawerComponent {
   private readonly cdr = inject(ChangeDetectorRef)
@@ -35,16 +44,23 @@ export class CourseActivitySettingsDrawerComponent {
 
   readonly localActivity = signal<Activity | undefined>(undefined)
 
+  protected readonly editingTitle = signal(false)
+  protected readonly titleDraft = signal('')
+
   constructor() {
     effect(
       () => {
-        this.localActivity.set(this.activity())
+        const activity = this.activity()
+        this.localActivity.set(activity)
+        this.titleDraft.set(activity?.title ?? '')
       },
       { allowSignalWrites: true }
     )
   }
 
   open(): void {
+    this.editingTitle.set(false)
+    this.titleDraft.set(this.localActivity()?.title ?? '')
     this.modal?.open()
   }
 
@@ -133,8 +149,18 @@ export class CourseActivitySettingsDrawerComponent {
     this.modal?.close()
   }
 
+  protected startEditingTitle(): void {
+    this.editingTitle.set(true)
+  }
+
+  protected confirmTitleEdit(): void {
+    this.editingTitle.set(false)
+    this.settingsComponent?.activityTitleInput.set(this.titleDraft())
+  }
+
   protected onActivityChange(activity: Activity): void {
     this.localActivity.set(activity)
+    this.titleDraft.set(activity.title)
     this.activityChange.emit(activity)
     this.cdr.markForCheck()
   }

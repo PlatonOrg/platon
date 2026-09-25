@@ -1,5 +1,5 @@
-@if (player.type === 'exercise') {
-<player-exercise [player]="$any(player)" />
+@if (player().type === 'exercise') {
+<player-exercise [player]="$any(player())" />
 } @else {
-<player-activity [player]="$any(player)" />
+<player-activity [player]="$any(player())" [embedded]="embedded()" />
 }

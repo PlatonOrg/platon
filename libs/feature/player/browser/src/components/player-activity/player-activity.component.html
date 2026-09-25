@@ -28,7 +28,7 @@
       <player-settings [player]="player" />
       <!-- BOUTONS D'ACTION -->
       <div class="action-buttons">
-        @if (canGoDashboard) {
+        @if (canGoDashboard && !embedded()) {
         <button mat-raised-button (click)="back()">
           <mat-icon>arrow_back</mat-icon>
           Retour
@@ -96,7 +96,7 @@
         }
         <player-results [player]="player" />
         <div class="action-buttons">
-          @if (canGoDashboard) {
+          @if (canGoDashboard && !embedded()) {
           <button mat-raised-button color="primary" (click)="back()">
             <mat-icon>home</mat-icon>
             Retourner sur PLaTon

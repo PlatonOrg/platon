@@ -1,0 +1,84 @@
+<section class="hero">
+  <div class="hero-main">
+    <h1>{{ course().name }}</h1>
+    <p class="desc">{{ course().desc }}</p>
+    <a
+      nz-button
+      nzType="primary"
+      nzShape="round"
+      nzSize="large"
+      [routerLink]="['/player/course', course().id]"
+      [queryParams]="firstIncompleteActivityId() ? { item: firstIncompleteActivityId() } : {}"
+    >
+      <span nz-icon nzType="play-circle"></span>
+      {{ hasStarted() ? 'Continuer le cours' : 'Commencer le cours' }}
+    </a>
+  </div>
+  <div class="hero-progress">
+    <nz-progress
+      [nzPercent]="course().statistic?.progression ?? 0"
+      nzType="circle"
+      [nzWidth]="96"
+      nzStrokeColor="var(--brand-color-primary)"
+    ></nz-progress>
+    <span class="progress-label">Progression</span>
+  </div>
+</section>
+
+<section class="toc">
+  <h2>Table des matières</h2>
+  @for (item of sectionItems(); track item.section.id) {
+  <div class="toc-section">
+    <h3>{{ item.section.name }}</h3>
+    <ul>
+      @for (activity of item.activities; track activity.id; let i = $index) {
+      <li>
+        <a class="toc-item" [routerLink]="['/player/course', course().id]" [queryParams]="{ item: activity.id }">
+          @if (activity.progression === 100) {
+          <span nz-icon nzType="check-circle" nzTheme="fill" class="toc-item-icon done"></span>
+          } @else {
+          <span class="toc-item-number">{{ i + 1 }}</span>
+          }
+          {{ activity.title }}
+        </a>
+      </li>
+      }
+    </ul>
+  </div>
+  }
+</section>
+
+@if (gradedActivities().length) {
+<section class="graded-section">
+  <h2>
+    <span nz-icon nzType="safety-certificate" class="graded-section-icon"></span>
+    Travaux notés
+  </h2>
+  <p class="graded-section-desc">
+    Ces activités sont surveillées (changement d'onglet ou perte de focus mettent fin à la tentative) et s'ouvrent dans
+    un environnement dédié. Elles ne comptent pas dans la progression du cours.
+  </p>
+  <ul class="graded-list">
+    @for (item of gradedActivities(); track item.activity.id) { @if (item.activity | courseActivityState; as
+    activityState) {
+    <li>
+      <a class="graded-item" [routerLink]="['/player/activity', item.activity.id]">
+        <span nz-icon nzType="lock" class="graded-item-icon"></span>
+        <div class="graded-item-body">
+          <span class="graded-item-title">{{ item.activity.title }}</span>
+          <span class="graded-item-meta">
+            <span [style.color]="activityState.color">{{ activityState.label }}</span>
+            @if (item.duration) {
+            <span>{{ item.duration | duration }}</span>
+            } @if (item.attempts) {
+            <span>{{ item.attempts }} tentative{{ item.attempts > 1 ? 's' : '' }}</span>
+            }
+          </span>
+        </div>
+        <span nz-icon nzType="arrow-right" class="graded-item-arrow"></span>
+      </a>
+    </li>
+    } }
+  </ul>
+</section>
+}

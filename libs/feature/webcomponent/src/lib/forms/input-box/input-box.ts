@@ -34,7 +34,7 @@ export const InputBoxComponentDefinition = defineWebComponent({
       type: {
         type: 'string',
         default: 'text',
-        enum: ['text', 'number', 'textarea'],
+        enum: ['text', 'number', 'textarea', 'password'],
         description: 'Le type du champ de saisi.',
       },
       value: {
