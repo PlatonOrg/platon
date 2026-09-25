@@ -365,6 +365,13 @@ export class ResourceFileController {
     }
 
     if (file) {
+      if (path == 'includes/')
+        try {
+          await repo.mkdir(path)
+        } catch {
+          // Failed to create the "includes" folder, maybe it already exists. -> no problem.
+          // or there is another problem -> upload will fail because folder doesn't exist.
+        }
       const dstpath = join(path, basename(file.originalname))
       const newName = await repo.upload(file.path, dstpath)
       this.eventService.emit<OnChangeFileEventPayload>(ON_CHANGE_FILE_EVENT, {

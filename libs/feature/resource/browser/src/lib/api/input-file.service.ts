@@ -58,7 +58,7 @@ export class InputFileService implements OnDestroy {
         reference = reference.replace('/', '')
       }
       const [resourceId, versionAndName] = reference.split(':') // resource id, version/file name
-      const url = reference === '' ? '' : path + resourceId + '/' + versionAndName.split('/')[1]
+      const url = reference === '' ? '' : path + resourceId + versionAndName.replace('latest', '')
       this.files.set(name, new Info(url))
     }
   }
@@ -105,15 +105,14 @@ export class InputFileService implements OnDestroy {
 
   /** to call when a file from oustide platon is drop
    *
-   * @return the name of the file uploaded
+   * @return the location (includes/{name}) of the file uploaded
    */
   async change(inputName: string, file: File): Promise<string> {
     if (!this.isBuilder) {
       // upload from outside the builder page
-      const url = path + this.resourceId + '/?version=latest'
+      const url = path + this.resourceId + '/includes/?version=latest'
       const name = await this.uploadFile(url, file)
-      this.openDialogue('Fichier ' + name + ' ajouté.')
-      return name
+      return 'includes/' + name
     }
     const info = this.files.get(inputName)
     if (!info) {
@@ -123,15 +122,15 @@ export class InputFileService implements OnDestroy {
     if (info.currentUrl != info.lastSaveUrl && info.currentUrl != '') {
       await this.deleteFile(info.currentUrl)
     }
-    const url = path + this.resourceId + '/?version=latest'
+    const url = path + this.resourceId + '/includes/?version=latest'
     const name = await this.uploadFile(url, file)
-    info.currentUrl = path + this.resourceId + '/' + name
+    info.currentUrl = path + this.resourceId + '/includes/' + name
     if (name === '') {
       this.openDialogue("N'a pas pu extraire le nom du fichier ajouté.")
     } else {
       this.openDialogue('Fichier ' + name + ' ajouté.')
     }
-    return name
+    return 'includes/' + name
   }
 
   /** call the service that upload file */
@@ -196,7 +195,7 @@ export class InputFileService implements OnDestroy {
     }
     reference = reference.replace('/', '')
     const [resourceId, versionAndName] = reference.split(':') // resource id, latest/file name
-    const uri = path + resourceId + '/' + versionAndName.split('/')[1] + '?download&version=' + this.version // uri for display and donwload
+    const uri = path + resourceId + versionAndName.replace('latest', '') + '?download&version=' + this.version // uri for display and donwload
     return uri
   }
 
