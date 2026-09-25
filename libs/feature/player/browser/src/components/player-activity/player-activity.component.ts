@@ -41,6 +41,7 @@ import {
 } from '@platon/feature/course/common'
 
 import { MatIconModule } from '@angular/material/icon'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { AnswerStates } from '@platon/feature/result/common'
@@ -68,6 +69,7 @@ import { NzNotificationComponent } from 'ng-zorro-antd/notification'
   styleUrls: ['./player-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NzSpinModule,
     RouterModule,
     MatIconModule,
     MatCardModule,
@@ -125,6 +127,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected onKeydownFn = this.onKeydown.bind(this)
   protected onContextMenuFn = this.onContextMenu.bind(this)
   protected loadingNext = false
+  protected isLoading = false
   protected activityLogs: PlatonLog[] = []
   protected code = ''
   protected isCodeError = false
@@ -271,12 +274,14 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   }
 
   protected async start(): Promise<void> {
+    this.isLoading = true
     if (this.composed) {
       await this.playAll()
     } else {
       const { navigation } = this.player
       await this.play(navigation.current || navigation.exercises[0])
     }
+    this.isLoading = false
     this.disableCopyPasteIfNeeded()
     this.startWatchingVisibilityChange()
   }

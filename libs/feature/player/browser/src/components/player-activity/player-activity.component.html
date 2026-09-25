@@ -34,9 +34,13 @@
           Retour
         </button>
         }
-        <button mat-raised-button color="primary" [disabled]="empty" (click)="start()">
+        <button mat-raised-button color="primary" [disabled]="empty || isLoading" (click)="start()">
+          @if (isLoading) {
+          <nz-spin nzSimple nzSize="small"></nz-spin>
+          } @else {
           <mat-icon>play_arrow</mat-icon>
-          Commencer
+          }
+          {{ isLoading ? 'Chargement' : 'Commencer' }}
         </button>
       </div>
       }
