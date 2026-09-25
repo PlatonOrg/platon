@@ -231,6 +231,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
           const activityClosedData = notificationData as ActivityClosedNotification
           if (activityClosedData.activityId === this.player.activityId) {
             this.state = 'closed'
+            await firstValueFrom(this.notificationService.deleteNotification(notification.id))
             await this.terminateModal(false, "L'activité a été fermée par l'enseignant.")
           }
         } else if (
