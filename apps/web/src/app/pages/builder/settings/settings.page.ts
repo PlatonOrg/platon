@@ -15,10 +15,9 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
-import { DialogService, ThemeService, TagService } from '@platon/core/browser'
+import { DialogService, ThemeService, TagSelectComponent } from '@platon/core/browser'
 import { ResourceService, RESOURCE_STATUS_NAMES } from '@platon/feature/resource/browser'
 import { Resource, UpdateResource, ResourceStatus } from '@platon/feature/resource/common'
-import { Level, Topic } from '@platon/core/common'
 import { firstValueFrom } from 'rxjs'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
@@ -40,6 +39,7 @@ export interface SettingItem {
     MatFormFieldModule,
     MatInputModule,
     NzSelectModule,
+    TagSelectComponent,
     NzSpinModule,
     NzButtonModule,
   ],
@@ -54,15 +54,12 @@ export interface SettingItem {
 export class SettingsPage implements OnInit {
   private readonly themeService = inject(ThemeService)
   private readonly dialogService = inject(DialogService)
-  private readonly tagService = inject(TagService)
   private readonly resourceService = inject(ResourceService)
 
   selectedSetting = input<SettingItem | null>(null)
   resource = input.required<Resource>()
 
   protected currentTheme = signal<string | null>('light')
-  protected topics = signal<Topic[]>([])
-  protected levels = signal<Level[]>([])
   protected loading = signal(false)
   protected saving = signal(false)
   protected hasFormChanges = signal(false)
@@ -94,23 +91,16 @@ export class SettingsPage implements OnInit {
       this.currentTheme.set('system')
     }
 
-    await this.loadTagsAndInitForm()
+    await this.initForm()
 
     this.form.valueChanges.subscribe(() => {
       this.hasFormChanges.set(true)
     })
   }
 
-  private async loadTagsAndInitForm(): Promise<void> {
+  private async initForm(): Promise<void> {
     try {
       this.loading.set(true)
-
-      const [topics, levels] = await Promise.all([
-        firstValueFrom(this.tagService.listTopics()),
-        firstValueFrom(this.tagService.listLevels()),
-      ])
-      this.topics.set(topics)
-      this.levels.set(levels)
 
       const currentResource = this.resource()
       if (currentResource) {

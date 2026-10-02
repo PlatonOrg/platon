@@ -10,41 +10,13 @@
   <nz-form-item>
     <nz-form-label nzFor="topics">Topics</nz-form-label>
     <nz-form-control>
-      <nz-select
-        id="topics"
-        name="topics"
-        nzAllowClear
-        nzShowSearch
-        nzSize="large"
-        nzMode="tags"
-        nzPlaceHolder="Cliquez pour selectionner"
-        formControlName="topics"
-        [nzDisabled]="!canEdit"
-      >
-        @for (item of dataSource?.topics; track trackByValue($index, item)) {
-        <nz-option [nzLabel]="item.name" [nzValue]="item.id"> </nz-option>
-        }
-      </nz-select>
+      <app-tag-select kind="topic" id="topics" formControlName="topics" />
     </nz-form-control>
   </nz-form-item>
   <nz-form-item>
     <nz-form-label nzFor="levels">Niveaux</nz-form-label>
     <nz-form-control>
-      <nz-select
-        id="levels"
-        name="levels"
-        nzAllowClear
-        nzShowSearch
-        nzSize="large"
-        nzMode="tags"
-        nzPlaceHolder="Cliquez pour selectionner"
-        formControlName="levels"
-        [nzDisabled]="!canEdit"
-      >
-        @for (item of dataSource?.levels; track trackByValue($index, item)) {
-        <nz-option [nzLabel]="item.name" [nzValue]="item.id"> </nz-option>
-        }
-      </nz-select>
+      <app-tag-select kind="level" id="levels" formControlName="levels" />
     </nz-form-control>
   </nz-form-item>
   @if (saving) {

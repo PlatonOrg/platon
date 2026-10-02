@@ -100,36 +100,12 @@
 
       <div class="form-field-wrapper">
         <label class="field-label">Topics</label>
-        <nz-select
-          nzAllowClear
-          nzShowSearch
-          nzSize="large"
-          nzMode="multiple"
-          nzPlaceHolder="Sélectionnez des topics"
-          formControlName="topics"
-          class="full-width"
-        >
-          @for (topic of topics(); track topic.id) {
-          <nz-option [nzLabel]="topic.name" [nzValue]="topic.id" />
-          }
-        </nz-select>
+        <app-tag-select kind="topic" formControlName="topics" class="full-width" />
       </div>
 
       <div class="form-field-wrapper">
         <label class="field-label">Niveaux</label>
-        <nz-select
-          nzAllowClear
-          nzShowSearch
-          nzSize="large"
-          nzMode="multiple"
-          nzPlaceHolder="Sélectionnez des niveaux"
-          formControlName="levels"
-          class="full-width"
-        >
-          @for (level of levels(); track level.id) {
-          <nz-option [nzLabel]="level.name" [nzValue]="level.id" />
-          }
-        </nz-select>
+        <app-tag-select kind="level" formControlName="levels" class="full-width" />
       </div>
     </form>
     }
