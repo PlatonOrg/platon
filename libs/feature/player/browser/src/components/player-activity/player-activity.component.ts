@@ -41,6 +41,7 @@ import {
 } from '@platon/feature/course/common'
 
 import { MatIconModule } from '@angular/material/icon'
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
@@ -71,6 +72,7 @@ import { ObserveVisibilityDirective } from '@platon/shared/ui'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NzSpinModule,
+    NzSkeletonModule,
     RouterModule,
     MatIconModule,
     MatCardModule,
@@ -131,6 +133,9 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected loadingNext = false
   protected isLoading = false
   protected isLoadingNextExercise = false
+  protected isSwitchingExercise = false
+  protected loadError: string | undefined
+  private failedLoad: { exercise: PlayerExercise; historyPosition?: number } | undefined
   protected activityLogs: PlatonLog[] = []
   protected code = ''
   protected isCodeError = false
@@ -168,6 +173,11 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected get showConclusion(): boolean {
     const { navigation } = this.player
     return this.state === 'closed' || navigation.terminated
+  }
+
+  protected get showUnlockCode(): boolean {
+    const security = this.player.settings?.security
+    return !!(security?.terminateOnLoseFocus || security?.terminateOnLeavePage)
   }
 
   protected get canGoDashboard(): boolean {
@@ -458,7 +468,21 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       }
     }
 
+    await this.loadExercise(exercise, modifiedNextExercisesHistoryPosition)
+  }
+
+  protected async retryLoadExercise(): Promise<void> {
+    if (this.failedLoad) {
+      await this.loadExercise(this.failedLoad.exercise, this.failedLoad.historyPosition)
+    }
+  }
+
+  private async loadExercise(exercise: PlayerExercise, historyPosition?: number): Promise<void> {
     this.exercises = undefined
+    this.loadError = undefined
+    this.failedLoad = undefined
+    this.isSwitchingExercise = true
+    this.changeDetectorRef.markForCheck()
 
     try {
       const output = await firstValueFrom(
@@ -469,21 +493,23 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       )
 
       if (output.navigation) {
-        if (modifiedNextExercisesHistoryPosition != undefined) {
-          output.navigation.nextExercisesHistoryPosition = modifiedNextExercisesHistoryPosition
+        if (historyPosition != undefined) {
+          output.navigation.nextExercisesHistoryPosition = historyPosition
         }
         this.player = { ...this.player, navigation: output.navigation }
       }
 
       this.exercises = output.exercises
     } catch (error) {
-      if (error instanceof HttpErrorResponse) {
-        this.dialogService.error(error.error?.message || error.message)
-        return
-      }
-      this.dialogService.error(
-        "Une erreur est survenue lors du chargement de l'exercice. Merci de prévenir votre professeur"
-      )
+      this.failedLoad = { exercise, historyPosition }
+      this.loadError =
+        error instanceof HttpErrorResponse
+          ? error.error?.message || error.message
+          : "Une erreur est survenue lors du chargement de l'exercice."
+      return
+    } finally {
+      this.isSwitchingExercise = false
+      this.changeDetectorRef.markForCheck()
     }
 
     this.calculatePositions()

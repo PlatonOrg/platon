@@ -1,5 +1,27 @@
 <main>
-  @if (!exercises) {
+  @if (!exercises && isSwitchingExercise) {
+  <mat-card>
+    <mat-card-content>
+      <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 8 }" />
+    </mat-card-content>
+  </mat-card>
+  } @else if (!exercises && loadError) {
+  <mat-card>
+    <mat-card-content>
+      <p role="alert">
+        Une erreur est survenue lors du chargement de l'exercice. <br />Merci de contacter votre enseignant ou de
+        réessayer plus tard.
+      </p>
+      <p class="load-error-details"><strong>Détails :</strong> {{ loadError }}</p>
+      <div class="action-buttons load-error-actions">
+        <button mat-raised-button color="primary" (click)="retryLoadExercise()">
+          <mat-icon>refresh</mat-icon>
+          Réessayer
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  } @else if (!exercises) {
   <mat-card>
     <mat-card-content>
       <!-- TITRE ET INTRODUCTION -->
@@ -76,6 +98,7 @@
         </section>
         }
         <!-- CODE DE DÉBLOCAGE -->
+        @if (showUnlockCode) {
         <section class="unlock-section">
           <h3 class="section-title">
             <mat-icon>lock_open</mat-icon>
@@ -86,6 +109,7 @@
             <ui-sixcode (codeComplete)="onCodeComplete($event)" [error]="isCodeError" />
           </div>
         </section>
+        }
         <!-- CONCLUSION -->
         @if (player.conclusion) {
         <section class="conclusion-section">

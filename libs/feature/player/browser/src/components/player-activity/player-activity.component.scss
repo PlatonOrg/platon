@@ -98,6 +98,16 @@ mat-card {
   line-height: 1.6;
 }
 
+.load-error-details {
+  opacity: 0.75;
+  overflow-wrap: anywhere;
+}
+
+.action-buttons.load-error-actions {
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
 .action-buttons {
   display: flex;
   justify-content: center;
