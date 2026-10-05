@@ -34,7 +34,7 @@ export class EditFilePreviewService {
   isEditable(src: string): boolean {
     const resourceId = this.getActiveResourceId()
     const splitUrl = src.split('/')
-    const oldResourceId = splitUrl[4].split(':')[0]
+    const oldResourceId = splitUrl[4]
     if (oldResourceId != resourceId) {
       return false // cannot edit a file from another resource.
     }

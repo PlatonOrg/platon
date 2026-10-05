@@ -158,7 +158,7 @@ export class InputFileService implements OnDestroy {
   /** indicate if you are allow to delete the file or not*/
   private isDeletable(url: string): boolean {
     const splitUrl = url.split('/')
-    const oldResourceId = splitUrl[4].split(':')[0]
+    const oldResourceId = splitUrl[4]
     const name = splitUrl.pop()
     if (!name) {
       // should never append
