@@ -36,7 +36,7 @@ const KINDS: Record<TagKind, TagKindConfig> = {
  * dès la sélection, après confirmation si un tag similaire existe déjà.
  */
 @Component({
-  selector: 'app-tag-select',
+  selector: 'tag-select',
   template: `
     <nz-select
       nzAllowClear

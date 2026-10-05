@@ -125,7 +125,7 @@
           @if (activity().permissions.viewResource) {
           <li nz-menu-item [routerLink]="['/resources', activity().resourceId]">Ouvrir la ressource associée</li>
           }
-          <li nz-menu-item (click)="qrModal.open()">QR Code</li>
+          <li nz-menu-item (click)="qrModal.open()">Partarger</li>
           @if (activity().permissions.update) {
           <li nz-menu-item (click)="settingsDrawer.open()">Paramètres</li>
           }
@@ -136,7 +136,7 @@
 </mat-card>
 }
 <course-activity-settings-drawer [activity]="activity()" (activityChange)="onActivityChange($event)" #settingsDrawer />
-<ui-qrcode-modal title="QR Code de l'activité" [url]="activityUrl" #qrModal />
+<ui-qrcode-modal title="Partager l'activité" [url]="activityUrl" #qrModal />
 <ng-template #progressionTemplate>
   <div class="progression">
     <span class="progression-value">{{ activity().progression }}</span>
