@@ -211,6 +211,12 @@ export class InputFileService implements OnDestroy {
       this.openDialogue('Une erreur est survenue.', true)
       return // should never append
     }
+    const splitUrl = info?.currentUrl.split('/')
+    const oldResourceId = splitUrl[4].split(':')[0]
+    if (oldResourceId != this.resourceId) {
+      console.error('Cannot change a file that from another resource.')
+      return
+    }
     this.resourcefileService.update({ url: info.currentUrl }, { content: content }).subscribe({
       next: () => {
         this.dialogService.success('Fichier mis à jour.')

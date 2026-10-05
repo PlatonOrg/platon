@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core'
+import { inject, Injectable, signal } from '@angular/core'
 import { extractSupportedExtension } from './file-preview'
+import { ActivatedRouteSnapshot, Router } from '@angular/router'
 
 declare const monaco: any
 
@@ -12,11 +13,31 @@ export class EditFilePreviewService {
   private currentFileContents = new Map<string, string>() // must correspond to the last saved content of each file edited
   private supportedExtension = ['txt', 'md', 'csv', 'json'] // file extension supported for editing
   refreshRequest = signal<number>(0) // help refresh the content after editing
+  private readonly router = inject(Router)
+
+  /** give the first resource id found
+   * @return string : the resource id | null if no id has been found */
+  private getActiveResourceId(): string | null {
+    let currentRoute: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root
+    while (currentRoute) {
+      if (currentRoute.paramMap.has('id')) {
+        return currentRoute.paramMap.get('id')
+      }
+      currentRoute = currentRoute.firstChild
+    }
+    return null
+  }
 
   /**
    * @param src file url
    * @return true if the file support editing, otherwise false */
   isEditable(src: string): boolean {
+    const resourceId = this.getActiveResourceId()
+    const splitUrl = src.split('/')
+    const oldResourceId = splitUrl[4].split(':')[0]
+    if (oldResourceId != resourceId) {
+      return false // cannot edit a file from another resource.
+    }
     const extension = extractSupportedExtension(src)
     return extension ? this.supportedExtension.includes(extension) : false
   }

@@ -239,8 +239,8 @@ export class ValueEditorComponent extends BaseValueEditor<string> implements OnD
 
   /** distinct ple case (open the file) from plo case (preview)*/
   protected eyeButton() {
-    if (this.modeBuilder) {
-      this.watchContent = !this.watchContent
+    if (this.modeBuilder || !this.editService.isEditable(this.url)) {
+      this.watchContent = !this.watchContent // go here if in ple editor, but the file is from another resource.
     } else {
       this.openFile()
     }

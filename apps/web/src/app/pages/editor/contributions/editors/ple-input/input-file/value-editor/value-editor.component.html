@@ -35,7 +35,7 @@
 <button nz-button nzType="text" nz-tooltip="Supprimer" (click)="changeValue('')">
   <span nz-icon nzType="close" nzTheme="outline"></span>
 </button>
-} @if (this.modeBuilder && watchContent) {
+} @if (watchContent && (this.modeBuilder || !editService.isEditable(this.url))) {
 <ui-modal-template
   closable
   height="70vh"
