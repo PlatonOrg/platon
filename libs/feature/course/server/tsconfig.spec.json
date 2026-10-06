@@ -6,7 +6,8 @@
     "target": "es2018",
     "types": ["jest", "node"],
     "composite": true,
+    "declaration": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["jest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts", "src/lib/course.controller.ts"]
+  "include": ["jest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts", "src/**/*.ts"]
 }
