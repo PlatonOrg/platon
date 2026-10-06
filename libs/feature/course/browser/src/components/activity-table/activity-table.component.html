@@ -30,9 +30,10 @@
         [nzChecked]="selection.has(model.activity.id)"
         (nzCheckedChange)="onItemChecked(model.activity.id, $event)"
       ></td>
+      }
       <td nzAlign="center">
         @if(model.activity.hidden) {
-        <div class="hidden-student-title">
+        <div class="hidden-student-message">
           <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
           Caché aux étudiants
         </div>
@@ -42,7 +43,7 @@
       <td nzAlign="center">
         @if (model.section?.hidden) {
         <span
-          class="hidden-student-section"
+          class="hidden-section"
           nz-icon
           [nzType]="'eye-invisible'"
           nzTheme="outline"

@@ -1,13 +1,11 @@
-@if (activity() | courseActivityState; as activityState) {
-
-  @if (activity().hidden){
-  <div class="hidden-student-message">
-    <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
-    Caché aux étudiants
-  </div>
-  }
+@if (activity() | courseActivityState; as activityState) { @if (activity().hidden){
+<div class="hidden-student-message">
+  <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
+  Caché aux étudiants
+</div>
+}
 <mat-card>
-    <div [class]="activity().hidden ? 'card-header-hidden' : 'card-header'" [style.background-color]="color"></div>
+  <div [class]="activity().hidden ? 'card-header-hidden' : 'card-header'" [style.background-color]="color"></div>
   <mat-card-header>
     <mat-card-title>
       @if (activity().isChallenge) {

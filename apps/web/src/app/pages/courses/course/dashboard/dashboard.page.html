@@ -69,13 +69,12 @@
             </span>
           </ng-template>
           <ng-template #extra>
-            @if (item.section.hidden){
-            <div class="hidden-student-message">
+            @if (context.course.permissions?.update) { @if (item.section.hidden){
+            <span class="hidden-student-message">
               <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
               Caché aux étudiants
-            </div>
+            </span>
             }
-            @if (context.course.permissions?.update) {
             <button
               class="add-activity"
               nz-button

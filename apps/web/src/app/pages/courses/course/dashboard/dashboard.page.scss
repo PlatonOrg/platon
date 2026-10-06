@@ -66,3 +66,7 @@ ui-search-bar {
   margin-top: 3px;
   overflow: hidden;
 }
+
+:host-context(.dark-theme) .hidden-section {
+  background-color: var(--brand-background-alpha-12);
+}
