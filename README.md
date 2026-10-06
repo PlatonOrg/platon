@@ -377,6 +377,7 @@ This document describes the environnement configuration for the application, inc
 | SANDBOX_URL                | api      | Defines python sandbox url.                                                         | <http://localhost:7000> |
 | SANDBOX_ENV_LIFESPAN       | api      | Value in seconds that determins for how long node sandbox env files should be kept. | 604800 (7 days)         |
 | SERVER_NAME                | nginx    | Defines nginx server name.                                                          | localhost               |
+| SERVER_HOST                | api      | Public host used to build links in emails. `https://` is added unless a scheme is given. | localhost               |
 
 ### Codebase Structure
 

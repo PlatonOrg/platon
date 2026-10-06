@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EmailService } from '@platon/feature/email/server'
 import { FeedbackCategoryValue, getFeedbackCategoryLabel } from '@platon/feature/player/common'
@@ -9,6 +10,7 @@ import { SessionEntity } from '@platon/feature/result/server'
 
 type projection = {
   creatorId: string
+  resourceId: string
   firstName: string
   lastName: string
   email: string
@@ -38,13 +40,15 @@ export class FeedbackService {
     @InjectRepository(FeedbackEntity) private readonly feedbackRepository: Repository<FeedbackEntity>,
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService
   ) {}
 
   async submitFeedback(input: FeedbackDTO, senderId: string): Promise<void> {
     const queryText = `
     SELECT
       COALESCE(session_data.activity_creator_id, session_data.resource_owner_id, session_data.course_owner_id) AS "creatorId",
+      session_data.resource_id AS "resourceId",
       users.first_name AS "firstName",
       users.last_name AS "lastName",
       users.email
@@ -69,10 +73,13 @@ export class FeedbackService {
 
     const categoryLabel = getFeedbackCategoryLabel(input.category)
     const subject = `[Signalement PLaTOn] ${input.exerciseTitle ?? 'Exercice'} - ${categoryLabel}`
+    const serverUrl = this.configService.get<string>('server.url')
+    const resourceUrl = `${serverUrl}/resources/${resourceCreator.resourceId}`
     const content = [
       'Un signalement a été soumis sur PLaTOn.',
       '',
       `Exercice : ${input.exerciseTitle ?? 'N/A'}`,
+      `Lien : ${resourceUrl}`,
       `Catégorie : ${categoryLabel}`,
       'Message :',
       input.message ?? '(aucun message)',

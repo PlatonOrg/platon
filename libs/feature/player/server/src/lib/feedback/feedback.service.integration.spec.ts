@@ -45,7 +45,14 @@ describe('FeedbackService (integration)', () => {
     sessionDataRepo = dataSource.getRepository(SessionDataEntity)
     feedbackRepo = dataSource.getRepository(FeedbackEntity)
 
-    service = new FeedbackService(feedbackRepo, sessionRepo, emailService as any)
+    service = new FeedbackService(
+      feedbackRepo,
+      sessionRepo,
+      emailService as any,
+      {
+        get: jest.fn().mockReturnValue('https://platon.test'),
+      } as any
+    )
   }, 60_000)
 
   afterAll(async () => {
