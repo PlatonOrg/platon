@@ -11,6 +11,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: calc((100% - (var(--cols) - 1) *16px)/ var(--cols));
+  max-width: calc((100% - (var(--cols) - 1) *16px)/ var(--cols));
   width: 100%;
 }
 
