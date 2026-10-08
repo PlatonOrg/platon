@@ -28,7 +28,7 @@ export interface Activity {
   readonly restrictions?: RestrictionList[] | null
 
   readonly colorHue?: number
-
+  readonly hidden?: boolean
   readonly activitySettings?: ActivitySettings
   readonly code: string
 }
@@ -53,6 +53,7 @@ export interface UpdateActivity {
   readonly openAt?: Date | null
   readonly closeAt?: Date | null
   readonly colorHue?: number | null
+  readonly hidden?: boolean
   readonly ignoreRestrictions?: boolean
   readonly activitySettings?: ActivitySettings
   readonly code?: string

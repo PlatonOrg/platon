@@ -88,6 +88,11 @@ export class ActivityDTO extends BaseDTO implements Activity {
 
   @IsString()
   readonly code!: string
+
+  @IsBoolean()
+  @ApiProperty()
+  @IsOptional()
+  readonly hidden?: boolean
 }
 
 export class ActivityFiltersDTO implements ActivityFilters {

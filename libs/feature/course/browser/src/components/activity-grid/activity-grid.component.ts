@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, Input, ViewChild, ElementRef } from
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzSegmentedModule } from 'ng-zorro-antd/segmented'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
+import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { Activity } from '@platon/feature/course/common'
@@ -19,6 +20,7 @@ import { CdkDragDrop, CdkDragMove, CdkDragStart, DragDropModule, moveItemInArray
     NzGridModule,
     NzTabsModule,
     NzSegmentedModule,
+    NzIconModule,
     DragDropModule,
     ReactiveFormsModule,
     CourseActivityCardComponent,

@@ -5,6 +5,7 @@ import { MockRepository, mockRepository } from '@platon/core/testing/server'
 import { DataSource } from 'typeorm'
 import { CourseSectionEntity } from './section.entity'
 import { CourseSectionService } from './section.service'
+import { CourseMemberService } from '../course-member/course-member.service'
 
 describe('CourseSectionService', () => {
   let service: CourseSectionService
@@ -20,6 +21,7 @@ describe('CourseSectionService', () => {
         CourseSectionService,
         { provide: DataSource, useValue: dataSource },
         { provide: getRepositoryToken(CourseSectionEntity), useValue: repository },
+        { provide: CourseMemberService, useValue: { hasWritePermission: jest.fn() } },
       ],
     }).compile()
 

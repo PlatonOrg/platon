@@ -4,6 +4,7 @@ import { Optional } from 'typescript-optional'
 import { CourseSectionController } from './section.controller'
 import { CourseSectionEntity } from './section.entity'
 import { CourseSectionService } from './section.service'
+import { IRequest } from '@platon/core/server'
 
 describe('CourseSectionController', () => {
   let controller: CourseSectionController
@@ -47,9 +48,10 @@ describe('CourseSectionController', () => {
 
   describe('list', () => {
     it('devrait retourner la liste mappée des sections', async () => {
+      const mockReq = {} as IRequest
       service.ofCourse.mockResolvedValue([[{ id: 's1' } as CourseSectionEntity], 1])
 
-      const result = await controller.list('course-1')
+      const result = await controller.list(mockReq, 'course-1')
 
       expect(result.total).toBe(1)
     })
