@@ -24,7 +24,7 @@
   </thead>
   <tbody>
     @for (model of nzTable.data; track trackByFn($index, model)) {
-    <tr>
+    <tr [id]="model.activity.id">
       @if (selectable && !disabled) {
       <td
         [nzChecked]="selection.has(model.activity.id)"

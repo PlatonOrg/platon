@@ -19,7 +19,9 @@
 <nz-row [nzGutter]="[24, 24]" nzAlign="top">
   @for (item of tab.items; track trackActivity(i, item); let i = $index) {
   <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12" nzXXl="8">
-    <course-activity-card [item]="item" [id]="i === 0 ? 'tuto-first-activity-card' : null" />
+    <div [id]="item.id">
+      <course-activity-card [item]="item" [id]="i === 0 ? 'tuto-first-activity-card' : null" />
+    </div>
   </nz-col>
   }
 </nz-row>

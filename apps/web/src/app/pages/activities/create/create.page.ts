@@ -479,7 +479,10 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       if (this.isTest) {
         await this.router.navigateByUrl(`/tests/${course?.id}`, { replaceUrl: true })
       } else {
-        await this.router.navigateByUrl(`/courses/${course?.id}`, { replaceUrl: true })
+        await this.router.navigate(['/courses', course?.id], {
+          queryParams: { activity: createdActivities.resources[0]?.id },
+          replaceUrl: true,
+        })
       }
     } catch (error) {
       let errorMessage = 'Une erreur inconnue est survenue'
