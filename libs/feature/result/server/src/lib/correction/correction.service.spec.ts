@@ -89,6 +89,17 @@ describe('CorrectionService', () => {
       expect(result[0].exercises).toHaveLength(2)
     })
 
+    it('should return exercises in their activity navigation order', async () => {
+      sessionRepository.query.mockResolvedValue([
+        { ...baseProjection, exerciseId: 'exercise-2', exerciseSessionId: 'session-2', exerciseOrder: 2 },
+        { ...baseProjection, exerciseId: 'exercise-1', exerciseSessionId: 'session-1', exerciseOrder: 1 },
+      ])
+
+      const result = await service.list('corrector-1')
+
+      expect(result[0].exercises.map((exercise) => exercise.exerciseId)).toEqual(['exercise-1', 'exercise-2'])
+    })
+
     it('should only return activities with at least one uncorrected exercise when status=pending', async () => {
       sessionRepository.query.mockResolvedValue([
         { ...baseProjection, activityId: 'activity-pending', correctedBy: undefined },
