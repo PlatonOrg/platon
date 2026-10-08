@@ -182,9 +182,9 @@ export abstract class PlayerManager {
   }
 
   async reroll(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
-    const envid = exerciseSession.envid
     const { source } = exerciseSession
 
+    let envid
     let variables = source.variables ?? exerciseSession.variables
     variables.seed = Date.now() % 100
 
@@ -195,7 +195,6 @@ export abstract class PlayerManager {
       variables['.meta']['totalAttempts'] = exerciseSession.variables['.meta']['totalAttempts']
       const output = await this.sandboxManager.run(
         {
-          envid,
           variables,
           files: exerciseSession.source.dependencies.map((file) => ({
             path: file.alias || basename(file.abspath),
@@ -206,10 +205,12 @@ export abstract class PlayerManager {
         variables.builder
       )
       variables = output.variables as ExerciseVariables
+      envid = output.envid
     }
 
     await this.updateSession(exerciseSession.id, {
       variables: (exerciseSession.variables = variables),
+      envid: (exerciseSession.envid = envid),
     })
 
     return withExercisePlayer(exerciseSession)
