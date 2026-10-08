@@ -212,7 +212,11 @@ export class CorrectionService {
     return Array.from(activityMap.values())
   }
 
-  async listSummary(correctorUserId: string, status?: CorrectionStatus, includeArchived: boolean = false): Promise<ActivityCorrectionSummary[]> {
+  async listSummary(
+    correctorUserId: string,
+    status?: CorrectionStatus,
+    includeArchived = false
+  ): Promise<ActivityCorrectionSummary[]> {
     let havingClause = ''
     if (status === CorrectionStatus.pending) {
       havingClause = 'HAVING COUNT(exercise_session.id) > COUNT(correction.id)'
