@@ -1,7 +1,27 @@
+@if(groups) {
+<span cdkScrollable>
+  Groupe(s) :
+  <nz-select
+    nzMode="multiple"
+    nzAllowClear
+    nzPlaceHolder="Tous les groupes"
+    nzShowSearch
+    [ngModel]="selectedGroup()"
+    [nzOpen]="open()"
+    (nzOpenChange)="open.set($event)"
+    (ngModelChange)="selectedGroup.set($event)"
+  >
+    @for (group of groups; track group.id) {
+    <nz-option [nzValue]="group.id" [nzLabel]="group.name" />
+    }
+  </nz-select>
+</span>
+}
+
 <nz-table
   #nzTable
   nzSize="small"
-  [nzData]="results"
+  [nzData]="filteredResults()"
   [nzFrontPagination]="false"
   nzTableLayout="auto"
   [nzShowPagination]="false"

@@ -138,4 +138,9 @@ export const USER_ACTIVITY_COUNT = 'user.activity-count'
  */
 export const USER_EXERCISE_COUNT = 'user.exercise-count'
 
+/**
+ * Groups of the course
+ */
+export const GROUPS = 'groups'
+
 export type DashboardOutput = Record<string, unknown>

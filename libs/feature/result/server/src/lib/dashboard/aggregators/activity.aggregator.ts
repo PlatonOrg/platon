@@ -26,6 +26,7 @@ type ActivityUserResultsResultsArgs = {
   activityMembers?: ActivityMemberView[] | null
   exerciseSessions: SessionDataEntity[]
   resourceMap?: Map<string, string>
+  groupIdsByUser?: Map<string, string[]>
 }
 
 type ActivityExerciseResultsArgs = {
@@ -43,7 +44,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
   private readonly exerciseSessions = new Map<string, SessionDataEntity>()
 
   constructor(args: ActivityUserResultsResultsArgs) {
-    const { activity, activityMembers, exerciseSessions, resourceMap } = args
+    const { activity, activityMembers, exerciseSessions, resourceMap, groupIdsByUser } = args
 
     activityMembers
       ?.sort((a, b) => a.username.localeCompare(b.username))
@@ -56,6 +57,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
             firstName: member.firstName,
             lastName: member.lastName,
             username: member.username,
+            groupIds: groupIdsByUser?.get(member.id) ?? [],
           })
         )
       })
@@ -71,6 +73,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
           lastName: exerciseSession.user?.lastName ?? this.anonymous,
           username: exerciseSession.user?.username ?? this.anonymous,
           activitySessionId: exerciseSession.parentId,
+          groupIds: exerciseSession.user ? groupIdsByUser?.get(exerciseSession.user.id) ?? [] : [],
         })
       )
     })

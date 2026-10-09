@@ -3,7 +3,13 @@ import { getRepositoryToken } from '@nestjs/typeorm'
 import { BadRequestResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
 import { UserEntity } from '@platon/core/server'
 import { MockRepository, mockRepository, mockSelectQueryBuilder } from '@platon/core/testing/server'
-import { ActivityEntity, ActivityMemberView, CourseMemberView } from '@platon/feature/course/server'
+import {
+  ActivityEntity,
+  ActivityMemberView,
+  CourseGroupEntity,
+  CourseGroupMemberEntity,
+  CourseMemberView,
+} from '@platon/feature/course/server'
 import { ResourceTypes } from '@platon/feature/resource/common'
 import { ResourceEntity, ResourceService } from '@platon/feature/resource/server'
 import { USER_ACTIVITY_COUNT, USER_COURSE_COUNT } from '@platon/feature/result/common'
@@ -19,6 +25,8 @@ describe('DashboardService', () => {
   let courseMemberView: MockRepository<CourseMemberView>
   let activityRepository: MockRepository<ActivityEntity>
   let activityMemberView: MockRepository<ActivityMemberView>
+  let courseGroup: MockRepository<CourseGroupEntity>
+  let courseGroupMember: MockRepository<CourseGroupMemberEntity>
 
   beforeEach(async () => {
     resourceService = { findByIdOrCode: jest.fn() }
@@ -26,6 +34,8 @@ describe('DashboardService', () => {
     courseMemberView = mockRepository<CourseMemberView>()
     activityRepository = mockRepository<ActivityEntity>()
     activityMemberView = mockRepository<ActivityMemberView>()
+    courseGroup = mockRepository<CourseGroupEntity>()
+    courseGroupMember = mockRepository<CourseGroupMemberEntity>()
 
     const module = await Test.createTestingModule({
       providers: [
@@ -35,6 +45,8 @@ describe('DashboardService', () => {
         { provide: getRepositoryToken(CourseMemberView), useValue: courseMemberView },
         { provide: getRepositoryToken(ActivityEntity), useValue: activityRepository },
         { provide: getRepositoryToken(ActivityMemberView), useValue: activityMemberView },
+        { provide: getRepositoryToken(CourseGroupEntity), useValue: courseGroup },
+        { provide: getRepositoryToken(CourseGroupMemberEntity), useValue: courseGroupMember },
       ],
     }).compile()
 
@@ -148,6 +160,13 @@ describe('DashboardService', () => {
       } as unknown as ActivityEntity)
       sessionData.find.mockResolvedValue([])
       activityMemberView.find.mockResolvedValue([])
+      courseGroup.find.mockResolvedValue([])
+      courseGroupMember.find.mockResolvedValue([])
+
+      const qb = mockSelectQueryBuilder<CourseGroupMemberEntity>()
+      qb.getRawMany = jest.fn().mockReturnValue([])
+      qb.getMany.mockResolvedValue([])
+      courseGroupMember.createQueryBuilder.mockReturnValue(qb as unknown as SelectQueryBuilder<CourseGroupMemberEntity>)
 
       const output = await service.ofActivity('activity-1')
 

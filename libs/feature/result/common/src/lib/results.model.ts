@@ -108,6 +108,11 @@ export interface UserResults {
    * A map of exercise results for the user.
    */
   exercises: Record<string, UserExerciseResults>
+
+  /**
+   * All groups id that contains the user
+   */
+  groupIds: string[]
 }
 
 export interface UserActivityResultsDistribution {
@@ -261,6 +266,16 @@ export interface ActivityResults {
    * Results for all exercises in the activity.
    */
   exercises: ExerciseResults[]
+
+  /**
+   * List of all groups in an activity
+   */
+  groups: ActivityGroup[]
+}
+
+export interface ActivityGroup {
+  id: string
+  name: string
 }
 
 export interface ActivityDistributionData {
@@ -337,5 +352,6 @@ export const emptyUserResults = (defaults?: Partial<UserResults>): UserResults =
   correcting: false,
   exercises: {},
   activitySessionId: '',
+  groupIds: [],
   ...defaults,
 })

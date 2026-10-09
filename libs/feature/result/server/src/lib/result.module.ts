@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { ActivityService, FeatureCourseServerModule } from '@platon/feature/course/server'
+import {
+  ActivityService,
+  FeatureCourseServerModule,
+  CourseGroupEntity,
+  CourseGroupMemberEntity,
+} from '@platon/feature/course/server'
 import { FeatureResourceServerModule } from '@platon/feature/resource/server'
 import { AnswerEntity } from './answers/answer.entity'
 import { AnswerService } from './answers/answer.service'
@@ -38,7 +43,6 @@ import { SubmissionStorageService } from './submissions/storage.service'
 import { StudentSubmissionEntity } from './submissions/submission.entity'
 import { ResourceSessionStatsView } from './sessions/session-stats.view'
 import { SessionStatsScheduler } from './sessions/session-stats.scheduler'
-
 @Module({
   imports: [
     FeatureCourseServerModule,
@@ -58,6 +62,8 @@ import { SessionStatsScheduler } from './sessions/session-stats.scheduler'
       UserFavoriteLabel,
       StudentSubmissionEntity,
       ResourceSessionStatsView,
+      CourseGroupEntity,
+      CourseGroupMemberEntity,
     ]),
   ],
   controllers: [
