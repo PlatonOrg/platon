@@ -188,6 +188,14 @@ export class PlayerCorrectionComponent implements OnInit {
     return this.answers.length
   }
 
+  protected get hasStarted(): boolean {
+    return this.currentExercise?.startedAt != null
+  }
+
+  protected get hasAnswer(): boolean {
+    return this.currentExercise?.answerId != null
+  }
+
   // === LIFECYCLE ===
   async ngOnInit(): Promise<void> {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -328,9 +336,10 @@ export class PlayerCorrectionComponent implements OnInit {
   // === EXERCISE LOADING ===
   protected async loadAnswers(exercise: ExerciseCorrection): Promise<void> {
     this.currentExercise = exercise
+    this.answers = []
     const initialGrade = exercise.correctedGrade ?? this.gradeOptionMap.get(this.selectedGradeOption) ?? exercise.grade
     this.correctedGrade = PlayerCorrectionService.validateGrade(initialGrade ?? 0)
-    if (exercise.exerciseSessionId) {
+    if (exercise.exerciseSessionId && exercise.answerId != null) {
       this.answers = (
         await firstValueFrom(
           this.playerService.playAnswers({

@@ -54,6 +54,14 @@ export class ExerciseCorrectionDTO implements ExerciseCorrection {
   exerciseSessionId!: string
 
   @IsOptional()
+  @IsDate()
+  startedAt?: Date | null
+
+  @IsOptional()
+  @IsUUID()
+  answerId?: string | null
+
+  @IsOptional()
   @IsUUID()
   correctedBy?: string
 

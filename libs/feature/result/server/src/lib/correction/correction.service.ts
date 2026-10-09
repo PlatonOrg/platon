@@ -22,6 +22,8 @@ type Projection = {
   exerciseOrder: number | null
   activitySessionId: string
   exerciseSessionId: string
+  startedAt?: Date | null
+  answerId?: string | null
   courseId: string
   courseName: string
   correctedBy?: string
@@ -62,13 +64,9 @@ export class CorrectionService {
     viewerMode = false,
     status?: CorrectionStatus
   ): Promise<ActivityCorrection[]> {
-    // In viewer mode, list exercise sessions directly from the activity without requiring answers.
-    // Uses a LEFT JOIN (not INNER) so exercises that crashed before the student could submit an
-    // answer (no "Answers" row at all) are still listed, as long as the session itself recorded an error.
-    const answerJoin = viewerMode
-      ? ''
-      : `LEFT JOIN LATERAL (
-      SELECT * FROM "Answers" a
+    // Keep the latest answer available for display, but do not require one to include the session.
+    const answerJoin = `LEFT JOIN LATERAL (
+      SELECT a.id FROM "Answers" a
       WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
       ORDER BY a.created_at DESC
       LIMIT 1
@@ -94,7 +92,7 @@ export class CorrectionService {
       userParam ? `(exercise_session.user_id IS NULL OR exercise_session.user_id <> ${userParam})` : undefined,
       viewerMode
         ? undefined
-        : `(answer.variables IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`,
+        : `(answer.id IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`,
       viewerMode ? undefined : "(activity_session.variables->'navigation'->>'terminated')::boolean = TRUE",
       userParam
         ? `EXISTS (
@@ -128,6 +126,8 @@ export class CorrectionService {
       activity_session.id as "activitySessionId",
       exercise_session.user_id as "userId",
       exercise_session.id as "exerciseSessionId",
+      exercise_session.started_at as "startedAt",
+      answer.id as "answerId",
       course.id as "courseId",
       course.name as "courseName",
       correction.author_id as "correctedBy",
@@ -178,6 +178,8 @@ export class CorrectionService {
         userId: projection.userId,
         activitySessionId: projection.activitySessionId,
         exerciseSessionId: projection.exerciseSessionId,
+        startedAt: projection.startedAt,
+        answerId: projection.answerId,
         correctedBy: projection.correctedBy,
         correctedAt: projection.correctedAt,
         correctedGrade: projection.correctedGrade,

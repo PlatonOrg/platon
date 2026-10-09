@@ -91,7 +91,19 @@
       <main style="padding: 0.5rem">
         <nz-row style="height: 95vh">
           <nz-col nzSpan="17" class="left-col-wrapper">
+            @if (hasAnswer) {
             <player-review #player [players]="answers" [reviewMode]="true" [canComment]="isCorrectionMode" />
+            } @else if (currentExercise) {
+            <nz-empty [nzNotFoundContent]="emptyExerciseMessage">
+              <ng-template #emptyExerciseMessage>
+                @if (hasStarted) {
+                <span>L'élève a commencé cet exercice, mais n'y a pas répondu.</span>
+                } @else {
+                <span>L'élève n'a pas commencé cet exercice.</span>
+                }
+              </ng-template>
+            </nz-empty>
+            }
           </nz-col>
           <nz-col nzSpan="7" class="mid-col-wrapper">
             @if (isCorrectionMode) {
