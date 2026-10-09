@@ -99,6 +99,11 @@ export class ResourceItemComponent implements OnChanges {
     return `/builder/${this.item.id}?version=latest`
   }
 
+  /** Where we go if we delete the resource */
+  get returnUrl(): string {
+    return this.router.url
+  }
+
   get previewUrl(): string {
     const sessionId = uuidv4()
     if (this.previewOverrides) {
