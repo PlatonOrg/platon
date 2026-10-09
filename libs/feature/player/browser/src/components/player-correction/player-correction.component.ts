@@ -421,6 +421,19 @@ export class PlayerCorrectionComponent implements OnInit {
     await this.onChooseExercise(this.selectedExerciseIndex + 1)
   }
 
+  protected async onChooseNextAnsweredExercise(): Promise<void> {
+    if (this.isCorrectionMode) {
+      await this.onSaveGrade()
+    }
+    for (let offset = 1; offset < this.exercises.length; offset++) {
+      const index = (this.selectedExerciseIndex + offset) % this.exercises.length
+      if (this.exercises[index]?.answerId != null) {
+        await this.onChooseExercise(index)
+        return
+      }
+    }
+  }
+
   protected async onChoosePreviousUserExercise(): Promise<void> {
     await this.onChooseExercise(this.selectedExerciseIndex - 1)
   }
@@ -494,6 +507,15 @@ export class PlayerCorrectionComponent implements OnInit {
         }, 400)
         break
       case 'ArrowRight':
+        event.preventDefault()
+        if (event.shiftKey) {
+          await this.onChooseNextAnsweredExercise()
+          this.animationState = 'right'
+          setTimeout(() => {
+            this.animationState = ''
+          }, 400)
+          break
+        }
         await this.onChooseNextUserExercise()
         this.animationState = 'right'
         setTimeout(() => {
