@@ -82,3 +82,18 @@ pre.monaco-editor {
     overflow: auto !important;
   }
 }
+
+.ui-modal-iframe-wrap.ant-modal-centered {
+  // fix issue, where in "espace de travail", preview was in the middle of the screen for some web browser. (ex: chromium )
+  overflow-x: hidden;
+  &::before {
+    display: none;
+  }
+
+  .ant-modal {
+    top: 0;
+    padding-bottom: 0;
+    vertical-align: initial;
+    max-width: 100%;
+  }
+}
