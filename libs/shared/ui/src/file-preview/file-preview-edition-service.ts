@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core'
-import { extractSupportedExtension } from './file-preview'
+import { extractSupportedExtension, SUPPORTED_CODE_EXTENSIONS, SUPPORTED_TEXT_EXTENSIONS } from './file-preview'
 import { ActivatedRouteSnapshot, Router } from '@angular/router'
 
 declare const monaco: any
@@ -11,7 +11,7 @@ export class EditFilePreviewService {
 
   isEditing = signal<boolean>(false)
   private currentFileContents = new Map<string, string>() // must correspond to the last saved content of each file edited
-  private supportedExtension = ['txt', 'md', 'csv', 'json'] // file extension supported for editing
+  private supportedExtension = [...SUPPORTED_TEXT_EXTENSIONS, ...SUPPORTED_CODE_EXTENSIONS, 'csv', 'json'] // file extension supported for editing
   refreshRequest = signal<number>(0) // help refresh the content after editing
   private readonly router = inject(Router)
 

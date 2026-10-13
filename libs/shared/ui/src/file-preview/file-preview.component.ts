@@ -30,6 +30,7 @@ import {
   SUPPORTED_IMAGE_EXTENSIONS,
   SUPPORTED_TEXT_EXTENSIONS,
   SUPPORTED_VIDEO_EXTENSIONS,
+  SUPPORTED_CODE_EXTENSIONS,
   extractSupportedExtension,
 } from './file-preview'
 import { NzInputModule } from 'ng-zorro-antd/input'
@@ -82,6 +83,7 @@ export class UiFilePreviewComponent implements OnChanges, OnDestroy {
   protected isCsv = false
   protected isJson = false
   protected isMd = false // separate .md from txt in order to don't have the md interpretation
+  protected isCode = false
   protected unsupported = false
   protected pdfDocument: any
   protected currentPage = 1
@@ -124,7 +126,7 @@ export class UiFilePreviewComponent implements OnChanges, OnDestroy {
       if (this.isPdf) {
         setTimeout(() => this.loadPDF(), 0) // wait for pdfCanvas to be defined
       }
-      if (this.isText || this.isCsv || this.isJson) {
+      if (this.isText || this.isCsv || this.isJson || this.isCode) {
         await this.loadTextContent()
       }
       if (this.isCsv && !this.editService.isEditing()) {
@@ -260,6 +262,7 @@ export class UiFilePreviewComponent implements OnChanges, OnDestroy {
     this.isPdf = extension === 'pdf'
     this.isCsv = extension === 'csv'
     this.isJson = extension === 'json'
+    this.isCode = SUPPORTED_CODE_EXTENSIONS.includes(extension)
   }
 
   // PDF
