@@ -49,6 +49,8 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
   private readonly disposables: monaco.IDisposable[] = []
   private model?: monaco.editor.ITextModel
   private editor?: monaco.editor.IStandaloneCodeEditor
+  private decorations?: monaco.editor.IEditorDecorationsCollection
+  private updatingState = false
   private resizeObserver?: ResizeObserver
 
   @Input() state!: CodeEditorState
@@ -193,6 +195,7 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
     standaloneEditor.updateOptions({
       autoIndent: 'advanced',
       lineNumbers: 'on',
+      lineNumbersMinChars: 4,
       renderWhitespace: 'all',
       quickSuggestions: true,
       glyphMargin: false,
@@ -207,6 +210,9 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
       },
     })
 
+    this.decorations = standaloneEditor.createDecorationsCollection()
+    this.updateDecorations()
+
     // LISTENERS
     this.disposables.push(this.model)
     this.disposables.push(standaloneEditor)
@@ -216,6 +222,10 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
           .ignore(this, () => {
             this.state.code = this.model?.getValue() || ''
             this.state.isFilled = this.state.code !== this.initialCode
+            if (!this.updatingState && this.state.decorations?.length) {
+              this.state.decorations = []
+              this.updateDecorations()
+            }
           })
           .catch(console.error)
       })
@@ -256,8 +266,41 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy, We
       quickSuggestions: this.state.quickSuggestions,
     })
     if (this.model.getValue() !== this.state.code) {
-      this.model.setValue(this.state.code)
+      this.updatingState = true
+      try {
+        this.model.setValue(this.state.code)
+      } finally {
+        this.updatingState = false
+      }
     }
+    this.updateDecorations()
+  }
+
+  private updateDecorations() {
+    const model = this.model
+    if (!this.decorations || !model) return
+
+    this.decorations.set(
+      (this.state.decorations ?? []).map((decoration) => {
+        const endLineNumber = decoration.endLineNumber ?? decoration.startLineNumber
+        const isWholeLine = decoration.isWholeLine ?? decoration.endColumn === undefined
+        const startColumn = isWholeLine ? 1 : decoration.startColumn ?? 1
+        const endColumn = isWholeLine
+          ? model.getLineMaxColumn(endLineNumber)
+          : decoration.endColumn ?? model.getLineMaxColumn(endLineNumber)
+        const severity = decoration.severity ?? 'error'
+
+        return {
+          range: new monaco.Range(decoration.startLineNumber, startColumn, endLineNumber, endColumn),
+          options: {
+            isWholeLine,
+            inlineClassName: isWholeLine ? undefined : `code-editor-decoration-${severity}`,
+            className: isWholeLine ? `code-editor-decoration-${severity}` : undefined,
+            hoverMessage: decoration.message ? { value: decoration.message } : undefined,
+          },
+        }
+      })
+    )
   }
 
   reset() {

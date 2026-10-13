@@ -1,12 +1,23 @@
 import { stripIndent } from 'common-tags'
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component'
 
+export interface CodeEditorDecoration {
+  startLineNumber: number
+  startColumn?: number
+  endLineNumber?: number
+  endColumn?: number
+  isWholeLine?: boolean
+  severity?: 'error' | 'warning' | 'info'
+  message?: string
+}
+
 export interface CodeEditorState extends IWebComponent {
   code: string
   height: number
   tabSize: number
   language: string
   quickSuggestions: boolean
+  decorations?: CodeEditorDecoration[]
 }
 
 export const CodeEditorComponentDefinition = defineWebComponent({
@@ -45,6 +56,51 @@ export const CodeEditorComponentDefinition = defineWebComponent({
         default: true,
         description: "Activer l'auto-complétion des mots?",
       },
+      decorations: {
+        type: 'array',
+        description:
+          "Décorations à afficher dans l'éditeur. Sans colonnes de fin, toute la ligne (ou les lignes) est surlignée.",
+        items: {
+          type: 'object',
+          properties: {
+            startLineNumber: {
+              type: 'integer',
+              minimum: 1,
+              description: 'Numéro de la première ligne (indexée à partir de 1).',
+            },
+            startColumn: {
+              type: 'integer',
+              minimum: 1,
+              description: 'Colonne de début pour une décoration de plage.',
+            },
+            endLineNumber: {
+              type: 'integer',
+              minimum: 1,
+              description: 'Numéro de la dernière ligne.',
+            },
+            endColumn: {
+              type: 'integer',
+              minimum: 1,
+              description: 'Colonne de fin ; si elle est omise, la ligne entière est surlignée.',
+            },
+            isWholeLine: {
+              type: 'boolean',
+              description: 'Force le surlignage de la ou des lignes entières.',
+            },
+            severity: {
+              type: 'string',
+              enum: ['error', 'warning', 'info'],
+              default: 'error',
+              description: 'Couleur de la décoration.',
+            },
+            message: {
+              type: 'string',
+              description: 'Message affiché au survol de la décoration.',
+            },
+          },
+          required: ['startLineNumber'],
+        },
+      },
     },
   },
   showcase: {
@@ -61,5 +117,22 @@ export const CodeEditorComponentDefinition = defineWebComponent({
         # Display the sum
         print('The sum of {0} and {1} is {2}'.format(num1, num2, sum))
         `,
+    decorations: [
+      {
+        startLineNumber: 3,
+        startColumn: 1,
+        endLineNumber: 3,
+        endColumn: 20,
+        severity: 'error',
+        message: 'This is an error decoration.',
+      },
+      {
+        startLineNumber: 7,
+        startColumn: 1,
+        endLineNumber: 7,
+        severity: 'warning',
+        message: 'This is a warning decoration.',
+      },
+    ],
   },
 })
