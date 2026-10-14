@@ -178,18 +178,25 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected async moveToOwnerCircle(): Promise<void> {
     await this.presenter.moveToOwnerCircle()
-    await this.router.navigate(['/resources'])
+    if (this.router.navigated) {
+      this.location.back()
+    } else {
+      await this.router.navigate(['/resources'])
+    }
   }
 
   protected async delete(): Promise<void> {
     await this.presenter.delete()
     if (this.returnUrl) {
-      await this.router.navigateByUrl(this.returnUrl)
+      await this.router.navigateByUrl(this.returnUrl, { replaceUrl: true })
+      return
     }
-    if (this.context.parent) {
-      await this.router.navigate(['/resources', this.context.parent.id])
+
+    if (this.router.navigated) {
+      this.location.back()
     } else {
-      await this.router.navigate(['/resources'])
+      const target = this.context.parent ? ['/resources', this.context.parent.id] : ['/resources']
+      await this.router.navigate(target, { replaceUrl: true })
     }
   }
 
