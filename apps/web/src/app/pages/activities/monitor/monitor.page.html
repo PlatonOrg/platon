@@ -41,4 +41,16 @@
   <i class="info-icon" nz-icon nzType="info-circle"></i>
   <p class="info-text"><strong>Information :</strong> L'activité doit être ouverte pour accéder au suivi.</p>
 </div>
-}
+@if (context.activity?.code; as activityCode) {
+<div class="content-section unlock-code">
+  <span class="unlock-code-label">Code de déblocage :</span>
+  <span
+    class="unlock-code-value"
+    [class.revealed]="isCodeRevealed"
+    (click)="isCodeRevealed = !isCodeRevealed"
+    [title]="isCodeRevealed ? 'Cliquer pour cacher' : 'Cliquer pour révéler le code'"
+  >
+    {{ isCodeRevealed ? activityCode : '●●●●●●' }}
+  </span>
+</div>
+} }

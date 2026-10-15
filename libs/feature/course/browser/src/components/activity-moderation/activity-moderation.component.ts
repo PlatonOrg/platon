@@ -191,11 +191,13 @@ export class ActivityModerationComponent {
       .map((user) => `${user.firstName} ${user.lastName}`)
 
     const seconds = await firstValueFrom(
-      this.dialog.open<AddTimeDialogComponent, { names: string[] }, number>(AddTimeDialogComponent, {
-        data: { names },
-        width: '420px',
-        autoFocus: false,
-      }).afterClosed()
+      this.dialog
+        .open<AddTimeDialogComponent, { names: string[] }, number>(AddTimeDialogComponent, {
+          data: { names },
+          width: '420px',
+          autoFocus: false,
+        })
+        .afterClosed()
     )
     if (!seconds) return
 

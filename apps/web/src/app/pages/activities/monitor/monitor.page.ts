@@ -48,6 +48,7 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   protected context = this.presenter.defaultContext()
   protected columnOrder?: string[] = []
   protected gradeList: number[] = []
+  protected isCodeRevealed = false
   ngOnInit(): void {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
@@ -205,11 +206,21 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   }
 
   protected isOpen(): boolean {
-    const openAt = this.context.activity?.openAt
-    const closeAt = this.context.activity?.closeAt
-    return (
-      (openAt === undefined || openAt === null || new Date() >= new Date(openAt)) &&
-      (closeAt === undefined || closeAt === null || new Date() <= new Date(closeAt))
-    )
+    const activity = this.context.activity
+    const now = new Date()
+    const isWithin = (start?: Date | string | null, end?: Date | string | null): boolean =>
+      (!start || now >= new Date(start)) && (!end || now <= new Date(end))
+
+    // Les dates de l'activité sont calculées pour l'utilisateur courant : avec des restrictions par période,
+    // l'activité n'est ouverte que si au moins une période est en cours.
+    if (activity?.restrictions?.length) {
+      return activity.restrictions.some(({ restriction }) => {
+        const range = restriction.find((r) => r.type === 'DateRange')?.config as
+          | { start?: Date | string; end?: Date | string }
+          | undefined
+        return !range || isWithin(range.start, range.end)
+      })
+    }
+    return isWithin(activity?.openAt, activity?.closeAt)
   }
 }

@@ -93,11 +93,7 @@
       </div>
       }
       <div class="summary-bar">
-        <button
-          class="summary-item"
-          [class.current]="statusFilter() === 'active'"
-          (click)="statusFilter.set('active')"
-        >
+        <button class="summary-item" [class.current]="statusFilter() === 'active'" (click)="statusFilter.set('active')">
           <span class="dot dot-active"></span> Actifs <strong>{{ counts().active }}</strong>
         </button>
         <button
@@ -166,8 +162,7 @@
           <span class="extra-badge" matTooltip="Temps supplémentaire accordé">{{
             formatExtraTime(user.extraTime)
           }}</span>
-          }
-          @if (user.activitySessionId) {
+          } @if (user.activitySessionId) {
           <span
             class="dot"
             [class.dot-active]="!user.terminated"

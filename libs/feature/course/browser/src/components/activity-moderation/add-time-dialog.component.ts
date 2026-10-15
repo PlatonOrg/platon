@@ -32,7 +32,14 @@ export interface AddTimeDialogData {
 
       <mat-form-field appearance="outline" class="custom">
         <mat-label>Durée personnalisée (minutes)</mat-label>
-        <input matInput type="number" min="1" max="600" [ngModel]="minutes()" (ngModelChange)="onMinutesChange($event)" />
+        <input
+          matInput
+          type="number"
+          min="1"
+          max="600"
+          [ngModel]="minutes()"
+          (ngModelChange)="onMinutesChange($event)"
+        />
       </mat-form-field>
 
       <p class="hint">Le temps s'ajoute à celui déjà accordé à chaque élève.</p>

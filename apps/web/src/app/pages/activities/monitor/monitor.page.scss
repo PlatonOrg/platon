@@ -93,3 +93,31 @@
     font-size: 0.85rem;
   }
 }
+
+.unlock-code {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .unlock-code-label {
+    font-weight: 500;
+  }
+
+  .unlock-code-value {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: 2px;
+    background-color: #2c2f33;
+    color: #aaa;
+
+    &.revealed {
+      background-color: transparent;
+      color: inherit;
+      user-select: text;
+    }
+  }
+}
