@@ -18,6 +18,7 @@ import {
   ExerciseChangesNotification,
   ModerationActivityChangesNotification,
   ResourceMovedByAdminNotification,
+  SessionStateChangesNotification,
 } from '@platon/feature/course/common'
 import { NotificationParser, NotificationRenderer } from '@platon/feature/notification/browser'
 
@@ -193,6 +194,17 @@ export const ModerationActivityChangesNotificationParser: NotificationParser<Mod
   },
 }
 
+export const SessionStateChangesNotificationParser: NotificationParser<SessionStateChangesNotification> = {
+  support(notification): boolean {
+    return notification.data.type === 'SESSION-STATE-CHANGES'
+  },
+  renderer(): NotificationRenderer {
+    return {
+      content: '',
+    }
+  },
+}
+
 export const CourseNotificationParsers: NotificationParser<unknown>[] = [
   CourseMemberCreationNotificationParser,
   ActivityMemberCreationNotificationParser,
@@ -204,4 +216,5 @@ export const CourseNotificationParsers: NotificationParser<unknown>[] = [
   ResourceMovedByAdminNotificationParser,
   ExerciseChangesNotificationParser,
   ModerationActivityChangesNotificationParser,
+  SessionStateChangesNotificationParser,
 ]

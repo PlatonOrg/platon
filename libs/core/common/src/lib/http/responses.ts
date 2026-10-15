@@ -91,6 +91,20 @@ export class BadRequestResponse extends ErrorResponse {
 }
 
 /**
+ * Official Documentation @ https://tools.ietf.org/html/rfc7231#section-6.5.8
+ *
+ * The request conflicts with the current state of the resource.
+ */
+export class ConflictResponse extends ErrorResponse {
+  constructor(message: string) {
+    super({
+      status: HTTP_STATUS_CODE.CONFLICT,
+      message,
+    })
+  }
+}
+
+/**
  * Official Documentation @ https://tools.ietf.org/html/rfc7235#section-3.1
  *
  * Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.

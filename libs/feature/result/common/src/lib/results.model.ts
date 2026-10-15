@@ -105,6 +105,16 @@ export interface UserResults {
   activitySessionId: string
 
   /**
+   * A value indicating whether the user's activity session is terminated (blocked).
+   */
+  terminated?: boolean
+
+  /**
+   * Extra time (in seconds) granted to the user.
+   */
+  extraTime?: number
+
+  /**
    * A map of exercise results for the user.
    */
   exercises: Record<string, UserExerciseResults>

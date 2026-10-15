@@ -7,7 +7,7 @@
           <button
             mat-icon-button
             (click)="selectAll()"
-            [disabled]="getSelectedCount() === getTotalCount()"
+            [disabled]="isAllFilteredSelected()"
             matTooltip="Tout sélectionner"
           >
             <mat-icon>select_all</mat-icon>
@@ -43,6 +43,16 @@
             class="action-close"
           >
             <mat-icon>lock</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            (click)="onAddTime()"
+            [disabled]="getSelectedCount() === 0"
+            matTooltip="Ajouter du temps aux utilisateurs sélectionnés"
+            class="action-time"
+          >
+            <mat-icon>schedule</mat-icon>
           </button>
         </div>
       </div>
@@ -82,6 +92,49 @@
         </button>
       </div>
       }
+      <div class="summary-bar">
+        <button
+          class="summary-item"
+          [class.current]="statusFilter() === 'active'"
+          (click)="statusFilter.set('active')"
+        >
+          <span class="dot dot-active"></span> Actifs <strong>{{ counts().active }}</strong>
+        </button>
+        <button
+          class="summary-item"
+          [class.current]="statusFilter() === 'blocked'"
+          (click)="statusFilter.set('blocked')"
+        >
+          <span class="dot dot-blocked"></span> Bloqués <strong>{{ counts().blocked }}</strong>
+        </button>
+        <button class="summary-item" [class.current]="statusFilter() === 'extra'" (click)="statusFilter.set('extra')">
+          <mat-icon>schedule</mat-icon> Temps supp. <strong>{{ counts().extra }}</strong>
+        </button>
+        <button
+          class="summary-item"
+          [class.current]="statusFilter() === 'notStarted'"
+          (click)="statusFilter.set('notStarted')"
+        >
+          <span class="dot dot-idle"></span> Non démarrés <strong>{{ counts().notStarted }}</strong>
+        </button>
+        <button class="summary-item" [class.current]="statusFilter() === 'all'" (click)="statusFilter.set('all')">
+          Total <strong>{{ counts().total }}</strong>
+        </button>
+        @if (groups().length) {
+        <mat-form-field class="group-filter" appearance="outline" subscriptSizing="dynamic">
+          <mat-select [value]="groupFilter()" (selectionChange)="groupFilter.set($event.value)" aria-label="Groupe">
+            <mat-option value="">Tous les groupes</mat-option>
+            @for (group of groups(); track group.id) {
+            <mat-option [value]="group.id">{{ group.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        }
+      </div>
+      <div
+        class="summary-progress"
+        [style.--blocked-pct]="counts().total ? (counts().blocked / counts().total) * 100 + '%' : '0%'"
+      ></div>
       <mat-form-field class="search-field" appearance="outline">
         <mat-icon matPrefix>search</mat-icon>
         <input
@@ -103,11 +156,27 @@
         <div
           class="user-chip"
           [class.selected]="isUserSelected(user.id)"
+          [class.not-started]="!user.activitySessionId"
           (click)="toggleUserSelection(user.id, user.activitySessionId)"
           [title]="user.firstName + ' ' + user.lastName"
         >
           <user-avatar [userIdOrName]="user.id" [showUsername]="'none'" />
           <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+          @if (user.extraTime) {
+          <span class="extra-badge" matTooltip="Temps supplémentaire accordé">{{
+            formatExtraTime(user.extraTime)
+          }}</span>
+          }
+          @if (user.activitySessionId) {
+          <span
+            class="dot"
+            [class.dot-active]="!user.terminated"
+            [class.dot-blocked]="user.terminated"
+            [matTooltip]="user.terminated ? 'Bloqué' : 'En cours'"
+          ></span>
+          } @else {
+          <span class="dot dot-idle" matTooltip="N'a pas encore lancé l'activité"></span>
+          }
         </div>
         }
       </div>

@@ -36,6 +36,8 @@ export interface PlayerExercise {
 export interface PlayerNavigation {
   started: boolean
   terminated: boolean
+  /** Extra time (in seconds) granted by a teacher to this session. */
+  extraTime?: number
   current?: PlayerExercise
   exercises: PlayerExercise[]
 
@@ -193,9 +195,10 @@ export interface PlayerActivityVariables extends ActivityVariables {
  * @returns True if the activity is timeouted, false otherwise.
  */
 export const isTimeouted = (player: Partial<ActivityPlayer>): boolean => {
-  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() : null
+  const extraTime = (player.navigation?.extraTime || 0) * 1000
+  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() + extraTime : null
   const startedAt = player.startedAt ? new Date(player.startedAt).getTime() : null
-  const duration = (player.settings?.duration || 0) * 1000
+  const duration = (player.settings?.duration || 0) * 1000 + extraTime
 
   // Get the current timestamp
   const currentTime = new Date().getTime()
@@ -226,8 +229,9 @@ export const isTimeouted = (player: Partial<ActivityPlayer>): boolean => {
  */
 export const getClosingTime = (player: Partial<ActivityPlayer>): number | null => {
   const startedAt = player.startedAt ? new Date(player.startedAt).getTime() : null
-  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() : null
-  const duration = (player.settings?.duration || 0) * 1000
+  const extraTime = (player.navigation?.extraTime || 0) * 1000
+  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() + extraTime : null
+  const duration = (player.settings?.duration || 0) * 1000 + extraTime
   let closingTime: number | null = null
 
   if (duration != 0 && startedAt != null) {

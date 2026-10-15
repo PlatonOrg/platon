@@ -96,6 +96,11 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
       .filter((grade) => typeof grade === 'number') as number[]
   }
 
+  private serverMessage(error: unknown): string | undefined {
+    const message = (error as { error?: { message?: unknown } })?.error?.message
+    return typeof message === 'string' ? message : undefined
+  }
+
   private async openSessionsForUsers(selections: Array<{ userId: string; sessionId: string }>): Promise<void> {
     try {
       const promises = selections.map(async ({ userId, sessionId }) => {
@@ -106,7 +111,9 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
           this.dialogService.success(`Activité ouverte pour l'utilisateur ${fullName}`)
         } catch (error) {
           console.error(`Erreur lors de l'ouverture pour l'utilisateur ${userId}:`, error)
-          this.dialogService.error(`Erreur lors de l'ouverture de l'activité pour l'utilisateur ${fullName}`)
+          this.dialogService.error(
+            `${fullName} : ${this.serverMessage(error) ?? "erreur lors de l'ouverture de l'activité"}`
+          )
         }
       })
       await Promise.allSettled(promises)
@@ -135,6 +142,26 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
     }
   }
 
+  private async addTimeForUsers(
+    selections: Array<{ userId: string; sessionId: string }>,
+    seconds: number
+  ): Promise<void> {
+    const minutes = Math.round(seconds / 60)
+    await Promise.allSettled(
+      selections.map(async ({ userId, sessionId }) => {
+        const user = this.context.results?.users.find((u) => u.id === userId)
+        const fullName = user ? `${user.lastName} ${user.firstName}` : 'Utilisateur inconnu'
+        try {
+          await this.presenter.addExtraTimeForUser(sessionId, seconds)
+          this.dialogService.success(`${minutes} min ajoutées pour ${fullName}`)
+        } catch (error) {
+          console.error(`Erreur lors de l'ajout de temps pour l'utilisateur ${userId}:`, error)
+          this.dialogService.error(`${fullName} : ${this.serverMessage(error) ?? "erreur lors de l'ajout de temps"}`)
+        }
+      })
+    )
+  }
+
   protected async onRegenerateCode(): Promise<void> {
     const confirmed = await this.dialogService.confirm({
       nzTitle: 'Régénérer le code',
@@ -161,6 +188,9 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
         break
       case 'close':
         await this.closeSessionsForUsers(selections)
+        break
+      case 'addTime':
+        if (event.seconds) await this.addTimeForUsers(selections, event.seconds)
         break
     }
   }

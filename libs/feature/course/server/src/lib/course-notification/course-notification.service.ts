@@ -9,6 +9,7 @@ import {
   CourseMemberCreationNotification,
   ExerciseChangesNotification,
   ModerationActivityChangesNotification,
+  SessionStateChangesNotification,
 } from '@platon/feature/course/common'
 import { NotificationService } from '@platon/feature/notification/server'
 import { DataSource } from 'typeorm'
@@ -236,6 +237,7 @@ export class CourseNotificationService {
         await this.notificationService.sendToAllUsers<ExerciseChangesNotification>(activeMonitors, {
           type: 'EXERCISE-CHANGES',
           userId: userId,
+          activityId,
           changes: {
             ...changes,
           },
@@ -243,6 +245,29 @@ export class CourseNotificationService {
       } else {
         this.logger.log(`No active monitors for activity ${activityId}, skipping exercise changes notification`)
       }
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
+
+  async notifySessionStateChanges(userId: string, activitySession: PlayActivityOuput): Promise<void> {
+    try {
+      const player = activitySession.activity
+      const activityId = player.activityId
+      if (!activityId) return
+
+      // Seuls les enseignants qui ont la page de suivi ouverte sont notifiés.
+      const activeMonitors = this.monitorPresenceService.getActiveMonitoringUsers(activityId)
+      if (activeMonitors.length === 0) return
+
+      await this.notificationService.sendToAllUsers<SessionStateChangesNotification>(activeMonitors, {
+        type: 'SESSION-STATE-CHANGES',
+        userId,
+        activityId,
+        activitySessionId: player.sessionId,
+        terminated: !!player.navigation?.terminated,
+        extraTime: player.navigation?.extraTime ?? 0,
+      })
     } catch (error) {
       this.logger.error(error)
     }

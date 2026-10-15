@@ -114,6 +114,8 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
           username: input.user?.username ?? this.anonymous,
         })
       userResult.activitySessionId = input.id
+      userResult.terminated = !!input.activityNavigation?.terminated
+      userResult.extraTime = input.activityNavigation?.extraTime ?? 0
 
       const userExercise = userResult.exercises[exercise.id] ?? {
         id: exercise.id,
