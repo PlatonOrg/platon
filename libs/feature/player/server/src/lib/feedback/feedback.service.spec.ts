@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
+import { ConfigService } from '@nestjs/config'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { EmailService } from '@platon/feature/email/server'
 import { FeedbackCategoryValue } from '@platon/feature/player/common'
@@ -23,6 +24,7 @@ describe('FeedbackService', () => {
 
   const creatorRow = {
     creatorId: 'creator-test-id',
+    resourceId: 'resource-test-id',
     firstName: 'Dominique',
     lastName: 'Revuz',
     email: 'dominique.revuz@univ-eiffel.fr',
@@ -38,6 +40,7 @@ describe('FeedbackService', () => {
         FeedbackService,
         { provide: getRepositoryToken(FeedbackEntity), useValue: feedbackRepository },
         { provide: getRepositoryToken(SessionEntity), useValue: sessionRepository },
+        { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('https://platon.test') } },
         {
           provide: EmailService,
           useValue: {

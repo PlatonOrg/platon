@@ -58,7 +58,7 @@ export class InputFileService implements OnDestroy {
         reference = reference.replace('/', '')
       }
       const [resourceId, versionAndName] = reference.split(':') // resource id, version/file name
-      const url = reference === '' ? '' : path + resourceId + '/' + versionAndName.split('/')[1]
+      const url = reference === '' ? '' : path + resourceId + versionAndName.replace('latest', '')
       this.files.set(name, new Info(url))
     }
   }
@@ -101,20 +101,18 @@ export class InputFileService implements OnDestroy {
       return // skip the openDialogue below
     }
     info.currentUrl = ''
-    this.openDialogue('Sauvegarder pour supprimer définitivement le fichier.')
   }
 
   /** to call when a file from oustide platon is drop
    *
-   * @return the name of the file uploaded
+   * @return the location (includes/{name}) of the file uploaded
    */
   async change(inputName: string, file: File): Promise<string> {
     if (!this.isBuilder) {
       // upload from outside the builder page
-      const url = path + this.resourceId + '/?version=latest'
+      const url = path + this.resourceId + '/includes/?version=latest'
       const name = await this.uploadFile(url, file)
-      this.openDialogue('Fichier ' + name + ' ajouté.')
-      return name
+      return 'includes/' + name
     }
     const info = this.files.get(inputName)
     if (!info) {
@@ -124,15 +122,15 @@ export class InputFileService implements OnDestroy {
     if (info.currentUrl != info.lastSaveUrl && info.currentUrl != '') {
       await this.deleteFile(info.currentUrl)
     }
-    const url = path + this.resourceId + '/?version=latest'
+    const url = path + this.resourceId + '/includes/?version=latest'
     const name = await this.uploadFile(url, file)
-    info.currentUrl = path + this.resourceId + '/' + name
+    info.currentUrl = path + this.resourceId + '/includes/' + name
     if (name === '') {
       this.openDialogue("N'a pas pu extraire le nom du fichier ajouté.")
     } else {
       this.openDialogue('Fichier ' + name + ' ajouté.')
     }
-    return name
+    return 'includes/' + name
   }
 
   /** call the service that upload file */
@@ -160,7 +158,7 @@ export class InputFileService implements OnDestroy {
   /** indicate if you are allow to delete the file or not*/
   private isDeletable(url: string): boolean {
     const splitUrl = url.split('/')
-    const oldResourceId = splitUrl[4].split(':')[0]
+    const oldResourceId = splitUrl[4]
     const name = splitUrl.pop()
     if (!name) {
       // should never append
@@ -171,24 +169,16 @@ export class InputFileService implements OnDestroy {
     if (splitName[0] === 'main') {
       const extension = ['ple', 'plo', 'plc']
       if (extension.includes(splitName[1])) {
-        this.openDialogue('Le fichier ' + name + " n'est pas supprimable.", true)
         return false
       }
     }
     if (splitName[0] === 'readme' && splitName[1] === 'md') {
-      this.openDialogue('Le fichier ' + name + " n'est pas supprimable.", true)
       return false
     }
     if (oldResourceId != this.resourceId) {
-      this.openDialogue("Vous ne pouvez pas supprimer le fichier d'une autre ressource.", true)
-      console.log("Pour supprimer le fichier aller à la ressource d'id : " + oldResourceId)
       return false
     }
     if (this.version != 'latest') {
-      this.openDialogue(
-        "Vous ne pouvez pas supprimer de fichier dans une ressource dont la version est différente de 'latest'.",
-        true
-      )
       return false
     }
     return true
@@ -205,7 +195,7 @@ export class InputFileService implements OnDestroy {
     }
     reference = reference.replace('/', '')
     const [resourceId, versionAndName] = reference.split(':') // resource id, latest/file name
-    const uri = path + resourceId + '/' + versionAndName.split('/')[1] + '?download&version=' + this.version // uri for display and donwload
+    const uri = path + resourceId + versionAndName.replace('latest', '') + '?download&version=' + this.version // uri for display and donwload
     return uri
   }
 
@@ -220,6 +210,12 @@ export class InputFileService implements OnDestroy {
       console.error("N'as pas réussi à trouver le fichier.")
       this.openDialogue('Une erreur est survenue.', true)
       return // should never append
+    }
+    const splitUrl = info?.currentUrl.split('/')
+    const oldResourceId = splitUrl[4].split(':')[0]
+    if (oldResourceId != this.resourceId) {
+      console.error('Cannot change a file that from another resource.')
+      return
     }
     this.resourcefileService.update({ url: info.currentUrl }, { content: content }).subscribe({
       next: () => {

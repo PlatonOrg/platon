@@ -1,4 +1,11 @@
-import { ForbiddenResponse, User, UserRoles } from '@platon/core/common'
+import {
+  BadRequestResponse,
+  ConflictResponse,
+  ForbiddenResponse,
+  NotFoundResponse,
+  User,
+  UserRoles,
+} from '@platon/core/common'
 import { ActivityVariables, ExerciseVariables, patchExerciseMeta } from '@platon/feature/compiler'
 import { Activity } from '@platon/feature/course/common'
 import { Answer, ExerciseSession, Session, answerStateFromGrade } from '@platon/feature/result/common'
@@ -18,6 +25,9 @@ import {
 } from './player.model'
 import { SandboxManager } from './sandbox-manager.model'
 import { basename } from '@platon/core/common'
+
+/** Maximum extra time (in seconds) that can be granted in one call: 10 hours. */
+export const MAX_EXTRA_TIME_SECONDS = 600 * 60
 
 type ActionHandler = (
   session: ExerciseSession,
@@ -63,6 +73,10 @@ export abstract class PlayerManager {
       this.onTerminate?.(activitySession.activity)
     }
 
+    if (session.userId) {
+      await this.notifySessionStateChanges(session.userId, { activity: withActivityPlayer(activitySession) })
+    }
+
     if (user?.role === UserRoles.teacher || user?.role === UserRoles.admin) {
       if (session.userId) {
         await this.notifyModerationActivityChanges(session.userId, {
@@ -76,16 +90,48 @@ export abstract class PlayerManager {
     }
   }
 
+  async addExtraTime(sessionId: string, seconds: number): Promise<PlayActivityOuput> {
+    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > MAX_EXTRA_TIME_SECONDS) {
+      throw new BadRequestResponse(`The extra time must be between 1 second and 10 hours.`)
+    }
+    const session = await this.findSessionById(sessionId)
+    if (!session) {
+      throw new NotFoundResponse(`Session with id ${sessionId} not found.`)
+    }
+    const activitySession = session.parent || session
+    const activityVariables = activitySession.variables
+    activityVariables.navigation.extraTime = (activityVariables.navigation.extraTime ?? 0) + Math.round(seconds)
+    activitySession.variables = activityVariables
+    await this.updateSession(activitySession.id, {
+      variables: activitySession.variables,
+    })
+
+    const result = { activity: withActivityPlayer(activitySession) }
+    if (session.userId) {
+      await this.notifyModerationActivityChanges(session.userId, result)
+      await this.notifySessionStateChanges(session.userId, result)
+    }
+    return result
+  }
+
   async openSession(sessionId: string): Promise<PlayActivityOuput> {
     const session = await this.findSessionById(sessionId)
     if (!session) {
-      throw new ForbiddenResponse(`Session with id ${sessionId} not found.`)
+      throw new NotFoundResponse(`Session with id ${sessionId} not found.`)
     }
     const activitySession = session.parent || session
     const activityVariables = activitySession.variables
 
-    if (this.isExpired(activitySession)) {
-      throw new ForbiddenResponse(`This session is expired.`)
+    const reason = this.expirationReason(activitySession)
+    if (reason === 'duration') {
+      throw new ConflictResponse(
+        `La durée de l'activité est écoulée pour cet élève : ajoutez du temps avant de rouvrir sa session.`
+      )
+    }
+    if (reason === 'closeAt') {
+      throw new ConflictResponse(
+        `La date de clôture de l'activité est dépassée : ajoutez du temps à l'élève avant de rouvrir sa session.`
+      )
     }
 
     if (!activityVariables.navigation.terminated) {
@@ -103,6 +149,7 @@ export abstract class PlayerManager {
 
     if (!session.userId) return result
     await this.notifyModerationActivityChanges(session.userId, result)
+    await this.notifySessionStateChanges(session.userId, result)
     return result
   }
 
@@ -136,6 +183,7 @@ export abstract class PlayerManager {
 
     if (!session.userId) return result
     await this.notifyModerationActivityChanges(session.userId, result)
+    await this.notifySessionStateChanges(session.userId, result)
     return result
   }
 
@@ -182,9 +230,9 @@ export abstract class PlayerManager {
   }
 
   async reroll(exerciseSession: ExerciseSession): Promise<ExercisePlayer> {
-    const envid = exerciseSession.envid
     const { source } = exerciseSession
 
+    let envid
     let variables = source.variables ?? exerciseSession.variables
     variables.seed = Date.now() % 100
 
@@ -195,7 +243,6 @@ export abstract class PlayerManager {
       variables['.meta']['totalAttempts'] = exerciseSession.variables['.meta']['totalAttempts']
       const output = await this.sandboxManager.run(
         {
-          envid,
           variables,
           files: exerciseSession.source.dependencies.map((file) => ({
             path: file.alias || basename(file.abspath),
@@ -206,10 +253,12 @@ export abstract class PlayerManager {
         variables.builder
       )
       variables = output.variables as ExerciseVariables
+      envid = output.envid
     }
 
     await this.updateSession(exerciseSession.id, {
       variables: (exerciseSession.variables = variables),
+      envid: (exerciseSession.envid = envid),
     })
 
     return withExercisePlayer(exerciseSession)
@@ -445,33 +494,39 @@ export abstract class PlayerManager {
   }
 
   private isExpired(session: Session): boolean {
+    return this.expirationReason(session) !== null
+  }
+
+  private expirationReason(session: Session): 'duration' | 'closeAt' | null {
     const settingsHolder = session.parent ?? session
     const duration = settingsHolder.variables.settings?.duration
+    const extraTime = settingsHolder.variables.navigation?.extraTime ?? 0
     const now = new Date()
 
     if (settingsHolder.startedAt && duration) {
       const durationExpiresAt = new Date(settingsHolder.startedAt)
-      durationExpiresAt.setSeconds(durationExpiresAt.getSeconds() + duration + 30)
+      durationExpiresAt.setSeconds(durationExpiresAt.getSeconds() + duration + extraTime + 30)
       if (now > durationExpiresAt) {
-        return true
+        return 'duration'
       }
     }
 
     if (session.activity?.closeAt) {
       const closeAtExpiresAt = new Date(session.activity.closeAt)
-      closeAtExpiresAt.setSeconds(closeAtExpiresAt.getSeconds() + 30)
+      closeAtExpiresAt.setSeconds(closeAtExpiresAt.getSeconds() + extraTime + 30)
       if (now > closeAtExpiresAt) {
-        return true
+        return 'closeAt'
       }
     }
 
-    return false
+    return null
   }
 
   protected abstract createAnswer(answer: Partial<Answer>): Promise<Answer>
   protected abstract updateSession(sessionId: string, changes: PartialDeep<Session>): Promise<void>
   protected abstract notifyExerciseChanges(userId: string, sessionId: string, exercise: PlayerExercise): Promise<void>
   protected abstract notifyModerationActivityChanges(userId: string, activityChange: PlayActivityOuput): Promise<void>
+  protected abstract notifySessionStateChanges(userId: string, activityChange: PlayActivityOuput): Promise<void>
 
   protected abstract findGrades(sessionId: string): Promise<number[]>
   protected abstract findSessionById(sessionId: string): Promise<Session | null | undefined>

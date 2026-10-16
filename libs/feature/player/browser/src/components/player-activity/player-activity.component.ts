@@ -41,6 +41,8 @@ import {
 } from '@platon/feature/course/common'
 
 import { MatIconModule } from '@angular/material/icon'
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { AnswerStates } from '@platon/feature/result/common'
@@ -61,6 +63,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { UI_MODAL_IFRAME_CLOSE } from '@platon/shared/ui'
 import { SixcodeComponent } from '@platon/shared/ui'
 import { NzNotificationComponent } from 'ng-zorro-antd/notification'
+import { ObserveVisibilityDirective } from '@platon/shared/ui'
 
 @Component({
   selector: 'player-activity',
@@ -68,6 +71,8 @@ import { NzNotificationComponent } from 'ng-zorro-antd/notification'
   styleUrls: ['./player-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NzSpinModule,
+    NzSkeletonModule,
     RouterModule,
     MatIconModule,
     MatCardModule,
@@ -86,6 +91,7 @@ import { NzNotificationComponent } from 'ng-zorro-antd/notification'
     PlayerSettingsComponent,
     PlayerNavigationComponent,
     PlayerTerminalLogsComponent,
+    ObserveVisibilityDirective,
   ],
 })
 export class PlayerActivityComponent implements OnInit, OnDestroy {
@@ -125,9 +131,15 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected onKeydownFn = this.onKeydown.bind(this)
   protected onContextMenuFn = this.onContextMenu.bind(this)
   protected loadingNext = false
+  protected isLoading = false
+  protected isLoadingNextExercise = false
+  protected isSwitchingExercise = false
+  protected loadError: string | undefined
+  private failedLoad: { exercise: PlayerExercise; historyPosition?: number } | undefined
   protected activityLogs: PlatonLog[] = []
   protected code = ''
   protected isCodeError = false
+  private INITIAL_EXERCISES_TO_LOAD = 2
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
   protected errorTemplate!: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>
@@ -161,6 +173,11 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   protected get showConclusion(): boolean {
     const { navigation } = this.player
     return this.state === 'closed' || navigation.terminated
+  }
+
+  protected get showUnlockCode(): boolean {
+    const security = this.player.settings?.security
+    return !!(security?.terminateOnLoseFocus || security?.terminateOnLeavePage)
   }
 
   protected get canGoDashboard(): boolean {
@@ -228,6 +245,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
           const activityClosedData = notificationData as ActivityClosedNotification
           if (activityClosedData.activityId === this.player.activityId) {
             this.state = 'closed'
+            await firstValueFrom(this.notificationService.deleteNotification(notification.id))
             await this.terminateModal(false, "L'activité a été fermée par l'enseignant.")
           }
         } else if (
@@ -271,12 +289,14 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   }
 
   protected async start(): Promise<void> {
+    this.isLoading = true
     if (this.composed) {
-      await this.playAll()
+      await this.playComposed()
     } else {
       const { navigation } = this.player
       await this.play(navigation.current || navigation.exercises[0])
     }
+    this.isLoading = false
     this.disableCopyPasteIfNeeded()
     this.startWatchingVisibilityChange()
   }
@@ -448,7 +468,21 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       }
     }
 
+    await this.loadExercise(exercise, modifiedNextExercisesHistoryPosition)
+  }
+
+  protected async retryLoadExercise(): Promise<void> {
+    if (this.failedLoad) {
+      await this.loadExercise(this.failedLoad.exercise, this.failedLoad.historyPosition)
+    }
+  }
+
+  private async loadExercise(exercise: PlayerExercise, historyPosition?: number): Promise<void> {
     this.exercises = undefined
+    this.loadError = undefined
+    this.failedLoad = undefined
+    this.isSwitchingExercise = true
+    this.changeDetectorRef.markForCheck()
 
     try {
       const output = await firstValueFrom(
@@ -459,21 +493,23 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       )
 
       if (output.navigation) {
-        if (modifiedNextExercisesHistoryPosition != undefined) {
-          output.navigation.nextExercisesHistoryPosition = modifiedNextExercisesHistoryPosition
+        if (historyPosition != undefined) {
+          output.navigation.nextExercisesHistoryPosition = historyPosition
         }
         this.player = { ...this.player, navigation: output.navigation }
       }
 
       this.exercises = output.exercises
     } catch (error) {
-      if (error instanceof HttpErrorResponse) {
-        this.dialogService.error(error.error?.message || error.message)
-        return
-      }
-      this.dialogService.error(
-        "Une erreur est survenue lors du chargement de l'exercice. Merci de prévenir votre professeur"
-      )
+      this.failedLoad = { exercise, historyPosition }
+      this.loadError =
+        error instanceof HttpErrorResponse
+          ? error.error?.message || error.message
+          : "Une erreur est survenue lors du chargement de l'exercice."
+      return
+    } finally {
+      this.isSwitchingExercise = false
+      this.changeDetectorRef.markForCheck()
     }
 
     this.calculatePositions()
@@ -482,12 +518,49 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     this.changeDetectorRef.markForCheck()
   }
 
-  protected async playAll(): Promise<void> {
+  protected async loadNextExercise(): Promise<void> {
+    if (
+      !this.composed ||
+      this.isLoadingNextExercise ||
+      this.exercises?.length === this.player.navigation.exercises.length
+    )
+      return
+    this.isLoadingNextExercise = true
+    this.changeDetectorRef.markForCheck()
+
+    const loadCount = this.exercises?.length ?? 0
+    const nextExerciseIndex = this.player.navigation.exercises[loadCount]?.sessionId
+    if (!nextExerciseIndex) {
+      this.isLoadingNextExercise = false
+      this.changeDetectorRef.markForCheck()
+      return
+    }
+
+    const nextExercise = await firstValueFrom(
+      this.playerService.playExercises({
+        activitySessionId: this.player.sessionId,
+        exerciseSessionIds: [nextExerciseIndex],
+      })
+    )
+
+    if (this.exercises) {
+      this.exercises = [...this.exercises, ...nextExercise.exercises]
+    } else {
+      this.exercises = nextExercise.exercises
+    }
+
+    this.isLoadingNextExercise = false
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected async playComposed(): Promise<void> {
     try {
       const output = await firstValueFrom(
         this.playerService.playExercises({
           activitySessionId: this.player.sessionId,
-          exerciseSessionIds: this.player.navigation.exercises.map((item) => item.sessionId),
+          exerciseSessionIds: this.player.navigation.exercises
+            .slice(0, this.INITIAL_EXERCISES_TO_LOAD)
+            .map((item) => item.sessionId),
         })
       )
 

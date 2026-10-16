@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IRequest, Public, Roles, UUIDParam, getContentDisposition } from '@platon/core/server'
 import { EvalExerciseInput, NextOutput, PlayAnswersInput } from '@platon/feature/player/common'
 import {
+  AddExtraTimeInputDTO,
   EvalExerciseOutputDTO,
   PlayActivityInputDTO,
   PlayActivityOutputDTO,
@@ -93,6 +94,15 @@ export class PlayerController {
     @UUIDParam('activitySessionId') activitySessionId: string
   ): Promise<PlayActivityOutputDTO> {
     return this.playerService.openSession(activitySessionId)
+  }
+
+  @Roles(UserRoles.admin, UserRoles.teacher)
+  @Post('/addExtraTime/:activitySessionId')
+  addExtraTime(
+    @UUIDParam('activitySessionId') activitySessionId: string,
+    @Body() input: AddExtraTimeInputDTO
+  ): Promise<PlayActivityOutputDTO> {
+    return this.playerService.addExtraTime(activitySessionId, input.seconds)
   }
 
   @Public()

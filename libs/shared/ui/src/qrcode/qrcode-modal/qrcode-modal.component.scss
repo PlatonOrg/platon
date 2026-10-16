@@ -1,0 +1,43 @@
+.qr-fullscreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-background-components, #fff);
+
+  &:fullscreen {
+    width: 100vw;
+    height: 100vh;
+  }
+}
+
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--brand-background-components, #fff);
+
+  .qr-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    // width: 0 + min-width: 100% => matches the QR width without enlarging it
+    width: 0;
+    min-width: 100%;
+
+    code {
+      flex: 1;
+      min-width: 0;
+      word-break: break-all;
+      user-select: all;
+    }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+}

@@ -11,7 +11,7 @@
 <div #grid class="exercise-grid">
   @for (item of items; track $index) {
   <div cdkDrag [cdkDragData]="item" class="exercise-drag-wrapper">
-    <app-exercise-card [item]="item" />
+    <app-exercise-card [item]="item" (exerciseClicked)="exerciseClicked.emit($event)" />
   </div>
   }
 </div>

@@ -98,6 +98,16 @@ mat-card {
   line-height: 1.6;
 }
 
+.load-error-details {
+  opacity: 0.75;
+  overflow-wrap: anywhere;
+}
+
+.action-buttons.load-error-actions {
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
 .action-buttons {
   display: flex;
   justify-content: center;
@@ -112,12 +122,24 @@ mat-card {
     font-weight: 500;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
 
     mat-icon {
       font-size: 1.1rem;
+      height: 1.1rem;
+      width: 1.1rem;
+    }
+
+    nz-spin {
+      display: inline-block;
     }
   }
+}
+
+.loading-next-exercise {
+  width: 100%;
+  text-align: center;
 }
 
 player-exercise {

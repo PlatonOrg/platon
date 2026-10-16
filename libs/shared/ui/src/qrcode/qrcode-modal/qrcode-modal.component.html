@@ -1,0 +1,18 @@
+<ui-modal-template [title]="title()" [width]="modalWidth" [bodyStyle]="bodyStyle" (closed)="exitFullscreen()" #modal>
+  <ng-template>
+    <div class="qr-fullscreen" #fullscreenContainer>
+      <div class="qr-container">
+        <ui-qrcode [value]="url()" [size]="qrSize()"></ui-qrcode>
+        <div class="qr-link">
+          <code>{{ url() }}</code>
+          <button nz-button nzType="primary" nz-tooltip="Copier le lien" (click)="copyUrl()">
+            <span nz-icon nzType="copy"></span>
+          </button>
+          <button nz-button nz-tooltip="Plein écran" (click)="toggleFullscreen(fullscreenContainer)">
+            <span nz-icon [nzType]="isFullscreen() ? 'fullscreen-exit' : 'fullscreen'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ui-modal-template>

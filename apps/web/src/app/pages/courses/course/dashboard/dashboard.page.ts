@@ -2,7 +2,7 @@ import Fuse from 'fuse.js'
 
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
-import { RouterModule } from '@angular/router'
+import { ActivatedRoute, RouterModule } from '@angular/router'
 import { Subscription, of } from 'rxjs'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
@@ -63,6 +63,7 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
 
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly activatedRoute = inject(ActivatedRoute)
   private readonly subscriptions: Subscription[] = []
 
   protected context = this.presenter.defaultContext()
@@ -112,6 +113,7 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
       this.presenter.contextChange.subscribe(async (context) => {
         this.context = context
         await this.refresh()
+        this.scrollToActivityFromQuery()
         this.checkForCourseTutorial()
       }),
       this.presenter.onDeletedActivity.subscribe((activity) => {
@@ -143,11 +145,39 @@ export class CourseDashboardPage implements OnInit, OnDestroy {
   }
 
   protected async addSection(after?: CourseSection): Promise<void> {
-    await this.presenter.addSection({
+    const section = await this.presenter.addSection({
       name: 'Section ' + (this.sections.length + 1),
       order: after ? after.order + 1 : 0,
     })
     await this.refresh()
+    if (section) {
+      this.scrollToSection(section)
+    }
+  }
+
+  private scrollToSection(section: CourseSection): void {
+    requestAnimationFrame(() => {
+      document.getElementById(`tuto-course-section-${section.id}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      })
+    })
+  }
+
+  private scrollToActivityFromQuery(): void {
+    const activityId = this.activatedRoute.snapshot.queryParamMap.get('activity')
+    if (!activityId) {
+      return
+    }
+
+    requestAnimationFrame(() => {
+      document.getElementById(activityId)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      })
+    })
   }
 
   protected async renameSection(section: CourseSection, newName: string): Promise<void> {

@@ -7,7 +7,9 @@ import {
   ACTIVITY_DROP_OUT_RATE,
   ACTIVITY_EXERCISE_RESULTS,
   ACTIVITY_USER_RESULTS,
+  GROUPS,
   ActivityResults,
+  ActivityGroup,
   SESSION_AVERAGE_DURATION,
   SESSION_AVERAGE_SCORE,
   SESSION_SUCCESS_RATE,
@@ -35,6 +37,7 @@ export class ResultController {
       successRate: output[SESSION_SUCCESS_RATE] as number,
       users: output[ACTIVITY_USER_RESULTS] as ActivityResults['users'],
       exercises: output[ACTIVITY_EXERCISE_RESULTS] as ActivityResults['exercises'],
+      groups: output[GROUPS] as ActivityGroup[],
     }
   }
 

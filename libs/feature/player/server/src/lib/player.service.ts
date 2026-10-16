@@ -493,6 +493,10 @@ export class PlayerService extends PlayerManager {
     return this.courseNotificationService.notifyModerationActivityChanges(userId, activityChange)
   }
 
+  protected notifySessionStateChanges(userId: string, activityChange: PlayActivityOuput): Promise<void> {
+    return this.courseNotificationService.notifySessionStateChanges(userId, activityChange)
+  }
+
   protected notifyExerciseChanges(userId: string, sessionId: string, exercise: PlayerExercise): Promise<void> {
     return this.courseNotificationService.notifyExerciseChanges(userId, sessionId, exercise)
   }

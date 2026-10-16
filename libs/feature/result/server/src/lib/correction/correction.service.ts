@@ -19,8 +19,11 @@ type Projection = {
   activityId: string
   activityName: string
   exerciseId: string
+  exerciseOrder: number | null
   activitySessionId: string
   exerciseSessionId: string
+  startedAt?: Date | null
+  answerId?: string | null
   courseId: string
   courseName: string
   correctedBy?: string
@@ -61,13 +64,9 @@ export class CorrectionService {
     viewerMode = false,
     status?: CorrectionStatus
   ): Promise<ActivityCorrection[]> {
-    // In viewer mode, list exercise sessions directly from the activity without requiring answers.
-    // Uses a LEFT JOIN (not INNER) so exercises that crashed before the student could submit an
-    // answer (no "Answers" row at all) are still listed, as long as the session itself recorded an error.
-    const answerJoin = viewerMode
-      ? ''
-      : `LEFT JOIN LATERAL (
-      SELECT * FROM "Answers" a
+    // Keep the latest answer available for display, but do not require one to include the session.
+    const answerJoin = `LEFT JOIN LATERAL (
+      SELECT a.id FROM "Answers" a
       WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
       ORDER BY a.created_at DESC
       LIMIT 1
@@ -93,7 +92,7 @@ export class CorrectionService {
       userParam ? `(exercise_session.user_id IS NULL OR exercise_session.user_id <> ${userParam})` : undefined,
       viewerMode
         ? undefined
-        : `(answer.variables IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`,
+        : `(answer.id IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`,
       viewerMode ? undefined : "(activity_session.variables->'navigation'->>'terminated')::boolean = TRUE",
       userParam
         ? `EXISTS (
@@ -117,10 +116,18 @@ export class CorrectionService {
          LIMIT 1),
         resources.id::text
       ) AS "exerciseId",
+      (SELECT nav.position::int
+       FROM jsonb_array_elements(
+          COALESCE(activity_session.variables->'navigation'->'exercises', '[]'::jsonb)
+       ) WITH ORDINALITY AS nav(elem, position)
+       WHERE nav.elem->>'sessionId' = exercise_session.id::text
+       LIMIT 1) AS "exerciseOrder",
       resources."name" as "exerciseName",
       activity_session.id as "activitySessionId",
       exercise_session.user_id as "userId",
       exercise_session.id as "exerciseSessionId",
+      exercise_session.started_at as "startedAt",
+      answer.id as "answerId",
       course.id as "courseId",
       course.name as "courseName",
       correction.author_id as "correctedBy",
@@ -160,12 +167,19 @@ export class CorrectionService {
     const projections = this.filterProjectionsByStatus(allProjections, status)
 
     const activityMap = new Map<string, ActivityCorrection>()
+    const exerciseOrderBySession = new Map<string, number>()
 
     for (const projection of projections) {
+      if (projection.exerciseOrder != null) {
+        exerciseOrderBySession.set(projection.exerciseSessionId, projection.exerciseOrder)
+      }
+
       const exercise: ExerciseCorrection = {
         userId: projection.userId,
         activitySessionId: projection.activitySessionId,
         exerciseSessionId: projection.exerciseSessionId,
+        startedAt: projection.startedAt,
+        answerId: projection.answerId,
         correctedBy: projection.correctedBy,
         correctedAt: projection.correctedAt,
         correctedGrade: projection.correctedGrade,
@@ -189,10 +203,22 @@ export class CorrectionService {
       }
     }
 
+    for (const activity of activityMap.values()) {
+      activity.exercises.sort(
+        (a, b) =>
+          (exerciseOrderBySession.get(a.exerciseSessionId) ?? Number.MAX_SAFE_INTEGER) -
+          (exerciseOrderBySession.get(b.exerciseSessionId) ?? Number.MAX_SAFE_INTEGER)
+      )
+    }
+
     return Array.from(activityMap.values())
   }
 
-  async listSummary(correctorUserId: string, status?: CorrectionStatus): Promise<ActivityCorrectionSummary[]> {
+  async listSummary(
+    correctorUserId: string,
+    status?: CorrectionStatus,
+    includeArchived = false
+  ): Promise<ActivityCorrectionSummary[]> {
     let havingClause = ''
     if (status === CorrectionStatus.pending) {
       havingClause = 'HAVING COUNT(exercise_session.id) > COUNT(correction.id)'
@@ -226,7 +252,10 @@ export class CorrectionService {
         ON exercise_session.parent_id = ts.id
         AND (exercise_session.user_id IS NULL OR exercise_session.user_id <> $1)
       LEFT JOIN "Corrections" correction ON correction.id = exercise_session.correction_id
-      WHERE EXISTS (
+      ${includeArchived ? '' : 'LEFT JOIN "CourseMembers" cm ON cm.course_id = ca.course_id AND cm.user_id = $1'}
+      WHERE
+        ${includeArchived ? '' : 'cm.archived IS FALSE AND'}
+        EXISTS (
         SELECT 1 FROM "Answers" a
         WHERE a.session_id = exercise_session.id AND a.variables IS NOT NULL
       )

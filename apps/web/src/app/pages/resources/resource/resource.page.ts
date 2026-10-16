@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms'
 import { Router, RouterModule, ActivatedRoute } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { Title } from '@angular/platform-browser'
-
+import { Location } from '@angular/common'
 import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
 
@@ -66,6 +66,9 @@ export class ResourcePage implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly resourcesTutorialService = inject(ResourcesTutorialService)
 
+  private readonly location = inject(Location)
+  private returnUrl: string | null = null
+
   protected context = this.presenter.defaultContext()
 
   readonly status = Object.values(ResourceStatus)
@@ -98,6 +101,10 @@ export class ResourcePage implements OnInit, OnDestroy {
       })
     )
     this.checkForTutorialContinuation()
+    const state = this.location.getState() as {
+      returnUrl?: unknown
+    }
+    this.returnUrl = typeof state.returnUrl === 'string' ? state.returnUrl : null
   }
 
   ngOnDestroy(): void {
@@ -171,12 +178,26 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected async moveToOwnerCircle(): Promise<void> {
     await this.presenter.moveToOwnerCircle()
-    await this.router.navigate(['/resources'])
+    if (this.router.navigated) {
+      this.location.back()
+    } else {
+      await this.router.navigate(['/resources'])
+    }
   }
 
   protected async delete(): Promise<void> {
     await this.presenter.delete()
-    await this.router.navigate(['/resources'])
+    if (this.returnUrl) {
+      await this.router.navigateByUrl(this.returnUrl, { replaceUrl: true })
+      return
+    }
+
+    if (this.router.navigated) {
+      this.location.back()
+    } else {
+      const target = this.context.parent ? ['/resources', this.context.parent.id] : ['/resources']
+      await this.router.navigate(target, { replaceUrl: true })
+    }
   }
 
   protected referencesNumber(): number {

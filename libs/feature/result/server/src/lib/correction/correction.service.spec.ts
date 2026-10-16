@@ -65,16 +65,27 @@ describe('CorrectionService', () => {
 
       const [queryText] = sessionRepository.query.mock.calls[0]
       expect(queryText).toContain(
-        `(answer.variables IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`
+        `(answer.id IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`
       )
     })
 
-    it('should not join or filter on answers at all in viewer mode', async () => {
+    it('should expose the latest answer in viewer mode without requiring an answer', async () => {
       await service.list('corrector-1', undefined, true)
 
       const [queryText] = sessionRepository.query.mock.calls[0]
-      expect(queryText).not.toContain('"Answers" a')
-      expect(queryText).not.toContain('answer.variables')
+      expect(queryText).toContain('"Answers" a')
+      expect(queryText).toContain('SELECT a.id FROM "Answers" a')
+      expect(queryText).toContain('answer.id as "answerId"')
+      expect(queryText).not.toContain('AND\n      (answer.variables IS NOT NULL')
+    })
+
+    it('should include startedAt and answerId in each exercise', async () => {
+      const startedAt = new Date('2026-10-09T08:00:00.000Z')
+      sessionRepository.query.mockResolvedValue([{ ...baseProjection, startedAt, answerId: 'answer-1' }])
+
+      const result = await service.list('corrector-1')
+
+      expect(result[0].exercises[0]).toMatchObject({ startedAt, answerId: 'answer-1' })
     })
 
     it('should group exercises of the same activity together', async () => {
@@ -87,6 +98,17 @@ describe('CorrectionService', () => {
 
       expect(result).toHaveLength(1)
       expect(result[0].exercises).toHaveLength(2)
+    })
+
+    it('should return exercises in their activity navigation order', async () => {
+      sessionRepository.query.mockResolvedValue([
+        { ...baseProjection, exerciseId: 'exercise-2', exerciseSessionId: 'session-2', exerciseOrder: 2 },
+        { ...baseProjection, exerciseId: 'exercise-1', exerciseSessionId: 'session-1', exerciseOrder: 1 },
+      ])
+
+      const result = await service.list('corrector-1')
+
+      expect(result[0].exercises.map((exercise) => exercise.exerciseId)).toEqual(['exercise-1', 'exercise-2'])
     })
 
     it('should only return activities with at least one uncorrected exercise when status=pending', async () => {

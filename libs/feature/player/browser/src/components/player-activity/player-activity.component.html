@@ -1,5 +1,27 @@
 <main>
-  @if (!exercises) {
+  @if (!exercises && isSwitchingExercise) {
+  <mat-card>
+    <mat-card-content>
+      <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzParagraph]="{ rows: 8 }" />
+    </mat-card-content>
+  </mat-card>
+  } @else if (!exercises && loadError) {
+  <mat-card>
+    <mat-card-content>
+      <p role="alert">
+        Une erreur est survenue lors du chargement de l'exercice. <br />Merci de contacter votre enseignant ou de
+        réessayer plus tard.
+      </p>
+      <p class="load-error-details"><strong>Détails :</strong> {{ loadError }}</p>
+      <div class="action-buttons load-error-actions">
+        <button mat-raised-button color="primary" (click)="retryLoadExercise()">
+          <mat-icon>refresh</mat-icon>
+          Réessayer
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  } @else if (!exercises) {
   <mat-card>
     <mat-card-content>
       <!-- TITRE ET INTRODUCTION -->
@@ -34,9 +56,13 @@
           Retour
         </button>
         }
-        <button mat-raised-button color="primary" [disabled]="empty" (click)="start()">
+        <button mat-raised-button color="primary" [disabled]="empty || isLoading" (click)="start()">
+          @if (isLoading) {
+          <nz-spin nzSimple nzSize="small"></nz-spin>
+          } @else {
           <mat-icon>play_arrow</mat-icon>
-          Commencer
+          }
+          {{ isLoading ? 'Chargement' : 'Commencer' }}
         </button>
       </div>
       }
@@ -72,6 +98,7 @@
         </section>
         }
         <!-- CODE DE DÉBLOCAGE -->
+        @if (showUnlockCode) {
         <section class="unlock-section">
           <h3 class="section-title">
             <mat-icon>lock_open</mat-icon>
@@ -82,6 +109,7 @@
             <ui-sixcode (codeComplete)="onCodeComplete($event)" [error]="isCodeError" />
           </div>
         </section>
+        }
         <!-- CONCLUSION -->
         @if (player.conclusion) {
         <section class="conclusion-section">
@@ -150,8 +178,8 @@
     </div>
     }
     <section>
-      @for (exercise of exercises; track trackBySessionId(i, exercise); let i = $index) {
-      <nz-ribbon [nzText]="ribbon">
+      @for (exercise of exercises; track trackBySessionId(i, exercise); let i = $index, count = $count) {
+      <nz-ribbon [nzText]="ribbon" [uiObserveVisibility]="i === count - 1 && composed" (visible)="loadNextExercise()">
         <ng-template #ribbon>
           @if (nextNavigation) { Exercice {{ player.navigation.nextExercisesHistoryPosition + 1 }}
           } @else {
@@ -172,7 +200,11 @@
       </nz-ribbon>
       }
     </section>
-    @if(canShowTerminalLogs()) {
+    @if (isLoadingNextExercise) {
+    <div class="loading-next-exercise">
+      <nz-spin nzSimple nzSize="large" />
+    </div>
+    } @if(canShowTerminalLogs()) {
     <player-terminal-logs [logs]="activityLogs" title="Terminal Next" />
     }
   </div>

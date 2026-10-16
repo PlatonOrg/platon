@@ -3,12 +3,18 @@ import { ActivatedRoute } from '@angular/router'
 import { AuthService, DialogService } from '@platon/core/browser'
 import { User } from '@platon/core/common'
 import { CourseService } from '@platon/feature/course/browser'
-import { Activity, Course, EXERCISE_CHANGES_NOTIFICATION } from '@platon/feature/course/common'
+import {
+  Activity,
+  Course,
+  EXERCISE_CHANGES_NOTIFICATION,
+  SESSION_STATE_CHANGES_NOTIFICATION,
+  SessionStateChangesNotification,
+} from '@platon/feature/course/common'
 import { ResultService } from '@platon/feature/result/browser'
 import { ActivityResults } from '@platon/feature/result/common'
 import { PlayerExercise } from '@platon/feature/player/common'
 import { NotificationService } from '@platon/feature/notification/browser'
-// import { Notification } from '@platon/feature/notification/common'
+import { Notification } from '@platon/feature/notification/common'
 import { LayoutState, layoutStateFromError } from '@platon/shared/ui'
 import { BehaviorSubject, Subject, Subscription, firstValueFrom } from 'rxjs'
 import { PlayerService } from '@platon/feature/player/browser'
@@ -102,10 +108,17 @@ export class MonitorPresenter implements OnDestroy {
         if (!context.activity) return
 
         // Process all relevant notifications and clean them up
+        this.handleSessionStateChanges(pagination.notifications)
+
         const exerciseChangeNotifications = pagination.notifications.filter((notification) => {
           const data = notification.data as Record<string, unknown>
           // Filter out notifications we've already processed
-          return data['type'] === EXERCISE_CHANGES_NOTIFICATION && !this.processedNotifications.has(notification.id)
+          // Les notifications d'une autre activité restent disponibles pour leur propre page de suivi
+          return (
+            data['type'] === EXERCISE_CHANGES_NOTIFICATION &&
+            data['activityId'] === context.activity?.id &&
+            !this.processedNotifications.has(notification.id)
+          )
         })
 
         if (exerciseChangeNotifications.length === 0) return
@@ -164,12 +177,62 @@ export class MonitorPresenter implements OnDestroy {
     this.subscriptions.push(subscription)
   }
 
+  /**
+   * Applique en direct les changements d'état (blocage, temps ajouté) reçus par notification,
+   * sans recharger les résultats : seul l'élève concerné est mis à jour.
+   */
+  private handleSessionStateChanges(notifications: Notification[]): void {
+    const context = this.context.value
+    const results = context.results
+    const activityId = context.activity?.id
+    if (!results || !activityId) return
+
+    // Seules les notifications de l'activité affichée sont consommées : les autres
+    // (ex: un autre onglet de suivi) doivent rester disponibles pour leur propre page.
+    const stateNotifications = notifications.filter((n) => {
+      const data = n.data as Partial<SessionStateChangesNotification>
+      return (
+        data.type === SESSION_STATE_CHANGES_NOTIFICATION &&
+        data.activityId === activityId &&
+        !this.processedNotifications.has(n.id)
+      )
+    })
+    if (stateNotifications.length === 0) return
+
+    // Les notifications sont triées de la plus récente à la plus ancienne : on les applique dans l'ordre chronologique.
+    const changes = new Map<string, SessionStateChangesNotification>()
+    for (const notification of [...stateNotifications].reverse()) {
+      this.processedNotifications.add(notification.id)
+      const data = notification.data as unknown as SessionStateChangesNotification
+      changes.set(data.userId, data)
+      firstValueFrom(this.notificationService.deleteNotification(notification.id)).catch((error) => {
+        console.warn('Failed to delete notification:', error)
+      })
+    }
+
+    let changed = false
+    const users = results.users.map((user) => {
+      const change = changes.get(user.id)
+      if (!change || change.activitySessionId !== user.activitySessionId) return user
+      changed = true
+      return { ...user, terminated: change.terminated, extraTime: change.extraTime }
+    })
+
+    if (changed) {
+      this.context.next({ ...context, results: { ...results, users } })
+    }
+  }
+
   async openActivityForUser(sessionId: string): Promise<void> {
     await firstValueFrom(this.playerService.openSession(sessionId))
   }
 
   async closeActivityForUser(sessionId: string): Promise<void> {
     await firstValueFrom(this.playerService.terminate(sessionId))
+  }
+
+  async addExtraTimeForUser(sessionId: string, seconds: number): Promise<void> {
+    await firstValueFrom(this.playerService.addExtraTime(sessionId, seconds))
   }
 
   async regenerateActivityCode(): Promise<void> {

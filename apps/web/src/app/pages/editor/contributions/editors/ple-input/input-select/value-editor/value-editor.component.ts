@@ -41,7 +41,7 @@ export class ValueEditorComponent extends BaseValueEditor<string | string[], Inp
       if (Array.isArray(this.value)) {
         this.value = this.value[0]
       }
-      this.value = options.choices?.includes(this.value as string) ? (this.value as string) : undefined
+      this.value = options.choices?.includes(this.value as string) ? (this.value as string) : ''
     }
 
     this.notifyValueChange?.(this.value!)

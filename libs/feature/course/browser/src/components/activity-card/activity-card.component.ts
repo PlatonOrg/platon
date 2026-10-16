@@ -12,6 +12,7 @@ import {
   computed,
 } from '@angular/core'
 import { RouterModule } from '@angular/router'
+import { UiQRCodeModalComponent } from '@platon/shared/ui'
 import { firstValueFrom, Subscription } from 'rxjs'
 
 import { MatCardModule } from '@angular/material/card'
@@ -51,6 +52,7 @@ import { CourseService } from '../../api/course.service'
     NzProgressModule,
     NzTooltipModule,
     NzDropDownModule,
+    UiQRCodeModalComponent,
     CoursePipesModule,
     CsvDownloadButtonComponent,
     CourseActivitySettingsDrawerComponent,
@@ -117,6 +119,10 @@ export class CourseActivityCardComponent implements OnInit, OnDestroy {
 
   get completedExercises(): number {
     return Math.floor((this.activity().progression * this.activity().exerciseCount) / 100)
+  }
+
+  get activityUrl(): string {
+    return `${location.origin}/player/activity/${this.activity().id}`
   }
 
   protected openTab(url: string): void {

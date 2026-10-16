@@ -48,6 +48,7 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   protected context = this.presenter.defaultContext()
   protected columnOrder?: string[] = []
   protected gradeList: number[] = []
+  protected isCodeRevealed = false
   ngOnInit(): void {
     this.subscriptions.push(
       this.presenter.contextChange.subscribe(async (context) => {
@@ -96,6 +97,11 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
       .filter((grade) => typeof grade === 'number') as number[]
   }
 
+  private serverMessage(error: unknown): string | undefined {
+    const message = (error as { error?: { message?: unknown } })?.error?.message
+    return typeof message === 'string' ? message : undefined
+  }
+
   private async openSessionsForUsers(selections: Array<{ userId: string; sessionId: string }>): Promise<void> {
     try {
       const promises = selections.map(async ({ userId, sessionId }) => {
@@ -106,7 +112,9 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
           this.dialogService.success(`Activité ouverte pour l'utilisateur ${fullName}`)
         } catch (error) {
           console.error(`Erreur lors de l'ouverture pour l'utilisateur ${userId}:`, error)
-          this.dialogService.error(`Erreur lors de l'ouverture de l'activité pour l'utilisateur ${fullName}`)
+          this.dialogService.error(
+            `${fullName} : ${this.serverMessage(error) ?? "erreur lors de l'ouverture de l'activité"}`
+          )
         }
       })
       await Promise.allSettled(promises)
@@ -133,6 +141,26 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
       console.error('Erreur lors de la fermeture des sessions:', error)
       this.dialogService.error('Une erreur est survenue lors de la fermeture des sessions.')
     }
+  }
+
+  private async addTimeForUsers(
+    selections: Array<{ userId: string; sessionId: string }>,
+    seconds: number
+  ): Promise<void> {
+    const minutes = Math.round(seconds / 60)
+    await Promise.allSettled(
+      selections.map(async ({ userId, sessionId }) => {
+        const user = this.context.results?.users.find((u) => u.id === userId)
+        const fullName = user ? `${user.lastName} ${user.firstName}` : 'Utilisateur inconnu'
+        try {
+          await this.presenter.addExtraTimeForUser(sessionId, seconds)
+          this.dialogService.success(`${minutes} min ajoutées pour ${fullName}`)
+        } catch (error) {
+          console.error(`Erreur lors de l'ajout de temps pour l'utilisateur ${userId}:`, error)
+          this.dialogService.error(`${fullName} : ${this.serverMessage(error) ?? "erreur lors de l'ajout de temps"}`)
+        }
+      })
+    )
   }
 
   protected async onRegenerateCode(): Promise<void> {
@@ -162,6 +190,9 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
       case 'close':
         await this.closeSessionsForUsers(selections)
         break
+      case 'addTime':
+        if (event.seconds) await this.addTimeForUsers(selections, event.seconds)
+        break
     }
   }
 
@@ -175,11 +206,21 @@ export class CourseActivityMonitorPage implements OnInit, OnDestroy {
   }
 
   protected isOpen(): boolean {
-    const openAt = this.context.activity?.openAt
-    const closeAt = this.context.activity?.closeAt
-    return (
-      (openAt === undefined || openAt === null || new Date() >= new Date(openAt)) &&
-      (closeAt === undefined || closeAt === null || new Date() <= new Date(closeAt))
-    )
+    const activity = this.context.activity
+    const now = new Date()
+    const isWithin = (start?: Date | string | null, end?: Date | string | null): boolean =>
+      (!start || now >= new Date(start)) && (!end || now <= new Date(end))
+
+    // Les dates de l'activité sont calculées pour l'utilisateur courant : avec des restrictions par période,
+    // l'activité n'est ouverte que si au moins une période est en cours.
+    if (activity?.restrictions?.length) {
+      return activity.restrictions.some(({ restriction }) => {
+        const range = restriction.find((r) => r.type === 'DateRange')?.config as
+          | { start?: Date | string; end?: Date | string }
+          | undefined
+        return !range || isWithin(range.start, range.end)
+      })
+    }
+    return isWithin(activity?.openAt, activity?.closeAt)
   }
 }

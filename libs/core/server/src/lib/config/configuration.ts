@@ -25,6 +25,9 @@ export interface Configuration {
   graphql: {
     playground: boolean
   }
+  server: {
+    url: string
+  }
   sandbox: {
     url: string
     envLifespan: number
@@ -42,6 +45,13 @@ export interface Configuration {
     from: string
     technicalTeam: string[]
   }
+}
+
+// Accepte un hôte (`example.com`, `localhost:4200`) ou une origine complète (`http://localhost:4200`).
+// `https://` est ajouté si aucun schéma n'est fourni, le slash final est retiré.
+const toPublicUrl = (host = 'localhost'): string => {
+  const value = host.trim().replace(/\/+$/, '') || 'localhost'
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`
 }
 
 export const configuration = (): Configuration => ({
@@ -68,6 +78,9 @@ export const configuration = (): Configuration => ({
   },
   graphql: {
     playground: process.env['GRAPHQL_PLAYGROUND'] ? process.env['GRAPHQL_PLAYGROUND'].toLowerCase() === 'true' : false,
+  },
+  server: {
+    url: toPublicUrl(process.env['SERVER_HOST']),
   },
   sandbox: {
     url: process.env['SANDBOX_URL'] as string,

@@ -61,6 +61,14 @@
       }
     }
 
+    .action-time {
+      color: #1976d2;
+
+      &:hover:not(:disabled) {
+        background-color: var(--brand-background-hover);
+      }
+    }
+
     button[mat-icon-button] {
       display: flex;
       &:disabled {
@@ -141,15 +149,106 @@
 }
 
 // Grid ultra-compact pour beaucoup d'utilisateurs
+.summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  .summary-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 16px;
+    border: 1px solid var(--brand-border-color, #dee2e6);
+    background: var(--brand-background-components);
+    color: var(--brand-text-primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .dot {
+      margin-left: 0;
+    }
+
+    &.current {
+      border-color: var(--brand-color-primary);
+      box-shadow: 0 0 0 1px var(--brand-color-primary);
+    }
+  }
+
+  .group-filter {
+    margin-left: auto;
+    min-width: min(200px, 100%);
+  }
+}
+
+.summary-progress {
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #f44336 var(--blocked-pct, 0%), #4caf50 var(--blocked-pct, 0%));
+}
+
+.dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-left: auto;
+
+  &.dot-active {
+    background: #4caf50;
+  }
+
+  &.dot-blocked {
+    background: #f44336;
+  }
+
+  &.dot-idle {
+    background: #bdbdbd;
+  }
+}
+
+.user-chip.not-started {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.extra-badge {
+  margin-left: auto;
+  padding: 0 0.4rem;
+  border-radius: 8px;
+  background: #1976d2;
+  color: #fff;
+  font-size: 0.7rem;
+  white-space: nowrap;
+
+  + .dot {
+    margin-left: 0.25rem;
+  }
+}
+
 .users-compact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
   gap: 0.25rem;
   max-height: 400px;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
 .user-chip {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -199,8 +298,9 @@
 
 .user-name {
   flex: 1;
+  min-width: 0;
   white-space: normal;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   font-weight: 500;
   font-size: 0.8rem;
   line-height: 1.2;
@@ -251,7 +351,7 @@
   }
 
   .users-compact-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
     gap: 0.2rem;
     max-height: 300px;
   }

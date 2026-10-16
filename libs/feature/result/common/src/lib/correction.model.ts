@@ -74,6 +74,16 @@ export interface ExerciseCorrection {
   exerciseSessionId: string
 
   /**
+   * The date the exercise session was started, if it was started.
+   */
+  startedAt?: Date | null
+
+  /**
+   * The id of the most recent submitted answer, if any.
+   */
+  answerId?: string | null
+
+  /**
    * The id of the exercise in it's activity navigation.
    */
   exerciseId: string

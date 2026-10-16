@@ -96,9 +96,7 @@ export class PlcEditorComponent implements OnInit, OnDestroy {
   }
 
   protected selectInput(index: number): void {
-    console.log('index : ', index)
     this.selectionIndex.set(index)
-    console.log('selction : ', this.selection)
   }
 
   protected onReorder(event: CdkDragDrop<PleInput[]>) {

@@ -13,7 +13,13 @@
 <nge-markdown [data]="editService.getCurrentFileContent(this.src)" />
 } @if (!this.isMd) {
 <pre>{{ editService.getCurrentFileContent(this.src) }}</pre>
-} } @else if (isPdf) {
+} } @else if(isCode){
+<pre>
+    <code>
+      {{ editService.getCurrentFileContent(this.src)}}
+    </code>
+  </pre>
+} @else if (isPdf) {
 <div class="pdf-navigation">
   <button nz-button (click)="onPrevPage()" [disabled]="currentPage <= 1">
     <span nz-icon nzType="left" nzTheme="outline"></span>

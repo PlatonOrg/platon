@@ -151,7 +151,11 @@
   </section>
   <section>
     <h4>Résultats par apprenants</h4>
-    <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" />
+    <result-by-members
+      [results]="context.results.users"
+      [columnOrder]="columnOrder"
+      [groups]="context.results.groups"
+    />
   </section>
   }
 </ui-layout-block>

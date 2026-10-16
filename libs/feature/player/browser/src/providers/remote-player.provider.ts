@@ -60,6 +60,10 @@ export class RemotePlayerService extends PlayerProvider {
     return this.http.post<PlayActivityOuput>('/api/v1/player/openSession/' + sessionId, {})
   }
 
+  addExtraTime(sessionId: string, seconds: number): Observable<PlayActivityOuput> {
+    return this.http.post<PlayActivityOuput>('/api/v1/player/addExtraTime/' + sessionId, { seconds })
+  }
+
   openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput> {
     return this.http.post<PlayActivityOuput>('/api/v1/player/openSessionWithCode/' + sessionId, { code })
   }

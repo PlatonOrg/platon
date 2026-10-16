@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ForbiddenResponse } from '@platon/core/common'
+import { ConflictResponse, ForbiddenResponse } from '@platon/core/common'
 import { ExerciseSession, Session } from '@platon/feature/result/common'
 import { PlayerManager } from './player-manager.model'
 import { SandboxManager } from './sandbox-manager.model'
@@ -64,6 +64,7 @@ class TestPlayerManager extends PlayerManager {
   findExerciseSessionById = jest.fn()
   notifyExerciseChanges = jest.fn().mockResolvedValue(undefined)
   notifyModerationActivityChanges = jest.fn().mockResolvedValue(undefined)
+  notifySessionStateChanges = jest.fn().mockResolvedValue(undefined)
   nextPeerExercise = jest.fn()
 }
 
@@ -206,7 +207,7 @@ describe('PlayerManager', () => {
   })
 
   describe('openSession (sans code)', () => {
-    it("rejette également si la durée de l'activité est dépassée (même régression que openSessionWithCode)", async () => {
+    it("rejette avec un conflit explicite si la durée de l'activité est dépassée", async () => {
       const duration = 60
       const session = createActivitySession({
         startedAt: new Date(Date.now() - duration * 2 * 1000),
@@ -214,7 +215,7 @@ describe('PlayerManager', () => {
       })
       manager.findSessionById.mockResolvedValue(session)
 
-      await expect(manager.openSession('session-id')).rejects.toBeInstanceOf(ForbiddenResponse)
+      await expect(manager.openSession('session-id')).rejects.toBeInstanceOf(ConflictResponse)
     })
   })
 

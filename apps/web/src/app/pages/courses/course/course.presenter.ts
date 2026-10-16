@@ -123,12 +123,13 @@ export class CoursePresenter implements OnDestroy {
     return response.resources
   }
 
-  async addSection(input: CreateCourseSection): Promise<void> {
+  async addSection(input: CreateCourseSection): Promise<CourseSection | undefined> {
     const { course } = this.context.value as Required<Context>
     try {
-      await firstValueFrom(this.courseService.createSection(course, input))
+      return await firstValueFrom(this.courseService.createSection(course, input))
     } catch {
       this.alertError()
+      return undefined
     }
   }
 

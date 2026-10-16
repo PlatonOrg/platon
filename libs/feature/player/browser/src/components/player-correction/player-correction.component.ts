@@ -188,6 +188,14 @@ export class PlayerCorrectionComponent implements OnInit {
     return this.answers.length
   }
 
+  protected get hasStarted(): boolean {
+    return this.currentExercise?.startedAt != null
+  }
+
+  protected get hasAnswer(): boolean {
+    return this.currentExercise?.answerId != null
+  }
+
   // === LIFECYCLE ===
   async ngOnInit(): Promise<void> {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -196,27 +204,38 @@ export class PlayerCorrectionComponent implements OnInit {
     })
     this.buildGroups()
     await this.getUsers()
+    this.sortGroupUsers()
     this.getAllExerciseGroup()
-    const firstGroup = this.getSessionId() ?? this.listExerciseGroup[this.startIndex]
+    const firstGroup = this.getGroupContainingSession() ?? this.listExerciseGroup[this.startIndex]
     if (firstGroup) {
-      this.onChooseGroup(firstGroup)
+      this.onChooseGroup(firstGroup, this.sessionId)
     }
   }
 
   // === SESSION MANAGEMENT ===
-  private getSessionId(): ExerciseGroup | undefined {
+  private getGroupContainingSession(): ExerciseGroup | undefined {
     if (!this.sessionId) {
       return undefined
     }
     for (const group of this.listExerciseGroup) {
-      const userIndex = group.users.findIndex((user) => user.exerciseSessionId === this.sessionId)
-      if (userIndex > -1) {
-        const [user] = group.users.splice(userIndex, 1)
-        group.users.unshift(user)
+      if (group.users.some((user) => user.exerciseSessionId === this.sessionId)) {
         return group
       }
     }
     return undefined
+  }
+
+  private sortGroupUsers(): void {
+    for (const { map } of this.activityExercisesMap.values()) {
+      for (const group of map.values()) {
+        group.users.sort((a, b) => {
+          const aUser = this.userMap.get(a.userId)
+          const bUser = this.userMap.get(b.userId)
+          const firstNameOrder = (aUser?.firstName ?? '').localeCompare(bUser?.firstName ?? '')
+          return firstNameOrder || (aUser?.lastName ?? '').localeCompare(bUser?.lastName ?? '')
+        })
+      }
+    }
   }
 
   private getAllExerciseGroup(): void {
@@ -317,9 +336,10 @@ export class PlayerCorrectionComponent implements OnInit {
   // === EXERCISE LOADING ===
   protected async loadAnswers(exercise: ExerciseCorrection): Promise<void> {
     this.currentExercise = exercise
+    this.answers = []
     const initialGrade = exercise.correctedGrade ?? this.gradeOptionMap.get(this.selectedGradeOption) ?? exercise.grade
     this.correctedGrade = PlayerCorrectionService.validateGrade(initialGrade ?? 0)
-    if (exercise.exerciseSessionId) {
+    if (exercise.exerciseSessionId && exercise.answerId != null) {
       this.answers = (
         await firstValueFrom(
           this.playerService.playAnswers({
@@ -333,28 +353,30 @@ export class PlayerCorrectionComponent implements OnInit {
   }
 
   // === NAVIGATION METHODS ===
-  protected onChooseTab(index: number): void {
+  protected onChooseTab(index: number, preferredSessionId?: string): void {
     const currentUserId = this.currentExercise?.userId
     this.answers = []
     this.selectedTabIndex = index
     this.currentExercise = undefined
-    this.exercises = this.currentGroup?.users || []
-    this.exercises.sort((a, b) => {
-      const aName = this.userMap.get(a.userId)?.lastName
-      const bName = this.userMap.get(b.userId)?.lastName
-      return aName?.localeCompare(bName ?? '') ?? 0
-    })
-    // Take the current user's exercise if it exists
-    let exerciseIndex = this.exercises.findIndex((exercise) => exercise.userId === currentUserId)
+    this.exercises = this.currentGroup?.users ?? []
+    let exerciseIndex = preferredSessionId
+      ? this.exercises.findIndex((exercise) => exercise.exerciseSessionId === preferredSessionId)
+      : -1
+    if (exerciseIndex === -1) {
+      exerciseIndex = this.exercises.findIndex((exercise) => exercise.userId === currentUserId)
+    }
     if (exerciseIndex == -1) {
       exerciseIndex = 0
     }
     this.onChooseExercise(exerciseIndex).catch(console.error)
   }
 
-  protected onChooseGroup(group: ExerciseGroup): void {
+  protected onChooseGroup(group: ExerciseGroup, preferredSessionId?: string): void {
     this.resumeMode = false
     if (this.currentGroup === group) {
+      if (preferredSessionId) {
+        this.onChooseTab(this.selectedTabIndex, preferredSessionId)
+      }
       return
     }
     this.correctionResumeList = []
@@ -366,7 +388,7 @@ export class PlayerCorrectionComponent implements OnInit {
         this.correctionResumeList.push(exercise)
       }
     }
-    this.onChooseTab(this.selectedTabIndex)
+    this.onChooseTab(this.selectedTabIndex, preferredSessionId)
   }
 
   protected async onChooseExercise(index: number): Promise<void> {
@@ -399,6 +421,19 @@ export class PlayerCorrectionComponent implements OnInit {
     await this.onChooseExercise(this.selectedExerciseIndex + 1)
   }
 
+  protected async onChooseNextAnsweredExercise(): Promise<void> {
+    if (this.isCorrectionMode) {
+      await this.onSaveGrade()
+    }
+    for (let offset = 1; offset < this.exercises.length; offset++) {
+      const index = (this.selectedExerciseIndex + offset) % this.exercises.length
+      if (this.exercises[index]?.answerId != null) {
+        await this.onChooseExercise(index)
+        return
+      }
+    }
+  }
+
   protected async onChoosePreviousUserExercise(): Promise<void> {
     await this.onChooseExercise(this.selectedExerciseIndex - 1)
   }
@@ -421,8 +456,8 @@ export class PlayerCorrectionComponent implements OnInit {
   // === GETTERS ===
   get userOptions(): Array<{ label: string; value: string }> {
     return (
-      this.currentGroup?.users?.map((user) => ({
-        label: `${this.userMap.get(user.userId)?.lastName} ${this.userMap.get(user.userId)?.firstName}`,
+      this.exercises.map((user) => ({
+        label: `${this.userMap.get(user.userId)?.firstName} ${this.userMap.get(user.userId)?.lastName}`,
         value: user.userId,
       })) ?? []
     )
@@ -472,6 +507,15 @@ export class PlayerCorrectionComponent implements OnInit {
         }, 400)
         break
       case 'ArrowRight':
+        event.preventDefault()
+        if (event.shiftKey) {
+          await this.onChooseNextAnsweredExercise()
+          this.animationState = 'right'
+          setTimeout(() => {
+            this.animationState = ''
+          }, 400)
+          break
+        }
         await this.onChooseNextUserExercise()
         this.animationState = 'right'
         setTimeout(() => {

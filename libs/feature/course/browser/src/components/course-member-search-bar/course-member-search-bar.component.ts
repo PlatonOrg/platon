@@ -66,7 +66,7 @@ export class CourseMemberSearchBarComponent implements OnInit, OnDestroy, OnChan
         this.selection = []
       }
 
-      this.selection.push(item)
+      this.selection = [...this.selection, item]
       this.onChangeSelection()
     },
   }

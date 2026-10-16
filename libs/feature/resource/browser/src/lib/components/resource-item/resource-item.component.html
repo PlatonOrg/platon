@@ -129,7 +129,7 @@
     (mouseenter)="configurable ? getReadmeContent() : null"
   >
     @if(clickable) {
-    <a [routerLink]="detailsUrl" class="resource-item-title">{{ name }}</a>
+    <a [routerLink]="detailsUrl" [state]="{ returnUrl: returnUrl }" class="resource-item-title">{{ name }}</a>
     } @else {
     <span class="resource-item-title">{{ name }}</span>
     } @if (configurable) {

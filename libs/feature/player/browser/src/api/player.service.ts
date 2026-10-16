@@ -60,6 +60,10 @@ export class PlayerService {
     return this.provider.openSession(sessionId)
   }
 
+  addExtraTime(sessionId: string, seconds: number): Observable<PlayActivityOuput> {
+    return this.provider.addExtraTime(sessionId, seconds)
+  }
+
   openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput> {
     return this.provider.openSessionWithCode(sessionId, code)
   }

@@ -26,6 +26,7 @@
 <div class="content-section">
   <course-activity-moderation
     [results]="context.results.users"
+    [groups]="context.results.groups"
     (moderationAction)="onModerationAction($event)"
     (regenerateCode)="onRegenerateCode()"
     [code]="$safeNavigationMigration(context.activity?.code)"
@@ -33,11 +34,23 @@
 </div>
 <!-- Tableaux de résultats -->
 <div class="content-section">
-  <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" />
+  <result-by-members [results]="context.results.users" [columnOrder]="columnOrder" [groups]="context.results.groups" />
 </div>
 } } @else {
 <div class="info-banner">
   <i class="info-icon" nz-icon nzType="info-circle"></i>
   <p class="info-text"><strong>Information :</strong> L'activité doit être ouverte pour accéder au suivi.</p>
 </div>
-}
+@if (context.activity?.code; as activityCode) {
+<div class="content-section unlock-code">
+  <span class="unlock-code-label">Code de déblocage :</span>
+  <span
+    class="unlock-code-value"
+    [class.revealed]="isCodeRevealed"
+    (click)="isCodeRevealed = !isCodeRevealed"
+    [title]="isCodeRevealed ? 'Cliquer pour cacher' : 'Cliquer pour révéler le code'"
+  >
+    {{ isCodeRevealed ? activityCode : '●●●●●●' }}
+  </span>
+</div>
+} }
