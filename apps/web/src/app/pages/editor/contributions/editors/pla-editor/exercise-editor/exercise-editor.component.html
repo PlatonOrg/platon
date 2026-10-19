@@ -1,35 +1,44 @@
-@if (resource) {
-<app-exercise-card [item]="resource" [showButton]="false" [modalMode]="true" [previewOverrides]="exercise.overrides" />
-<ul nz-list-item-actions>
-  <nz-list-item-action>
-    @if (!overriding && inputs) {
-    <button
-      nz-button
-      nzType="text"
-      nz-tooltip="Afficher les variables"
-      (click)="showModal(modalContent); overriding = !overriding"
-    >
-      <span nz-icon nzType="form" nzTheme="outline"></span>
-    </button>
-    } @if (overriding) {
-    <button nz-button nzType="text" nz-tooltip="Cacher les variables" (click)="overriding = false">
-      <span nz-icon nzType="close-circle" nzTheme="outline"></span>
-    </button>
-    }
-  </nz-list-item-action>
-  <nz-list-item-action>
-    <button
-      nz-button
-      nzDanger
-      nzType="text"
-      nz-tooltip="Supprimer"
-      [disabled]="disabled"
-      (click)="deleteClicked.emit()"
-    >
-      <span nz-icon nzType="delete" nzTheme="outline"></span>
-    </button>
-  </nz-list-item-action>
-</ul>
+@switch (loadState()) { @case('loading') {
+<div class="card-skeleton"></div>
+} @case('public') { @if (resource) {
+<div class="normal-card">
+  <app-exercise-card
+    [item]="resource"
+    [showButton]="false"
+    [modalMode]="true"
+    [previewOverrides]="exercise.overrides"
+  />
+  <ul nz-list-item-actions>
+    <nz-list-item-action>
+      @if (!overriding && inputs) {
+      <button
+        nz-button
+        nzType="text"
+        nz-tooltip="Afficher les variables"
+        (click)="showModal(modalContent); overriding = !overriding"
+      >
+        <span nz-icon nzType="form" nzTheme="outline"></span>
+      </button>
+      } @if (overriding) {
+      <button nz-button nzType="text" nz-tooltip="Cacher les variables" (click)="overriding = false">
+        <span nz-icon nzType="close-circle" nzTheme="outline"></span>
+      </button>
+      }
+    </nz-list-item-action>
+    <nz-list-item-action>
+      <button
+        nz-button
+        nzDanger
+        nzType="text"
+        nz-tooltip="Supprimer"
+        [disabled]="disabled"
+        (click)="deleteClicked.emit()"
+      >
+        <span nz-icon nzType="delete" nzTheme="outline"></span>
+      </button>
+    </nz-list-item-action>
+  </ul>
+</div>
 <ng-template #modalContent let-modal>
   @if (overriding && inputs) {
   <table>
@@ -73,4 +82,27 @@
   </table>
   }
 </ng-template>
-}
+} } @case ('private') {
+<div class="private-card">
+  <div class="card-header">
+    <mat-icon>lock</mat-icon>
+    <span class="card-title">Exercice privé</span>
+  </div>
+  <div class="card-description">
+    <p>Vous n'avez pas les droits de lecture sur cet exercice.</p>
+  </div>
+  <div class="card-footer">
+    <span class="spacer"></span>
+    <button
+      nz-button
+      nzDanger
+      nzType="text"
+      nz-tooltip="Supprimer"
+      [disabled]="disabled"
+      (click)="deleteClicked.emit()"
+    >
+      <span nz-icon nzType="delete" nzTheme="outline"></span>
+    </button>
+  </div>
+</div>
+} }

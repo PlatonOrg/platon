@@ -7,6 +7,7 @@ import {
   Output,
   TemplateRef,
   inject,
+  signal,
 } from '@angular/core'
 import { ActivityExercise, PleInput, Variables } from '@platon/feature/compiler'
 import { ResourceService } from '@platon/feature/resource/browser'
@@ -20,13 +21,24 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { PleInputEditorModule } from '../../ple-input/ple-input.module'
 import { NzListModule } from 'ng-zorro-antd/list'
 import { ExerciseCardComponent } from '../exercise-card/exercise-card.component'
+import { MatIconModule } from '@angular/material/icon'
+
+type ExerciseStatut = 'public' | 'private' | 'error' | 'loading'
 
 @Component({
   selector: 'app-pla-exercise-editor',
   templateUrl: './exercise-editor.component.html',
   styleUrls: ['./exercise-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NzButtonModule, NzIconModule, NzTooltipModule, PleInputEditorModule, NzListModule, ExerciseCardComponent],
+  imports: [
+    NzButtonModule,
+    NzIconModule,
+    NzTooltipModule,
+    PleInputEditorModule,
+    NzListModule,
+    ExerciseCardComponent,
+    MatIconModule,
+  ],
 })
 export class PlaExerciseEditorComponent {
   private readonly resourceService = inject(ResourceService)
@@ -38,6 +50,7 @@ export class PlaExerciseEditorComponent {
   protected inputs?: PleInput[] = []
   protected resource?: Resource
   protected overrides: Variables = {}
+  protected loadState = signal<ExerciseStatut>('loading')
 
   get exercise(): ActivityExercise {
     return this._exercise
@@ -56,6 +69,7 @@ export class PlaExerciseEditorComponent {
     )
       .then((resource) => {
         this.resource = resource
+        this.loadState.set('public')
         const metadata = resource.metadata as ExerciseResourceMeta | undefined
         this.inputs = []
         this.overrides = {}
@@ -74,8 +88,15 @@ export class PlaExerciseEditorComponent {
         this.changeDetectorRef.detectChanges()
       })
       .catch((error) => {
-        console.error('Unable to load resource metadata', error)
-        this.exerciseLoadFailed.emit(value)
+        if (error?.status === 403) {
+          this.resource = undefined
+          this.inputs = undefined
+          this.loadState.set('private')
+        } else {
+          this.loadState.set('error')
+          console.error('Unable to load resource metadata', error)
+          this.exerciseLoadFailed.emit(value)
+        }
       })
   }
 

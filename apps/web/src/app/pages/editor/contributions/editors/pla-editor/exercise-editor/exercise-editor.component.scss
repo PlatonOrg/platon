@@ -58,3 +58,67 @@ ul {
   display: flex;
   align-items: center;
 }
+
+// Exercise where user as not the read permission
+
+
+.private-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 120px;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px dashed #cccccc;
+  background-color: #f6f8fa;
+  color: var(--brand-text-secondary);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-title {
+  max-width: 75%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.card-description {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  p {
+    margin: 0;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.card-footer {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.spacer { flex: 1; }
+.action { cursor: pointer; }
+
+
+// when loading
+.card-skeleton {
+  height: 120px;
+  border-radius: 0.5rem;
+  background: #f0f2f4;
+}
