@@ -59,10 +59,9 @@ ul {
   align-items: center;
 }
 
-// Exercise where user as not the read permission
+// Exercise card when user as not the read permission or error occure
 
-
-.private-card {
+.base-card {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -70,9 +69,23 @@ ul {
   box-sizing: border-box;
   padding: 0.75rem;
   border-radius: 0.5rem;
+  color: var(--brand-text-secondary);
+}
+
+.private-card {
   border: 1px dashed #cccccc;
   background-color: #f6f8fa;
-  color: var(--brand-text-secondary);
+}
+
+.error-card {
+  border: 1px dashed #f0b4b4;
+  background-color: #fff5f5;
+  mat-icon {
+    color : #c53030
+  }
+  .reload {
+    color:  var(--brand-text-secondary);
+  }
 }
 
 .card-header {
@@ -108,17 +121,23 @@ ul {
 .card-footer {
   display: flex;
   align-items: flex-end;
+  justify-content: flex-end;
   flex-wrap: wrap;
-  font-size: 0.85rem;
+  margin: 0 -0.8rem 0.4rem 0;
 }
 
 .spacer { flex: 1; }
 .action { cursor: pointer; }
-
 
 // when loading
 .card-skeleton {
   height: 120px;
   border-radius: 0.5rem;
   background: #f0f2f4;
+  border: 1px solid #cccccc;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }

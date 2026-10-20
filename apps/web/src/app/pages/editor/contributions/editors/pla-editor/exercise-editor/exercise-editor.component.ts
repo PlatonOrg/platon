@@ -59,6 +59,10 @@ export class PlaExerciseEditorComponent {
   @Input()
   set exercise(value: ActivityExercise) {
     this._exercise = value
+    this.load(this._exercise)
+  }
+
+  private load(value: ActivityExercise) {
     // TODO: read from file system instead of using metadata since they contains only metadata
     // for latest version of the resource
     firstValueFrom(
@@ -92,10 +96,13 @@ export class PlaExerciseEditorComponent {
           this.resource = undefined
           this.inputs = undefined
           this.loadState.set('private')
+          console.log("You don't have the read permission for the resource: ", value.resource)
+        } else if (error?.status === 404) {
+          console.error('Unable to load resource metadata', error)
+          this.exerciseLoadFailed.emit(value)
         } else {
           this.loadState.set('error')
           console.error('Unable to load resource metadata', error)
-          this.exerciseLoadFailed.emit(value)
         }
       })
   }
@@ -134,5 +141,12 @@ export class PlaExerciseEditorComponent {
         this.changeDetectorRef.detectChanges()
       },
     })
+  }
+
+  protected reloadExercise() {
+    this.loadState.set('loading')
+    if (this._exercise) {
+      this.load(this._exercise)
+    }
   }
 }

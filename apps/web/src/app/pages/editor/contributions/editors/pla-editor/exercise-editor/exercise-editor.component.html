@@ -1,5 +1,7 @@
 @switch (loadState()) { @case('loading') {
-<div class="card-skeleton"></div>
+<div class="card-skeleton">
+  <nz-icon nzType="loading" nzTheme="outline" />
+</div>
 } @case('public') { @if (resource) {
 <div class="normal-card">
   <app-exercise-card
@@ -83,7 +85,7 @@
   }
 </ng-template>
 } } @case ('private') {
-<div class="private-card">
+<div class="private-card base-card">
   <div class="card-header">
     <mat-icon>lock</mat-icon>
     <span class="card-title">Exercice privé</span>
@@ -105,4 +107,36 @@
     </button>
   </div>
 </div>
-} }
+} @case('error') {
+<div class="error-card base-card">
+  <div class="card-header">
+    <mat-icon>warning</mat-icon>
+    <span class="card-title">Erreur</span>
+  </div>
+  <div class="card-description">
+    <p>Une erreur est survenue lors du chargement de l'exercice.</p>
+  </div>
+  <div class="card-footer">
+    <button
+      class="reload"
+      nz-button
+      nzType="text"
+      nz-tooltip="recharger"
+      [disabled]="disabled"
+      (click)="reloadExercise()"
+    >
+      <span nz-icon nzType="reload" nzTheme="outline"></span>
+    </button>
+    <button
+      nz-button
+      nzDanger
+      nzType="text"
+      nz-tooltip="Supprimer"
+      [disabled]="disabled"
+      (click)="deleteClicked.emit()"
+    >
+      <span nz-icon nzType="delete" nzTheme="outline"></span>
+    </button>
+  </div>
+</div>
+}}
