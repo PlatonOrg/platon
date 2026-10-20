@@ -444,11 +444,25 @@
   height: 32px;
   font-size: 12px;
   transition: 0.3s;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 
   &:hover {
     background: var(--brand-background-hover);
     border-color: var(--brand-color-primary-shade);
     color: var(--brand-color-primary-shade);
+  }
+
+  .label {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
