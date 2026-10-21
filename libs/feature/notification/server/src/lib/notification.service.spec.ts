@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { PubSubService } from '@platon/core/server'
 import { MockRepository, mockRepository, mockSelectQueryBuilder } from '@platon/core/testing/server'
-import { EntityManager, SelectQueryBuilder } from 'typeorm'
+import { EntityManager, IsNull, MoreThan, SelectQueryBuilder } from 'typeorm'
 import { NotificationEntity } from './notification.entity'
 import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notification.provider'
 import { ON_CHANGE_NOTIFICATIONS } from './notification.pubsub'
@@ -129,7 +129,7 @@ describe('NotificationService', () => {
 
       expect(qb.where).toHaveBeenCalledWith('user_id = :userId', { userId: 'user-1' })
       expect(qb.orderBy).toHaveBeenCalledWith('created_at', 'DESC')
-      expect(qb.andWhere).not.toHaveBeenCalled()
+      expect(qb.andWhere).toHaveBeenCalledTimes(1)
       expect(qb.offset).not.toHaveBeenCalled()
       expect(qb.limit).not.toHaveBeenCalled()
     })
@@ -274,12 +274,22 @@ describe('NotificationService', () => {
   })
 
   describe('unreadCount', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-21T12:00:00Z'))
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
     it("devrait compter les notifications non lues de l'utilisateur", async () => {
       repository.count.mockResolvedValue(4)
 
       const result = await service.unreadCount('user-1')
 
-      expect(repository.count).toHaveBeenCalledWith({ where: { userId: 'user-1', readAt: expect.anything() } })
+      expect(repository.count).toHaveBeenCalledWith({
+        where: { userId: 'user-1', readAt: IsNull(), createdAt: MoreThan(new Date('2025-10-21T12:00:00Z')) },
+      })
       expect(result).toBe(4)
     })
   })

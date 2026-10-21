@@ -2,8 +2,8 @@ import { DiscoveryService } from '@golevelup/nestjs-discovery'
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DeleteWhereExpression, PubSubService, buildDeleteQuery } from '@platon/core/server'
-import { NotificationFilters } from '@platon/feature/notification/common'
-import { EntityManager, In, IsNull, Repository } from 'typeorm'
+import { MAX_AGE_MONTHS, NotificationFilters } from '@platon/feature/notification/common'
+import { EntityManager, In, IsNull, MoreThan, Repository } from 'typeorm'
 import { NotificationEntity } from './notification.entity'
 import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notification.provider'
 import { ON_CHANGE_NOTIFICATIONS, OnChangeNotificationsPayload } from './notification.pubsub'
@@ -52,10 +52,21 @@ export class NotificationService {
     )
   }
 
+  /** Give the date "months" ago from now
+   * @param months  number of months to remove
+   * @return the date it was "months" ago
+   * */
+  private limitDate(months: number): Date {
+    const date = new Date()
+    date.setMonth(date.getMonth() - months)
+    return date
+  }
+
   async ofUser(userId: string, filters: NotificationFilters = {}): Promise<[NotificationEntity[], number]> {
     const query = this.repository
       .createQueryBuilder('notification')
       .where('user_id = :userId', { userId })
+      .andWhere('created_at > :maxAge', { maxAge: this.limitDate(MAX_AGE_MONTHS) })
       .orderBy('created_at', 'DESC')
 
     if (filters.unread) {
@@ -151,6 +162,7 @@ export class NotificationService {
       where: {
         userId,
         readAt: IsNull(),
+        createdAt: MoreThan(this.limitDate(MAX_AGE_MONTHS)),
       },
     })
   }
