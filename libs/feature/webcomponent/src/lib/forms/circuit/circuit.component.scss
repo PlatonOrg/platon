@@ -1,0 +1,115 @@
+:host {
+  display: block;
+  max-width: 100%;
+  --wc-circuit-accent: var(--brand-color-primary, #1677ff);
+  --wc-circuit-bg: var(--brand-background-components, #fff);
+}
+
+.circuit {
+  margin: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  color: var(--brand-text-primary, currentColor);
+
+  svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    font-family: inherit;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+/* primitives */
+.st {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.thick {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.blade {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.bg {
+  fill: var(--wc-circuit-bg);
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.so {
+  fill: currentColor;
+  stroke: none;
+}
+.lit {
+  fill: #ffd54a;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+.on {
+  fill: var(--wc-circuit-accent);
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+.tx {
+  fill: currentColor;
+}
+.txon {
+  fill: #fff;
+  font-weight: 700;
+}
+
+/* interrupteurs manœuvrables */
+.hit {
+  fill: transparent;
+  stroke: none;
+}
+.switch {
+  cursor: pointer;
+  outline: none;
+
+  &:hover .hit {
+    fill: color-mix(in srgb, var(--wc-circuit-accent) 12%, transparent);
+  }
+  &:hover .blade,
+  &:focus-visible .blade {
+    stroke: var(--wc-circuit-accent);
+  }
+  &:focus-visible .hit {
+    stroke: var(--wc-circuit-accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+}
+
+.errors {
+  margin: 0 0 8px;
+  padding: 8px 12px 8px 28px;
+  border-radius: 6px;
+  border: 1px solid var(--brand-color-danger, #d4380d);
+  color: var(--brand-color-danger, #d4380d);
+  font-size: 0.85em;
+}
+
+figcaption {
+  margin-top: 4px;
+  font-size: 0.9em;
+  text-align: center;
+  opacity: 0.8;
+}
+
+.help {
+  margin: 4px 0 0;
+  font-size: 0.8em;
+  opacity: 0.7;
+}

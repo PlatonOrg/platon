@@ -1,0 +1,77 @@
+<figure class="circuit" [class.interactive]="interactive && hasSwitches">
+  @if (drawing.errors.length) {
+  <ul class="errors" role="alert">
+    @for (error of drawing.errors; track $index) {
+    <li>{{ error }}</li>
+    }
+  </ul>
+  }
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    [attr.role]="hasSwitches && interactive ? 'group' : 'img'"
+    [attr.viewBox]="drawing.viewBox"
+    [attr.width]="drawing.width"
+    [attr.height]="drawing.height"
+    [attr.aria-label]="ariaLabel"
+  >
+    @for (layer of layers; track trackLayer($index, layer)) {
+    <svg:g
+      [class.switch]="!!layer.element?.switchable && interactive"
+      [attr.data-id]="layer.element?.id || null"
+      [attr.data-state]="layer.element?.hit ? layer.element?.state : null"
+      [attr.tabindex]="layer.element?.switchable && interactive ? 0 : null"
+      [attr.role]="layer.element?.switchable && interactive ? 'button' : null"
+      [attr.aria-label]="layer.element?.aria || null"
+      (click)="toggle(layer.element, $event)"
+      (keydown)="onKey(layer.element, $event)"
+    >
+      @if (layer.element?.hit; as hit) {
+      <svg:rect class="hit" rx="6" [attr.x]="hit.x" [attr.y]="hit.y" [attr.width]="hit.w" [attr.height]="hit.h" />
+      }
+      @for (p of layer.prims; track $index) {
+      @switch (p.k) {
+      @case ('path') {
+      <svg:path [attr.class]="p.c" [attr.d]="$any(p).d" />
+      }
+      @case ('circle') {
+      <svg:circle [attr.class]="p.c" [attr.cx]="$any(p).x" [attr.cy]="$any(p).y" [attr.r]="$any(p).r" />
+      }
+      @case ('rect') {
+      <svg:rect [attr.class]="p.c" [attr.x]="$any(p).x" [attr.y]="$any(p).y" [attr.width]="$any(p).w" [attr.height]="$any(p).h" />
+      }
+      @case ('text') {
+      <svg:text
+        [attr.class]="p.c"
+        [attr.x]="$any(p).x"
+        [attr.y]="$any(p).y"
+        [attr.text-anchor]="$any(p).anchor"
+        [attr.dominant-baseline]="$any(p).base"
+        [attr.font-size]="$any(p).size"
+      >
+        @for (t of $any(p).parts; track $index) {
+        @if (t.sub) {
+        <svg:tspan baseline-shift="sub" [attr.font-size]="$any(p).size * 0.72">{{ t.t }}</svg:tspan>
+        } @else if (t.sup) {
+        <svg:tspan baseline-shift="super" [attr.font-size]="$any(p).size * 0.72">{{ t.t }}</svg:tspan>
+        } @else if (t.over) {
+        <svg:tspan text-decoration="overline">{{ t.t }}</svg:tspan>
+        } @else {
+        <svg:tspan>{{ t.t }}</svg:tspan>
+        }
+        }
+      </svg:text>
+      }
+      }
+      }
+    </svg:g>
+    }
+  </svg>
+  @if (state.caption) {
+  <figcaption>{{ state.caption }}</figcaption>
+  }
+  @if (interactive && hasSwitches && !state.hideHelp) {
+  <p class="help">Cliquez sur un interrupteur pour le faire passer à la position suivante.</p>
+  }
+</figure>
+
+<wc-base [(state)]="state"></wc-base>

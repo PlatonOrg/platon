@@ -1,0 +1,38 @@
+# Allumer une lampe : l'élève manœuvre les interrupteurs
+sandbox = "python"
+
+title = "Allumer la lampe L2"
+
+circuit = :wc-circuit
+circuit.schema = {
+  "unit": 40,
+  "elements": [
+    {"type": "V", "id": "E", "from": [0, 4], "to": [0, 0], "value": 12, "u": "E"},
+    {"type": "switch", "id": "K1", "from": [0, 0], "to": [3, 0]},
+    {"type": "wire", "points": [[3, 0], [4, 0]]},
+    {"type": "selector", "id": "K2", "at": [4, 0], "labels": ["1", "2"]},
+    {"type": "lamp", "id": "L1", "from": [6, -1], "to": [9, -1]},
+    {"type": "lamp", "id": "L2", "from": [6, 1], "to": [9, 1]},
+    {"type": "wire", "points": [[9, -1], [10, -1], [10, 4], [0, 4]]},
+    {"type": "wire", "points": [[9, 1], [10, 1]]}
+  ]
+}
+
+statement ==
+Placez les interrupteurs pour que **seule la lampe $L_2$** soit allumée.
+==
+
+form ==
+{{ circuit }}
+==
+
+grader == #!lang=py
+positions = circuit.get("value")
+positions = positions if isinstance(positions, dict) else {}
+if positions.get("K1") == 1 and positions.get("K2") == 1:
+    grade = 100
+    feedback = {"type": "success", "content": "Bravo : K1 fermé, K2 en position 2."}
+else:
+    grade = 0
+    feedback = {"type": "error", "content": "La lampe L2 n'est pas la seule allumée."}
+==

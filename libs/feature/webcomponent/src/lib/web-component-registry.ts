@@ -8,6 +8,7 @@ import { CodeViewerComponentDefinition } from './widgets/code-viewer/code-viewer
 import { CodeEditorComponentDefinition } from './forms/code-editor/code-editor'
 import { RadioGroupComponentDefinition } from './forms/radio-group/radio-group'
 import { CheckboxGroupComponentDefinition } from './forms/checkbox-group/checkbox-group'
+import { CircuitComponentDefinition } from './forms/circuit/circuit'
 import { SortListComponentDefinition } from './forms/sort-list/sort-list'
 import { TextSelectComponentDefinition } from './forms/text-select/text-select'
 import { AutomatonEditorComponentDefinition } from './forms/automaton-editor/automaton-editor'
@@ -56,6 +57,11 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
       import(/* webpackChunkName: "wc-checkbox-group" */ './forms/checkbox-group/checkbox-group.module').then(
         (m) => m.CheckboxGroupModule
       ),
+  },
+  {
+    selector: 'wc-circuit',
+    module: () =>
+      import(/* webpackChunkName: "wc-circuit" */ './forms/circuit/circuit.module').then((m) => m.CircuitModule),
   },
   {
     selector: 'wc-code-editor',
@@ -255,6 +261,11 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: CheckboxGroupComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: CircuitComponentDefinition,
   },
   {
     provide: WEB_COMPONENT_DEFINITIONS,
