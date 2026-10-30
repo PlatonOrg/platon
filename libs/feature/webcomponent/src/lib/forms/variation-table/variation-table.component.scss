@@ -1,0 +1,259 @@
+/* CSS « à plat » (sans imbrication) : valide en SCSS comme en CSS. */
+
+:host {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  --tv-line: currentColor;
+  --tv-dash: rgba(128, 128, 128, 0.7);
+  --tv-accent: var(--brand-color-primary, #1677ff);
+  --tv-cell-height: 2.6em;
+  --tv-var-height: 7.2em;
+}
+
+.tv {
+  display: grid;
+  width: max-content;
+  min-width: min(100%, 32em);
+  border: 1px solid var(--tv-line);
+  border-radius: 4px;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.tv-row {
+  display: contents;
+}
+
+.tv-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tv-cell-height);
+  padding: 0 0.15em;
+  border-top: 1px solid var(--tv-line);
+}
+
+.tv-row:first-child .tv-cell {
+  border-top: none;
+}
+
+.tv-label {
+  justify-content: flex-start;
+  padding: 0 0.6em;
+  border-right: 1px solid var(--tv-line);
+}
+
+.tv-var {
+  min-height: var(--tv-var-height);
+}
+
+/* Traits verticaux sous chaque valeur de x (lignes de signes) */
+.tv-row[data-type='sign'] .tv-point::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 1px dashed var(--tv-dash);
+}
+
+.tv-row[data-type='sign'] .tv-point.tv-end[data-mark='']::before {
+  display: none;
+}
+
+.tv-row[data-type='sign'] .tv-point[data-mark='||']::before {
+  left: calc(50% - 3px);
+  width: 3px;
+  border-left: 1.5px solid var(--tv-line);
+  border-right: 1.5px solid var(--tv-line);
+}
+
+/* Boutons qui couvrent toute la case : signe, marque, flèche */
+.tv-button {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tv-button:hover:not(:disabled) {
+  background: rgba(22, 119, 255, 0.08);
+}
+
+.tv-button:focus-visible {
+  outline: 2px solid var(--tv-accent);
+  outline-offset: -2px;
+}
+
+.tv-button:disabled {
+  cursor: default;
+}
+
+.tv-sign {
+  font-size: 1.25em;
+  font-weight: 600;
+}
+
+.tv-sign[data-sign='']::after,
+.tv-placeholder {
+  content: '?';
+  color: var(--tv-dash);
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.tv-mark {
+  width: 2.2em;
+}
+
+.tv-zero {
+  position: relative;
+  padding: 0 0.15em;
+  background: var(--brand-background-components, Canvas);
+  font-weight: 600;
+}
+
+/* Ligne de variations : trois niveaux (haut, milieu, bas) */
+.tv-point.tv-var {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: minmax(2.5em, max-content);
+  align-items: center;
+  justify-items: center;
+}
+
+.tv-point.tv-var.tv-split {
+  grid-template-columns: minmax(2.5em, max-content) 6px minmax(2.5em, max-content);
+}
+
+.tv-left {
+  grid-column: 1;
+}
+
+.tv-right {
+  grid-column: 3;
+}
+
+.tv-bar {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  align-self: stretch;
+  width: 3px;
+  border-left: 1.5px solid var(--tv-line);
+  border-right: 1.5px solid var(--tv-line);
+}
+
+.tv-arrow {
+  display: block;
+}
+
+.tv-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: inherit;
+}
+
+.tv-svg line {
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+/* Saisie des valeurs (MathLive) */
+.tv-math {
+  min-width: 2.2em;
+  padding: 0.1em 0.25em;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1em;
+  text-align: center;
+}
+
+.tv-math.tv-editable {
+  border-bottom: 1px dashed var(--tv-dash);
+  border-radius: 2px;
+}
+
+.tv-math.tv-editable:focus-within {
+  border-bottom-color: var(--tv-accent);
+  outline: 1px solid var(--tv-accent);
+}
+
+.tv-math::part(menu-toggle),
+.tv-math::part(virtual-keyboard-toggle) {
+  display: none;
+}
+
+.tv-label .tv-math {
+  min-width: 0;
+  padding: 0;
+}
+
+/* Outils de l'élève (ligne « Colonnes ») : ajouter / supprimer une valeur de x, valeur interdite */
+.tv-tools .tv-cell {
+  min-height: 2em;
+  gap: 0.25em;
+  border-top: 1px dashed var(--tv-dash);
+}
+
+.tv-tools-title {
+  color: var(--tv-dash);
+  font-size: 0.75rem;
+}
+
+.tv-tool {
+  min-width: 1.9em;
+  height: 1.9em;
+  padding: 0 0.3em;
+  border: 1px solid var(--tv-dash);
+  border-radius: 0.8em;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tv-tool:hover {
+  border-color: var(--tv-accent);
+  color: var(--tv-accent);
+}
+
+.tv-tool:focus-visible {
+  outline: 2px solid var(--tv-accent);
+  outline-offset: 1px;
+}
+
+.tv-split-toggle {
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: -0.1em;
+}
+
+.tv-split-toggle.tv-active {
+  border-color: var(--tv-accent);
+  background: rgba(22, 119, 255, 0.1);
+  color: var(--tv-accent);
+}
+
+/* Écrans tactiles : boutons plus grands */
+@media (hover: none) {
+  .tv-tool {
+    min-width: 2.6em;
+    height: 2.6em;
+    font-size: 0.9rem;
+  }
+}

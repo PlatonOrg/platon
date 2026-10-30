@@ -1,0 +1,191 @@
+<div
+  class="tv"
+  role="table"
+  aria-label="Tableau de signes et de variations"
+  [class.tv-disabled]="state.disabled"
+  [style.grid-template-columns]="columns()"
+>
+  @for (row of rows(); track $index; let r = $index) {
+  <div class="tv-row" role="row" [attr.data-type]="row.type">
+    <div class="tv-cell tv-label" role="rowheader">
+      <math-field class="tv-math" readonly tabindex="-1" [value]="row.label"></math-field>
+    </div>
+    @for (p of row.points; track $index; let i = $index, last = $last) { @switch (row.type) { @case ('x') {
+    <!-- ligne des valeurs de x -->
+    <div class="tv-cell tv-point" role="cell">
+      <math-field
+        class="tv-math"
+        placeholder="?"
+        [class.tv-editable]="!readonly(row, 'p', i)"
+        [attr.readonly]="readonly(row, 'p', i) ? '' : null"
+        [attr.tabindex]="readonly(row, 'p', i) ? -1 : null"
+        [attr.aria-label]="label(row, 'p', i)"
+        [value]="pointText(p)"
+        (input)="onValue(r, i, 0, $event)"
+      ></math-field>
+    </div>
+    @if (!last) {
+    <div class="tv-cell tv-interval" role="cell"></div>
+    } } @case ('sign') {
+    <!-- ligne de signes : marque au point, signe sur l'intervalle -->
+    <div class="tv-cell tv-point" role="cell" [class.tv-end]="i === 0 || last" [attr.data-mark]="pointText(p)">
+      <button
+        type="button"
+        class="tv-button tv-mark"
+        [disabled]="readonly(row, 'p', i)"
+        [attr.aria-label]="label(row, 'p', i)"
+        (click)="cycleMark(r, i)"
+      >
+        @if (pointText(p) === '0') {
+        <span class="tv-zero">0</span>
+        }
+      </button>
+    </div>
+    @if (!last) {
+    <div class="tv-cell tv-interval" role="cell">
+      <button
+        type="button"
+        class="tv-button tv-sign"
+        [attr.data-sign]="row.intervals[i]"
+        [disabled]="readonly(row, 'i', i)"
+        [attr.aria-label]="label(row, 'i', i)"
+        (click)="cycleSign(r, i)"
+      >
+        {{ signText(row.intervals[i]) }}
+      </button>
+    </div>
+    } } @case ('variation') {
+    <!-- ligne de variations : valeur(s) au point, flèche sur l'intervalle -->
+    <div class="tv-cell tv-point tv-var" role="cell" [class.tv-split]="isSplit(p)">
+      @if (isSplit(p)) {
+      <math-field
+        class="tv-math tv-left"
+        placeholder="?"
+        [class.tv-editable]="!readonly(row, 'p', i)"
+        [style.grid-row]="level(row, i, 0)"
+        [attr.readonly]="readonly(row, 'p', i) ? '' : null"
+        [attr.tabindex]="readonly(row, 'p', i) ? -1 : null"
+        [attr.aria-label]="label(row, 'p', i) + ', limite à gauche'"
+        [value]="pointText(p, 0)"
+        (input)="onValue(r, i, 0, $event)"
+      ></math-field>
+      <span class="tv-bar" aria-hidden="true"></span>
+      <math-field
+        class="tv-math tv-right"
+        placeholder="?"
+        [class.tv-editable]="!readonly(row, 'p', i)"
+        [style.grid-row]="level(row, i, 1)"
+        [attr.readonly]="readonly(row, 'p', i) ? '' : null"
+        [attr.tabindex]="readonly(row, 'p', i) ? -1 : null"
+        [attr.aria-label]="label(row, 'p', i) + ', limite à droite'"
+        [value]="pointText(p, 1)"
+        (input)="onValue(r, i, 1, $event)"
+      ></math-field>
+      } @else if (state.values) {
+      <math-field
+        class="tv-math"
+        placeholder="?"
+        [class.tv-editable]="!readonly(row, 'p', i)"
+        [style.grid-row]="level(row, i, 0)"
+        [attr.readonly]="readonly(row, 'p', i) ? '' : null"
+        [attr.tabindex]="readonly(row, 'p', i) ? -1 : null"
+        [attr.aria-label]="label(row, 'p', i)"
+        [value]="pointText(p)"
+        (input)="onValue(r, i, 0, $event)"
+      ></math-field>
+      }
+    </div>
+    @if (!last) {
+    <div class="tv-cell tv-interval tv-var" role="cell">
+      <button
+        type="button"
+        class="tv-button tv-arrow"
+        [disabled]="readonly(row, 'i', i)"
+        [attr.aria-label]="label(row, 'i', i)"
+        (click)="cycleArrow(r, i)"
+      >
+        @if (arrow(row, i); as a) {
+        <svg class="tv-svg" aria-hidden="true" focusable="false">
+          <defs>
+            <marker
+              [attr.id]="markerId + '-' + r + '-' + i"
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <line
+            [attr.x1]="a.x1"
+            [attr.y1]="a.y1"
+            [attr.x2]="a.x2"
+            [attr.y2]="a.y2"
+            [attr.marker-end]="'url(#' + markerId + '-' + r + '-' + i + ')'"
+          ></line>
+        </svg>
+        } @else {
+        <span class="tv-placeholder">?</span>
+        }
+      </button>
+    </div>
+    } } } }
+  </div>
+  }
+  <!-- outils de l'élève : ajouter / supprimer une valeur de x, valeur interdite -->
+  @if (showTools()) {
+  <div class="tv-row tv-tools" role="row">
+    <div class="tv-cell tv-label" role="rowheader"><span class="tv-tools-title">Colonnes</span></div>
+    @for (p of rows()[0].points; track $index; let i = $index, last = $last) {
+    <div class="tv-cell tv-point" role="cell">
+      @if (canRemove(i)) {
+      <button
+        type="button"
+        class="tv-tool"
+        title="Supprimer cette valeur de x"
+        [attr.aria-label]="'Supprimer la valeur de x n° ' + (i + 1)"
+        (click)="remove(i)"
+      >
+        ×
+      </button>
+      } @if (canSplitColumn(i)) {
+      <button
+        type="button"
+        class="tv-tool tv-split-toggle"
+        title="Valeur interdite (double barre)"
+        [attr.aria-label]="'Valeur interdite en x n° ' + (i + 1)"
+        [class.tv-active]="isColumnSplit(i)"
+        [attr.aria-pressed]="isColumnSplit(i)"
+        (click)="toggleColumn(i)"
+      >
+        ||
+      </button>
+      }
+    </div>
+    @if (!last) {
+    <div class="tv-cell tv-interval" role="cell">
+      @if (canInsert(i)) {
+      <button
+        type="button"
+        class="tv-tool"
+        title="Ajouter une valeur de x ici"
+        [attr.aria-label]="'Ajouter une valeur de x entre les valeurs n° ' + (i + 1) + ' et ' + (i + 2)"
+        (click)="insert(i)"
+      >
+        +
+      </button>
+      }
+    </div>
+    } }
+  </div>
+  }
+</div>
+
+<!--
+  THE FOLLOWING CODE HANDLE THE LOGIC SHARED BY ALL THE COMPONENTS
+  YOU SHOULD NOT MODIFY/REMOVE IT OR PLACE IT INSIDE ANY OTHER ELEMENT
+-->
+<wc-base [(state)]="state"></wc-base>

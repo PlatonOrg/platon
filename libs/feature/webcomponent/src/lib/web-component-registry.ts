@@ -34,6 +34,7 @@ import { TimerComponentDefinition } from './widgets/timer/timer'
 import { ConfettiComponentDefinition } from './widgets/confetti/confetti'
 import { ImageClickerComponentDefinition } from './forms/image-clicker/image-clicker'
 import { CrosswordComponentDefinition } from './forms/crossword/crossword'
+import { VariationTableComponentDefinition } from './forms/variation-table/variation-table'
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
   {
@@ -160,6 +161,13 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     selector: 'wc-sort-list',
     module: () =>
       import(/* webpackChunkName: "wc-sort-list" */ './forms/sort-list/sort-list.module').then((m) => m.SortListModule),
+  },
+  {
+    selector: 'wc-variation-table',
+    module: () =>
+      import(/* webpackChunkName: "wc-variation-table" */ './forms/variation-table/variation-table.module').then(
+        (m) => m.VariationTableModule
+      ),
   },
   {
     selector: 'wc-text-select',
@@ -340,6 +348,11 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     provide: WEB_COMPONENT_DEFINITIONS,
     multi: true,
     useValue: SortListComponentDefinition,
+  },
+  {
+    provide: WEB_COMPONENT_DEFINITIONS,
+    multi: true,
+    useValue: VariationTableComponentDefinition,
   },
   {
     provide: WEB_COMPONENT_DEFINITIONS,

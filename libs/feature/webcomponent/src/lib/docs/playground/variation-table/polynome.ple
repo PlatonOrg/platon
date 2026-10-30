@@ -1,0 +1,47 @@
+sandbox = "python"
+
+tableau = :wc-variation-table
+tableau.resizable = true
+tableau.rows = [
+  {"type": "x", "label": "x", "points": ["-\infty", "+\infty"], "locked": ["p0", "p1"]},
+  {"type": "sign", "label": "f'(x)"},
+  {"type": "variation", "label": "f(x)"}
+]
+
+title ==
+Variations d'un polynôme
+==
+
+statement ==
+Dresser le tableau de variations de la fonction $f$ définie sur $\mathbb{R}$ par $f(x) = x^3 - 3x$.
+
+Ajoutez les valeurs de x avec le bouton **+**, cliquez sur les cases pour choisir signes et flèches,
+puis tapez les extremums et les limites (`oo` donne $\infty$).
+==
+
+form ==
+{{ tableau }}
+==
+
+grader == #!lang=py
+def norme(v):
+    v = (v or '').replace(' ', '')
+    return '+\\infty' if v in ('\\infty', '+\\infty') else v
+
+x, signe, variations = tableau['rows']
+erreurs = []
+if [norme(v) for v in x['points']] != ['-\\infty', '-1', '1', '+\\infty']:
+    erreurs.append("les valeurs de x")
+if signe['intervals'] != ['+', '-', '+'] or signe['points'][1:3] != ['0', '0']:
+    erreurs.append("le signe de f'(x)")
+if variations['intervals'] != ['up', 'down', 'up']:
+    erreurs.append("le sens de variation")
+if [norme(v) for v in variations['points']] != ['-\\infty', '2', '-2', '+\\infty']:
+    erreurs.append("les extremums ou les limites")
+
+grade = 100 if not erreurs else 0
+feedback = {
+    'type': 'success' if not erreurs else 'error',
+    'content': 'Bonne réponse !' if not erreurs else 'À revoir : ' + ', '.join(erreurs) + '.',
+}
+==

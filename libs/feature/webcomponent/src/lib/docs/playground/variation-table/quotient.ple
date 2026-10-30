@@ -1,0 +1,40 @@
+sandbox = "python"
+
+tableau = :wc-variation-table
+tableau.rows = [
+  {"type": "x", "label": "x", "points": ["-\infty", "-2", "1", "+\infty"], "locked": true},
+  {"type": "sign", "label": "x+2"},
+  {"type": "sign", "label": "x-1"},
+  {"type": "sign", "label": "\frac{x+2}{x-1}"}
+]
+
+title ==
+Signe d'un quotient
+==
+
+statement ==
+Compléter le tableau de signes de $\dfrac{x+2}{x-1}$ : cliquez sur une case pour choisir
+le signe (`+`, `-`), ou pour placer un `0` ou une double barre (valeur interdite) sous une valeur de x.
+==
+
+form ==
+{{ tableau }}
+==
+
+grader == #!lang=py
+attendu = [
+    (['', '0', '', ''], ['-', '+', '+']),
+    (['', '', '0', ''], ['-', '-', '+']),
+    (['', '0', '||', ''], ['+', '-', '+']),
+]
+lignes = tableau['rows'][1:]
+fausses = [
+    ligne['label'] for ligne, (points, intervalles) in zip(lignes, attendu)
+    if ligne['points'] != points or ligne['intervals'] != intervalles
+]
+grade = 100 if not fausses else 0
+feedback = {
+    'type': 'success' if not fausses else 'error',
+    'content': 'Bonne réponse !' if not fausses else 'Lignes à revoir : ' + ', '.join('$' + f + '$' for f in fausses) + '.',
+}
+==

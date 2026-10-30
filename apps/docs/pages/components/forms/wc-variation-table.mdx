@@ -1,0 +1,376 @@
+---
+title: VariationTable
+description: Tableau de signes et de variations d'une fonction, à compléter par l'élève (valeurs de x, signes, zéros et valeurs interdites, flèches de variation, extremums et limites saisis avec MathLive). Adapté aux études de fonctions du lycée et du supérieur, au signe d'un produit ou d'un quotient et au signe de la dérivée.
+---
+
+import { Tabs, Tab } from 'nextra/components'
+import { ComponentProperties, Playground } from '../../../components'
+import { useAbsoluteUrl } from '../../../hooks'
+
+# VariationTable
+
+`wc-variation-table`
+
+Tableau de signes et de variations d'une fonction, à compléter par l'élève (valeurs de x, signes, zéros et valeurs interdites, flèches de variation, extremums et limites saisis avec MathLive). Adapté aux études de fonctions du lycée et du supérieur, au signe d'un produit ou d'un quotient et au signe de la dérivée.
+
+## Documentation
+
+Le composant VariationTable affiche un tableau de signes ou de variations que l'élève complète : valeurs de x, signes, zéros et valeurs interdites, flèches de variation, extremums et limites. Les valeurs se tapent avec MathLive (LaTeX), le reste se choisit d'un clic.
+
+### Structure
+
+Un tableau compte **n valeurs de x** (bornes comprises) et donc **n - 1 intervalles**. La propriété `rows` contient les lignes ; la première est toujours la ligne des valeurs de x. Chaque ligne a :
+
+- `type` : `"x"`, `"sign"` (ligne de signes) ou `"variation"` (ligne de variations) ;
+- `label` : l'intitulé en LaTeX (`"f'(x)"`, `"f(x)"`, `"x-1"`...) ;
+- `points` : une case par valeur de x ;
+- `intervals` : une case par intervalle ;
+- `locked` (facultatif) : `true` pour figer toute la ligne, ou la liste des cases figées (`"p0"` : première valeur, `"i1"` : deuxième intervalle...).
+
+| Ligne | `points` | `intervals` |
+|---|---|---|
+| `x` | la valeur de x en LaTeX (`-\infty`, `\frac{1}{2}`) | inutilisé |
+| `sign` | `""`, `"0"` ou `"\|\|"` (valeur interdite) | `""`, `"+"` ou `"-"` |
+| `variation` | la valeur en LaTeX, ou `["gauche", "droite"]` de part et d'autre d'une double barre | `""`, `"up"`, `"down"` ou `"const"` |
+
+Les valeurs sont placées automatiquement en haut, au milieu ou en bas selon les flèches voisines (maximum en haut, minimum en bas, valeur intermédiaire au milieu).
+
+### Ce que fait l'élève
+
+- un clic sur une case de signe la fait passer de vide à `+`, `-`, puis vide ; sur une case de point : `0`, `||` (valeur interdite), puis vide ;
+- un clic sur une case de variation : flèche montante, descendante, constante, puis vide ;
+- les valeurs (valeurs de x, extremums, limites) se tapent au clavier, comme dans `wc-math-live` (`oo` donne ∞) ;
+- avec `resizable`, la ligne « Colonnes » sous le tableau permet d'ajouter (**+**) ou de supprimer (**×**) une valeur de x : l'élève doit alors trouver lui-même les valeurs remarquables ;
+- avec `forbidden`, le bouton **||** de cette même ligne marque une valeur interdite : double barre dans les lignes de variations (deux limites à saisir) et `||` dans les lignes de signes.
+
+Les bornes et les cases figées (`locked`) ne sont pas modifiables. Les cases vides sont signalées par un point d'interrogation.
+
+### Exemple
+
+```
+tableau = :wc-variation-table
+tableau.resizable = true
+tableau.rows = [
+  {"type": "x", "label": "x", "points": ["-\infty", "+\infty"], "locked": ["p0", "p1"]},
+  {"type": "sign", "label": "f'(x)"},
+  {"type": "variation", "label": "f(x)"}
+]
+```
+
+Les cases manquantes sont complétées automatiquement : il suffit de donner les valeurs de x et l'intitulé des autres lignes. En PLE, une barre oblique inverse s'écrit une seule fois (`"-\infty"`) ; dans un script Python, elle se double (`"-\\infty"`).
+
+### Correction
+
+Le grader lit `tableau['rows']` (même structure). Les valeurs saisies sont du LaTeX brut de MathLive (sans normalisation par le Compute Engine) : `-\infty`, `\infty`, `\frac{1}{e}`, `e^{-1}`... Pour comparer des valeurs, utilisez un outil de calcul formel (SymPy) plutôt qu'une comparaison de chaînes.
+
+Le template « Maths MathLive » (bibliothèque `mlsympy`) corrige ce composant automatiquement avec une réponse de type `tableau` : le tableau attendu est calculé avec SymPy (zéros de la dérivée, valeurs interdites, signes, limites) et comparé case par case, avec un message pour chaque ligne fausse et des points partiels.
+
+### Applications pédagogiques
+
+- signe d'un produit ou d'un quotient de facteurs affines (seconde) ;
+- sens de variation d'un polynôme, extremums sur un intervalle (première) ;
+- étude complète de fonction avec limites et valeurs interdites (terminale, supérieur) ;
+- lecture d'un tableau donné (`disabled: true`) pour un exercice de compréhension.
+
+## Exemple interactif
+
+<Playground
+  width='100%'
+  items={[
+    {
+      name: 'Visualisation',
+      url: 'playground/components/wc-variation-table',
+    },
+    ...[
+  {
+    "name": "Exemple: Variations d’un polynôme",
+    "url": "/playground/exercises/variation-table/polynome.ple",
+    "code": "sandbox = \"python\"\n\ntableau = :wc-variation-table\ntableau.resizable = true\ntableau.rows = [\n  {\"type\": \"x\", \"label\": \"x\", \"points\": [\"-\\infty\", \"+\\infty\"], \"locked\": [\"p0\", \"p1\"]},\n  {\"type\": \"sign\", \"label\": \"f'(x)\"},\n  {\"type\": \"variation\", \"label\": \"f(x)\"}\n]\n\ntitle ==\nVariations d'un polynôme\n==\n\nstatement ==\nDresser le tableau de variations de la fonction $f$ définie sur $\\mathbb{R}$ par $f(x) = x^3 - 3x$.\n\nAjoutez les valeurs de x avec le bouton **+**, cliquez sur les cases pour choisir signes et flèches,\npuis tapez les extremums et les limites (`oo` donne $\\infty$).\n==\n\nform ==\n{{ tableau }}\n==\n\ngrader == #!lang=py\ndef norme(v):\n    v = (v or '').replace(' ', '')\n    return '+\\\\infty' if v in ('\\\\infty', '+\\\\infty') else v\n\nx, signe, variations = tableau['rows']\nerreurs = []\nif [norme(v) for v in x['points']] != ['-\\\\infty', '-1', '1', '+\\\\infty']:\n    erreurs.append(\"les valeurs de x\")\nif signe['intervals'] != ['+', '-', '+'] or signe['points'][1:3] != ['0', '0']:\n    erreurs.append(\"le signe de f'(x)\")\nif variations['intervals'] != ['up', 'down', 'up']:\n    erreurs.append(\"le sens de variation\")\nif [norme(v) for v in variations['points']] != ['-\\\\infty', '2', '-2', '+\\\\infty']:\n    erreurs.append(\"les extremums ou les limites\")\n\ngrade = 100 if not erreurs else 0\nfeedback = {\n    'type': 'success' if not erreurs else 'error',\n    'content': 'Bonne réponse !' if not erreurs else 'À revoir : ' + ', '.join(erreurs) + '.',\n}\n=="
+  },
+  {
+    "name": "Exemple: Signe d’un quotient",
+    "url": "/playground/exercises/variation-table/quotient.ple",
+    "code": "sandbox = \"python\"\n\ntableau = :wc-variation-table\ntableau.rows = [\n  {\"type\": \"x\", \"label\": \"x\", \"points\": [\"-\\infty\", \"-2\", \"1\", \"+\\infty\"], \"locked\": true},\n  {\"type\": \"sign\", \"label\": \"x+2\"},\n  {\"type\": \"sign\", \"label\": \"x-1\"},\n  {\"type\": \"sign\", \"label\": \"\\frac{x+2}{x-1}\"}\n]\n\ntitle ==\nSigne d'un quotient\n==\n\nstatement ==\nCompléter le tableau de signes de $\\dfrac{x+2}{x-1}$ : cliquez sur une case pour choisir\nle signe (`+`, `-`), ou pour placer un `0` ou une double barre (valeur interdite) sous une valeur de x.\n==\n\nform ==\n{{ tableau }}\n==\n\ngrader == #!lang=py\nattendu = [\n    (['', '0', '', ''], ['-', '+', '+']),\n    (['', '', '0', ''], ['-', '-', '+']),\n    (['', '0', '||', ''], ['+', '-', '+']),\n]\nlignes = tableau['rows'][1:]\nfausses = [\n    ligne['label'] for ligne, (points, intervalles) in zip(lignes, attendu)\n    if ligne['points'] != points or ligne['intervals'] != intervalles\n]\ngrade = 100 if not fausses else 0\nfeedback = {\n    'type': 'success' if not fausses else 'error',\n    'content': 'Bonne réponse !' if not fausses else 'Lignes à revoir : ' + ', '.join('$' + f + '$' for f in fausses) + '.',\n}\n=="
+  }
+]
+  ]}
+/>
+
+## API
+
+<Tabs items={['Graphique', 'JSON']}>
+  <Tab>
+    <ComponentProperties schema={{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "properties": {
+    "rows": {
+      "type": "array",
+      "default": [
+        {
+          "type": "x",
+          "label": "x",
+          "points": [
+            "-\\infty",
+            "+\\infty"
+          ],
+          "intervals": [
+            ""
+          ],
+          "locked": [
+            "p0",
+            "p1"
+          ]
+        },
+        {
+          "type": "sign",
+          "label": "f'(x)",
+          "points": [
+            "",
+            ""
+          ],
+          "intervals": [
+            ""
+          ]
+        },
+        {
+          "type": "variation",
+          "label": "f(x)",
+          "points": [
+            "",
+            ""
+          ],
+          "intervals": [
+            ""
+          ]
+        }
+      ],
+      "description": "Les lignes du tableau. La première est la ligne des valeurs de x (type: 'x'), les suivantes des lignes de signes ('sign') ou de variations ('variation').",
+      "items": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "x",
+              "sign",
+              "variation"
+            ],
+            "description": "La nature de la ligne."
+          },
+          "label": {
+            "type": "string",
+            "default": "",
+            "description": "L'intitulé de la ligne en LaTeX (x, f'(x), f(x)...)."
+          },
+          "points": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": [
+                "string",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Une case par valeur de x. Ligne x : la valeur en LaTeX. Ligne de signes : '', '0' ou '||'. Ligne de variations : la valeur (extremum, limite) en LaTeX, ou [gauche, droite] pour une valeur interdite."
+          },
+          "intervals": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "description": "Une case par intervalle entre deux valeurs de x. Ligne de signes : '', '+' ou '-'. Ligne de variations : '', 'up', 'down' ou 'const'."
+          },
+          "locked": {
+            "type": [
+              "boolean",
+              "array"
+            ],
+            "default": false,
+            "items": {
+              "type": "string"
+            },
+            "description": "true pour figer toute la ligne, ou la liste des cases figées : 'p0' pour la première valeur, 'i1' pour le deuxième intervalle..."
+          }
+        }
+      }
+    },
+    "resizable": {
+      "type": "boolean",
+      "default": false,
+      "description": "L'élève peut-il ajouter ou supprimer des valeurs de x ?"
+    },
+    "minPoints": {
+      "type": "number",
+      "default": 2,
+      "description": "Le nombre minimal de valeurs de x, bornes comprises."
+    },
+    "maxPoints": {
+      "type": "number",
+      "default": 8,
+      "description": "Le nombre maximal de valeurs de x, bornes comprises."
+    },
+    "values": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher les cases de valeurs (extremums, limites) dans les lignes de variations ?"
+    },
+    "forbidden": {
+      "type": "boolean",
+      "default": true,
+      "description": "L'élève peut-il placer des valeurs interdites (double barre) ?"
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le tableau ?"
+    }
+  }
+}} />
+  </Tab>
+  <Tab>
+    ```json
+    {
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "properties": {
+    "rows": {
+      "type": "array",
+      "default": [
+        {
+          "type": "x",
+          "label": "x",
+          "points": [
+            "-\\infty",
+            "+\\infty"
+          ],
+          "intervals": [
+            ""
+          ],
+          "locked": [
+            "p0",
+            "p1"
+          ]
+        },
+        {
+          "type": "sign",
+          "label": "f'(x)",
+          "points": [
+            "",
+            ""
+          ],
+          "intervals": [
+            ""
+          ]
+        },
+        {
+          "type": "variation",
+          "label": "f(x)",
+          "points": [
+            "",
+            ""
+          ],
+          "intervals": [
+            ""
+          ]
+        }
+      ],
+      "description": "Les lignes du tableau. La première est la ligne des valeurs de x (type: 'x'), les suivantes des lignes de signes ('sign') ou de variations ('variation').",
+      "items": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "x",
+              "sign",
+              "variation"
+            ],
+            "description": "La nature de la ligne."
+          },
+          "label": {
+            "type": "string",
+            "default": "",
+            "description": "L'intitulé de la ligne en LaTeX (x, f'(x), f(x)...)."
+          },
+          "points": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": [
+                "string",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Une case par valeur de x. Ligne x : la valeur en LaTeX. Ligne de signes : '', '0' ou '||'. Ligne de variations : la valeur (extremum, limite) en LaTeX, ou [gauche, droite] pour une valeur interdite."
+          },
+          "intervals": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "description": "Une case par intervalle entre deux valeurs de x. Ligne de signes : '', '+' ou '-'. Ligne de variations : '', 'up', 'down' ou 'const'."
+          },
+          "locked": {
+            "type": [
+              "boolean",
+              "array"
+            ],
+            "default": false,
+            "items": {
+              "type": "string"
+            },
+            "description": "true pour figer toute la ligne, ou la liste des cases figées : 'p0' pour la première valeur, 'i1' pour le deuxième intervalle..."
+          }
+        }
+      }
+    },
+    "resizable": {
+      "type": "boolean",
+      "default": false,
+      "description": "L'élève peut-il ajouter ou supprimer des valeurs de x ?"
+    },
+    "minPoints": {
+      "type": "number",
+      "default": 2,
+      "description": "Le nombre minimal de valeurs de x, bornes comprises."
+    },
+    "maxPoints": {
+      "type": "number",
+      "default": 8,
+      "description": "Le nombre maximal de valeurs de x, bornes comprises."
+    },
+    "values": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher les cases de valeurs (extremums, limites) dans les lignes de variations ?"
+    },
+    "forbidden": {
+      "type": "boolean",
+      "default": true,
+      "description": "L'élève peut-il placer des valeurs interdites (double barre) ?"
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Désactiver le tableau ?"
+    }
+  }
+}
+    ```
+  </Tab>
+</Tabs>
