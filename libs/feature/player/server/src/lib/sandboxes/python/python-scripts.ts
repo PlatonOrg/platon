@@ -170,8 +170,8 @@ if __name__ == "__main__":
     variables['platon_log'] = platon_log  # Fonction du module partagé
 
     try:
-        exec(with_try_clause(script, StopExec), variables)
         exec("", glob)
+        exec(with_try_clause(script, StopExec), variables)
     except BaseException as e:
         # Ne pas catcher les erreurs de timeout - les laisser se propager
         if is_timeout_error(e):
