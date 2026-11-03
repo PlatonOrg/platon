@@ -64,7 +64,7 @@ describe('NotificationService (integration)', () => {
   describe('cascade DB', () => {
     it("devrait supprimer automatiquement les notifications d'un utilisateur supprimé", async () => {
       const user = await seedUser()
-      await service.sendToUser(user.id, { type: 'FOO' })
+      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
 
       await userRepo.delete(user.id)
 
@@ -76,22 +76,24 @@ describe('NotificationService (integration)', () => {
   describe('deleteWhere', () => {
     it('devrait supprimer uniquement les notifications correspondant à une expression additionnelle réelle', async () => {
       const user = await seedUser()
-      await service.sendToUser(user.id, { type: 'FOO' })
-      await service.sendToUser(user.id, { type: 'BAR' })
+      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
+      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-2' })
 
-      const affected = await service.deleteWhere(user.id, (qb) => qb.andWhere(`data->>'type' = :type`, { type: 'FOO' }))
+      const affected = await service.deleteWhere(user.id, (qb) =>
+        qb.andWhere(`data->>'activityId' = :actId`, { actId: 'act-1' })
+      )
 
       expect(affected).toBe(1)
       const remaining = await notificationRepo.find({ where: { userId: user.id } })
       expect(remaining).toHaveLength(1)
-      expect(remaining[0].data['type']).toBe('BAR')
+      expect(remaining[0].data['activityId']).toBe('act-2')
     })
 
     it("ne devrait pas supprimer les notifications d'un autre utilisateur", async () => {
       const user1 = await seedUser()
       const user2 = await seedUser()
-      await service.sendToUser(user1.id, { type: 'FOO' })
-      await service.sendToUser(user2.id, { type: 'FOO' })
+      await service.sendToUser(user1.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
+      await service.sendToUser(user2.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
 
       await service.deleteWhere(user1.id)
 
@@ -103,9 +105,9 @@ describe('NotificationService (integration)', () => {
   describe('ofUser', () => {
     it('devrait trier par date décroissante, filtrer les non lues et paginer', async () => {
       const user = await seedUser()
-      const n1 = await service.sendToUser(user.id, { type: 'FIRST' })
+      const n1 = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
       await new Promise((resolve) => setTimeout(resolve, 5))
-      const n2 = await service.sendToUser(user.id, { type: 'SECOND' })
+      const n2 = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-2' })
       await notificationRepo.update(n1.id, { readAt: new Date() })
 
       const [unread] = await service.ofUser(user.id, { unread: true })
@@ -122,8 +124,8 @@ describe('NotificationService (integration)', () => {
   describe('markAsRead / markAllAsRead / unreadCount', () => {
     it('devrait marquer une notification comme lue puis refléter le compteur', async () => {
       const user = await seedUser()
-      const n1 = await service.sendToUser(user.id, { type: 'FOO' })
-      await service.sendToUser(user.id, { type: 'BAR' })
+      const n1 = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
+      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-2' })
 
       expect(await service.unreadCount(user.id)).toBe(2)
 
@@ -132,6 +134,28 @@ describe('NotificationService (integration)', () => {
 
       await service.markAllAsRead(user.id)
       expect(await service.unreadCount(user.id)).toBe(0)
+    })
+  })
+
+  describe('deleteOldNotifications (Cron)', () => {
+    it("devrait supprimer uniquement les notifications de plus d'un an", async () => {
+      const user = await seedUser()
+      const oldNotification = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-old' })
+
+      const pastDate = new Date()
+      pastDate.setFullYear(pastDate.getFullYear() - 2)
+      await notificationRepo.update(oldNotification.id, { createdAt: pastDate })
+
+      const recentNotification = await service.sendToUser(user.id, {
+        type: 'ACTIVITY-CLOSED',
+        activityId: 'act-recent',
+      })
+
+      await service.deleteOldNotifications()
+
+      const remaining = await notificationRepo.find({ where: { userId: user.id } })
+      expect(remaining).toHaveLength(1)
+      expect(remaining[0].id).toBe(recentNotification.id)
     })
   })
 })
