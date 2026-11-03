@@ -24,7 +24,7 @@ describe('LmsCourseService', () => {
 
   describe('create', () => {
     it('devrait sauvegarder la liaison LMS/cours', async () => {
-      const data = { lmsId: 'lms-1', lmsCourseId: 'ctx-1', courseId: 'course-1' }
+      const data = { ltiPlatformId: 'lms-1', lmsCourseId: 'ctx-1', courseId: 'course-1' }
       repository.save.mockResolvedValue(data as LmsCourseEntity)
 
       await expect(service.create(data)).resolves.toBe(data)
@@ -39,12 +39,17 @@ describe('LmsCourseService', () => {
       await expect((await service.findLmsCourseFromLTI('ctx-1', 'lms-1')).isEmpty()).toBe(true)
     })
 
-    it('devrait chercher par lmsCourseId et lmsId', async () => {
+    it('ne devrait pas interroger la base sans id de cours LMS (TypeORM ignorerait la condition)', async () => {
+      await expect((await service.findLmsCourseFromLTI(undefined as unknown as string, 'lms-1')).isEmpty()).toBe(true)
+      expect(repository.findOne).not.toHaveBeenCalled()
+    })
+
+    it('devrait chercher par lmsCourseId et ltiPlatformId', async () => {
       repository.findOne.mockResolvedValue(null)
 
       await service.findLmsCourseFromLTI('ctx-1', 'lms-1')
 
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { lmsCourseId: 'ctx-1', lmsId: 'lms-1' } })
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { lmsCourseId: 'ctx-1', ltiPlatformId: 'lms-1' } })
     })
   })
 })

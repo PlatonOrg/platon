@@ -72,7 +72,7 @@ describe('CourseLTIInterceptor', () => {
 
   it('devrait rediriger vers /courses/not-found si aucun cours LMS existant et utilisateur non enseignant', async () => {
     lmsCourseService.findLmsCourseFromLTI.mockResolvedValue(Optional.empty())
-    const args = buildArgs({ context_id: 'ctx-1', is_instructor: false }, '/login')
+    const args = buildArgs({ id: 'ctx-1', is_instructor: false }, '/login')
 
     await interceptor.intercept(args)
 
@@ -84,7 +84,7 @@ describe('CourseLTIInterceptor', () => {
   it('devrait créer un nouveau cours pour un enseignant sans cours LMS existant', async () => {
     lmsCourseService.findLmsCourseFromLTI.mockResolvedValue(Optional.empty())
     courseService.create.mockResolvedValue({ id: 'new-course' } as CourseEntity)
-    const args = buildArgs({ context_id: 'ctx-1', context_title: 'My Course', is_instructor: true }, '/login')
+    const args = buildArgs({ id: 'ctx-1', title: 'My Course', is_instructor: true }, '/login')
 
     await interceptor.intercept(args)
 
@@ -92,18 +92,29 @@ describe('CourseLTIInterceptor', () => {
       expect.objectContaining({ name: 'My Course', ownerId: 'user-1', isTest: false })
     )
     expect(lmsCourseService.create).toHaveBeenCalledWith({
-      lmsId: 'lms-1',
+      ltiPlatformId: 'lms-1',
       lmsCourseId: 'ctx-1',
       courseId: 'new-course',
     })
     expect(args.nextUrl).toBe('/courses/new-course')
   })
 
+  it("devrait renvoyer vers l'accueil sans inscrire l'utilisateur si le lancement n'a pas de contexte de cours", async () => {
+    const args = buildArgs({ is_instructor: true }, '/login')
+
+    await interceptor.intercept(args)
+
+    expect(args.nextUrl).toBe('/')
+    expect(lmsCourseService.findLmsCourseFromLTI).not.toHaveBeenCalled()
+    expect(courseService.create).not.toHaveBeenCalled()
+    expect(courseMemberService.addUser).not.toHaveBeenCalled()
+  })
+
   it('devrait réutiliser un cours LMS existant', async () => {
     lmsCourseService.findLmsCourseFromLTI.mockResolvedValue(
       Optional.of({ courseId: 'existing-course' } as LmsCourseEntity)
     )
-    const args = buildArgs({ context_id: 'ctx-1' }, '/login')
+    const args = buildArgs({ id: 'ctx-1' }, '/login')
 
     await interceptor.intercept(args)
 
@@ -119,6 +130,25 @@ describe('CourseLTIInterceptor', () => {
 
       expect(courseMemberService.addUser).toHaveBeenCalledWith('course-1', 'user-1', 'student')
       expect(courseMemberService.updateRole).not.toHaveBeenCalled()
+    })
+
+    it("devrait attendre la fin de l'inscription avant de rendre la main", async () => {
+      let enrolled = false
+      courseMemberService.addUser.mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        enrolled = true
+        return {} as never
+      })
+
+      await interceptor.intercept(buildArgs({}, '/courses/course-1'))
+
+      expect(enrolled).toBe(true)
+    })
+
+    it("devrait propager une erreur d'inscription", async () => {
+      courseMemberService.addUser.mockRejectedValue(new Error('boom'))
+
+      await expect(interceptor.intercept(buildArgs({}, '/courses/course-1'))).rejects.toThrow('boom')
     })
 
     it('devrait mettre à jour le rôle si le membre existant a un rôle différent', async () => {
@@ -155,7 +185,7 @@ describe('CourseLTIInterceptor', () => {
   })
 
   it('devrait ajouter le user aux groupes personnalisés', async () => {
-    const args = buildArgs({ custom_groups: 'group-1,group-2' }, '/courses/course-1')
+    const args = buildArgs({ groups: 'group-1,group-2' }, '/courses/course-1')
 
     await interceptor.intercept(args)
 
@@ -165,7 +195,7 @@ describe('CourseLTIInterceptor', () => {
     expect(courseGroupMemberService.addCourseGroupMember).toHaveBeenCalledWith('group-2', 'user-1')
   })
 
-  it('ne devrait pas traiter les groupes si custom_groups est absent', async () => {
+  it('ne devrait pas traiter les groupes si groups est absent', async () => {
     const args = buildArgs({}, '/courses/course-1')
 
     await interceptor.intercept(args)

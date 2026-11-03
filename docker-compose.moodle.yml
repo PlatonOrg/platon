@@ -1,0 +1,62 @@
+# Local Moodle to test PLaTon's LTI integration (1.1 and 1.3), on https://localhost:8443.
+#
+# Prerequisites: ./bin/install.sh (generates moodle.crt and the rootCA.crt root CA) and the dev stack running.
+#   docker compose -f docker-compose.moodle.yml up -d
+#
+# From Moodle, PLaTon is reachable at https://host.docker.internal (covered by localhost.crt).
+# The administrator account is `admin` / MOODLE_ADMIN_PASSWORD.
+name: platon-moodle
+
+services:
+  moodle-db:
+    image: mariadb:10.11
+    container_name: platon_moodle_db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: change-me-db
+      MARIADB_ROOT_PASSWORD: change-me-root
+    volumes:
+      - moodle-db:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 10s
+      retries: 30
+
+  moodle:
+    image: oksigenia/moodle:4.5
+    container_name: platon_moodle
+    restart: unless-stopped
+    depends_on:
+      moodle-db:
+        condition: service_healthy
+    ports:
+      - '8443:8443'
+    extra_hosts:
+      # Automatic with Docker Desktop, required on Linux
+      - 'host.docker.internal:host-gateway'
+    environment:
+      # LTI 1.3 requires an HTTPS URL: it is used as the issuer and as the base of the platform URLs
+      MOODLE_URL: https://localhost:8443
+      MOODLE_DB_HOST: moodle-db
+      MOODLE_DB_PASSWORD: change-me-db
+      MOODLE_ADMIN_PASSWORD: change-me-admin
+    volumes:
+      - moodle:/var/www/moodle
+      - moodledata:/var/www/moodledata
+      # Apache HTTPS certificate
+      - ./.docker/nginx/ssl/certs/moodle.crt:/certs/tls.crt:ro
+      - ./.docker/nginx/ssl/certs/moodle.key:/certs/tls.key:ro
+      # Local root CA: Moodle (PHP) must trust PLaTon to fetch its keys (/lti/keys)
+      - ./.docker/nginx/ssl/certs/rootCA.crt:/usr/local/share/ca-certificates/platon-local-root-ca.crt:ro
+    # Adds the root CA to the system store before the image's normal startup
+    entrypoint: ['/bin/bash', '-c', 'update-ca-certificates && exec /usr/bin/tini -g -- docker-entrypoint all']
+
+volumes:
+  moodle-db:
+    name: platon_moodle_db
+  moodle:
+    name: platon_moodle
+  moodledata:
+    name: platon_moodledata

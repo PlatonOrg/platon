@@ -1,5 +1,5 @@
 import { CasVersions } from '@platon/feature/cas/common'
-import { LmsEntity, LTIService } from '@platon/feature/lti/server'
+import { LmsEntity, LTIOldService } from '@platon/feature/lti/server'
 import { createTestDatabase, TestDatabase } from '@platon/core/testing/server'
 import { DataSource, QueryFailedError, Repository } from 'typeorm'
 import { CasEntity } from './entities/cas.entity'
@@ -18,7 +18,7 @@ describe('CasService (integration)', () => {
   let lmsRepo: Repository<LmsEntity>
   let service: CasService
 
-  const fakeLtiService = { findLmsById: jest.fn() } as unknown as LTIService
+  const fakeLtiService = { findLmsById: jest.fn() } as unknown as LTIOldService
 
   beforeAll(async () => {
     testDb = await createTestDatabase([LmsEntity, CasEntity])

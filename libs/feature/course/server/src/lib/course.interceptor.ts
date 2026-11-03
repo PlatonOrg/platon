@@ -36,108 +36,114 @@ export class CourseLTIInterceptor implements LTILaunchInterceptor {
     const { user } = lmsUser
     const role = this.getRoleFromPayload(payload)
 
-    this.logger.log(
-      `[LTI COURSE INTERCEPTOR] Début du traitement pour l'utilisateur: ${user.username} (ID: ${user.id})`
-    )
-    this.logger.log(`[LTI COURSE INTERCEPTOR] Rôle déterminé: ${role}`)
-    this.logger.log(`[LTI COURSE INTERCEPTOR] URL actuelle: ${args.nextUrl}`)
+    this.logger.log(`[LTI COURSE INTERCEPTOR] Processing user: ${user.username} (ID: ${user.id})`)
+    this.logger.log(`[LTI COURSE INTERCEPTOR] Resolved role: ${role}`)
+    this.logger.log(`[LTI COURSE INTERCEPTOR] Current URL: ${args.nextUrl}`)
 
     const courseMatch = args.nextUrl.match(/\/courses\/(?<courseId>[^\\/]+)/)
     let courseId = courseMatch?.groups?.['courseId'] || payload['custom_course']
 
-    this.logger.log(`[LTI COURSE INTERCEPTOR] CourseId extrait de l'URL: ${courseId || 'NON TROUVÉ'}`)
-    this.logger.log(`[LTI COURSE INTERCEPTOR] Payload complet:`, payload)
+    this.logger.log(`[LTI COURSE INTERCEPTOR] CourseId extracted from URL: ${courseId || 'NOT FOUND'}`)
+    this.logger.log(`[LTI COURSE INTERCEPTOR] Full payload:`, payload)
 
     if (!courseId) {
-      this.logger.log(`[LTI COURSE INTERCEPTOR] Recherche du cours LMS avec context_id: ${payload['context_id']}`)
-      const lmsCourse = await this.lmsCourseService.findLmsCourseFromLTI(payload['context_id'], lms.id)
+      const lmsCourseId = payload['id']
+      if (typeof lmsCourseId !== 'string' || !lmsCourseId) {
+        // Launch without a course context (the `context` claim is optional in LTI 1.3): no course to link
+        this.logger.warn(`[LTI COURSE INTERCEPTOR] No LMS course id, redirecting to home`)
+        args.nextUrl = '/'
+        return
+      }
+
+      this.logger.log(`[LTI COURSE INTERCEPTOR] Looking up LMS course with id: ${lmsCourseId}`)
+      const lmsCourse = await this.lmsCourseService.findLmsCourseFromLTI(lmsCourseId, lms.id)
 
       const lmsCoursePresent = lmsCourse.isPresent()
-      this.logger.log(`[LTI COURSE INTERCEPTOR] Cours LMS trouvé: ${lmsCoursePresent ? 'OUI' : 'NON'}`)
+      this.logger.log(`[LTI COURSE INTERCEPTOR] LMS course found: ${lmsCoursePresent ? 'YES' : 'NO'}`)
 
       if (!lmsCoursePresent && role === CourseMemberRoles.teacher) {
-        this.logger.log(`[LTI COURSE INTERCEPTOR] Création d'un nouveau cours par l'enseignant`)
-        this.logger.log(`[LTI COURSE INTERCEPTOR] Titre du cours: ${payload['context_title']}`)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Creating a new course for the teacher`)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Course title: ${payload['title']}`)
+
+        if (!payload['title']) {
+          payload['title'] = 'Cours PLaTOn'
+        }
 
         const course = await this.CourseService.create({
-          name: payload['context_title'],
-          desc: `Cours PLaTOn rattaché à : ${payload['context_title']}`,
+          name: payload['title'] as string,
+          desc: `Cours PLaTOn rattaché à : ${payload['title']}`,
           ownerId: user.id,
           isTest: false,
         })
 
         courseId = course.id
-        this.logger.log(`[LTI COURSE INTERCEPTOR] Cours créé avec ID: ${courseId}`)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Course created with ID: ${courseId}`)
 
         await this.lmsCourseService.create({
-          lmsId: lms.id,
-          lmsCourseId: payload['context_id'],
-          courseId,
+          ltiPlatformId: lms.id,
+          lmsCourseId,
+          courseId: courseId as string,
         })
 
-        this.logger.log(`[LTI COURSE INTERCEPTOR] Liaison LMS-Cours créée`)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] LMS-course link created`)
 
         args.nextUrl = `/courses/${courseId}`
-        this.logger.log(`[LTI COURSE INTERCEPTOR] URL mise à jour: ${args.nextUrl}`)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Updated URL: ${args.nextUrl}`)
       } else if (!lmsCoursePresent && role !== CourseMemberRoles.teacher) {
         this.logger.log(
-          `[LTI COURSE INTERCEPTOR] Cours non trouvé et utilisateur non enseignant - redirection vers not-found`
+          `[LTI COURSE INTERCEPTOR] Course not found and user is not a teacher - redirecting to not-found`
         )
         args.nextUrl = '/courses/not-found'
         return
       } else {
         courseId = lmsCourse.get().courseId
-        this.logger.log(`[LTI COURSE INTERCEPTOR] Cours existant trouvé avec ID: ${courseId}`)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Existing course found with ID: ${courseId}`)
         args.nextUrl = `/courses/${courseId}`
-        this.logger.log(`[LTI COURSE INTERCEPTOR] URL mise à jour: ${args.nextUrl}`)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Updated URL: ${args.nextUrl}`)
       }
     } else {
       args.nextUrl = `/courses/${courseId}`
-      this.logger.log(`[LTI COURSE INTERCEPTOR] URL mise à jour: ${args.nextUrl}`)
+      this.logger.log(`[LTI COURSE INTERCEPTOR] Updated URL: ${args.nextUrl}`)
     }
 
-    this.logger.log(`[LTI COURSE INTERCEPTOR] Vérification de l'adhésion au cours pour l'utilisateur: ${user.id}`)
-    const courseMember = await this.courseMemberService.getByUserIdAndCourseId(user.id, courseId)
+    this.logger.log(`[LTI COURSE INTERCEPTOR] Checking course membership for user: ${user.id}`)
+    const courseMember = await this.courseMemberService.getByUserIdAndCourseId(user.id, courseId as string)
 
-    courseMember.ifPresentOrElse(
-      (member) => {
-        this.logger.log(
-          `[LTI COURSE INTERCEPTOR] Membre existant trouvé - Rôle actuel: ${member.role}, Rôle LTI: ${role}`
-        )
-        if (member.role !== role) {
-          this.logger.log(`[LTI COURSE INTERCEPTOR] Mise à jour du rôle de ${member.role} vers ${role}`)
-          return this.courseMemberService.updateRole(courseId, member.id, role)
-        }
-        return member
-      },
-      () => {
-        this.logger.log(
-          `[LTI COURSE INTERCEPTOR] Ajout de l'utilisateur ${user.username} au cours ${courseId} avec le rôle ${role}`
-        )
-        return this.courseMemberService.addUser(courseId, user.id, role)
+    // Enrollment must be done before returning: the client is redirected to the course right after
+    if (courseMember.isPresent()) {
+      const member = courseMember.get()
+      this.logger.log(
+        `[LTI COURSE INTERCEPTOR] Existing member found - current role: ${member.role}, LTI role: ${role}`
+      )
+      if (member.role !== role) {
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Updating role from ${member.role} to ${role}`)
+        await this.courseMemberService.updateRole(courseId as string, member.id, role)
       }
-    )
+    } else {
+      this.logger.log(`[LTI COURSE INTERCEPTOR] Adding user ${user.username} to course ${courseId} with role ${role}`)
+      await this.courseMemberService.addUser(courseId as string, user.id, role)
+    }
     const customActivity = payload['custom_activity']
     if (courseId && customActivity) {
-      this.logger.log(`[LTI COURSE INTERCEPTOR] Activité personnalisée trouvée: ${customActivity}`)
+      this.logger.log(`[LTI COURSE INTERCEPTOR] Custom activity found: ${customActivity}`)
       args.nextUrl = `/player/activity/${customActivity}`
     }
-    const customGroups = payload['custom_groups']
-    this.logger.log(`[LTI COURSE INTERCEPTOR] Groupes personnalisés: ${customGroups || 'AUCUN'}`)
+    const customGroups = payload['groups'] as string
+    this.logger.log(`[LTI COURSE INTERCEPTOR] Custom groups: ${customGroups || 'NONE'}`)
 
     if (courseId && customGroups && customGroups.length > 0) {
       const groups = customGroups.split(',')
-      this.logger.log(`[LTI COURSE INTERCEPTOR] Traitement de ${groups.length} groupes: ${groups.join(', ')}`)
+      this.logger.log(`[LTI COURSE INTERCEPTOR] Processing ${groups.length} groups: ${groups.join(', ')}`)
 
       for (const group of groups) {
-        this.logger.log(`[LTI COURSE INTERCEPTOR] Ajout au groupe: ${group}`)
-        await this.courseGroupService.addCourseGroup(courseId, group)
+        this.logger.log(`[LTI COURSE INTERCEPTOR] Adding to group: ${group}`)
+        await this.courseGroupService.addCourseGroup(courseId as string, group)
         await this.courseGroupMemberService.addCourseGroupMember(group, user.id)
       }
 
-      this.logger.log(`[LTI COURSE INTERCEPTOR] Tous les groupes ont été traités`)
+      this.logger.log(`[LTI COURSE INTERCEPTOR] All groups processed`)
     }
 
-    this.logger.log(`[LTI COURSE INTERCEPTOR] Traitement terminé pour l'utilisateur: ${user.username}`)
+    this.logger.log(`[LTI COURSE INTERCEPTOR] Done processing user: ${user.username}`)
   }
 }
