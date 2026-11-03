@@ -16,12 +16,20 @@ export enum NotificationType {
   MODERATION_ACTIVITY_CHANGES = 'MODERATION-ACTIVITY-CHANGES',
   SESSION_STATE_CHANGES = 'SESSION-STATE-CHANGES',
 }
+
+/** Utility notification. Those are notification that must be receive but not show to user.*/
+export const HIDDEN_NOTIFICATION_TYPES: readonly NotificationType[] = [
+  NotificationType.MODERATION_ACTIVITY_CHANGES,
+  NotificationType.SESSION_STATE_CHANGES,
+]
+
 export interface Notification<TData = unknown> {
   id: string
   userId: string
   createdAt: Date
   updatedAt: Date
   readAt?: Date | null
+  type: NotificationType
   groupId: string | null
   data: TData
 }

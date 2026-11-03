@@ -2,7 +2,12 @@ import { DiscoveryService } from '@golevelup/nestjs-discovery'
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DeleteWhereExpression, PubSubService, buildDeleteQuery } from '@platon/core/server'
-import { MAX_AGE_MONTHS, NotificationFilters, NotificationType } from '@platon/feature/notification/common'
+import {
+  HIDDEN_NOTIFICATION_TYPES,
+  MAX_AGE_MONTHS,
+  NotificationFilters,
+  NotificationType,
+} from '@platon/feature/notification/common'
 import { EntityManager, In, IsNull, Repository } from 'typeorm'
 import { NotificationEntity } from './notification.entity'
 import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notification.provider'
@@ -150,10 +155,12 @@ export class NotificationService {
   }
 
   /**Regroup the notification by type to hide the similar ones
-   * Return the most recent for each group
+   * @param userId receive notification of this user
+   * @param includeUtility optional if set to false it removes all notifications where their types are in HIDDEN_NOTIFICATION_TYPES
+   * @Return the most recent for each group
    */
-  private visibleQuery(userId: string) {
-    return this.repository
+  private visibleQuery(userId: string, includeUtility = true) {
+    const query = this.repository
       .createQueryBuilder('notification')
       .where('notification.user_id = :userId', { userId })
       .andWhere('notification.created_at > :maxAge', { maxAge: this.limitDate(MAX_AGE_MONTHS) }).andWhere(`NOT EXISTS (
@@ -162,9 +169,14 @@ export class NotificationService {
           AND newer.group_id = notification.group_id
           AND (newer.created_at, newer.id) > (notification.created_at, notification.id)
         )`)
+    if (!includeUtility) {
+      query.andWhere('notification.type NOT IN (:...hidden)', { hidden: HIDDEN_NOTIFICATION_TYPES })
+    }
+    return query
   }
 
   async ofUser(userId: string, filters: NotificationFilters = {}): Promise<[NotificationEntity[], number]> {
+    // include all notification types even utility ones (those in HIDDEN_NOTIFICATION_TYPES)
     const query = this.visibleQuery(userId).orderBy('notification.created_at', 'DESC')
 
     if (filters.unread) {
@@ -272,8 +284,12 @@ export class NotificationService {
     return affected
   }
 
+  /** Return the number of unread notifications.
+   * Notifications are regroupe by type. It count only one per group.
+   * It doesn't take in count the notifications where the type is in HIDDEN_NOTIFICATION_TYPES
+   */
   async unreadCount(userId: string): Promise<number> {
-    return this.visibleQuery(userId).andWhere('notification.read_at IS NULL').getCount()
+    return this.visibleQuery(userId, false).andWhere('notification.read_at IS NULL').getCount()
   }
 
   async withExtraData(notification: NotificationEntity): Promise<Record<string, unknown> | undefined> {

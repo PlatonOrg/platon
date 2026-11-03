@@ -8,6 +8,7 @@ import { NotificationEntity } from './notification.entity'
 import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notification.provider'
 import { ON_CHANGE_NOTIFICATIONS } from './notification.pubsub'
 import { NotificationService } from './notification.service'
+import { HIDDEN_NOTIFICATION_TYPES } from '@platon/feature/notification/common'
 
 describe('NotificationService', () => {
   let service: NotificationService
@@ -291,6 +292,12 @@ describe('NotificationService', () => {
       expect(qb.offset).toHaveBeenCalledWith(10)
       expect(qb.limit).toHaveBeenCalledWith(5)
     })
+
+    it('ne devrait pas exclure les types utilitaires', async () => {
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+      await service.ofUser('user-1')
+      expect(qb.andWhere).not.toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', expect.anything())
+    })
   })
 
   function mockQueryBuilder() {
@@ -446,6 +453,14 @@ describe('NotificationService', () => {
       expect(qb['andWhere']).toHaveBeenCalledWith('notification.read_at IS NULL')
       expect(qb['andWhere']).toHaveBeenCalledWith('notification.created_at > :maxAge', {
         maxAge: new Date('2025-10-21T12:00:00Z'),
+      })
+    })
+    it('devrait exclure les types utilitaires', async () => {
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      await service.unreadCount('user-1')
+      expect(qb['andWhere']).toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', {
+        hidden: Object.values(HIDDEN_NOTIFICATION_TYPES),
       })
     })
   })

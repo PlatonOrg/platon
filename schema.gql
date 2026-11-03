@@ -43,6 +43,7 @@ type Notification {
   readAt: Date
   data: JSON!
   groupId: String
+  type: NotificationType!
   user: User!
 }
 
@@ -50,6 +51,25 @@ type Notification {
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+enum NotificationType {
+  COURSE_MEMBER_CREATION
+  ACTIVITY_MEMBER_CREATION
+  CORRECTOR_CREATED
+  CORRECTOR_REMOVED
+  CORRECTION_PENDING
+  CORRECTION_AVAILABLE
+  ACTIVITY_CLOSED
+  RESOURCE_MOVED_BY_ADMIN
+  EXERCISE_CHANGES
+  RESOURCE_INVITATION
+  MEMBER_CREATE
+  MEMBER_REMOVE
+  RESOURCE_STATUS_CHANGE
+  RESOURCE_CREATE
+  MODERATION_ACTIVITY_CHANGES
+  SESSION_STATE_CHANGES
+}
 
 type NotificationConnection {
   edges: [NotificationGraphModelEdge!]!
