@@ -472,4 +472,49 @@ describe('NotificationService', () => {
       await expect(service.withExtraData(notification)).resolves.toBeUndefined()
     })
   })
+
+  describe('deleteOldNotifications', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-21T12:00:00Z'))
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it("devrait supprimer les notifications de plus d'un an", async () => {
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+
+      await service.deleteOldNotifications()
+
+      expect(qb['from']).toHaveBeenCalledWith(NotificationEntity)
+      expect(qb['where']).toHaveBeenCalledWith('created_at < :maxAge', {
+        maxAge: new Date('2025-10-21T12:00:00Z'),
+      })
+      expect(qb['execute']).toHaveBeenCalledTimes(1)
+    })
+
+    it('devrait journaliser le nombre de notifications supprimées', async () => {
+      const logSpy = jest.spyOn(service['logger'], 'log').mockImplementation()
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      qb['execute'].mockResolvedValue({ affected: 7 })
+
+      await service.deleteOldNotifications()
+
+      expect(logSpy).toHaveBeenCalledWith('Done deleting 7 notifications that were created at least 12 months ago')
+    })
+
+    it("devrait journaliser 0 si rien n'est supprimé", async () => {
+      const logSpy = jest.spyOn(service['logger'], 'log').mockImplementation()
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      qb['execute'].mockResolvedValue({ affected: undefined })
+
+      await service.deleteOldNotifications()
+
+      expect(logSpy).toHaveBeenCalledWith('Done deleting 0 notifications that were created at least 12 months ago')
+    })
+  })
 })

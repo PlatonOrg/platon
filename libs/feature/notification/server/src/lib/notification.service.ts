@@ -309,4 +309,19 @@ export class NotificationService {
       })
       .catch(this.logger.error.bind(this.logger))
   }
+
+  /** Remove all notifications that are too old.
+   */
+  async deleteOldNotifications(): Promise<void> {
+    const result = await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(NotificationEntity)
+      .where('created_at < :maxAge', { maxAge: this.limitDate(MAX_AGE_MONTHS) })
+      .execute()
+
+    this.logger.log(
+      `Done deleting ${result.affected ?? 0} notifications that were created at least ${MAX_AGE_MONTHS} months ago`
+    )
+  }
 }
