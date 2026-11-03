@@ -42,6 +42,7 @@ type Notification {
   updatedAt: Date!
   readAt: Date
   data: JSON!
+  groupId: String
   user: User!
 }
 

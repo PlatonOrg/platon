@@ -20,6 +20,9 @@ export class NotificationGraphModel extends BaseGraphModel implements Notificati
   @Field(() => GraphQLJSON)
   data!: Record<string, unknown>
 
+  @Field(() => String, { nullable: true })
+  groupId!: string | null
+
   userId!: string
 }
 

@@ -68,24 +68,29 @@ export class NotificationListComponent implements OnChanges {
   @Output() loadMore = new EventEmitter()
 
   protected items: Item[] = []
+  private cache = new Map<string, Item>()
 
   ngOnChanges(): void {
+    const next = new Map<string, Item>()
     this.items = this.notifications.map((notification) => {
-      const injector = Injector.create({
-        parent: this.injector,
-        providers: [
-          {
-            provide: NOTIFICATION,
-            useValue: notification,
-          },
-        ],
-      })
-      return {
-        injector,
-        renderer: this.parsers?.find((parser) => parser.support(notification))?.renderer(notification, injector),
-        notification,
-      } as Item
+      const previous = this.cache.get(notification.id)
+      const item = previous ? { ...previous, notification } : this.createItem(notification)
+      next.set(notification.id, item)
+      return item
     })
+    this.cache = next
+  }
+
+  private createItem(notification: Notification): Item {
+    const injector = Injector.create({
+      parent: this.injector,
+      providers: [{ provide: NOTIFICATION, useValue: notification }],
+    })
+    return {
+      injector,
+      renderer: this.parsers?.find((p) => p.support(notification))?.renderer(notification, injector),
+      notification,
+    } as Item
   }
 
   protected delete(notification: Notification): void {

@@ -9,6 +9,7 @@ export const NOTIFICATION_QUERIES = gql`
     createdAt
     updatedAt
     data
+    groupId
     user {
       id
       email
@@ -65,6 +66,7 @@ export const decodeNotificationFragment = (fragment: NotifFragment): Notificatio
     createdAt: new Date(fragment.createdAt),
     updatedAt: new Date(fragment.updatedAt),
     data: fragment.data,
+    groupId: fragment.groupId ?? null,
     userId: fragment.user.id,
     readAt: fragment.readAt ? new Date(fragment.readAt) : null,
   }

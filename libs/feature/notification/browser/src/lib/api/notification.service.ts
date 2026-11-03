@@ -46,27 +46,26 @@ export class NotificationService {
         if (!payload.subscriptionData.data) {
           return prev
         }
-
         const change = payload.subscriptionData.data.onChangeNotifications
         const pageInfo = prev.notifications?.pageInfo
+        const previousEdges = prev.notifications?.edges ?? []
 
         counter.next(change.unreadCount)
+        const incoming = change.newNotification
+        const edges = incoming
+          ? [
+              { node: incoming, cursor: incoming.id },
+              ...previousEdges.filter(
+                ({ node }) => node.id !== incoming.id && !(incoming.groupId && node.groupId === incoming.groupId)
+              ),
+            ]
+          : previousEdges
 
         return {
           ...prev,
           notifications: {
             ...prev.notifications,
-            edges: [
-              ...(change.newNotification
-                ? [
-                    {
-                      node: change.newNotification,
-                      cursor: change.newNotification.id,
-                    },
-                  ]
-                : []),
-              ...(prev.notifications?.edges ?? []),
-            ],
+            edges,
             pageInfo: {
               ...pageInfo,
               endCursor: pageInfo?.endCursor ?? null,
