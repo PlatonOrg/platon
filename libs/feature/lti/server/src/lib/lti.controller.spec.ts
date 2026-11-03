@@ -3,11 +3,11 @@ import { NotFoundResponse } from '@platon/core/common'
 import { Optional } from 'typescript-optional'
 import { LmsEntity } from './entities/lms.entity'
 import { LTIController } from './lti.controller'
-import { LTIService } from './lti.service'
+import { LTIOldService } from './lti.service.old'
 
 describe('LTIController', () => {
   let controller: LTIController
-  let service: jest.Mocked<Pick<LTIService, 'searchLMS' | 'findLmsById' | 'createLms' | 'updateLms' | 'deleteLms'>>
+  let service: jest.Mocked<Pick<LTIOldService, 'searchLMS' | 'findLmsById' | 'createLms' | 'updateLms' | 'deleteLms'>>
 
   beforeEach(async () => {
     service = {
@@ -19,7 +19,7 @@ describe('LTIController', () => {
     }
 
     const module = await Test.createTestingModule({
-      providers: [LTIController, { provide: LTIService, useValue: service }],
+      providers: [LTIController, { provide: LTIOldService, useValue: service }],
     }).compile()
 
     controller = module.get(LTIController)

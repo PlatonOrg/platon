@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService, UserService } from '@platon/core/server'
 import { NotFoundResponse } from '@platon/core/common'
-import { LTIService } from '@platon/feature/lti/server'
+import { LTIOldService } from '@platon/feature/lti/server'
 import { Optional } from 'typescript-optional'
 import { AxiosService } from './axios.service'
 import { CasController } from './cas.controller'
@@ -11,7 +11,7 @@ import { CasService } from './cas.service'
 describe('CasController', () => {
   let controller: CasController
   let service: jest.Mocked<CasService>
-  let ltiService: jest.Mocked<LTIService>
+  let ltiService: jest.Mocked<LTIOldService>
   let authService: jest.Mocked<AuthService>
   let userService: jest.Mocked<UserService>
   let https: jest.Mocked<AxiosService>
@@ -26,13 +26,14 @@ describe('CasController', () => {
             searchCas: jest.fn(),
             findCasById: jest.fn(),
             findCasByName: jest.fn(),
+            findLmsIds: jest.fn().mockResolvedValue([]),
             createCas: jest.fn(),
             updateCas: jest.fn(),
             deleteCas: jest.fn(),
             fromInput: jest.fn(),
           },
         },
-        { provide: LTIService, useValue: { findLmsUserByUsername: jest.fn() } },
+        { provide: LTIOldService, useValue: { findLmsUserByUsername: jest.fn() } },
         { provide: AuthService, useValue: { authenticate: jest.fn() } },
         { provide: UserService, useValue: { findById: jest.fn() } },
         { provide: AxiosService, useValue: { get: jest.fn() } },
@@ -41,7 +42,7 @@ describe('CasController', () => {
 
     controller = module.get(CasController)
     service = module.get(CasService)
-    ltiService = module.get(LTIService)
+    ltiService = module.get(LTIOldService)
     authService = module.get(AuthService)
     userService = module.get(UserService)
     https = module.get(AxiosService)
