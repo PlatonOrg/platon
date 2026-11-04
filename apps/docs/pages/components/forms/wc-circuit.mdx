@@ -19,7 +19,7 @@ Le composant **Circuit** affiche un schéma électrique décrit en JSON. Le mêm
 
 Le composant a deux usages :
 
-- **figure** (`readonly: true`) : schéma d'un énoncé, d'une correction ou d'un retour, avec les interrupteurs dans la position choisie par l'auteur ;
+- **figure** (`disabled: true`) : schéma d'un énoncé, d'une correction ou d'un retour, avec les interrupteurs dans la position choisie par l'auteur ;
 - **saisie** : l'élève clique sur un interrupteur (clic gauche) pour le faire passer à la position suivante. Le correcteur reçoit dans `value` la position de **tous** les interrupteurs, par identifiant.
 
 Le clavier fonctionne aussi : chaque interrupteur est un bouton (Tab pour l'atteindre, Entrée ou Espace pour le manœuvrer).
@@ -169,11 +169,6 @@ Le template « Électronique » fournit la bibliothèque `elec.py` : elle recons
       "default": {},
       "description": "Position de chaque interrupteur, par identifiant : 0 ouvert, 1 fermé (switch, push, toggle) ; numéro de la borne (selector), -1 pour la position sans contact. Complétée automatiquement pour contenir tous les interrupteurs."
     },
-    "readonly": {
-      "type": "boolean",
-      "default": false,
-      "description": "Afficher le schéma sans permettre de manœuvrer les interrupteurs (figure d’énoncé)."
-    },
     "disabled": {
       "type": "boolean",
       "default": false,
@@ -219,11 +214,6 @@ Le template « Électronique » fournit la bibliothèque `elec.py` : elle recons
       "type": "object",
       "default": {},
       "description": "Position de chaque interrupteur, par identifiant : 0 ouvert, 1 fermé (switch, push, toggle) ; numéro de la borne (selector), -1 pour la position sans contact. Complétée automatiquement pour contenir tous les interrupteurs."
-    },
-    "readonly": {
-      "type": "boolean",
-      "default": false,
-      "description": "Afficher le schéma sans permettre de manœuvrer les interrupteurs (figure d’énoncé)."
     },
     "disabled": {
       "type": "boolean",
