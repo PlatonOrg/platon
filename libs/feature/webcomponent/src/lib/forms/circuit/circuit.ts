@@ -68,12 +68,32 @@ export const CircuitComponentDefinition = defineWebComponent({
       elements: [
         { type: 'V', id: 'E', from: [0, 4], to: [0, 0], value: 12, u: 'E' },
         { type: 'switch', id: 'K1', from: [0, 0], to: [3, 0] },
-        { type: 'wire', points: [[3, 0], [4, 0]] },
+        {
+          type: 'wire',
+          points: [
+            [3, 0],
+            [4, 0],
+          ],
+        },
         { type: 'selector', id: 'K2', at: [4, 0], labels: ['1', '2'] },
         { type: 'lamp', id: 'L1', from: [6, -1], to: [9, -1] },
         { type: 'lamp', id: 'L2', from: [6, 1], to: [9, 1] },
-        { type: 'wire', points: [[9, -1], [10, -1], [10, 4], [0, 4]] },
-        { type: 'wire', points: [[9, 1], [10, 1]] },
+        {
+          type: 'wire',
+          points: [
+            [9, -1],
+            [10, -1],
+            [10, 4],
+            [0, 4],
+          ],
+        },
+        {
+          type: 'wire',
+          points: [
+            [9, 1],
+            [10, 1],
+          ],
+        },
       ],
     },
     value: { K1: 1, K2: 0 },

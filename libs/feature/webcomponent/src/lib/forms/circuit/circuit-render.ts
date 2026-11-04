@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Moteur de rendu des schémas électriques de `wc-circuit`.
  *
@@ -79,7 +78,16 @@ export type Prim =
   | { k: 'path'; d: string; c: string }
   | { k: 'circle'; x: number; y: number; r: number; c: string }
   | { k: 'rect'; x: number; y: number; w: number; h: number; c: string }
-  | { k: 'text'; x: number; y: number; parts: TextPart[]; anchor: 'start' | 'middle' | 'end'; base: string; size: number; c: string }
+  | {
+      k: 'text'
+      x: number
+      y: number
+      parts: TextPart[]
+      anchor: 'start' | 'middle' | 'end'
+      base: string
+      size: number
+      c: string
+    }
 
 export interface HitBox {
   x: number
@@ -123,14 +131,58 @@ export interface SwitchInfo {
 
 /** Dipôles : placés avec `from` et `to`. */
 export const TWO_TERMINALS = [
-  'R', 'L', 'C', 'Cpol', 'Z', 'Rvar', 'V', 'I', 'Vac', 'battery', 'diode', 'led', 'zener', 'lamp', 'motor',
-  'switch', 'push', 'fuse', 'ammeter', 'voltmeter', 'Vdep', 'Idep',
+  'R',
+  'L',
+  'C',
+  'Cpol',
+  'Z',
+  'Rvar',
+  'V',
+  'I',
+  'Vac',
+  'battery',
+  'diode',
+  'led',
+  'zener',
+  'lamp',
+  'motor',
+  'switch',
+  'push',
+  'fuse',
+  'ammeter',
+  'voltmeter',
+  'Vdep',
+  'Idep',
 ]
 
 /** Éléments placés avec `at` (et éventuellement `rot`, `flip`). */
 export const POINT_ELEMENTS = [
-  'gnd', 'rail', 'node', 'text', 'terminal', 'toggle', 'probe', 'clock', 'selector', 'npn', 'pnp', 'nmos', 'pmos',
-  'opamp', 'and', 'or', 'nand', 'nor', 'xor', 'xnor', 'not', 'buf', 'block', 'sum', 'transformer', 'iarrow',
+  'gnd',
+  'rail',
+  'node',
+  'text',
+  'terminal',
+  'toggle',
+  'probe',
+  'clock',
+  'selector',
+  'npn',
+  'pnp',
+  'nmos',
+  'pmos',
+  'opamp',
+  'and',
+  'or',
+  'nand',
+  'nor',
+  'xor',
+  'xnor',
+  'not',
+  'buf',
+  'block',
+  'sum',
+  'transformer',
+  'iarrow',
 ]
 
 export const OTHER_ELEMENTS = ['wire', 'varrow']
@@ -140,13 +192,28 @@ export const SWITCH_TYPES = ['switch', 'push', 'selector', 'toggle']
 const GATES = ['and', 'or', 'nand', 'nor', 'xor', 'xnor', 'not', 'buf']
 
 const UNITS: Record<string, string> = {
-  R: 'Ω', Z: 'Ω', Rvar: 'Ω', lamp: 'Ω', motor: 'Ω', L: 'H', C: 'F', Cpol: 'F',
-  V: 'V', Vac: 'V', battery: 'V', rail: 'V', I: 'A', fuse: 'A',
+  R: 'Ω',
+  Z: 'Ω',
+  Rvar: 'Ω',
+  lamp: 'Ω',
+  motor: 'Ω',
+  L: 'H',
+  C: 'F',
+  Cpol: 'F',
+  V: 'V',
+  Vac: 'V',
+  battery: 'V',
+  rail: 'V',
+  I: 'A',
+  fuse: 'A',
 }
 
 /** Noms français affichés dans les libellés d'accessibilité. */
 const NAMES: Record<string, string> = {
-  switch: 'Interrupteur', push: 'Bouton poussoir', selector: 'Commutateur', toggle: 'Entrée logique',
+  switch: 'Interrupteur',
+  push: 'Bouton poussoir',
+  selector: 'Commutateur',
+  toggle: 'Entrée logique',
 }
 
 /* ------------------------------------------------------------------------ */
@@ -360,8 +427,13 @@ function attrErrors(el: CircuitElement): string[] {
     const r = toNum(el.rot)
     if (Number.isNaN(r) || r % 90 !== 0) errs.push('« rot » doit valoir 0, 90, 180 ou 270.')
   }
-  if (GATES.includes(el.type) && el.type !== 'not' && el.type !== 'buf' && el.inputs != null &&
-      Number.isNaN(toInt(el.inputs, [2, 3, 4]))) {
+  if (
+    GATES.includes(el.type) &&
+    el.type !== 'not' &&
+    el.type !== 'buf' &&
+    el.inputs != null &&
+    Number.isNaN(toInt(el.inputs, [2, 3, 4]))
+  ) {
     errs.push('« inputs » doit valoir 2, 3 ou 4.')
   }
   if (el.type === 'selector' && el.throws != null && Number.isNaN(toInt(el.throws, [2, 3, 4, 5, 6]))) {
@@ -396,7 +468,8 @@ export function validateSchema(schema: any): string[] {
     }
     if (TWO_TERMINALS.includes(el.type) || el.type === 'varrow') {
       if (!isPt(el.from) || !isPt(el.to)) errors.push(`${where} : « from » et « to » doivent être des points [x, y].`)
-      else if (el.from![0] === el.to![0] && el.from![1] === el.to![1]) errors.push(`${where} : « from » et « to » sont confondus.`)
+      else if (el.from![0] === el.to![0] && el.from![1] === el.to![1])
+        errors.push(`${where} : « from » et « to » sont confondus.`)
     } else if (el.type === 'wire') {
       if (!Array.isArray(el.points) || el.points.length < 2 || !el.points.every(isPt)) {
         errors.push(`${where} : un fil demande « points » (au moins deux points [x, y]).`)
@@ -415,11 +488,16 @@ export function validateSchema(schema: any): string[] {
     if (!TWO_TERMINALS.includes(el.type) || !isPt(el.from) || !isPt(el.to)) continue
     for (const other of els) {
       if (other === el) continue
-      const pts: Pt[] = other.type === 'wire' && Array.isArray(other.points) ? other.points.filter(isPt) : Object.values(elementPins(other))
+      const pts: Pt[] =
+        other.type === 'wire' && Array.isArray(other.points)
+          ? other.points.filter(isPt)
+          : Object.values(elementPins(other))
       for (const p of pts) {
         if (onSegmentInterior(p, el.from as Pt, el.to as Pt)) {
           errors.push(
-            `${el.id ?? el.type} : une borne de « ${other.id ?? other.type} » est posée sur le dipôle sans y être reliée (point [${p[0]}, ${p[1]}]).`
+            `${el.id ?? el.type} : une borne de « ${
+              other.id ?? other.type
+            } » est posée sur le dipôle sans y être reliée (point [${p[0]}, ${p[1]}]).`
           )
         }
       }
@@ -490,11 +568,45 @@ export function junctionPoints(schema: any): Pt[] {
 /* ------------------------------------------------------------------------ */
 
 const GREEK: Record<string, string> = {
-  alpha: 'α', beta: 'β', gamma: 'γ', Gamma: 'Γ', delta: 'δ', Delta: 'Δ', epsilon: 'ε', varepsilon: 'ε',
-  zeta: 'ζ', eta: 'η', theta: 'θ', Theta: 'Θ', kappa: 'κ', lambda: 'λ', Lambda: 'Λ', mu: 'µ', nu: 'ν', xi: 'ξ',
-  pi: 'π', Pi: 'Π', rho: 'ρ', sigma: 'σ', Sigma: 'Σ', tau: 'τ', phi: 'φ', varphi: 'φ', Phi: 'Φ', chi: 'χ',
-  psi: 'ψ', Psi: 'Ψ', omega: 'ω', Omega: 'Ω', infty: '∞', cdot: '·',
-  times: '×', approx: '≈', leq: '≤', geq: '≥', circ: '°',
+  alpha: 'α',
+  beta: 'β',
+  gamma: 'γ',
+  Gamma: 'Γ',
+  delta: 'δ',
+  Delta: 'Δ',
+  epsilon: 'ε',
+  varepsilon: 'ε',
+  zeta: 'ζ',
+  eta: 'η',
+  theta: 'θ',
+  Theta: 'Θ',
+  kappa: 'κ',
+  lambda: 'λ',
+  Lambda: 'Λ',
+  mu: 'µ',
+  nu: 'ν',
+  xi: 'ξ',
+  pi: 'π',
+  Pi: 'Π',
+  rho: 'ρ',
+  sigma: 'σ',
+  Sigma: 'Σ',
+  tau: 'τ',
+  phi: 'φ',
+  varphi: 'φ',
+  Phi: 'Φ',
+  chi: 'χ',
+  psi: 'ψ',
+  Psi: 'Ψ',
+  omega: 'ω',
+  Omega: 'Ω',
+  infty: '∞',
+  cdot: '·',
+  times: '×',
+  approx: '≈',
+  leq: '≤',
+  geq: '≥',
+  circ: '°',
 }
 
 /**
@@ -555,7 +667,15 @@ export function defaultLabel(id: string): string {
 }
 
 const PREFIXES: [number, string][] = [
-  [1e12, 'T'], [1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'],
+  [1e12, 'T'],
+  [1e9, 'G'],
+  [1e6, 'M'],
+  [1e3, 'k'],
+  [1, ''],
+  [1e-3, 'm'],
+  [1e-6, 'µ'],
+  [1e-9, 'n'],
+  [1e-12, 'p'],
 ]
 
 /** Formate une valeur avec préfixe SI et virgule décimale : 4700 → « 4,7 kΩ ». */
@@ -607,7 +727,14 @@ class Builder {
   circle(p: V2, r: number, c = 'bg') {
     this.prims.push({ k: 'circle', x: r2(p[0]), y: r2(p[1]), r: r2(r), c })
   }
-  text(p: V2, label: string | TextPart[], anchor: 'start' | 'middle' | 'end' = 'middle', base = 'central', size?: number, c = 'tx') {
+  text(
+    p: V2,
+    label: string | TextPart[],
+    anchor: 'start' | 'middle' | 'end' = 'middle',
+    base = 'central',
+    size?: number,
+    c = 'tx'
+  ) {
     const parts = typeof label === 'string' ? parseLabel(label) : label
     if (!parts.length) return
     this.prims.push({ k: 'text', x: r2(p[0]), y: r2(p[1]), parts, anchor, base, size: size ?? this.fs, c })
@@ -681,8 +808,7 @@ function drawTwoTerminal(B: Builder, el: CircuitElement, a: V2, b: V2, state: nu
     B.line(a, T(-h, 0))
     B.line(T(h, 0), b)
   }
-  const poly = (pts: V2[], c = 'bg') =>
-    B.path('M' + pts.map((p) => `${r2(p[0])} ${r2(p[1])}`).join(' L') + ' Z', c)
+  const poly = (pts: V2[], c = 'bg') => B.path('M' + pts.map((p) => `${r2(p[0])} ${r2(p[1])}`).join(' L') + ' Z', c)
   switch (el.type) {
     case 'R':
     case 'Z':
@@ -743,9 +869,16 @@ function drawTwoTerminal(B: Builder, el: CircuitElement, a: V2, b: V2, state: nu
         B.arrowHead(T(r * 0.7, 0), F.d, 8 * k)
       } else if (el.type === 'Vac') {
         const q = r * 0.55
-        const p0 = T(-q, 0), p1 = T(0, 0), p2 = T(q, 0)
-        const c1 = T(-q / 2, -q * 1.1), c2 = T(q / 2, q * 1.1)
-        B.path(`M${r2(p0[0])} ${r2(p0[1])} Q${r2(c1[0])} ${r2(c1[1])} ${r2(p1[0])} ${r2(p1[1])} Q${r2(c2[0])} ${r2(c2[1])} ${r2(p2[0])} ${r2(p2[1])}`)
+        const p0 = T(-q, 0),
+          p1 = T(0, 0),
+          p2 = T(q, 0)
+        const c1 = T(-q / 2, -q * 1.1),
+          c2 = T(q / 2, q * 1.1)
+        B.path(
+          `M${r2(p0[0])} ${r2(p0[1])} Q${r2(c1[0])} ${r2(c1[1])} ${r2(p1[0])} ${r2(p1[1])} Q${r2(c2[0])} ${r2(
+            c2[1]
+          )} ${r2(p2[0])} ${r2(p2[1])}`
+        )
       } else if (el.type === 'lamp') {
         const q = r * 0.7071
         B.line(T(-q, -q), T(q, q))
@@ -827,7 +960,15 @@ function drawPointElement(B: Builder, el: CircuitElement, state: number, gates: 
   const P = localTransform(el, U)
   const L = (...pts: [number, number][]) => B.line(...pts.map((p) => P(p[0], p[1])))
   const poly = (pts: [number, number][], c = 'bg') =>
-    B.path('M' + pts.map((p) => P(p[0], p[1])).map((p) => `${r2(p[0])} ${r2(p[1])}`).join(' L') + ' Z', c)
+    B.path(
+      'M' +
+        pts
+          .map((p) => P(p[0], p[1]))
+          .map((p) => `${r2(p[0])} ${r2(p[1])}`)
+          .join(' L') +
+        ' Z',
+      c
+    )
   // un miroir inverse le sens de parcours des arcs
   const sweep = (s: number) => (el.flip ? 1 - s : s)
   switch (el.type) {
@@ -853,13 +994,26 @@ function drawPointElement(B: Builder, el: CircuitElement, state: number, gates: 
     }
     case 'clock': {
       L([0, 0], [-0.6, 0])
-      poly([[-1.6, -0.45], [-0.6, -0.45], [-0.6, 0.45], [-1.6, 0.45]])
+      poly([
+        [-1.6, -0.45],
+        [-0.6, -0.45],
+        [-0.6, 0.45],
+        [-1.6, 0.45],
+      ])
       L([-1.45, 0.25], [-1.25, 0.25], [-1.25, -0.25], [-1.0, -0.25], [-1.0, 0.25], [-0.75, 0.25])
       break
     }
     case 'toggle': {
       L([0, 0], [-0.6, 0])
-      poly([[-1.6, -0.45], [-0.6, -0.45], [-0.6, 0.45], [-1.6, 0.45]], state === 1 ? 'on' : 'bg')
+      poly(
+        [
+          [-1.6, -0.45],
+          [-0.6, -0.45],
+          [-0.6, 0.45],
+          [-1.6, 0.45],
+        ],
+        state === 1 ? 'on' : 'bg'
+      )
       B.text(P(-1.1, 0), String(state === 1 ? 1 : 0), 'middle', 'central', B.fs * 1.05, state === 1 ? 'txon' : 'tx')
       break
     }
@@ -914,7 +1068,11 @@ function drawPointElement(B: Builder, el: CircuitElement, state: number, gates: 
     case 'pmos': {
       L([-1, 0], [-0.5, 0])
       L([-0.5, -0.38], [-0.5, 0.38])
-      for (const [y0, y1] of [[-0.42, -0.18], [-0.1, 0.1], [0.18, 0.42]]) {
+      for (const [y0, y1] of [
+        [-0.42, -0.18],
+        [-0.1, 0.1],
+        [0.18, 0.42],
+      ]) {
         B.path(`M${P(-0.36, y0).map(r2).join(' ')} L${P(-0.36, y1).map(r2).join(' ')}`, 'thick')
       }
       L([-0.36, -0.3], [0, -0.3], [0, -1])
@@ -932,7 +1090,11 @@ function drawPointElement(B: Builder, el: CircuitElement, state: number, gates: 
       L([-2, -1], [-1.3, -1])
       L([-2, 1], [-1.3, 1])
       L([1.4, 0], [2, 0])
-      poly([[-1.3, -1.5], [-1.3, 1.5], [1.4, 0]])
+      poly([
+        [-1.3, -1.5],
+        [-1.3, 1.5],
+        [1.4, 0],
+      ])
       B.text(P(-1.0, -1), '−', 'middle', 'central', B.fs * 1.1)
       B.text(P(-1.0, 1), '+', 'middle', 'central', B.fs * 1.1)
       if (el.infinity !== false) B.text(P(-0.2, 0), '∞', 'middle', 'central', B.fs * 0.9)
@@ -949,7 +1111,9 @@ function drawPointElement(B: Builder, el: CircuitElement, state: number, gates: 
         for (let i = 0; i < 4; i++) {
           const p0 = P(x, -1 + 0.5 * i)
           const p1 = P(x, -1 + 0.5 * (i + 1))
-          d += `${i === 0 ? 'M' + r2(p0[0]) + ' ' + r2(p0[1]) : ''} A${r2(r * U)} ${r2(r * U)} 0 0 ${sweep(s)} ${r2(p1[0])} ${r2(p1[1])} `
+          d += `${i === 0 ? 'M' + r2(p0[0]) + ' ' + r2(p0[1]) : ''} A${r2(r * U)} ${r2(r * U)} 0 0 ${sweep(s)} ${r2(
+            p1[0]
+          )} ${r2(p1[1])} `
         }
         B.path(d.trim())
       }
@@ -967,7 +1131,12 @@ function drawPointElement(B: Builder, el: CircuitElement, state: number, gates: 
       L([-r, -r], [r, r])
       L([-r, r], [r, -r])
       const signs = el.signs ?? {}
-      const pos: Record<string, [number, number]> = { w: [-0.72, -0.38], e: [0.72, -0.38], n: [0.38, -0.72], s: [0.38, 0.72] }
+      const pos: Record<string, [number, number]> = {
+        w: [-0.72, -0.38],
+        e: [0.72, -0.38],
+        n: [0.38, -0.72],
+        s: [0.38, 0.72],
+      }
       Object.keys(pos).forEach((key) => {
         if (signs[key]) {
           const sgn = signs[key] === '-' ? '−' : String(signs[key])
@@ -979,7 +1148,12 @@ function drawPointElement(B: Builder, el: CircuitElement, state: number, gates: 
     case 'block': {
       const w = numOr(el.w, 2)
       const h = numOr(el.h, 2)
-      poly([[-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2]])
+      poly([
+        [-w / 2, -h / 2],
+        [w / 2, -h / 2],
+        [w / 2, h / 2],
+        [-w / 2, h / 2],
+      ])
       if (el.text != null) B.text(P(0, 0), String(el.text), 'middle', 'central', B.fs)
       if (Array.isArray(el.pins)) {
         for (const p of el.pins) {
@@ -1030,14 +1204,24 @@ function drawGate(
   const outX = neg ? bodyRight + 0.3 : bodyRight
   // fils d'entrée et de sortie
   ins.forEach((y) => {
-    const xIn = !iec && ['or', 'nor', 'xor', 'xnor'].includes(el.type) ? -1.2 + 0.35 * (1 - (y / H) ** 2) : single ? -0.75 : -1.2
+    const xIn =
+      !iec && ['or', 'nor', 'xor', 'xnor'].includes(el.type) ? -1.2 + 0.35 * (1 - (y / H) ** 2) : single ? -0.75 : -1.2
     B.line(P(-2, y), P(iec ? -1.2 : xIn, y))
   })
   B.line(P(outX, 0), P(2, 0))
   if (iec) {
     const Hh = single ? 0.9 : H
     B.path(`M${pt(-1.2, -Hh)} L${pt(0.9, -Hh)} L${pt(0.9, Hh)} L${pt(-1.2, Hh)} Z`, 'bg')
-    const sym: Record<string, string> = { and: '&', nand: '&', or: '≥1', nor: '≥1', xor: '=1', xnor: '=1', not: '1', buf: '1' }
+    const sym: Record<string, string> = {
+      and: '&',
+      nand: '&',
+      or: '≥1',
+      nor: '≥1',
+      xor: '=1',
+      xnor: '=1',
+      not: '1',
+      buf: '1',
+    }
     B.text(P(-0.15, -Hh + 0.45), sym[el.type], 'middle', 'central', B.fs)
     if (neg) {
       B.line(P(0.9, 0), P(outX, 0))
@@ -1047,7 +1231,10 @@ function drawGate(
   }
   const R = H * U
   if (el.type === 'and' || el.type === 'nand') {
-    B.path(`M${pt(-1.2, -H)} L${pt(0, -H)} A${r2(1.3 * U)} ${r2(R)} 0 0 ${sweep(1)} ${pt(0, H)} L${pt(-1.2, H)} Z`, 'bg')
+    B.path(
+      `M${pt(-1.2, -H)} L${pt(0, -H)} A${r2(1.3 * U)} ${r2(R)} 0 0 ${sweep(1)} ${pt(0, H)} L${pt(-1.2, H)} Z`,
+      'bg'
+    )
   } else if (['or', 'nor', 'xor', 'xnor'].includes(el.type)) {
     B.path(
       `M${pt(-1.2, -H)} Q${pt(0.3, -H)} ${pt(1.3, 0)} Q${pt(0.3, H)} ${pt(-1.2, H)} Q${pt(-0.5, 0)} ${pt(-1.2, -H)} Z`,
@@ -1102,26 +1289,25 @@ function drawTwoTerminalLabels(B: Builder, el: CircuitElement, a: V2, b: V2) {
   const thick = ['V', 'I', 'Vac', 'lamp', 'motor', 'ammeter', 'voltmeter', 'Vdep', 'Idep'].includes(el.type)
     ? h
     : ['switch', 'push'].includes(el.type)
-      ? 12 * k
-      : ['C', 'Cpol', 'battery'].includes(el.type)
-        ? 13 * k
-        : 9 * k
+    ? 12 * k
+    : ['C', 'Cpol', 'battery'].includes(el.type)
+    ? 13 * k
+    : 9 * k
   const side = sideValue(el.label_side, 1)
   const nL = sideNormal(F.d, side)
   const nV: V2 = el.value_side != null ? sideNormal(F.d, sideValue(el.value_side, -1)) : [-nL[0], -nL[1]]
   const source = ['V', 'I', 'Vac', 'battery', 'Vdep', 'Idep'].includes(el.type)
   const u = annotation(el.u)
   // une source dont la flèche de tension est nommée n'a pas besoin d'un second libellé
-  const label =
-    el.label != null ? String(el.label) : el.id && !(source && u?.label) ? defaultLabel(String(el.id)) : ''
+  const label = el.label != null ? String(el.label) : el.id && !(source && u?.label) ? defaultLabel(String(el.id)) : ''
   const valueText =
     el.value_label != null
       ? String(el.value_label)
       : el.value != null && el.show_value !== false
-        ? typeof el.value === 'number'
-          ? formatValue(el.value, UNITS[el.type] ?? '')
-          : String(el.value)
-        : ''
+      ? typeof el.value === 'number'
+        ? formatValue(el.value, UNITS[el.type] ?? '')
+        : String(el.value)
+      : ''
   const gap = thick + 5 * k
   const uSide: V2 = u?.side != null ? sideNormal(F.d, sideValue(u.side, -1)) : nV
   const off = thick + 9 * k
@@ -1205,30 +1391,45 @@ function drawTwoTerminalLabels(B: Builder, el: CircuitElement, a: V2, b: V2) {
 
 /** Boîte englobante (pixels) d'un ensemble de primitives. */
 function bbox(prims: Prim[]): HitBox | null {
-  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
+  let x0 = Infinity,
+    y0 = Infinity,
+    x1 = -Infinity,
+    y1 = -Infinity
   const add = (x: number, y: number) => {
-    x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y)
+    x0 = Math.min(x0, x)
+    y0 = Math.min(y0, y)
+    x1 = Math.max(x1, x)
+    y1 = Math.max(y1, y)
   }
   for (const p of prims) {
     if (p.k === 'circle') {
-      add(p.x - p.r, p.y - p.r); add(p.x + p.r, p.y + p.r)
+      add(p.x - p.r, p.y - p.r)
+      add(p.x + p.r, p.y + p.r)
     } else if (p.k === 'rect') {
-      add(p.x, p.y); add(p.x + p.w, p.y + p.h)
+      add(p.x, p.y)
+      add(p.x + p.w, p.y + p.h)
     } else if (p.k === 'text') {
       const w = textWidth(p.parts, p.size)
       const xs = p.anchor === 'start' ? p.x : p.anchor === 'end' ? p.x - w : p.x - w / 2
       const ys = p.base === 'auto' ? p.y - p.size : p.base === 'hanging' ? p.y : p.y - p.size / 2
-      add(xs, ys); add(xs + w, ys + p.size * 1.15)
+      add(xs, ys)
+      add(xs + w, ys + p.size * 1.15)
     } else {
       const nums = p.d.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? []
       // les arcs « A rx ry rot large sweep x y » : on ne garde que les points
       const cmds = p.d.match(/[MLQAZ][^MLQAZ]*/g) ?? []
       if (cmds.length) {
         for (const c of cmds) {
-          const v = c.slice(1).trim().split(/[\s,]+/).filter(Boolean).map(Number)
+          const v = c
+            .slice(1)
+            .trim()
+            .split(/[\s,]+/)
+            .filter(Boolean)
+            .map(Number)
           if (c[0] === 'A') {
             add(v[5], v[6])
-            add(v[5] - v[0], v[6] - v[1]); add(v[5] + v[0], v[6] + v[1])
+            add(v[5] - v[0], v[6] - v[1])
+            add(v[5] + v[0], v[6] + v[1])
           } else {
             for (let i = 0; i + 1 < v.length; i += 2) add(v[i], v[i + 1])
           }
@@ -1243,7 +1444,12 @@ function bbox(prims: Prim[]): HitBox | null {
 }
 
 function multiPinLabel(B: Builder, el: CircuitElement, prims: Prim[]) {
-  const label = el.label != null ? String(el.label) : el.id && !['toggle', 'probe', 'clock'].includes(el.type) ? defaultLabel(String(el.id)) : ''
+  const label =
+    el.label != null
+      ? String(el.label)
+      : el.id && !['toggle', 'probe', 'clock'].includes(el.type)
+      ? defaultLabel(String(el.id))
+      : ''
   const U = B.U
   if (['toggle', 'clock'].includes(el.type) || el.type === 'probe' || el.type === 'terminal' || el.type === 'node') {
     const name = el.label != null ? String(el.label) : el.id ? String(el.id) : ''
@@ -1260,13 +1466,17 @@ function multiPinLabel(B: Builder, el: CircuitElement, prims: Prim[]) {
       }
       const pos = el.label_pos ?? 'above'
       const off: Record<string, [V2, 'start' | 'middle' | 'end', string]> = {
-        above: [[0, -8], 'middle', 'auto'], below: [[0, 8], 'middle', 'hanging'],
-        left: [[-8, 0], 'end', 'central'], right: [[8, 0], 'start', 'central'],
-        'above-left': [[-5, -6], 'end', 'auto'], 'above-right': [[5, -6], 'start', 'auto'],
-        'below-left': [[-5, 6], 'end', 'hanging'], 'below-right': [[5, 6], 'start', 'hanging'],
+        above: [[0, -8], 'middle', 'auto'],
+        below: [[0, 8], 'middle', 'hanging'],
+        left: [[-8, 0], 'end', 'central'],
+        right: [[8, 0], 'start', 'central'],
+        'above-left': [[-5, -6], 'end', 'auto'],
+        'above-right': [[5, -6], 'start', 'auto'],
+        'below-left': [[-5, 6], 'end', 'hanging'],
+        'below-right': [[5, 6], 'start', 'hanging'],
       }
       const o = off[pos] ?? off['above']
-      B.text([at[0] + o[0][0] * U / 40, at[1] + o[0][1] * U / 40], name, o[1], o[2])
+      B.text([at[0] + (o[0][0] * U) / 40, at[1] + (o[0][1] * U) / 40], name, o[1], o[2])
       return
     } else dirPt = P(-1.75, 0)
     const dx = dirPt[0] - at[0]
@@ -1283,8 +1493,10 @@ function multiPinLabel(B: Builder, el: CircuitElement, prims: Prim[]) {
   }
   const box = bbox(prims)
   if (!box) return
-  const pos = el.label_pos ?? (['npn', 'pnp', 'nmos', 'pmos'].includes(el.type) ? 'right' : el.type === 'rail' ? 'above' : 'above')
-  const g = 4 * U / 40
+  const pos =
+    el.label_pos ??
+    (['npn', 'pnp', 'nmos', 'pmos'].includes(el.type) ? 'right' : el.type === 'rail' ? 'above' : 'above')
+  const g = (4 * U) / 40
   if (pos === 'right') B.text([box.x + box.w + g, box.y + box.h / 2], label, 'start', 'central')
   else if (pos === 'left') B.text([box.x - g, box.y + box.h / 2], label, 'end', 'central')
   else if (pos === 'below') B.text([box.x + box.w / 2, box.y + box.h + g], label, 'middle', 'hanging')
@@ -1330,41 +1542,53 @@ export function renderCircuit(
       wiresB.line(...pts)
       const arrow = el.arrow
       if (arrow === 'end' || arrow === 'both' || arrow === true) {
-        const a = pts[pts.length - 2], b = pts[pts.length - 1]
+        const a = pts[pts.length - 2],
+          b = pts[pts.length - 1]
         const dl = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
-        wiresB.arrowHead(b, [(b[0] - a[0]) / dl, (b[1] - a[1]) / dl], 9 * U / 40)
+        wiresB.arrowHead(b, [(b[0] - a[0]) / dl, (b[1] - a[1]) / dl], (9 * U) / 40)
       }
       if (arrow === 'start' || arrow === 'both') {
-        const a = pts[1], b = pts[0]
+        const a = pts[1],
+          b = pts[0]
         const dl = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
-        wiresB.arrowHead(b, [(b[0] - a[0]) / dl, (b[1] - a[1]) / dl], 9 * U / 40)
+        wiresB.arrowHead(b, [(b[0] - a[0]) / dl, (b[1] - a[1]) / dl], (9 * U) / 40)
       }
       if (el.label != null) {
         const i = Math.max(0, Math.floor((pts.length - 2) / 2))
-        const a = pts[i], b = pts[i + 1]
+        const a = pts[i],
+          b = pts[i + 1]
         const m: V2 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
         const horiz = Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1])
         const s = sideValue(el.label_side, 1)
-        if (horiz) wiresB.text([m[0], m[1] - s * 6 * U / 40], String(el.label), 'middle', s > 0 ? 'auto' : 'hanging')
-        else wiresB.text([m[0] + s * 6 * U / 40, m[1]], String(el.label), s > 0 ? 'start' : 'end', 'central')
+        if (horiz) wiresB.text([m[0], m[1] - (s * 6 * U) / 40], String(el.label), 'middle', s > 0 ? 'auto' : 'hanging')
+        else wiresB.text([m[0] + (s * 6 * U) / 40, m[1]], String(el.label), s > 0 ? 'start' : 'end', 'central')
       }
       return
     }
     if (el.type === 'varrow') {
-      const a = px(el.from!), b = px(el.to!)
+      const a = px(el.from!),
+        b = px(el.to!)
       const F = frame(a, b)
       const off = Number(el.offset ?? 0.5) * U
-      const n: V2 = [F.m[0] * (el.side === 'right' || el.side === -1 ? -1 : 1), F.m[1] * (el.side === 'right' || el.side === -1 ? -1 : 1)]
+      const n: V2 = [
+        F.m[0] * (el.side === 'right' || el.side === -1 ? -1 : 1),
+        F.m[1] * (el.side === 'right' || el.side === -1 ? -1 : 1),
+      ]
       const len = Math.hypot(b[0] - a[0], b[1] - a[1])
-      const shrink = Math.min(len * 0.15, 10 * U / 40)
+      const shrink = Math.min(len * 0.15, (10 * U) / 40)
       const s: V2 = [a[0] + F.d[0] * shrink + n[0] * off, a[1] + F.d[1] * shrink + n[1] * off]
       const e: V2 = [b[0] - F.d[0] * shrink + n[0] * off, b[1] - F.d[1] * shrink + n[1] * off]
       overlayB.line(s, e)
-      overlayB.arrowHead(e, F.d, 8 * U / 40)
+      overlayB.arrowHead(e, F.d, (8 * U) / 40)
       if (el.label != null) {
         const nn: V2 = Math.abs(n[0]) > Math.abs(n[1]) ? [Math.sign(n[0]), 0] : [0, Math.sign(n[1])]
         const [an, base] = anchorFor(nn)
-        overlayB.text([(s[0] + e[0]) / 2 + nn[0] * 6 * U / 40, (s[1] + e[1]) / 2 + nn[1] * 6 * U / 40], String(el.label), an, base)
+        overlayB.text(
+          [(s[0] + e[0]) / 2 + (nn[0] * 6 * U) / 40, (s[1] + e[1]) / 2 + (nn[1] * 6 * U) / 40],
+          String(el.label),
+          an,
+          base
+        )
       }
       return
     }
@@ -1372,13 +1596,13 @@ export function renderCircuit(
       const at = px(el.at!)
       const dirs: Record<string, V2> = { right: [1, 0], left: [-1, 0], up: [0, -1], down: [0, 1] }
       const d = dirs[String(el.dir ?? 'right')] ?? [1, 0]
-      overlayB.arrowHead([at[0] + d[0] * 4 * U / 40, at[1] + d[1] * 4 * U / 40], d, 8 * U / 40)
+      overlayB.arrowHead([at[0] + (d[0] * 4 * U) / 40, at[1] + (d[1] * 4 * U) / 40], d, (8 * U) / 40)
       if (el.label != null) {
         const n: V2 = d[0] !== 0 ? [0, -1] : [1, 0]
         const s = sideValue(el.label_side, 1)
         const nn: V2 = [n[0] * s, n[1] * s]
         const [an, base] = anchorFor(nn)
-        overlayB.text([at[0] + nn[0] * 8 * U / 40, at[1] + nn[1] * 8 * U / 40], String(el.label), an, base)
+        overlayB.text([at[0] + (nn[0] * 8 * U) / 40, at[1] + (nn[1] * 8 * U) / 40], String(el.label), an, base)
       }
       return
     }
@@ -1391,7 +1615,8 @@ export function renderCircuit(
     const B = new Builder(U, fs)
     const state = el.id && infos.has(String(el.id)) ? pos[String(el.id)] : numOr(el.state, 0)
     if (TWO_TERMINALS.includes(el.type)) {
-      const a = px(el.from!), b = px(el.to!)
+      const a = px(el.from!),
+        b = px(el.to!)
       drawTwoTerminal(B, el, a, b, state)
       const body = B.prims.slice()
       drawTwoTerminalLabels(B, el, a, b)
@@ -1401,13 +1626,25 @@ export function renderCircuit(
       const body = B.prims.slice()
       if (el.type === 'rail') {
         const P = localTransform(el, U)
-        const lab = el.label != null ? String(el.label) : el.value != null ? (typeof el.value === 'number' ? (el.value > 0 ? '+' : '') + formatValue(el.value, 'V') : String(el.value)) : ''
+        const lab =
+          el.label != null
+            ? String(el.label)
+            : el.value != null
+            ? typeof el.value === 'number'
+              ? (el.value > 0 ? '+' : '') + formatValue(el.value, 'V')
+              : String(el.value)
+            : ''
         if (lab) {
           const top = P(0, -0.55)
           const at = P(0, 0)
           const dy = top[1] - at[1]
           const dx = top[0] - at[0]
-          B.text(top, lab, Math.abs(dx) < 1 ? 'middle' : dx > 0 ? 'start' : 'end', Math.abs(dy) < 1 ? 'central' : dy < 0 ? 'auto' : 'hanging')
+          B.text(
+            top,
+            lab,
+            Math.abs(dx) < 1 ? 'middle' : dx > 0 ? 'start' : 'end',
+            Math.abs(dy) < 1 ? 'central' : dy < 0 ? 'auto' : 'hanging'
+          )
         }
       } else if (el.type !== 'gnd') {
         multiPinLabel(B, el, body)
@@ -1424,7 +1661,7 @@ export function renderCircuit(
     if (info) {
       const b = bbox(body)
       if (b) {
-        const pad = 4 * U / 40
+        const pad = (4 * U) / 40
         hit = { x: b.x - pad, y: b.y - pad, w: b.w + 2 * pad, h: b.h + 2 * pad }
       }
     }
@@ -1442,13 +1679,13 @@ export function renderCircuit(
 
   // points de jonction
   for (const p of junctionPoints(schema)) {
-    overlayB.circle([p[0] * U, p[1] * U], 3 * U / 40, 'so')
+    overlayB.circle([p[0] * U, p[1] * U], (3 * U) / 40, 'so')
   }
 
   const all: Prim[] = [...wiresB.prims, ...overlayB.prims]
   elements.forEach((e) => all.push(...e.prims))
   const box = bbox(all) ?? { x: 0, y: 0, w: U, h: U }
-  const margin = 8 * U / 40
+  const margin = (8 * U) / 40
   const x = Math.floor(box.x - margin)
   const y = Math.floor(box.y - margin)
   const w = Math.ceil(box.w + 2 * margin)
@@ -1492,8 +1729,10 @@ export function primToSvg(p: Prim): string {
     case 'text': {
       const spans = p.parts
         .map((t) => {
-          if (t.sub) return `<tspan class="sub" baseline-shift="sub" font-size="${r2(p.size * 0.72)}">${esc(t.t)}</tspan>`
-          if (t.sup) return `<tspan class="sup" baseline-shift="super" font-size="${r2(p.size * 0.72)}">${esc(t.t)}</tspan>`
+          if (t.sub)
+            return `<tspan class="sub" baseline-shift="sub" font-size="${r2(p.size * 0.72)}">${esc(t.t)}</tspan>`
+          if (t.sup)
+            return `<tspan class="sup" baseline-shift="super" font-size="${r2(p.size * 0.72)}">${esc(t.t)}</tspan>`
           if (t.over) return `<tspan text-decoration="overline">${esc(t.t)}</tspan>`
           return `<tspan>${esc(t.t)}</tspan>`
         })
@@ -1516,7 +1755,11 @@ export const SVG_STYLE = `
 `
 
 /** SVG autonome (sans interaction) d'un schéma. */
-export function circuitToSvg(schema: CircuitSchema, positions: Record<string, number> = {}, options: RenderOptions = {}): string {
+export function circuitToSvg(
+  schema: CircuitSchema,
+  positions: Record<string, number> = {},
+  options: RenderOptions = {}
+): string {
   const d = renderCircuit(schema, positions, options)
   const body = [...d.wires, ...d.elements.flatMap((e) => e.prims), ...d.overlay].map(primToSvg).join('')
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${d.viewBox}" width="${d.width}" height="${d.height}" style="color:#1b1b1b;font-family:sans-serif"><style>${SVG_STYLE}</style>${body}</svg>`

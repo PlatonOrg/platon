@@ -1,4 +1,5 @@
 import {
+  CircuitSchema,
   circuitToSvg,
   defaultLabel,
   elementPins,
@@ -19,12 +20,32 @@ const lampe = {
   elements: [
     { type: 'V', id: 'E', from: [0, 4], to: [0, 0], value: 12 },
     { type: 'switch', id: 'K1', from: [0, 0], to: [3, 0] },
-    { type: 'wire', points: [[3, 0], [4, 0]] },
+    {
+      type: 'wire',
+      points: [
+        [3, 0],
+        [4, 0],
+      ],
+    },
     { type: 'selector', id: 'K2', at: [4, 0], labels: ['1', '2'] },
     { type: 'lamp', id: 'L1', from: [6, -1], to: [9, -1] },
     { type: 'lamp', id: 'L2', from: [6, 1], to: [9, 1] },
-    { type: 'wire', points: [[9, -1], [10, -1], [10, 4], [0, 4]] },
-    { type: 'wire', points: [[9, 1], [10, 1]] },
+    {
+      type: 'wire',
+      points: [
+        [9, -1],
+        [10, -1],
+        [10, 4],
+        [0, 4],
+      ],
+    },
+    {
+      type: 'wire',
+      points: [
+        [9, 1],
+        [10, 1],
+      ],
+    },
   ],
 } as any
 
@@ -33,7 +54,9 @@ describe('circuit-render', () => {
     const infos = switchInfos(lampe)
     expect(infos.map((i) => i.id)).toEqual(['K1', 'K2'])
     expect(infos[1].states).toEqual([0, 1])
-    const withOff = switchInfos({ elements: [{ type: 'selector', id: 'S', at: [0, 0], throws: 3, off: true, state: 2 }] })
+    const withOff = switchInfos({
+      elements: [{ type: 'selector', id: 'S', at: [0, 0], throws: 3, off: true, state: 2 }],
+    })
     expect(withOff[0].states).toEqual([0, 1, 2, -1])
     expect(withOff[0].initial).toBe(2)
   })
@@ -41,7 +64,9 @@ describe('circuit-render', () => {
   it('complète la valeur avec tous les interrupteurs et ignore les positions invalides', () => {
     expect(normalizePositions(lampe, {})).toEqual({ K1: 0, K2: 0 })
     expect(normalizePositions(lampe, { K1: 1, K2: 5, X: 1 })).toEqual({ K1: 1, K2: 0 })
-    const fixed = { elements: [{ type: 'switch', id: 'K', from: [0, 0], to: [2, 0], state: 1, fixed: true }] }
+    const fixed: CircuitSchema = {
+      elements: [{ type: 'switch', id: 'K', from: [0, 0], to: [2, 0], state: 1, fixed: true }],
+    }
     expect(normalizePositions(fixed, { K: 0 })).toEqual({ K: 1 })
   })
 
@@ -67,8 +92,20 @@ describe('circuit-render', () => {
     expect(junctionPoints(lampe)).toEqual([[10, 1]])
     const crossing = {
       elements: [
-        { type: 'wire', points: [[0, 0], [4, 0]] },
-        { type: 'wire', points: [[2, -2], [2, 2]] },
+        {
+          type: 'wire',
+          points: [
+            [0, 0],
+            [4, 0],
+          ],
+        },
+        {
+          type: 'wire',
+          points: [
+            [2, -2],
+            [2, 2],
+          ],
+        },
       ],
     }
     expect(junctionPoints(crossing)).toEqual([])

@@ -71,7 +71,7 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
   }
 
   /** Clic gauche ou touche Entrée/Espace : position suivante de l'interrupteur. */
-  protected async toggle(element: DrawnElement | undefined, event?: Event) {
+  protected async toggle(element: DrawnElement | undefined, event?: Event): Promise<void> {
     if (!element || !element.switchable || !this.interactive) return
     event?.preventDefault()
     const info = this.infos.get(element.id)
@@ -87,9 +87,9 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
     this.cdr.markForCheck()
   }
 
-  protected onKey(element: DrawnElement | undefined, event: KeyboardEvent) {
+  protected async onKey(element: DrawnElement | undefined, event: KeyboardEvent) {
     if (event.key === 'Enter' || event.key === ' ') {
-      this.toggle(element, event)
+      await this.toggle(element, event)
     }
   }
 

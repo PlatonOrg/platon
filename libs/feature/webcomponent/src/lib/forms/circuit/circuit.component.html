@@ -27,19 +27,19 @@
     >
       @if (layer.element?.hit; as hit) {
       <svg:rect class="hit" rx="6" [attr.x]="hit.x" [attr.y]="hit.y" [attr.width]="hit.w" [attr.height]="hit.h" />
-      }
-      @for (p of layer.prims; track $index) {
-      @switch (p.k) {
-      @case ('path') {
+      } @for (p of layer.prims; track $index) { @switch (p.k) { @case ('path') {
       <svg:path [attr.class]="p.c" [attr.d]="$any(p).d" />
-      }
-      @case ('circle') {
+      } @case ('circle') {
       <svg:circle [attr.class]="p.c" [attr.cx]="$any(p).x" [attr.cy]="$any(p).y" [attr.r]="$any(p).r" />
-      }
-      @case ('rect') {
-      <svg:rect [attr.class]="p.c" [attr.x]="$any(p).x" [attr.y]="$any(p).y" [attr.width]="$any(p).w" [attr.height]="$any(p).h" />
-      }
-      @case ('text') {
+      } @case ('rect') {
+      <svg:rect
+        [attr.class]="p.c"
+        [attr.x]="$any(p).x"
+        [attr.y]="$any(p).y"
+        [attr.width]="$any(p).w"
+        [attr.height]="$any(p).h"
+      />
+      } @case ('text') {
       <svg:text
         [attr.class]="p.c"
         [attr.x]="$any(p).x"
@@ -48,8 +48,7 @@
         [attr.dominant-baseline]="$any(p).base"
         [attr.font-size]="$any(p).size"
       >
-        @for (t of $any(p).parts; track $index) {
-        @if (t.sub) {
+        @for (t of $any(p).parts; track $index) { @if (t.sub) {
         <svg:tspan baseline-shift="sub" [attr.font-size]="$any(p).size * 0.72">{{ t.t }}</svg:tspan>
         } @else if (t.sup) {
         <svg:tspan baseline-shift="super" [attr.font-size]="$any(p).size * 0.72">{{ t.t }}</svg:tspan>
@@ -57,19 +56,15 @@
         <svg:tspan text-decoration="overline">{{ t.t }}</svg:tspan>
         } @else {
         <svg:tspan>{{ t.t }}</svg:tspan>
-        }
-        }
+        } }
       </svg:text>
-      }
-      }
-      }
+      } } }
     </svg:g>
     }
   </svg>
   @if (state.caption) {
   <figcaption>{{ state.caption }}</figcaption>
-  }
-  @if (interactive && hasSwitches && !state.hideHelp) {
+  } @if (interactive && hasSwitches && !state.hideHelp) {
   <p class="help">Cliquez sur un interrupteur pour le faire passer à la position suivante.</p>
   }
 </figure>
