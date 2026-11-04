@@ -13,7 +13,7 @@ import {
   toInt,
   toNum,
   validateSchema,
-} from './circuit-render'
+} from './index'
 
 const lampe = {
   unit: 40,

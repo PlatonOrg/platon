@@ -23,7 +23,7 @@ import {
   renderCircuit,
   switchInfos,
   elementsOf,
-} from './circuit-render'
+} from './render'
 
 /** Groupe affiché : un élément du schéma, ou une couche sans interaction (fils, annotations). */
 interface Layer {

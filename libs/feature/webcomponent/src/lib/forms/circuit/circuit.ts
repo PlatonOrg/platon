@@ -1,5 +1,5 @@
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component'
-import { CircuitSchema } from './circuit-render'
+import { CircuitSchema } from './render'
 
 export interface CircuitState extends IWebComponent {
   schema: CircuitSchema
