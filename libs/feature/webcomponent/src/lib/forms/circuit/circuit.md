@@ -2,7 +2,7 @@ Le composant **Circuit** affiche un schéma électrique décrit en JSON. Le mêm
 
 Le composant a deux usages :
 
-- **figure** (`readonly: true`) : schéma d'un énoncé, d'une correction ou d'un retour, avec les interrupteurs dans la position choisie par l'auteur ;
+- **figure** (`disabled: true`) : schéma d'un énoncé, d'une correction ou d'un retour, avec les interrupteurs dans la position choisie par l'auteur ;
 - **saisie** : l'élève clique sur un interrupteur (clic gauche) pour le faire passer à la position suivante. Le correcteur reçoit dans `value` la position de **tous** les interrupteurs, par identifiant.
 
 Le clavier fonctionne aussi : chaque interrupteur est un bouton (Tab pour l'atteindre, Entrée ou Espace pour le manœuvrer).

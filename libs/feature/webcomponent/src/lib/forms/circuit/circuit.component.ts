@@ -55,7 +55,7 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
 
   /** Les interrupteurs peuvent-ils être manœuvrés ? */
   protected get interactive(): boolean {
-    return !this.state.readonly && !this.state.disabled
+    return !this.state.disabled
   }
 
   onChangeState() {

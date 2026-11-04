@@ -4,7 +4,6 @@ import { CircuitSchema } from './circuit-render'
 export interface CircuitState extends IWebComponent {
   schema: CircuitSchema
   value: Record<string, number>
-  readonly: boolean
   disabled: boolean
   scale: number
   caption: string
@@ -34,11 +33,6 @@ export const CircuitComponentDefinition = defineWebComponent({
         default: {},
         description:
           'Position de chaque interrupteur, par identifiant : 0 ouvert, 1 fermé (switch, push, toggle) ; numéro de la borne (selector), -1 pour la position sans contact. Complétée automatiquement pour contenir tous les interrupteurs.',
-      },
-      readonly: {
-        type: 'boolean',
-        default: false,
-        description: 'Afficher le schéma sans permettre de manœuvrer les interrupteurs (figure d’énoncé).',
       },
       disabled: {
         type: 'boolean',
