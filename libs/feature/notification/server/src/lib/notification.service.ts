@@ -39,13 +39,21 @@ export class NotificationService {
    *
    * @param prefix the regroup prefix that identifie the notification type
    * @param parts all other information needed (course_id, user_id, resource_id, ... ) to join
-   * @returns null if something is missing in parts or the group_id
+   * @throws Error if an element is undefined, null or empty
+   * @returns the group id
    */
-  private groupIdtoString(prefix: string, ...parts: unknown[]): string | null {
-    if (parts.every((element) => element !== undefined && element !== null && element != '')) {
-      return [prefix, ...parts].join('_')
+  private groupIdToString(prefix: string, ...parts: unknown[]): string {
+    for (const element of parts) {
+      if (element === undefined || element === null || element === '') {
+        this.logger.error(
+          `Failed to generate group_id: Missing required element in parts: ${JSON.stringify(
+            parts
+          )} for prefix : ${prefix}`
+        )
+        throw new Error(`Missing required element to generate group_id for prefix : ${prefix}`)
+      }
     }
-    return null
+    return [prefix, ...parts].join('_')
   }
 
   /** give the group_id corresponding to the notification.
@@ -58,45 +66,49 @@ export class NotificationService {
   private resolveGroupId(type: NotificationType, userId: string, data: Data): string | null {
     switch (type) {
       case NotificationType.COURSE_MEMBER_CREATION:
-        return this.groupIdtoString('CMC', data['courseId'], userId)
+        return this.groupIdToString('CMC', data?.['courseId'], userId)
 
       case NotificationType.ACTIVITY_MEMBER_CREATION:
-        return this.groupIdtoString('AMC', data['activityId'], userId)
+        return this.groupIdToString('AMC', data?.['activityId'], userId)
       case NotificationType.CORRECTOR_CREATED:
-        return this.groupIdtoString('CM', data['activityId'], userId)
+        return this.groupIdToString('CM', data?.['activityId'], userId)
 
       case NotificationType.CORRECTOR_REMOVED:
-        return this.groupIdtoString('CM', data['activityId'], userId)
+        return this.groupIdToString('CM', data?.['activityId'], userId)
 
       case NotificationType.CORRECTION_PENDING:
-        return this.groupIdtoString('CP', data['activityId'], userId)
+        return this.groupIdToString('CP', data?.['activityId'], userId)
 
       case NotificationType.CORRECTION_AVAILABLE:
-        return this.groupIdtoString('CA', data['activityId'], userId)
+        return this.groupIdToString('CA', data?.['activityId'], userId)
 
       case NotificationType.ACTIVITY_CLOSED:
-        return this.groupIdtoString('AC', data['activityId'])
+        return this.groupIdToString('AC', data?.['activityId'])
 
       case NotificationType.RESOURCE_MOVED_BY_ADMIN:
-        return this.groupIdtoString('RMBA', data['resourceId'])
+        return this.groupIdToString('RMBA', data?.['resourceId'])
 
       case NotificationType.EXERCISE_CHANGES:
-        return this.groupIdtoString('EC', data['resourceId'])
+        return this.groupIdToString('EC', data?.['resourceId'])
 
       case NotificationType.RESOURCE_INVITATION:
-        return this.groupIdtoString('RI', data['resourceId'])
+        return this.groupIdToString('RI', data?.['resourceId'])
 
       case NotificationType.MEMBER_CREATE:
-        return this.groupIdtoString('REMM', data['eventInfo']['resourceId'], data['eventInfo']['data']['userId'])
+        return this.groupIdToString(
+          'REMM',
+          data?.['eventInfo']?.['resourceId'],
+          data?.['eventInfo']?.['data']?.['userId']
+        )
 
       case NotificationType.MEMBER_REMOVE:
-        return this.groupIdtoString('REMM', data['eventInfo']['resourceId'], data['eventInfo']['actorId'])
+        return this.groupIdToString('REMM', data?.['eventInfo']?.['resourceId'], data?.['eventInfo']?.['actorId'])
 
       case NotificationType.RESOURCE_STATUS_CHANGE:
-        return this.groupIdtoString('RERSC', data['eventInfo']['resourceId'])
+        return this.groupIdToString('RERSC', data?.['eventInfo']?.['resourceId'])
 
       case NotificationType.RESOURCE_CREATE:
-        return this.groupIdtoString('RERC', data['eventInfo']['resourceId'])
+        return this.groupIdToString('RERC', data?.['eventInfo']?.['resourceId'])
 
       default:
         return null
@@ -116,6 +128,14 @@ export class NotificationService {
     return type
   }
 
+  private requireGroupId(type: NotificationType): boolean {
+    const utilityTypes: string[] = [
+      NotificationType.MODERATION_ACTIVITY_CHANGES,
+      NotificationType.SESSION_STATE_CHANGES,
+    ]
+    return !utilityTypes.includes(type)
+  }
+
   async sendToUser<T extends object>(
     userId: string,
     data: T,
@@ -123,6 +143,15 @@ export class NotificationService {
   ): Promise<NotificationEntity> {
     const type = this.resolveNotificationType(data)
     const groupId = this.resolveGroupId(type, userId, data)
+    if (groupId === null && this.requireGroupId(type)) {
+      this.logger.error(
+        `Failed to send notification: Missing required parameters for type '${type}' and user '${userId}'. Data received: ${JSON.stringify(
+          data
+        )}`
+      )
+      throw new Error(`Missing required data to generate group ID for notification type : ${type}`)
+    }
+
     const completedData = { userId, data, type, groupId }
 
     const newNotification = entityManager
@@ -206,6 +235,9 @@ export class NotificationService {
     `
 
   async markAsRead(userId: string, ids: string[]): Promise<void> {
+    if (!ids || ids.length === 0) {
+      return
+    }
     await this.repository
       .createQueryBuilder()
       .update()
@@ -218,6 +250,9 @@ export class NotificationService {
   }
 
   async markAsUnread(userId: string, ids: string[]): Promise<void> {
+    if (!ids || ids.length === 0) {
+      return
+    }
     await this.repository.update(
       {
         userId,
@@ -240,6 +275,9 @@ export class NotificationService {
   }
 
   async delete(userId: string, ids: string[]): Promise<number> {
+    if (!ids || ids.length === 0) {
+      return 0
+    }
     const result = await this.repository
       .createQueryBuilder()
       .delete()

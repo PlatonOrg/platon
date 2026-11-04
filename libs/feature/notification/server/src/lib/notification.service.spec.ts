@@ -242,10 +242,10 @@ describe('NotificationService', () => {
       expect(joined).toBe(left)
     })
 
-    it('ne devrait pas regrouper (groupId null) si un identifiant manque', async () => {
-      await service.sendToUser('user-1', { type: 'CORRECTION-PENDING' })
-
-      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ groupId: null }))
+    it('devrait rejeter une notification si un identifiant manque', async () => {
+      await expect(service.sendToUser('user-1', { type: 'CORRECTION-PENDING' })).rejects.toThrow(
+        'Missing required element to generate group_id for prefix : CP'
+      )
     })
 
     it('devrait rejeter un RESOURCE-EVENT sans sous-type', async () => {
