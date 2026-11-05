@@ -62,7 +62,7 @@ import { MatchStatus, PeerContest } from '@platon/feature/peer/common'
 import { v4 as uuidv4 } from 'uuid'
 
 type CreateSessionArgs = {
-  user?: User | null
+  userId?: string | null
   source: PLSourceFile
   parentId?: string | null
   overrides?: Variables | null
@@ -169,7 +169,7 @@ export class PlayerService extends PlayerManager {
       const activity = await this.activityService.findByIdForUser(activityId, user)
 
       activitySession = await this.createNewSession({
-        user,
+        userId: user.id,
         activity,
         source: activity.source,
         isBuilt: true,
@@ -252,13 +252,17 @@ export class PlayerService extends PlayerManager {
     }
   }
 
-  async playNext(activitySessionId: string, _user: User): Promise<NextOutput> {
+  async playNext(activitySessionId: string, user?: User): Promise<NextOutput> {
     const activitySession = await this.sessionService.findById<PlayerActivityVariables>(activitySessionId, {
       parent: false,
       activity: true,
     })
     if (!activitySession) {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
+    }
+    // Sessions without owner are preview sessions, which can be played anonymously.
+    if (activitySession.userId && activitySession.userId !== user?.id) {
+      throw new ForbiddenResponse("Vous n'avez pas accès à cette session.")
     }
     if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
       throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
@@ -716,7 +720,7 @@ export class PlayerService extends PlayerManager {
    */
   private async createNewSession(args: CreateSessionArgs, entityManager?: EntityManager): Promise<SessionEntity> {
     const runWithEntityManager = async (manager: EntityManager): Promise<SessionEntity> => {
-      const { user, source, parentId, activity, isBuilt } = args
+      const { userId, source, parentId, activity, isBuilt } = args
 
       source.variables['seed'] = (Number.parseInt(source.variables['seed'] + '') || randomInt(100)) % 100
 
@@ -725,7 +729,7 @@ export class PlayerService extends PlayerManager {
           activity,
           variables: source.variables as Variables,
           envid: null,
-          userId: user?.id || null,
+          userId: userId || null,
           parentId: parentId || null,
           activityId: activity?.id || null,
           source,
@@ -735,12 +739,7 @@ export class PlayerService extends PlayerManager {
       )
 
       if (source.abspath.endsWith(ACTIVITY_FILE_EXTENSION)) {
-        session.variables = await this.createNavigation(
-          source.variables as PlayerActivityVariables,
-          session,
-          user,
-          manager
-        )
+        session.variables = await this.createNavigation(source.variables as PlayerActivityVariables, session, manager)
 
         await this.sessionService.update(session.id, { variables: session.variables as any }, manager)
       }
@@ -751,14 +750,14 @@ export class PlayerService extends PlayerManager {
   }
 
   /**
-   * Ensures that a session is created for each exercices of the given activity navigation for `user`.
+   * Ensures that a session is created for each exercices of the given activity navigation.
+   * Exercise sessions always belong to the owner of `activitySession`.
    * @param variables Activity variables.
    * @returns Computed variables.
    */
   private async createNavigation(
     variables: PlayerActivityVariables,
     activitySession: SessionEntity,
-    user?: User | null,
     manager?: EntityManager
   ): Promise<PlayerActivityVariables> {
     const navigation = variables.navigation || {}
@@ -790,7 +789,7 @@ export class PlayerService extends PlayerManager {
               activity: activitySession.activity,
               parentId: activitySession.id,
               source: item.source,
-              user,
+              userId: activitySession.userId,
             },
             manager
           )
