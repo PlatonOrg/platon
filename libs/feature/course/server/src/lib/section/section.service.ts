@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { NotFoundResponse, User } from '@platon/core/common'
+import { NotFoundResponse, User, UserRoles } from '@platon/core/common'
 import { DataSource, Repository, MoreThanOrEqual, And, MoreThan, LessThanOrEqual, LessThan, Not } from 'typeorm'
 import { Optional } from 'typescript-optional'
 import { CourseSectionEntity } from './section.entity'
@@ -16,12 +16,26 @@ export class CourseSectionService {
     private readonly repository: Repository<CourseSectionEntity>
   ) {}
 
-  async findById(courseId: string, id: string): Promise<Optional<CourseSectionEntity>> {
-    return Optional.ofNullable(await this.repository.findOne({ where: { courseId, id } }))
+  async findById(courseId: string, id: string, user: User): Promise<Optional<CourseSectionEntity>> {
+    const section = await this.repository.findOne({ where: { courseId, id } })
+    if (!section) {
+      return Optional.empty()
+    }
+    if (section.hidden && !(await this.canSeeHidden(courseId, user))) {
+      return Optional.empty()
+    }
+    return Optional.of(section)
+  }
+
+  private async canSeeHidden(courseId: string, user: User): Promise<boolean> {
+    if (!user) {
+      return false
+    }
+    return this.courseMemberService.hasWritePermission(courseId, user)
   }
 
   async ofCourse(courseId: string, user?: User): Promise<[CourseSectionEntity[], number]> {
-    let showAllSection = true
+    let showAllSection = false
     if (user) {
       showAllSection = await this.courseMemberService.hasWritePermission(courseId, user)
     }
@@ -92,8 +106,8 @@ export class CourseSectionService {
           await manager.save(down)
         }
       }
-
-      Object.assign(section, changes)
+      const { id: _id, courseId: _courseId, ...safeChanges } = changes // cannot change the id of the course or the section
+      Object.assign(section, safeChanges)
       return manager.save(section)
     })
   }

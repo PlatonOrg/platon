@@ -14,10 +14,11 @@ export class CourseSectionController {
 
   @Get('/:sectionId')
   async find(
+    @Req() req: IRequest,
     @UUIDParam('courseId') courseId: string,
     @UUIDParam('sectionId') sectionId: string
   ): Promise<ItemResponse<CourseSectionDTO>> {
-    const optional = await this.service.findById(courseId, sectionId)
+    const optional = await this.service.findById(courseId, sectionId, req.user)
     const resource = Mapper.map(
       optional.orElseThrow(() => new NotFoundResponse(`CourseSection not found: ${sectionId}`)),
       CourseSectionDTO

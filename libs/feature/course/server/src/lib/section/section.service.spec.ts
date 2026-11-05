@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { NotFoundResponse } from '@platon/core/common'
+import { NotFoundResponse, User } from '@platon/core/common'
 import { MockRepository, mockRepository } from '@platon/core/testing/server'
 import { DataSource } from 'typeorm'
 import { CourseSectionEntity } from './section.entity'
@@ -12,16 +12,30 @@ describe('CourseSectionService', () => {
   let repository: MockRepository<CourseSectionEntity>
   let dataSource: { transaction: jest.Mock }
 
+  let courseMemberService: { hasWritePermission: jest.Mock }
+
+  const student = { role: 'student' } as User
+  const teacher = { role: 'teacher' } as User
+  const admin = { role: 'admin' } as User
+  const demo = { role: 'demo' } as User
+  const candidate = { role: 'candidate' } as User
+
   beforeEach(async () => {
     repository = mockRepository<CourseSectionEntity>()
     dataSource = { transaction: jest.fn() }
+
+    courseMemberService = {
+      hasWritePermission: jest.fn(
+        async (_courseId: string, user: User) => user.role === 'teacher' || user.role === 'admin'
+      ),
+    }
 
     const module = await Test.createTestingModule({
       providers: [
         CourseSectionService,
         { provide: DataSource, useValue: dataSource },
         { provide: getRepositoryToken(CourseSectionEntity), useValue: repository },
-        { provide: CourseMemberService, useValue: { hasWritePermission: jest.fn() } },
+        { provide: CourseMemberService, useValue: courseMemberService },
       ],
     }).compile()
 
@@ -35,8 +49,44 @@ describe('CourseSectionService', () => {
   describe('findById', () => {
     it('devrait retourner Optional.empty() si non trouvé', async () => {
       repository.findOne.mockResolvedValue(null)
+      expect((await service.findById('course-1', 'section-1', teacher)).isEmpty()).toBe(true)
+    })
 
-      await expect((await service.findById('course-1', 'section-1')).isEmpty()).toBe(true)
+    it('cherche dans le bon cours', async () => {
+      repository.findOne.mockResolvedValue(null)
+      await service.findById('course-1', 'section-1', student)
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { courseId: 'course-1', id: 'section-1' } })
+    })
+
+    it('renvoie une section visible à un étudiant', async () => {
+      repository.findOne.mockResolvedValue({ id: 'section-1', hidden: false } as CourseSectionEntity)
+      const result = await service.findById('course-1', 'section-1', student)
+      expect(result.isPresent()).toBe(true)
+    })
+
+    it('masque une section cachée à un étudiant', async () => {
+      repository.findOne.mockResolvedValue({ id: 'section-1', hidden: true } as CourseSectionEntity)
+      expect((await service.findById('course-1', 'section-1', student)).isEmpty()).toBe(true)
+    })
+
+    it('masque une section cachée à un utilisateur ayant le rôle demo', async () => {
+      repository.findOne.mockResolvedValue({ id: 'section-1', hidden: true } as CourseSectionEntity)
+      expect((await service.findById('course-1', 'section-1', demo)).isEmpty()).toBe(true)
+    })
+
+    it('masque une section cachée à un candidat', async () => {
+      repository.findOne.mockResolvedValue({ id: 'section-1', hidden: true } as CourseSectionEntity)
+      expect((await service.findById('course-1', 'section-1', candidate)).isEmpty()).toBe(true)
+    })
+
+    it('montre une section cachée à un enseignant', async () => {
+      repository.findOne.mockResolvedValue({ id: 'section-1', hidden: true } as CourseSectionEntity)
+      expect((await service.findById('course-1', 'section-1', teacher)).isPresent()).toBe(true)
+    })
+
+    it('montre une section cachée à un admin', async () => {
+      repository.findOne.mockResolvedValue({ id: 'section-1', hidden: true } as CourseSectionEntity)
+      expect((await service.findById('course-1', 'section-1', admin)).isPresent()).toBe(true)
     })
   })
 
@@ -47,7 +97,7 @@ describe('CourseSectionService', () => {
       await service.ofCourse('course-1')
 
       expect(repository.findAndCount).toHaveBeenCalledWith({
-        where: { courseId: 'course-1' },
+        where: { courseId: 'course-1', hidden: false },
         order: { order: { direction: 'ASC' } },
       })
     })
@@ -133,6 +183,34 @@ describe('CourseSectionService', () => {
         expect.objectContaining({ id: 's1', order: 2 }),
         expect.objectContaining({ id: 's2', order: 3 }),
       ])
+    })
+
+    it('ne permet pas de modifier id ni courseId', async () => {
+      const section = { id: 'section-1', courseId: 'course-1', order: 1 } as CourseSectionEntity
+      const manager = { findOne: jest.fn().mockResolvedValue(section), find: jest.fn(), save: jest.fn((s) => s) }
+      dataSource.transaction.mockImplementation((fn) => fn(manager))
+
+      await service.update('course-1', 'section-1', {
+        id: 'autre',
+        courseId: 'course-2',
+        name: 'New',
+      } as Partial<CourseSectionEntity>)
+
+      expect(manager.save).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'section-1', courseId: 'course-1', name: 'New' })
+      )
+    })
+
+    it('cherche la section dans le bon cours', async () => {
+      const manager = { findOne: jest.fn().mockResolvedValue(null) }
+      dataSource.transaction.mockImplementation((fn) => fn(manager))
+
+      await expect(service.update('course-1', 'section-1', { name: 'X' })).rejects.toBeInstanceOf(NotFoundResponse)
+
+      expect(manager.findOne).toHaveBeenCalledWith(
+        CourseSectionEntity,
+        expect.objectContaining({ where: expect.objectContaining({ id: 'section-1', courseId: 'course-1' }) })
+      )
     })
   })
 

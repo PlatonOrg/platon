@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing'
-import { NotFoundResponse } from '@platon/core/common'
+import { NotFoundResponse, User } from '@platon/core/common'
 import { Optional } from 'typescript-optional'
 import { CourseSectionController } from './section.controller'
 import { CourseSectionEntity } from './section.entity'
@@ -33,16 +33,33 @@ describe('CourseSectionController', () => {
   describe('find', () => {
     it("devrait lever une NotFoundResponse si la section n'existe pas", async () => {
       service.findById.mockResolvedValue(Optional.empty())
+      const mockReq = {} as IRequest
 
-      await expect(controller.find('course-1', 'section-1')).rejects.toBeInstanceOf(NotFoundResponse)
+      await expect(controller.find(mockReq, 'course-1', 'section-1')).rejects.toBeInstanceOf(NotFoundResponse)
     })
 
     it('devrait retourner la section trouvée', async () => {
       service.findById.mockResolvedValue(Optional.of({ id: 'section-1' } as CourseSectionEntity))
+      const mockReq = {} as IRequest
 
-      const result = await controller.find('course-1', 'section-1')
+      const result = await controller.find(mockReq, 'course-1', 'section-1')
 
       expect(result.resource.id).toBe('section-1')
+    })
+
+    it("ne devrait pas lever d'exception pour un utilisateur non défini", async () => {
+      service.findById.mockResolvedValue(Optional.of({ id: 'section-1' } as CourseSectionEntity))
+
+      await expect(controller.find({} as IRequest, 'course-1', 'section-1')).resolves.toBeDefined()
+      expect(service.findById).toHaveBeenCalledWith('course-1', 'section-1', undefined)
+    })
+
+    it('devrait renvoyer une 404 quand le service masque une section cachée', async () => {
+      service.findById.mockResolvedValue(Optional.empty())
+
+      await expect(
+        controller.find({ user: { id: 'student' } } as IRequest, 'course-1', 'hidden-1')
+      ).rejects.toBeInstanceOf(NotFoundResponse)
     })
   })
 
@@ -54,6 +71,16 @@ describe('CourseSectionController', () => {
       const result = await controller.list(mockReq, 'course-1')
 
       expect(result.total).toBe(1)
+      expect(result.resources).toHaveLength(1)
+    })
+
+    it("devrait transmettre l'utilisateur de la requête au service", async () => {
+      const user = { id: 'user-1' } as User
+      service.ofCourse.mockResolvedValue([[], 0])
+
+      await controller.list({ user } as IRequest, 'course-1')
+
+      expect(service.ofCourse).toHaveBeenCalledWith('course-1', user)
     })
   })
 
