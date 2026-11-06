@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { randomInt } from 'crypto'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { ForbiddenResponse, NotFoundResponse, User, UserRoles } from '@platon/core/common'
+import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
 import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@platon/core/server'
 import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
@@ -73,13 +72,37 @@ export class ActivityService {
     private readonly resourceService: ResourceService
   ) {}
 
+  private async canSeeHidden(courseId: string, user?: User): Promise<boolean> {
+    return !!user && (await this.courseMemberService.hasWritePermission(courseId, user))
+  }
+
+  /** true if activity or section is hidden. */
+  async isHidden(activityId: string): Promise<boolean> {
+    const count = await this.repository
+      .createQueryBuilder('activity')
+      .leftJoin('activity.section', 'section')
+      .where('activity.id = :id', { id: activityId })
+      .andWhere('(activity.hidden = true OR section.hidden = true)')
+      .getCount()
+    return count > 0
+  }
+
+  private applyVisibility(qb: SelectQueryBuilder<ActivityEntity>): void {
+    // LEFT JOIN if activity without section
+    // COALESCE NULL value are set to not hidden
+    qb.leftJoin('activity.section', 'section')
+      .andWhere('COALESCE(activity.hidden, false) = false')
+      .andWhere('COALESCE(section.hidden, false) = false')
+  }
+
   async search(courseId: string, filters?: ActivityFilters): Promise<[ActivityEntity[], number]> {
-    let showhidden = false
-    if (this.request.user) {
-      showhidden = await this.courseMemberService.hasWritePermission(courseId, this.request.user)
+    const user = this.request.user
+    if (!user) {
+      throw new ForbiddenResponse('Authentication required')
     }
 
-    const qb = this.createQueryBuilder(courseId)
+    const canSeeHidden = await this.canSeeHidden(courseId, user)
+    const qb = this.createQueryBuilder(courseId, user, canSeeHidden)
 
     if (filters?.sectionId) {
       qb.andWhere(`section_id = :sectionId`, { sectionId: filters.sectionId })
@@ -88,9 +111,7 @@ export class ActivityService {
     if (filters?.challenge != null) {
       qb.andWhere(`is_challenge = :isChallenge`, { isChallenge: !!filters.challenge })
     }
-    if (!showhidden) {
-      qb.andWhere('hidden = false')
-    }
+    if (!canSeeHidden) this.applyVisibility(qb)
 
     qb.orderBy('activity.createdAt')
 
@@ -112,21 +133,29 @@ export class ActivityService {
       throw new NotFoundResponse(`Activity ${id} not found.`)
     }
 
-    const isCreator = user.id === activity.creatorId
-    const isPrivateMember = await this.activityMemberService.isPrivateMember(id, user.id)
-    const isInGroup = await this.activityGroupService.isUserInActivityGroup(id, user.id)
-    const isMember =
-      (await this.activityMemberService.isMember(id, user.id)) &&
-      (await this.activityGroupService.numberOfGroups(id)) === 0
-    if (!isCreator && !isPrivateMember && !isInGroup && !isMember) {
-      throw new ForbiddenResponse(`You are not a member of this activity`)
+    // check user role in the course and not his general role on the plateform
+    const hasWriteRight =
+      user.id === activity.creatorId || (await this.courseMemberService.hasWritePermission(activity.courseId, user))
+    if (!hasWriteRight) {
+      if (await this.isHidden(id)) throw new NotFoundResponse(`Activity ${id} not found.`)
+      const [isPrivateMember, isInGroup, isMember, numGroups] = await Promise.all([
+        this.activityMemberService.isPrivateMember(id, user.id),
+        this.activityGroupService.isUserInActivityGroup(id, user.id),
+        this.activityMemberService.isMember(id, user.id),
+        this.activityGroupService.numberOfGroups(id),
+      ])
+      if (!(isPrivateMember || isInGroup || (isMember && numGroups === 0))) {
+        throw new ForbiddenResponse(`You are not a member of this activity`)
+      }
     }
+
     await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
     return activity
   }
 
+  /** @internal unsafe : don't check if the activity are hidden or the write permission*/
   async findByActivityId(activityId: string): Promise<Optional<ActivityEntity>> {
     const qb = this.repository.createQueryBuilder('activity')
     qb.andWhere(`activity.id = :id`, { id: activityId })
@@ -139,6 +168,7 @@ export class ActivityService {
     return Optional.ofNullable(activity)
   }
 
+  /** @internal unsafe : don't check if the activity are hidden or the write permission*/
   async findActivitiesByCourseId(courseId: string): Promise<Optional<ActivityEntity[]>> {
     //without using createQueryBuilder because we need to use the member view and it's not implemented on discord yet.
     const activities = await this.repository.find({
@@ -152,18 +182,27 @@ export class ActivityService {
     return Optional.of(activities)
   }
 
-  async findByCourseId(courseId: string, activityId: string): Promise<Optional<ActivityEntity>> {
-    const qb = this.createQueryBuilder(courseId)
-    qb.andWhere(`activity.id = :id`, { id: activityId })
-
-    const activity = await qb.getOne()
-    if (activity) {
-      await this.updateActivitiesDates([activity])
-
-      await this.addVirtualColumns(activity)
+  async findByCourseId(courseId: string, activityId: string, user?: User): Promise<Optional<ActivityEntity>> {
+    if (!user) {
+      throw new ForbiddenResponse('Authentication required')
     }
 
-    return Optional.ofNullable(activity)
+    const canSeeHidden = await this.canSeeHidden(courseId, user)
+    const qb = this.createQueryBuilder(courseId, user, canSeeHidden)
+    qb.andWhere(`activity.id = :id`, { id: activityId })
+
+    if (!canSeeHidden) this.applyVisibility(qb)
+
+    const activity = await qb.getOne()
+    if (!activity) {
+      return Optional.empty()
+    }
+
+    await this.updateActivitiesDates([activity])
+
+    await this.addVirtualColumns(activity)
+
+    return Optional.of(activity)
   }
 
   async create(activity: Partial<ActivityEntity>): Promise<ActivityEntity> {
@@ -176,6 +215,10 @@ export class ActivityService {
   }
 
   async createActivities(activities: Partial<ActivityEntity>[]): Promise<ActivityEntity[]> {
+    if (activities.length === 0) {
+      return []
+    }
+
     const maxOrder =
       (await this.repository.maximum('order', {
         courseId: activities[0].courseId,
@@ -187,7 +230,11 @@ export class ActivityService {
     return result
   }
 
-  async updateActivitesOrder(ids: string[]): Promise<void> {
+  async updateActivitesOrder(courseId: string, ids: string[]): Promise<void> {
+    const owned = await this.repository.count({ where: { courseId, id: In(ids) } })
+    if (owned !== new Set(ids).size) {
+      throw new NotFoundResponse('Some activities do not belong to this course')
+    }
     const activitiesWithOrder = ids.map((activity, index) => ({ id: activity, order: index }))
     await this.repository.save(activitiesWithOrder)
   }
@@ -213,26 +260,33 @@ export class ActivityService {
       await guard(activity)
     }
 
-    if (changes.activitySettings !== undefined) {
+    const {
+      // immuables fields: never read the from request body
+      id: _id,
+      courseId: _courseId,
+      creatorId: _creatorId,
+
+      // Virtual / calulated column should not be persisted
+      title: _title,
+      state: _state,
+      timeSpent: _timeSpent,
+      resourceId: _resourceId,
+      exerciseCount: _exerciseCount,
+      progression: _progression,
+      permissions: _permissions,
+
+      activitySettings,
+      ...persistedChanges
+    } = changes
+
+    if (activitySettings !== undefined) {
       if (!activity.source.variables) {
         activity.source.variables = {} as ActivityVariables
       }
-      activity.source.variables.settings = changes.activitySettings
+      activity.source.variables.settings = activitySettings
     }
 
-    Object.assign(activity, {
-      ...changes,
-
-      // REMOVE ALL VIRTUAL COLUMNS HERE
-      title: undefined,
-      state: undefined,
-      timeSpent: undefined,
-      resourceId: undefined,
-      exerciseCount: undefined,
-      progression: undefined,
-      permissions: undefined,
-      activitySettings: undefined,
-    } as Partial<ActivityEntity>)
+    Object.assign(activity, persistedChanges)
 
     const result = await this.repository.save(activity)
     await this.addVirtualColumns(result)
@@ -288,10 +342,6 @@ export class ActivityService {
   }
 
   async close(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityEntity> {
-    this.notificationService.notifyActivityBeingClosed(activityId).catch((error) => {
-      this.logger.error('Failed to send notification', error)
-    })
-
     const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
     if (!activity) {
       throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
@@ -299,9 +349,14 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
+
+    this.notificationService.notifyActivityBeingClosed(activityId).catch((error) => {
+      this.logger.error('Failed to send notification', error)
+    })
+
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, false)
     this.eventService.emit<OnCloseActivityEventPayload>(ON_CLOSE_ACTIVITY_EVENT, { activityId })
-    return this.update(courseId, activityId, { closeAt: new Date(), restrictions: activity.restrictions }, guard)
+    return this.update(courseId, activityId, { closeAt: new Date(), restrictions: activity.restrictions })
   }
 
   async reopen(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityEntity> {
@@ -325,7 +380,7 @@ export class ActivityService {
     if (guard) {
       await guard(activity)
     }
-    return this.update(courseId, activityId, { code: generateAccessCode() }, guard)
+    return this.update(courseId, activityId, { code: generateAccessCode() })
   }
 
   async delete(courseId: string, activityId: string, guard?: ActivityGuard) {
@@ -362,48 +417,60 @@ export class ActivityService {
   async fromInput(input: CreateActivity | UpdateActivity): Promise<ActivityEntity> {
     const activity = new ActivityEntity()
 
+    // don't change DTO object
+    const payload: Record<string, unknown> = { ...input }
+    const resourceId = payload['resourceId']
+    const resourceVersion = payload['resourceVersion'] as string | undefined
+
+    // use to compile the resource
+    delete payload['resourceId']
+    delete payload['resourceVersion']
+
     try {
-      if ('resourceId' in input) {
+      if (typeof resourceId === 'string' && resourceId.length > 0) {
         const { source } = await this.fileService.compile({
-          resourceId: input.resourceId,
-          version: input.resourceVersion,
+          resourceId,
+          version: resourceVersion,
         })
         activity.source = source as PLSourceFile<ActivityVariables>
-        delete (input as any).resourceId
-        delete (input as any).resourceVersion
       }
     } catch (error) {
-      if ('resourceId' in input) {
-        const activityFailure = await this.findByActivityId(input.resourceId)
-        activityFailure.ifPresent((activity) => {
-          throw new NotFoundResponse(`Resource not found: ${activity.title} version ${input.resourceVersion}`)
+      if (typeof resourceId === 'string' && resourceId.length > 0) {
+        const activityFailure = await this.findByActivityId(resourceId)
+        activityFailure.ifPresent((existingActivity) => {
+          throw new NotFoundResponse(
+            `Resource not found: ${existingActivity.title} version ${String(resourceVersion ?? '')}`
+          )
         })
 
-        const resource = await this.resourceService.findByIdOrCode(input.resourceId)
-        resource.ifPresent((resource) => {
-          throw new NotFoundResponse(`Erreur lord du chargement de l'activité: ${resource.name}`)
+        const resource = await this.resourceService.findByIdOrCode(resourceId)
+        resource.ifPresent((existingResource) => {
+          throw new NotFoundResponse(`Erreur lord du chargement de l'activité: ${existingResource.name}`)
         })
       }
       throw error
     }
 
-    Object.assign(activity, input)
+    const { id: _id, courseId: _courseId, creatorId: _creatorId, ...allowed } = payload
+
+    Object.assign(activity, allowed)
     return activity
   }
 
-  private createQueryBuilder(courseId: string) {
-    // TODO select only the fields we need here
-    if (this.request.user.role === 'admin') {
-      return this.repository.createQueryBuilder('activity').where(`activity.course_id = :courseId`, { courseId })
-    }
-    const qb = buildSelectQuery(
-      this.repository.createQueryBuilder('activity'),
-      (qb) => this.withMemberJoin(qb, this.request.user),
-      (qb) => qb.where(`activity.course_id = :courseId`, { courseId }),
-      (qb) => this.withMemberClause(qb, this.request.user)
-    )
+  private createQueryBuilder(courseId: string, user: User, canSeeAllActivities: boolean) {
+    // Role are check from the course role and not the plateform role
+    const baseQuery = this.repository.createQueryBuilder('activity')
 
-    return qb
+    if (canSeeAllActivities) {
+      return baseQuery.where(`activity.course_id = :courseId`, { courseId })
+    }
+
+    return buildSelectQuery(
+      baseQuery,
+      (qb) => this.withMemberJoin(qb, user),
+      (qb) => qb.where(`activity.course_id = :courseId`, { courseId }),
+      (qb) => this.withMemberClause(qb, user)
+    )
   }
 
   private async addVirtualColumns(...activities: ActivityEntity[]): Promise<void> {
@@ -421,14 +488,22 @@ export class ActivityService {
         })
       : []
 
+    // check right for every activity one time
+    const user = this.request.user
+    const courseIds = Array.from(new Set(activities.map((activity) => activity.courseId)))
+    const writePermissionEntries = await Promise.all(
+      courseIds.map(async (courseId) => {
+        const canWrite = !!user && (await this.courseMemberService.hasWritePermission(courseId, user))
+        return [courseId, canWrite] as const
+      })
+    )
+    const writePermissionByCourse = new Map(writePermissionEntries)
+
     await Promise.all(
       activities.map(async (activity) => {
         const title = activity.source.variables.title as string
         const exerciseGroups = (activity.source.variables.exerciseGroups as Record<string, ActivityExerciseGroup>) || {}
-        const hasWritePermission = await this.courseMemberService.hasWritePermission(
-          activity.courseId,
-          this.request.user
-        )
+        const hasWritePermission = writePermissionByCourse.get(activity.courseId) ?? false
         Object.assign(activity, {
           state: calculateActivityOpenState(activity),
           title: title?.trim() || resources.find((r) => r.id === activity.source.resource)?.name,

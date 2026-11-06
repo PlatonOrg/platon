@@ -8,6 +8,7 @@ import { CLS_REQ } from 'nestjs-cls'
 import { Optional } from 'typescript-optional'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { ActivityMemberService } from '../activity-member/activity-member.service'
+import { ActivityMemberView } from '../activity-member/activity-member.view'
 import { CourseGroupMemberEntity } from '../course-group-member/course-group-member.entity'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
@@ -15,6 +16,7 @@ import { ActivityEntity } from './activity.entity'
 import { ActivityService } from './activity.service'
 import { ON_RELOAD_ACTIVITY_EVENT } from './activity.event'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
+import { In } from 'typeorm'
 
 describe('ActivityService', () => {
   let service: ActivityService
@@ -90,19 +92,20 @@ describe('ActivityService', () => {
   })
 
   describe('search', () => {
-    it('devrait utiliser une requête simple (sans jointure membre) pour un admin', async () => {
-      request.user = { ...request.user, role: 'admin' } as User
+    it('devrait utiliser une requête simple pour un utilisateur ayant le droit effectif d’écriture du cours', async () => {
+      courseMemberService.hasWritePermission.mockResolvedValue(true)
       const qb = mockSelectQueryBuilder<ActivityEntity>()
       qb.getManyAndCount.mockResolvedValue([[], 0])
       repository.createQueryBuilder.mockReturnValue(qb)
 
       await service.search('course-1')
 
+      expect(courseMemberService.hasWritePermission).toHaveBeenCalledWith('course-1', request.user)
       expect(qb.where).toHaveBeenCalledWith(`activity.course_id = :courseId`, { courseId: 'course-1' })
       expect(qb.leftJoin).not.toHaveBeenCalled()
     })
 
-    it('devrait joindre la vue membre et le sous-select de groupe pour un non-admin', async () => {
+    it('devrait joindre les membres et appliquer la visibilité pour un utilisateur sans droit d’écriture', async () => {
       const qb = mockSelectQueryBuilder<ActivityEntity>()
       qb.getManyAndCount.mockResolvedValue([[], 0])
       repository.createQueryBuilder.mockReturnValue(qb)
@@ -111,6 +114,54 @@ describe('ActivityService', () => {
         leftJoin: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
+        getQuery: jest.fn().mockReturnValue('SELECT user_id'),
+      }
+      courseGroupMemberRepository.createQueryBuilder.mockReturnValue(subQb as never)
+
+      await service.search('course-1')
+
+      expect(qb.leftJoin).toHaveBeenCalledWith(
+        ActivityMemberView,
+        'member',
+        'member.activity_id = activity.id AND member.id = :userId',
+        { userId: 'user-1' }
+      )
+      expect(qb.leftJoin).toHaveBeenCalledWith('activity.section', 'section')
+      expect(qb.andWhere).toHaveBeenCalledWith('COALESCE(activity.hidden, false) = false')
+      expect(qb.andWhere).toHaveBeenCalledWith('COALESCE(section.hidden, false) = false')
+    })
+
+    it('ne recalcule le droit d’écriture qu’une fois par cours pour une liste d’activités', async () => {
+      const qb = mockSelectQueryBuilder<ActivityEntity>()
+      qb.getManyAndCount.mockResolvedValue([[buildActivity(), buildActivity({ id: 'activity-2' })], 2])
+      repository.createQueryBuilder.mockReturnValue(qb)
+      const subQb = {
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getQuery: jest.fn().mockReturnValue('SELECT user_id'),
+      }
+      courseGroupMemberRepository.createQueryBuilder.mockReturnValue(subQb as never)
+
+      await service.search('course-1')
+
+      // Une fois dans canSeeHidden, puis une fois dans addVirtualColumns pour ce cours.
+      expect(courseMemberService.hasWritePermission).toHaveBeenCalledTimes(2)
+    })
+
+    it('un admin plateforme rétrogradé dans le cours reste soumis au filtre des membres', async () => {
+      request.user = { ...request.user, role: 'admin' } as User
+      courseMemberService.hasWritePermission.mockResolvedValue(false)
+      const qb = mockSelectQueryBuilder<ActivityEntity>()
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+      repository.createQueryBuilder.mockReturnValue(qb)
+      const subQb = {
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getQuery: jest.fn().mockReturnValue('SELECT user_id'),
       }
       courseGroupMemberRepository.createQueryBuilder.mockReturnValue(subQb as never)
 
@@ -122,6 +173,7 @@ describe('ActivityService', () => {
 
     it('devrait filtrer par sectionId et challenge', async () => {
       request.user = { ...request.user, role: 'admin' } as User
+      courseMemberService.hasWritePermission.mockResolvedValue(true)
       const qb = mockSelectQueryBuilder<ActivityEntity>()
       qb.getManyAndCount.mockResolvedValue([[], 0])
       repository.createQueryBuilder.mockReturnValue(qb)
@@ -153,6 +205,35 @@ describe('ActivityService', () => {
       activityGroupService.numberOfGroups.mockResolvedValue(0)
 
       await expect(service.findByIdForUser('activity-1', request.user)).resolves.toBe(activity)
+    })
+
+    it('devrait autoriser un éditeur du cours même sans appartenance à l’activité', async () => {
+      courseMemberService.hasWritePermission.mockResolvedValue(true)
+      const qb = mockSelectQueryBuilder<ActivityEntity>()
+      const activity = buildActivity({ creatorId: 'someone-else', hidden: true })
+      qb.getOne.mockResolvedValue(activity)
+      repository.createQueryBuilder.mockReturnValue(qb)
+
+      await expect(service.findByIdForUser('activity-1', request.user)).resolves.toBe(activity)
+      expect(courseMemberService.hasWritePermission).toHaveBeenCalledWith('course-1', request.user)
+      expect(activityMemberService.isMember).not.toHaveBeenCalled()
+    })
+
+    it('ne devrait pas traiter un admin plateforme rétrogradé comme un éditeur du cours', async () => {
+      request.user = { ...request.user, role: 'admin' } as User
+      courseMemberService.hasWritePermission.mockResolvedValue(false)
+      const qb = mockSelectQueryBuilder<ActivityEntity>()
+      const activity = buildActivity({ creatorId: 'someone-else' })
+      qb.getOne.mockResolvedValue(activity)
+      repository.createQueryBuilder.mockReturnValue(qb)
+      // La vérification d'appartenance échoue pour cet utilisateur.
+      activityMemberService.isPrivateMember.mockResolvedValue(false)
+      activityGroupService.isUserInActivityGroup.mockResolvedValue(false)
+      activityMemberService.isMember.mockResolvedValue(false)
+      activityGroupService.numberOfGroups.mockResolvedValue(0)
+
+      await expect(service.findByIdForUser('activity-1', request.user)).rejects.toBeInstanceOf(ForbiddenResponse)
+      expect(courseMemberService.hasWritePermission).toHaveBeenCalledWith('course-1', request.user)
     })
 
     it("devrait lever une ForbiddenResponse si aucune condition d'accès n'est remplie", async () => {
@@ -244,15 +325,35 @@ describe('ActivityService', () => {
     })
   })
 
+  it('createActivities devrait accepter une liste vide sans interroger la base', async () => {
+    await expect(service.createActivities([])).resolves.toEqual([])
+    expect(repository.maximum).not.toHaveBeenCalled()
+    expect(repository.save).not.toHaveBeenCalled()
+  })
+
   describe('updateActivitesOrder', () => {
     it('devrait sauvegarder les ids avec leur index comme ordre', async () => {
-      await service.updateActivitesOrder(['a1', 'a2', 'a3'])
+      repository.count.mockResolvedValue(3)
+
+      await service.updateActivitesOrder('course-1', ['a1', 'a2', 'a3'])
+
+      expect(repository.count).toHaveBeenCalledWith({
+        where: { courseId: 'course-1', id: In(['a1', 'a2', 'a3']) },
+      })
 
       expect(repository.save).toHaveBeenCalledWith([
         { id: 'a1', order: 0 },
         { id: 'a2', order: 1 },
         { id: 'a3', order: 2 },
       ])
+    })
+
+    it("devrait rejeter si certaines activités n'appartiennent pas au cours", async () => {
+      repository.count.mockResolvedValue(2)
+
+      await expect(service.updateActivitesOrder('course-1', ['a1', 'a2', 'a3'])).rejects.toBeInstanceOf(
+        NotFoundResponse
+      )
     })
   })
 
@@ -300,6 +401,16 @@ describe('ActivityService', () => {
       expect(savedArg?.code).toBe('ABC123')
       expect(savedArg?.title).toBeUndefined()
       expect(savedArg?.state).toBeUndefined()
+    })
+
+    it('update ignore id, courseId et creatorId', async () => {
+      repository.findOne.mockResolvedValue(buildActivity())
+      let saved: Partial<ActivityEntity> | undefined
+      repository.save.mockImplementation(async (a) => ((saved = { ...(a as ActivityEntity) }), a as ActivityEntity))
+
+      await service.update('course-1', 'activity-1', { id: 'x', courseId: 'course-2', creatorId: 'evil' } as never)
+
+      expect(saved).toMatchObject({ id: 'activity-1', courseId: 'course-1', creatorId: 'creator-1' })
     })
   })
 
@@ -438,20 +549,30 @@ describe('ActivityService', () => {
   })
 
   describe('fromInput', () => {
-    it('devrait assigner directement les champs sans resourceId', async () => {
-      const result = await service.fromInput({ courseId: 'course-1' } as never)
+    it('devrait ignorer les champs contrôlés par la route et ne pas muter le DTO', async () => {
+      const input = { id: 'spoofed-id', courseId: 'spoofed-course', creatorId: 'spoofed-creator' }
+      const result = await service.fromInput(input as never)
 
-      expect(result.courseId).toBe('course-1')
+      expect(result.id).toBeUndefined()
+      expect(result.courseId).toBeUndefined()
+      expect(result.creatorId).toBeUndefined()
+      expect(input).toEqual({
+        id: 'spoofed-id',
+        courseId: 'spoofed-course',
+        creatorId: 'spoofed-creator',
+      })
       expect(fileService.compile).not.toHaveBeenCalled()
     })
 
     it('devrait compiler la source et retirer resourceId/resourceVersion pour une création', async () => {
       fileService.compile.mockResolvedValue({ source: { variables: {} } } as never)
 
-      const result = await service.fromInput({ resourceId: 'res-1', resourceVersion: 'v1' } as never)
+      const input = { resourceId: 'res-1', resourceVersion: 'v1' }
+      const result = await service.fromInput(input as never)
 
       expect(fileService.compile).toHaveBeenCalledWith({ resourceId: 'res-1', version: 'v1' })
       expect((result as unknown as { resourceId?: string }).resourceId).toBeUndefined()
+      expect(input).toEqual({ resourceId: 'res-1', resourceVersion: 'v1' })
     })
 
     it("devrait lever une NotFoundResponse avec le titre si l'activité liée à resourceId existe déjà", async () => {

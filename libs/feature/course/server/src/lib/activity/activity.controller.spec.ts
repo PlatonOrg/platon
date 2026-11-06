@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing'
-import { NotFoundResponse, UserRoles } from '@platon/core/common'
+import { ForbiddenResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
 import { IRequest } from '@platon/core/server'
 import { Optional } from 'typescript-optional'
 import { CoursePermissionsService } from '../permissions/permissions.service'
@@ -31,7 +31,10 @@ describe('ActivityController', () => {
   let permissionsService: jest.Mocked<
     Pick<
       CoursePermissionsService,
-      'ensureActivityReadPermission' | 'ensureCourseWritePermission' | 'ensureActivityWritePermission'
+      | 'ensureActivityReadPermission'
+      | 'ensureCourseWritePermission'
+      | 'ensureActivityWritePermission'
+      | 'hasCourseWritePermission'
     >
   >
   const req = { user: { id: 'teacher-1', role: UserRoles.teacher } } as IRequest
@@ -58,6 +61,7 @@ describe('ActivityController', () => {
       ensureActivityReadPermission: jest.fn().mockResolvedValue(undefined),
       ensureCourseWritePermission: jest.fn().mockResolvedValue(undefined),
       ensureActivityWritePermission: jest.fn().mockResolvedValue(undefined),
+      hasCourseWritePermission: jest.fn().mockResolvedValue(false),
     }
 
     const module = await Test.createTestingModule({
@@ -75,28 +79,40 @@ describe('ActivityController', () => {
     jest.clearAllMocks()
   })
 
-  it('search devrait retourner la liste mappée', async () => {
-    activityService.search.mockResolvedValue([[{ id: 'a1' } as ActivityEntity], 1])
+  describe('search', () => {
+    it('search devrait retourner la liste mappée', async () => {
+      activityService.search.mockResolvedValue([[{ id: 'a1' } as ActivityEntity], 1])
 
-    const result = await controller.search(req, 'course-1')
+      const result = await controller.search(req, 'course-1')
 
-    expect(result.total).toBe(1)
-  })
+      expect(result.total).toBe(1)
+    })
 
-  it('search devrait masquer le code de déblocage pour un étudiant', async () => {
-    activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
+    it('search devrait masquer le code de déblocage pour un étudiant', async () => {
+      activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
 
-    const result = await controller.search(studentReq, 'course-1')
+      const result = await controller.search(studentReq, 'course-1')
 
-    expect(result.resources[0].code).toBeUndefined()
-  })
+      expect(result.resources[0].code).toBeUndefined()
+    })
 
-  it('search devrait conserver le code de déblocage pour un professeur', async () => {
-    activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
+    it('search masque le code si le rôle teacher plateforme est rétrogradé dans le cours', async () => {
+      activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
 
-    const result = await controller.search(req, 'course-1')
+      const result = await controller.search(req, 'course-1')
 
-    expect(result.resources[0].code).toBe('ABC123')
+      expect(permissionsService.hasCourseWritePermission).toHaveBeenCalledWith('course-1', req)
+      expect(result.resources[0].code).toBeUndefined()
+    })
+
+    it('search devrait conserver le code de déblocage pour un rédacteur effectif du cours', async () => {
+      permissionsService.hasCourseWritePermission.mockResolvedValue(true)
+      activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
+
+      const result = await controller.search(req, 'course-1')
+
+      expect(result.resources[0].code).toBe('ABC123')
+    })
   })
 
   it('getCourseColors devrait retourner les couleurs', async () => {
@@ -133,13 +149,44 @@ describe('ActivityController', () => {
       expect(result.resource.code).toBeUndefined()
     })
 
-    it('devrait conserver le code de déblocage pour un professeur', async () => {
+    it('devrait conserver le code de déblocage pour un rédacteur effectif du cours', async () => {
+      permissionsService.hasCourseWritePermission.mockResolvedValue(true)
       const activity = { id: 'activity-1', code: 'ABC123' } as ActivityEntity
       activityService.findByCourseId.mockResolvedValue(Optional.of(activity))
 
       const result = await controller.find(req, 'course-1', 'activity-1')
 
       expect(result.resource.code).toBe('ABC123')
+    })
+
+    it("find devrait transmettre l'utilisateur au service", async () => {
+      activityService.findByCourseId.mockResolvedValue(Optional.of({ id: 'activity-1' } as ActivityEntity))
+
+      await controller.find(studentReq, 'course-1', 'activity-1')
+
+      expect(activityService.findByCourseId).toHaveBeenCalledWith('course-1', 'activity-1', studentReq.user)
+    })
+
+    it('find devrait renvoyer 404 sans vérifier la permission quand le service masque l’activité', async () => {
+      activityService.findByCourseId.mockResolvedValue(Optional.empty())
+
+      await expect(controller.find(studentReq, 'course-1', 'hidden-1')).rejects.toBeInstanceOf(NotFoundResponse)
+      expect(permissionsService.ensureActivityReadPermission).not.toHaveBeenCalled()
+    })
+
+    it('find devrait propager le refus de ensureActivityReadPermission', async () => {
+      activityService.findByCourseId.mockResolvedValue(Optional.of({ id: 'activity-1' } as ActivityEntity))
+      permissionsService.ensureActivityReadPermission.mockRejectedValue(new ForbiddenResponse('no'))
+
+      await expect(controller.find(studentReq, 'course-1', 'activity-1')).rejects.toBeInstanceOf(ForbiddenResponse)
+    })
+    it('find et search ne plantent pas pour un anonyme et masquent le code', async () => {
+      const anonymous = {} as IRequest
+      activityService.findByCourseId.mockResolvedValue(Optional.of({ id: 'a1', code: 'ABC123' } as ActivityEntity))
+      activityService.search.mockResolvedValue([[{ id: 'a1', code: 'ABC123' } as ActivityEntity], 1])
+
+      expect((await controller.find(anonymous, 'course-1', 'a1')).resource.code).toBeUndefined()
+      expect((await controller.search(anonymous, 'course-1')).resources[0].code).toBeUndefined()
     })
   })
 
@@ -171,7 +218,7 @@ describe('ActivityController', () => {
     await controller.changeOrder(req, 'course-1', ['a1', 'a2'])
 
     expect(permissionsService.ensureCourseWritePermission).toHaveBeenCalledWith('course-1', req)
-    expect(activityService.updateActivitesOrder).toHaveBeenCalledWith(['a1', 'a2'])
+    expect(activityService.updateActivitesOrder).toHaveBeenCalledWith('course-1', ['a1', 'a2'])
   })
 
   it('update devrait déléguer avec un guard de permission écriture', async () => {
@@ -179,6 +226,7 @@ describe('ActivityController', () => {
 
     await controller.update(req, 'course-1', 'activity-1', {} as never)
 
+    expect(permissionsService.ensureActivityWritePermission).toHaveBeenCalledWith('activity-1', req)
     expect(activityService.update).toHaveBeenCalledWith(
       'course-1',
       'activity-1',
