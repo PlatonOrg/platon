@@ -5,6 +5,8 @@ import { TOKEN_EXPIRED_ERROR_CODE, User, UnauthorizedResponse } from '@platon/co
 import { createUserEntity } from '@platon/core/testing/server'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { of } from 'rxjs'
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
+import { IS_REFRESH_TOKEN_AUTH_KEY } from '../decorators/refresh-token-auth.decorator'
 import { AuthGuard } from './auth.guard'
 
 jest.mock('@nestjs/graphql', () => ({
@@ -31,6 +33,9 @@ describe('AuthGuard', () => {
   })
 
   afterEach(() => jest.restoreAllMocks())
+
+  const mockMetadata = (metadata: Record<string, boolean>) =>
+    reflector.getAllAndOverride.mockImplementation((key) => metadata[key as string])
 
   describe('getRequest', () => {
     it('devrait retourner la requête HTTP pour un contexte HTTP', () => {
@@ -62,8 +67,16 @@ describe('AuthGuard', () => {
   })
 
   describe('canActivate', () => {
+    it("devrait laisser passer une route @RefreshTokenAuth() sans l'authentifier (JwtRefreshGuard s'en charge)", async () => {
+      mockMetadata({ [IS_REFRESH_TOKEN_AUTH_KEY]: true })
+      const context = buildHttpContext({})
+
+      await expect(guard.canActivate(context)).resolves.toBe(true)
+      expect(superCanActivate).not.toHaveBeenCalled()
+    })
+
     it("devrait autoriser une route publique même si l'authentification échoue", async () => {
-      reflector.getAllAndOverride.mockReturnValue(true)
+      mockMetadata({ [IS_PUBLIC_KEY]: true })
       superCanActivate.mockImplementation(() => {
         throw new Error('no token')
       })
@@ -73,7 +86,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait rejeter une route publique si le token est expiré', async () => {
-      reflector.getAllAndOverride.mockReturnValue(true)
+      mockMetadata({ [IS_PUBLIC_KEY]: true })
       const error = new UnauthorizedResponse(TOKEN_EXPIRED_ERROR_CODE)
       superCanActivate.mockReturnValue(Promise.reject(error))
       const context = buildHttpContext({})
@@ -82,7 +95,7 @@ describe('AuthGuard', () => {
     })
 
     it("devrait rejeter une route privée si l'authentification échoue", async () => {
-      reflector.getAllAndOverride.mockReturnValue(false)
+      mockMetadata({ [IS_PUBLIC_KEY]: false })
       const error = new Error('no token')
       superCanActivate.mockImplementation(() => {
         throw error
@@ -93,7 +106,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait retourner true si super.canActivate retourne true (synchrone)', async () => {
-      reflector.getAllAndOverride.mockReturnValue(false)
+      mockMetadata({ [IS_PUBLIC_KEY]: false })
       superCanActivate.mockReturnValue(true)
       const context = buildHttpContext({})
 
@@ -101,7 +114,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait retourner false si super.canActivate retourne false (synchrone) et route non publique', async () => {
-      reflector.getAllAndOverride.mockReturnValue(false)
+      mockMetadata({ [IS_PUBLIC_KEY]: false })
       superCanActivate.mockReturnValue(false)
       const context = buildHttpContext({})
 
@@ -109,7 +122,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait attendre une Promise retournée par super.canActivate', async () => {
-      reflector.getAllAndOverride.mockReturnValue(false)
+      mockMetadata({ [IS_PUBLIC_KEY]: false })
       superCanActivate.mockReturnValue(Promise.resolve(true))
       const context = buildHttpContext({})
 
@@ -117,7 +130,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait forcer true sur une route publique même si la Promise résout à false', async () => {
-      reflector.getAllAndOverride.mockReturnValue(true)
+      mockMetadata({ [IS_PUBLIC_KEY]: true })
       superCanActivate.mockReturnValue(Promise.resolve(false))
       const context = buildHttpContext({})
 
@@ -125,7 +138,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait attendre un Observable retourné par super.canActivate', async () => {
-      reflector.getAllAndOverride.mockReturnValue(false)
+      mockMetadata({ [IS_PUBLIC_KEY]: false })
       superCanActivate.mockReturnValue(of(true))
       const context = buildHttpContext({})
 
@@ -133,7 +146,7 @@ describe('AuthGuard', () => {
     })
 
     it("devrait exposer request.memoize et ne calculer la valeur mémoïsée qu'une seule fois", async () => {
-      reflector.getAllAndOverride.mockReturnValue(false)
+      mockMetadata({ [IS_PUBLIC_KEY]: false })
       superCanActivate.mockReturnValue(true)
       const request: Record<string, unknown> = {}
       const context = buildHttpContext(request)

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
 import { JwtHelperService } from '@auth0/angular-jwt'
 import { AuthToken, ItemResponse } from '@platon/core/common'
@@ -64,6 +64,11 @@ export class RemoteTokenProvider extends TokenProvider {
 
   /**
    * Refreshs the current auth token.
+   *
+   * The refresh token is only sent to the refresh endpoint. The server does not renew it (the session lasts
+   * at most the refresh token lifetime from the sign-in), but the returned pair is stored as is so that
+   * renewing it on the server side would not require any change here.
+   *
    * @returns A promise that resolves with an auth token.
    */
   async refresh(): Promise<AuthToken> {
@@ -79,14 +84,25 @@ export class RemoteTokenProvider extends TokenProvider {
     }
 
     try {
-      const response = await lastValueFrom(this.http.post<ItemResponse<AuthToken>>('/api/v1/auth/refresh/', {}))
-      token.accessToken = response.resource.accessToken
-      await firstValueFrom(this.storage.set(KEY, token))
-      localStorage.setItem(KEY, JSON.stringify(token))
-      return token
+      const response = await lastValueFrom(
+        this.http.post<ItemResponse<AuthToken>>(
+          '/api/v1/auth/refresh/',
+          {},
+          { headers: new HttpHeaders({ Authorization: `Bearer ${token.refreshToken}` }) }
+        )
+      )
+      const refreshed: AuthToken = {
+        accessToken: response.resource.accessToken,
+        refreshToken: response.resource.refreshToken || token.refreshToken,
+      }
+      await this.save(refreshed)
+      return refreshed
     } catch (error) {
       console.error('Unable to refresh token', error)
-      // await this.remove()
+      // The server refused the refresh token: the session is over. Other errors (network, ...) may be temporary.
+      if (error instanceof HttpErrorResponse && error.status === 401) {
+        await this.remove()
+      }
       throw error
     }
   }
