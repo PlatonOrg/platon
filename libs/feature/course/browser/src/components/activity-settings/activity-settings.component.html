@@ -391,15 +391,7 @@
           <div class="action-group">
             <h4>Actions avancées</h4>
             <div class="action-buttons">
-              <button
-                nz-button
-                nzDanger
-                nz-popconfirm
-                [nzPopconfirmTitle]="confirmReload"
-                nzPopconfirmPlacement="top"
-                (nzOnConfirm)="reload()"
-                class="action-btn"
-              >
+              <button nz-button nzDanger (click)="reload()" class="action-btn">
                 <i nz-icon nzType="reload" nzTheme="outline"></i>
                 Recharger
               </button>
@@ -437,13 +429,6 @@
   <div class="confirm-content">
     <h4>Rouvrir pour tous</h4>
     <p>La date de fin sera automatiquement supprimée.</p>
-  </div>
-</ng-template>
-
-<ng-template #confirmReload>
-  <div class="confirm-content">
-    <h4>Recharger l'activité</h4>
-    <p>L'activité sera remplacée par sa dernière version publiée.</p>
   </div>
 </ng-template>
 

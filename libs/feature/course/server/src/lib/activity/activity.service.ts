@@ -7,6 +7,7 @@ import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@plat
 import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
   ActivityFilters,
+  ActivityReloadPreview,
   CreateActivity,
   ReloadActivity,
   RestrictionList,
@@ -35,6 +36,8 @@ import { ActivityGroupEntity } from '../activity-group/activity-group.entity'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
+import { diffActivityExercises, planActivityReload } from './activity-reload'
+import { changedExerciseVariables, exerciseReloadRisks } from './exercise-merge'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
 
@@ -274,17 +277,86 @@ export class ActivityService {
       resourceId: activity.source.resource,
       version: input.version,
     })
-    activity.source = source as PLSourceFile<ActivityVariables>
+    const next = source as PLSourceFile<ActivityVariables>
+    const isPeer = activitySettings?.navigation?.mode === 'peer'
+    // The students of a peer activity compare their answers with each other: their data cannot be split.
+    const plan = isPeer
+      ? planActivityReload(activity.source.variables, next.variables)
+      : planActivityReload(activity.source.variables, next.variables, input.exerciseKeys, input.keepAnswersKeys)
+    const hasChanges = plan.resetExerciseIds.length > 0 || plan.removedExerciseIds.length > 0
+    const hasAdditions = diffActivityExercises(activity.source.variables, plan.variables).some(
+      (diff) => diff.status === 'added'
+    )
+
+    activity.source = { ...next, variables: plan.variables }
     activity.source.variables.settings = activitySettings
 
-    activity = await this.repository.save(activity)
+    // The sessions of the students are updated before saving the activity:
+    // if it fails, the activity keeps its previous version and the reload can be done again.
+    await this.eventService.emitAsync<OnReloadActivityEventPayload>(ON_RELOAD_ACTIVITY_EVENT, {
+      activity,
+      changes:
+        isPeer && (hasChanges || hasAdditions)
+          ? undefined
+          : {
+              resetExerciseIds: plan.resetExerciseIds,
+              removedExerciseIds: plan.removedExerciseIds,
+              patchedExercises: plan.patchedExercises,
+              mergeRule: input.mergeRule,
+            },
+    })
 
-    this.eventService.emit<OnReloadActivityEventPayload>(ON_RELOAD_ACTIVITY_EVENT, { activity })
+    activity = await this.repository.save(activity)
 
     await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
     return activity
+  }
+
+  /**
+   * Compares the activity with its last published version, without changing anything.
+   */
+  async reloadPreview(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityReloadPreview> {
+    const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
+    if (!activity) {
+      throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
+    }
+    if (guard) {
+      await guard(activity)
+    }
+
+    const { source } = await this.fileService.compile({ resourceId: activity.source.resource })
+    const started: { id: string; count: number }[] = await this.repository.manager.query(
+      `SELECT exercise->>'id' AS id, COUNT(*)::int AS count
+       FROM "Sessions" session, jsonb_array_elements(session.variables->'navigation'->'exercises') exercise
+       WHERE session.activity_id = $1 AND session.parent_id IS NULL AND exercise->>'state' <> 'NOT_STARTED'
+       GROUP BY 1`,
+      [activityId]
+    )
+
+    const settings = activity.source.variables.settings as ActivitySettings
+    const diffs = diffActivityExercises(
+      activity.source.variables,
+      (source as PLSourceFile<ActivityVariables>).variables
+    )
+    return {
+      fullReset: settings?.navigation?.mode === 'peer',
+      exercises: diffs.map((diff) => ({
+        key: diff.key,
+        status: diff.status,
+        title: String((diff.next ?? diff.previous)?.source.variables['title'] ?? ''),
+        startedCount: started.find((item) => item.id === diff.previous?.id)?.count ?? 0,
+        changedVariables:
+          diff.status === 'modified' && diff.previous && diff.next
+            ? changedExerciseVariables(diff.previous.source.variables, diff.next.source.variables)
+            : [],
+        risks:
+          diff.status === 'modified' && diff.previous && diff.next
+            ? exerciseReloadRisks(diff.previous.source, diff.next.source)
+            : [],
+      })),
+    }
   }
 
   async close(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityEntity> {
