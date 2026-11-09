@@ -4,8 +4,8 @@ import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
 import { Injectable, inject } from '@angular/core'
 import { AuthToken, ErrorResponse, TOKEN_EXPIRED_ERROR_CODE } from '@platon/core/common'
 
-import { BehaviorSubject, from, Observable, throwError } from 'rxjs'
-import { catchError, filter, finalize, switchMap, take } from 'rxjs/operators'
+import { BehaviorSubject, from, Observable, of, throwError } from 'rxjs'
+import { catchError, filter, finalize, switchMap, take, tap } from 'rxjs/operators'
 import { TokenService } from '../api/token.service'
 
 /**
@@ -16,7 +16,8 @@ export class AuthInterceptor implements HttpInterceptor {
   private readonly tokenService = inject(TokenService)
 
   private isRefreshing = false
-  private readonly token$ = new BehaviorSubject<AuthToken | undefined>(undefined)
+  /** `undefined` while refreshing, `null` if the refresh failed. */
+  private readonly token$ = new BehaviorSubject<AuthToken | null | undefined>(undefined)
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return from(this.tokenService.token()).pipe(
@@ -49,20 +50,27 @@ export class AuthInterceptor implements HttpInterceptor {
       this.token$.next(undefined)
 
       return from(this.tokenService.refresh()).pipe(
-        switchMap((token) => {
-          return next.handle(this.addAuthorization(req, token!.accessToken))
-        }),
+        // The session cannot be refreshed: the request is retried anonymously, so public routes still work.
+        catchError(() => of(null)),
+        tap((token) => this.token$.next(token)),
+        switchMap((token) => this.retry(req, next, token)),
         finalize(() => (this.isRefreshing = false))
       )
     }
 
     return this.token$.pipe(
-      filter((token) => token != null),
+      filter((token) => token !== undefined),
       take(1),
-      switchMap((token) => {
-        return next.handle(this.addAuthorization(req, token!.accessToken))
-      })
+      switchMap((token) => this.retry(req, next, token))
     )
+  }
+
+  private retry(
+    req: HttpRequest<any>,
+    next: HttpHandler,
+    token: AuthToken | null | undefined
+  ): Observable<HttpEvent<any>> {
+    return next.handle(token ? this.addAuthorization(req, token.accessToken) : req)
   }
 
   private addAuthorization(req: HttpRequest<any>, token: string): HttpRequest<any> {

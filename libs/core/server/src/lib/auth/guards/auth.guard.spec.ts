@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
-import { User, UnauthorizedResponse } from '@platon/core/common'
+import { TOKEN_EXPIRED_ERROR_CODE, User, UnauthorizedResponse } from '@platon/core/common'
 import { createUserEntity } from '@platon/core/testing/server'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { of } from 'rxjs'
@@ -70,6 +70,15 @@ describe('AuthGuard', () => {
       const context = buildHttpContext({})
 
       await expect(guard.canActivate(context)).resolves.toBe(true)
+    })
+
+    it('devrait rejeter une route publique si le token est expiré', async () => {
+      reflector.getAllAndOverride.mockReturnValue(true)
+      const error = new UnauthorizedResponse(TOKEN_EXPIRED_ERROR_CODE)
+      superCanActivate.mockReturnValue(Promise.reject(error))
+      const context = buildHttpContext({})
+
+      await expect(guard.canActivate(context)).rejects.toBe(error)
     })
 
     it("devrait rejeter une route privée si l'authentification échoue", async () => {
