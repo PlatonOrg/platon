@@ -442,7 +442,12 @@ describe('PlayerService (integration)', () => {
       it('should count the students who answered each exercise in the preview', async () => {
         const user = await seedUser()
         const activity = await seedActivity(user.id)
-        await seedStudent(activity, user.id)
+        const student = await seedStudent(activity, user.id)
+        // The state of the navigation can stay NOT_STARTED while an answer exists: only the answers count.
+        await dataSource.getRepository(AnswerEntity).save([
+          { sessionId: student.kept.id, userId: user.id, variables: {} as any, grade: 100 },
+          { sessionId: student.gone.id, userId: user.id, variables: {} as any, grade: -2 },
+        ])
         activity.source = {
           ...activity.source,
           resource: 'res',
@@ -463,17 +468,21 @@ describe('PlayerService (integration)', () => {
             },
           },
         })
-        const preview = await new (ActivityService as any)(
-          {},
-          { compile },
-          ...Array(6).fill({}),
-          activityRepo
-        ).reloadPreview(activity.courseId, activity.id)
+        const preview = await new (ActivityService as any)({}, { compile }, ...Array(6).fill({}), activityRepo, {
+          find: jest.fn().mockResolvedValue([{ id: 'kept', name: 'Nom de la ressource' }]),
+        }).reloadPreview(activity.courseId, activity.id)
 
         expect(preview.exercises).toEqual([
-          { key: 'kept', status: 'unchanged', title: 'A', startedCount: 1, changedVariables: [], risks: [] },
-          { key: 'reset', status: 'modified', title: 'B2', startedCount: 1, changedVariables: ['title'], risks: [] },
-          { key: 'gone', status: 'removed', title: 'C', startedCount: 0, changedVariables: [], risks: [] },
+          {
+            key: 'kept',
+            status: 'unchanged',
+            title: 'Nom de la ressource',
+            startedCount: 1,
+            changedVariables: [],
+            risks: [],
+          },
+          { key: 'reset', status: 'modified', title: 'B2', startedCount: 0, changedVariables: ['title'], risks: [] },
+          { key: 'gone', status: 'removed', title: 'C', startedCount: 1, changedVariables: [], risks: [] },
         ])
       })
     })

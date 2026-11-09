@@ -327,10 +327,12 @@ export class ActivityService {
     }
 
     const { source } = await this.fileService.compile({ resourceId: activity.source.resource })
+    // The state of the navigation is not reliable: only the answers tell who really answered.
     const started: { id: string; count: number }[] = await this.repository.manager.query(
       `SELECT exercise->>'id' AS id, COUNT(*)::int AS count
        FROM "Sessions" session, jsonb_array_elements(session.variables->'navigation'->'exercises') exercise
-       WHERE session.activity_id = $1 AND session.parent_id IS NULL AND exercise->>'state' <> 'NOT_STARTED'
+       WHERE session.activity_id = $1 AND session.parent_id IS NULL
+         AND EXISTS (SELECT 1 FROM "Answers" answer WHERE answer.session_id = (exercise->>'sessionId')::uuid)
        GROUP BY 1`,
       [activityId]
     )
@@ -340,22 +342,31 @@ export class ActivityService {
       activity.source.variables,
       (source as PLSourceFile<ActivityVariables>).variables
     )
+    // The title variable can be a default value inherited from a template: it does not identify the exercise.
+    const resources = await this.resourceRepository.find({
+      where: { id: In(diffs.map((diff) => (diff.next ?? diff.previous)?.resource as string)) },
+    })
     return {
       fullReset: settings?.navigation?.mode === 'peer',
-      exercises: diffs.map((diff) => ({
-        key: diff.key,
-        status: diff.status,
-        title: String((diff.next ?? diff.previous)?.source.variables['title'] ?? ''),
-        startedCount: started.find((item) => item.id === diff.previous?.id)?.count ?? 0,
-        changedVariables:
-          diff.status === 'modified' && diff.previous && diff.next
-            ? changedExerciseVariables(diff.previous.source.variables, diff.next.source.variables)
-            : [],
-        risks:
-          diff.status === 'modified' && diff.previous && diff.next
-            ? exerciseReloadRisks(diff.previous.source, diff.next.source)
-            : [],
-      })),
+      exercises: diffs.map((diff) => {
+        const exercise = diff.next ?? diff.previous
+        return {
+          key: diff.key,
+          status: diff.status,
+          title:
+            resources.find((resource) => resource.id === exercise?.resource)?.name ??
+            String(exercise?.source.variables['title'] ?? ''),
+          startedCount: started.find((item) => item.id === diff.previous?.id)?.count ?? 0,
+          changedVariables:
+            diff.status === 'modified' && diff.previous && diff.next
+              ? changedExerciseVariables(diff.previous.source.variables, diff.next.source.variables)
+              : [],
+          risks:
+            diff.status === 'modified' && diff.previous && diff.next
+              ? exerciseReloadRisks(diff.previous.source, diff.next.source)
+              : [],
+        }
+      }),
     }
   }
 

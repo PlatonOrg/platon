@@ -29,6 +29,11 @@ import {
         {{ changed.length }} exercice{{ changed.length > 1 ? 's ont' : ' a' }} changé. Seules les données des exercices
         rechargés qui ont changé seront effacées.
       </p>
+      } @if (sharedChange) {
+      <p class="hint">
+        Plusieurs exercices ont un builder ou un grader modifié. Si vous n'y avez pas touché, le changement vient
+        probablement d'un modèle commun.
+      </p>
       }
 
       <ul class="exercises">
@@ -68,7 +73,10 @@ import {
         </li>
         }
       </ul>
-
+    </mat-dialog-content>
+    <!-- Outside of the scrollable content: these warnings must stay visible next to the buttons. -->
+    @if (keptKeys().length > 0 || (!data.fullReset && destroyedCount() > 0)) {
+    <div class="summary">
       @if (keptKeys().length > 0) {
       <p class="warning">
         <strong>Garder les réponses comporte des risques :</strong> à utiliser uniquement pour une correction de forme
@@ -81,28 +89,46 @@ import {
         (réponses et notes) sur ces exercices {{ destroyedCount() > 1 ? 'seront effacées' : 'sera effacée' }}.
       </p>
       }
-    </mat-dialog-content>
+    </div>
+    }
     <mat-dialog-actions align="end">
       <button mat-button type="button" (click)="dialogRef.close()">Annuler</button>
       @if (choosing()) {
       <button
         mat-flat-button
         type="button"
+        [class.danger]="destructive()"
         (click)="dialogRef.close({ exerciseKeys: selectedKeys(), keepAnswersKeys: keptKeys() })"
       >
-        Recharger la sélection ({{ selectedKeys().length }})
+        {{ confirmLabel() }}
       </button>
       } @else { @if (!data.fullReset && changed.length > 0) {
       <button mat-stroked-button type="button" (click)="choosing.set(true)">Choisir les exercices</button>
       }
-      <button mat-flat-button type="button" (click)="dialogRef.close({ exerciseKeys: changedKeys })">
-        Recharger les exercices modifiés ({{ changed.length }})
+      <button
+        mat-flat-button
+        type="button"
+        [class.danger]="destructive()"
+        (click)="dialogRef.close({ exerciseKeys: changedKeys })"
+      >
+        {{ confirmLabel() }}
       </button>
       }
     </mat-dialog-actions>
   `,
   styles: [
     `
+      /* Only the list scrolls: the warnings and the buttons always fit in the screen. */
+      :host(.mat-mdc-dialog-component-host) {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 2rem);
+      }
+      mat-dialog-content {
+        flex: 1 1 auto;
+        min-height: 4rem;
+        max-height: none;
+      }
       .exercises {
         list-style: none;
         margin: 1rem 0;
@@ -146,6 +172,19 @@ import {
       .warning {
         color: #d4380d;
       }
+      .summary {
+        padding: 0.5rem 1.5rem 0;
+      }
+      .summary .warning {
+        margin: 0 0 0.5rem;
+      }
+      .hint {
+        font-size: 0.9rem;
+      }
+      button.danger {
+        background-color: #d4380d;
+        color: #fff;
+      }
     `,
   ],
 })
@@ -185,6 +224,30 @@ export class ActivityReloadDialogComponent {
         (exercise) => exercise.status !== 'unchanged' && keys.includes(exercise.key) && !kept.includes(exercise.key)
       )
       .reduce((total, exercise) => total + exercise.startedCount, 0)
+  })
+
+  /** A template shared by several exercises is the usual reason why they all change at once. */
+  protected readonly sharedChange =
+    this.changed.filter((exercise) => exercise.risks.includes('builder') || exercise.risks.includes('grader')).length >
+    1
+
+  /** Whether confirming erases the work of the students. */
+  protected readonly destructive = computed(
+    () => (this.data.fullReset && this.changed.length > 0) || this.destroyedCount() > 0
+  )
+
+  /** The button says what it erases: the warnings alone can be missed. */
+  protected readonly confirmLabel = computed(() => {
+    if (this.data.fullReset && this.changed.length > 0) {
+      return 'Effacer toutes les copies et recharger'
+    }
+    const destroyed = this.destroyedCount()
+    if (destroyed > 0) {
+      return `Effacer ${destroyed} copie${destroyed > 1 ? 's' : ''} et recharger`
+    }
+    return this.choosing()
+      ? `Recharger la sélection (${this.selectedKeys().length})`
+      : `Recharger les exercices modifiés (${this.changed.length})`
   })
 
   private readonly riskLabels: Record<ReloadExerciseRisk, string> = {

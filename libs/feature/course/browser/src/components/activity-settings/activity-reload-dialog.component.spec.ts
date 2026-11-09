@@ -74,4 +74,76 @@ describe('ActivityReloadDialogComponent', () => {
     expect(component.describeRisks(preview.exercises[2])).toEqual('le grader et les fichiers inclus ont changé')
     expect(fixture.nativeElement.querySelector('.details .warning')).not.toBeNull()
   })
+
+  it('garde les avertissements hors de la zone qui défile', () => {
+    const summary = fixture.nativeElement.querySelector('.summary')
+
+    expect(summary.textContent).toContain('Irréversible')
+    expect(fixture.nativeElement.querySelector('mat-dialog-content').contains(summary)).toBe(false)
+  })
+
+  it('indique sur le bouton ce qui sera effacé', () => {
+    const button = () => fixture.nativeElement.querySelector('button.danger')
+
+    expect(button().textContent).toContain('Effacer 6 copies et recharger')
+
+    component.choosing.set(true)
+    component.toggleKept(preview.exercises[1], true)
+    component.toggleKept(preview.exercises[2], true)
+    fixture.detectChanges()
+
+    expect(button()).toBeNull()
+    expect(component.confirmLabel()).toEqual('Recharger la sélection (2)')
+  })
+})
+
+describe('ActivityReloadDialogComponent, cas particuliers', () => {
+  const create = (preview: ActivityReloadPreview) => {
+    TestBed.configureTestingModule({
+      imports: [ActivityReloadDialogComponent],
+      providers: [
+        provideNoopAnimations(),
+        { provide: MAT_DIALOG_DATA, useValue: preview },
+        { provide: MatDialogRef, useValue: { close: jest.fn() } },
+      ],
+    })
+    const fixture = TestBed.createComponent(ActivityReloadDialogComponent)
+    fixture.detectChanges()
+    return fixture
+  }
+
+  const modified = (key: string, risks: ActivityReloadExercise['risks'] = []): ActivityReloadExercise => ({
+    key,
+    title: key,
+    status: 'modified',
+    startedCount: 1,
+    changedVariables: ['builder'],
+    risks,
+  })
+
+  it('annonce un effacement complet en mode pairs', () => {
+    const fixture = create({ fullReset: true, exercises: [modified('a')] })
+
+    expect(fixture.nativeElement.querySelector('button.danger').textContent).toContain(
+      'Effacer toutes les copies et recharger'
+    )
+  })
+
+  it('ne présente pas comme destructif un rechargement sans changement', () => {
+    const fixture = create({
+      fullReset: false,
+      exercises: [{ ...modified('a'), status: 'unchanged' }],
+    })
+
+    expect(fixture.nativeElement.querySelector('button.danger')).toBeNull()
+  })
+
+  it('évoque un modèle commun quand plusieurs builders ou graders ont changé', () => {
+    const shared = create({ fullReset: false, exercises: [modified('a', ['builder']), modified('b', ['grader'])] })
+    expect(shared.nativeElement.querySelector('.hint')).not.toBeNull()
+
+    TestBed.resetTestingModule()
+    const single = create({ fullReset: false, exercises: [modified('a', ['builder']), modified('b')] })
+    expect(single.nativeElement.querySelector('.hint')).toBeNull()
+  })
 })

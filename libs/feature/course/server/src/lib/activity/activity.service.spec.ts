@@ -352,6 +352,50 @@ describe('ActivityService', () => {
     })
   })
 
+  describe('reloadPreview', () => {
+    const variables = (statement: string) => ({
+      exerciseGroups: {
+        0: {
+          name: 'Groupe',
+          grader: { type: 'empty' },
+          exercises: [
+            {
+              id: 'e1',
+              groupId: 0,
+              resource: 'r1',
+              version: 'latest',
+              source: { dependencies: [], variables: { title: 'A faire', statement } },
+            },
+          ],
+        },
+      },
+    })
+
+    beforeEach(() => {
+      Object.assign(repository, { manager: { query: jest.fn().mockResolvedValue([]) } })
+      repository.findOne.mockResolvedValue(
+        buildActivity({ source: { resource: 'res-1', variables: variables('avant') } as never })
+      )
+      fileService.compile.mockResolvedValue({ source: { variables: variables('après') } } as never)
+    })
+
+    it('devrait nommer un exercice par sa ressource, le titre pouvant venir de son modèle', async () => {
+      resourceRepository.find.mockResolvedValue([{ id: 'r1', name: 'Listes chainées' } as ResourceEntity])
+
+      const { exercises } = await service.reloadPreview('course-1', 'activity-1')
+
+      expect(exercises.map(({ title, status }) => [title, status])).toEqual([['Listes chainées', 'modified']])
+    })
+
+    it('devrait se rabattre sur le titre si la ressource est introuvable', async () => {
+      resourceRepository.find.mockResolvedValue([])
+
+      const { exercises } = await service.reloadPreview('course-1', 'activity-1')
+
+      expect(exercises[0].title).toEqual('A faire')
+    })
+  })
+
   describe('close', () => {
     it("devrait lever une NotFoundResponse si l'activité n'existe pas", async () => {
       repository.findOne.mockResolvedValue(null)
