@@ -50,4 +50,7 @@ export const DragDropComponentDefinition = defineWebComponent({
     content: '$c = \\pm\\sqrt{a^2 + b^2}$',
     draggable: true,
   },
+  playgrounds: {
+    'Associer termes et définitions': 'definitions.ple',
+  },
 })

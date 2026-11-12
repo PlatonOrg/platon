@@ -1,0 +1,50 @@
+sandbox = "node"
+
+// Le compte à rebours démarre à l'affichage. À 0, la réponse est soumise automatiquement.
+chrono = :wc-timer
+chrono.countDownTime = 30
+chrono.alignment = "right"
+
+reponse = :wc-input-box
+reponse.type = "number"
+reponse.autoValidation = true
+
+builder == #!lang=js
+a = 11 + Math.floor(Math.random() * 30)
+b = 11 + Math.floor(Math.random() * 30)
+==
+
+title ==
+Calcul mental chronométré
+==
+
+statement ==
+Vous avez 30 secondes : combien font {{ a }} + {{ b }} ?
+==
+
+// Le chronomètre est placé dans le formulaire : seuls les composants du formulaire
+// renvoient leur état au grader.
+form ==
+{{ chrono }}
+{{ reponse }}
+==
+
+grader == #!lang=js
+// L'état du chronomètre est transmis au grader avec les réponses.
+const tempsRestant = chrono.countDownTime
+chrono.disabled = true
+
+if (Number(reponse.value) === a + b) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = `Bravo, il vous restait ${tempsRestant} seconde(s).`
+} else if (tempsRestant <= 0) {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Temps écoulé !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Ce n\'est pas le bon résultat.'
+}
+==

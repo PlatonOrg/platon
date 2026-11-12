@@ -1,0 +1,36 @@
+sandbox = "node"
+
+bulles = :wc-binded-bubbles
+// Les paires sont proposées dans le désordre, 4 à la fois.
+bulles.mode = "shuffle"
+bulles.numberPairToShow = 4
+bulles.items = [
+  { item1: { content: "France" }, item2: { content: "Paris" } },
+  { item1: { content: "Espagne" }, item2: { content: "Madrid" } },
+  { item1: { content: "Italie" }, item2: { content: "Rome" } },
+  { item1: { content: "Allemagne" }, item2: { content: "Berlin" } },
+  { item1: { content: "Portugal" }, item2: { content: "Lisbonne" } },
+  { item1: { content: "Belgique" }, item2: { content: "Bruxelles" } }
+]
+
+title ==
+Pays et capitales
+==
+
+statement ==
+Associez chaque pays à sa capitale.
+==
+
+form ==
+{{ bulles }}
+==
+
+grader == #!lang=js
+// nbError compte les mauvaises associations ; errors liste les paires concernées.
+const penalite = 15 * bulles.nbError
+grade = Math.max(0, 100 - penalite)
+feedback.type = bulles.nbError === 0 ? 'success' : 'warning'
+feedback.content = bulles.nbError === 0
+  ? 'Sans faute !'
+  : `${bulles.nbError} erreur(s) : ${bulles.errors.map((e) => e.item1.content + ' / ' + e.item2.content).join(', ')}.`
+==

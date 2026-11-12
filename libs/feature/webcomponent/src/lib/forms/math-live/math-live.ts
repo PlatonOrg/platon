@@ -60,4 +60,7 @@ export const MathLiveComponentDefinition = defineWebComponent({
     value: 'x=\\frac{-b\\pm \\sqrt{b^2-4ac}}{2a}',
     suffix: 'clarity happy-face color=FF0000',
   },
+  playgrounds: {
+    'Développer une expression': 'expand.ple',
+  },
 })

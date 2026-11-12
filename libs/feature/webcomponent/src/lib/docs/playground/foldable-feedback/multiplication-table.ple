@@ -1,0 +1,55 @@
+sandbox = "node"
+
+builder == #!lang=js
+table = 2 + Math.floor(Math.random() * 8)
+questions = [3, 6, 7, 9].map((n) => {
+  const champ = component('wc-input-box')
+  champ.type = 'number'
+  champ.width = '80px'
+  champ.appearance = 'inline'
+  return { n, champ }
+})
+==
+
+title ==
+Feedbacks dépliables
+==
+
+statement ==
+Complétez la table de {{ table }}.
+==
+
+form ==
+{% for q in questions %}
+{{ table }} × {{ q.n }} = {{ q.champ }}<br />
+{% endfor %}
+==
+
+grader == #!lang=js
+// Lorsque feedback.content est une LISTE, le player affiche des feedbacks dépliables (wc-foldable-feedback).
+// Chaque élément peut contenir des sous-feedbacks (feedbacks) pour former une catégorie.
+const details = questions.map((q) => {
+  const attendu = table * q.n
+  const ok = Number(q.champ.value) === attendu
+  return {
+    name: `${table} × ${q.n}`,
+    type: ok ? 'success' : 'error',
+    expected: String(attendu),
+    obtained: String(q.champ.value),
+    display: !ok
+  }
+})
+
+const justes = details.filter((d) => d.type === 'success').length
+grade = Math.round((100 * justes) / details.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = [
+  {
+    name: `Résultats : ${justes} / ${details.length}`,
+    description: 'Cliquez sur une ligne pour voir le détail.',
+    type: grade === 100 ? 'success' : 'warning',
+    display: true,
+    feedbacks: details
+  }
+]
+==

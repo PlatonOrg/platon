@@ -1,0 +1,46 @@
+sandbox = "node"
+
+nombres = :wc-checkbox-group
+nombres.horizontal = true
+
+builder == #!lang=js
+const estPremier = (n) => {
+  if (n < 2) return false
+  for (let d = 2; d * d <= n; d++) if (n % d === 0) return false
+  return true
+}
+const tirage = new Set()
+while (tirage.size < 8) tirage.add(2 + Math.floor(Math.random() * 48))
+// Chaque proposition peut être un objet { content, checked, css }.
+nombres.items = [...tirage].map((n) => ({ content: String(n), checked: false }))
+premiers = [...tirage].filter(estPremier).map(String)
+==
+
+title ==
+Nombres premiers (notation partielle)
+==
+
+statement ==
+Cochez tous les nombres **premiers**.
+==
+
+form ==
+{{ nombres }}
+==
+
+grader == #!lang=js
+let bons = 0
+for (const item of nombres.items) {
+  const attendu = premiers.includes(item.content)
+  if (!!item.checked === attendu) bons++
+  item.css = !!item.checked === attendu ? 'success-border' : 'error-border'
+}
+// Note proportionnelle au nombre de cases correctement cochées ou laissées vides.
+grade = Math.round((100 * bons) / nombres.items.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${bons} réponse(s) correcte(s) sur ${nombres.items.length}.`
+==
+
+solution ==
+Les nombres premiers étaient : {{ premiers | join(", ") }}.
+==

@@ -61,6 +61,9 @@ export const ChartViewerBarsComponentDefinition = defineWebComponent({
     ],
     labels: ['Sales', 'Administration', 'Information Technology', 'Customer Support', 'Development', 'Marketing'],
   },
+  playgrounds: {
+    'Lire un diagramme en barres': 'best-month.ple',
+  },
 })
 
 export const verticalChartViewerBarsState: EChartsOption = {

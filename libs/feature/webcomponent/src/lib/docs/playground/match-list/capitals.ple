@@ -1,0 +1,39 @@
+sandbox = "node"
+
+liens = :wc-match-list
+
+builder == #!lang=js
+const paires = [['fr', 'France', 'Paris'], ['de', 'Allemagne', 'Berlin'], ['it', 'Italie', 'Rome'], ['es', 'Espagne', 'Madrid']]
+// Chaque nœud a un identifiant unique ; les liens tracés relient un nœud source à un nœud cible.
+liens.nodes = [
+  ...paires.map(([id, pays]) => ({ id: 'pays-' + id, type: 'source', content: pays })),
+  ...paires.map(([id, , ville]) => ({ id: 'ville-' + id, type: 'target', content: ville })).sort(() => Math.random() - 0.5)
+]
+attendus = paires.map(([id]) => ({ source: 'pays-' + id, target: 'ville-' + id }))
+==
+
+title ==
+Relier pays et capitales
+==
+
+statement ==
+Reliez chaque pays à sa capitale.
+==
+
+form ==
+{{ liens }}
+==
+
+grader == #!lang=js
+let corrects = 0
+for (const lien of liens.links) {
+  const ok = attendus.some((a) => a.source === lien.source && a.target === lien.target)
+  if (ok) corrects++
+  // Colore chaque lien selon sa justesse.
+  lien.css = ok ? 'success-state' : 'error-state'
+}
+const faux = liens.links.length - corrects
+grade = Math.max(0, Math.round((100 * (corrects - faux)) / attendus.length))
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${corrects} lien(s) correct(s), ${faux} lien(s) incorrect(s).`
+==

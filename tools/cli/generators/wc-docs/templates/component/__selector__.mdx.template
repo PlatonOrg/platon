@@ -3,7 +3,7 @@ title: <%- name %>
 description: <%- description %>
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -29,7 +29,20 @@ import { useAbsoluteUrl } from '../../../hooks'
     ...<%- playgrounds %>
   ]}
 />
+<% if (playgroundSources.length) { %>
+### Code des exemples
 
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+<% playgroundSources.forEach(function (source) { %>
+<details>
+<summary><%- source.name %></summary>
+
+`````ple
+<%- source.code %>
+`````
+
+</details>
+<% }) %><% } %>
 ## API
 
 <Tabs items={['Graphique', 'JSON']}>

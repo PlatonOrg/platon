@@ -1,0 +1,46 @@
+// Même principe que l'exemple « Addition », avec la sandbox Python et des valeurs aléatoires.
+sandbox = "python"
+
+reponse = :wc-input-box
+reponse.type = "number"
+reponse.placeholder = "Votre réponse"
+// Valide la réponse avec la touche Entrée.
+reponse.autoValidation = true
+
+builder == #!lang=py
+import random
+
+# La variable seed (entier entre 0 et 99) est fournie par PLaTon :
+# elle rend le tirage reproductible pour un même apprenant.
+random.seed(seed)
+a = random.randint(10, 99)
+b = random.randint(2, 9)
+==
+
+title ==
+Multiplication aléatoire (Python)
+==
+
+statement ==
+Calculez \( {{ a }} \times {{ b }} \).
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=py
+attendu = a * b
+if reponse["value"] == attendu:
+    grade = 100
+    feedback["type"] = "success"
+    feedback["content"] = "Bonne réponse !"
+else:
+    grade = 0
+    feedback["type"] = "error"
+    feedback["content"] = f"Mauvaise réponse : {a} × {b} = {attendu}."
+==
+
+solution ==
+\( {{ a }} \times {{ b }} = {{ a * b }} \)
+==

@@ -157,7 +157,10 @@ function extractObjectLiteralValue(node: ts.Node, constants: Constants = new Map
     const obj: Record<string, any> = {}
     node.properties.forEach((prop) => {
       if (ts.isPropertyAssignment(prop)) {
-        const propName = prop.name.getText().replace(/['"`]/g, '')
+        const propName =
+          ts.isStringLiteral(prop.name) || ts.isIdentifier(prop.name)
+            ? prop.name.text
+            : prop.name.getText().replace(/['"`]/g, '')
         obj[propName] = extractObjectLiteralValue(prop.initializer, constants)
       } else if (ts.isSpreadAssignment(prop) && ts.isIdentifier(prop.expression)) {
         // `...SharedProperties`: merge the properties of the referenced constant

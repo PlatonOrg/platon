@@ -1,0 +1,66 @@
+sandbox = "node"
+
+cible = :wc-image-clicker
+cible.clickDisplayMode = "last-only"
+cible.maxWidth = "500px"
+
+builder == #!lang=js
+// L'image est générée par le builder (SVG encodé dans une URL data:).
+// Pour une image de votre exercice, utilisez plutôt : cible.imageUrl = @copyurl mon-image.png
+// Le cercle à trouver est placé au hasard dans une image de 1000 × 600 unités.
+cx = 100 + Math.floor(Math.random() * 800)
+cy = 100 + Math.floor(Math.random() * 400)
+rayon = 60
+
+const formes = []
+for (let i = 0; i < 6; i++) {
+  const x = 60 + Math.floor(Math.random() * 880)
+  const y = 60 + Math.floor(Math.random() * 480)
+  formes.push(`<rect x='${x - 40}' y='${y - 40}' width='80' height='80' fill='%23cbd5e1'/>`)
+}
+const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600'>`
+  + `<rect width='1000' height='600' fill='%23f8fafc' stroke='%2394a3b8'/>`
+  + formes.join('')
+  + `<circle cx='${cx}' cy='${cy}' r='${rayon}' fill='%23ef4444'/>`
+  + `</svg>`
+cible.imageUrl = 'data:image/svg+xml;utf8,' + svg
+==
+
+title ==
+Cliquer sur une image
+==
+
+statement ==
+Cliquez sur le **disque rouge**. Vous pouvez cliquer à nouveau pour déplacer votre point
+(clic droit sur un point pour le supprimer).
+==
+
+form ==
+{{ cible }}
+==
+
+grader == #!lang=js
+// Les coordonnées des clics sont normalisées entre 0 et 1000 sur chaque axe,
+// quelle que soit la taille d'affichage de l'image.
+const points = cible.clickPoints || []
+if (points.length === 0) {
+  grade = -1
+  feedback.type = 'warning'
+  feedback.content = "Cliquez sur l'image avant de valider."
+} else {
+  const p = points[points.length - 1]
+  // Conversion vers le repère de l'image (1000 × 600).
+  const x = p.x
+  const y = (p.y * 600) / 1000
+  const distance = Math.hypot(x - cx, y - cy)
+  if (distance <= rayon) {
+    grade = 100
+    feedback.type = 'success'
+    feedback.content = 'Bien vu !'
+  } else {
+    grade = 0
+    feedback.type = 'error'
+    feedback.content = 'Ce point est en dehors du disque rouge.'
+  }
+}
+==

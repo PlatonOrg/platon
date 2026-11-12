@@ -1,0 +1,64 @@
+sandbox = "node"
+
+// wc-presenter affiche un diaporama Reveal.js. Chaque <section> est une diapositive ;
+// data-markdown permet d'écrire une diapositive en markdown.
+diapos ==
+<section data-markdown>
+  <textarea data-template>
+## Le théorème de Pythagore
+
+Dans un triangle **rectangle**, le carré de l'hypoténuse est égal à la somme des carrés des deux autres côtés.
+  </textarea>
+</section>
+<section data-markdown>
+  <textarea data-template>
+## Formule
+
+$$ a^2 + b^2 = c^2 $$
+
+où $c$ est la longueur de l'hypoténuse.
+  </textarea>
+</section>
+<section data-markdown>
+  <textarea data-template>
+## Exemple
+
+Si $a = 3$ et $b = 4$, alors $c^2 = 9 + 16 = 25$, donc $c = 5$.
+  </textarea>
+</section>
+==
+
+presentation = :wc-presenter
+// Une variable peut être réutilisée comme valeur d'une autre.
+presentation.template = diapos
+
+reponse = :wc-input-box
+reponse.type = "number"
+
+builder == #!lang=js
+const triplets = [[6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]
+const t = triplets[Math.floor(Math.random() * triplets.length)]
+a = t[0]; b = t[1]; c = t[2]
+==
+
+title ==
+Diaporama de cours
+==
+
+statement ==
+Parcourez le diaporama avec les flèches, puis répondez à la question.
+
+{{ presentation }}
+
+Un triangle rectangle a des côtés de l'angle droit de {{ a }} et {{ b }}. Quelle est la longueur de son hypoténuse ?
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+grade = Number(reponse.value) === c ? 100 : 0
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = grade === 100 ? 'Exact !' : `Calculez la racine carrée de ${a}² + ${b}².`
+==

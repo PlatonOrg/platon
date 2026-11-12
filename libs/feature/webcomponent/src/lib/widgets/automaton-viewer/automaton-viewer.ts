@@ -42,4 +42,7 @@ export const AutomatonViewerComponentDefinition = defineWebComponent({
         s1:b>s2
         `,
   },
+  playgrounds: {
+    'Mots acceptés par un automate': 'accepted-words.ple',
+  },
 })
