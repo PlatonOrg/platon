@@ -45,7 +45,9 @@ const valeurs = [-2, -1, 0, 1, 2, 3]
 const egal = f !== null && valeurs.every((x) => Math.abs(f(x) - (a * x + b) ** 2) < 1e-9)
 
 if (!saisie.trim()) {
-  grade = -1
+  // Une note inférieure à -1 refuse la soumission sans compter de tentative
+  // (-1 est réservé aux erreurs d'exécution).
+  grade = -2
   feedback.type = 'warning'
   feedback.content = 'Saisissez une expression avant de valider.'
 } else if (!egal) {

@@ -1,10 +1,77 @@
 ---
 title: Présentation du module de cours
-description: Introduction au module de cours de PLaTon, son organisation et ses principales fonctionnalités pour enseignants et apprenants.
+description: Introduction au module de cours de PLaTon, son organisation (sections, activités, membres, groupes) et ses principales fonctionnalités pour enseignants et apprenants.
 ---
+
+import { Callout, Cards, Card } from 'nextra/components'
 
 # Présentation du module de cours
 
+Un **cours** est l'espace dans lequel un enseignant propose des activités à ses étudiants et suit leurs résultats.
+Les exercices et les activités sont créés dans l'[espace de travail des ressources](/main/resources/types) ; le cours
+sert à les **diffuser** à un public donné, avec des dates d'ouverture, des règles d'accès et un suivi des notes.
+
 ![Recherche de cours](../../../public/screens/courses/search.png)
 
-Cette page est en cours de construction
+## Les notions à connaître
+
+| Notion                | Description                                                                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cours**             | Conteneur des sections, activités et membres. Il a un nom, une description et un propriétaire (l'enseignant qui l'a créé).                                                                                                                       |
+| **Section**           | Regroupement thématique d'activités (chapitre, semaine, séance…). Voir [Organiser un cours en sections](/main/courses/sections).                                                                                                                  |
+| **Activité de cours** | Une [activité](/main/resources/activities) de l'espace de travail ajoutée dans une section. Elle a ses propres dates, restrictions d'accès et paramètres, indépendants des autres cours qui utilisent la même ressource. Voir [Ajouter des activités](/main/courses/activities). |
+| **Membre**            | Utilisateur (ou groupe d'utilisateurs de la plateforme) inscrit au cours avec le rôle **Étudiant** ou **Enseignant**. Voir [Membres d'un cours](/main/courses/members).                                                                          |
+| **Groupe de cours**   | Sous-ensemble des étudiants du cours (TD, TP, demi-groupe…), utilisé pour restreindre l'accès aux activités ou filtrer les notes. Voir [Gestion des groupes](/main/courses/groups).                                                               |
+| **Challenge**         | Activité de cours dont le classement est visible par tous les élèves. Voir [Challenges](/main/courses/challenges).                                                                                                                              |
+
+## Les onglets d'un cours
+
+La page d'un cours affiche en en-tête son nom et sa description (modifiables en cliquant dessus si vous êtes
+enseignant du cours), la date de création et le propriétaire, ainsi qu'un bouton **Partager** pour les enseignants.
+
+| Onglet              | Visible par                                     | Contenu                                                                                                                    |
+| ------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Vue d'ensemble**  | Tous les membres                                | Sections et activités du cours, indicateurs d'avancement, export des notes. Voir [Sections](/main/courses/sections).       |
+| **Challenges**      | Tous les membres, si le cours contient au moins un challenge | Classements des challenges. Voir [Challenges](/main/courses/challenges).                                      |
+| **Membres**         | Tous les membres                                | Liste des membres du cours. Les enseignants peuvent en ajouter, en retirer et changer leur rôle.                          |
+| **Groupes**         | Tous les membres                                | Groupes d'étudiants du cours.                                                                                              |
+| **Paramètres**      | Enseignants du cours                            | Informations du cours, accès démo, import d'un autre cours, suppression. Voir [Paramètres du cours](/main/courses/settings). |
+
+## Qui peut faire quoi ?
+
+| Action                                                         | Étudiant du cours | Enseignant du cours |
+| -------------------------------------------------------------- | :---------------: | :-----------------: |
+| Voir les sections et activités visibles                        |        ✔          |         ✔           |
+| Lancer une activité ouverte et voir ses propres résultats      |        ✔          |         ✔           |
+| Voir les sections et activités cachées aux étudiants          |                   |         ✔           |
+| Ajouter, modifier, réorganiser des sections et des activités   |                   |         ✔           |
+| Gérer les membres et les groupes                               |                   |         ✔           |
+| Voir le suivi, les statistiques et télécharger les notes       |                   |         ✔           |
+| Corriger les copies d'une activité                             |                   | ✔ (s'il est correcteur) |
+| Modifier les paramètres et supprimer le cours                  |                   |         ✔           |
+
+<Callout type="info">
+  Les administrateurs de la plateforme peuvent accéder à tous les cours, y compris ceux dont ils ne sont pas membres.
+</Callout>
+
+## Comment un étudiant rejoint-il un cours ?
+
+Un étudiant accède à un cours dès qu'il en est membre. Il peut le devenir de plusieurs façons :
+
+- un enseignant l'ajoute depuis l'onglet [Membres](/main/courses/members), seul ou via un groupe d'utilisateurs ;
+- il suit le **lien LTI** du cours depuis son LMS (Moodle…) : il est alors inscrit automatiquement comme étudiant
+  (voir [Partager un cours](/main/courses/create#partager-un-cours) et [Intégration LTI](/main/users/lti-integration)) ;
+- il ouvre le lien d'**accès démo** du cours : il est inscrit comme étudiant (voir [Accès démo](/main/courses/demo)).
+
+## Le parcours type d'un enseignant
+
+<Cards>
+  <Card title="1. Créer le cours" href="/main/courses/create" />
+  <Card title="2. Créer les sections" href="/main/courses/sections" />
+  <Card title="3. Inscrire les membres" href="/main/courses/members" />
+  <Card title="4. Ajouter les activités" href="/main/courses/activities" />
+  <Card title="5. Suivre en direct" href="/main/courses/monitoring" />
+  <Card title="6. Corriger" href="/main/courses/corrections" />
+  <Card title="7. Analyser les résultats" href="/main/courses/statistics" />
+  <Card title="8. Exporter les notes" href="/main/courses/grades-csv" />
+</Cards>

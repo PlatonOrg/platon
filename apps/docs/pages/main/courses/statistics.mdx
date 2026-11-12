@@ -1,10 +1,82 @@
 ---
-title: Suivi de la progression des apprennants
-description: Guide sur les fonctionnalités de suivi et d'analyse des performances des apprenants dans les cours PLaTon, incluant visualisations et exports de données.
+title: Statistiques d'une activité
+description: Analyser les résultats d'une activité de cours PLaTon - indicateurs globaux, résultats par exercice, distribution de l'avancement dans le temps, boîte à moustaches et résultats par apprenant.
 ---
 
-# Suivi de la progression des apprennants
+import { Callout } from 'nextra/components'
 
-![Progression des apprennants](../../../public/screens/courses/statistics.png)
+# Statistiques d'une activité
 
-Cette page est en cours de construction
+La page **Statistiques** d'une activité s'ouvre depuis le menu ⋮ de sa carte dans le cours (entrée réservée aux
+enseignants du cours). Elle aide à repérer les exercices difficiles, les étudiants en retard et la dynamique de
+travail du groupe.
+
+![Statistiques](../../../public/screens/courses/statistics.png)
+
+<Callout type="info">
+  Les indicateurs sont calculés uniquement sur les sessions des participants qui ont **ouvert** l'activité. Quand une
+  copie a été [corrigée](/main/courses/corrections), c'est la note corrigée qui est utilisée.
+</Callout>
+
+## Vue d'ensemble
+
+| Indicateur          | Définition                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Note moyenne**    | Moyenne des notes des sessions complétées, sur 100.                                                                        |
+| **Durée moyenne**   | Durée moyenne d'une session, du début à la fin, pauses prolongées comprises.                                               |
+| **Taux de réussite**| Pourcentage des sessions complétées avec une note de 100.                                                                  |
+| **Taux de réponses**| Pourcentage des sessions complétées avec au moins un exercice répondu.                                                     |
+| **Taux d'abandon**  | Pourcentage des sessions complétées avec au moins un exercice non répondu.                                                 |
+
+## Résultats par exercices
+
+Le tableau liste les exercices de l'activité et, pour chacun, le nombre d'étudiants dans chaque état (voir la
+**Légende** à droite de la page) :
+
+| État                     | Signification                                           |
+| ------------------------ | ------------------------------------------------------- |
+| **Réussi**               | Note de 100.                                            |
+| **Partiellement Réussi** | Note strictement comprise entre 0 et 100.               |
+| **Échoué**               | Note de 0.                                              |
+| **Réponse enregistrée**  | Réponse enregistrée sans note (activité sans évaluation immédiate). |
+| **Commencé**             | Exercice ouvert sans réponse enregistrée.               |
+| **À faire**              | Exercice pas encore ouvert.                             |
+| **Erreur**               | L'exécution de l'exercice a échoué (erreur du builder ou du grader). |
+
+Dépliez une ligne pour obtenir les indicateurs détaillés de l'exercice :
+
+| Indicateur                                   | Définition                                                                                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Évaluations**                              | Nombre de réponses enregistrées (note supérieure à -1).                                                                            |
+| **Note moyenne**                             | Moyenne des notes de toutes les réponses.                                                                                         |
+| **Durée moyenne**                            | Somme des intervalles entre deux réponses ; un intervalle de plus de 20 minutes compte pour 2 minutes.                            |
+| **Essais par apprenant**                     | Nombre moyen de réponses par apprenant.                                                                                            |
+| **Délai moyen avant 1ère réponse**           | Temps moyen entre l'ouverture de l'exercice et la première réponse.                                                               |
+| **Taux de réussite à la 1ère tentative**     | Pourcentage de réponses notées 100 dès la première tentative.                                                                     |
+| **Moyenne des tentatives avant succès**      | Nombre moyen de tentatives avant d'obtenir 100.                                                                                    |
+| **Taux de réussite**                         | Pourcentage des réponses notées 100.                                                                                               |
+
+## Avancement dans le temps
+
+Le graphique d'avancement répartit les étudiants selon le nombre d'exercices qu'ils ont réussis, à une date donnée :
+
+- la liste déroulante choisit le nombre de tranches (2, 5, 10, 15 ou 20) ;
+- le sélecteur de dates délimite la période étudiée (par défaut, de la création de l'activité à sa fermeture) ;
+- le curseur sous le graphique déplace la date d'observation dans cette période, pour rejouer l'évolution du groupe.
+
+## Boîte à moustaches
+
+La **boîte à moustaches** représente, pour chaque exercice, la dispersion des notes : médiane, quartiles et valeurs
+extrêmes. Un exercice dont la boîte est basse et étalée mérite souvent d'être revu.
+
+## Résultats par apprenants
+
+Le dernier tableau donne, pour chaque étudiant, l'état et la note de chaque exercice. Il peut être filtré par groupe
+du cours. Un clic sur une case ouvre la session de l'étudiant en visualisation (voir
+[Consulter une copie](/main/courses/corrections#consulter-une-copie-sans-la-corriger)).
+
+Pour récupérer ces données dans un tableur, utilisez l'[export CSV des notes](/main/courses/grades-csv).
+
+## Évaluation par les pairs
+
+Pour une activité en mode évaluation par les pairs, la page affiche en plus l'arbre des comparaisons entre copies.

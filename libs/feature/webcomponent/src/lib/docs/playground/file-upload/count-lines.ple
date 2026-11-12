@@ -28,7 +28,9 @@ dossier = "submission"
 fichiers = sorted(os.listdir(dossier)) if os.path.isdir(dossier) else []
 
 if not fichiers:
-    grade = -1
+    # Une note inférieure à -1 refuse la soumission sans compter de tentative
+    # (-1 est réservé aux erreurs d'exécution).
+    grade = -2
     feedback["type"] = "warning"
     feedback["content"] = "Aucun fichier reçu : déposez un fichier avant de valider."
 else:

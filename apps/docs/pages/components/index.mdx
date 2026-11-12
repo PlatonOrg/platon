@@ -68,13 +68,89 @@ Voici un exemple de composant en action : `MatchList`.  Ce composant permet de f
 ></iframe>
 
 
+## Utiliser un composant dans un exercice
+
+Cette section résume les règles communes à tous les composants. Chaque page de composant contient ensuite des
+exercices complets, à essayer dans le playground et à copier.
+
+### Déclarer un composant
+
+Dans un fichier `.ple`, une variable devient un composant grâce à la syntaxe `:wc-<nom>`. Ses propriétés se règlent
+ensuite avec la notation pointée :
+
+```ple
+reponse = :wc-input-box
+reponse.type = "number"
+reponse.placeholder = "Votre réponse"
+```
+
+PLaTon remplace `:wc-input-box` par un objet `{ cid, selector }` : `cid` est un identifiant unique généré
+automatiquement et `selector` le nom du composant. Les autres propriétés sont celles décrites dans la partie **API**
+de la page du composant.
+
+Un composant peut aussi être créé par un script, avec la fonction `component`, disponible dans les sandboxes Node et
+Python. C'est utile pour générer un nombre variable de composants :
+
+```ple
+builder == #!lang=js
+champs = [1, 2, 3].map((n) => {
+  const champ = component('wc-input-box')
+  champ.type = 'number'
+  return champ
+})
+==
+```
+
+### Afficher un composant
+
+Un composant s'affiche en insérant sa variable dans un texte rendu par le moteur de gabarits Nunjucks : `statement`,
+`form`, `solution`, `hint` ou `feedback`.
+
+```ple
+form ==
+{{ reponse }}
+==
+```
+
+Les composants peuvent être placés dans des tableaux ou des objets, et affichés avec une boucle
+`{% for champ in champs %}{{ champ }}{% endfor %}`.
+
+### Récupérer la réponse de l'apprenant
+
+Quand l'apprenant valide, l'état de chaque composant est envoyé au serveur puis fusionné dans la variable
+correspondante avant l'exécution du `grader`. Le grader lit donc directement les propriétés modifiées par
+l'apprenant (`reponse.value`, `qcm.selection`, `liste.items`…). La propriété à lire est indiquée dans la
+documentation de chaque composant.
+
+<Callout type="warning">
+  Seuls les composants placés dans le **`form`** renvoient leur état au grader. Un composant affiché dans l'énoncé
+  (`statement`) ou dans la solution est seulement affiché : les interactions de l'apprenant avec lui ne sont pas
+  transmises.
+</Callout>
+
+Le grader peut aussi **modifier** un composant : les changements sont visibles dès l'affichage du résultat. Par
+exemple, il peut colorer une réponse avec la propriété `css` (voir l'[API CSS](/components/css-api)), désactiver un
+champ avec `disabled = true` ou mettre à jour un widget affiché dans l'énoncé.
+
+### Propriétés communes
+
+| Propriété  | Rôle                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `disabled` | Désactive l'interaction (disponible sur la plupart des composants). Lors de la consultation d'une réponse passée, les composants sont automatiquement désactivés. |
+| `css`      | Classes d'apparence et d'animation (voir l'[API CSS](/components/css-api)).                                              |
+| `debug`    | Si `true`, affiche sous le composant son état courant au format JSON. Pratique pendant la mise au point d'un exercice.   |
+| `isFilled` | Positionnée par le composant quand l'apprenant a commencé à répondre. PLaTon s'en sert pour avertir l'apprenant qui quitte l'exercice sans valider. |
+
+Certains composants ont une propriété `autoValidation` : lorsqu'elle vaut `true`, une action de l'apprenant
+(touche Entrée, choix d'une proposition, clic sur l'image…) déclenche directement la validation.
+
 ## Comment en savoir plus sur les composants ?
 
 Pour chaque composant disponible, vous trouverez une documentation détaillée qui explique :
 
 1.  **À quoi sert le composant :** Une description de son objectif et de son utilisation.
 2.  **Les propriétés et options de configuration :**  Comment personnaliser le comportement et l'apparence du composant.
-3.  **Des exemples d'utilisation :**  Des cas concrets pour vous montrer comment intégrer le composant dans vos exercices.
+3.  **Des exemples d'utilisation :**  Des exercices complets, à essayer dans le playground (sur la plateforme) et dont le code est affiché sous la section « Exemple interactif ».
 4.  **Un explorateur de propriétés interactif :**  Un outil pour tester et manipuler les propriétés du composant en direct.
 
 Vous pouvez explorer la liste des composants en utilisant la barre de navigation (le menu latéral) ou en recherchant un composant spécifique par son nom.
@@ -185,6 +261,15 @@ Si vous avez des compétences en développement web et que vous souhaitez contri
         ```
 
     *   **Rédigez la documentation :**  Créez un fichier au format Markdown pour expliquer comment utiliser votre composant.
+
+    *   **Ajoutez des exercices d'exemple :**  Placez un ou plusieurs exercices complets (`.ple`) dans le dossier
+        `libs/feature/webcomponent/src/lib/docs/playground/my-component/`, puis déclarez-les dans la propriété
+        `playgrounds` de la définition du composant (`{ "Titre de l'exemple": 'fichier.ple' }`). Ils apparaissent
+        dans le playground et leur code est affiché sur la page du composant.
+
+    *   **Générez la page de documentation :**  la commande `yarn nx g @platon/cli:wc-docs` (lancée automatiquement
+        par `yarn serve:docs` et `yarn build:docs`) produit la page du composant à partir de sa définition, de son
+        fichier Markdown et de ses exemples.
 
 5. L'arborecence de votre composant doit ressembler à ceci :
 
