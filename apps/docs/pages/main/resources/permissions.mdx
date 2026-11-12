@@ -1,29 +1,56 @@
 ---
 title: Gestion des droits
-description: Explication des règles d'accès aux ressources dans PLaTon. Précise qui peut voir, créer ou modifier des cercles, activités et exercices selon les rôles d'utilisateur et le statut de collaborateur.
+description: Règles d'accès aux ressources PLaTon - qui peut voir, créer, modifier, dupliquer, déplacer ou supprimer un cercle, une activité ou un exercice, et comment les droits d'écriture se propagent aux sous-cercles.
 ---
 
 import { Callout } from 'nextra/components'
 
 # Gestion des droits
 
-## Qui peut voir une ressource ?
+Les droits sur une ressource (exercice, activité ou cercle) se déterminent à partir du **cercle** qui la contient :
+pour un exercice ou une activité, c'est son cercle parent ; pour un cercle, c'est le cercle lui-même. Ces règles
+s'appliquent aux comptes **enseignant** et **administrateur** ; les étudiants n'ont pas accès à l'espace de travail.
 
-Tous les enseignants et administrateurs peuvent voir les ressources sans restriction sauf si la ressource est dans un cercle personnel ou est un cercle personnel.
+## Lecture : qui peut voir une ressource ?
+
+| Cercle de la ressource      | Qui peut la voir                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Cercle partagé              | Tous les enseignants et administrateurs.                                                             |
+| [Cercle personnel](/main/resources/circles) | Son propriétaire et les [membres](/main/resources/members) qu'il a acceptés dans ce cercle. Les administrateurs n'y ont pas accès. |
+
+## Écriture : qui peut modifier une ressource ?
+
+Le droit d'écriture permet de modifier les fichiers et les informations d'une ressource et de créer de nouvelles
+ressources dans un cercle. Un utilisateur a ce droit sur les ressources d'un cercle s'il est :
+
+- le **propriétaire** du cercle ;
+- **administrateur**, sauf s'il s'agit d'un cercle personnel ;
+- **membre** du cercle (demande d'adhésion acceptée, voir [Membres](/main/resources/members)) ;
+- propriétaire ou membre d'un **cercle parent** (à n'importe quel niveau), sauf s'il s'agit du cercle personnel de
+  quelqu'un d'autre.
 
 <Callout type="info">
-  Il est possible de rendre visible les cercles personnels à des utilisateurs spécifiques. Pour cela, il faut ajouter
-  les utilisateurs dans la liste des collaborateurs du cercle.
+  Les droits d'écriture **se propagent vers le bas** : être membre d'un cercle donne aussi le droit d'écrire dans tous
+  ses sous-cercles. Il n'est donc pas nécessaire d'ajouter les mêmes membres à chaque sous-cercle.
 </Callout>
 
-## Qui peut créer un cercle ?
+Un membre dont la demande d'adhésion est **en attente** n'a pas encore le droit d'écriture.
 
-Seuls les administrateurs peuvent créer des cercles.
+## Les actions et leurs conditions
 
-## Qui peut créer/éditer des activités et exercices ?
+| Action                                         | Condition                                                                                                                                       |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Créer un **cercle**                            | Être **administrateur**.                                                                                                                        |
+| Créer un **exercice** ou une **activité**      | Être enseignant ou administrateur et avoir le droit d'écriture sur le cercle de destination (votre cercle personnel en particulier).            |
+| Modifier une ressource                         | Avoir le droit d'écriture.                                                                                                                      |
+| **Dupliquer** un exercice ou une activité      | Pouvoir voir la ressource. La copie est créée dans **votre cercle personnel**. Les cercles ne peuvent pas être dupliqués.                      |
+| **Déplacer** une ressource                     | Avoir le droit d'écriture sur la ressource et sur son cercle. Hors administrateurs, seules les ressources d'un **cercle personnel** peuvent être déplacées. |
+| Renvoyer une ressource dans le cercle personnel de son auteur | Être **administrateur**.                                                                                         |
+| **Supprimer** une ressource                    | Avoir le droit d'écriture, et que la ressource soit dans un **cercle personnel** : une ressource publiée dans un cercle partagé ne peut pas être supprimée, même par un administrateur. Une ressource dont d'autres dépendent ne peut pas être supprimée. |
+| **Suivre** une ressource                       | Pouvoir la voir (voir [Observateurs](/main/resources/watchers)).                                                                               |
 
-Seuls les administrateurs et les utilisateurs définis comme "[collaborateurs](/main/resources/members)" peuvent créer des activités et exercices.
-
-## Qui peut modifier les informations d'une ressource ?
-
-Seuls les administrateurs et les utilisateurs définis comme "[collaborateurs](/main/resources/members)" peuvent modifier les informations d'une ressource.
+<Callout type="warning">
+  Une ressource utilisée par d'autres (dans une activité ou un cours) peut continuer à fonctionner après une
+  modification de votre part : les activités de cours utilisent la version de la ressource au moment de leur ajout
+  ou de leur dernier [rechargement](/main/courses/activities#recharger-une-activité).
+</Callout>
