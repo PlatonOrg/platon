@@ -6,9 +6,9 @@ const config: DocsThemeConfig = {
   logo: <Logo />,
   logoLink: false,
   project: {
-    link: 'https://github.com/cisstech/platon',
+    link: 'https://github.com/PlatonOrg/platon',
   },
-  docsRepositoryBase: 'https://github.com/cisstech/platon/tree/main/apps/docs/',
+  docsRepositoryBase: 'https://github.com/PlatonOrg/platon/tree/main/apps/docs/',
   footer: {
     text: <Copyright />,
   },

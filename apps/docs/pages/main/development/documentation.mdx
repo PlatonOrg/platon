@@ -1,0 +1,93 @@
+---
+title: Contribuer à la documentation
+description: Organisation du site de documentation PLaTon (Nextra), ajout d'une page, génération des pages de composants et ajout d'exercices de playground.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Contribuer à la documentation
+
+La documentation est un site [Nextra](https://nextra.site) situé dans `apps/docs`. Les pages sont des fichiers MDX
+dans `apps/docs/pages`, les images dans `apps/docs/public/screens`.
+
+```bash
+yarn serve:docs    # régénère les pages des composants puis lance le site en local
+yarn build:docs    # même génération, puis construction du site
+```
+
+## Ajouter une page
+
+<Steps>
+
+### Créer le fichier
+
+Créez un fichier `.mdx` dans le dossier de la section, avec un en-tête :
+
+```mdx
+---
+title: Titre de la page
+description: Une phrase qui résume la page.
+---
+
+# Titre de la page
+```
+
+### L'ajouter au menu
+
+Chaque dossier contient un `_meta.json` qui fixe l'ordre des pages ; ajoutez-y le nom du fichier (sans extension).
+Une valeur vide reprend le `title` de la page.
+
+### Vérifier
+
+Lancez `yarn serve:docs`. MDX est strict : en dehors des blocs de code et du code en ligne, `{`, `}` et `<` sont
+interprétés comme du JSX. Placez donc la syntaxe Nunjucks (`{{ … }}`) dans des blocs de code ou entre accents graves.
+
+</Steps>
+
+Les composants `Callout`, `Steps`, `Tabs`, `Cards` et `FileTree` de `nextra/components` sont disponibles. Les blocs de
+code `ple` utilisent la coloration du langage PLE (`apps/docs/ple.tmLanguage.json`).
+
+## Les pages des composants
+
+Les pages de `apps/docs/pages/components/forms` et `apps/docs/pages/components/widgets` sont **générées** : ne les
+modifiez pas directement. Le générateur `tools/cli/generators/wc-docs` (lancé par `bin/cli/wc-docs.sh`, appelé
+automatiquement par `serve:docs` et `build:docs`) assemble pour chaque composant :
+
+- la définition du composant (`<nom>.ts` : nom, description, schéma JSON des propriétés, `playgrounds`) ;
+- sa documentation en Markdown (`<nom>.md`, qui peut utiliser `Callout`) ;
+- ses exercices de playground, dont le code est affiché sous l'exemple interactif.
+
+Pour modifier la page d'un composant, modifiez donc ces fichiers dans
+`libs/feature/webcomponent/src/lib/{forms,widgets}/<nom>/`, puis régénérez avec `yarn nx g @platon/cli:wc-docs`.
+
+## Ajouter un exercice de playground
+
+<Steps>
+
+### Écrire l'exercice
+
+Créez un exercice complet (`.ple`) dans `libs/feature/webcomponent/src/lib/docs/playground/<nom-du-composant>/`.
+Préférez la sandbox Node, qui fonctionne sans serveur de sandbox, et commentez les points importants : le code est
+affiché dans la documentation.
+
+### Le déclarer
+
+Ajoutez-le à la propriété `playgrounds` de la définition du composant :
+
+```ts
+playgrounds: {
+  'Titre de l’exemple': 'mon-exemple.ple',
+},
+```
+
+### Le tester
+
+L'onglet de l'exemple ouvre l'exercice dans le playground de la plateforme (`/playground/exercises/<composant>/<fichier>`),
+où il peut être modifié et prévisualisé. Vérifiez une bonne et une mauvaise réponse.
+
+</Steps>
+
+<Callout type="info">
+  Sur la version de la documentation publiée sur GitHub Pages, les exemples interactifs d'exercices ne sont pas
+  affichés (ils nécessitent un serveur PLaTon) ; leur code reste visible.
+</Callout>
