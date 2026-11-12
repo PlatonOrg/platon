@@ -1,6 +1,6 @@
 ---
 title: Intégration LTI
-description: Connecter PLaTon à un LMS (Moodle, Canvas…) par LTI 1.3 ou LTI 1.1 - déclaration de la plateforme, URL de l'outil, paramètres personnalisés, création automatique des comptes, des cours et des groupes.
+description: Connecter PLaTon à un LMS (Moodle, Canvas…) par LTI 1.3 ou LTI 1.1 et à un serveur CAS - déclaration de la plateforme, URL de l'outil, paramètres personnalisés, création automatique des comptes, des cours et des groupes.
 ---
 
 import { Callout, Steps } from 'nextra/components'
@@ -109,6 +109,28 @@ Pour relier un lien du LMS à un cours PLaTon précis, indiquez par exemple `cou
 <Callout type="info">
   Un utilisateur créé par LTI n'a pas de mot de passe PLaTon. Il peut en définir un depuis son profil pour se
   connecter aussi directement (voir [Profil utilisateur](/main/users/profile)).
+</Callout>
+
+## Connexion CAS
+
+Un serveur **CAS** (service d'authentification centralisé de l'établissement) permet aux utilisateurs de se connecter
+directement à PLaTon, sans passer par le LMS, avec leurs identifiants de l'établissement. Il se déclare dans
+**Administration** › **CAS** › **Ajouter un CAS** :
+
+| Champ                            | Contenu                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Nom du CAS**                   | Nom affiché sur le bouton de connexion.                                                     |
+| **URL de connexion**             | Adresse de la page de connexion du CAS.                                                     |
+| **URL du service de validation** | Adresse du service de validation des tickets du CAS.                                        |
+| **Version du CAS**               | Version du protocole utilisée par le CAS.                                                   |
+| **LMS**                          | Le ou les LMS par lesquels les utilisateurs de ce CAS ont été créés.                        |
+
+Chaque CAS déclaré ajoute un bouton sous le formulaire de la page de connexion.
+
+<Callout type="warning">
+  La connexion CAS **ne crée pas de compte** : elle retrouve l'utilisateur dont l'identifiant dans un des LMS associés
+  correspond à son identifiant CAS. Un utilisateur doit donc s'être connecté au moins une fois depuis ce LMS ; sinon,
+  il est redirigé vers la page « Vous n'avez pas de compte sur PLaTon ? ».
 </Callout>
 
 ## LTI 1.1 (obsolète)
