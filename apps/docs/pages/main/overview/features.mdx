@@ -5,41 +5,44 @@ description: Vue d'ensemble des fonctionnalités principales de PLaTon - gestion
 
 # Aperçu des fonctionnalités clés
 
-PLaTon propose une gamme de fonctionnalités sophistiquées, conçues pour améliorer et faciliter l'expérience d'enseignement et d'apprentissage en ligne.
-Les fonctionnalités suivantes sont essentielles à la plateforme et seront explorées plus en détail dans les prochains chapitres.
+Cette page donne un panorama des fonctionnalités de PLaTon, avec un lien vers la documentation de chacune.
 
-## Gestion des Utilisateurs
+## Créer des contenus pédagogiques
 
-La gestion des utilisateurs est une composante cruciale de PLaTon, permettant une administration efficace des comptes des enseignants, des élèves et des administrateurs. Cette fonctionnalité inclut :
+| Fonctionnalité                                             | Documentation                                                                                                         |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Exercices autocorrigés programmables (JavaScript ou Python) | [Le langage PLE](/main/programing/exercise/langage), [Évaluation](/main/programing/exercise/grading)                    |
+| Une trentaine de composants interactifs (QCM, éditeur de code, glisser-déposer, mots croisés, graphiques…) | [Composants](/components)                                              |
+| Modèles d'exercices personnalisables sans code             | [Builder d'exercice](/main/resources/builder), [Rendre un exercice configurable](/main/programing/exercise/config)    |
+| Aides, théories, solutions, feedbacks dépliables           | [Aides](/main/programing/exercise/hints), [Théories](/main/programing/exercise/theories)                               |
+| Activités : enchaînements d'exercices, navigation adaptative, validation par étapes, évaluation par les pairs | [Configuration d'une activité](/main/programing/activity/config)                     |
+| Éditeur en ligne avec prévisualisation et débogage         | [Éditeur](/main/programing/ide), [Déboguer un exercice](/main/programing/exercise/debug)                               |
 
-- **Création et Gestion des Comptes** : Procédures pour l'inscription, la configuration de profils, et la gestion des rôles des utilisateurs.
-- **Authentification et Sécurité** : Mécanismes pour assurer la sécurité des comptes et la protection des données personnelles.
-- **Suivi et Analyse** : Outils pour surveiller l'activité des utilisateurs, leurs progrès et leur engagement sur la plateforme.
+## Partager et organiser les ressources
 
-## Gestion des Ressources
+| Fonctionnalité                                             | Documentation                                                                 |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Cercles, cercle personnel, collaborateurs                  | [Cercles](/main/resources/circles), [Membres](/main/resources/members)        |
+| Droits d'écriture propagés aux sous-cercles                | [Gestion des droits](/main/resources/permissions)                             |
+| Recherche avancée, topics et niveaux                       | [Recherche](/main/resources/search), [Tags](/main/resources/tags)             |
+| Versions, duplication, partage public d'un exercice        | [La page d'une ressource](/main/resources/resource-page)                      |
+| Suivi des ressources et notifications                      | [Observateurs](/main/resources/watchers), [Événements](/main/resources/events) |
 
-La gestion des ressources sur PLaTon englobe la création, l'édition, et le partage de contenu pédagogique de qualité :
+## Enseigner avec des cours
 
-- **Création de Ressources** : Outils pour développer divers types de contenus éducatifs.
-- **Édition et Mise à Jour** : Fonctionnalités pour modifier et actualiser les ressources existantes.
-- **Partage et Collaboration** : Mécanismes pour partager des ressources entre les enseignants, favorisant la collaboration et l'échange de connaissances.
+| Fonctionnalité                                             | Documentation                                                                                   |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Cours, sections, membres et groupes                        | [Présentation du module de cours](/main/courses/overview)                                       |
+| Périodes d'accès par groupe ou par étudiant                | [Ajouter et paramétrer des activités](/main/courses/activities)                                 |
+| TP notés et examens sécurisés, code de déblocage           | [Paramètres d'un TP noté](/main/courses/activities#paramètres-dun-tp-noté)                      |
+| Suivi en direct, temps supplémentaire                      | [Suivi en direct](/main/courses/monitoring)                                                     |
+| Correction manuelle avec barèmes et commentaires           | [Corriger les copies](/main/courses/corrections)                                                |
+| Statistiques et export des notes                           | [Statistiques](/main/courses/statistics), [Téléchargement des notes](/main/courses/grades-csv) |
+| Challenges, accès démo, tests d'entrée pour des candidats  | [Challenges](/main/courses/challenges), [Accès démo](/main/courses/demo), [Tests d'entrée](/main/courses/tests) |
 
-## Gestion de Cours
+## Administrer la plateforme
 
-Cette fonctionnalité permet aux enseignants de concevoir, gérer et optimiser les cours en ligne :
-
-- **Création de Cours** : Outils pour structurer et organiser de nouveaux cours.
-- **Ajout de Ressources et de Membres** : Intégration facile de matériel pédagogique et gestion des inscriptions des élèves.
-- **Gestion des Correcteurs** : Attribution de tâches de correction et suivi des évaluations.
-- **Paramétrage des Cours** : Réglage des paramètres tels que les dates d'ouverture et de clôture etc.
-
-## Programmation d'Exercices
-
-Une caractéristique distinctive de PLaTon est sa capacité à permettre la programmation d'exercices interactifs :
-
-- **Langage de Programmation Interne** : Un langage spécialement conçu pour créer des exercices autocorrigés et interactifs.
-- **Édition Graphique** : Interfaces utilisateur intuitives pour faciliter la conception d'exercices sans nécessiter de compétences avancées en programmation.
-- **Système de Template** : Modèles prédéfinis pour accélérer et simplifier la création d'exercices.
-
-Chaque fonctionnalité est conçue pour offrir une expérience utilisateur optimale, en facilitant la gestion des cours, des ressources, et des utilisateurs.
-Les détails complets et les guides d'utilisation de ces fonctionnalités seront fournis dans les chapitres suivants de la documentation.
+| Fonctionnalité                                             | Documentation                                                                               |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Comptes, rôles, groupes d'utilisateurs, annonces           | [Tableau de bord administrateur](/main/dashboard/admin), [Types de compte](/main/users/account-types) |
+| Intégration aux LMS (LTI 1.3 et 1.1), CAS                  | [Intégration LTI](/main/users/lti-integration), [Rôles LTI](/main/users/lti-roles)          |
