@@ -1,45 +1,64 @@
 ---
 title: Ajout d'Exercices à une Activité
-description: Guide sur l'ajout, l'organisation et la configuration d'exercices dans une activité PLaTon. Explique la création de groupes, la recherche d'exercices, et le paramétrage spécifique des exercices configurables.
+description: Ajouter des exercices à une activité PLaTon - groupes d'exercices, recherche, paramétrage des exercices configurables, ordre de passage et rôle des groupes selon le mode de navigation.
 ---
 
-# Ajout d'Exercices à une Activité
+import { Callout } from 'nextra/components'
+
+# Ajout d'exercices à une activité
 
 ![Onglet exercices d'une activité](../../../../public/screens/resources/ide/activity-exercises.png)
 
-La phase finale de la configuration d'une activité sur PLaTon implique l'ajout d'exercices.
-Ces exercices peuvent être organisés en groupes, une fonctionnalité qui prévoit la possibilité d'une navigation dynamique adaptée au progrès de l'apprenant dans de futures mises à jour de PLaTon.
-Voici comment ajouter et organiser des exercices au sein d'une activité :
+Les exercices d'une activité sont rangés dans des **groupes d'exercices**, dans l'onglet de l'éditeur de `main.pla`
+consacré aux exercices.
 
-## Création de Groupes d'Exercices
+## Créer des groupes
 
-- **Ajout de Groupes** :
-  - Commencez par ajouter des groupes pour organiser les exercices. Les groupes n'affectent pas directement l'activité pour le moment, mais seront utilisés par PLaTon à l'avenir pour une navigation adaptative.
-- **Nommage des Groupes** :
-  - Le nommage des groupes se fait automatiquement en fonction de l'ordre dans lequel ils sont créés. Vous pouvez les réorganiser en les faisant glisser et en les déposant dans l'ordre souhaité.
+- **Ajouter un groupe** crée un nouveau groupe, nommé automatiquement selon son rang. Vous pouvez le renommer.
+- Les groupes peuvent être réordonnés par glisser-déposer et supprimés avec l'icône de corbeille.
+- Cliquez sur un groupe pour le sélectionner : c'est dans ce groupe que seront ajoutés les exercices.
 
-## Intégration d'Exercices
+## Ajouter des exercices
 
-- **Sélection de Groupe** :
-  - Cliquez sur un groupe pour commencer à y ajouter des exercices.
-- **Rechercher des exercices**
-  - La barre de recherche trouvera les exercices en fonctions de vos filtres, par défaut, nous vous affichons vos exercices du cercle dans lequel vous créez l'activité.
-  - Vous pouvez ajouter des filtres en cliquant sur le bouton "filtre" à droite de la barre de recherche, un menu s'ouvre vous permettant de filtrer vos résultats.
-  - Retirez les filtres précédemment ajouter en cliquant sur la croix en dessous de la barre de recherche.
-- **Ajout d'Exercices** :
-  - Utilisez le bouton d'ajout pour sélectionner et intégrer des exercices à un groupe spécifique (+), ou bien drag and drop les exercices dans un groupe.
-- **Configurer les Exercices** :
-  - Si un exercice est configurable, il est légèrement bleuté, vous pouvez cliquer sur le bouton `Éditer` à droite de celui-çi pour afficher les variables que vous pouvez personnaliser.
-- **Prévisualisation** :
-  - Avant de finaliser l'ajout, utilisez l'option de prévisualisation pour vérifier que l'exercice fonctionne comme prévu dans le contexte de l'activité.
-  - Pour les exercices configurables, la prévisualisation se base sur les valeurs modifiées si elles sont définies, sinon sur les valeurs par défaut.
-- **Validation des Exercices** :
-  - Une fois les exercices ajoutés et configurés, validez votre sélection pour les inclure dans l'activité.
+- La barre de recherche trouve les exercices de la plateforme ; par défaut, elle affiche les exercices du cercle dans
+  lequel vous créez l'activité. Le bouton de filtre ouvre la [recherche avancée](/main/resources/search).
+- Ajoutez un exercice au groupe sélectionné avec le bouton **+** (**Ajouter l'exercice au groupe**), ou faites-le
+  glisser dans un groupe.
+- Chaque carte de résultat indique la note moyenne obtenue par les apprenants et le nombre d'utilisations de
+  l'exercice, ainsi que sa date de mise à jour. Les boutons **Éditer** et **Prévisualiser** ouvrent l'exercice.
 
-## Organisation et Révision
+## Paramétrer un exercice configurable
 
-- **Réorganiser les Exercices** : Vous pouvez réorganiser l'ordre des exercices au sein d'un groupe pour structurer l'activité selon un parcours pédagogique spécifique.
-- **Modifier ou Supprimer des Exercices** : À tout moment, vous avez la possibilité de modifier les paramètres d'un exercice ou de le supprimer du groupe si nécessaire.
-- **Affichage des Variables** : Pour les exercices configurables, vous pouvez accéder et modifier les variables en cliquant sur "Afficher les variables" pour chaque exercice.
+Un exercice **configurable** (créé à partir d'un modèle, ou possédant un `main.plc`) expose des variables
+personnalisables. Dans le groupe, **Afficher les variables** déplie la liste des variables ; **Editer** ouvre le champ
+d'une variable. Les valeurs saisies ne s'appliquent qu'à **cette activité** : l'exercice d'origine n'est pas modifié.
+La prévisualisation de l'exercice dans l'activité utilise ces valeurs.
 
-En suivant ces étapes, vous pouvez personnaliser de manière approfondie l'expérience d'apprentissage offerte par votre activité. Bien que les groupes n'ont pas d'impact immédiat sur la navigation de l'activité, il est conseillé de les utiliser pour préparer votre activité aux fonctionnalités à venir de PLaTon.
+<Callout type="info">
+  Une carte **Exercice privé** signale un exercice que vous n'avez plus le droit de lire (par exemple déplacé dans un
+  cercle personnel). Une carte **Erreur** signale un exercice qui n'a pas pu être chargé. Dans les deux cas, vous
+  pouvez retirer l'exercice du groupe.
+</Callout>
+
+## À quoi servent les groupes ?
+
+Le rôle des groupes dépend du [mode de navigation](/main/programing/activity/config) de l'activité :
+
+| Mode                                     | Rôle des groupes                                                                                                                                                                          |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Progressive** et **Composée**          | Organisation pour l'enseignant uniquement : l'apprenant reçoit **tous** les exercices de tous les groupes, dans l'ordre des groupes puis des exercices. Les noms des groupes ne lui sont pas affichés. |
+| **Validation**                           | Chaque groupe est une étape à valider (note minimale, nombre d'exercices, tentatives…). Voir [Navigation par validation](/main/programing/activity/next-navigation/validation).            |
+| **Intelligente**                         | Les groupes sont accessibles depuis le script `next` pour choisir les exercices. Voir [Navigation intelligente](/main/programing/activity/next-navigation/next).                           |
+| **Comparaison par les pairs**            | Les groupes doivent porter des noms précis. Voir [Évaluation par les pairs](/main/programing/activity/peer).                                                                              |
+
+<Callout type="warning">
+  En mode Progressive ou Composée, les exercices ne sont **pas mélangés** et les titres des groupes ne sont pas visibles
+  par les apprenants. Pour présenter des parties à l'apprenant, utilisez l'introduction de l'activité ou l'énoncé des
+  exercices.
+</Callout>
+
+## Après la publication de l'activité
+
+Les cours qui utilisent l'activité gardent la version qu'ils ont ajoutée. Après avoir modifié les exercices ou les
+groupes, utilisez **Recharger** dans les paramètres de l'activité de cours pour mettre à jour les cours (voir
+[Recharger une activité](/main/courses/activities#recharger-une-activité)).
