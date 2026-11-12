@@ -3,7 +3,7 @@ title: InputBox
 description: Champ de saisie polyvalent supportant texte, nombres et zones de texte avec fonctionnalités avancées comme l'autocomplétion et les caractères spéciaux. Utilisable pour de nombreux types d'exercices comme les réponses courtes, calculs numériques, entrée de mots ou phrases, saisie de code, réponses à format spécifique (dates, formules simples).
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -148,12 +148,160 @@ Adaptez le style visuel du champ à vos besoins:
     ...[
   {
     "name": "Exemple: Addition",
-    "url": "/playground/exercises/input-box/sum.ple",
-    "code": "sandbox = \"node\"\n\ninput = :wc-input-box\ninput.type = \"number\"\ninput.placeholder = \"Entrez votre réponse ici\"\n\ntitle ==\nCalcul numérique\n==\n\nstatement ==\nRésolvez le problème suivant et entrez la réponse sous forme de nombre.\n\n\\( 2 + 2 = \\)\n==\n\nform ==\n{{ input }}\n==\n\ngrader == #!lang=js\ngrade = 0\nfeedback.type = \"error\"\nfeedback.content = \"Mauvaise réponse\"\nif (input.value == 4) {\n  grade = 100\n  feedback.type = \"success\"\n  feedback.content = \"Bonne réponse !\"\n}\n==\n"
+    "url": "/playground/exercises/input-box/sum.ple"
+  },
+  {
+    "name": "Exemple: Multiplication en Python",
+    "url": "/playground/exercises/input-box/python-random.ple"
+  },
+  {
+    "name": "Exemple: Réponse textuelle",
+    "url": "/playground/exercises/input-box/capital.ple"
   }
 ]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Addition</summary>
+
+`````ple
+sandbox = "node"
+
+input = :wc-input-box
+input.type = "number"
+input.placeholder = "Entrez votre réponse ici"
+
+title ==
+Calcul numérique
+==
+
+statement ==
+Résolvez le problème suivant et entrez la réponse sous forme de nombre.
+
+\( 2 + 2 = \)
+==
+
+form ==
+{{ input }}
+==
+
+grader == #!lang=js
+grade = 0
+feedback.type = "error"
+feedback.content = "Mauvaise réponse"
+if (input.value == 4) {
+  grade = 100
+  feedback.type = "success"
+  feedback.content = "Bonne réponse !"
+}
+==
+`````
+
+</details>
+
+<details>
+<summary>Multiplication en Python</summary>
+
+`````ple
+// Même principe que l'exemple « Addition », avec la sandbox Python et des valeurs aléatoires.
+sandbox = "python"
+
+reponse = :wc-input-box
+reponse.type = "number"
+reponse.placeholder = "Votre réponse"
+// Valide la réponse avec la touche Entrée.
+reponse.autoValidation = true
+
+builder == #!lang=py
+import random
+
+# La variable seed (entier entre 0 et 99) est fournie par PLaTon :
+# elle rend le tirage reproductible pour un même apprenant.
+random.seed(seed)
+a = random.randint(10, 99)
+b = random.randint(2, 9)
+==
+
+title ==
+Multiplication aléatoire (Python)
+==
+
+statement ==
+Calculez \( {{ a }} \times {{ b }} \).
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=py
+attendu = a * b
+if reponse["value"] == attendu:
+    grade = 100
+    feedback["type"] = "success"
+    feedback["content"] = "Bonne réponse !"
+else:
+    grade = 0
+    feedback["type"] = "error"
+    feedback["content"] = f"Mauvaise réponse : {a} × {b} = {attendu}."
+==
+
+solution ==
+\( {{ a }} \times {{ b }} = {{ a * b }} \)
+==
+`````
+
+</details>
+
+<details>
+<summary>Réponse textuelle</summary>
+
+`````ple
+sandbox = "node"
+
+// Champ texte avec suggestions automatiques et clavier de caractères spéciaux.
+reponse = :wc-input-box
+reponse.placeholder = "Nom de la ville"
+reponse.completion = ["Berlin", "Bruxelles", "Madrid", "Lisbonne", "Rome", "Vienne", "Varsovie"]
+reponse.specialCharacters = [["é", "è", "ê", "à", "ç"]]
+reponse.hint = "Commencez à taper pour voir des suggestions"
+
+title ==
+Réponse textuelle
+==
+
+statement ==
+Quelle est la capitale du **Portugal** ?
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+// Normalisation : sans accents, sans majuscules et sans espaces superflus.
+const normaliser = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase()
+
+if (normaliser(reponse.value) === 'lisbonne') {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Exact !'
+  reponse.css = 'success-state'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Ce n\'est pas la bonne ville.'
+  reponse.css = 'error-state'
+}
+==
+`````
+
+</details>
 
 ## API
 

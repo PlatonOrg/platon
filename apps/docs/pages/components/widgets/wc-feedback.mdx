@@ -3,7 +3,7 @@ title: Feedback
 description: Composant d'affichage de messages de retour avec différents niveaux visuels (succès, information, avertissement, erreur). Essentiel pour fournir des retours clairs aux apprenants sur leurs réponses, donner des indications supplémentaires, ou afficher des messages contextuels dans tout type d'exercice interactif.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -87,9 +87,77 @@ Le support du Markdown permet d'enrichir les messages avec des éléments comme 
       name: 'Visualisation',
       url: 'playground/components/wc-feedback',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Encadrés dans l'énoncé",
+    "url": "/playground/exercises/feedback/callout.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Encadrés dans l'énoncé</summary>
+
+`````ple
+sandbox = "node"
+
+// wc-feedback affiche un encadré coloré (success, info, warning ou error) au contenu markdown.
+// Il peut être placé dans l'énoncé, le formulaire ou la solution.
+rappel = :wc-feedback
+rappel.type = "info"
+rappel.content = "**Rappel** : l'aire d'un rectangle est le produit de sa longueur par sa largeur."
+
+attention = :wc-feedback
+attention.type = "warning"
+attention.content = "Donnez votre réponse en **cm²**, sans unité."
+
+reponse = :wc-input-box
+reponse.type = "number"
+
+builder == #!lang=js
+longueur = 3 + Math.floor(Math.random() * 10)
+largeur = 2 + Math.floor(Math.random() * 5)
+==
+
+title ==
+Encadrés d'information
+==
+
+statement ==
+{{ rappel }}
+
+Un rectangle mesure {{ longueur }} cm de long et {{ largeur }} cm de large. Quelle est son aire ?
+
+{{ attention }}
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+const aire = longueur * largeur
+if (Number(reponse.value) === aire) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Exact !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Ce n\'est pas la bonne aire.'
+  // Un widget peut aussi être modifié par le grader : ici l'encadré de l'énoncé devient une alerte.
+  attention.type = 'error'
+  attention.content = `Vous avez répondu ${reponse.value}. Vérifiez que vous avez multiplié (et non additionné) les deux dimensions.`
+}
+==
+`````
+
+</details>
 
 ## API
 

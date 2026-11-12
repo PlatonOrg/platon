@@ -3,7 +3,7 @@ title: Picker
 description: Menu déroulant permettant de sélectionner une valeur parmi une liste prédéfinie. Idéal pour les exercices à choix limité, les sélections de paramètres, de catégories, ou de valeurs spécifiques dans un ensemble fermé, offrant une interface compacte pour les questions où l'espace est limité.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -63,9 +63,68 @@ Le Picker est particulièrement utile pour:
       name: 'Visualisation',
       url: 'playground/components/wc-picker',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Choisir une unité",
+    "url": "/playground/exercises/picker/units.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Choisir une unité</summary>
+
+`````ple
+sandbox = "node"
+
+// Avec appearance = "inline", le picker s'insère dans une phrase.
+unite1 = :wc-picker
+unite1.appearance = "inline"
+unite1.items = ["mm", "cm", "m", "km"]
+
+unite2 = :wc-picker
+unite2.appearance = "inline"
+unite2.items = ["g", "kg", "t"]
+
+unite3 = :wc-picker
+unite3.items = ["seconde", "minute", "heure", "jour"]
+unite3.placeholder = "Choisissez une unité"
+unite3.hint = "Unité la plus adaptée"
+
+title ==
+Choisir l'unité adaptée
+==
+
+statement ==
+Choisissez l'unité la plus adaptée pour chaque grandeur.
+==
+
+form ==
+La distance entre Paris et Lyon se mesure en {{ unite1 }} et la masse d'un éléphant en {{ unite2 }}.
+
+La durée d'un film se mesure en :
+
+{{ unite3 }}
+==
+
+grader == #!lang=js
+const reponses = [[unite1, 'km'], [unite2, 't'], [unite3, 'heure']]
+let corrects = 0
+for (const [picker, attendu] of reponses) {
+  if (picker.selection === attendu) corrects++
+}
+grade = Math.round((100 * corrects) / reponses.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${corrects} bonne(s) réponse(s) sur ${reponses.length}.`
+==
+`````
+
+</details>
 
 ## API
 

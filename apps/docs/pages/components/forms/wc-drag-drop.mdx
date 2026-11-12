@@ -3,7 +3,7 @@ title: DragDrop
 description: Composant permettant de créer des éléments déplaçables par glisser-déposer. Parfait pour les exercices de tri et classement, reconstitution de séquences, placement d'éléments sur une carte ou un schéma, ordonner des phrases, ou organiser des concepts dans un diagramme.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -56,9 +56,97 @@ Ce composant est idéal pour créer des exercices comme:
       name: 'Visualisation',
       url: 'playground/components/wc-drag-drop',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Associer termes et définitions",
+    "url": "/playground/exercises/drag-drop/definitions.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Associer termes et définitions</summary>
+
+`````ple
+sandbox = "node"
+
+// Plusieurs composants wc-drag-drop travaillent ensemble :
+// - les étiquettes à déplacer ont draggable = true ;
+// - les zones de dépôt ont draggable = false (valeur par défaut) ;
+// - un élément ne peut être déposé que dans une zone du même groupe (group).
+paires = [
+  { terme: "Variable", definition: "Nom associé à une valeur en mémoire" },
+  { terme: "Boucle", definition: "Répète un bloc d'instructions" },
+  { terme: "Condition", definition: "Exécute un bloc seulement si un test est vrai" },
+  { terme: "Fonction", definition: "Bloc de code nommé et réutilisable" }
+]
+
+builder == #!lang=js
+function melanger(t) {
+  for (let i = t.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [t[i], t[j]] = [t[j], t[i]]
+  }
+  return t
+}
+
+// component(selector) crée un composant depuis un script.
+etiquettes = melanger(paires.map((p) => {
+  const c = component('wc-drag-drop')
+  c.draggable = true
+  c.group = 'vocabulaire'
+  c.content = p.terme
+  return c
+}))
+
+zones = paires.map((p) => {
+  const c = component('wc-drag-drop')
+  c.group = 'vocabulaire'
+  return c
+})
+==
+
+title ==
+Glisser-déposer : associer termes et définitions
+==
+
+statement ==
+Faites glisser chaque terme dans la zone placée en face de sa définition.
+Une zone remplie peut être vidée avec la croix, ou échangée avec une autre zone par glisser-déposer.
+==
+
+form ==
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px">
+{% for e in etiquettes %}{{ e }}{% endfor %}
+</div>
+<table>
+{% for p in paires %}
+<tr><td style="padding: 4px 12px 4px 0">{{ p.definition }}</td><td style="min-width: 160px">{{ zones[loop.index0] }}</td></tr>
+{% endfor %}
+</table>
+==
+
+grader == #!lang=js
+let corrects = 0
+zones.forEach((zone, i) => {
+  const ok = zone.content === paires[i].terme
+  if (ok) corrects++
+  // css colore la zone après la correction (voir la page API CSS des composants).
+  zone.css = ok ? 'success-state' : 'error-state'
+})
+
+grade = Math.round((100 * corrects) / zones.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${corrects} association(s) correcte(s) sur ${zones.length}.`
+==
+`````
+
+</details>
 
 ## API
 

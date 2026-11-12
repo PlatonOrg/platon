@@ -3,7 +3,7 @@ title: Crossword
 description: Composant de grille interactive de mots croisés. Conçu pour la saisie mot par mot, il est idéal pour les exercices de vocabulaire ciblés et l'association terme-définition.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -60,9 +60,67 @@ Vous pouvez ajuster certains paramètres visuels du composant :
       name: 'Visualisation',
       url: 'playground/components/wc-crossword',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Vocabulaire de la programmation",
+    "url": "/playground/exercises/crossword/programming.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Vocabulaire de la programmation</summary>
+
+`````ple
+sandbox = "node"
+
+grille = :wc-crossword
+grille.cellSize = 32
+grille.correctionColor = true
+grille.words = [
+  { clue: "Structure qui répète un bloc d'instructions", answer: "boucle" },
+  { clue: "Nom donné à une valeur mémorisée", answer: "variable" },
+  { clue: "Bloc de code nommé et réutilisable", answer: "fonction" },
+  { clue: "Collection ordonnée d'éléments en Python", answer: "liste" },
+  { clue: "Langage de programmation au nom de serpent", answer: "python" }
+]
+
+title ==
+Mots croisés : vocabulaire de la programmation
+==
+
+statement ==
+Complétez la grille à l'aide des définitions.
+==
+
+form ==
+{{ grille }}
+==
+
+grader == #!lang=js
+// grille.results contient une entrée par mot : { number, answer }.
+// number est le numéro de la définition (1 pour le premier mot de grille.words),
+// answer est la saisie de l'apprenant (« - » pour une case vide).
+let corrects = 0
+for (const res of grille.results) {
+  const attendu = grille.words[res.number - 1].answer
+  if (res.answer.toLowerCase() === attendu.toLowerCase()) {
+    corrects++
+  }
+}
+
+grade = Math.round((100 * corrects) / grille.words.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${corrects} mot(s) correct(s) sur ${grille.words.length}.`
+==
+`````
+
+</details>
 
 ## API
 

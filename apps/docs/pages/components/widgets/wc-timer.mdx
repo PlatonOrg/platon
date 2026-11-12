@@ -1,9 +1,9 @@
 ---
 title: Timer
-description: Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du composant ou qui fait un compte à rebours.
+description: Compte à rebours qui soumet automatiquement la réponse de l'apprenant lorsque le temps est écoulé. Utile pour les exercices chronométrés, le calcul mental ou les questions éclair.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -11,10 +11,42 @@ import { useAbsoluteUrl } from '../../../hooks'
 
 `wc-timer`
 
-Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du composant ou qui fait un compte à rebours.
+Compte à rebours qui soumet automatiquement la réponse de l'apprenant lorsque le temps est écoulé. Utile pour les exercices chronométrés, le calcul mental ou les questions éclair.
 
 ## Documentation
 
+Le composant Timer affiche un **compte à rebours** au format minutes:secondes. Il sert à limiter le temps de réponse d'un exercice : lorsque le temps est écoulé, la réponse de l'apprenant est **soumise automatiquement**, comme s'il avait cliqué sur le bouton de validation.
+
+### Propriétés principales
+
+- **countDownTime** : durée du compte à rebours, en secondes. Le chronomètre décompte une seconde à la fois tant que cette valeur est supérieure à 0. Avec la valeur 0 (par défaut), il reste à l'arrêt.
+- **alignment** : position du chronomètre dans la page (`center`, `left` ou `right`).
+- **disabled** : met le décompte en pause tant que la valeur est `true`.
+
+Pendant la dernière minute, l'affichage clignote pour attirer l'attention de l'apprenant.
+
+### Utilisation dans un exercice
+
+```ple
+chrono = :wc-timer
+chrono.countDownTime = 60
+chrono.alignment = "right"
+
+form ==
+{{ chrono }}
+{{ reponse }}
+==
+```
+
+<Callout type="warning">
+Placez le chronomètre dans le `form` : seuls les composants du formulaire renvoient leur état au grader. Le grader peut alors lire le temps restant dans `chrono.countDownTime` (0 si la réponse a été soumise automatiquement).
+</Callout>
+
+### Points d'attention
+
+- Le décompte démarre à l'affichage de l'exercice.
+- Pour arrêter le chronomètre après la correction, mettez `chrono.disabled = true` dans le grader.
+- La soumission automatique déclenche le grader comme une validation normale : prévoyez dans le grader le cas d'une réponse vide.
 
 
 ## Exemple interactif
@@ -26,9 +58,76 @@ Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du c
       name: 'Visualisation',
       url: 'playground/components/wc-timer',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Calcul mental chronométré",
+    "url": "/playground/exercises/timer/mental-calculation.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Calcul mental chronométré</summary>
+
+`````ple
+sandbox = "node"
+
+// Le compte à rebours démarre à l'affichage. À 0, la réponse est soumise automatiquement.
+chrono = :wc-timer
+chrono.countDownTime = 30
+chrono.alignment = "right"
+
+reponse = :wc-input-box
+reponse.type = "number"
+reponse.autoValidation = true
+
+builder == #!lang=js
+a = 11 + Math.floor(Math.random() * 30)
+b = 11 + Math.floor(Math.random() * 30)
+==
+
+title ==
+Calcul mental chronométré
+==
+
+statement ==
+Vous avez 30 secondes : combien font {{ a }} + {{ b }} ?
+==
+
+// Le chronomètre est placé dans le formulaire : seuls les composants du formulaire
+// renvoient leur état au grader.
+form ==
+{{ chrono }}
+{{ reponse }}
+==
+
+grader == #!lang=js
+// L'état du chronomètre est transmis au grader avec les réponses.
+const tempsRestant = chrono.countDownTime
+chrono.disabled = true
+
+if (Number(reponse.value) === a + b) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = `Bravo, il vous restait ${tempsRestant} seconde(s).`
+} else if (tempsRestant <= 0) {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Temps écoulé !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Ce n\'est pas le bon résultat.'
+}
+==
+`````
+
+</details>
 
 ## API
 

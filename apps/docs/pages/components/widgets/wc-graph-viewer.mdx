@@ -3,7 +3,7 @@ title: GraphViewer
 description: Visualiseur de graphes utilisant le format DOT pour représenter des structures de données complexes. Particulièrement utile pour les exercices d'algorithmique, de théorie des graphes, de structures de données, ou tout contexte nécessitant la visualisation de relations entre objets comme des arbres généalogiques ou des réseaux.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -130,9 +130,70 @@ La puissance du langage DOT permet de créer rapidement des visualisations compl
       name: 'Visualisation',
       url: 'playground/components/wc-graph-viewer',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Degré d'un sommet",
+    "url": "/playground/exercises/graph-viewer/degree.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Degré d'un sommet</summary>
+
+`````ple
+sandbox = "node"
+
+// wc-graph-viewer dessine un graphe décrit au format DOT (Graphviz).
+dessin = :wc-graph-viewer
+
+reponse = :wc-input-box
+reponse.type = "number"
+
+builder == #!lang=js
+const sommets = ['A', 'B', 'C', 'D', 'E']
+aretes = []
+for (let i = 0; i < sommets.length; i++) {
+  for (let j = i + 1; j < sommets.length; j++) {
+    if (Math.random() < 0.5) aretes.push([sommets[i], sommets[j]])
+  }
+}
+if (!aretes.some(([x, y]) => x === 'A' || y === 'A')) aretes.push(['A', 'B'])
+
+dessin.graph = 'graph G {\n  node [shape=circle];\n  '
+  + sommets.join('; ') + ';\n  '
+  + aretes.map(([x, y]) => `${x} -- ${y}`).join(';\n  ')
+  + ';\n}'
+degre = aretes.filter(([x, y]) => x === 'A' || y === 'A').length
+==
+
+title ==
+Degré d'un sommet
+==
+
+statement ==
+{{ dessin }}
+
+Quel est le **degré** du sommet A (nombre d'arêtes qui le touchent) ?
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+grade = Number(reponse.value) === degre ? 100 : 0
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = grade === 100 ? 'Exact !' : 'Comptez les arêtes reliées à A.'
+==
+`````
+
+</details>
 
 ## API
 

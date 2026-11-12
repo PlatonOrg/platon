@@ -3,7 +3,7 @@ title: MatchList
 description: Composant interactif permettant d'associer des éléments entre deux colonnes en traçant des lignes. Parfait pour les exercices d'appariement comme associer des termes à leurs définitions, des mots à leurs traductions, des formules à leurs applications, ou encore des images à leurs descriptions.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -75,13 +75,168 @@ Utilisez le markdown dans la propriété content pour intégrer des formules, im
     },
     ...[
   {
-    "name": "Exemple: Biologie animal",
-    "url": "/playground/exercises/match-list/biology.ple",
-    "code": "sandbox = \"node\"\n\n// Initialisation du composant MatchList\nmatchList = :wc-match-list\n\n// Définition des nœuds\nespeces = [\n  { id: \"loup\", type: \"source\", content: \"Loup\" },\n  { id: \"ours\", type: \"source\", content: \"Ours\" },\n  { id: \"renard\", type: \"source\", content: \"Renard\" },\n  { id: \"aigle\", type: \"source\", content: \"Aigle royal\" }\n]\n\nregimes = [\n  { id: \"carnivore\", type: \"target\", content: \"Carnivore\" },\n  { id: \"omnivore\", type: \"target\", content: \"Omnivore\" },\n  { id: \"charognard\", type: \"target\", content: \"Charognard\" },\n  { id: \"rapace\", type: \"target\", content: \"Rapace\" }\n]\n\n// Mélange des éléments au début de l'exercice\nbuilder == #!lang=js\n\nfunction shuffleArray(array) {\n  for (let i = array.length - 1; i > 0; i--) {\n    const j = Math.floor(Math.random() * (i + 1));\n    [array[i], array[j]] = [array[j], array[i]];\n  }\n}\n\nshuffleArray(especes);\nshuffleArray(regimes);\n\nmatchList.nodes = [...especes, ...regimes];\n\n==\n\ntitle==\nAssociation Espèce - Régime Alimentaire\n==\n\nstatement==\nReliez chaque espèce à son régime alimentaire principal.\n==\n\nform==\n{{ matchList }}\n==\n\nhint = [\n  \"Pensez aux proies typiques de chaque animal.\",\n  \"Certains animaux ont un régime alimentaire très varié.\",\n  \"\\nSi vous êtes bloqué, essayez de commencer par les associations dont vous êtes le plus sûr.\"\n]\n\ngrader== #!lang=js\ngrade = 0\nfeedback.type = \"error\"\nfeedback.content = \"Mauvaise réponse\"\n\nlet correctLinks = [\n  { source: \"loup\", target: \"carnivore\" },\n  { source: \"ours\", target: \"omnivore\" },\n  { source: \"renard\", target: \"omnivore\" },\n  { source: \"aigle\", target: \"rapace\" }\n];\n\nlet userLinks = matchList.links;\n\n// Vérification des réponses\nlet correctCount = 0;\nfor (let i = 0; i < correctLinks.length; i++) {\n  let correctLink = correctLinks[i];\n  for (let j = 0; j < userLinks.length; j++) {\n    let userLink = userLinks[j];\n    if (correctLink.source === userLink.source && correctLink.target === userLink.target) {\n      correctCount++;\n      break;\n    }\n  }\n}\n\nif (correctCount === correctLinks.length) {\n  grade = 100\n  feedback.type = \"success\"\n  feedback.content = \"Félicitations, toutes les associations sont correctes !\"\n} else {\n  grade = (correctCount / correctLinks.length) * 100;\n  feedback.type = \"error\";\n  feedback.content = `Vous avez ${correctCount} associations correctes sur ${correctLinks.length}.`;\n}\n\n==\n"
+    "name": "Exemple: Biologie animale",
+    "url": "/playground/exercises/match-list/biology.ple"
+  },
+  {
+    "name": "Exemple: Pays et capitales",
+    "url": "/playground/exercises/match-list/capitals.ple"
   }
 ]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Biologie animale</summary>
+
+`````ple
+sandbox = "node"
+
+// Initialisation du composant MatchList
+matchList = :wc-match-list
+
+// Définition des nœuds
+especes = [
+  { id: "loup", type: "source", content: "Loup" },
+  { id: "ours", type: "source", content: "Ours" },
+  { id: "renard", type: "source", content: "Renard" },
+  { id: "aigle", type: "source", content: "Aigle royal" }
+]
+
+regimes = [
+  { id: "carnivore", type: "target", content: "Carnivore" },
+  { id: "omnivore", type: "target", content: "Omnivore" },
+  { id: "charognard", type: "target", content: "Charognard" },
+  { id: "rapace", type: "target", content: "Rapace" }
+]
+
+// Mélange des éléments au début de l'exercice
+builder == #!lang=js
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+shuffleArray(especes);
+shuffleArray(regimes);
+
+matchList.nodes = [...especes, ...regimes];
+
+==
+
+title==
+Association Espèce - Régime Alimentaire
+==
+
+statement==
+Reliez chaque espèce à son régime alimentaire principal.
+==
+
+form==
+{{ matchList }}
+==
+
+hint = [
+  "Pensez aux proies typiques de chaque animal.",
+  "Certains animaux ont un régime alimentaire très varié.",
+  "\nSi vous êtes bloqué, essayez de commencer par les associations dont vous êtes le plus sûr."
+]
+
+grader== #!lang=js
+grade = 0
+feedback.type = "error"
+feedback.content = "Mauvaise réponse"
+
+let correctLinks = [
+  { source: "loup", target: "carnivore" },
+  { source: "ours", target: "omnivore" },
+  { source: "renard", target: "omnivore" },
+  { source: "aigle", target: "rapace" }
+];
+
+let userLinks = matchList.links;
+
+// Vérification des réponses
+let correctCount = 0;
+for (let i = 0; i < correctLinks.length; i++) {
+  let correctLink = correctLinks[i];
+  for (let j = 0; j < userLinks.length; j++) {
+    let userLink = userLinks[j];
+    if (correctLink.source === userLink.source && correctLink.target === userLink.target) {
+      correctCount++;
+      break;
+    }
+  }
+}
+
+if (correctCount === correctLinks.length) {
+  grade = 100
+  feedback.type = "success"
+  feedback.content = "Félicitations, toutes les associations sont correctes !"
+} else {
+  grade = (correctCount / correctLinks.length) * 100;
+  feedback.type = "error";
+  feedback.content = `Vous avez ${correctCount} associations correctes sur ${correctLinks.length}.`;
+}
+
+==
+`````
+
+</details>
+
+<details>
+<summary>Pays et capitales</summary>
+
+`````ple
+sandbox = "node"
+
+liens = :wc-match-list
+
+builder == #!lang=js
+const paires = [['fr', 'France', 'Paris'], ['de', 'Allemagne', 'Berlin'], ['it', 'Italie', 'Rome'], ['es', 'Espagne', 'Madrid']]
+// Chaque nœud a un identifiant unique ; les liens tracés relient un nœud source à un nœud cible.
+liens.nodes = [
+  ...paires.map(([id, pays]) => ({ id: 'pays-' + id, type: 'source', content: pays })),
+  ...paires.map(([id, , ville]) => ({ id: 'ville-' + id, type: 'target', content: ville })).sort(() => Math.random() - 0.5)
+]
+attendus = paires.map(([id]) => ({ source: 'pays-' + id, target: 'ville-' + id }))
+==
+
+title ==
+Relier pays et capitales
+==
+
+statement ==
+Reliez chaque pays à sa capitale.
+==
+
+form ==
+{{ liens }}
+==
+
+grader == #!lang=js
+let corrects = 0
+for (const lien of liens.links) {
+  const ok = attendus.some((a) => a.source === lien.source && a.target === lien.target)
+  if (ok) corrects++
+  // Colore chaque lien selon sa justesse.
+  lien.css = ok ? 'success-state' : 'error-state'
+}
+const faux = liens.links.length - corrects
+grade = Math.max(0, Math.round((100 * (corrects - faux)) / attendus.length))
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${corrects} lien(s) correct(s), ${faux} lien(s) incorrect(s).`
+==
+`````
+
+</details>
 
 ## API
 

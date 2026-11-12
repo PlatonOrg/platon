@@ -3,7 +3,7 @@ title: MathLive
 description: Composant avancé pour saisir des expressions mathématiques en notation LaTeX avec rendu visuel en temps réel. Particulièrement adapté aux exercices de calcul différentiel et intégral, algèbre, équations, fractions, racines et expressions complexes où la précision de la notation est essentielle.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -64,9 +64,94 @@ Pour une expérience optimale, pensez à:
       name: 'Visualisation',
       url: 'playground/components/wc-math-live',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Développer une expression",
+    "url": "/playground/exercises/math-live/expand.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Développer une expression</summary>
+
+`````ple
+sandbox = "node"
+
+// wc-math-live est un champ de saisie mathématique avec clavier virtuel.
+// La saisie est transmise au grader en LaTeX dans reponse.value.
+reponse = :wc-math-live
+
+builder == #!lang=js
+a = 1 + Math.floor(Math.random() * 5)
+b = 1 + Math.floor(Math.random() * 5)
+==
+
+title ==
+Développer une identité remarquable
+==
+
+statement ==
+Développez et réduisez l'expression : \( ({{ a }}x + {{ b }})^2 \)
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+// Conversion d'une expression LaTeX simple en expression JavaScript.
+function versJs(latex) {
+  return latex
+    .replace(/\\left|\\right/g, '')
+    .replace(/\\cdot|\\times/g, '*')
+    .replace(/[{}\s]/g, '')
+    .replace(/\^/g, '**')
+    .replace(/(\d)(x|\()/g, '$1*$2')
+    .replace(/(x|\))(x|\(|\d)/g, '$1*$2')
+}
+
+const saisie = reponse.value || ''
+let f = null
+try {
+  f = new Function('x', 'return ' + versJs(saisie))
+} catch (e) {
+  f = null
+}
+
+const valeurs = [-2, -1, 0, 1, 2, 3]
+const egal = f !== null && valeurs.every((x) => Math.abs(f(x) - (a * x + b) ** 2) < 1e-9)
+
+if (!saisie.trim()) {
+  grade = -1
+  feedback.type = 'warning'
+  feedback.content = 'Saisissez une expression avant de valider.'
+} else if (!egal) {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = "Votre expression n'est pas égale à l'expression de départ."
+} else if (saisie.includes('(')) {
+  grade = 50
+  feedback.type = 'warning'
+  feedback.content = "Votre expression est juste, mais elle n'est pas développée."
+} else {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Bravo !'
+}
+==
+
+solution ==
+\( ({{ a }}x + {{ b }})^2 = {{ a * a }}x^2 + {{ 2 * a * b }}x + {{ b * b }} \)
+==
+`````
+
+</details>
 
 ## API
 

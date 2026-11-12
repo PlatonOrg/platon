@@ -3,7 +3,7 @@ title: AutomatonEditor
 description: Éditeur graphique interactif pour créer et manipuler des automates finis. Essentiel pour les exercices de théorie des langages formels, conception d'expressions régulières, modélisation de machines à états, vérification de propriétés de langages, ou pour l'apprentissage des concepts fondamentaux d'informatique théorique.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -74,9 +74,99 @@ s1:b>s2
       name: 'Visualisation',
       url: 'playground/components/wc-automaton-editor',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Langage des mots terminant par b",
+    "url": "/playground/exercises/automaton-editor/ends-with-b.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Langage des mots terminant par b</summary>
+
+`````ple
+sandbox = "node"
+
+// L'éditeur d'automate démarre vide : l'apprenant dessine ses états et ses transitions.
+automate = :wc-automaton-editor
+automate.height = 400
+
+title ==
+Automate : mots terminant par « b »
+==
+
+statement ==
+Dessinez un automate fini qui reconnaît **exactement** les mots de l'alphabet `{a, b}` qui se terminent par la lettre `b`.
+
+- Double-cliquez dans la zone pour créer un état.
+- Reliez deux états pour créer une transition, puis saisissez son ou ses symboles.
+- Utilisez le menu d'un état pour le rendre initial ou acceptant.
+==
+
+form ==
+{{ automate }}
+==
+
+grader == #!lang=js
+// Le grader reçoit l'automate au format objet :
+// { states, alphabet, initialStates, acceptingStates, transitions: [{ fromState, toState, symbols }] }
+const a = automate.automaton || {}
+const transitions = a.transitions || []
+
+// Simule l'automate (éventuellement non déterministe) sur un mot.
+function accepte(mot) {
+  let courants = new Set(a.initialStates || [])
+  for (const lettre of mot) {
+    const suivants = new Set()
+    for (const t of transitions) {
+      if (courants.has(t.fromState) && (t.symbols || []).includes(lettre)) {
+        suivants.add(t.toState)
+      }
+    }
+    courants = suivants
+  }
+  return [...courants].some((etat) => (a.acceptingStates || []).includes(etat))
+}
+
+// Jeu de tests : tous les mots de longueur 0 à 5 sur {a, b}.
+const mots = ['']
+for (let n = 1; n <= 5; n++) {
+  for (let i = 0; i < 2 ** n; i++) {
+    mots.push(i.toString(2).padStart(n, '0').replace(/0/g, 'a').replace(/1/g, 'b'))
+  }
+}
+
+const erreurs = mots.filter((mot) => accepte(mot) !== mot.endsWith('b'))
+
+if (!(a.initialStates || []).length) {
+  grade = 0
+  feedback.type = 'warning'
+  feedback.content = "Votre automate n'a pas d'état initial."
+} else if (erreurs.length === 0) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Bravo, votre automate reconnaît exactement le langage demandé.'
+} else {
+  grade = Math.round((100 * (mots.length - erreurs.length)) / mots.length)
+  const exemples = erreurs.slice(0, 3).map((m) => '`' + (m || 'ε') + '`').join(', ')
+  feedback.type = 'error'
+  feedback.content = `Votre automate se trompe sur ${erreurs.length} mot(s) testé(s), par exemple : ${exemples}.`
+}
+==
+
+solution ==
+Deux états suffisent : `q0` (initial) et `q1` (acceptant).
+Depuis chaque état, la lettre `a` mène à `q0` et la lettre `b` mène à `q1`.
+==
+`````
+
+</details>
 
 ## API
 

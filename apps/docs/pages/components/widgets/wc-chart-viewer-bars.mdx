@@ -3,7 +3,7 @@ title: ChartViewer-Bars
 description: Graphique à barres horizontales ou verticales pour la visualisation comparative de données. Particulièrement utile pour les exercices d'économie, de statistiques, d'analyse de données séquentielles, de comparaison de performances sur différentes périodes, ou pour illustrer des distributions et tendances dans diverses disciplines scientifiques.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -83,9 +83,83 @@ Ce composant est particulièrement adapté pour:
       name: 'Visualisation',
       url: 'playground/components/wc-chart-viewer-bars',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Lire un diagramme en barres",
+    "url": "/playground/exercises/chart-viewer-bars/best-month.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Lire un diagramme en barres</summary>
+
+`````ple
+sandbox = "node"
+
+graphique = :wc-chart-viewer-bars
+graphique.mode = "vertical"
+graphique.title = { text: "Ventes du premier semestre", subtext: "en milliers d'euros", left: "center" }
+graphique.labels = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin"]
+graphique.xAxisLabel = "Mois"
+graphique.yAxisLabel = "Ventes"
+
+choix = :wc-radio-group
+choix.horizontal = true
+choix.items = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin"]
+
+builder == #!lang=js
+// Une série par magasin : value contient une valeur par étiquette de labels.
+const serie = () => graphique.labels.map(() => 10 + Math.floor(Math.random() * 40))
+graphique.data = [
+  { name: 'Magasin A', value: serie() },
+  { name: 'Magasin B', value: serie() }
+]
+// Les composants sont remplacés par leur rendu HTML avant l'affichage :
+// on copie dans des variables simples ce qui doit apparaître dans la solution.
+mois = graphique.labels
+totaux = graphique.labels.map((_, i) => graphique.data[0].value[i] + graphique.data[1].value[i])
+const max = Math.max(...totaux)
+meilleurs = graphique.labels.filter((_, i) => totaux[i] === max)
+==
+
+title ==
+Lire un diagramme en barres
+==
+
+statement ==
+{{ graphique }}
+
+Quel mois a réalisé le plus de ventes, **tous magasins confondus** ?
+==
+
+form ==
+{{ choix }}
+==
+
+grader == #!lang=js
+if (meilleurs.includes(choix.selection)) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Exact !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Additionnez les deux barres de chaque mois.'
+}
+==
+
+solution ==
+Totaux par mois : {{ mois | join(", ") }} → {{ totaux | join(", ") }}.
+==
+`````
+
+</details>
 
 ## API
 
@@ -124,6 +198,132 @@ Ce composant est particulièrement adapté pour:
       "description": "Liste des labels",
       "items": {
         "type": "string"
+      }
+    },
+    "title": {
+      "type": "object",
+      "default": {
+        "text": "Title",
+        "subtext": "SubTitle",
+        "left": "center"
+      },
+      "description": "Titre du graphique",
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "Title",
+          "description": "Titre du graphique"
+        },
+        "subtext": {
+          "type": "string",
+          "default": "SubTitle",
+          "description": "Sous-titre du graphique"
+        },
+        "left": {
+          "type": "string",
+          "default": "center",
+          "description": "Position du titre sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position du titre sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "default": {
+        "orient": "vertical",
+        "left": "left"
+      },
+      "description": "Légende du graphique",
+      "properties": {
+        "orient": {
+          "type": "string",
+          "default": "vertical",
+          "description": "Orientation de la légende",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        "left": {
+          "type": "string",
+          "default": "left",
+          "description": "Position de la légende sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position de la légende sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "tooltip": {
+      "type": "object",
+      "default": {
+        "trigger": "item"
+      },
+      "description": "Tooltip du graphique",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "default": "item",
+          "description": "Type de tooltip",
+          "enum": [
+            "item",
+            "axis"
+          ]
+        }
+      }
+    },
+    "dataTitle": {
+      "type": "string",
+      "default": "Valeur de la donnée",
+      "description": "Titre à afficher sur chaque donnée"
+    },
+    "data": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des données du graphique",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "",
+            "description": "Nom de l'indicateur"
+          },
+          "value": {
+            "type": "array",
+            "default": [],
+            "description": "Valeur de l'indicateur",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
       }
     }
   }
@@ -164,6 +364,132 @@ Ce composant est particulièrement adapté pour:
       "description": "Liste des labels",
       "items": {
         "type": "string"
+      }
+    },
+    "title": {
+      "type": "object",
+      "default": {
+        "text": "Title",
+        "subtext": "SubTitle",
+        "left": "center"
+      },
+      "description": "Titre du graphique",
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "Title",
+          "description": "Titre du graphique"
+        },
+        "subtext": {
+          "type": "string",
+          "default": "SubTitle",
+          "description": "Sous-titre du graphique"
+        },
+        "left": {
+          "type": "string",
+          "default": "center",
+          "description": "Position du titre sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position du titre sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "default": {
+        "orient": "vertical",
+        "left": "left"
+      },
+      "description": "Légende du graphique",
+      "properties": {
+        "orient": {
+          "type": "string",
+          "default": "vertical",
+          "description": "Orientation de la légende",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        "left": {
+          "type": "string",
+          "default": "left",
+          "description": "Position de la légende sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position de la légende sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "tooltip": {
+      "type": "object",
+      "default": {
+        "trigger": "item"
+      },
+      "description": "Tooltip du graphique",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "default": "item",
+          "description": "Type de tooltip",
+          "enum": [
+            "item",
+            "axis"
+          ]
+        }
+      }
+    },
+    "dataTitle": {
+      "type": "string",
+      "default": "Valeur de la donnée",
+      "description": "Titre à afficher sur chaque donnée"
+    },
+    "data": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des données du graphique",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "",
+            "description": "Nom de l'indicateur"
+          },
+          "value": {
+            "type": "array",
+            "default": [],
+            "description": "Valeur de l'indicateur",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
       }
     }
   }

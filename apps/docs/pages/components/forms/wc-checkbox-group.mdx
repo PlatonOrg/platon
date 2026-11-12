@@ -3,7 +3,7 @@ title: CheckboxGroup
 description: Ensemble de cases à cocher permettant la sélection multiple d'options parmi une liste. Idéal pour les QCM à réponses multiples, les exercices de type "cochez toutes les bonnes réponses", les listes de vérification, l'identification de caractéristiques ou propriétés multiples d'un concept.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -104,12 +104,141 @@ La prise en charge du format Markdown dans le contenu des options permet d'inclu
     ...[
   {
     "name": "Exemple: Système solaire",
-    "url": "/playground/exercises/checkbox-group/solar-system.ple",
-    "code": "# Définition de la sandbox\nsandbox = \"node\"\n\n# Initialisation du composant CheckboxGroup\ncheckboxGroup = :wc-checkbox-group\ncheckboxGroup.items = [\n  \"La Terre\",\n  \"Mars\",\n  \"Pluton\",\n  \"Jupiter\",\n  \"Venus\"\n]\n\n# Titre de l'exercice\ntitle ==\nQCM : Quelles sont les planètes du système solaire ?\n==\n\n# Énoncé de l'exercice\nstatement ==\nVeuillez sélectionner toutes les planètes qui font partie de notre système solaire.\n==\n\n# Formulaire de l'exercice\nform ==\n{{ checkboxGroup }}\n==\n\nhint = [\"Un des choix n'est plus une planète depuis 2006\"]\n\n# Builder\nbuilder == #!lang=js\n// Mélangement aléatoire des choix\ncheckboxGroup.items = checkboxGroup.items.sort(() => Math.random() - 0.5);\n==\n\n\n# Grader\ngrader == #!lang=js\n\ngrade = 0;\nfeedback.type = \"error\";\nfeedback.content = \"Incorrect. Veuillez réessayer.\";\n\n// Réponses correctes\nconst correctAnswers = [\"La Terre\", \"Mars\", \"Jupiter\", \"Venus\"];\n\n// Récupérer les réponses sélectionnées\nconst selectedAnswers = checkboxGroup.items\n    .filter(item => item.checked)\n    .map(item => item.content);\n\n// Vérifier si toutes les réponses correctes ont été sélectionnées et aucune réponse incorrecte n'a été sélectionnée\nif (selectedAnswers.length === correctAnswers.length && selectedAnswers.every(answer => correctAnswers.includes(answer))) {\n  grade = 100;\n  feedback.type = \"success\";\n  feedback.content = \"Félicitations ! Vous avez correctement identifié toutes les planètes du système solaire.\";\n}\n\n==\n"
+    "url": "/playground/exercises/checkbox-group/solar-system.ple"
+  },
+  {
+    "name": "Exemple: Nombres premiers (notation partielle)",
+    "url": "/playground/exercises/checkbox-group/primes.ple"
   }
 ]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Système solaire</summary>
+
+`````ple
+# Définition de la sandbox
+sandbox = "node"
+
+# Initialisation du composant CheckboxGroup
+checkboxGroup = :wc-checkbox-group
+checkboxGroup.items = [
+  "La Terre",
+  "Mars",
+  "Pluton",
+  "Jupiter",
+  "Venus"
+]
+
+# Titre de l'exercice
+title ==
+QCM : Quelles sont les planètes du système solaire ?
+==
+
+# Énoncé de l'exercice
+statement ==
+Veuillez sélectionner toutes les planètes qui font partie de notre système solaire.
+==
+
+# Formulaire de l'exercice
+form ==
+{{ checkboxGroup }}
+==
+
+hint = ["Un des choix n'est plus une planète depuis 2006"]
+
+# Builder
+builder == #!lang=js
+// Mélangement aléatoire des choix
+checkboxGroup.items = checkboxGroup.items.sort(() => Math.random() - 0.5);
+==
+
+
+# Grader
+grader == #!lang=js
+
+grade = 0;
+feedback.type = "error";
+feedback.content = "Incorrect. Veuillez réessayer.";
+
+// Réponses correctes
+const correctAnswers = ["La Terre", "Mars", "Jupiter", "Venus"];
+
+// Récupérer les réponses sélectionnées
+const selectedAnswers = checkboxGroup.items
+    .filter(item => item.checked)
+    .map(item => item.content);
+
+// Vérifier si toutes les réponses correctes ont été sélectionnées et aucune réponse incorrecte n'a été sélectionnée
+if (selectedAnswers.length === correctAnswers.length && selectedAnswers.every(answer => correctAnswers.includes(answer))) {
+  grade = 100;
+  feedback.type = "success";
+  feedback.content = "Félicitations ! Vous avez correctement identifié toutes les planètes du système solaire.";
+}
+
+==
+`````
+
+</details>
+
+<details>
+<summary>Nombres premiers (notation partielle)</summary>
+
+`````ple
+sandbox = "node"
+
+nombres = :wc-checkbox-group
+nombres.horizontal = true
+
+builder == #!lang=js
+const estPremier = (n) => {
+  if (n < 2) return false
+  for (let d = 2; d * d <= n; d++) if (n % d === 0) return false
+  return true
+}
+const tirage = new Set()
+while (tirage.size < 8) tirage.add(2 + Math.floor(Math.random() * 48))
+// Chaque proposition peut être un objet { content, checked, css }.
+nombres.items = [...tirage].map((n) => ({ content: String(n), checked: false }))
+premiers = [...tirage].filter(estPremier).map(String)
+==
+
+title ==
+Nombres premiers (notation partielle)
+==
+
+statement ==
+Cochez tous les nombres **premiers**.
+==
+
+form ==
+{{ nombres }}
+==
+
+grader == #!lang=js
+let bons = 0
+for (const item of nombres.items) {
+  const attendu = premiers.includes(item.content)
+  if (!!item.checked === attendu) bons++
+  item.css = !!item.checked === attendu ? 'success-border' : 'error-border'
+}
+// Note proportionnelle au nombre de cases correctement cochées ou laissées vides.
+grade = Math.round((100 * bons) / nombres.items.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${bons} réponse(s) correcte(s) sur ${nombres.items.length}.`
+==
+
+solution ==
+Les nombres premiers étaient : {{ premiers | join(", ") }}.
+==
+`````
+
+</details>
 
 ## API
 

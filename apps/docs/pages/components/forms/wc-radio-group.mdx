@@ -3,7 +3,7 @@ title: RadioGroup
 description: Ensemble de boutons radio pour sélection unique parmi une liste d'options. Essentiel pour les questionnaires à choix unique, les QCM, les sondages, les tests de connaissance, ou tout exercice nécessitant une sélection exclusive parmi plusieurs possibilités avec capacité d'afficher du contenu riche (images, formules) dans les options.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -71,12 +71,136 @@ Activez la validation automatique avec `autoValidation: true` pour que l'exercic
     ...[
   {
     "name": "Exemple: Système solaire",
-    "url": "/playground/exercises/radio-group/solar-system.ple",
-    "code": "# Définition de la sandbox\nsandbox = \"node\"\n\n# Initialisation du composant RadioGroup\nradioGroup = :wc-radio-group\nradioGroup.items = [\n  \"La Terre\",\n  \"Mars\",\n  \"Pluton\",\n  \"Jupiter\",\n  \"Venus\"\n]\n\n# Titre de l'exercice\ntitle ==\nQCM : Quelles sont les planètes du système solaire ?\n==\n\n# Énoncé de l'exercice\nstatement ==\nVeuillez sélectionner la planète qui fait partie de notre système solaire.\n==\n\n# Formulaire de l'exercice\nform ==\n{{ radioGroup }}\n==\n\nhint = [\"Un des choix n'est plus une planète depuis 2006\"]\n\n# Builder\nbuilder == #!lang=js\n// Mélangement aléatoire des choix\nradioGroup.items = radioGroup.items.sort(() => Math.random() - 0.5);\n==\n\n\n# Grader\ngrader == #!lang=js\n\ngrade = 0;\nfeedback.type = \"error\";\nfeedback.content = \"Veuillez sélectionner une réponse.\";\n\n// Réponse correcte\nconst correctAnswer = \"Pluton\";\n\n// Vérifier si une réponse a été sélectionnée\nif (radioGroup.selection == correctAnswer) {\n  grade = 100;\n  feedback.type = \"success\";\n  feedback.content = \"Félicitations ! Vous avez correctement identifié le bon choix.\";\n}\n\n==\n"
+    "url": "/playground/exercises/radio-group/solar-system.ple"
+  },
+  {
+    "name": "Exemple: QCM généré en Python",
+    "url": "/playground/exercises/radio-group/python-generated.ple"
   }
 ]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Système solaire</summary>
+
+`````ple
+# Définition de la sandbox
+sandbox = "node"
+
+# Initialisation du composant RadioGroup
+radioGroup = :wc-radio-group
+radioGroup.items = [
+  "La Terre",
+  "Mars",
+  "Pluton",
+  "Jupiter",
+  "Venus"
+]
+
+# Titre de l'exercice
+title ==
+QCM : Quelles sont les planètes du système solaire ?
+==
+
+# Énoncé de l'exercice
+statement ==
+Veuillez sélectionner la planète qui fait partie de notre système solaire.
+==
+
+# Formulaire de l'exercice
+form ==
+{{ radioGroup }}
+==
+
+hint = ["Un des choix n'est plus une planète depuis 2006"]
+
+# Builder
+builder == #!lang=js
+// Mélangement aléatoire des choix
+radioGroup.items = radioGroup.items.sort(() => Math.random() - 0.5);
+==
+
+
+# Grader
+grader == #!lang=js
+
+grade = 0;
+feedback.type = "error";
+feedback.content = "Veuillez sélectionner une réponse.";
+
+// Réponse correcte
+const correctAnswer = "Pluton";
+
+// Vérifier si une réponse a été sélectionnée
+if (radioGroup.selection == correctAnswer) {
+  grade = 100;
+  feedback.type = "success";
+  feedback.content = "Félicitations ! Vous avez correctement identifié le bon choix.";
+}
+
+==
+`````
+
+</details>
+
+<details>
+<summary>QCM généré en Python</summary>
+
+`````ple
+sandbox = "python"
+
+qcm = :wc-radio-group
+qcm.horizontal = true
+
+builder == #!lang=py
+import random
+
+random.seed(seed)
+a = random.randint(3, 12)
+b = random.randint(3, 12)
+bonne = a * b
+
+# Distracteurs plausibles, sans doublon.
+propositions = {bonne, bonne + a, bonne - b, a + b}
+while len(propositions) < 4:
+    propositions.add(bonne + random.randint(1, 9))
+propositions = list(propositions)
+random.shuffle(propositions)
+
+# Les propositions sont des chaînes : qcm["selection"] contiendra le texte choisi.
+qcm["items"] = [str(p) for p in propositions]
+==
+
+title ==
+QCM généré en Python
+==
+
+statement ==
+Combien font {{ a }} × {{ b }} ?
+==
+
+form ==
+{{ qcm }}
+==
+
+grader == #!lang=py
+if qcm.get("selection") == str(bonne):
+    grade = 100
+    feedback["type"] = "success"
+    feedback["content"] = "Bonne réponse !"
+else:
+    grade = 0
+    feedback["type"] = "error"
+    feedback["content"] = f"La bonne réponse était {bonne}."
+==
+`````
+
+</details>
 
 ## API
 
@@ -137,7 +261,7 @@ Activez la validation automatique avec `autoValidation: true` pour que l'exercic
     },
     "selectedIndex": {
       "type": "number",
-      "default": "-1",
+      "default": -1,
       "description": "Index de la proposition sélectionnée."
     },
     "css": {
@@ -205,7 +329,7 @@ Activez la validation automatique avec `autoValidation: true` pour que l'exercic
     },
     "selectedIndex": {
       "type": "number",
-      "default": "-1",
+      "default": -1,
       "description": "Index de la proposition sélectionnée."
     },
     "css": {

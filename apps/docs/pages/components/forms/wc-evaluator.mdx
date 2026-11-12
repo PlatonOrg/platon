@@ -3,7 +3,7 @@ title: Evaluator
 description: Carte permettant de donner une note à un élément avec des étoiles ou autres icônes personnalisées.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -70,9 +70,61 @@ Vous pouvez déninir la propriété `filledIcons = true` pour avoir des icônes 
       name: 'Visualisation',
       url: 'playground/components/wc-evaluator',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Auto-évaluation",
+    "url": "/playground/exercises/evaluator/self-assessment.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Auto-évaluation</summary>
+
+`````ple
+sandbox = "node"
+
+// wc-evaluator affiche une note sous forme d'icônes (étoiles par défaut).
+note = :wc-evaluator
+note.title = "Votre niveau de confiance"
+note.count = 5
+note.tooltips = ["Pas du tout", "Un peu", "Moyennement", "Plutôt bien", "Parfaitement"]
+
+title ==
+Auto-évaluation
+==
+
+statement ==
+Avant de passer à la suite, indiquez à quel point vous vous sentez à l'aise avec les boucles `for`.
+==
+
+form ==
+{{ note }}
+==
+
+grader == #!lang=js
+// Il n'y a pas de bonne réponse : on valide dès qu'une note est donnée
+// et on adapte le message à la réponse.
+if (!note.value) {
+  grade = -1
+  feedback.type = 'warning'
+  feedback.content = 'Choisissez un nombre d\'étoiles avant de valider.'
+} else {
+  grade = 100
+  feedback.type = 'info'
+  feedback.content = note.value <= 2
+    ? 'Merci ! Nous vous conseillons de relire le cours sur les boucles avant de continuer.'
+    : 'Merci ! Vous pouvez passer aux exercices suivants.'
+}
+==
+`````
+
+</details>
 
 ## API
 

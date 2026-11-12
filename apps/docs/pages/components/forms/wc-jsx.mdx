@@ -3,7 +3,7 @@ title: Jsx
 description: Interface graphique interactive basée sur JSXGraph permettant de créer, manipuler et explorer des constructions géométriques dynamiques. Idéal pour les exercices de géométrie euclidienne, trigonométrie, fonctions mathématiques, lieux géométriques, ou pour illustrer des concepts physiques avec des simulations visuelles.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -113,9 +113,79 @@ Le composant JSX est parfaitement adapté pour:
       name: 'Visualisation',
       url: 'playground/components/wc-jsx',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Milieu d'un segment",
+    "url": "/playground/exercises/jsx/midpoint.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Milieu d'un segment</summary>
+
+`````ple
+sandbox = "node"
+
+// wc-jsx affiche une figure JSXGraph. Le script reçoit la variable « board ».
+// Les points nommés sont renvoyés au grader dans figure.points : { A: { x, y }, ... }
+figure = :wc-jsx
+figure.attributes = { boundingbox: [-6, 6, 6, -6], axis: true }
+
+builder == #!lang=js
+const alea = () => Math.floor(Math.random() * 9) - 4
+ax = alea(); ay = alea()
+bx = alea(); by = alea()
+if (ax === bx && ay === by) { bx = ax + 2 }
+
+figure.script = `
+const A = board.create('point', [${ax}, ${ay}], { name: 'A', fixed: true });
+const B = board.create('point', [${bx}, ${by}], { name: 'B', fixed: true });
+board.create('segment', [A, B]);
+board.create('point', [0, 0], { name: 'M', color: 'blue' });
+`
+==
+
+title ==
+Placer le milieu d'un segment
+==
+
+statement ==
+Déplacez le point bleu **M** pour qu'il soit le milieu du segment **[AB]**.
+==
+
+form ==
+{{ figure }}
+==
+
+grader == #!lang=js
+const M = figure.points.M
+const mx = (ax + bx) / 2
+const my = (ay + by) / 2
+const ecart = Math.hypot(M.x - mx, M.y - my)
+
+if (ecart < 0.2) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Bravo, M est bien le milieu de [AB].'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = `M est en (${M.x.toFixed(1)} ; ${M.y.toFixed(1)}). Les coordonnées du milieu sont les moyennes de celles de A et de B.`
+}
+==
+
+solution ==
+Le milieu de [AB] a pour coordonnées ( ({{ ax }} + {{ bx }}) / 2 ; ({{ ay }} + {{ by }}) / 2 ).
+==
+`````
+
+</details>
 
 ## API
 

@@ -3,7 +3,7 @@ title: CodeEditor
 description: Éditeur de code complet avec coloration syntaxique pour multiples langages de programmation, indentation automatique et suggestions. Adapté aux exercices d'informatique comme la programmation, le débogage, la complétion de code, les algorithmes, ou l'analyse de code avec une interface professionnelle similaire aux IDE modernes.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -79,9 +79,184 @@ Pour une expérience optimale, adaptez la hauteur de l'éditeur en fonction de l
       name: 'Visualisation',
       url: 'playground/components/wc-code-editor',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Fonction JavaScript testée",
+    "url": "/playground/exercises/code-editor/sum-function.ple"
+  },
+  {
+    "name": "Exemple: Fonction Python testée",
+    "url": "/playground/exercises/code-editor/python-function.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Fonction JavaScript testée</summary>
+
+`````ple
+sandbox = "node"
+
+editeur = :wc-code-editor
+editeur.language = "javascript"
+editeur.height = 220
+editeur.code ==
+function somme(tableau) {
+  // Écrivez votre code ici
+}
+==
+
+title ==
+Somme des éléments d'un tableau
+==
+
+statement ==
+Complétez la fonction `somme(tableau)` pour qu'elle **renvoie** la somme des nombres du tableau.
+Un tableau vide a pour somme `0`.
+==
+
+form ==
+{{ editeur }}
+==
+
+grader == #!lang=js
+const tests = [[[1, 2, 3], 6], [[], 0], [[-4, 4, 10], 10], [[2.5, 2.5], 5]]
+const resultats = []
+let reussis = 0
+
+// Signale dans l'éditeur les lignes qui affichent au lieu de renvoyer.
+const decorations = []
+editeur.code.split('\n').forEach((ligne, i) => {
+  if (ligne.includes('console.log')) {
+    decorations.push({
+      startLineNumber: i + 1,
+      severity: 'warning',
+      message: 'La fonction doit renvoyer le résultat avec return, pas l\'afficher.',
+    })
+  }
+})
+editeur.decorations = decorations
+
+let somme
+try {
+  somme = new Function(editeur.code + '\nreturn somme')()
+} catch (e) {
+  somme = undefined
+  resultats.push({ name: 'Compilation', type: 'error', description: String(e), display: true })
+}
+
+if (typeof somme === 'function') {
+  for (const [entree, attendu] of tests) {
+    let obtenu
+    try {
+      obtenu = somme([...entree])
+    } catch (e) {
+      obtenu = 'Erreur : ' + e.message
+    }
+    const ok = obtenu === attendu
+    if (ok) reussis++
+    resultats.push({
+      name: `somme(${JSON.stringify(entree)})`,
+      type: ok ? 'success' : 'error',
+      arguments: JSON.stringify(entree),
+      expected: JSON.stringify(attendu),
+      obtained: JSON.stringify(obtenu) ?? 'undefined',
+    })
+  }
+}
+
+grade = Math.round((100 * reussis) / tests.length)
+// Un feedback dont le contenu est une liste est affiché sous forme de feedbacks dépliables.
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = resultats
+==
+
+solution ==
+```js
+function somme(tableau) {
+  let total = 0
+  for (const x of tableau) total += x
+  return total
+}
+```
+==
+`````
+
+</details>
+
+<details>
+<summary>Fonction Python testée</summary>
+
+`````ple
+sandbox = "python"
+
+editeur = :wc-code-editor
+editeur.language = "python"
+editeur.height = 200
+editeur.code ==
+def maximum(liste):
+    # Écrivez votre code ici
+    pass
+==
+
+title ==
+Maximum d'une liste (Python)
+==
+
+statement ==
+Écrivez la fonction `maximum(liste)` qui renvoie le plus grand élément d'une liste non vide,
+**sans utiliser** la fonction prédéfinie `max`.
+==
+
+form ==
+{{ editeur }}
+==
+
+grader == #!lang=py
+import random
+
+tests = [[3, 1, 2], [-5, -2, -9], [7]]
+tests.append([random.randint(-50, 50) for _ in range(8)])
+
+details = []
+reussis = 0
+espace = {}
+
+try:
+    exec(editeur["code"], espace)
+except Exception as e:
+    details.append({"name": "Exécution du code", "type": "error", "description": repr(e), "display": True})
+
+fonction = espace.get("maximum")
+if "max(" in editeur["code"]:
+    details.append({"name": "Contrainte", "type": "warning", "description": "La fonction max est interdite."})
+elif callable(fonction):
+    for liste in tests:
+        try:
+            obtenu = fonction(list(liste))
+        except Exception as e:
+            obtenu = repr(e)
+        ok = obtenu == max(liste)
+        reussis += 1 if ok else 0
+        details.append({
+            "name": f"maximum({liste})",
+            "type": "success" if ok else "error",
+            "expected": str(max(liste)),
+            "obtained": str(obtenu),
+        })
+
+grade = round(100 * reussis / len(tests))
+feedback["type"] = "success" if grade == 100 else "error"
+feedback["content"] = details
+==
+`````
+
+</details>
 
 ## API
 

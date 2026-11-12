@@ -3,7 +3,7 @@ title: CodeViewer
 description: Composant d'affichage de code source avec coloration syntaxique, numérotation et surlignage de lignes. Idéal pour les exercices d'analyse de code, de débogage, d'explication d'algorithmes ou pour présenter des exemples de programmation avec mise en évidence des sections importantes.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -98,9 +98,81 @@ La coloration syntaxique et le surlignage permettent de focaliser l'attention de
       name: 'Visualisation',
       url: 'playground/components/wc-code-viewer',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Exécuter un programme à la main",
+    "url": "/playground/exercises/code-viewer/trace.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Exécuter un programme à la main</summary>
+
+`````ple
+sandbox = "node"
+
+// wc-code-viewer affiche du code en lecture seule, avec coloration et lignes surlignées.
+programme = :wc-code-viewer
+programme.language = "python"
+programme.highlights = "3-4"
+programme.lines = "1"
+
+reponse = :wc-input-box
+reponse.type = "number"
+
+builder == #!lang=js
+n = 3 + Math.floor(Math.random() * 4)
+pas = 1 + Math.floor(Math.random() * 3)
+programme.code = [
+  'total = 0',
+  `for i in range(${n}):`,
+  `    total = total + i * ${pas}`,
+  '    print(total)',
+  'print("fin")'
+].join('\n')
+
+resultat = 0
+for (let i = 0; i < n; i++) resultat += i * pas
+==
+
+title ==
+Exécuter un programme à la main
+==
+
+statement ==
+{{ programme }}
+
+Quelle est la **dernière valeur numérique** affichée par ce programme ?
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+if (Number(reponse.value) === resultat) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Exact !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Suivez la valeur de total à chaque tour de boucle (lignes surlignées).'
+}
+==
+
+solution ==
+La boucle s'exécute pour i allant de 0 à {{ n - 1 }} : la dernière valeur affichée est {{ resultat }}.
+==
+`````
+
+</details>
 
 ## API
 

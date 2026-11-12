@@ -3,7 +3,7 @@ title: WordSelector
 description: Interface interactive pour sélectionner et organiser des mots afin de construire des phrases ou expressions. Idéal pour les exercices linguistiques comme la construction de phrases, l'apprentissage de langues étrangères, la mise en ordre syntaxique, ou pour des exercices de logique où l'ordre des éléments est important.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -83,9 +83,61 @@ Ce composant permet de créer des exercices variés comme la construction de phr
       name: 'Visualisation',
       url: 'playground/components/wc-word-selector',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Construire une phrase",
+    "url": "/playground/exercises/word-selector/sentence.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Construire une phrase</summary>
+
+`````ple
+sandbox = "node"
+
+// Les mots disponibles sont mélangés automatiquement par le composant.
+// L'apprenant clique (ou glisse) les mots pour construire la phrase dans selectedWords.
+phrase = :wc-word-selector
+phrase.words = ["The", "cat", "is", "sleeping", "on", "the", "sofa"]
+
+title ==
+Construire une phrase en anglais
+==
+
+statement ==
+Traduisez en anglais : « Le chat dort sur le canapé. »
+==
+
+form ==
+{{ phrase }}
+==
+
+grader == #!lang=js
+// Un mot peut être une chaîne ou un objet { content, css }.
+const texte = (m) => (typeof m === 'string' ? m : m.content)
+const attendu = 'The cat is sleeping on the sofa'
+const obtenu = phrase.selectedWords.map(texte).join(' ')
+
+if (obtenu === attendu) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Parfait !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = `Votre phrase : « ${obtenu || '(vide)'} ».`
+}
+==
+`````
+
+</details>
 
 ## API
 

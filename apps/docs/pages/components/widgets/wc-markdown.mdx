@@ -3,7 +3,7 @@ title: Markdown
 description: Composant de rendu Markdown avec support pour éléments avancés comme les admonitions, les onglets, et la mise en forme riche. Parfait pour afficher des énoncés d'exercices, des explications théoriques, des guides méthodologiques ou des ressources documentaires avec une mise en forme élégante et structurée.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -102,9 +102,81 @@ Pour explorer toutes les possibilités offertes par ce composant:
       name: 'Visualisation',
       url: 'playground/components/wc-markdown',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Lire une fiche de cours",
+    "url": "/playground/exercises/markdown/reading.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Lire une fiche de cours</summary>
+
+`````ple
+sandbox = "node"
+
+// wc-markdown affiche un contenu markdown (tableaux, code, formules…).
+// data contient le texte ; file peut pointer vers un fichier : document.file = @copyurl cours.md
+document = :wc-markdown
+document.data ==
+### Fiche technique : la boucle `while`
+
+La boucle `while` répète un bloc **tant qu'une condition est vraie**.
+
+| Élément    | Rôle                                   |
+| ---------- | -------------------------------------- |
+| condition  | évaluée **avant** chaque tour          |
+| corps      | instructions répétées                  |
+| mise à jour| doit finir par rendre la condition fausse |
+
+```python
+i = 0
+while i < 3:
+    print(i)
+    i = i + 1
+```
+
+> Si la condition ne devient jamais fausse, le programme ne s'arrête pas : c'est une **boucle infinie**.
+==
+
+choix = :wc-radio-group
+choix.items = [
+  "Avant chaque tour de boucle",
+  "Après chaque tour de boucle",
+  "Une seule fois, au début",
+  "Uniquement quand la boucle se termine"
+]
+
+title ==
+Lire une fiche de cours
+==
+
+statement ==
+Lisez la fiche suivante puis répondez à la question.
+
+{{ document }}
+
+**Quand la condition d'une boucle `while` est-elle évaluée ?**
+==
+
+form ==
+{{ choix }}
+==
+
+grader == #!lang=js
+grade = choix.selection === 'Avant chaque tour de boucle' ? 100 : 0
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = grade === 100 ? 'Exact !' : 'Relisez le tableau de la fiche.'
+==
+`````
+
+</details>
 
 ## API
 

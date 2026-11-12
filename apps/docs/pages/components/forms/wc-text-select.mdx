@@ -3,7 +3,7 @@ title: TextSelect
 description: Outil d'analyse textuelle permettant la sélection de segments spécifiques dans un texte. Parfaitement adapté aux exercices d'analyse grammaticale, d'identification de structures syntaxiques, de repérage d'éléments littéraires, de correction de textes, ou pour tout type d'exercice nécessitant une interaction précise avec des parties d'un texte.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -72,9 +72,68 @@ Dans les modes `free` et `units`, vous pouvez enrichir votre texte avec du HTML 
       name: 'Visualisation',
       url: 'playground/components/wc-text-select',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Repérer les verbes",
+    "url": "/playground/exercises/text-select/verbs.ple"
+  }
+]
   ]}
 />
+
+### Code des exemples
+
+Chaque exemple ci-dessus est un exercice complet. Copiez son code dans le fichier `main.ple` d'un exercice pour l'essayer ou l'adapter.
+
+<details>
+<summary>Repérer les verbes</summary>
+
+`````ple
+sandbox = "node"
+
+// En mode « units », seuls les morceaux entre accolades sont sélectionnables.
+// Ils sont numérotés à partir de 0 dans l'ordre du texte.
+texte = :wc-text-select
+texte.mode = "units"
+
+builder == #!lang=js
+const phrase = [
+  ['Le', false], ['chat', false], ['dort', true], ['pendant', false], ['que', false],
+  ['les', false], ['enfants', false], ['jouent', true], ['et', false], ['chantent', true]
+]
+texte.text = phrase.map(([mot]) => '{' + mot + '}').join(' ') + '.'
+verbes = phrase.map(([, estVerbe], i) => (estVerbe ? i : -1)).filter((i) => i >= 0)
+==
+
+title ==
+Repérer les verbes
+==
+
+statement ==
+Cliquez sur tous les **verbes conjugués** de la phrase. Cliquez de nouveau sur un mot pour le désélectionner.
+==
+
+form ==
+{{ texte }}
+==
+
+grader == #!lang=js
+// texte.selections : [{ position, content }] où position est le numéro du morceau sélectionné.
+const choisis = texte.selections.map((s) => s.position)
+const justes = choisis.filter((p) => verbes.includes(p)).length
+const fausses = choisis.length - justes
+
+texte.selections.forEach((s) => {
+  s.css = verbes.includes(s.position) ? 'success-state' : 'error-state'
+})
+
+grade = Math.max(0, Math.round((100 * (justes - fausses)) / verbes.length))
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${justes} verbe(s) trouvé(s) sur ${verbes.length}, ${fausses} sélection(s) erronée(s).`
+==
+`````
+
+</details>
 
 ## API
 
