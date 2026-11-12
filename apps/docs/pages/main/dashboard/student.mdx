@@ -1,8 +1,55 @@
 ---
 title: Tableau de bord apprenant
-description: Présentation du tableau de bord apprenant sur PLaTon, centralisant l'accès aux cours suivis, aux activités à réaliser et aux statistiques personnelles sur les progrès d'apprentissage.
+description: Ce que voit un apprenant sur son tableau de bord PLaTon - indicateurs de réussite, temps d'apprentissage estimé, évolution mensuelle et répartition des résultats - et comment naviguer vers ses cours.
 ---
+
+import { Callout } from 'nextra/components'
 
 # Tableau de bord apprenant
 
-Cette page est en cours de construction.
+Le tableau de bord est la page d'accueil de PLaTon après la connexion. Pour un apprenant, il résume son travail sur
+l'ensemble de ses cours.
+
+![Interface](../../../public/screens/dashboard/interface.png)
+
+## Les indicateurs
+
+| Indicateur                          | Définition                                                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Taux de réussite**                | Pourcentage des exercices complétés avec une note de 100.                                                                   |
+| **Taux de réponses**                | Pourcentage des exercices avec au moins une réponse enregistrée.                                                            |
+| **Taux d'abandon**                  | Pourcentage des exercices sans réponse.                                                                                     |
+| **Cours suivis**                    | Nombre de cours dont vous êtes membre.                                                                                      |
+| **Activités suivies**               | Nombre d'activités dont vous êtes membre.                                                                                   |
+| **Exercices réalisés**              | Nombre d'exercices avec au moins une réponse.                                                                               |
+| **Note moyenne**                    | Moyenne des notes de vos réponses enregistrées, sur 100.                                                                    |
+| **Temps d'apprentissage estimé**    | Temps total passé sur les exercices : somme des intervalles entre deux réponses, un intervalle de plus de 20 minutes comptant pour 2 minutes. |
+
+## Évolution de votre apprentissage
+
+Le graphique **Évolution de votre apprentissage** montre, jour par jour sur un mois, soit votre **note moyenne**, soit
+votre **temps d'apprentissage estimé** (liste déroulante en haut du graphique). Le sélecteur de mois permet de
+consulter les mois précédents.
+
+## Répartition de vos résultats
+
+Le dernier graphique répartit vos exercices selon leur état : réussi, partiellement réussi, échoué, commencé, en
+erreur… (voir la légende des [statistiques](/main/courses/statistics#résultats-par-exercices)).
+
+## Aller plus loin
+
+Le menu latéral donne accès aux autres pages :
+
+- **Annonces** : messages publiés par les administrateurs de la plateforme ;
+- **Cours** : vos cours, dans lesquels vous lancez les activités (voir
+  [Présentation du module de cours](/main/courses/overview)) ;
+- **Corrections** : utilisé par les enseignants ; un apprenant n'y trouve en principe aucune copie.
+
+La barre du haut permet de changer de thème (clair, sombre ou système), de consulter vos **notifications** (nouvelle
+inscription à un cours, copie corrigée…) et, via votre avatar, d'ouvrir **Mon compte** ou de vous déconnecter (voir
+[Profil utilisateur](/main/users/profile)).
+
+<Callout type="info">
+  Vos résultats détaillés pour une activité sont accessibles depuis la carte de l'activité dans le cours, avec le
+  bouton **Voir mes résultats** une fois l'activité fermée.
+</Callout>
