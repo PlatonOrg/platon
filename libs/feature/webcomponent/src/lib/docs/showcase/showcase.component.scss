@@ -38,3 +38,8 @@
     }
   }
 }
+
+// The text mode (Ace) has no intrinsic height, unlike the tree mode.
+:host ::ng-deep .jsoneditor.jsoneditor-mode-code {
+  height: 400px;
+}
