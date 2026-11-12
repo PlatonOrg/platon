@@ -50,11 +50,25 @@ expected_result = op1 + op2
 ==
 ```
 
-Pour l'aléatoire dans une sandbox Python:
+### Aléatoire et graine (`seed`)
+
+Chaque exercice reçoit une variable **`seed`**, un entier compris entre 0 et 99, fixé par PLaTon à la création de la
+session de l'apprenant :
+
+| Situation                                                    | Valeur de `seed`                                                                                                        |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| L'exercice définit lui-même `seed = 42`                      | Cette valeur (ramenée entre 0 et 99).                                                                                   |
+| Exercice lancé seul (prévisualisation, lien direct)          | Un nombre tiré au hasard.                                                                                               |
+| Exercice d'une activité                                      | La graine de l'activité, **commune à tous ses exercices** ; une graine différente par exercice si l'option **Seed aléatoire par exercice** est activée dans les paramètres de l'activité. |
+| L'apprenant clique sur **Recharger** (nouvelle question)     | Une nouvelle valeur, puis le `builder` est exécuté de nouveau.                                                          |
+
+PLaTon **ne configure pas** lui-même les générateurs aléatoires : c'est au builder d'utiliser `seed` s'il veut des
+tirages reproductibles (même graine ⇒ même exercice).
+
+En Python, initialisez le module `random` avec la graine :
 
 ```pl-py
 builder == #!lang=py
-# Important: utilisez la graine (seed) fournie automatiquement
 import random
 random.seed(seed)
 op1 = random.randint(1, 10)
@@ -62,6 +76,32 @@ op2 = random.randint(1, 10)
 expected_result = op1 + op2
 ==
 ```
+
+En JavaScript, `Math.random()` ne peut pas être initialisé : il donne des valeurs différentes à chaque construction.
+Pour des tirages reproductibles, utilisez un petit générateur initialisé avec `seed` :
+
+```pl-js
+builder == #!lang=js
+// Générateur pseudo-aléatoire (mulberry32) initialisé avec la graine fournie par PLaTon.
+function generateur(graine) {
+  return function () {
+    graine |= 0
+    graine = (graine + 0x6d2b79f5) | 0
+    let t = Math.imul(graine ^ (graine >>> 15), 1 | graine)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+const alea = generateur(seed)
+op1 = 1 + Math.floor(alea() * 10)
+op2 = 1 + Math.floor(alea() * 10)
+==
+```
+
+<Callout type="info">
+  Dans une activité, tous les exercices partagent par défaut la même graine : deux exercices qui tirent leurs valeurs de
+  la même façon afficheront les mêmes nombres. Activez **Seed aléatoire par exercice** si ce n'est pas souhaité.
+</Callout>
 
 ## Affichage: Title, Statement et Form
 
@@ -98,7 +138,8 @@ Ces clés supportent le HTML, le [Markdown](https://fr.wikipedia.org/wiki/Markdo
 
 ## Évaluation: Grader
 
-Le grader évalue la réponse de l'apprenant et lui attribue une note:
+Le grader évalue la réponse de l'apprenant et lui attribue une note (référence complète :
+[Évaluation : note et feedback](/main/programing/exercise/grading)) :
 
 ```pl-js
 grader == #!lang=js

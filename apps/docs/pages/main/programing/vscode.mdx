@@ -1,8 +1,54 @@
 ---
 title: Utiliser Visual Studio Code comme Éditeur
-description: Guide d'utilisation de Visual Studio Code comme alternative à l'IDE intégré de PLaTon pour la création et la modification de ressources pédagogiques.
+description: Travailler sur les fichiers d'un exercice PLaTon avec Visual Studio Code (ou un autre éditeur local) puis les importer dans PLaTon.
 ---
+
+import { Callout, Steps } from 'nextra/components'
 
 # Utiliser Visual Studio Code comme Éditeur
 
-Cette page est en cours de rédaction.
+L'[éditeur intégré](/main/programing/ide) de PLaTon est l'outil de référence pour créer des ressources : il compile
+le code PLE, affiche les erreurs et permet de prévisualiser l'exercice. Il est toutefois possible de préparer des
+fichiers dans **Visual Studio Code** (ou tout autre éditeur), par exemple pour écrire un long script Python, puis de
+les importer.
+
+<Callout type="info">
+  PLaTon ne fournit pas d'extension Visual Studio Code : les fichiers ne sont pas synchronisés automatiquement. Les
+  étapes ci-dessous passent par l'import de fichiers dans l'éditeur intégré.
+</Callout>
+
+## Préparer les fichiers localement
+
+Dans VS Code, ouvrez un dossier qui reproduit la structure de la ressource (`main.ple`, `includes/`, images…). Les
+fichiers `.ple`, `.pla`, `.plc` et `.plo` sont de simples fichiers texte : associez-les au mode texte, ou au mode
+Python ou JavaScript selon la partie que vous éditez, pour bénéficier de la coloration.
+
+<Callout type="warning">
+  Le code PLE n'est vérifié qu'au moment de la compilation dans PLaTon. Pensez aux règles du langage, par exemple les
+  chaînes entre guillemets doubles uniquement (voir [Le langage PLE](/main/programing/exercise/langage)).
+</Callout>
+
+## Importer les fichiers dans PLaTon
+
+<Steps>
+
+### Ouvrir la ressource dans l'éditeur
+
+Depuis la page de la ressource, ouvrez l'éditeur intégré.
+
+### Déposer les fichiers
+
+Glissez-déposez les fichiers ou dossiers depuis votre ordinateur dans l'explorateur de fichiers de l'éditeur. Pour un
+dossier complet, vous pouvez aussi déposer une archive `.zip`, puis utiliser **Extraire ici** (ou **Extraire ici et
+supprimer** pour retirer l'archive après extraction) dans le menu contextuel de l'archive.
+
+### Vérifier et prévisualiser
+
+Ouvrez `main.ple`, vérifiez qu'il n'y a pas d'erreur de compilation et lancez la prévisualisation.
+
+</Steps>
+
+<Callout type="info">
+  Si des fichiers déjà ouverts dans l'éditeur ont été remplacés par l'extraction d'une archive, fermez-les et
+  rouvrez-les pour afficher leur nouveau contenu.
+</Callout>
