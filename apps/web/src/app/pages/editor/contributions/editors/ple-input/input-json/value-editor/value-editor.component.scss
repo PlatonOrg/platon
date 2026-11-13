@@ -1,0 +1,22 @@
+.json-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// The text mode (Ace) has no intrinsic height, unlike the tree mode.
+:host ::ng-deep .jsoneditor.jsoneditor-mode-code {
+  height: 400px;
+}

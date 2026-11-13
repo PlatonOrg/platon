@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm'
 import { NotFoundResponse, UserOrderings, UserRoles } from '@platon/core/common'
 import { MockRepository, mockRepository, mockSelectQueryBuilder, createUserEntity } from '@platon/core/testing/server'
 import { UserEntity } from './user.entity'
+import { QueryFailedError } from 'typeorm'
 import { UserService } from './user.service'
 
 const UUID = '123e4567-e89b-42d3-a456-556642440001'
@@ -114,7 +115,7 @@ describe('UserService', () => {
       expect(qb.innerJoin).toHaveBeenCalledWith(
         'LmsUsers',
         'lms_user',
-        'lms_user.user_id = user.id AND lms_user.lms_id IN (:...ids)',
+        'lms_user.user_id = user.id AND lms_user.lti_platform_id IN (:...ids)',
         { ids: ['lms-1'] }
       )
     })
@@ -187,6 +188,79 @@ describe('UserService', () => {
 
       expect(repository.save).toHaveBeenCalledWith({ username: 'newuser' })
       expect(result).toBe(created)
+    })
+  })
+
+  describe('createWithAvailableUsername', () => {
+    const takenUsernames = (...usernames: string[]) => {
+      const qb = mockSelectQueryBuilder<UserEntity>()
+      qb.getRawMany.mockResolvedValue(usernames.map((username) => ({ username })))
+      repository.createQueryBuilder.mockReturnValue(qb)
+      return qb
+    }
+
+    it("devrait utiliser le username de base s'il est libre", async () => {
+      takenUsernames('john1')
+      repository.save.mockImplementation(async (user) => user as UserEntity)
+
+      const result = await service.createWithAvailableUsername({ role: UserRoles.student }, 'john')
+
+      expect(repository.save).toHaveBeenCalledWith({ role: UserRoles.student, username: 'john' })
+      expect(result.username).toBe('john')
+    })
+
+    it('devrait suffixer avec le premier compteur libre', async () => {
+      takenUsernames('john', 'john1', 'john3', 'johnny')
+      repository.save.mockImplementation(async (user) => user as UserEntity)
+
+      const result = await service.createWithAvailableUsername({}, 'john')
+
+      expect(result.username).toBe('john2')
+    })
+
+    it('devrait échapper les caractères spéciaux de LIKE', async () => {
+      const qb = takenUsernames()
+      repository.save.mockImplementation(async (user) => user as UserEntity)
+
+      await service.createWithAvailableUsername({}, 'j_doe%')
+
+      expect(qb.where).toHaveBeenCalledWith('user.username LIKE :pattern', { pattern: 'j\\_doe\\%%' })
+    })
+
+    it('devrait réessayer avec le username suivant en cas de conflit concurrent', async () => {
+      const qb = mockSelectQueryBuilder<UserEntity>()
+      qb.getRawMany.mockResolvedValueOnce([]).mockResolvedValueOnce([{ username: 'john' }])
+      repository.createQueryBuilder.mockReturnValue(qb)
+      const conflict = new QueryFailedError('INSERT', [], Object.assign(new Error('duplicate'), { code: '23505' }))
+      repository.save.mockRejectedValueOnce(conflict).mockImplementation(async (user) => user as UserEntity)
+
+      const result = await service.createWithAvailableUsername({}, 'john')
+
+      expect(repository.save).toHaveBeenCalledTimes(2)
+      expect(result.username).toBe('john1')
+    })
+
+    it('devrait isoler chaque tentative dans un SAVEPOINT de la transaction fournie', async () => {
+      takenUsernames()
+      const conflict = new QueryFailedError('INSERT', [], Object.assign(new Error('duplicate'), { code: '23505' }))
+      repository.save.mockRejectedValueOnce(conflict).mockImplementation(async (user) => user as UserEntity)
+      const manager: { getRepository: jest.Mock; transaction: jest.Mock } = {
+        getRepository: jest.fn(() => repository),
+        transaction: jest.fn((run: (savepoint: unknown) => unknown) => run(manager)),
+      }
+
+      const result = await service.createWithAvailableUsername({}, 'john', manager as never)
+
+      expect(manager.transaction).toHaveBeenCalledTimes(2)
+      expect(result.username).toBe('john')
+    })
+
+    it('devrait propager les autres erreurs sans réessayer', async () => {
+      takenUsernames()
+      repository.save.mockRejectedValue(new Error('boom'))
+
+      await expect(service.createWithAvailableUsername({}, 'john')).rejects.toThrow('boom')
+      expect(repository.save).toHaveBeenCalledTimes(1)
     })
   })
 

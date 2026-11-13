@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { ForbiddenResponse, NotFoundResponse, User, isTeacherRole } from '@platon/core/common'
+import { ForbiddenResponse, NotFoundResponse, User, deepCopy, isTeacherRole } from '@platon/core/common'
 import { EventService, UserEntity } from '@platon/core/server'
 import {
   ACTIVITY_FILE_EXTENSION,
@@ -23,6 +23,8 @@ import {
   OnChallengeSuccededEventPayload,
   OnReloadActivityEventPayload,
   OnTerminateActivityEventPayload,
+  mergeExerciseSourceVariables,
+  mergeExerciseVariables,
 } from '@platon/feature/course/server'
 import {
   ExercisePlayer,
@@ -53,7 +55,7 @@ import {
   SessionService,
 } from '@platon/feature/result/server' // from '@platon/feature/player/server
 import { PartialDeep } from 'type-fest'
-import { DataSource, EntityManager, In } from 'typeorm'
+import { DataSource, EntityManager, In, IsNull } from 'typeorm'
 import { PreviewOuputDTO } from './player.dto'
 import { SandboxService } from './sandboxes/sandbox.service'
 import { randomInt } from 'crypto'
@@ -62,7 +64,7 @@ import { MatchStatus, PeerContest } from '@platon/feature/peer/common'
 import { v4 as uuidv4 } from 'uuid'
 
 type CreateSessionArgs = {
-  user?: User | null
+  userId?: string | null
   source: PLSourceFile
   parentId?: string | null
   overrides?: Variables | null
@@ -169,7 +171,7 @@ export class PlayerService extends PlayerManager {
       const activity = await this.activityService.findByIdForUser(activityId, user)
 
       activitySession = await this.createNewSession({
-        user,
+        userId: user.id,
         activity,
         source: activity.source,
         isBuilt: true,
@@ -252,13 +254,17 @@ export class PlayerService extends PlayerManager {
     }
   }
 
-  async playNext(activitySessionId: string, _user: User): Promise<NextOutput> {
+  async playNext(activitySessionId: string, user?: User): Promise<NextOutput> {
     const activitySession = await this.sessionService.findById<PlayerActivityVariables>(activitySessionId, {
       parent: false,
       activity: true,
     })
     if (!activitySession) {
       throw new NotFoundResponse(`ActivitySession not found: ${activitySessionId}`)
+    }
+    // Sessions without owner are preview sessions, which can be played anonymously.
+    if (activitySession.userId && activitySession.userId !== user?.id) {
+      throw new ForbiddenResponse("Vous n'avez pas accès à cette session.")
     }
     if (activitySession.activity?.openAt && activitySession.activity.openAt > new Date()) {
       throw new ForbiddenResponse("L'activité n'est pas encore ouverte.")
@@ -537,9 +543,17 @@ export class PlayerService extends PlayerManager {
     })
   }
 
-  @OnEvent(ON_RELOAD_ACTIVITY_EVENT)
+  // Errors are not suppressed: the reload of the activity must fail if the sessions cannot be updated.
+  @OnEvent(ON_RELOAD_ACTIVITY_EVENT, { suppressErrors: false })
   protected async onReloadActivity(payload: OnReloadActivityEventPayload): Promise<void> {
-    const { activity } = payload
+    const { activity, changes } = payload
+    if (changes) {
+      await this.reloadExercises(activity as ActivityEntity, changes).catch((error) => {
+        this.logger.error('Error while reloading activity', error)
+        throw error
+      })
+      return
+    }
     await this.dataSource
       .transaction(async (manager) => {
         this.logger.log(`Reload activity ${activity.id}`)
@@ -556,7 +570,198 @@ export class PlayerService extends PlayerManager {
       })
       .catch((error) => {
         this.logger.error('Error while reloading activity', error)
+        throw error
       })
+  }
+
+  /**
+   * Applies a reload to the sessions of the students, by destroying only the data of the given exercises.
+   * The sessions of the patched exercises are updated with the new variables, their answers are never modified.
+   *
+   * This is a best effort, the known limits are documented in `apps/docs/pages/main/courses/activities.mdx`:
+   * - the sessions are not locked: an answer given during the reload can be overwritten in the navigation;
+   * - in `next` mode, the data of the script (savedVariables, generatedExercises, exercisesHistory) is not cleaned;
+   * - `succeededAt` is not set when the recomputed grade reaches 100.
+   */
+  private async reloadExercises(
+    activity: ActivityEntity,
+    changes: NonNullable<OnReloadActivityEventPayload['changes']>
+  ): Promise<void> {
+    const destroyed = new Set([...changes.resetExerciseIds, ...changes.removedExerciseIds])
+    const source = activity.source
+    const updates: { id: string; grade: number }[] = []
+
+    await this.dataSource.transaction(async (manager) => {
+      const sessions = await manager.find(SessionEntity, {
+        where: { activityId: activity.id, parentId: IsNull() },
+      })
+      this.logger.log(`Reload ${destroyed.size} exercises of activity ${activity.id} for ${sessions.length} sessions`)
+
+      for (const session of sessions as ActivitySessionEntity[]) {
+        const variables = session.variables as PlayerActivityVariables
+        const items = (variables.navigation?.exercises ?? []) as PlayerExercise[]
+        const destroyedItems = items.filter((item) => destroyed.has(item.id))
+
+        if (destroyedItems.length) {
+          const sessionIds = destroyedItems.map((item) => item.sessionId)
+          const children = await manager.find(SessionEntity, { where: { id: In(sessionIds) } })
+          await manager.delete(SessionEntity, { id: In(sessionIds) })
+          const correctionIds = children.map((child) => child.correctionId).filter((id) => !!id) as string[]
+          if (correctionIds.length) {
+            await manager.delete(CorrectionEntity, { id: In(correctionIds) })
+          }
+        }
+
+        // Exercises generated by a next script only exist in the session of the student.
+        const generated = variables.exerciseGroups?.['-1']
+        const exerciseGroups = deepCopy(source.variables.exerciseGroups)
+        if (generated) {
+          exerciseGroups['-1'] = generated
+        }
+
+        const next: PlayerActivityVariables = {
+          ...variables,
+          title: source.variables.title,
+          author: source.variables.author,
+          introduction: source.variables.introduction,
+          conclusion: source.variables.conclusion,
+          next: source.variables.next,
+          exerciseGroups,
+        }
+
+        const exercises = extractExercisesFromActivityVariables(next)
+        await this.patchExercises(items, exercises, changes, manager)
+
+        const known = new Set(exercises.map((exercise) => exercise.id))
+        next.navigation = {
+          ...variables.navigation,
+          exercises: [
+            ...exercises.map((exercise) => {
+              const item = items.find((candidate) => candidate.id === exercise.id)
+              return item && !destroyed.has(item.id) ? { ...item, groupId: exercise.groupId } : exercise
+            }),
+            ...items.filter((item) => !known.has(item.id) && !destroyed.has(item.id)),
+          ],
+        } as PlayerNavigation
+
+        session.activity = activity
+        const built = await this.createNavigation(next, session, manager)
+        const navigation = built.navigation
+        const previousIds = new Set(items.map((item) => item.id))
+        const hasAdditions = navigation.exercises.some((item) => !previousIds.has(item.id))
+
+        // An answered exercise was destroyed or a new exercise appeared: the student must be able to do it.
+        if (hasAdditions || destroyedItems.some((item) => item.state !== AnswerStates.NOT_STARTED)) {
+          navigation.terminated = false
+        }
+
+        const currentId = (navigation.current as PlayerExercise | undefined)?.id
+        if (currentId && (destroyed.has(currentId) || changes.patchedExercises?.some(({ id }) => id === currentId))) {
+          navigation.current = navigation.exercises.find((item) => item.id === currentId) as PlayerExercise | undefined
+        }
+
+        const isGone = (id?: string) => !!id && changes.removedExerciseIds.includes(id)
+        if (destroyedItems.length) {
+          navigation.nextExercisesHistory = (navigation.nextExercisesHistory ?? []).filter((id) => !isGone(id))
+          navigation.nextExercisesHistoryPosition = Math.min(
+            navigation.nextExercisesHistoryPosition ?? -1,
+            navigation.nextExercisesHistory.length - 1
+          )
+          if (isGone(built.nextExerciseId)) {
+            built.nextExerciseId = undefined
+          }
+        }
+
+        let grade = session.grade
+        let attempts = session.attempts
+        let succeededAt = session.succeededAt
+        if (destroyedItems.length || hasAdditions) {
+          const children = await manager.find(SessionEntity, {
+            where: { parentId: session.id },
+            relations: { correction: true },
+          })
+          attempts = children.reduce((total, child) => total + (child.attempts ?? 0), 0)
+          const mode = built.settings?.navigation?.mode
+          if (mode !== 'next' && mode !== 'validation') {
+            // The grade given by a teacher replaces the automatic grade, as in CorrectionService.
+            const grades = children
+              .map((child) => child.correction?.grade ?? child.grade)
+              .filter((value) => typeof value === 'number' && value !== -1)
+            grade = grades.length
+              ? Number((grades.reduce((total, value) => total + value, 0) / children.length).toFixed(2))
+              : -1
+            succeededAt = grade === 100 ? succeededAt : null
+          }
+        }
+
+        await this.sessionService.update(
+          session.id,
+          {
+            grade,
+            attempts,
+            succeededAt,
+            variables: built as any,
+            source: { ...source, variables: built } as any,
+          },
+          manager
+        )
+        updates.push({ id: session.id, grade })
+      }
+    })
+
+    // SessionData is computed outside of the transaction: refresh it now that the changes are visible.
+    // The sessions are already saved, so a failure here must not make the reload of the activity fail.
+    for (const { id, grade } of updates) {
+      await this.sessionService.update(id, { grade }).catch((error) => {
+        this.logger.error(`Error while refreshing the data of session ${id}`, error)
+      })
+    }
+  }
+
+  /**
+   * Updates the sessions of the patched exercises with their new version, without touching their answers nor grades.
+   */
+  private async patchExercises(
+    items: PlayerExercise[],
+    exercises: ActivityExercise[],
+    changes: NonNullable<OnReloadActivityEventPayload['changes']>,
+    manager: EntityManager
+  ): Promise<void> {
+    const rule = changes.mergeRule ?? 'unmodified'
+    for (const patched of changes.patchedExercises ?? []) {
+      const item = items.find((candidate) => candidate.id === patched.id)
+      const exercise = exercises.find((candidate) => candidate.id === patched.id)
+      if (!item?.sessionId || !exercise?.source) {
+        continue
+      }
+      const child = await manager.findOne(SessionEntity, { where: { id: item.sessionId } })
+      if (!child) {
+        continue
+      }
+
+      const base = child.source.variables as Variables
+      const sourceVariables = mergeExerciseSourceVariables(patched.variables, base, exercise.source.variables)
+      let variables = sourceVariables
+      // A session that was not built yet has the variables of its source.
+      if (child.isBuilt) {
+        const merged = mergeExerciseVariables(rule, {
+          keys: patched.variables,
+          base,
+          next: exercise.source.variables,
+          current: child.variables as Variables,
+        })
+        if (merged.skipped.length) {
+          this.logger.warn(`Variables kept in session ${child.id}: ${merged.skipped.join(', ')}`)
+        }
+        variables = merged.variables
+      }
+
+      const source = { ...child.source, dependencies: exercise.source.dependencies, variables: sourceVariables }
+      await this.sessionService.linkDependencies(source)
+      await this.sessionService.update(child.id, { source: source as any, variables: variables as any }, manager)
+      // The title of the navigation is the name of the resource, which can be fixed as well.
+      item.title = await this.resourceFileService.getTitle(exercise.resource)
+    }
   }
 
   /**
@@ -716,7 +921,7 @@ export class PlayerService extends PlayerManager {
    */
   private async createNewSession(args: CreateSessionArgs, entityManager?: EntityManager): Promise<SessionEntity> {
     const runWithEntityManager = async (manager: EntityManager): Promise<SessionEntity> => {
-      const { user, source, parentId, activity, isBuilt } = args
+      const { userId, source, parentId, activity, isBuilt } = args
 
       source.variables['seed'] = (Number.parseInt(source.variables['seed'] + '') || randomInt(100)) % 100
 
@@ -725,7 +930,7 @@ export class PlayerService extends PlayerManager {
           activity,
           variables: source.variables as Variables,
           envid: null,
-          userId: user?.id || null,
+          userId: userId || null,
           parentId: parentId || null,
           activityId: activity?.id || null,
           source,
@@ -735,12 +940,7 @@ export class PlayerService extends PlayerManager {
       )
 
       if (source.abspath.endsWith(ACTIVITY_FILE_EXTENSION)) {
-        session.variables = await this.createNavigation(
-          source.variables as PlayerActivityVariables,
-          session,
-          user,
-          manager
-        )
+        session.variables = await this.createNavigation(source.variables as PlayerActivityVariables, session, manager)
 
         await this.sessionService.update(session.id, { variables: session.variables as any }, manager)
       }
@@ -751,14 +951,14 @@ export class PlayerService extends PlayerManager {
   }
 
   /**
-   * Ensures that a session is created for each exercices of the given activity navigation for `user`.
+   * Ensures that a session is created for each exercices of the given activity navigation.
+   * Exercise sessions always belong to the owner of `activitySession`.
    * @param variables Activity variables.
    * @returns Computed variables.
    */
   private async createNavigation(
     variables: PlayerActivityVariables,
     activitySession: SessionEntity,
-    user?: User | null,
     manager?: EntityManager
   ): Promise<PlayerActivityVariables> {
     const navigation = variables.navigation || {}
@@ -790,7 +990,7 @@ export class PlayerService extends PlayerManager {
               activity: activitySession.activity,
               parentId: activitySession.id,
               source: item.source,
-              user,
+              userId: activitySession.userId,
             },
             manager
           )

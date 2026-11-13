@@ -1,0 +1,28 @@
+<nz-table #nzTable [nzSize]="'small'" [nzData]="platforms" [nzLoading]="loading" [nzShowSizeChanger]="true">
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Issuer</th>
+      <th>Client ID</th>
+      <th>Statut</th>
+      <th>Date d'ajout</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (platform of nzTable.data; track platform.id) {
+    <tr (click)="openDetails.next(platform)">
+      <td>{{ platform.name }}</td>
+      <td>{{ platform.url }}</td>
+      <td>{{ platform.clientId }}</td>
+      <td>
+        @if (platform.active) {
+        <nz-tag nzColor="success">Active</nz-tag>
+        } @else {
+        <nz-tag>Inactive</nz-tag>
+        }
+      </td>
+      <td>{{ platform.createdAt | date }}</td>
+    </tr>
+    }
+  </tbody>
+</nz-table>

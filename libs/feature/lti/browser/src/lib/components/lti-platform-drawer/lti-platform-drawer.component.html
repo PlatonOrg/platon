@@ -1,0 +1,70 @@
+<ui-modal-drawer
+  size="large"
+  [title]="platform ? platform.name : 'Ajouter une plateforme LTI 1.3'"
+  [footer]="footerTpl"
+  (closed)="platform = undefined; form = createForm()"
+  #modal
+>
+  <ng-template>
+    <form [formGroup]="form">
+      @if (!platform) {
+      <mat-form-field appearance="fill">
+        <mat-label>Reprendre un LMS LTI 1.1 (optionnel)</mat-label>
+        <mat-select formControlName="lmsId" (selectionChange)="onSelectLms($event.value)">
+          <mat-option [value]="''">Aucun</mat-option>
+          @for (lms of lmses; track lms.id) {
+          <mat-option [value]="lms.id">{{ lms.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint
+          >La plateforme reprend l'identifiant du LMS : les comptes et les cours déjà créés via LTI 1.1 sont
+          conservés.</mat-hint
+        >
+      </mat-form-field>
+      }
+      <mat-form-field appearance="fill">
+        <mat-label>Nom</mat-label>
+        <input formControlName="name" matInput />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Issuer (URL de la plateforme)</mat-label>
+        <input formControlName="url" type="url" matInput />
+        <mat-hint>La valeur du champ « iss » envoyée par le LMS (ex: https://moodle.exemple.fr).</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Client ID</mat-label>
+        <input formControlName="clientId" matInput />
+        <mat-hint>L'identifiant du client généré par le LMS lors de la déclaration de l'outil.</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>URL d'authentification</mat-label>
+        <input formControlName="authenticationEndpoint" type="url" matInput />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>URL du jeton d'accès</mat-label>
+        <input formControlName="accessTokenEndpoint" type="url" matInput />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Serveur d'autorisation (optionnel)</mat-label>
+        <input formControlName="authorizationServer" type="url" matInput />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>URL du JWKS de la plateforme</mat-label>
+        <input formControlName="key" matInput />
+        <mat-hint>Utilisée pour vérifier la signature des lancements envoyés par le LMS.</mat-hint>
+      </mat-form-field>
+      <div>
+        <nz-switch formControlName="active"></nz-switch>
+        Plateforme active
+      </div>
+    </form>
+  </ng-template>
+</ui-modal-drawer>
+
+<ng-template #footerTpl>
+  @if (platform) {
+  <button nz-button nzType="default" nzDanger (click)="delete()">Supprimer</button>
+  }
+  <button nz-button nzType="default" (click)="modal.close()">Annuler</button>
+  <button nz-button nzType="primary" (click)="save()" [disabled]="!form.valid">Enregistrer</button>
+</ng-template>

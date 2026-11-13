@@ -25,6 +25,16 @@
     >
       arrow_upward
     </mat-icon>
+    @if (showEditor) {
+    <mat-icon
+      class="showcase-action"
+      aria-label="Paste a JSON from the clipboard"
+      nz-tooltip="Coller un JSON depuis le presse-papier"
+      (click)="pasteJson()"
+    >
+      content_paste
+    </mat-icon>
+    }
   </div>
   @if (showEditor) {
   <json-editor [options]="options" [data]="component.state"></json-editor>

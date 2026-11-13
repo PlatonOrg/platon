@@ -27,6 +27,8 @@ import {
   CourseMemberRoles,
   RestrictionList,
   CreateTestMember,
+  ActivityReloadPreview,
+  ReloadActivity,
 } from '@platon/feature/course/common'
 import { Observable, Subject, tap } from 'rxjs'
 import { ActivityCorrectorProvider } from '../models/activity-corrector.provider'
@@ -186,8 +188,12 @@ export class CourseService {
     return this.activityProvider.updateOrder(course, sortedActivityIds)
   }
 
-  reloadActivity(activity: Activity, version?: string): Observable<Activity> {
-    return this.activityProvider.reload(activity, version)
+  reloadActivityPreview(activity: Activity): Observable<ActivityReloadPreview> {
+    return this.activityProvider.reloadPreview(activity)
+  }
+
+  reloadActivity(activity: Activity, input?: ReloadActivity): Observable<Activity> {
+    return this.activityProvider.reload(activity, input)
   }
 
   deleteActivity(activity: Activity): Observable<void> {

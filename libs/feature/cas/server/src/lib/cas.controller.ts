@@ -20,7 +20,7 @@ import { Request } from 'express'
 import { CasServiceValidateResponse } from './payloads'
 import { AxiosError, AxiosResponse } from 'axios'
 import { Optional } from 'typescript-optional'
-import { LTIService } from '@platon/feature/lti/server'
+import { LTIOldService } from '@platon/feature/lti/server'
 import { AxiosService } from './axios.service'
 import { ApiBearerAuth } from '@nestjs/swagger'
 import { URL } from 'url'
@@ -29,7 +29,7 @@ import { URL } from 'url'
 export class CasController {
   constructor(
     private readonly service: CasService,
-    private readonly LtiService: LTIService,
+    private readonly LtiService: LTIOldService,
     private readonly authService: AuthService,
     private readonly userService: UserService,
     private readonly https: AxiosService
@@ -110,7 +110,10 @@ export class CasController {
           statusCode: 302,
         }
       }
-      const lmsUserEntity = await this.LtiService.findLmsUserByUsername(username.get(), casEntity.lmses)
+      const lmsUserEntity = await this.LtiService.findLmsUserByUsername(
+        username.get(),
+        await this.service.findLmsIds(casEntity.id)
+      )
       if (lmsUserEntity.isEmpty()) {
         return {
           url: `/login/no-account`,

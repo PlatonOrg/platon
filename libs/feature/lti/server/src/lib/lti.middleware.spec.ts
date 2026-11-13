@@ -4,7 +4,7 @@ import { Optional } from 'typescript-optional'
 import { LmsEntity } from './entities/lms.entity'
 import { LmsUserEntity } from './entities/lms-user.entity'
 import { LTIMiddleware } from './lti.middleware'
-import { LTIService } from './lti.service'
+import { LTIOldService } from './lti.service.old'
 import { LTIProvider } from './provider'
 
 jest.mock('./provider', () => ({
@@ -13,7 +13,7 @@ jest.mock('./provider', () => ({
 
 describe('LTIMiddleware', () => {
   let middleware: LTIMiddleware
-  let lti: jest.Mocked<Pick<LTIService, 'findLmsByConsumerKey' | 'withLmsUser' | 'interceptLaunch'>>
+  let lti: jest.Mocked<Pick<LTIOldService, 'findLmsByConsumerKey' | 'withLmsUser' | 'interceptLaunch'>>
   let authService: jest.Mocked<Pick<AuthService, 'authenticate'>>
   let next: jest.Mock
   let res: { redirect: jest.Mock }
@@ -32,7 +32,7 @@ describe('LTIMiddleware', () => {
     const module = await Test.createTestingModule({
       providers: [
         LTIMiddleware,
-        { provide: LTIService, useValue: lti },
+        { provide: LTIOldService, useValue: lti },
         { provide: AuthService, useValue: authService },
       ],
     }).compile()
@@ -81,7 +81,13 @@ describe('LTIMiddleware', () => {
     const lms = { id: 'lms-1', name: 'Moodle', consumerKey: 'key', consumerSecret: 'secret' } as LmsEntity
     lti.findLmsByConsumerKey.mockResolvedValue(Optional.of(lms))
 
-    const payload = { user_id: 'ext-1' }
+    const payload = {
+      user_id: 'ext-1',
+      context_id: 'ctx-1',
+      context_title: 'Cours',
+      custom_groups: 'g1,g2',
+      is_instructor: true,
+    }
     const validate = jest.fn().mockResolvedValue(payload)
     ;(LTIProvider as unknown as jest.Mock).mockImplementation(() => ({ validate, body: payload }))
 
@@ -98,7 +104,14 @@ describe('LTIMiddleware', () => {
     expect(lti.interceptLaunch).toHaveBeenCalledWith({
       lms,
       lmsUser,
-      payload,
+      payload: {
+        id: 'ctx-1',
+        title: 'Cours',
+        groups: 'g1,g2',
+        custom_course: undefined,
+        custom_activity: undefined,
+        is_instructor: true,
+      },
       nextUrl: '/course/1',
     })
     expect(res.redirect).toHaveBeenCalledWith(
@@ -111,7 +124,13 @@ describe('LTIMiddleware', () => {
     const lms = { id: 'lms-1', name: 'Moodle', consumerKey: 'key', consumerSecret: 'secret' } as LmsEntity
     lti.findLmsByConsumerKey.mockResolvedValue(Optional.of(lms))
 
-    const payload = { user_id: 'ext-1' }
+    const payload = {
+      user_id: 'ext-1',
+      context_id: 'ctx-1',
+      context_title: 'Cours',
+      custom_groups: 'g1,g2',
+      is_instructor: true,
+    }
     const validate = jest.fn().mockResolvedValue(payload)
     ;(LTIProvider as unknown as jest.Mock).mockImplementation(() => ({ validate, body: payload }))
 

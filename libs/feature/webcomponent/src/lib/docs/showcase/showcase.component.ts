@@ -11,26 +11,38 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
+import { DialogService } from '@platon/core/browser'
+import {
+  REPAIRED_JSON_MESSAGE,
+  readJsonFromClipboard,
+  renderJsonEditorLineBreaks,
+  replaceJsonEditorValue,
+  switchJsonEditorToTreeMode,
+} from '@platon/shared/ui'
+import { isJsonObject } from '@platon/shared/utils'
 import { JsonEditorComponent, JsonEditorOptions, JsonEditorTreeNode } from 'ang-jsoneditor'
 import { firstValueFrom } from 'rxjs'
 import { type WebComponentDefinition } from '../../web-component'
 
 import { MatButtonModule } from '@angular/material/button'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
-import { NgJsonEditorModule } from 'ang-jsoneditor'
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { MatIconModule } from '@angular/material/icon'
+
+/** Fields of a webcomponent state that must never be edited. */
+const READONLY_FIELDS = ['cid', 'selector']
 
 @Component({
   selector: 'wc-showcase',
   templateUrl: './showcase.component.html',
   styleUrls: ['./showcase.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MatButtonModule, NzTooltipModule, NgeMarkdownModule, NgJsonEditorModule, MatIconModule],
+  imports: [MatButtonModule, NzTooltipModule, NgeMarkdownModule, JsonEditorComponent, MatIconModule],
 })
 export class ShowcaseComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly elementRef = inject(ElementRef) as ElementRef<HTMLElement>
   private readonly resourceLoader = inject(ResourceLoaderService)
+  private readonly dialogService = inject(DialogService)
   private resizeObserver?: ResizeObserver
 
   protected readonly options = new JsonEditorOptions()
@@ -65,37 +77,67 @@ export class ShowcaseComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     host?.appendChild(this.component)
 
-    this.options.modes = ['tree']
+    this.options.modes = ['tree', 'code']
     this.options.language = 'fr-FR'
     this.options.schema = schema
-    this.options.mainMenuBar = false
+    this.options.mainMenuBar = true
+    this.options.navigationBar = false
+    this.options.statusBar = false
+    this.options.enableSort = false
+    this.options.enableTransform = false
     this.options.sortObjectKeys = false
 
     this.options.onEditable = (e) => {
       const node = e as JsonEditorTreeNode
-      if (node.field === 'cid' || node.field === 'selector') return false
+      if (READONLY_FIELDS.includes(`${node.field}`)) return false
       return true
     }
 
-    this.options.onBlur = () => {
-      const div = this.editor?.jsonEditorContainer.nativeElement as HTMLDivElement
-      if (!div) return
-      const textNodes = div.querySelectorAll('[class="jsoneditor-value jsoneditor-string"]')
-      textNodes.forEach((node) => {
-        node.innerHTML = node.textContent?.replace(/\\n/g, '<br/>') || ''
-      })
-    }
+    this.options.onBlur = () => renderJsonEditorLineBreaks(this.editor)
   }
 
   editorToComponent() {
     try {
       const state = this.editor?.get()
-      if (state && this.component) {
-        this.component.state = state
-      }
+      if (!isJsonObject(state) || !this.component) return
+      this.component.state = this.withReadonlyFields(state)
     } catch (error) {
+      // The text mode may contain invalid JSON.
+      this.dialogService.error("Le contenu de l'éditeur n'est pas un JSON valide.")
       console.error(error)
     }
+  }
+
+  async pasteJson() {
+    if (!this.editor) return
+
+    // The state of a component is always an object.
+    const result = await readJsonFromClipboard({ allowArrays: false })
+    if (result.status === 'denied') {
+      this.editor.setMode('code')
+      this.dialogService.info('Accès au presse-papier refusé : collez le JSON directement dans l’éditeur texte.')
+      return
+    }
+    if (result.status === 'invalid') {
+      this.dialogService.error(result.message)
+      return
+    }
+
+    // The replacement is recorded in the history of the tree mode so that it can be undone with Ctrl+Z.
+    switchJsonEditorToTreeMode(this.editor, this.component?.state ?? {})
+    replaceJsonEditorValue(this.editor, this.withReadonlyFields(result.value as Record<string, any>))
+    this.editorToComponent()
+    this.editor.focus()
+
+    if (result.repaired) {
+      this.dialogService.warning(REPAIRED_JSON_MESSAGE)
+    }
+  }
+
+  private withReadonlyFields(state: Record<string, any>): Record<string, any> {
+    const current = this.component?.state ?? {}
+    const readonly = Object.fromEntries(READONLY_FIELDS.filter((f) => f in current).map((f) => [f, current[f]]))
+    return { ...readonly, ...state, ...readonly }
   }
 
   componentToEditor() {

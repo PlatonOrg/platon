@@ -17,7 +17,7 @@ import {
   ON_REOPEN_ACTIVITY_EVENT,
   OnReopenActivityEventPayload,
 } from '@platon/feature/course/server'
-import { ActivityVariables } from '@platon/feature/compiler'
+import { ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 
 @Injectable()
 export class SessionService {
@@ -107,12 +107,12 @@ export class SessionService {
     return session
   }
 
-  async create<TVariables>(
-    input: Partial<SessionEntity<TVariables>>,
-    entityManager?: EntityManager
-  ): Promise<SessionEntity<TVariables>> {
+  /**
+   * Copies the files included by the given source in the media folder, so they can be served to the students.
+   */
+  async linkDependencies(source?: Pick<PLSourceFile, 'resource' | 'dependencies'> | null): Promise<void> {
     await Promise.all(
-      (input.source?.dependencies ?? []).map(async (dependency) => {
+      (source?.dependencies ?? []).map(async (dependency) => {
         const hash = dependency.hash
         const newPath = path.join('resources/media', dependency.hash[0], hash)
 
@@ -123,7 +123,7 @@ export class SessionService {
         if (alreadyExists) return
 
         const { resource, relpath, version } = resolveFileReference('/' + dependency.abspath, {
-          resource: input.source?.resource || '',
+          resource: source?.resource || '',
         })
 
         try {
@@ -134,6 +134,13 @@ export class SessionService {
         }
       })
     )
+  }
+
+  async create<TVariables>(
+    input: Partial<SessionEntity<TVariables>>,
+    entityManager?: EntityManager
+  ): Promise<SessionEntity<TVariables>> {
+    await this.linkDependencies(input.source)
 
     if (entityManager) {
       return entityManager.save(entityManager.create(this.repository.target, input as SessionEntity<TVariables>))

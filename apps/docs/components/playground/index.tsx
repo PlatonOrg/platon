@@ -61,6 +61,8 @@ export const Playground: React.FC<PlaygroundProps> = ({ items, height = '700px',
             src={item.url}
             style={{ width, height, border: 'none' }}
             title={item.name}
+            // Lets the showcase "paste a JSON" action read the clipboard when the docs are served from another origin.
+            allow="clipboard-read"
           />
         </Tab>
       ))}

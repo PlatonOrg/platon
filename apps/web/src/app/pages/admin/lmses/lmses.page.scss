@@ -6,3 +6,16 @@ lms-search-bar {
 nz-button-group {
   margin-bottom: 1rem;
 }
+
+.tool-config {
+  margin: 1rem 0;
+
+  code {
+    user-select: all;
+  }
+}
+
+lti-platform-table {
+  display: block;
+  margin-top: 1rem;
+}

@@ -21,11 +21,11 @@ describe('JwtStrategy', () => {
     strategy = new JwtStrategy(userService, configService)
   })
 
-  it("devrait retourner l'utilisateur et mettre à jour sa dernière activité si le token est valide", async () => {
+  it("devrait retourner l'utilisateur et mettre à jour sa dernière activité si le token d'accès est valide", async () => {
     const user = createUserEntity({ id: 'user-1', username: 'testuser' })
     userService.findByIdOrName.mockResolvedValue(Optional.of(user))
 
-    const result = await strategy.validate({ sub: 'user-1', username: 'testuser' })
+    const result = await strategy.validate({ sub: 'user-1', username: 'testuser', type: 'access' })
 
     expect(userService.findByIdOrName).toHaveBeenCalledWith('user-1')
     expect(userService.updateLastActivity).toHaveBeenCalledWith(user)
@@ -35,7 +35,26 @@ describe('JwtStrategy', () => {
   it("devrait rejeter avec UnauthorizedException si l'utilisateur du token n'existe plus", async () => {
     userService.findByIdOrName.mockResolvedValue(Optional.empty())
 
-    await expect(strategy.validate({ sub: 'unknown', username: 'ghost' })).rejects.toThrow(UnauthorizedException)
+    await expect(strategy.validate({ sub: 'unknown', username: 'ghost', type: 'access' })).rejects.toThrow(
+      UnauthorizedException
+    )
     expect(userService.updateLastActivity).not.toHaveBeenCalled()
+  })
+
+  it('devrait rejeter un refresh token avec UnauthorizedException', async () => {
+    userService.findByIdOrName.mockResolvedValue(Optional.of(createUserEntity({ id: 'user-1' })))
+
+    await expect(strategy.validate({ sub: 'user-1', username: 'testuser', type: 'refresh' })).rejects.toThrow(
+      UnauthorizedException
+    )
+    expect(userService.findByIdOrName).not.toHaveBeenCalled()
+    expect(userService.updateLastActivity).not.toHaveBeenCalled()
+  })
+
+  it("devrait accepter un token émis avant l'ajout du claim type (transition)", async () => {
+    const user = createUserEntity({ id: 'user-1', username: 'testuser' })
+    userService.findByIdOrName.mockResolvedValue(Optional.of(user))
+
+    await expect(strategy.validate({ sub: 'user-1', username: 'testuser' })).resolves.toBe(user)
   })
 })

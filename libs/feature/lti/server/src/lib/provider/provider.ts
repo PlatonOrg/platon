@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ConsumerError, ParameterError, SignatureError } from './errors'
 import { LTIPayload } from './payload'
-import { AdminRoles, InstructorRoles, ReviewerRoles, StudentRoles } from './roles'
+import { Lti11AdminRoles, Lti11InstructorRoles, Lti11StudentRoles } from './roles.lti11'
 import { HmacSha1 } from './signers/hmac-sha1'
 import { Signer } from './signers/signer'
 import { MemoryNonceStore } from './stores/memory-nonce-store'
@@ -88,12 +88,10 @@ export class LTIProvider {
 
     Object.assign(this.body, body)
 
-    this.body.is_admin = Object.values(AdminRoles).some((role) => this.body.roles.includes(role))
+    this.body.is_admin = Object.values(Lti11AdminRoles).some((role) => this.body.roles.includes(role))
 
-    this.body.is_student = Object.values(StudentRoles).some((role) => this.body.roles.includes(role))
+    this.body.is_student = Object.values(Lti11StudentRoles).some((role) => this.body.roles.includes(role))
 
-    this.body.is_reviewer = Object.values(ReviewerRoles).some((role) => this.body.roles.includes(role))
-
-    this.body.is_instructor = Object.values(InstructorRoles).some((role) => this.body.roles.includes(role))
+    this.body.is_instructor = Object.values(Lti11InstructorRoles).some((role) => this.body.roles.includes(role))
   }
 }

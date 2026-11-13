@@ -30,4 +30,8 @@ describe('answerStateFromGrade', () => {
     const result = answerStateFromGrade(grade)
     expect(result).toBe(AnswerStates.ERROR)
   })
+
+  it.each([-2, -4, -50, -100])('should return AnswerStates.STARTED if grade is %i', (grade) => {
+    expect(answerStateFromGrade(grade)).toBe(AnswerStates.STARTED)
+  })
 })

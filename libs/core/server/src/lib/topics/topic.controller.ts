@@ -4,6 +4,7 @@ import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse } from '
 import { Mapper, UUIDParam } from '../utils'
 import { CreateTopicDTO, TopicDTO, UpdateTopicDTO } from './topic.dto'
 import { TopicService } from './topic.service'
+import { Roles } from '../auth/decorators/roles.decorator'
 
 @ApiBearerAuth()
 @Controller('topics')
@@ -19,6 +20,7 @@ export class TopicController {
   }
 
   @Post()
+  @Roles('admin', 'teacher')
   async create(@Body() input: CreateTopicDTO): Promise<CreatedResponse<TopicDTO>> {
     const force = input.force || false
     const result = await this.service.create(input, force)
@@ -30,12 +32,14 @@ export class TopicController {
   }
 
   @Patch('/:id')
+  @Roles('admin')
   async update(@UUIDParam('id') id: string, @Body() input: UpdateTopicDTO): Promise<ItemResponse<TopicDTO>> {
     const resource = Mapper.map(await this.service.update(id, input), TopicDTO)
     return new ItemResponse({ resource })
   }
 
   @Delete('/:id')
+  @Roles('admin')
   async delete(@UUIDParam('id') id: string): Promise<NoContentResponse> {
     await this.service.delete(id)
     return new NoContentResponse()

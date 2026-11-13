@@ -118,7 +118,7 @@ v22.0.0
   yarn
   ```
 
-- **Set up the environment**: After cloning and installing the repository, run the `./bin/install.sh` script to set up the necessary environment variables. This script generates an `.env` and `./tools/database/init.json` files with the default values from the `./templates` directory, which you can customize according to your development or production environment. Also a self signed ssl certificate will be generated into `.docker/nginx/ssl/certs` to run the project in `https` during develop. Please note that these generated files are not kept in the Git history.
+- **Set up the environment**: After cloning and installing the repository, run the `./bin/install.sh` script to set up the necessary environment variables. This script generates an `.env` and `./tools/database/init.json` files with the default values from the `./templates` directory, which you can customize according to your development or production environment. Also a local root certificate authority (`rootCA.crt`) and the certificates it signs (`localhost.crt` for nginx, `moodle.crt` for the local Moodle) will be generated into `.docker/nginx/ssl/certs` to run the project in `https` during develop. Only the root CA is added to the system trust store (admin password required). Please note that these generated files are not kept in the Git history.
 
   ```sh
   ./bin/install.sh
@@ -178,7 +178,7 @@ The message and the way you will fix it might be different depending on the brow
   Using your keyboard, type `thisisunsafe`. This will add the website to a safe list, where you should not be prompted again.
   Strange steps, but it surely works!
 
-- On **Safari** for mac, you should add `./docker/nginx/ssl/certs/localhost.crt` the Keychain app, then approve the `localhost` certificate by double click on it.
+- On **Safari** for mac, `./bin/install.sh` already trusts the root CA. If needed, add `.docker/nginx/ssl/certs/rootCA.crt` to the Keychain app, then approve the `PLaTon-Local-Root-CA` certificate by double click on it.
 
 <p align="left">
     <img src="./.github/images/keychain.png" alt="Keychain app" width="620px" />
@@ -353,30 +353,30 @@ PLaTon is built on a modern, scalable architecture using the following key techn
 
 This document describes the environnement configuration for the application, including the required environment variables and their descriptions. Proper configuration is crucial for the smooth operation of the system. Make sure to set these variables before running the application in development or production mode.
 
-| Name                       | Service  | Description                                                                         | Default                 |
-| -------------------------- | -------- | ----------------------------------------------------------------------------------- | ----------------------- |
-| COMPOSE_HTTP_TIMEOUT       | docker   | Increase docker build timeout which is set to 20 by default                         | 200                     |
-| POSTGRES_USER              | postgres | PostgreSQL database username.                                                       | platon                  |
-| POSTGRES_PASSWORD          | postgres | PostgreSQL database password.                                                       | test                    |
-| POSTGRES_DB                | postgres | PostgreSQL database name.                                                           | platon                  |
-| PGADMIN_DEFAULT_EMAIL      | pgadmin  | PgAdmin default email for login.                                                    | test@test.com           |
-| PGADMIN_DEFAULT_PASSWORD   | pgadmin  | PgAdmin default password for login.                                                 | test                    |
-| DB_NAME                    | api      | Database name for the API service.                                                  | platon_db               |
-| DB_USERNAME                | api      | Database username for the API service.                                              | platon                  |
-| DB_PASSWORD                | api      | Database password for the API service.                                              | test                    |
-| DB_HOST                    | api      | Database host for the API service.                                                  | localhost               |
-| DB_PORT                    | api      | Database port for the API service.                                                  | 5432                    |
-| REDIS_HOST                 | api      | Sets NestJs `REDIS_HOST` value setting                                              | localhost               |
-| REDIS_PORT                 | api      | Sets NestJs `REDIS_PORT` value setting                                              | 6379                    |
-| SECRET_KEY                 | api      | Secret key for the API service.                                                     | secret                  |
-| PASSWORD_SALT              | api      | Secret key for the API service.                                                     | 10                      |
-| JWT_ACCESS_TOKEN_LIFETIME  | api      | Access token lifetime for JWT authentication.                                       | 7d                      |
-| JWT_REFRESH_TOKEN_LIFETIME | api      | Refresh token lifetime for JWT authentication.                                      | 7d                      |
-| FILES_CACHE_LIFETIME       | api      | Duration of cacheable files in seconds.                                             | 604800 (7 days)         |
-| GRAPHQL_PLAYGROUND         | api      | Enable/disable GraphQL Playground.                                                  | true                    |
-| SANDBOX_URL                | api      | Defines python sandbox url.                                                         | <http://localhost:7000> |
-| SANDBOX_ENV_LIFESPAN       | api      | Value in seconds that determins for how long node sandbox env files should be kept. | 604800 (7 days)         |
-| SERVER_NAME                | nginx    | Defines nginx server name.                                                          | localhost               |
+| Name                       | Service  | Description                                                                              | Default                 |
+| -------------------------- | -------- | ---------------------------------------------------------------------------------------- | ----------------------- |
+| COMPOSE_HTTP_TIMEOUT       | docker   | Increase docker build timeout which is set to 20 by default                              | 200                     |
+| POSTGRES_USER              | postgres | PostgreSQL database username.                                                            | platon                  |
+| POSTGRES_PASSWORD          | postgres | PostgreSQL database password.                                                            | test                    |
+| POSTGRES_DB                | postgres | PostgreSQL database name.                                                                | platon                  |
+| PGADMIN_DEFAULT_EMAIL      | pgadmin  | PgAdmin default email for login.                                                         | test@test.com           |
+| PGADMIN_DEFAULT_PASSWORD   | pgadmin  | PgAdmin default password for login.                                                      | test                    |
+| DB_NAME                    | api      | Database name for the API service.                                                       | platon_db               |
+| DB_USERNAME                | api      | Database username for the API service.                                                   | platon                  |
+| DB_PASSWORD                | api      | Database password for the API service.                                                   | test                    |
+| DB_HOST                    | api      | Database host for the API service.                                                       | localhost               |
+| DB_PORT                    | api      | Database port for the API service.                                                       | 5432                    |
+| REDIS_HOST                 | api      | Sets NestJs `REDIS_HOST` value setting                                                   | localhost               |
+| REDIS_PORT                 | api      | Sets NestJs `REDIS_PORT` value setting                                                   | 6379                    |
+| SECRET_KEY                 | api      | Secret key for the API service.                                                          | secret                  |
+| PASSWORD_SALT              | api      | Secret key for the API service.                                                          | 10                      |
+| JWT_ACCESS_TOKEN_LIFETIME  | api      | Access token lifetime for JWT authentication.                                            | 15m                     |
+| JWT_REFRESH_TOKEN_LIFETIME | api      | Refresh token lifetime for JWT authentication.                                           | 7d                      |
+| FILES_CACHE_LIFETIME       | api      | Duration of cacheable files in seconds.                                                  | 604800 (7 days)         |
+| GRAPHQL_PLAYGROUND         | api      | Enable/disable GraphQL Playground.                                                       | true                    |
+| SANDBOX_URL                | api      | Defines python sandbox url.                                                              | <http://localhost:7000> |
+| SANDBOX_ENV_LIFESPAN       | api      | Value in seconds that determins for how long node sandbox env files should be kept.      | 604800 (7 days)         |
+| SERVER_NAME                | nginx    | Defines nginx server name.                                                               | localhost               |
 | SERVER_HOST                | api      | Public host used to build links in emails. `https://` is added unless a scheme is given. | localhost               |
 
 ### Codebase Structure

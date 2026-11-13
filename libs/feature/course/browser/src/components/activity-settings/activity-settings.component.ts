@@ -23,6 +23,7 @@ import differenceInMilliseconds from 'date-fns/differenceInMilliseconds'
 
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
+import { MatDialog, MatDialogModule } from '@angular/material/dialog'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
@@ -44,9 +45,11 @@ import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import {
   type Activity,
+  ActivityReloadPreview,
   calculateActivityOpenState,
   CourseGroup,
   CourseMember,
+  ReloadActivity,
   Restriction,
   RestrictionConfig,
   RestrictionList,
@@ -54,6 +57,7 @@ import {
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
+import { ActivityReloadDialogComponent } from './activity-reload-dialog.component'
 import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
 import { CourseColorPickerComponent } from '../color-picker/color-picker.component'
 import { User } from '@platon/core/common'
@@ -67,6 +71,7 @@ import { ActivitySettings } from '@platon/feature/compiler'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    MatDialogModule,
     FormsModule,
     ReactiveFormsModule,
     DragDropModule,
@@ -99,6 +104,7 @@ import { ActivitySettings } from '@platon/feature/compiler'
 export class CourseActivitySettingsComponent implements OnInit {
   private readonly courseService = inject(CourseService)
   private readonly dialogService = inject(DialogService)
+  private readonly dialog = inject(MatDialog)
   private readonly authService = inject(AuthService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly validatorService = inject(ActivityRestrictionsValidatorService)
@@ -585,7 +591,20 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
 
     try {
-      const activity = await firstValueFrom(this.courseService.reloadActivity(this.activity))
+      const preview = await firstValueFrom(this.courseService.reloadActivityPreview(this.activity))
+      const input = await firstValueFrom(
+        this.dialog
+          .open<ActivityReloadDialogComponent, ActivityReloadPreview, ReloadActivity>(ActivityReloadDialogComponent, {
+            data: preview,
+            width: '40rem',
+          })
+          .afterClosed()
+      )
+      if (!input) {
+        return
+      }
+
+      const activity = await firstValueFrom(this.courseService.reloadActivity(this.activity, input))
 
       this.activityChange.emit((this.activity = activity))
 
