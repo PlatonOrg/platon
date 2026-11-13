@@ -4,7 +4,7 @@
 
 import { GATES } from './constants'
 import { transformLocal, selectorThrows, numOr, isPt, gateInputOffsets, gateInputs } from './pins'
-import { parseLabel } from './text'
+import { parseLabel } from './labels'
 import { Prim, TextPart, CircuitElement, V2, Frame } from './types'
 
 export const r2 = (x: number) => Math.round(x * 100) / 100
