@@ -16,7 +16,6 @@ import { CircuitComponentDefinition, CircuitState } from './circuit'
 import {
   Drawing,
   DrawnElement,
-  Prim,
   SwitchInfo,
   nextState,
   normalizePositions,
@@ -24,13 +23,6 @@ import {
   switchInfos,
   elementsOf,
 } from './render'
-
-/** Groupe affiché : un élément du schéma, ou une couche sans interaction (fils, annotations). */
-interface Layer {
-  key: string
-  element?: DrawnElement
-  prims: Prim[]
-}
 
 @Component({
   selector: 'wc-circuit',
@@ -49,7 +41,6 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
   @Output() stateChange = new EventEmitter<CircuitState>()
 
   protected drawing: Drawing = renderCircuit({ elements: [] })
-  protected layers: Layer[] = []
   protected hasSwitches = false
   private infos = new Map<string, SwitchInfo>()
 
@@ -71,8 +62,8 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
   }
 
   /** Clic gauche ou touche Entrée/Espace : position suivante de l'interrupteur. */
-  protected async toggle(element: DrawnElement | undefined, event?: Event): Promise<void> {
-    if (!element || !element.switchable || !this.interactive) return
+  protected async toggle(element: DrawnElement, event?: Event): Promise<void> {
+    if (!element.switchable || !this.interactive) return
     event?.preventDefault()
     const info = this.infos.get(element.id)
     if (!info) return
@@ -88,14 +79,10 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
     this.cdr.markForCheck()
   }
 
-  protected async onKey(element: DrawnElement | undefined, event: KeyboardEvent) {
+  protected async onKey(element: DrawnElement, event: KeyboardEvent) {
     if (event.key === 'Enter' || event.key === ' ') {
       await this.toggle(element, event)
     }
-  }
-
-  protected trackLayer(_: number, layer: Layer) {
-    return layer.key
   }
 
   /** Description du schéma pour les lecteurs d'écran. */
@@ -111,12 +98,7 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
     const schema = this.state.schema ?? { elements: [] }
     // l'échelle du composant multiplie celle éventuellement fixée dans le schéma (comme circuitToSvg)
     this.drawing = renderCircuit(schema, positions, {
-      scale: (Number(this.state.scale) || 1) * (Number((schema as any).scale) || 1),
+      scale: (Number(this.state.scale) || 1) * (Number(schema.scale) || 1),
     })
-    this.layers = [
-      { key: 'wires', prims: this.drawing.wires },
-      ...this.drawing.elements.map((e) => ({ key: e.key, element: e, prims: e.prims })),
-      { key: 'overlay', prims: this.drawing.overlay },
-    ]
   }
 }

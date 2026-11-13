@@ -35,9 +35,9 @@ export function renderCircuit(
   options: RenderOptions = {}
 ): Drawing {
   const errors = validateSchema(schema)
-  const U = Math.max(10, Math.min(100, Number((schema as any)?.unit ?? 40) || 40))
+  const U = Math.max(10, Math.min(100, Number(schema?.unit ?? 40) || 40))
   const fs = Math.round(14 * (U / 40) * 10) / 10
-  const gates = (schema as any)?.gates === 'iec' ? 'iec' : 'us'
+  const gates = schema?.gates === 'iec' ? 'iec' : 'us'
   const wiresB = new Builder(U, fs)
   const overlayB = new Builder(U, fs)
   const elements: DrawnElement[] = []
@@ -45,10 +45,10 @@ export function renderCircuit(
   const infos = new Map(switchInfos(schema).map((s) => [s.id, s]))
   const valid = (el: CircuitElement) => {
     if (TWO_TERMINALS.includes(el.type) || el.type === 'varrow') {
-      return isPt(el.from) && isPt(el.to) && !(el.from![0] === el.to![0] && el.from![1] === el.to![1])
+      return isPt(el.from) && isPt(el.to) && !(el.from[0] === el.to[0] && el.from[1] === el.to[1])
     }
     if (el.type === 'wire') return Array.isArray(el.points) && el.points.filter(isPt).length >= 2
-    return isPt(el.at) && [...POINT_ELEMENTS].includes(el.type)
+    return isPt(el.at) && POINT_ELEMENTS.includes(el.type)
   }
   elementsOf(schema).forEach((el, index) => {
     if (!valid(el)) return
@@ -207,7 +207,7 @@ export function renderCircuit(
   const y = Math.floor(box.y - margin)
   const w = Math.ceil(box.w + 2 * margin)
   const h = Math.ceil(box.h + 2 * margin)
-  const scale = Number(options.scale ?? (schema as any)?.scale ?? 1) || 1
+  const scale = Number(options.scale ?? schema?.scale ?? 1) || 1
   return {
     viewBox: `${x} ${y} ${w} ${h}`,
     width: Math.round(w * scale),

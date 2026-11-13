@@ -130,8 +130,8 @@ export function transformLocal(el: CircuitElement, p: Pt): Pt {
 export function elementPins(el: CircuitElement): Record<string, Pt> {
   if (TWO_TERMINALS.includes(el.type)) {
     const pins: Record<string, Pt> = {}
-    if (isPt(el.from)) pins['from'] = el.from as Pt
-    if (isPt(el.to)) pins['to'] = el.to as Pt
+    if (isPt(el.from)) pins['from'] = el.from
+    if (isPt(el.to)) pins['to'] = el.to
     return pins
   }
   if (POINT_ELEMENTS.includes(el.type) && isPt(el.at)) {
@@ -144,6 +144,6 @@ export function elementPins(el: CircuitElement): Record<string, Pt> {
   return {}
 }
 
-export function isPt(p: any): boolean {
+export function isPt(p: unknown): p is Pt {
   return Array.isArray(p) && p.length === 2 && p.every((c) => typeof c === 'number' && Number.isFinite(c))
 }

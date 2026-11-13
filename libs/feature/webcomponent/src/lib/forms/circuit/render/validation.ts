@@ -75,7 +75,7 @@ export function validateSchema(schema: any): string[] {
     }
     if (TWO_TERMINALS.includes(el.type) || el.type === 'varrow') {
       if (!isPt(el.from) || !isPt(el.to)) errors.push(`${where} : « from » et « to » doivent être des points [x, y].`)
-      else if (el.from![0] === el.to![0] && el.from![1] === el.to![1])
+      else if (el.from[0] === el.to[0] && el.from[1] === el.to[1])
         errors.push(`${where} : « from » et « to » sont confondus.`)
     } else if (el.type === 'wire') {
       if (!Array.isArray(el.points) || el.points.length < 2 || !el.points.every(isPt)) {

@@ -260,7 +260,7 @@ export function multiPinLabel(B: Builder, el: CircuitElement, prims: Prim[]) {
     else if (el.type === 'terminal' || el.type === 'node') {
       const lp = el.label_at
       if (isPt(lp)) {
-        B.text([lp![0] * U, lp![1] * U], name, 'middle', 'central')
+        B.text([lp[0] * U, lp[1] * U], name, 'middle', 'central')
         return
       }
       const pos = el.label_pos ?? 'above'
@@ -287,14 +287,12 @@ export function multiPinLabel(B: Builder, el: CircuitElement, prims: Prim[]) {
   }
   if (!label) return
   if (isPt(el.label_at)) {
-    B.text([el.label_at![0] * U, el.label_at![1] * U], label, 'middle', 'central')
+    B.text([el.label_at[0] * U, el.label_at[1] * U], label, 'middle', 'central')
     return
   }
   const box = bbox(prims)
   if (!box) return
-  const pos =
-    el.label_pos ??
-    (['npn', 'pnp', 'nmos', 'pmos'].includes(el.type) ? 'right' : el.type === 'rail' ? 'above' : 'above')
+  const pos = el.label_pos ?? (['npn', 'pnp', 'nmos', 'pmos'].includes(el.type) ? 'right' : 'above')
   const g = (4 * U) / 40
   if (pos === 'right') B.text([box.x + box.w + g, box.y + box.h / 2], label, 'start', 'central')
   else if (pos === 'left') B.text([box.x - g, box.y + box.h / 2], label, 'end', 'central')

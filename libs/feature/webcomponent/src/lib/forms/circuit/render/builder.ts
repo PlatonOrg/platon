@@ -61,26 +61,22 @@ export function bodyHalf(type: string): number {
     case 'Z':
     case 'Rvar':
     case 'fuse':
-      return 20
     case 'L':
       return 20
     case 'C':
     case 'Cpol':
-      return 4
     case 'battery':
       return 4
     case 'diode':
     case 'led':
     case 'zener':
       return 8
-    case 'switch':
-    case 'push':
-      return 14
     case 'lamp':
     case 'ammeter':
     case 'voltmeter':
       return 12
     default:
+      // interrupteurs, sources, moteur, sources commandées
       return 14
   }
 }
@@ -481,7 +477,6 @@ function drawGate(
   style: string
 ) {
   const U = B.U
-  const k = U / 40
   const ins = gateInputOffsets(gateInputs(el))
   const neg = ['nand', 'nor', 'xnor', 'not'].includes(el.type)
   const H = Math.max(1.3, Math.max(...ins.map(Math.abs)) + 0.35)
@@ -535,5 +530,4 @@ function drawGate(
     B.path(`M${pt(-0.75, -0.8)} L${pt(0.75, 0)} L${pt(-0.75, 0.8)} Z`, 'bg')
   }
   if (neg) B.circle(P(bodyRight + 0.15, 0), 0.15 * U, 'bg')
-  void k
 }
