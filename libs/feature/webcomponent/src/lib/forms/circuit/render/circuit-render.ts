@@ -85,7 +85,7 @@ export function renderCircuit(
       const a = px(el.from!),
         b = px(el.to!)
       const F = frame(a, b)
-      const off = Number(el.offset ?? 0.5) * U
+      const off = numOr(el.offset, 0.5) * U
       const n: V2 = [
         F.m[0] * (el.side === 'right' || el.side === -1 ? -1 : 1),
         F.m[1] * (el.side === 'right' || el.side === -1 ? -1 : 1),
@@ -125,7 +125,7 @@ export function renderCircuit(
     if (el.type === 'text') {
       const at = px(el.at!)
       const anchor = el.anchor === 'start' || el.anchor === 'end' ? el.anchor : 'middle'
-      overlayB.text(at, String(el.text ?? el.label ?? ''), anchor, 'central', fs * Number(el.size ?? 1))
+      overlayB.text(at, String(el.text ?? el.label ?? ''), anchor, 'central', fs * numOr(el.size, 1))
       return
     }
     const B = new Builder(U, fs)

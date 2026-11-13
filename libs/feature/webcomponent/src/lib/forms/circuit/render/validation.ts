@@ -43,6 +43,10 @@ function attrErrors(el: CircuitElement): string[] {
     errs.push('« throws » doit être un entier de 2 à 6.')
   }
   if (el.type === 'block' && el.w != null && Number.isNaN(toNum(el.w))) errs.push('« w » doit être un nombre.')
+  if (el.type === 'block' && el.h != null && Number.isNaN(toNum(el.h))) errs.push('« h » doit être un nombre.')
+  if (el.size != null && Number.isNaN(toNum(el.size))) errs.push('« size » doit être un nombre.')
+  if (el.offset != null && Number.isNaN(toNum(el.offset))) errs.push('« offset » doit être un nombre.')
+  if (el.label_at != null && !isPt(el.label_at)) errs.push('« label_at » doit être un point [x, y].')
   if (el.type === 'block' && Array.isArray(el.pins)) {
     el.pins.forEach((pin: any, k: number) => {
       if (!(pin && typeof pin === 'object' && isPt(pin.at))) {

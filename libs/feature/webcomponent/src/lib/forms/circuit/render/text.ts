@@ -4,6 +4,7 @@
 
 import { Builder, frame, bodyHalf, localTransform } from './builder'
 import { UNITS } from './constants'
+import { isPt } from './pins'
 import { CircuitElement, HitBox, Prim, TextPart, V2 } from './types'
 
 const GREEK: Record<string, string> = {
@@ -290,6 +291,8 @@ export function bbox(prims: Prim[]): HitBox | null {
     x1 = -Infinity,
     y1 = -Infinity
   const add = (x: number, y: number) => {
+    // une coordonnée NaN (attribut mal écrit) ne doit pas faire perdre la boîte de tout le schéma
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return
     x0 = Math.min(x0, x)
     y0 = Math.min(y0, y)
     x1 = Math.max(x1, x)
@@ -354,8 +357,8 @@ export function multiPinLabel(B: Builder, el: CircuitElement, prims: Prim[]) {
     if (el.type === 'probe') dirPt = P(1.45, 0)
     else if (el.type === 'terminal' || el.type === 'node') {
       const lp = el.label_at
-      if (Array.isArray(lp)) {
-        B.text([lp[0] * U, lp[1] * U], name, 'middle', 'central')
+      if (isPt(lp)) {
+        B.text([lp![0] * U, lp![1] * U], name, 'middle', 'central')
         return
       }
       const pos = el.label_pos ?? 'above'
@@ -381,8 +384,8 @@ export function multiPinLabel(B: Builder, el: CircuitElement, prims: Prim[]) {
     return
   }
   if (!label) return
-  if (Array.isArray(el.label_at)) {
-    B.text([el.label_at[0] * U, el.label_at[1] * U], label, 'middle', 'central')
+  if (isPt(el.label_at)) {
+    B.text([el.label_at![0] * U, el.label_at![1] * U], label, 'middle', 'central')
     return
   }
   const box = bbox(prims)

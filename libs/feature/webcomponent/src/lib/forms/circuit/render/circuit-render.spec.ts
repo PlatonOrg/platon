@@ -123,6 +123,26 @@ describe('circuit-render', () => {
     expect(errs.length).toBe(4)
   })
 
+  it('garde le cadrage du schéma malgré un attribut numérique mal écrit, et le signale', () => {
+    const base = [
+      { type: 'R', id: 'R1', from: [0, 0], to: [4, 0] },
+      { type: 'R', id: 'R2', from: [0, 3], to: [8, 3] },
+    ]
+    const ref = renderCircuit({ elements: base } as CircuitSchema)
+    const odd = [
+      { type: 'text', at: [2, 2], text: 'x', size: 'big' },
+      { type: 'varrow', from: [0, 0], to: [4, 0], offset: 'a', label: 'U' },
+      { type: 'terminal', id: 'A', at: [0, 0], label_at: ['a', 1] },
+      { type: 'block', id: 'B', at: [4, 6], h: 'x' },
+    ]
+    for (const extra of odd) {
+      const d = renderCircuit({ elements: [...base, extra] } as CircuitSchema)
+      expect(d.viewBox).not.toContain('NaN')
+      expect(d.width).toBeGreaterThanOrEqual(ref.width)
+      expect(d.errors.length).toBe(1)
+    }
+  })
+
   it('formate les valeurs à la française', () => {
     expect(formatValue(4700, 'Ω')).toBe('4,7 kΩ')
     expect(formatValue(1e-6, 'F')).toBe('1 µF')
