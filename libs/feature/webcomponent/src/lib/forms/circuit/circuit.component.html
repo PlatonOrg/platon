@@ -18,9 +18,9 @@
     <svg:g
       [class.switch]="!!layer.element?.switchable && interactive"
       [attr.data-id]="layer.element?.id || null"
-      [attr.data-state]="layer.element?.hit ? layer.element.state : null"
+      [attr.data-state]="layer.element?.aria ? layer.element.state : null"
       [attr.tabindex]="layer.element?.switchable && interactive ? 0 : null"
-      [attr.role]="layer.element?.switchable && interactive ? 'button' : null"
+      [attr.role]="layer.element?.switchable && interactive ? 'button' : layer.element?.aria ? 'img' : null"
       [attr.aria-label]="layer.element?.aria || null"
       (click)="toggle(layer.element, $event)"
       (keydown)="onKey(layer.element, $event)"

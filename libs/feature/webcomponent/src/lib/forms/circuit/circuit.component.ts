@@ -80,9 +80,10 @@ export class CircuitComponent implements WebComponentHooks<CircuitState> {
     positions[info.id] = nextState(info, positions[info.id])
     this.redraw(positions)
     await this.changeDetector.ignore(this, () => {
-      // une seule affectation : l'état est un proxy qui déclenche la détection de changements
+      // chaque affectation passe par le proxy de l'état et émet `stateChange` :
+      // `isFilled` n'est affecté qu'au premier clic, et `value` en dernier pour que l'état émis soit complet
+      if (!this.state.isFilled) this.state.isFilled = true
       this.state.value = positions
-      this.state.isFilled = true
     })
     this.cdr.markForCheck()
   }

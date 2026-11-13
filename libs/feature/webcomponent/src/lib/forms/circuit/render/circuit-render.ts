@@ -173,8 +173,9 @@ export function renderCircuit(
     const id = el.id != null ? String(el.id) : ''
     const info = id ? infos.get(id) : undefined
     const switchable = !!info && !info.fixed
+    // zone cliquable seulement pour un interrupteur manœuvrable ; un interrupteur fixe garde son libellé d'état
     let hit: HitBox | undefined
-    if (info) {
+    if (switchable) {
       const b = bbox(body)
       if (b) {
         const pad = (4 * U) / 40
@@ -189,7 +190,7 @@ export function renderCircuit(
       state,
       prims,
       hit,
-      aria: info ? switchAria(el, state) : '',
+      aria: info ? switchAria(el, state, info.fixed) : '',
     })
   }
 
@@ -219,8 +220,8 @@ export function renderCircuit(
 }
 
 /** Libellé d'accessibilité d'un interrupteur dans une position donnée. */
-function switchAria(el: CircuitElement, state: number): string {
-  const name = `${NAMES[el.type] ?? 'Interrupteur'} ${el.label ?? el.id}`
+function switchAria(el: CircuitElement, state: number, fixed = false): string {
+  const name = `${NAMES[el.type] ?? 'Interrupteur'}${fixed ? ' fixe' : ''} ${el.label ?? el.id}`
   if (el.type === 'switch' || el.type === 'push') return `${name} : ${state === 1 ? 'fermé' : 'ouvert'}`
   if (el.type === 'toggle') return `${name} : ${state === 1 ? '1' : '0'}`
   if (state < 0) return `${name} : aucune position`

@@ -170,6 +170,16 @@ describe('circuit-render', () => {
     expect(open.width).toBeGreaterThan(300)
     expect(circuitToSvg(lampe)).toContain('<svg')
   })
+
+  it('ne donne pas de zone cliquable à un interrupteur fixe mais garde son état lisible', () => {
+    const d = renderCircuit({
+      elements: [{ type: 'switch', id: 'K', from: [0, 0], to: [2, 0], state: 1, fixed: true }],
+    })
+    const k = d.elements[0]
+    expect(k.switchable).toBe(false)
+    expect(k.hit).toBeUndefined()
+    expect(k.aria).toBe('Interrupteur fixe K : fermé')
+  })
 })
 
 // mêmes cas que tests/test_elec.py (test_ts_python_parity_on_odd_values, test_switch_state_...) :
