@@ -15,7 +15,7 @@ export const CircuitComponentDefinition = defineWebComponent({
   name: 'Circuit',
   selector: 'wc-circuit',
   description:
-    "Affiche un schéma électrique décrit en JSON (dipôles, sources, semi-conducteurs, AOP, portes logiques, schémas-blocs) et permet de manœuvrer ses interrupteurs d'un clic. La valeur transmise au correcteur donne la position de tous les interrupteurs. En lecture seule, il sert de figure dans un énoncé ou une correction.",
+    "Affiche un schéma électrique décrit en JSON (dipôles, sources, semi-conducteurs, AOP, portes logiques, schémas-blocs) et permet de manœuvrer ses interrupteurs d'un clic. La valeur transmise au correcteur donne la position de tous les interrupteurs. Désactivé, il sert de figure dans un énoncé ou une correction.",
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',

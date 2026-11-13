@@ -6,8 +6,8 @@ import { CircuitElement, Pt } from './types'
 /* ------------------------------------------------------------------------ */
 
 /*
- * Conversions identiques à elec.py (_to_num, _to_int, _js_round) : le dessin et la simulation
- * doivent lire un schéma JSON de la même façon, même mal écrit.
+ * Conversions tolérantes et prévisibles : un schéma JSON mal écrit (nombre en chaîne, booléen…)
+ * est lu toujours de la même façon. Un correcteur qui reconstitue le circuit doit suivre les mêmes règles.
  */
 const NUM_RE = /^\s*[-+]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][-+]?[0-9]+)?\s*$/
 

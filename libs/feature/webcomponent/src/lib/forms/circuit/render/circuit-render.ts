@@ -3,9 +3,9 @@
  *
  * Ce fichier ne dépend d'aucune bibliothèque (ni Angular ni le DOM) :
  * il transforme la description JSON d'un schéma en primitives SVG.
- * Le même fichier sert au composant PLaTon et aux outils de relecture.
+ * `circuitToSvg` en tire aussi un SVG autonome (tests, export).
  *
- * Règles de connexion (identiques côté Python, `elec.py`) :
+ * Règles de connexion (un correcteur qui reconstitue le circuit doit appliquer les mêmes) :
  *  - deux broches (ou sommets de fil) au même point de la grille sont reliées ;
  *  - une broche ou un sommet de fil posé à l'intérieur d'un segment de fil est relié à ce fil ;
  *  - deux fils qui se croisent sans sommet commun ne sont pas reliés.

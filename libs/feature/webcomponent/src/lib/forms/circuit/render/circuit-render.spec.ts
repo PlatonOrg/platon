@@ -182,10 +182,9 @@ describe('circuit-render', () => {
   })
 })
 
-// mêmes cas que tests/test_elec.py (test_ts_python_parity_on_odd_values, test_switch_state_...) :
-// le dessin (TS) et la simulation (Python) doivent lire un schéma mal écrit de la même façon
-describe('parité avec elec.py', () => {
-  it('convertit les nombres comme _to_num', () => {
+// un schéma mal écrit (nombres en chaîne, booléens, valeurs hors bornes) doit toujours être lu de la même façon
+describe('lecture des schémas mal écrits', () => {
+  it('convertit les nombres de façon stricte', () => {
     expect(toNum('1')).toBe(1)
     expect(toNum(true)).toBe(1)
     expect(toNum(null)).toBeNaN()
@@ -196,7 +195,7 @@ describe('parité avec elec.py', () => {
     expect(toInt(2.5, [2, 3])).toBeNaN()
   })
 
-  it('arrondit et valide les attributs comme Python', () => {
+  it('arrondit et valide les attributs', () => {
     const sel = { type: 'selector', id: 'S', at: [3, -2], rot: 45 }
     expect(elementPins(sel as any)['t0']).toEqual([4, 0])
     expect(Object.keys(elementPins({ type: 'and', at: [0, 0], inputs: 2.5 } as any))).toEqual(['a', 'b', 'out'])
@@ -210,7 +209,7 @@ describe('parité avec elec.py', () => {
     expect(errs.some((e) => e.includes('inputs'))).toBe(true)
   })
 
-  it('lit les positions des interrupteurs comme Python', () => {
+  it('lit les positions des interrupteurs', () => {
     const s = {
       elements: [
         { type: 'switch', id: 1, from: [0, 0], to: [2, 0], state: '1' },

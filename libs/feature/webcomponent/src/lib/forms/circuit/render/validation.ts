@@ -23,7 +23,7 @@ export function onSegmentInterior(p: Pt, a: Pt, b: Pt): boolean {
   return dot > EPS && dot < len2 - EPS
 }
 
-/** Attributs numériques mal écrits (mêmes messages que _attr_errors de elec.py). */
+/** Attributs numériques mal écrits. */
 function attrErrors(el: CircuitElement): string[] {
   const errs: string[] = []
   if (el.rot != null) {
