@@ -10,6 +10,10 @@ CheckboxGroup
 Élaborer un QCM à réponses multiples où les étudiants doivent cocher toutes les bonnes réponses parmi une liste d'options. CheckboxGroup
 Créer une liste de vérification (checklist) pour s'assurer que les étudiants ont bien suivi toutes les étapes d'une procédure. CheckboxGroup
 Mettre en place un exercice de classification où les étudiants doivent cocher tous les éléments appartenant à une catégorie spécifique. CheckboxGroup
+Circuit
+Créer un exercice où l'étudiant manœuvre les interrupteurs d'un schéma électrique pour allumer une lampe ou obtenir une sortie logique donnée. Circuit
+Afficher un schéma électrique en lecture seule dans l'énoncé ou la correction d'un exercice d'électronique. Circuit
+Demander de placer un commutateur à plusieurs positions pour obtenir une tension, un courant ou un montage donné. Circuit
 CodeEditor
 Concevoir un exercice de programmation où les étudiants doivent écrire du code complet dans un langage spécifique. CodeEditor
 Créer une activité de débogage où un code avec des erreurs est présenté, et les étudiants doivent identifier et corriger ces erreurs. CodeEditor

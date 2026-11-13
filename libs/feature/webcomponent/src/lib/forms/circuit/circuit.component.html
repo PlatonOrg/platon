@@ -1,0 +1,87 @@
+<figure class="circuit" [class.interactive]="interactive && hasSwitches">
+  @if (drawing.errors.length) {
+  <ul class="errors" role="alert">
+    @for (error of drawing.errors; track $index) {
+    <li>{{ error }}</li>
+    }
+  </ul>
+  }
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    [attr.role]="hasSwitches && interactive ? 'group' : 'img'"
+    [attr.viewBox]="drawing.viewBox"
+    [attr.width]="drawing.width"
+    [attr.height]="drawing.height"
+    [attr.aria-label]="ariaLabel"
+  >
+    <svg:g>
+      <ng-container *ngTemplateOutlet="primitives; context: { $implicit: drawing.wires }" />
+    </svg:g>
+    @for (element of drawing.elements; track element.key) { @if (element.switchable && interactive) {
+    <svg:g
+      class="switch"
+      tabindex="0"
+      role="button"
+      [attr.data-id]="element.id"
+      [attr.data-state]="element.state"
+      [attr.aria-label]="element.aria"
+      (click)="toggle(element, $event)"
+      (keydown)="onKey(element, $event)"
+    >
+      @if (element.hit; as hit) {
+      <svg:rect class="hit" rx="6" [attr.x]="hit.x" [attr.y]="hit.y" [attr.width]="hit.w" [attr.height]="hit.h" />
+      }
+      <ng-container *ngTemplateOutlet="primitives; context: { $implicit: element.prims }" />
+    </svg:g>
+    } @else {
+    <svg:g
+      [attr.data-id]="element.id || null"
+      [attr.data-state]="element.aria ? element.state : null"
+      [attr.role]="element.aria ? 'img' : null"
+      [attr.aria-label]="element.aria || null"
+    >
+      <ng-container *ngTemplateOutlet="primitives; context: { $implicit: element.prims }" />
+    </svg:g>
+    } }
+    <svg:g>
+      <ng-container *ngTemplateOutlet="primitives; context: { $implicit: drawing.overlay }" />
+    </svg:g>
+  </svg>
+  @if (state.caption) {
+  <figcaption>{{ state.caption }}</figcaption>
+  } @if (interactive && hasSwitches && !state.hideHelp) {
+  <p class="help">Cliquez sur un interrupteur pour le faire passer à la position suivante.</p>
+  }
+</figure>
+
+<!-- primitives SVG d'une couche (fils, élément ou annotations) -->
+<ng-template #primitives let-prims>
+  @for (p of prims; track $index) { @switch (p.k) { @case ('path') {
+  <svg:path [attr.class]="p.c" [attr.d]="p.d" />
+  } @case ('circle') {
+  <svg:circle [attr.class]="p.c" [attr.cx]="p.x" [attr.cy]="p.y" [attr.r]="p.r" />
+  } @case ('rect') {
+  <svg:rect [attr.class]="p.c" [attr.x]="p.x" [attr.y]="p.y" [attr.width]="p.w" [attr.height]="p.h" />
+  } @case ('text') {
+  <svg:text
+    [attr.class]="p.c"
+    [attr.x]="p.x"
+    [attr.y]="p.y"
+    [attr.text-anchor]="p.anchor"
+    [attr.dominant-baseline]="p.base"
+    [attr.font-size]="p.size"
+  >
+    @for (t of p.parts; track $index) { @if (t.sub) {
+    <svg:tspan baseline-shift="sub" [attr.font-size]="p.size * 0.72">{{ t.t }}</svg:tspan>
+    } @else if (t.sup) {
+    <svg:tspan baseline-shift="super" [attr.font-size]="p.size * 0.72">{{ t.t }}</svg:tspan>
+    } @else if (t.over) {
+    <svg:tspan text-decoration="overline">{{ t.t }}</svg:tspan>
+    } @else {
+    <svg:tspan>{{ t.t }}</svg:tspan>
+    } }
+  </svg:text>
+  } } }
+</ng-template>
+
+<wc-base [(state)]="state"></wc-base>
