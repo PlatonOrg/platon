@@ -194,7 +194,7 @@ describe('ActivityService', () => {
       await expect(service.findByIdForUser('activity-1', request.user)).rejects.toBeInstanceOf(NotFoundResponse)
     })
 
-    it("devrait autoriser le créateur de l'activité", async () => {
+    it("ne devrait pas autoriser le créateur de l'activité s'il a le rôle 'student'", async () => {
       const qb = mockSelectQueryBuilder<ActivityEntity>()
       const activity = buildActivity({ creatorId: 'user-1' })
       qb.getOne.mockResolvedValue(activity)
@@ -204,7 +204,7 @@ describe('ActivityService', () => {
       activityMemberService.isMember.mockResolvedValue(false)
       activityGroupService.numberOfGroups.mockResolvedValue(0)
 
-      await expect(service.findByIdForUser('activity-1', request.user)).resolves.toBe(activity)
+      await expect(service.findByIdForUser('activity-1', request.user)).rejects.toBeInstanceOf(ForbiddenResponse)
     })
 
     it('devrait autoriser un éditeur du cours même sans appartenance à l’activité', async () => {
@@ -269,7 +269,7 @@ describe('ActivityService', () => {
       qb.getOne.mockResolvedValue(null)
       repository.createQueryBuilder.mockReturnValue(qb)
 
-      await expect((await service.findByActivityId('activity-1')).isEmpty()).toBe(true)
+      expect((await service.findByActivityId('activity-1')).isEmpty()).toBe(true)
     })
 
     it('devrait mettre à jour les dates et colonnes virtuelles si trouvé', async () => {

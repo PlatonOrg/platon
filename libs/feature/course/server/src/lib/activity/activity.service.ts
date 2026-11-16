@@ -134,8 +134,7 @@ export class ActivityService {
     }
 
     // check user role in the course and not his general role on the plateform
-    const hasWriteRight =
-      user.id === activity.creatorId || (await this.courseMemberService.hasWritePermission(activity.courseId, user))
+    const hasWriteRight = await this.courseMemberService.hasWritePermission(activity.courseId, user)
     if (!hasWriteRight) {
       if (await this.isHidden(id)) throw new NotFoundResponse(`Activity ${id} not found.`)
       const [isPrivateMember, isInGroup, isMember, numGroups] = await Promise.all([
