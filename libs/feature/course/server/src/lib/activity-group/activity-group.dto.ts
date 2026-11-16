@@ -8,6 +8,9 @@ export class ActivityGroupDTO extends BaseDTO implements ActivityGroup {
   @IsUUID()
   readonly activityId!: string
 
+  @IsUUID()
+  readonly groupId!: string
+
   @Type(() => CourseGroupDTO)
   readonly group!: CourseGroupDTO
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing'
 import { PlayerController } from './player.controller'
 import { PlayerService } from './player.service'
@@ -82,7 +81,7 @@ describe('PlayerController', () => {
       const input: PlayActivityInputDTO = { activityId: 'activity-test-id' }
       const result = await controller.playActivity(mockReq, input)
 
-      expect(service.playActivity).toHaveBeenCalledWith('activity-test-id', mockUser)
+      expect(service.playActivity).toHaveBeenCalledWith('activity-test-id', mockReq)
       expect(result.activity).toBeDefined()
     })
   })

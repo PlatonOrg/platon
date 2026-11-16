@@ -38,6 +38,7 @@ describe('PlayerService (integration)', () => {
     resourceFileService: { compile: jest.fn(), getTitle: jest.fn() },
     peerService: { getNextCopy: jest.fn(), createMatch: jest.fn(), resolveGame: jest.fn() },
     courseNotificationService: { notifyModerationActivityChanges: jest.fn(), notifyExerciseChanges: jest.fn() },
+    coursePermissionsService: { ensureActivityReadPermission: jest.fn() },
   }
 
   beforeAll(async () => {
@@ -66,7 +67,8 @@ describe('PlayerService (integration)', () => {
       mockDeps.activityService as any,
       mockDeps.resourceFileService as any,
       mockDeps.peerService as any,
-      mockDeps.courseNotificationService as any
+      mockDeps.courseNotificationService as any,
+      mockDeps.coursePermissionsService as any
     )
   }, 60_000)
 

@@ -2,7 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { ForbiddenResponse, NotFoundResponse, User, isTeacherRole } from '@platon/core/common'
-import { EventService, UserEntity } from '@platon/core/server'
+import { EventService, IRequest, UserEntity } from '@platon/core/server'
 import {
   ACTIVITY_FILE_EXTENSION,
   ActivityExercise,
@@ -17,6 +17,7 @@ import {
   ActivityEntity,
   ActivityService,
   CourseNotificationService,
+  CoursePermissionsService,
   ON_CHALLENGE_SUCCEEDED_EVENT,
   ON_RELOAD_ACTIVITY_EVENT,
   ON_TERMINATE_ACTIVITY_EVENT,
@@ -83,7 +84,8 @@ export class PlayerService extends PlayerManager {
     private readonly activityService: ActivityService,
     private readonly resourceFileService: ResourceFileService,
     private readonly peerService: PeerService,
-    private readonly courseNotificationService: CourseNotificationService
+    private readonly courseNotificationService: CourseNotificationService,
+    private readonly coursePermissionsService: CoursePermissionsService
   ) {
     super(sandboxService)
   }
@@ -163,7 +165,9 @@ export class PlayerService extends PlayerManager {
     }
   }
 
-  async playActivity(activityId: string, user: User): Promise<PlayActivityOuput> {
+  async playActivity(activityId: string, req: IRequest): Promise<PlayActivityOuput> {
+    const user = req.user
+    await this.coursePermissionsService.ensureActivityReadPermission(activityId, req)
     let activitySession = await this.sessionService.findUserActivity(activityId, user.id)
     if (!activitySession) {
       const activity = await this.activityService.findByIdForUser(activityId, user)
@@ -175,6 +179,7 @@ export class PlayerService extends PlayerManager {
         isBuilt: true,
       })
     }
+
     if (activitySession.activity) {
       await this.checkActivityDateRestrictions(activitySession.activity)
     }

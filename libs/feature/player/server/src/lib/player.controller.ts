@@ -40,7 +40,7 @@ export class PlayerController {
   @Public()
   @Post('/play/activity')
   playActivity(@Req() req: IRequest, @Body() input: PlayActivityInputDTO): Promise<PlayActivityOutputDTO> {
-    return this.playerService.playActivity(input.activityId, req.user)
+    return this.playerService.playActivity(input.activityId, req)
   }
 
   @Public()

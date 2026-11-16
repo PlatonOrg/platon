@@ -118,6 +118,7 @@ import { CourseMonitorPresenceController } from './course-monitor-presence/cours
     CourseDemoService,
     ActivityCorrectorService,
     CourseNotificationService,
+    CoursePermissionsService,
     ActivityGroupService,
     CourseGroupService,
     ActivityDatesService,

@@ -5,9 +5,9 @@ import { createUserEntity } from '@platon/core/testing/server'
 import { DataSource } from 'typeorm'
 import { PlayerService } from './player.service'
 import { SandboxService } from './sandboxes/sandbox.service'
-import { EventService } from '@platon/core/server'
+import { EventService, IRequest } from '@platon/core/server'
 import { AnswerService, SessionService } from '@platon/feature/result/server'
-import { ActivityService, CourseNotificationService } from '@platon/feature/course/server'
+import { ActivityService, CourseNotificationService, CoursePermissionsService } from '@platon/feature/course/server'
 import { ResourceFileService } from '@platon/feature/resource/server'
 import { PeerService } from '@platon/feature/peer/server'
 import {
@@ -122,6 +122,12 @@ describe('PlayerService', () => {
           useValue: {
             notifyModerationActivityChanges: jest.fn(),
             notifyExerciseChanges: jest.fn(),
+          },
+        },
+        {
+          provide: CoursePermissionsService,
+          useValue: {
+            ensureActivityReadPermission: jest.fn(),
           },
         },
       ],
@@ -299,7 +305,8 @@ describe('PlayerService', () => {
       activityService.updateActivitiesDates.mockResolvedValue({ start: undefined, end: undefined })
 
       const user = createUserEntity()
-      const result = await service.playActivity('activity-test-id', user as any)
+      const mockReq = { user: user } as unknown as IRequest
+      const result = await service.playActivity('activity-test-id', mockReq)
 
       expect(sessionService.findUserActivity).toHaveBeenCalledWith('activity-test-id', user.id)
       expect(activityService.findByIdForUser).not.toHaveBeenCalled()
@@ -317,7 +324,8 @@ describe('PlayerService', () => {
       activityService.updateActivitiesDates.mockResolvedValue({ start: undefined, end: undefined })
 
       const user = createUserEntity()
-      const result = await service.playActivity('activity-test-id', user as any)
+      const mockReq = { user: user } as unknown as IRequest
+      const result = await service.playActivity('activity-test-id', mockReq)
 
       expect(activityService.findByIdForUser).toHaveBeenCalledWith('activity-test-id', user)
       expect(sessionService.create).toHaveBeenCalled()
@@ -330,7 +338,8 @@ describe('PlayerService', () => {
       sessionService.findUserActivity.mockResolvedValue(activitySession as any)
 
       const user = createUserEntity()
-      await service.playActivity('activity-test-id', user as any)
+      const mockReq = { user: user } as unknown as IRequest
+      await service.playActivity('activity-test-id', mockReq)
 
       expect(activityService.updateActivitiesDates).not.toHaveBeenCalled()
     })
@@ -342,7 +351,8 @@ describe('PlayerService', () => {
       activityService.updateActivitiesDates.mockResolvedValue({ start: undefined, end: undefined })
 
       const user = createUserEntity()
-      await service.playActivity('activity-test-id', user as any)
+      const mockReq = { user: user } as unknown as IRequest
+      await service.playActivity('activity-test-id', mockReq)
 
       expect(activityService.updateActivitiesDates).toHaveBeenCalledWith([activity])
     })
