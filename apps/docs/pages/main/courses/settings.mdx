@@ -1,0 +1,62 @@
+---
+title: Paramètres du cours
+description: Modifier le nom et la description d'un cours, gérer son accès démo, importer les sections et activités d'un autre cours et supprimer un cours.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Paramètres du cours
+
+L'onglet **Paramètres** d'un cours n'est visible que par ses enseignants (et par les administrateurs). Il regroupe
+quatre cadres.
+
+## Informations
+
+Modifiez le **Nom** et la **Description** du cours puis cliquez sur **Sauvegarder**. Le nom et la description peuvent
+aussi être modifiés directement dans l'en-tête de la page du cours, en cliquant dessus.
+
+## Demo
+
+Crée ou supprime un lien permettant d'accéder au cours sans compte. Voir [Accès démo d'un cours](/main/courses/demo).
+
+## Charger un cours
+
+Ce cadre permet de réutiliser le travail d'une année précédente : il **importe les sections et les activités d'un
+autre cours** dans le cours courant.
+
+<Steps>
+
+### Choisir le cours source
+
+Recherchez le cours à importer parmi ceux dont vous êtes enseignant. Le bouton **Voir** ouvre un cours dans un nouvel
+onglet pour vérifier son contenu ; cliquez sur **Sélectionner** pour le choisir.
+
+### Confirmer
+
+Cliquez sur **Confirmer** puis validez.
+
+</Steps>
+
+Lors de l'import :
+
+- les sections importées sont ajoutées **après** les sections existantes du cours ;
+- les dates d'ouverture et de fermeture des activités sont **décalées automatiquement à l'année scolaire suivante** ;
+- les paramètres des activités (durée, actions, sécurité…) sont copiés tels quels ;
+- les membres, les groupes et les résultats du cours source ne sont pas copiés.
+
+<Callout type="warning">
+  Les **périodes d'accès** des activités sont copiées sans modification : leurs dates ne sont pas décalées et elles
+  font toujours référence aux membres et aux groupes du cours source, qui n'existent pas dans le nouveau cours.
+  Vérifiez les dates des activités importées dans leurs [paramètres](/main/courses/activities)
+  avant de rendre les sections visibles aux étudiants.
+</Callout>
+
+## Zone de danger
+
+Le bouton **Supprimer le cours** supprime définitivement le cours, après confirmation. Les ressources (exercices et
+activités) de l'espace de travail ne sont pas supprimées : seules leurs copies dans le cours disparaissent.
+
+<Callout type="warning">
+  La suppression d'un cours est irréversible. Pour simplement le retirer de votre liste, archivez-le plutôt (voir
+  [Archiver un cours](/main/courses/create#archiver-un-cours)).
+</Callout>
