@@ -123,4 +123,57 @@ describe('feature/course/server entities (integration)', () => {
       expect(await activityRepo.find({ where: { courseId: course.id } })).toHaveLength(0)
     })
   })
+
+  describe('visibilité par défaut', () => {
+    it('devrait créer sections et activités visibles par défaut', async () => {
+      const owner = await seedUser()
+      const course = await courseRepo.save(courseRepo.create({ name: 'Course', ownerId: owner.id }))
+      const section = await sectionRepo.save(sectionRepo.create({ courseId: course.id, name: 'S', order: 0 }))
+      const activity = await activityRepo.save(
+        activityRepo.create({
+          courseId: course.id,
+          sectionId: section.id,
+          creatorId: owner.id,
+          source: { variables: {} } as never,
+        })
+      )
+
+      expect((await sectionRepo.findOneByOrFail({ id: section.id })).hidden).toBe(false)
+      expect((await activityRepo.findOneByOrFail({ id: activity.id })).hidden).toBe(false)
+    })
+  })
+
+  describe('cascades depuis CourseSectionEntity', () => {
+    it("devrait supprimer les activités d'une section supprimée (aucune activité orpheline)", async () => {
+      const owner = await seedUser()
+      const course = await courseRepo.save(courseRepo.create({ name: 'Course', ownerId: owner.id }))
+      const section = await sectionRepo.save(sectionRepo.create({ courseId: course.id, name: 'S', order: 0 }))
+      await activityRepo.save(
+        activityRepo.create({
+          courseId: course.id,
+          sectionId: section.id,
+          creatorId: owner.id,
+          source: { variables: {} } as never,
+        })
+      )
+
+      await sectionRepo.delete(section.id)
+
+      expect(await activityRepo.count({ where: { courseId: course.id } })).toBe(0)
+    })
+
+    it('devrait refuser une activité rattachée à une section inexistante', async () => {
+      const owner = await seedUser()
+      const course = await courseRepo.save(courseRepo.create({ name: 'Course', ownerId: owner.id }))
+
+      await expect(
+        activityRepo.insert({
+          courseId: course.id,
+          creatorId: owner.id,
+          sectionId: '00000000-0000-0000-0000-000000000000',
+          source: { variables: {} } as never,
+        })
+      ).rejects.toBeInstanceOf(QueryFailedError)
+    })
+  })
 })

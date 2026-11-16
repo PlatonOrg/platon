@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataSource, Repository } from 'typeorm'
 import { UserEntity } from '@platon/core/server'
 import { createTestDatabase, TestDatabase } from '@platon/core/testing/server'
