@@ -13,7 +13,7 @@ import {
   inject,
 } from '@angular/core'
 import { ControlValueAccessor, FormBuilder, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
-import { PleInput } from '@platon/feature/compiler'
+import type { PleInput } from '@platon/feature/compiler'
 import { Subscription, debounceTime } from 'rxjs'
 import { InputAutomatonProvider } from './input-automaton'
 import { InputBooleanProvider } from './input-boolean'
@@ -30,7 +30,7 @@ import {
   CONFIG_EDITOR_TOKEN,
   PLE_INPUT_PROVIDERS,
   PleInputConfigEditor,
-  PleInputMode,
+  type PleInputMode,
   PleInputProvider,
   PleInputValueEditor,
   VALUE_EDITOR_TOKEN,

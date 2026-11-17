@@ -6,7 +6,6 @@
     "target": "es2018",
     "types": ["jest", "node"],
     "isolatedModules": true,
-    "composite": true,
     "declaration": true,
     "emitDecoratorMetadata": true
   },

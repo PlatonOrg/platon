@@ -18,6 +18,14 @@
       "inputs": ["default", "{workspaceRoot}/eslint.config.mjs"],
       "cache": true
     },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p {projectRoot}/tsconfig.spec.json --noEmit"
+      },
+      "inputs": ["default", "^production", "{workspaceRoot}/tsconfig.base.json"],
+      "cache": true
+    },
     "@nx/jest:jest": {
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
       "cache": true,
