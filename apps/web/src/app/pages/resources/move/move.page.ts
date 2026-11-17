@@ -23,6 +23,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag'
 import { firstValueFrom } from 'rxjs'
 import { SelectionModel } from '@angular/cdk/collections'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { UiShortcutDirective } from '@platon/shared/ui'
 
 type TemplateSource = {
   circle: CircleTree
@@ -36,6 +37,7 @@ type TemplateSource = {
   styleUrls: ['./move.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    UiShortcutDirective,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

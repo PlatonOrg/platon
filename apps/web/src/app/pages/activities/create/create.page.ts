@@ -64,6 +64,7 @@ import {
   UiSearchBarComponent,
   UiStepDirective,
   UiStepperComponent,
+  UiShortcutDirective,
   FilterIndicator,
   PeriodFilterMatcher,
   UiFilterIndicatorComponent,
@@ -85,9 +86,6 @@ export type ActivityFunction = 'training' | 'graded' | 'challenge'
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(window:keydown.meta.enter)': 'handleKeyDown()',
-  },
   imports: [
     CommonModule,
     FormsModule,
@@ -105,6 +103,7 @@ export type ActivityFunction = 'training' | 'graded' | 'challenge'
     DialogModule,
     UiStepDirective,
     UiStepperComponent,
+    UiShortcutDirective,
     UiSearchBarComponent,
     CourseSectionSearchBarComponent,
     ResourceFiltersComponent,
@@ -195,16 +194,6 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
   protected activitySection!: ElementRef<HTMLElement>
 
   protected readonly gradedSettings = viewChild.required<GradedActivitySettingsComponent>('gradedSettings')
-
-  protected async handleKeyDown() {
-    if (this.stepper().isValid) {
-      if (this.stepper().isLast) {
-        await this.create()
-      } else {
-        this.stepper().nextStep()
-      }
-    }
-  }
 
   protected courseInfo = new FormGroup({
     course: new FormControl<Course | undefined>(undefined, [Validators.required]),

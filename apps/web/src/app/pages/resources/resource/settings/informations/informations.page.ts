@@ -8,11 +8,11 @@ import { MatInputModule } from '@angular/material/input'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzFormModule } from 'ng-zorro-antd/form'
-import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { Subscription, firstValueFrom } from 'rxjs'
 import { ResourcePresenter } from '../../resource.presenter'
 import { TagSelectComponent } from '@platon/core/browser'
+import { UiShortcutDirective } from '@platon/shared/ui'
 
 @Component({
   selector: 'app-resource-informations',
@@ -25,14 +25,11 @@ import { TagSelectComponent } from '@platon/core/browser'
     MatButtonModule,
     MatCheckboxModule,
     MatFormFieldModule,
-    NzSpinModule,
     NzFormModule,
     NzButtonModule,
     TagSelectComponent,
+    UiShortcutDirective,
   ],
-  host: {
-    '(window:keydown)': 'onKeyDown($event)',
-  },
 })
 export class ResourceInformationsPage implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []
@@ -111,13 +108,6 @@ export class ResourceInformationsPage implements OnInit, OnDestroy {
     } finally {
       this.saving = false
       this.changeDetectorRef.markForCheck()
-    }
-  }
-
-  protected async onKeyDown(event: KeyboardEvent) {
-    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-      event.preventDefault()
-      await this.saveChanges()
     }
   }
 }

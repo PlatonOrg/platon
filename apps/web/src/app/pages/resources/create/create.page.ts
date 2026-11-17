@@ -1,13 +1,5 @@
 import { CommonModule } from '@angular/common'
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  HostListener,
-  OnInit,
-  ViewChild,
-  inject,
-} from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core'
 import {
   AbstractControl,
   FormControl,
@@ -51,7 +43,7 @@ import {
   circleAncestors,
   flattenCircleTree,
 } from '@platon/feature/resource/common'
-import { UiStepDirective, UiStepperComponent } from '@platon/shared/ui'
+import { UiShortcutDirective, UiStepDirective, UiStepperComponent } from '@platon/shared/ui'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { NzTagModule } from 'ng-zorro-antd/tag'
@@ -89,6 +81,7 @@ type TemplateSource = {
     NzTooltipModule,
     UiStepDirective,
     UiStepperComponent,
+    UiShortcutDirective,
     DialogModule,
     CircleTreeComponent,
     ResourcePipesModule,
@@ -143,17 +136,6 @@ export class ResourceCreatePage implements OnInit {
 
   @ViewChild(UiStepperComponent)
   protected stepper!: UiStepperComponent
-
-  @HostListener('window:keydown.meta.enter')
-  protected async handleKeyDown(): Promise<void> {
-    if (this.stepper.isValid) {
-      if (this.stepper.isLast) {
-        await this.create()
-      } else {
-        this.stepper.nextStep()
-      }
-    }
-  }
 
   async ngOnInit(): Promise<void> {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes

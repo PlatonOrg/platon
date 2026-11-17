@@ -176,6 +176,7 @@
   <button
     [id]="action.id ?? null"
     mat-raised-button
+    [uiShortcut]="action.shortcut"
     (click)="action.run?.()"
     [color]="action.color"
     [class.danger]="action.danger"

@@ -46,6 +46,9 @@ import {
   IsUUIDPipe,
   UiModalDrawerComponent,
   UiModalTemplateComponent,
+  UiShortcutDirective,
+  UiShortcutKind,
+  UiShortcutSurfaceDirective,
 } from '@platon/shared/ui'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
@@ -73,6 +76,7 @@ type Action = {
   showLabel?: boolean
   playerAction?: PlayerActions
   menu?: MatMenu
+  shortcut?: UiShortcutKind
   run?: () => void
 }
 
@@ -118,7 +122,11 @@ type FullscreenElement = HTMLElement & {
     PlayerTerminalLogsComponent,
     PlayerQuestionFeedbackComponent,
     PlayerErrorComponent,
+    UiShortcutDirective,
   ],
+  // Each exercise is its own surface: with several exercises on a page, Mod+Enter validates the one
+  // that holds the focus.
+  hostDirectives: [UiShortcutSurfaceDirective],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
@@ -199,6 +207,8 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
         visible: !this.reviewMode,
         disabled: this.disabled || !!this.runningAction,
         playerAction: PlayerActions.CHECK_ANSWER,
+        // The last attempt cannot be undone: it stays a deliberate click.
+        shortcut: this.player.remainingAttempts === 1 ? undefined : 'submit',
         showLabel: this.showLabelIfEnoughSpace,
         run: async () => {
           this.removeAnswerFromLocalStorage()
@@ -216,6 +226,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
         visible: !this.reviewMode && !this.previewMode,
         disabled: !!this.runningAction,
         playerAction: PlayerActions.SAVE_ANSWER,
+        shortcut: 'save',
         showLabel: this.showLabelIfEnoughSpace,
         run: async () => {
           await this.saveTemporaryAnswer(PlayerActions.SAVE_ANSWER)

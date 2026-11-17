@@ -19,9 +19,5 @@
       <tag-select kind="level" id="levels" formControlName="levels" />
     </nz-form-control>
   </nz-form-item>
-  @if (saving) {
-  <nz-spin></nz-spin>
-  } @else {
-  <button nz-button nzType="primary" [disabled]="!canSubmit">Sauvegarder</button>
-  }
+  <button nz-button nzType="primary" uiShortcut="save" [nzLoading]="saving" [disabled]="!canSubmit">Sauvegarder</button>
 </form>

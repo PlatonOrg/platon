@@ -35,6 +35,6 @@
   @if (moving) {
   <nz-spin nzTip="Déplacement en cours..."></nz-spin>
   } @else { @if (!loading) {
-  <button nz-button nzType="primary" (click)="move()">Déplacer</button>
+  <button nz-button nzType="primary" uiShortcut="submit" (click)="move()">Déplacer</button>
   } }
 </footer>

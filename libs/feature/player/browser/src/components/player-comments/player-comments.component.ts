@@ -111,11 +111,12 @@ export class PlayerCommentsComponent implements OnInit, OnChanges {
   }
 
   protected async blockEvents(event: KeyboardEvent): Promise<void> {
-    if (event.metaKey && event.key === 'Enter') {
-      await this.onSubmitComment()
-      event.preventDefault()
-      event.stopPropagation()
-    }
+    // Synchronously, before any await: Mod+Enter sends the comment and must not reach the shortcuts of
+    // the page, which would validate the exercise.
     event.stopPropagation()
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault()
+      await this.onSubmitComment()
+    }
   }
 }
