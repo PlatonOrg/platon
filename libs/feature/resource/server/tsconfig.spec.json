@@ -4,6 +4,7 @@
     "outDir": "../../../../dist/out-tsc",
     "module": "commonjs",
     "types": ["jest", "node"],
+    "isolatedModules": true,
     "composite": true,
     "emitDecoratorMetadata": true
   },
