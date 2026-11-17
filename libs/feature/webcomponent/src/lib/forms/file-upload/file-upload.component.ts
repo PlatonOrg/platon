@@ -25,6 +25,7 @@ import { CssPipeModule } from '../../shared/pipes/css.pipe'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatProgressBarModule } from '@angular/material/progress-bar'
+import { AuthService } from '@platon/core/browser'
 
 @Component({
   selector: 'wc-file-upload',
@@ -48,6 +49,7 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
   readonly injector = inject(Injector)
   readonly changeDetector = inject(WebComponentChangeDetectorService)
   private readonly fileUploadService = inject(FileUploadService)
+  private readonly authService = inject(AuthService)
 
   private readonly webComponentService!: WebComponentService
 
@@ -56,6 +58,11 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
   @ViewChild('uploadZone') uploadZoneRef?: ElementRef
 
   protected errors: string[] = []
+  /**
+   * The files are saved for the signed-in user: a visitor who is not signed in can't upload any.
+   * `undefined` while the check is running, the upload being disabled until it ends.
+   */
+  protected signedIn?: boolean
   private subscription?: Subscription
   private dragCounter = 0
   private fileMap = new Map<string, File>() // Stocker les fichiers bruts
@@ -98,9 +105,24 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
   }
 
   /**
+   * Checks that a user is signed in: the server saves the files for the user, and answers 401 to
+   * a visitor who is not signed in (the documentation, for example).
+   */
+  private async checkSignedIn(): Promise<boolean> {
+    const user = await this.authService.ready().catch(() => undefined)
+    await this.changeDetector.ignore(this, () => {
+      this.signedIn = !!user
+    })
+    return !!user
+  }
+
+  /**
    * Charge les fichiers déjà envoyés pour la session
    */
   private async loadExistingSubmissions() {
+    if (!(await this.checkSignedIn())) {
+      return
+    }
     try {
       const response = await firstValueFrom(this.fileUploadService.getExistingSubmissions(this.sessionId))
 
@@ -202,6 +224,9 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
    */
   private async processFiles(files: FileList) {
     this.errors = []
+    if (!this.signedIn) {
+      return
+    }
     const filesToAdd: UploadedFile[] = []
     const rawFilesToStore: Array<{ id: string; file: File }> = []
 
@@ -383,7 +408,7 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
         case 413:
           return `Fichier trop volumineux (max: ${this.formatFileSize(this.state.maxFileSize)})`
         case 401:
-          return `Authentification requise. Veuillez vous reconnecter.`
+          return `Connectez-vous à PLaTon pour déposer un fichier.`
         case 403:
           return `Vous n'avez pas la permission d'uploader ce fichier`
         case 404:
@@ -503,6 +528,14 @@ export class FileUploadComponent implements OnInit, OnDestroy, WebComponentHooks
    */
   protected isMaxFilesReached(): boolean {
     return this.state.maxFiles > 0 && this.state.uploadedFiles.length >= this.state.maxFiles
+  }
+
+  /**
+   * Vérifie si l'apprenant ne peut pas déposer de fichier (composant désactivé, limite atteinte,
+   * visiteur non connecté)
+   */
+  protected isUploadDisabled(): boolean {
+    return this.state.disabled || this.isMaxFilesReached() || !this.signedIn
   }
 
   /**

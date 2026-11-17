@@ -11,7 +11,7 @@ export const TimerComponentDefinition = defineWebComponent({
   name: 'Timer',
   selector: 'wc-timer',
   description:
-    "Chronomètre qui affiche le temps écoulé depuis le début de l'exécution du composant ou qui fait un compte à rebours.",
+    "Compte à rebours qui soumet automatiquement la réponse de l'apprenant lorsque le temps est écoulé. Utile pour les exercices chronométrés, le calcul mental ou les questions éclair.",
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
@@ -38,5 +38,8 @@ export const TimerComponentDefinition = defineWebComponent({
   showcase: {
     countDownTime: 120,
     alignment: 'right',
+  },
+  playgrounds: {
+    'Calcul mental chronométré': 'mental-calculation.ple',
   },
 })

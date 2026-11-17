@@ -1,0 +1,60 @@
+sandbox = "node"
+
+nombres = :wc-checkbox-group
+nombres.horizontal = true
+
+builder == #!lang=js
+const estPremier = (n) => {
+  if (n < 2) return false
+  for (let d = 2; d * d <= n; d++) if (n % d === 0) return false
+  return true
+}
+// Mélange de Fisher-Yates : chaque ordre a la même probabilité.
+const melanger = (liste) => {
+  for (let i = liste.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[liste[i], liste[j]] = [liste[j], liste[i]]
+  }
+  return liste
+}
+const candidats = Array.from({ length: 48 }, (_, i) => i + 2) // de 2 à 49
+// De 2 à 5 nombres premiers, et des nombres composés pour compléter à 8 propositions :
+// un tirage entièrement au hasard pourrait ne contenir aucun nombre premier, ou un seul.
+const combien = 2 + Math.floor(Math.random() * 4)
+const tirage = melanger([
+  ...melanger(candidats.filter(estPremier)).slice(0, combien),
+  ...melanger(candidats.filter((n) => !estPremier(n))).slice(0, 8 - combien),
+])
+// Chaque proposition peut être un objet { content, checked, css }.
+nombres.items = tirage.map((n) => ({ content: String(n), checked: false }))
+premiers = tirage.filter(estPremier).map(String)
+==
+
+title ==
+Nombres premiers (notation partielle)
+==
+
+statement ==
+Cochez tous les nombres **premiers**.
+==
+
+form ==
+{{ nombres }}
+==
+
+grader == #!lang=js
+let bons = 0
+for (const item of nombres.items) {
+  const attendu = premiers.includes(item.content)
+  if (!!item.checked === attendu) bons++
+  item.css = !!item.checked === attendu ? 'success-border' : 'error-border'
+}
+// Note proportionnelle au nombre de cases correctement cochées ou laissées vides.
+grade = Math.round((100 * bons) / nombres.items.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${bons} réponse(s) correcte(s) sur ${nombres.items.length}.`
+==
+
+solution ==
+Les nombres premiers étaient : {{ premiers | join(", ") }}.
+==

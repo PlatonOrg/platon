@@ -33,4 +33,7 @@ export const GraphViewerComponentDefinition = defineWebComponent({
         }
         `,
   },
+  playgrounds: {
+    "Degré d'un sommet": 'degree.ple',
+  },
 })

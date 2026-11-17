@@ -59,6 +59,9 @@ export const ChartViewerPiesComponentDefinition = defineWebComponent({
       },
     ],
   },
+  playgrounds: {
+    'Calculer un pourcentage': 'percentage.ple',
+  },
 })
 
 export const simpleChartViewerPiesState: EChartsOption = {

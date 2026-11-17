@@ -1,0 +1,37 @@
+sandbox = "node"
+
+// Champ texte avec suggestions automatiques et clavier de caractères spéciaux.
+reponse = :wc-input-box
+reponse.placeholder = "Nom de la ville"
+reponse.completion = ["Berlin", "Bruxelles", "Madrid", "Lisbonne", "Rome", "Vienne", "Varsovie"]
+reponse.specialCharacters = [["é", "è", "ê", "à", "ç"]]
+reponse.hint = "Commencez à taper pour voir des suggestions"
+
+title ==
+Réponse textuelle
+==
+
+statement ==
+Quelle est la capitale du **Portugal** ?
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+// Normalisation : sans accents, sans majuscules et sans espaces superflus.
+const normaliser = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase()
+
+if (normaliser(reponse.value) === 'lisbonne') {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Exact !'
+  reponse.css = 'success-state'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Ce n\'est pas la bonne ville.'
+  reponse.css = 'error-state'
+}
+==

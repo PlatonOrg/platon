@@ -18,6 +18,8 @@ Le composant CodeViewer permet d'afficher du code source avec une mise en forme 
   - Plages de lignes : "1-3 5-7"
   - Combinaisons : "1 3-5 8"
 
+Une valeur invalide de `lines` ou de `highlights` est ignorée, et un langage que l'éditeur ne connaît pas affiche le code sans coloration : dans ces cas, un avertissement est écrit dans la console du navigateur.
+
 ### Exemples d'utilisation
 
 #### Exemple Python avec surlignage
@@ -27,8 +29,7 @@ Le composant CodeViewer permet d'afficher du code source avec une mise en forme 
   language: "python",
   lines: "1",
   highlights: "2 4-5",
-  code: `
-def calcul_moyenne(notes):
+  code: `def calcul_moyenne(notes):
     somme = 0
     for note in notes:
         somme += note
@@ -37,24 +38,21 @@ def calcul_moyenne(notes):
 # Exemple d'utilisation
 resultats = [12, 15, 9, 14]
 moyenne = calcul_moyenne(resultats)
-print(f"La moyenne est de {moyenne}")
-  `
+print(f"La moyenne est de {moyenne}")`
 }
 ```
 
-Dans cet exemple, la ligne 2 (déclaration de variable) et les lignes 4-5 (calcul et retour) seront surlignées.
+Dans cet exemple, la ligne 2 (initialisation de la somme) et les lignes 4-5 (calcul et retour) seront surlignées. Les lignes sont comptées à partir de la première ligne du code : un saut de ligne au début du code ajoute une ligne vide numérotée 1.
 
 #### Exemple HTML sans numérotation
 
 ```typescript
 {
   language: "html",
-  code: `
-<div class="container">
+  code: `<div class="container">
   <h1>Mon titre</h1>
   <p>Un paragraphe avec du <strong>texte important</strong>.</p>
-</div>
-  `
+</div>`
 }
 ```
 

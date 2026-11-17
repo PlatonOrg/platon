@@ -110,4 +110,7 @@ export const FoldableFeedbackComponentDefinition = defineWebComponent({
       },
     ],
   },
+  playgrounds: {
+    'Table de multiplication': 'multiplication-table.ple',
+  },
 })

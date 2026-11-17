@@ -135,4 +135,8 @@ export const CodeEditorComponentDefinition = defineWebComponent({
       },
     ],
   },
+  playgrounds: {
+    'Fonction JavaScript testée': 'sum-function.ple',
+    'Fonction Python testée': 'python-function.ple',
+  },
 })

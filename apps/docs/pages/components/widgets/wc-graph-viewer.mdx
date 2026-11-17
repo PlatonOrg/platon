@@ -3,7 +3,7 @@ title: GraphViewer
 description: Visualiseur de graphes utilisant le format DOT pour représenter des structures de données complexes. Particulièrement utile pour les exercices d'algorithmique, de théorie des graphes, de structures de données, ou tout contexte nécessitant la visualisation de relations entre objets comme des arbres généalogiques ou des réseaux.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -130,7 +130,12 @@ La puissance du langage DOT permet de créer rapidement des visualisations compl
       name: 'Visualisation',
       url: 'playground/components/wc-graph-viewer',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Degré d'un sommet",
+    "url": "/playground/exercises/graph-viewer/degree.ple"
+  }
+]
   ]}
 />
 

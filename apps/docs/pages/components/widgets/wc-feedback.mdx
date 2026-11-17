@@ -3,7 +3,7 @@ title: Feedback
 description: Composant d'affichage de messages de retour avec différents niveaux visuels (succès, information, avertissement, erreur). Essentiel pour fournir des retours clairs aux apprenants sur leurs réponses, donner des indications supplémentaires, ou afficher des messages contextuels dans tout type d'exercice interactif.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -87,7 +87,12 @@ Le support du Markdown permet d'enrichir les messages avec des éléments comme 
       name: 'Visualisation',
       url: 'playground/components/wc-feedback',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Encadrés dans l'énoncé",
+    "url": "/playground/exercises/feedback/callout.ple"
+  }
+]
   ]}
 />
 

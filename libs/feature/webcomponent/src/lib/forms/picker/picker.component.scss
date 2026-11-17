@@ -21,3 +21,27 @@ mat-form-field {
     background-color: transparent !important;
   }
 }
+
+.inline-select {
+  display: inline-block;
+  width: 100%;
+  padding: 0 0.25rem;
+  border-bottom: 1px solid #8c8c8c;
+  box-sizing: border-box;
+  /* Use the font of the surrounding text. */
+  --mat-select-trigger-text-font: inherit;
+  --mat-select-trigger-text-size: inherit;
+  --mat-select-trigger-text-line-height: inherit;
+  --mat-select-trigger-text-weight: inherit;
+  --mat-select-trigger-text-tracking: inherit;
+
+  &.mat-mdc-select-disabled {
+    border-bottom-style: dotted;
+  }
+}
+
+.inline-select[aria-expanded='true'],
+.inline-select:focus {
+  border-bottom-color: #171c8f;
+  box-shadow: 0 1px 0 #171c8f;
+}

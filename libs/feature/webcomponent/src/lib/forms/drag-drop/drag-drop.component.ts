@@ -66,12 +66,15 @@ export class DragDropComponent implements OnInit, OnDestroy, WebComponentHooks<D
         return
       }
 
-      if (!src.state.draggable && src.state.content && dst.state.content) {
+      if (src.state.draggable) {
+        // An original label is copied: it can be dropped into several zones.
+        dst.state.content = src.state.content
+      } else {
+        // Between two zones, the contents are swapped: a label dropped into an empty zone is moved.
         const content = src.state.content
         src.state.content = dst.state.content
         dst.state.content = content
-      } else {
-        dst.state.content = src.state.content
+        src.state.isFilled = !!src.state.content
       }
       dst.state.isFilled = !!dst.state.content
     }

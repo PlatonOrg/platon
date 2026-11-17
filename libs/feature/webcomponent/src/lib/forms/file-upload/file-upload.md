@@ -54,19 +54,8 @@
 - `disabled`: Désactiver l'upload
 - `multiple`: Upload multiple
 
-## Backend
+## Envoi et correction
 
-Endpoint `/api/upload`:
-
-```typescript
-@Post('upload')
-@UseInterceptors(FileInterceptor('file'))
-uploadFile(@UploadedFile() file: Express.Multer.File) {
-  return {
-    success: true,
-    url: `/files/${file.filename}`,
-    fileName: file.originalname,
-    fileSize: file.size
-  }
-}
-```
+- Chaque fichier est envoyé dès qu'il est déposé, à `/api/v1/sessions/<session>/submissions/upload`, et enregistré pour l'utilisateur connecté.
+- **Il faut être connecté à PLaTon** : pour un visiteur non connecté (la documentation, par exemple), la zone de dépôt est désactivée et le composant affiche « Connectez-vous à PLaTon pour déposer un fichier. ».
+- À la correction, les fichiers déposés sont copiés dans le dossier `submission/` de l'environnement d'exécution : ils ne sont accessibles qu'avec la sandbox Python. Le grader reçoit aussi la liste `uploadedFiles` (nom, taille, type, statut) dans l'état du composant.

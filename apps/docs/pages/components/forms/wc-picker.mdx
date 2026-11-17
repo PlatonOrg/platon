@@ -3,7 +3,7 @@ title: Picker
 description: Menu déroulant permettant de sélectionner une valeur parmi une liste prédéfinie. Idéal pour les exercices à choix limité, les sélections de paramètres, de catégories, ou de valeurs spécifiques dans un ensemble fermé, offrant une interface compacte pour les questions où l'espace est limité.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -63,7 +63,12 @@ Le Picker est particulièrement utile pour:
       name: 'Visualisation',
       url: 'playground/components/wc-picker',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Choisir une unité",
+    "url": "/playground/exercises/picker/units.ple"
+  }
+]
   ]}
 />
 

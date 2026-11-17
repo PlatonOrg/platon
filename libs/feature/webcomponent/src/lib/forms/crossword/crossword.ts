@@ -120,5 +120,7 @@ export const CrosswordComponentDefinition = defineWebComponent({
       },
     ],
   },
-  playgrounds: {},
+  playgrounds: {
+    'Vocabulaire de la programmation': 'programming.ple',
+  },
 })
