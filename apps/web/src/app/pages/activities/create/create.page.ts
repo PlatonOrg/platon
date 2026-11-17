@@ -446,7 +446,6 @@ export class ActivityCreatePage implements OnInit, OnDestroy {
       const { resources } = this.resourceInfo.value
       const { openAt, closeAt, isChallenge } = this.settingsInfo.value
 
-      console.log("Membres sélectionnés pour l'activité :", this.members)
       const createdActivities = await firstValueFrom(
         this.courseService.createActivities(
           course as Course,
