@@ -24,6 +24,23 @@ type Scripts = Record<string, string>
 nunjucks.configure({ autoescape: false })
 
 /**
+ * Escapes a JSON text to write it in a `<script>` tag of a template rendered as markdown.
+ *
+ * Before parsing, the markdown contributions rewrite their syntax everywhere in the text, scripts
+ * included: KaTeX replaces `$...$`, `\(...\)`... with HTML placeholders and the icons replace
+ * `@fa star@`. Their quotes would break the JSON of the scripts (a slide with a formula, for example).
+ * These characters only appear inside JSON strings, where `\uXXXX` escapes give the same value
+ * to `JSON.parse`. `<` is escaped too, so that a `</script>` in a string can't close the tag.
+ * @param json A valid JSON text.
+ * @returns The same JSON value, without the characters rewritten by the markdown.
+ */
+export const toScriptJson = (json: string): string =>
+  // `\\` is an escaped backslash: valid JSON is read from left to right, so each match is a whole escape.
+  json.replace(/\\\\|[$@`<]/g, (match) =>
+    match === '\\\\' ? '\\u005c' : `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`
+  )
+
+/**
  * Transforms recursivly all Editor.js content to HTML code from `object`.
  * @param variables Object to transform.
  * @param scripts A list of scripts to fill.
@@ -51,7 +68,7 @@ const withEditorJsContent = (variables: any, scripts: Scripts): any => {
     if (isEditorJsOutput) {
       const id = uuidv4()
       scripts[id] = variables
-      return `\n<script type='application/json' id='${id}'>${scripts[id]}</script>\n<wc-editorjs-viewer id='${id}'></wc-editorjs-viewer>`
+      return `\n<script type='application/json' id='${id}'>${toScriptJson(scripts[id])}</script>\n<wc-editorjs-viewer id='${id}'></wc-editorjs-viewer>`
     }
   }
 
@@ -82,7 +99,8 @@ export const withRenderedComponents = (variables: any, scripts: Scripts, reviewM
       const { cid, selector } = variables
       const scriptId = uuidv4()
       scripts[scriptId] = JSON.stringify(variables)
-      return `\n<script type='application/json' id='${scriptId}'>${scripts[scriptId]}</script>\n<${selector} data-script-id='${scriptId}' cid='${cid}'></${selector}>`
+      // The state script is added at the end of the rendered template (see `withComponentScripts`).
+      return `<${selector} data-script-id='${scriptId}' cid='${cid}'></${selector}>`
     }
     return Object.keys(variables).reduce((o, k) => {
       o[k] = withRenderedComponents(variables[k], scripts, reviewMode)
@@ -91,6 +109,25 @@ export const withRenderedComponents = (variables: any, scripts: Scripts, reviewM
   }
 
   return variables
+}
+
+/**
+ * Appends to `html` the state scripts of the components it contains.
+ *
+ * The scripts are written at the end, each one as a raw HTML block so that the markdown renderer
+ * leaves their JSON untouched. Written next to its component, a block would end the current
+ * paragraph and break the components placed inside a sentence (input-box, picker...).
+ * The components find their script by id anywhere in the page.
+ * @param html A rendered template.
+ * @param scripts The scripts of the components.
+ * @returns The template followed by the scripts of its components.
+ */
+const withComponentScripts = (html: string, scripts: Scripts): string => {
+  const ids = new Set(Array.from(html.matchAll(/data-script-id='([^']+)'/g), (match) => match[1]))
+  const blocks = Array.from(ids)
+    .filter((id) => id in scripts)
+    .map((id) => `<script type='application/json' id='${id}'>${toScriptJson(scripts[id])}</script>`)
+  return blocks.length ? `${html}\n\n${blocks.join('\n')}` : html
 }
 
 /**
@@ -116,7 +153,7 @@ export const withRenderedTemplates = (variables: ExerciseVariables, reviewMode?:
   const render = (v: any): any => {
     if (typeof v === 'string') {
       try {
-        return nunjucks.renderString(v, computed).trim()
+        return withComponentScripts(nunjucks.renderString(v, computed).trim(), scripts)
       } catch (_error) {
         return v
       }

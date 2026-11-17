@@ -4,19 +4,28 @@
 
 mat-card {
   width: fit-content;
+  max-width: 100%;
 
   mat-card-content {
+    // The title and the icons keep their natural width, side by side: the icons go under the
+    // title when there is not enough room, and wrap only when they don't fit on a whole line.
+    // In a card wider than its content (`width` property), the icons go to the right.
     display: flex;
-    align-items: baseline;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    width: 100%;
+    gap: 8px 32px;
     height: 100%;
-    div {
-      margin: 0 16px;
-      width: 150px;
-      height: 100%;
-      display: flex;
-      align-items: center;
+
+    h3 {
+      margin: 0;
+    }
+
+    // The icons are a list: in an exercise, the markdown theme adds the indent and the bottom
+    // margin of a list of text.
+    ::ng-deep .ant-rate {
+      margin: 0;
+      padding: 0;
     }
   }
 }

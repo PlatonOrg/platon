@@ -3,7 +3,7 @@ title: ChartViewer-Bars
 description: Graphique à barres horizontales ou verticales pour la visualisation comparative de données. Particulièrement utile pour les exercices d'économie, de statistiques, d'analyse de données séquentielles, de comparaison de performances sur différentes périodes, ou pour illustrer des distributions et tendances dans diverses disciplines scientifiques.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -33,12 +33,14 @@ Chaque élément du tableau `value` correspond à une catégorie définie dans l
 ### Configuration des axes
 
 - **labels**: Tableau de chaînes définissant les catégories (axe des abscisses en mode vertical, ordonnées en mode horizontal)
-- **xAxisLabel**: Titre de l'axe horizontal
-- **yAxisLabel**: Titre de l'axe vertical
+- **xAxisLabel**: Titre de l'axe horizontal, quel que soit le mode
+- **yAxisLabel**: Titre de l'axe vertical, quel que soit le mode
+
+En mode horizontal, les catégories passent sur l'axe vertical : pensez à échanger les deux titres si vous changez de mode.
 
 ### Modes d'affichage
 
-- **vertical**: Barres verticales (classique)
+- **vertical** (par défaut): Barres verticales (classique)
 - **horizontal**: Barres horizontales (utile pour les étiquettes longues ou nombreuses)
 
 ### Exemple pratique
@@ -83,7 +85,12 @@ Ce composant est particulièrement adapté pour:
       name: 'Visualisation',
       url: 'playground/components/wc-chart-viewer-bars',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Lire un diagramme en barres",
+    "url": "/playground/exercises/chart-viewer-bars/best-month.ple"
+  }
+]
   ]}
 />
 
@@ -101,8 +108,8 @@ Ce composant est particulièrement adapté pour:
   "properties": {
     "mode": {
       "type": "string",
-      "default": "horizontal",
-      "description": "Mode d'affichage du graphe : horizontal ou vertical",
+      "default": "vertical",
+      "description": "Sens des barres : vertical (barres verticales, les labels sous l'axe horizontal) ou horizontal",
       "enum": [
         "horizontal",
         "vertical"
@@ -111,12 +118,12 @@ Ce composant est particulièrement adapté pour:
     "xAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe X"
+      "description": "Titre de l'axe horizontal"
     },
     "yAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe Y"
+      "description": "Titre de l'axe vertical"
     },
     "labels": {
       "type": "array",
@@ -267,8 +274,8 @@ Ce composant est particulièrement adapté pour:
   "properties": {
     "mode": {
       "type": "string",
-      "default": "horizontal",
-      "description": "Mode d'affichage du graphe : horizontal ou vertical",
+      "default": "vertical",
+      "description": "Sens des barres : vertical (barres verticales, les labels sous l'axe horizontal) ou horizontal",
       "enum": [
         "horizontal",
         "vertical"
@@ -277,12 +284,12 @@ Ce composant est particulièrement adapté pour:
     "xAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe X"
+      "description": "Titre de l'axe horizontal"
     },
     "yAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe Y"
+      "description": "Titre de l'axe vertical"
     },
     "labels": {
       "type": "array",

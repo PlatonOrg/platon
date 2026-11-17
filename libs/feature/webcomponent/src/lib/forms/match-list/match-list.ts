@@ -125,6 +125,7 @@ export const MatchListComponentDefinition = defineWebComponent({
   },
 
   playgrounds: {
-    'Biologie animal': 'biology.ple',
+    'Biologie animale': 'biology.ple',
+    'Pays et capitales': 'capitals.ple',
   },
 })

@@ -3,7 +3,7 @@ title: Matrix
 description: Composant permettant de saisir ou afficher une matrice de valeurs. Idéal pour les exercices de calcul matriciel, résolution de systèmes d'équations linéaires, transformations géométriques ou tout problème nécessitant l'entrée ou l'affichage de données tabulaires.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -65,7 +65,12 @@ Ce composant est parfaitement adapté pour:
       name: 'Visualisation',
       url: 'playground/components/wc-matrix',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Somme de matrices",
+    "url": "/playground/exercises/matrix/sum.ple"
+  }
+]
   ]}
 />
 

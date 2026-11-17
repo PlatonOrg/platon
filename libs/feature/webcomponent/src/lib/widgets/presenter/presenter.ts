@@ -49,4 +49,7 @@ export const PresenterComponentDefinition = defineWebComponent({
       </section>
     `,
   },
+  playgrounds: {
+    'Diaporama de cours': 'slides.ple',
+  },
 })

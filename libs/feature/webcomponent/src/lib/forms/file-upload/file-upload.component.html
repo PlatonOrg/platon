@@ -4,10 +4,10 @@
     #uploadZone
     class="upload-zone"
     [class.drag-active]="state.dragActive"
-    [class.disabled]="state.disabled || isMaxFilesReached()"
-    (dragover)="state.disabled || isMaxFilesReached() ? null : onDragOver($event)"
-    (dragleave)="state.disabled || isMaxFilesReached() ? null : onDragLeave($event)"
-    (drop)="state.disabled || isMaxFilesReached() ? null : onDrop($event)"
+    [class.disabled]="isUploadDisabled()"
+    (dragover)="isUploadDisabled() ? null : onDragOver($event)"
+    (dragleave)="isUploadDisabled() ? null : onDragLeave($event)"
+    (drop)="isUploadDisabled() ? null : onDrop($event)"
   >
     <div class="upload-content">
       <mat-icon class="upload-icon">cloud_upload</mat-icon>
@@ -18,7 +18,7 @@
         mat-raised-button
         color="primary"
         (click)="fileInput.click()"
-        [disabled]="state.disabled || isMaxFilesReached()"
+        [disabled]="isUploadDisabled()"
         class="select-button"
       >
         <mat-icon>attach_file</mat-icon>
@@ -30,14 +30,19 @@
         type="file"
         #fileInput
         [multiple]="state.multiple && state.maxFiles > 1"
-        [disabled]="state.disabled"
+        [disabled]="isUploadDisabled()"
         [accept]="state.acceptedFormats"
         (change)="onFileSelected($event)"
       />
 
       <!-- Upload Constraints Info -->
       <div class="constraints-info">
-        @if (isMaxFilesReached()) {
+        @if (signedIn === false) {
+        <p class="constraint warning">
+          <mat-icon>lock</mat-icon>
+          Connectez-vous à PLaTon pour déposer un fichier.
+        </p>
+        } @if (isMaxFilesReached()) {
         <p class="constraint warning">
           <mat-icon>check_circle</mat-icon>
           Limite de <strong>{{ state.maxFiles }}</strong> fichier(s) atteinte

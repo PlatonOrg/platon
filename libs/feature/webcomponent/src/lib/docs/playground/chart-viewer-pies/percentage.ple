@@ -1,0 +1,50 @@
+sandbox = "node"
+
+camembert = :wc-chart-viewer-pies
+camembert.mode = "donut"
+camembert.title = { text: "Moyens de transport des élèves", subtext: "", left: "center" }
+camembert.dataTitle = "Élèves"
+
+reponse = :wc-input-box
+reponse.type = "number"
+reponse.placeholder = "Pourcentage"
+
+builder == #!lang=js
+const effectifs = [20, 30, 50, 60, 80, 90, 110, 120]
+const tirer = () => effectifs[Math.floor(Math.random() * effectifs.length)]
+camembert.data = [
+  { name: 'Bus', value: tirer() },
+  { name: 'Vélo', value: tirer() },
+  { name: 'À pied', value: tirer() },
+  { name: 'Voiture', value: tirer() }
+]
+total = camembert.data.reduce((s, d) => s + d.value, 0)
+pourcentage = (100 * camembert.data[1].value) / total
+==
+
+title ==
+Lire un diagramme circulaire
+==
+
+statement ==
+{{ camembert }}
+
+Survolez le diagramme pour lire les effectifs.
+Quel **pourcentage** des élèves vient en **vélo** ? Arrondissez à l'unité.
+==
+
+form ==
+{{ reponse }} %
+==
+
+grader == #!lang=js
+if (Math.abs(Number(reponse.value) - pourcentage) <= 0.5) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Exact !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Divisez l\'effectif des élèves à vélo par l\'effectif total, puis multipliez par 100.'
+}
+==

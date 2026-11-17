@@ -46,4 +46,7 @@ export const MarkdownComponentDefinition = defineWebComponent({
         <https://cisstech.github.io/nge/docs/nge-markdown/cheatsheet>
         `,
   },
+  playgrounds: {
+    'Lire une fiche de cours': 'reading.ple',
+  },
 })

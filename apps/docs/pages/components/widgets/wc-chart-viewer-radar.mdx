@@ -3,7 +3,7 @@ title: ChartViewer-Radar
 description: Graphique en forme de radar (ou toile d'araignée) permettant de visualiser des données multidimensionnelles. Parfait pour les exercices de comparaison de caractéristiques multiples, l'évaluation de compétences, l'analyse de performances selon différents critères, ou l'illustration de concepts statistiques avec représentation visuelle de données complexes.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -93,7 +93,12 @@ La propriété `indicators` définit les axes de votre radar avec leurs valeurs 
       name: 'Visualisation',
       url: 'playground/components/wc-chart-viewer-radar',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Lire un radar",
+    "url": "/playground/exercises/chart-viewer-radar/skills.ple"
+  }
+]
   ]}
 />
 

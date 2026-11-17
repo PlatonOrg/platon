@@ -92,4 +92,7 @@ export const EvaluatorComponentDefinition = defineWebComponent({
   showcase: {
     title: 'Donnez une note',
   },
+  playgrounds: {
+    'Auto-évaluation': 'self-assessment.ple',
+  },
 })

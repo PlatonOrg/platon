@@ -1,0 +1,41 @@
+sandbox = "node"
+
+reponse = :wc-input-box
+reponse.type = "number"
+
+// Les confettis sont lancés quand trigger passe de false à true.
+// Le composant n'occupe pas de place dans la page.
+fete = :wc-confetti
+fete.mode = "fireworks"
+
+builder == #!lang=js
+a = 2 + Math.floor(Math.random() * 8)
+b = 2 + Math.floor(Math.random() * 8)
+==
+
+title ==
+Récompenser une bonne réponse
+==
+
+statement ==
+Combien font {{ a }} × {{ b }} ?
+==
+
+form ==
+{{ reponse }}
+{{ fete }}
+==
+
+grader == #!lang=js
+if (Number(reponse.value) === a * b) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Bravo !'
+  fete.trigger = true
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Ce n\'est pas le bon résultat.'
+  fete.trigger = false
+}
+==

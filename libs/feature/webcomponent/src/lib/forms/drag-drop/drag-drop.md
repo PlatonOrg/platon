@@ -7,7 +7,12 @@ Le composant fonctionne avec deux types d'éléments:
 - **Éléments déplaçables** (`draggable=true`): Ces éléments peuvent être saisis et déplacés.
 - **Zones de dépôt** (`draggable=false`): Ces zones peuvent recevoir des éléments déplaçables.
 
-Lorsqu'un élément déplaçable est déposé dans une zone de dépôt, le contenu (`content`) de l'élément déplaçable est automatiquement copié dans la zone de dépôt. Un même élément déplaçable peut être utilisé plusieurs fois dans différentes zones.
+Lorsqu'un élément déplaçable est déposé dans une zone de dépôt, le contenu (`content`) de l'élément déplaçable est automatiquement copié dans la zone de dépôt. Un même élément déplaçable peut être utilisé plusieurs fois dans différentes zones : c'est ce qui permet, par exemple, d'attribuer une catégorie à chaque ligne d'un tableau.
+
+Le contenu d'une zone remplie peut aussi être glissé vers une autre zone :
+
+- vers une zone vide, il y est **déplacé** et la zone de départ se vide ;
+- vers une zone remplie, les contenus des deux zones sont **échangés**.
 
 ### Regroupement et restrictions
 

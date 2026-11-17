@@ -72,4 +72,7 @@ export const WordSelectorComponentDefinition = defineWebComponent({
     selectedWords: [],
     words: ["C'", 'est', 'mon', 'ami', 'il', 'vient', "d'", 'Australie', 'et', 'il', 'est', 'très', 'sympa'],
   },
+  playgrounds: {
+    'Construire une phrase': 'sentence.ple',
+  },
 })

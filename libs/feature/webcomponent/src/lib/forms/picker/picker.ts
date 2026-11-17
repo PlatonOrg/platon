@@ -81,4 +81,7 @@ export const PickerComponentDefinition = defineWebComponent({
   showcase: {
     items: ['Choix 1', 'Choix 2', 'Choix 3'],
   },
+  playgrounds: {
+    'Choisir une unité': 'units.ple',
+  },
 })

@@ -3,7 +3,7 @@ title: FoldableFeedback
 description: Système avancé d'affichage de retours détaillés et hiérarchisés avec des sections pliables/dépliables. Particulièrement adapté aux exercices de programmation pour montrer les résultats de tests unitaires, aux analyses multicritères, ou toute évaluation nécessitant plusieurs niveaux de détail avec comparaison entre valeurs attendues et obtenues.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -98,7 +98,12 @@ Ce composant est particulièrement utile pour les exercices de programmation, le
       name: 'Visualisation',
       url: 'playground/components/wc-foldable-feedback',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Table de multiplication",
+    "url": "/playground/exercises/foldable-feedback/multiplication-table.ple"
+  }
+]
   ]}
 />
 

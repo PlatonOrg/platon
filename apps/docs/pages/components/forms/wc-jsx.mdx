@@ -3,7 +3,7 @@ title: Jsx
 description: Interface graphique interactive basée sur JSXGraph permettant de créer, manipuler et explorer des constructions géométriques dynamiques. Idéal pour les exercices de géométrie euclidienne, trigonométrie, fonctions mathématiques, lieux géométriques, ou pour illustrer des concepts physiques avec des simulations visuelles.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -113,7 +113,12 @@ Le composant JSX est parfaitement adapté pour:
       name: 'Visualisation',
       url: 'playground/components/wc-jsx',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Milieu d'un segment",
+    "url": "/playground/exercises/jsx/midpoint.ple"
+  }
+]
   ]}
 />
 

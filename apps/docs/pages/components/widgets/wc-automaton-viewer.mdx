@@ -3,7 +3,7 @@ title: AutomatonViewer
 description: Visualiseur d'automates finis permettant d'afficher des machines à états avec leurs transitions. Essentiel pour les exercices d'informatique théorique, théorie des langages, expressions régulières, compilation, et pour illustrer des concepts comme les langages formels, les grammaires, ou les systèmes de transitions d'états.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -114,7 +114,12 @@ Le composant génère automatiquement une représentation graphique de l'automat
       name: 'Visualisation',
       url: 'playground/components/wc-automaton-viewer',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Mots acceptés par un automate",
+    "url": "/playground/exercises/automaton-viewer/accepted-words.ple"
+  }
+]
   ]}
 />
 

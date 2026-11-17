@@ -1,0 +1,85 @@
+sandbox = "node"
+
+// Classement par catégories : chaque étiquette d'origine (draggable = true) peut être déposée
+// dans autant de zones que nécessaire, elle est copiée à chaque dépôt.
+// Une étiquette déjà déposée se déplace d'une zone à l'autre (ou s'échange avec une zone remplie).
+plantes = [
+  { nom: "Ortie", categorie: "Comestible" },
+  { nom: "Pissenlit", categorie: "Comestible" },
+  { nom: "Ail des ours", categorie: "Comestible" },
+  { nom: "Châtaigne", categorie: "Comestible" },
+  { nom: "Muguet", categorie: "Toxique" },
+  { nom: "Digitale", categorie: "Toxique" },
+  { nom: "Marron d'Inde", categorie: "Toxique" },
+  { nom: "If", categorie: "Toxique" }
+]
+
+builder == #!lang=js
+function melanger(t) {
+  for (let i = t.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [t[i], t[j]] = [t[j], t[i]]
+  }
+  return t
+}
+
+plantes = melanger(plantes)
+
+etiquettes = ['Comestible', 'Toxique'].map((categorie) => {
+  const c = component('wc-drag-drop')
+  c.draggable = true
+  c.group = 'categories'
+  c.content = categorie
+  return c
+})
+
+// Une zone de dépôt par plante, dans le même ordre que plantes.
+zones = plantes.map(() => {
+  const c = component('wc-drag-drop')
+  c.group = 'categories'
+  return c
+})
+==
+
+title ==
+Glisser-déposer : plantes comestibles ou toxiques
+==
+
+statement ==
+Classez chaque plante : faites glisser **Comestible** ou **Toxique** dans la zone de sa ligne.
+Chaque étiquette peut servir plusieurs fois.
+==
+
+form ==
+<div style="display: flex; gap: 8px; margin-bottom: 16px">
+{% for e in etiquettes %}{{ e }}{% endfor %}
+</div>
+<table>
+{% for p in plantes %}
+<tr><td style="padding: 4px 12px 4px 0">{{ p.nom }}</td><td style="min-width: 160px">{{ zones[loop.index0] }}</td></tr>
+{% endfor %}
+</table>
+==
+
+grader == #!lang=js
+const erreurs = []
+zones.forEach((zone, i) => {
+  const ok = zone.content === plantes[i].categorie
+  if (!ok) erreurs.push(plantes[i].nom)
+  zone.css = ok ? 'success-state' : 'error-state'
+})
+
+grade = Math.round((100 * (zones.length - erreurs.length)) / zones.length)
+if (erreurs.length === 0) {
+  feedback.type = 'success'
+  feedback.content = 'Toutes les plantes sont bien classées.'
+} else {
+  feedback.type = 'error'
+  feedback.content = `${erreurs.length} plante(s) mal classée(s) ou non classée(s) : ${erreurs.join(', ')}.`
+}
+==
+
+solution ==
+- **Comestibles** : ortie, pissenlit, ail des ours, châtaigne.
+- **Toxiques** : muguet (souvent confondu avec l'ail des ours), digitale, marron d'Inde (à ne pas confondre avec la châtaigne), if.
+==

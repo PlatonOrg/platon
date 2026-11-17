@@ -29,4 +29,7 @@ export const FeedbackComponentDefinition = defineWebComponent({
     type: 'success',
     content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
   },
+  playgrounds: {
+    "Encadrés dans l'énoncé": 'callout.ple',
+  },
 })

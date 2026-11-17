@@ -3,7 +3,7 @@ title: Crossword
 description: Composant de grille interactive de mots croisés. Conçu pour la saisie mot par mot, il est idéal pour les exercices de vocabulaire ciblés et l'association terme-définition.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -60,7 +60,12 @@ Vous pouvez ajuster certains paramètres visuels du composant :
       name: 'Visualisation',
       url: 'playground/components/wc-crossword',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Vocabulaire de la programmation",
+    "url": "/playground/exercises/crossword/programming.ple"
+  }
+]
   ]}
 />
 
