@@ -68,7 +68,9 @@ const withEditorJsContent = (variables: any, scripts: Scripts): any => {
     if (isEditorJsOutput) {
       const id = uuidv4()
       scripts[id] = variables
-      return `\n<script type='application/json' id='${id}'>${toScriptJson(scripts[id])}</script>\n<wc-editorjs-viewer id='${id}'></wc-editorjs-viewer>`
+      return `\n<script type='application/json' id='${id}'>${toScriptJson(
+        scripts[id]
+      )}</script>\n<wc-editorjs-viewer id='${id}'></wc-editorjs-viewer>`
     }
   }
 
