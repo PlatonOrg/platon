@@ -1,0 +1,49 @@
+sandbox = "node"
+
+bulles = :wc-binded-bubbles
+// 4 paires sont affichées à la fois : dès qu'une paire est trouvée, une nouvelle la remplace.
+bulles.numberPairToShow = 4
+bulles.items = [
+  { item1: { content: "France" }, item2: { content: "Paris" } },
+  { item1: { content: "Espagne" }, item2: { content: "Madrid" } },
+  { item1: { content: "Italie" }, item2: { content: "Rome" } },
+  { item1: { content: "Allemagne" }, item2: { content: "Berlin" } },
+  { item1: { content: "Portugal" }, item2: { content: "Lisbonne" } },
+  { item1: { content: "Belgique" }, item2: { content: "Bruxelles" } }
+]
+
+title ==
+Pays et capitales
+==
+
+statement ==
+Associez chaque pays à sa capitale.
+==
+
+form ==
+{{ bulles }}
+==
+
+grader == #!lang=js
+// Une paire trouvée a l'état « achieved », ou « disabled » pour les dernières paires
+// (qui ne sont plus remplacées). nbError compte les mauvaises associations
+// et errors liste les paires concernées.
+const total = bulles.items.length
+const trouvees = bulles.items.filter((p) => ['achieved', 'disabled'].includes(p.item1.state)).length
+const penalite = 15 * bulles.nbError
+const erreurs = bulles.errors.map((e) => e.item1.content + ' / ' + e.item2.content).join(', ')
+
+// L'exercice est soumis automatiquement quand toutes les paires sont trouvées,
+// mais l'apprenant peut aussi valider avant : on vérifie donc que tout est associé.
+grade = Math.max(0, Math.round((100 * trouvees) / total) - penalite)
+if (trouvees < total) {
+  feedback.type = 'warning'
+  feedback.content = `Vous avez associé ${trouvees} paire(s) sur ${total}.`
+} else if (bulles.nbError === 0) {
+  feedback.type = 'success'
+  feedback.content = 'Sans faute !'
+} else {
+  feedback.type = 'warning'
+  feedback.content = `${bulles.nbError} erreur(s) : ${erreurs}.`
+}
+==

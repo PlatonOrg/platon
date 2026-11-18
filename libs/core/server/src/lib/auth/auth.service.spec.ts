@@ -85,7 +85,7 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ accessToken: 'signed-token', refreshToken: 'signed-token' })
       expect(jwtService.signAsync).toHaveBeenCalledWith(
-        { sub: 'user-1', username: 'testuser' },
+        { sub: 'user-1', username: 'testuser', type: 'access' },
         { secret: 'test-secret', expiresIn: '1h' }
       )
     })
@@ -222,15 +222,15 @@ describe('AuthService', () => {
   })
 
   describe('authenticate', () => {
-    it('devrait générer un access token et un refresh token avec les bonnes durées de vie', async () => {
+    it('devrait générer un access token et un refresh token typés avec les bonnes durées de vie', async () => {
       await service.authenticate('user-1', 'testuser')
 
       expect(jwtService.signAsync).toHaveBeenCalledWith(
-        { sub: 'user-1', username: 'testuser' },
+        { sub: 'user-1', username: 'testuser', type: 'access' },
         { secret: 'test-secret', expiresIn: '1h' }
       )
       expect(jwtService.signAsync).toHaveBeenCalledWith(
-        { sub: 'user-1', username: 'testuser' },
+        { sub: 'user-1', username: 'testuser', type: 'refresh' },
         { secret: 'test-secret', expiresIn: '7d' }
       )
     })
@@ -249,6 +249,53 @@ describe('AuthService', () => {
         accessToken: 'signed-token',
         refreshToken: 'signed-token',
       })
+    })
+  })
+
+  describe('refresh', () => {
+    // A real JwtService is used to check the claims and expirations of the issued tokens.
+    const realJwt = new JwtService({ secret: 'test-secret' })
+    let refreshService: AuthService
+
+    const now = () => Math.floor(Date.now() / 1000)
+
+    const buildService = (lifetimes: { access: string; refresh: string }) =>
+      new AuthService(
+        realJwt,
+        userService,
+        new ConfigService({
+          secret: 'test-secret',
+          auth: { accessLifetime: lifetimes.access, refreshLifetime: lifetimes.refresh, salt: 10 },
+        })
+      )
+
+    beforeEach(() => {
+      refreshService = buildService({ access: '15m', refresh: '7d' })
+    })
+
+    it("devrait émettre un nouveau token d'accès et renvoyer le refresh token tel quel (pas de rotation)", async () => {
+      const { refreshToken } = await refreshService.authenticate('user-1', 'testuser')
+      jest.clearAllMocks()
+
+      const result = await refreshService.refresh('user-1', 'testuser', refreshToken)
+
+      expect(result.refreshToken).toBe(refreshToken)
+      const payload = realJwt.verify(result.accessToken)
+      expect(payload).toMatchObject({ sub: 'user-1', username: 'testuser', type: 'access' })
+      expect(payload.exp - now()).toBeLessThanOrEqual(15 * 60)
+      expect(userService.touchLastLogin).not.toHaveBeenCalled()
+    })
+
+    it("ne devrait pas émettre de token d'accès qui expire après le refresh token", async () => {
+      refreshService = buildService({ access: '7d', refresh: '1h' })
+      const { refreshToken } = await refreshService.authenticate('user-1', 'testuser')
+
+      const result = await refreshService.refresh('user-1', 'testuser', refreshToken)
+
+      const { exp: accessExpiration } = realJwt.verify(result.accessToken)
+      const { exp: sessionExpiration } = realJwt.verify(refreshToken)
+      expect(accessExpiration).toBeLessThanOrEqual(sessionExpiration)
+      expect(accessExpiration).toBeGreaterThan(now())
     })
   })
 

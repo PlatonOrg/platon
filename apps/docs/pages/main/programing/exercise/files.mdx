@@ -1,22 +1,147 @@
 ---
 title: Fichiers d'un exercice
-description: Présentation des fichiers essentiels d'un exercice PLaTon (main.ple, main.plc, main.plo, readme.md) expliquant leur rôle, leur importance et comment ils s'intègrent dans le développement d'exercices.
+description: Les fichiers d'un exercice PLaTon (main.ple, main.plc, main.plo, readme.md), le dossier includes/, l'opérateur @include et l'accès aux fichiers depuis le builder et le grader.
 ---
+
+import { Callout, FileTree } from 'nextra/components'
 
 # Fichiers d'un exercice
 
-En plus d'éventuels fichiers de ressources (images, sons, etc.), un exercice est composé de plusieurs fichiers importants et obligatoires pour certains :
+Un exercice est une ressource qui contient des fichiers, gérés dans l'[éditeur](/main/programing/ide). Certains ont un
+rôle particulier ; les autres (images, données, code fourni aux étudiants…) sont des fichiers de ressources que
+l'exercice peut utiliser.
 
-- **main.ple** (PLaTon exercice)
-  - Fichier principal contenant le code de l'exercice.
-  - Ce fichier ne peut pas être supprimé.
-- **main.plc** : (PLaTon config - Optionnel)
-  - Fichier de configuration des variables de l'exercice. Une fois créé, l'exercice sera considéré comme un template et sera donc affiché dans la liste des templates au moment de la création d'un nouvel exercice.
-- **main.plo** (PLaTon override - Optionnel)
-  - Uniquement créé si l'exercice est issu d'un template. Ce fichier permet de modifier graphiquement les variables configurées dans le template dont est issu l'exercice.
-  - Ce fichier ne peut n'y être créé, n'y supprimé manuellement s'il existe.
-- **readme.md**
-  - Document explicatif de l'exercice, à usage des enseignants.
+<FileTree>
+  <FileTree.Folder name="mon-exercice" defaultOpen>
+    <FileTree.File name="main.ple" />
+    <FileTree.File name="main.plc" />
+    <FileTree.File name="main.plo" />
+    <FileTree.File name="readme.md" />
+    <FileTree.Folder name="includes" defaultOpen>
+      <FileTree.File name="donnees.csv" />
+      <FileTree.File name="outils.py" />
+    </FileTree.Folder>
+    <FileTree.File name="schema.png" />
+  </FileTree.Folder>
+</FileTree>
 
-Lorsque vous créer un exercice, ces fichiers sont automatiquement générés avec un exemple fontionnel de base. Vous pouvez ensuite les modifier à votre guise
-et supprimer ceux qui ne vous sont pas utiles.
+## Les fichiers principaux
+
+| Fichier       | Rôle                                                                                                                                                                                                                       |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `main.ple`    | Code de l'exercice, écrit dans le [langage PLE](/main/programing/exercise/langage). C'est le seul fichier exécuté ; il ne peut pas être supprimé.                                                                         |
+| `main.plc`    | *Facultatif.* Déclare les variables configurables de l'exercice. Sa présence fait de l'exercice un **modèle** (template) réutilisable : voir [Rendre un exercice configurable](/main/programing/exercise/config).          |
+| `main.plo`    | *Facultatif.* Présent uniquement dans un exercice créé à partir d'un modèle : il contient les valeurs choisies pour les variables du modèle. Il est géré par le [builder d'exercice](/main/resources/builder) et ne se crée ni ne se supprime à la main. |
+| `readme.md`   | Notes destinées aux enseignants (mode d'emploi, intentions pédagogiques…). Il n'est pas affiché aux étudiants.                                                                                                             |
+
+À la création d'un exercice, ces fichiers sont générés avec un exemple fonctionnel que vous pouvez modifier ou supprimer.
+
+## Utiliser un fichier dans l'énoncé
+
+Deux opérateurs du langage PLE lisent un fichier au moment de la compilation de l'exercice :
+
+| Syntaxe                         | Valeur obtenue                                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `@copyurl chemin/fichier`       | L'**adresse** du fichier, pour l'afficher (image, PDF, lien de téléchargement…).                     |
+| `@copycontent chemin/fichier`   | Le **contenu texte** du fichier, copié dans la variable.                                             |
+
+```ple
+image = @copyurl schema.png
+consigne = @copycontent consignes/partie1.md
+
+statement ==
+![Schéma]({{ image }})
+
+{{ consigne }}
+==
+```
+
+Voir aussi [Importation d'image](/main/programing/exercise/image).
+
+### Référencer le fichier d'une autre ressource
+
+Les chemins sont relatifs à la ressource courante. Pour viser le fichier d'une **autre ressource** (par exemple un
+document du cercle), préfixez le chemin par son identifiant (ou son code) et, si besoin, sa version :
+
+| Chemin                             | Fichier visé                                                       |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `images/a.png`                     | `images/a.png` de la ressource courante                            |
+| `/<ressource>/images/a.png`        | `images/a.png` de la dernière version (`latest`) d'une autre ressource |
+| `/<ressource>:<version>/images/a.png` | Même fichier, dans une version précise                          |
+| `:<version>/images/a.png`          | `images/a.png` d'une version précise de la ressource courante      |
+
+```ple
+theories = [
+  { title: "Fiche de cours", url: @copyurl /mon-cercle-theorie/fiches/boucles.pdf }
+]
+```
+
+## Rendre des fichiers disponibles pour le builder et le grader
+
+Le `builder` et le `grader` s'exécutent dans une [sandbox](/main/programing/exercise/workflow#environnement-dexécution--sandbox)
+qui ne voit pas directement les fichiers de la ressource. Deux mécanismes y copient des fichiers.
+
+### Le dossier `includes/`
+
+Tous les fichiers placés dans un dossier `includes/` à la racine de l'exercice (sous-dossiers compris) sont copiés
+**automatiquement** dans l'environnement d'exécution, **en conservant leur chemin** :
+
+```ple
+sandbox = "python"
+
+grader == #!lang=py
+import csv
+
+with open("includes/donnees.csv") as f:
+    lignes = list(csv.reader(f))
+==
+```
+
+<Callout type="info">
+  Le dossier `includes/` est lu dans la ressource de l'exercice elle-même. Un exercice qui hérite d'un autre
+  (`@extends`) ne récupère pas le dossier `includes/` de son parent : utilisez `@include` pour ces fichiers.
+</Callout>
+
+### L'opérateur `@include`
+
+`@include` copie **un** fichier dans l'environnement d'exécution. Il peut viser un fichier de l'exercice ou d'une
+autre ressource :
+
+```ple
+@include utils/outils.py
+@include /ma-bibliotheque/correcteur.py as correcteur.py
+```
+
+- Sans `as`, le fichier est copié **à la racine** de l'environnement sous son seul nom (`utils/outils.py` devient
+  `outils.py`).
+- Avec `as nom`, il est copié sous le nom indiqué.
+- Les jokers (`@include utils/*.py`) ne sont pas pris en charge : écrivez une ligne par fichier, ou placez les
+  fichiers dans `includes/`.
+
+### Lire les fichiers copiés
+
+| Sandbox  | Lecture d'un fichier copié                                                                 |
+| -------- | ------------------------------------------------------------------------------------------ |
+| Python   | Fonctions habituelles (`open("outils.py")`, `import outils`…), le dossier courant est la racine de l'environnement. |
+| Node     | Fonction `readFile(chemin)` fournie par la sandbox : `const texte = readFile('donnees.txt')`. |
+
+<Callout type="warning">
+  Avec la sandbox **Node**, seuls les fichiers copiés **à la racine** de l'environnement sont pris en charge : un
+  fichier copié dans un sous-dossier (comme ceux du dossier `includes/`) provoque une erreur à la construction de
+  l'exercice. Avec Node, préférez `@include` (sans sous-dossier dans le nom final).
+</Callout>
+
+### Fichiers déposés par l'étudiant
+
+Les fichiers déposés avec le composant [wc-file-upload](/components/forms/wc-file-upload) sont copiés dans le dossier
+`submission/` de l'environnement, uniquement avec la sandbox Python.
+
+## Quand les fichiers sont-ils copiés ?
+
+L'environnement d'exécution est préparé lors de la **construction** de l'exercice (premier affichage) puis réutilisé
+pour les évaluations suivantes. Les fichiers inclus sont ceux de la **version de la ressource** utilisée par
+l'exercice : après une modification, il faut que l'exercice soit reconstruit (nouvelle prévisualisation, nouvelle
+session ou [rechargement de l'activité](/main/courses/activities#recharger-une-activité)) pour en tenir compte.
+
+Pour vérifier le contenu de l'environnement, utilisez **Télécharger l'environnement** en prévisualisation (voir
+[Déboguer un exercice](/main/programing/exercise/debug)).

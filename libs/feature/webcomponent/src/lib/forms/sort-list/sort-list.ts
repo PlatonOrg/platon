@@ -66,5 +66,6 @@ export const SortListComponentDefinition = defineWebComponent({
   },
   playgrounds: {
     Histoire: 'history.ple',
+    'Nombres décimaux': 'numbers.ple',
   },
 })

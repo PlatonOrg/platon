@@ -1,8 +1,150 @@
 ---
 title: Utiliser Visual Studio Code comme Éditeur
-description: Guide d'utilisation de Visual Studio Code comme alternative à l'IDE intégré de PLaTon pour la création et la modification de ressources pédagogiques.
+description: Installer et utiliser l'extension PLaTOn pour Visual Studio Code - connexion à PLaTon, ouverture d'une ressource, synchronisation des fichiers, prévisualisation et aide à l'écriture des fichiers PLE.
 ---
+
+import { Callout, Steps } from 'nextra/components'
 
 # Utiliser Visual Studio Code comme Éditeur
 
-Cette page est en cours de rédaction.
+L'extension **PLaTOn** pour [Visual Studio Code](https://code.visualstudio.com) permet de modifier les fichiers d'une
+ressource (exercice, activité…) dans VS Code, puis de les renvoyer sur PLaTon. Elle est développée dans le dépôt
+[PlatonOrg/platon-vscode](https://github.com/PlatonOrg/platon-vscode).
+
+Elle s'adresse aux enseignants qui préfèrent leur éditeur habituel, par exemple pour écrire un long `builder` ou
+`grader`. L'[éditeur intégré](/main/programing/ide) reste nécessaire pour certaines tâches, comme l'édition graphique
+d'une activité ou le [builder](/main/resources/builder) des exercices issus d'un modèle.
+
+## Prérequis
+
+- Visual Studio Code **1.97** ou plus récent ;
+- **Git** installé sur votre ordinateur ([git-scm.com](https://git-scm.com/)) : l'extension s'en sert pour synchroniser
+  les fichiers ;
+- un compte PLaTon avec le **droit d'écriture** sur les ressources à modifier (voir
+  [Gestion des droits](/main/resources/permissions)).
+
+## Installer l'extension
+
+L'extension s'installe à partir de son dépôt. Il faut [Node.js](https://nodejs.org) et
+[Yarn](https://classic.yarnpkg.com) pour la construire.
+
+```bash
+git clone https://github.com/PlatonOrg/platon-vscode.git
+cd platon-vscode
+yarn
+npx @vscode/vsce package          # produit platon-vscode-<version>.vsix
+code --install-extension platon-vscode-*.vsix
+```
+
+Vous pouvez aussi installer le fichier `.vsix` depuis VS Code : vue **Extensions** › menu **…** ›
+**Installer à partir de VSIX…**.
+
+### Choisir la plateforme
+
+Par défaut, l'extension se connecte à `https://platon.univ-eiffel.fr/`. Pour une autre installation de PLaTon,
+modifiez le réglage **`platon.baseUrl`** dans les paramètres de VS Code.
+
+<Callout type="warning">
+  L'adresse doit se terminer par une barre oblique (`https://mon-platon.exemple.fr/`) : l'extension y ajoute
+  directement les chemins de PLaTon.
+</Callout>
+
+## Se connecter
+
+<Steps>
+
+### Lancer la connexion
+
+Ouvrez la palette de commandes (`Ctrl+Maj+P`, ou `Cmd+Maj+P` sur macOS) et lancez **PLaTOn: Se connecter à PLaTOn**.
+La page de connexion de PLaTon s'ouvre dans votre navigateur.
+
+### Autoriser VS Code
+
+Connectez-vous si besoin, puis cliquez sur **Continuer sur Visual Studio Code en tant que « VOTRE NOM »**. Le
+navigateur demande l'autorisation d'ouvrir VS Code : acceptez.
+
+### Vérifier
+
+VS Code affiche « Authentication à PLaTOn réussie. Bienvenue … ! ». Les jetons de connexion sont conservés dans le
+stockage sécurisé de VS Code.
+
+</Steps>
+
+<Callout type="warning">
+  Chaque nouvelle connexion **efface les copies locales** des ressources ouvertes dans VS Code. Synchronisez vos
+  ressources avant de vous reconnecter, sinon les modifications non envoyées sont perdues.
+</Callout>
+
+## Ouvrir une ressource
+
+1. Sur PLaTon, ouvrez la page de la ressource : son **identifiant** est la suite de caractères à la fin de l'adresse
+   (`…/resources/01234567-89ab-cdef-aaaa-0123456789ab`).
+2. Dans VS Code, lancez **PLaTOn: Ouvrir une ressource** et collez cet identifiant.
+3. Les fichiers de la ressource sont téléchargés et la ressource apparaît comme un dossier de l'espace de travail,
+   sous son nom.
+
+Vous pouvez ouvrir plusieurs ressources : chacune est un dossier distinct de l'espace de travail.
+
+<Callout type="info">
+  L'ouverture est refusée si vous n'avez pas le droit d'écriture sur la ressource (« You don't have the rights to edit
+  these files »).
+</Callout>
+
+## Envoyer vos modifications : la synchronisation
+
+Les modifications faites dans VS Code restent **sur votre ordinateur** tant que vous ne synchronisez pas. Pour les
+envoyer, utilisez **Synchroniser avec PLaTOn** :
+
+- dans la palette de commandes : toutes les ressources ouvertes sont synchronisées ;
+- par clic droit dans un fichier de la ressource, ou sur le dossier de la ressource dans l'explorateur : seule cette
+  ressource est synchronisée.
+
+La synchronisation enregistre vos modifications localement, récupère la version du serveur, fusionne les deux puis
+envoie le résultat à PLaTon. Les modifications faites entre-temps dans l'éditeur web sont donc conservées.
+
+### En cas de conflit
+
+Si un même passage a été modifié à la fois dans VS Code et sur PLaTon, la synchronisation s'arrête avec le message
+« Votre dépôt local contient des conflits… ». Les fichiers concernés contiennent alors les marques de conflit de Git
+(`<<<<<<<`, `=======`, `>>>>>>>`) : choisissez la bonne version dans chaque fichier, supprimez les marques, puis
+synchronisez à nouveau.
+
+## Prévisualiser
+
+La commande **Prévisualiser la ressource** (bouton dans la barre de titre de l'éditeur, ou clic droit dans un fichier)
+**synchronise d'abord** la ressource, puis affiche sa prévisualisation dans un panneau à côté de l'éditeur. Relancez la
+commande pour rafraîchir la prévisualisation après une modification.
+
+<Callout type="warning">
+  La prévisualisation n'est pas connectée à votre compte : elle ne fonctionne que si la ressource est
+  **visible en dehors de PLaTon**. Réglez cette visibilité dans le panneau **Partager** de la page de la ressource
+  (voir [Partager une ressource](/main/resources/resource-page#partager-une-ressource)). Sinon, prévisualisez depuis
+  PLaTon.
+</Callout>
+
+## Aide à l'écriture des fichiers `.ple`
+
+L'extension apporte aussi :
+
+- la **coloration syntaxique** des fichiers `.ple` ;
+- l'**autocomplétion** des variables réservées : `title`, `statement`, `form`, `builder`, `grader`, `solution`,
+  `hint`, `theories`, `sandbox` ;
+- une **info-bulle** au survol de mots-clés (`builder`, `grader`, `extends`, `include`, `copyurl`…), avec un lien
+  vers la documentation ;
+- des **liens cliquables** : le chemin écrit après `@extends`, `@include`, `@copyurl` ou `@copycontent` ouvre le
+  fichier correspondant lorsqu'il appartient à la même ressource, et une mention `#docs/main/…` dans un commentaire
+  ouvre la page de documentation correspondante.
+
+## Récapitulatif des commandes
+
+| Commande (palette)                      | Effet                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------- |
+| **PLaTOn: Se connecter à PLaTOn**       | Connecte VS Code à votre compte PLaTon.                                   |
+| **PLaTOn: Ouvrir une ressource**        | Télécharge une ressource à partir de son identifiant.                     |
+| **PLaTOn: Synchroniser avec PLaTOn**    | Fusionne vos modifications avec la version du serveur et les envoie.      |
+| **PLaTOn: Prévisualiser la ressource**  | Synchronise puis affiche la prévisualisation dans VS Code.                |
+
+<Callout type="info">
+  Les noms des commandes s'affichent en anglais si VS Code est en anglais (**PLaTOn: Connect**, **Open Resource**,
+  **Synchronize**, **Preview**).
+</Callout>

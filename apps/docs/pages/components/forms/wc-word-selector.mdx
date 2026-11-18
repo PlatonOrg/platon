@@ -3,7 +3,7 @@ title: WordSelector
 description: Interface interactive pour sélectionner et organiser des mots afin de construire des phrases ou expressions. Idéal pour les exercices linguistiques comme la construction de phrases, l'apprentissage de langues étrangères, la mise en ordre syntaxique, ou pour des exercices de logique où l'ordre des éléments est important.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -83,7 +83,12 @@ Ce composant permet de créer des exercices variés comme la construction de phr
       name: 'Visualisation',
       url: 'playground/components/wc-word-selector',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Construire une phrase",
+    "url": "/playground/exercises/word-selector/sentence.ple"
+  }
+]
   ]}
 />
 

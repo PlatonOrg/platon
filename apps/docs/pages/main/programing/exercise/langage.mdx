@@ -162,6 +162,14 @@ texte = "Bonjour monde"
 booleen = true       # Peut aussi utiliser True/False (style Python)
 ```
 
+<Callout type="warning">
+  Les chaînes s'écrivent uniquement entre **guillemets doubles** (`"texte"`). Les apostrophes (`'texte'`) provoquent
+  une erreur de compilation (« Lexical error »). Pour un texte contenant des guillemets ou plusieurs lignes, utilisez
+  l'opérateur multiligne `==` : les séquences d'échappement (`\"`, `\n`) ne sont pas interprétées et restent
+  telles quelles dans la valeur. Cette règle ne concerne que le langage PLE : dans les scripts `builder` et `grader`,
+  la syntaxe de JavaScript ou de Python s'applique normalement.
+</Callout>
+
 ### Nombres avec séparateurs
 ```pl-js
 grand_nombre = 1_000_000  # Les underscores sont ignorés: équivalent à 1000000

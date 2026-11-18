@@ -1,6 +1,16 @@
 import { Injectable, inject } from '@angular/core'
-import { ActivatedRouteSnapshot, Route, Router, RouterStateSnapshot } from '@angular/router'
+import {
+  ActivatedRouteSnapshot,
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationSkipped,
+  Route,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router'
 import { UserRoles } from '@platon/core/common'
+import { filter, firstValueFrom } from 'rxjs'
 import { AuthService } from '../api/auth.service'
 
 @Injectable({ providedIn: 'root' })
@@ -34,6 +44,41 @@ export class AuthGuard {
       queryParams: { next: state.url },
       queryParamsHandling: 'merge',
     })
+  }
+
+  /**
+   * Sends the user to the login page if the current page requires an authenticated user: it could not load
+   * anything anymore. They come back to it after signing in. Public pages are left as is.
+   */
+  async redirectIfProtected(): Promise<void> {
+    // A guard running in the navigation in progress may already be redirecting to the login page, with the right url.
+    await this.navigationSettled()
+
+    if (this.isProtected(this.router.routerState.snapshot.root)) {
+      await this.router.navigate(['/login'], { queryParams: { next: this.router.url }, replaceUrl: true })
+    }
+  }
+
+  private isProtected(route: ActivatedRouteSnapshot): boolean {
+    return !!route.routeConfig?.canActivate?.includes(AuthGuard) || route.children.some((c) => this.isProtected(c))
+  }
+
+  private async navigationSettled(): Promise<void> {
+    while (this.router.currentNavigation()) {
+      await firstValueFrom(
+        this.router.events.pipe(
+          filter(
+            (event) =>
+              event instanceof NavigationEnd ||
+              event instanceof NavigationCancel ||
+              event instanceof NavigationError ||
+              event instanceof NavigationSkipped
+          )
+        )
+      )
+      // The router clears the navigation, or starts the one it is redirected to, right after emitting these events.
+      await new Promise((resolve) => setTimeout(resolve))
+    }
   }
 
   private redirect403(reason?: string) {

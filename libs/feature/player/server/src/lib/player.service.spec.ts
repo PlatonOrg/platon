@@ -414,6 +414,50 @@ describe('PlayerService', () => {
       await expect(service.playNext('missing-id', user as any)).rejects.toBeInstanceOf(NotFoundResponse)
     })
 
+    it('should throw ForbiddenResponse when the caller does not own the activity session', async () => {
+      const activitySession = createMockActivitySession({ userId: 'other-user-id' })
+      sessionService.findById.mockResolvedValue(activitySession as any)
+
+      const user = createUserEntity()
+      await expect(service.playNext('activity-session-id', user as any)).rejects.toBeInstanceOf(ForbiddenResponse)
+      expect(sandboxService.buildNext).not.toHaveBeenCalled()
+    })
+
+    it('should allow anonymous callers on preview sessions without owner', async () => {
+      const activitySession = createMockActivitySession({
+        userId: null,
+        activity: null,
+        variables: {
+          navigation: {
+            started: true,
+            terminated: false,
+            exercises: [],
+            nextExercisesHistory: [],
+            nextExercisesHistoryPosition: -1,
+          },
+          settings: {},
+          exerciseGroups: {},
+          seed: 42,
+        },
+      })
+      sessionService.findById.mockResolvedValue(activitySession as any)
+      sessionService.findAllWithParent.mockResolvedValue([])
+      sandboxService.buildNext.mockResolvedValue({
+        envid: 'env-id',
+        variables: {
+          nextExerciseId: 'next-exercise-id',
+          navigation: { exercises: [], nextExercisesHistory: [], nextExercisesHistoryPosition: -1 },
+          generatedExercises: {},
+          exerciseGroups: {},
+        },
+      } as any)
+      sessionService.update.mockResolvedValue(undefined)
+
+      const result = await service.playNext('activity-session-id')
+
+      expect(result.nextExerciseId).toBe('next-exercise-id')
+    })
+
     it('should throw ForbiddenResponse when activity is not yet opened', async () => {
       const futureDate = new Date(Date.now() + 60_000)
       const activitySession = createMockActivitySession({

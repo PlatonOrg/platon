@@ -4,11 +4,15 @@ import { Reflector } from '@nestjs/core'
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host'
 import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard as PassportGuard } from '@nestjs/passport'
+import { IS_REFRESH_TOKEN_AUTH_KEY } from '../decorators/refresh-token-auth.decorator'
 import { MemoizedPromise, TOKEN_EXPIRED_ERROR_CODE, UnauthorizedResponse, User } from '@platon/core/common'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { firstValueFrom, Observable } from 'rxjs'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
 import { AuthExecutionContext, IRequest } from '../auth.types'
+
+const isTokenExpiredError = (error: unknown): boolean =>
+  error instanceof UnauthorizedResponse && error.message === TOKEN_EXPIRED_ERROR_CODE
 
 @Injectable()
 export class AuthGuard extends PassportGuard(['jwt']) {
@@ -26,6 +30,13 @@ export class AuthGuard extends PassportGuard(['jwt']) {
   }
 
   override async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Routes authenticated with a refresh token are handled by `JwtRefreshGuard` (see `@RefreshTokenAuth()`).
+    if (
+      this.reflector.getAllAndOverride<boolean>(IS_REFRESH_TOKEN_AUTH_KEY, [context.getHandler(), context.getClass()])
+    ) {
+      return true
+    }
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -56,7 +67,9 @@ export class AuthGuard extends PassportGuard(['jwt']) {
 
       return (await loggedIn) || isPublic
     } catch (error) {
-      if (isPublic) {
+      // An expired token is rejected even on public routes so that the client refreshes it,
+      // instead of the request being silently handled as anonymous.
+      if (isPublic && !isTokenExpiredError(error)) {
         return true
       }
       throw error

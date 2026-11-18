@@ -1,0 +1,57 @@
+sandbox = "node"
+
+graphique = :wc-chart-viewer-bars
+graphique.mode = "vertical"
+graphique.title = { text: "Ventes du premier semestre", subtext: "en milliers d'euros", left: "center" }
+graphique.labels = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin"]
+graphique.xAxisLabel = "Mois"
+graphique.yAxisLabel = "Ventes"
+
+choix = :wc-radio-group
+choix.horizontal = true
+choix.items = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin"]
+
+builder == #!lang=js
+// Une série par magasin : value contient une valeur par étiquette de labels.
+const serie = () => graphique.labels.map(() => 10 + Math.floor(Math.random() * 40))
+graphique.data = [
+  { name: 'Magasin A', value: serie() },
+  { name: 'Magasin B', value: serie() }
+]
+// Les composants sont remplacés par leur rendu HTML avant l'affichage :
+// on copie dans des variables simples ce qui doit apparaître dans la solution.
+mois = graphique.labels
+totaux = graphique.labels.map((_, i) => graphique.data[0].value[i] + graphique.data[1].value[i])
+const max = Math.max(...totaux)
+meilleurs = graphique.labels.filter((_, i) => totaux[i] === max)
+==
+
+title ==
+Lire un diagramme en barres
+==
+
+statement ==
+{{ graphique }}
+
+Quel mois a réalisé le plus de ventes, **tous magasins confondus** ?
+==
+
+form ==
+{{ choix }}
+==
+
+grader == #!lang=js
+if (meilleurs.includes(choix.selection)) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Exact !'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = 'Additionnez les deux barres de chaque mois.'
+}
+==
+
+solution ==
+Totaux par mois : {{ mois | join(", ") }} → {{ totaux | join(", ") }}.
+==

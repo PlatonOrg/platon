@@ -1,85 +1,117 @@
 export enum AdminRoles {
-  SysAdmin = 'urn:lti:sysrole:ims/lis/SysAdmin',
-  AccountAdmin = 'urn:lti:sysrole:ims/lis/AccountAdmin',
-  Manager = 'urn:lti:role:ims/lis/Manager',
-  ManagerAreaManager = 'urn:lti:role:ims/lis/Manager/AreaManager',
-  ManagerCourseCoordinator = 'urn:lti:role:ims/lis/Manager/CourseCoordinator',
-  ManagerObserver = 'urn:lti:role:ims/lis/Manager/Observer',
-  ManagerExternalObserver = 'urn:lti:role:ims/lis/Manager/ExternalObserver',
-  Administrator = 'urn:lti:sysrole:ims/lis/Administrator',
-  Administrator2 = 'urn:lti:instrole:ims/lis/Administrator',
-  Administrator3 = 'urn:lti:role:ims/lis/Administrator',
-  AdministratorAdministrator = 'urn:lti:role:ims/lis/Administrator/Administrator',
-  AdministratorSupport = 'urn:lti:role:ims/lis/Administrator/Support',
-  AdministratorDeveloper = 'urn:lti:role:ims/lis/Administrator/Developer',
-  AdministratorSystemAdministrator = 'urn:lti:role:ims/lis/Administrator/SystemAdministrator',
-  AdministratorExternalSystemAdministrator = 'urn:lti:role:ims/lis/Administrator/ExternalSystemAdministrator',
-  AdministratorExternalDeveloper = 'urn:lti:role:ims/lis/Administrator/ExternalDeveloper',
-  AdministratorExternalSupport = 'urn:lti:role:ims/lis/Administrator/ExternalSupport',
+  // System roles — core
+  SystemAdministrator = 'http://purl.imsglobal.org/vocab/lis/v2/system/person#Administrator',
+
+  // System roles — non-core
+  AccountAdmin = 'http://purl.imsglobal.org/vocab/lis/v2/system/person#AccountAdmin',
+  SysAdmin = 'http://purl.imsglobal.org/vocab/lis/v2/system/person#SysAdmin',
+  SysSupport = 'http://purl.imsglobal.org/vocab/lis/v2/system/person#SysSupport',
+
+  // Institution roles
+  InstitutionAdministrator = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Administrator',
+
+  // Course administration roles — core
+  ContextAdministrator = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Administrator',
+
+  SimpleAdministrator = 'Administrator',
+
+  // Course administration sub-roles
+  ContextAdminAdministrator = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#Administrator',
+  Developer = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#Developer',
+  ExternalDeveloper = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#ExternalDeveloper',
+  ExternalSupport = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#ExternalSupport',
+  ExternalSystemAdministrator = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#ExternalSystemAdministrator',
+  Support = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#Support',
+  ContextSystemAdministrator = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#SystemAdministrator',
 }
 
 export enum InstructorRoles {
-  Faculty = 'urn:lti:instrole:ims/lis/Faculty',
-  Staff = 'urn:lti:instrole:ims/lis/Staff',
-  Alumni = 'urn:lti:instrole:ims/lis/Alumni',
-  Instructor = 'urn:lti:instrole:ims/lis/Instructor',
-  Instructor2 = 'urn:lti:role:ims/lis/Instructor',
-  Instructor3 = 'Instructor',
-  InstructorPrimaryInstructor = 'urn:lti:role:ims/lis/Instructor/PrimaryInstructor',
-  InstructorLecturer = 'urn:lti:role:ims/lis/Instructor/Lecturer',
-  InstructorGuestInstructor = 'urn:lti:role:ims/lis/Instructor/GuestInstructor',
-  InstructorExternalInstructor = 'urn:lti:role:ims/lis/Instructor/ExternalInstructor',
-  ContentDeveloper = 'urn:lti:role:ims/lis/ContentDeveloper',
-  ContentDeveloperContentDeveloper = 'urn:lti:role:ims/lis/ContentDeveloper/ContentDeveloper',
-  ContentDeveloperLibrarian = 'urn:lti:role:ims/lis/ContentDeveloper/Librarian',
-  ContentDeveloperContentExpert = 'urn:lti:role:ims/lis/ContentDeveloper/ContentExpert',
-  ContentDeveloperExternalContentExpert = 'urn:lti:role:ims/lis/ContentDeveloper/ExternalContentExpert',
-}
+  // Course role — core
+  Instructor = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor',
 
-export enum ReviewerRoles {
-  SysSupport = 'urn:lti:sysrole:ims/lis/SysSupport',
-  Creator = 'urn:lti:sysrole:ims/lis/Creator',
-  Observer = 'urn:lti:instrole:ims/lis/Observer',
-  Mentor = 'urn:lti:instrole:ims/lis/Mentor',
-  Mentor2 = 'urn:lti:role:ims/lis/Mentor',
-  MentorMentor = 'urn:lti:role:ims/lis/Mentor/Mentor',
-  MentorReviewer = 'urn:lti:role:ims/lis/Mentor/Reviewer',
-  MentorAdvisor = 'urn:lti:role:ims/lis/Mentor/Advisor',
-  MentorAuditor = 'urn:lti:role:ims/lis/Mentor/Auditor',
-  MentorTutor = 'urn:lti:role:ims/lis/Mentor/Tutor',
-  MentorLearningFacilitator = 'urn:lti:role:ims/lis/Mentor/LearningFacilitator',
-  MentorExternalMentor = 'urn:lti:role:ims/lis/Mentor/ExternalMentor',
-  MentorExternalReviewer = 'urn:lti:role:ims/lis/Mentor/ExternalReviewer',
-  MentorExternalAdvisor = 'urn:lti:role:ims/lis/Mentor/ExternalAdvisor',
-  MentorExternalAuditor = 'urn:lti:role:ims/lis/Mentor/ExternalAuditor',
-  MentorExternalTutor = 'urn:lti:role:ims/lis/Mentor/ExternalTutor',
-  MentorExternalLearningFacilitator = 'urn:lti:role:ims/lis/Mentor/ExternalLearningFacilitator',
-  TeachingAssistant = 'urn:lti:role:ims/lis/TeachingAssistant',
-  TeachingAssistantTeachingAssistant = 'urn:lti:role:ims/lis/TeachingAssistant/TeachingAssistant',
-  TeachingAssistantTeachingAssistantSection = 'urn:lti:role:ims/lis/TeachingAssistant/TeachingAssistantSection',
-  TeachingAssistantTeachingAssistantSectionAssociation = 'urn:lti:role:ims/lis/TeachingAssistant/TeachingAssistantSectionAssociation',
-  TeachingAssistantTeachingAssistantOffering = 'urn:lti:role:ims/lis/TeachingAssistant/TeachingAssistantOffering',
-  TeachingAssistantTeachingAssistantTemplate = 'urn:lti:role:ims/lis/TeachingAssistant/TeachingAssistantTemplate',
-  TeachingAssistantTeachingAssistantGroup = 'urn:lti:role:ims/lis/TeachingAssistant/TeachingAssistantGroup',
-  TeachingAssistantGrader = 'urn:lti:role:ims/lis/TeachingAssistant/Grader',
+  SimpleInstructor = 'Instructor',
+
+  // Institution role — non-core
+  InstitutionInstructor = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Instructor',
+
+  // Institution role — core, teaching staff
+  Faculty = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Faculty',
+
+  // Instructional design — core
+  ContentDeveloper = 'http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper',
+
+  // Instructor sub-roles
+  ExternalInstructor = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#ExternalInstructor',
+  Grader = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#Grader',
+  GuestInstructor = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#GuestInstructor',
+  Lecturer = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#Lecturer',
+  PrimaryInstructor = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#PrimaryInstructor',
+  SecondaryInstructor = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#SecondaryInstructor',
+  TeachingAssistant = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#TeachingAssistant',
+  TeachingAssistantGroup = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#TeachingAssistantGroup',
+  TeachingAssistantOffering = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#TeachingAssistantOffering',
+  TeachingAssistantSection = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#TeachingAssistantSection',
+  TeachingAssistantSectionAssociation = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#TeachingAssistantSectionAssociation',
+  TeachingAssistantTemplate = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#TeachingAssistantTemplate',
+
+  // ContentDeveloper sub-roles
+  ContentExpert = 'http://purl.imsglobal.org/vocab/lis/v2/membership/ContentDeveloper#ContentExpert',
+  ExternalContentExpert = 'http://purl.imsglobal.org/vocab/lis/v2/membership/ContentDeveloper#ExternalContentExpert',
+  Librarian = 'http://purl.imsglobal.org/vocab/lis/v2/membership/ContentDeveloper#Librarian',
 }
 
 export enum StudentRoles {
-  User = 'urn:lti:sysrole:ims/lis/User',
-  Student = 'urn:lti:instrole:ims/lis/Student',
-  Learner = 'urn:lti:instrole:ims/lis/Learner',
-  Learner2 = 'urn:lti:role:ims/lis/Learner',
-  Learner3 = 'Learner',
-  Guest = 'urn:lti:instrole:ims/lis/Guest',
-  ProspectiveStudent = 'urn:lti:instrole:ims/lis/ProspectiveStudent',
-  LearnerLearner = 'urn:lti:role:ims/lis/Learner/Learner',
-  LearnerNonCreditLearner = 'urn:lti:role:ims/lis/Learner/NonCreditLearner',
-  LearnerGuestLearner = 'urn:lti:role:ims/lis/Learner/GuestLearner',
-  LearnerExternalLearner = 'urn:lti:role:ims/lis/Learner/ExternalLearner',
-  LearnerInstructor = 'urn:lti:role:ims/lis/Learner/Instructor',
-  Member = 'urn:lti:role:ims/lis/Member',
-  MemberMember = 'urn:lti:role:ims/lis/Member/Member',
-  Other = 'urn:lti:instrole:ims/lis/Other',
+  // Course role — core
+  Learner = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner',
+
+  SimpleLearner = 'Learner',
+
+  // Institution role — core
+  InstitutionStudent = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student',
+
+  // Institution role — non-core
+  InstitutionLearner = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Learner',
+
+  // Learner sub-roles
+  ExternalLearner = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Learner#ExternalLearner',
+  GuestLearner = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Learner#GuestLearner',
+  LearnerInstructor = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Learner#Instructor',
+  LearnerSubRole = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Learner#Learner',
+  NonCreditLearner = 'http://purl.imsglobal.org/vocab/lis/v2/membership/Learner#NonCreditLearner',
 }
 
-export declare type LTIRoles = AdminRoles | InstructorRoles | ReviewerRoles | StudentRoles
+export enum OtherLtiRoles { // Not used yet, but could be useful in the future
+  // Course role — core
+  Mentor = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Mentor',
+
+  // Course role — non-core
+  Manager = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Manager',
+  Member = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Member',
+  Officer = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Officer',
+
+  // Institution roles — core
+  InstitutionStaff = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Staff',
+  InstitutionGuest = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Guest',
+  InstitutionOther = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Other',
+  InstitutionNone = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#None',
+
+  // Institution roles — non-core
+  Alumni = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Alumni',
+  InstitutionMember = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Member',
+  InstitutionMentor = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Mentor',
+  InstitutionObserver = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Observer',
+  ProspectiveStudent = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#ProspectiveStudent',
+
+  // System roles
+  SystemNone = 'http://purl.imsglobal.org/vocab/lis/v2/system/person#None',
+  SystemCreator = 'http://purl.imsglobal.org/vocab/lis/v2/system/person#Creator',
+  SystemUser = 'http://purl.imsglobal.org/vocab/lis/v2/system/person#User',
+
+  // LTI-specific role: test user
+  TestUser = 'http://purl.imsglobal.org/vocab/lti/system/person#TestUser',
+}
+
+export declare type LTIRoles = AdminRoles | InstructorRoles | StudentRoles
+
+/** LTI 1.3 roles that grant the teacher role in PLaTon. */
+export const TEACHER_ROLES: readonly string[] = [...Object.values(AdminRoles), ...Object.values(InstructorRoles)]

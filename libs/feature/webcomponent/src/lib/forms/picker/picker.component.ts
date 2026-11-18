@@ -37,4 +37,10 @@ export class PickerComponent implements WebComponentHooks<PickerState>, OnInit {
   ngOnInit() {
     this.state.isFilled = false
   }
+
+  /** Inline, the select is as wide as its longest choice (in `ch`, arrow included). */
+  protected get inlineMinWidth(): number {
+    const texts = [...(this.state.items ?? []), this.state.placeholder ?? '']
+    return Math.max(...texts.map((text) => String(text).length), 3) + 4
+  }
 }

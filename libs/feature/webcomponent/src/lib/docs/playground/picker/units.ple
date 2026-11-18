@@ -1,0 +1,42 @@
+sandbox = "node"
+
+// Avec appearance = "inline", le picker s'insère dans une phrase.
+unite1 = :wc-picker
+unite1.appearance = "inline"
+unite1.items = ["mm", "cm", "m", "km"]
+
+unite2 = :wc-picker
+unite2.appearance = "inline"
+unite2.items = ["g", "kg", "t"]
+
+unite3 = :wc-picker
+unite3.items = ["seconde", "minute", "heure", "jour"]
+unite3.placeholder = "Choisissez une unité"
+unite3.hint = "Unité la plus adaptée"
+
+title ==
+Choisir l'unité adaptée
+==
+
+statement ==
+Choisissez l'unité la plus adaptée pour chaque grandeur.
+==
+
+form ==
+La distance entre Paris et Lyon se mesure en {{ unite1 }} et la masse d'un éléphant en {{ unite2 }}.
+
+La durée d'un film se mesure en :
+
+{{ unite3 }}
+==
+
+grader == #!lang=js
+const reponses = [[unite1, 'km'], [unite2, 't'], [unite3, 'heure']]
+let corrects = 0
+for (const [picker, attendu] of reponses) {
+  if (picker.selection === attendu) corrects++
+}
+grade = Math.round((100 * corrects) / reponses.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${corrects} bonne(s) réponse(s) sur ${reponses.length}.`
+==

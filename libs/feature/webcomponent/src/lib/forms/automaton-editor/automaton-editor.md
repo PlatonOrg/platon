@@ -46,3 +46,27 @@ s1:b>s2
 ```
 
 > Le format envoyé au grader est toujours le format objet.
+
+### Transitions ε
+
+Le symbole `$` désigne une transition ε, franchie sans lire de lettre. C'est le symbole d'une transition que l'apprenant vient de tracer, tant qu'il ne l'a pas changé par le menu « Changer étiquette » : un grader qui simule l'automate doit donc suivre ces transitions (ε-fermeture), sans quoi un automate correct est jugé faux. Le symbole `$` figure aussi dans `alphabet` dès qu'une transition le porte.
+
+```js
+// États atteints depuis `etats` par des transitions ε.
+function fermeture(etats, transitions) {
+  const atteints = new Set(etats)
+  const aVisiter = [...atteints]
+  while (aVisiter.length) {
+    const etat = aVisiter.pop()
+    for (const t of transitions) {
+      if (t.fromState === etat && t.symbols.includes('$') && !atteints.has(t.toState)) {
+        atteints.add(t.toState)
+        aVisiter.push(t.toState)
+      }
+    }
+  }
+  return atteints
+}
+```
+
+L'exemple « Langage des mots terminant par b » montre un grader complet.

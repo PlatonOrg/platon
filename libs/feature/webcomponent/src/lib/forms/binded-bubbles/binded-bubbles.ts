@@ -177,5 +177,7 @@ export const BindedBubblesComponentDefinition = defineWebComponent({
   },
   playgrounds: {
     Traductions: 'translation.ple',
+    'Pays et capitales': 'capitals.ple',
+    'Mode shuffle': 'shuffle.ple',
   },
 })

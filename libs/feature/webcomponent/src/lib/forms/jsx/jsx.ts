@@ -58,4 +58,7 @@ export const JsxComponentDefinition = defineWebComponent({
         const secOAM = board.create('sector', [O, A, M], {color: 'orange'});
         `,
   },
+  playgrounds: {
+    "Milieu d'un segment": 'midpoint.ple',
+  },
 })

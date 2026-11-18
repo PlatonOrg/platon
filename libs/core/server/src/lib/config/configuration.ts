@@ -45,6 +45,9 @@ export interface Configuration {
     from: string
     technicalTeam: string[]
   }
+  lti: {
+    encryptionKey: string
+  }
 }
 
 // Accepte un hôte (`example.com`, `localhost:4200`) ou une origine complète (`http://localhost:4200`).
@@ -103,5 +106,8 @@ export const configuration = (): Configuration => ({
     technicalTeam: process.env['EMAIL_TECHNICAL_TEAM']
       ? process.env['EMAIL_TECHNICAL_TEAM'].split(',').map((email) => email.trim())
       : [],
+  },
+  lti: {
+    encryptionKey: process.env['LTI_ENCRYPTION_KEY'] as string,
   },
 })

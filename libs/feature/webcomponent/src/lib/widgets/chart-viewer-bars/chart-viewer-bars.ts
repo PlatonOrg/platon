@@ -23,19 +23,19 @@ export const ChartViewerBarsComponentDefinition = defineWebComponent({
     properties: {
       mode: {
         type: 'string',
-        default: 'horizontal',
-        description: "Mode d'affichage du graphe : horizontal ou vertical",
+        default: 'vertical',
+        description: "Sens des barres : vertical (barres verticales, les labels sous l'axe horizontal) ou horizontal",
         enum: ['horizontal', 'vertical'],
       },
       xAxisLabel: {
         type: 'string',
         default: '',
-        description: "Label de l'axe X",
+        description: "Titre de l'axe horizontal",
       },
       yAxisLabel: {
         type: 'string',
         default: '',
-        description: "Label de l'axe Y",
+        description: "Titre de l'axe vertical",
       },
       labels: {
         type: 'array',
@@ -61,65 +61,47 @@ export const ChartViewerBarsComponentDefinition = defineWebComponent({
     ],
     labels: ['Sales', 'Administration', 'Information Technology', 'Customer Support', 'Development', 'Marketing'],
   },
+  playgrounds: {
+    'Lire un diagramme en barres': 'best-month.ple',
+  },
 })
 
-export const verticalChartViewerBarsState: EChartsOption = {
-  title: {
-    text: 'Waterfall Chart',
-    subtext: 'Living Expenses in Shenzhen',
-    left: 'center',
-  },
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true,
-  },
-  xAxis: {
-    type: 'category',
-    axisLabel: { interval: 0, rotate: 30 },
-    data: [],
-  },
-  yAxis: {
-    type: 'value',
-  },
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'shadow',
-    },
-  },
-  series: [],
-}
+/**
+ * Builds the ECharts option of a bar chart from the state of the component.
+ *
+ * In `vertical` mode, the bars rise from the horizontal axis, which holds the `labels`.
+ * In `horizontal` mode, they extend from the vertical axis, which holds the `labels`.
+ * `xAxisLabel` is always the title of the horizontal axis and `yAxisLabel` the title of the vertical axis.
+ * @param state The state of the component.
+ * @returns A complete option, meant to replace the previous one.
+ */
+export const chartViewerBarsOption = (state: ChartViewerBarsState): EChartsOption => {
+  const vertical = state.mode !== 'horizontal'
+  const categoryAxis = { type: 'category' as const, data: state.labels ?? [], axisLabel: { interval: 0 } }
+  const valueAxis = { type: 'value' as const }
 
-export const horizontalChartViewerBarsState: EChartsOption = {
-  title: {
-    text: 'Waterfall Chart',
-    subtext: 'Living Expenses in Shenzhen',
-    left: 'center',
-  },
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true,
-  },
-  yAxis: {
-    type: 'category',
-    axisLabel: { interval: 0, rotate: 30 },
-    data: [],
-  },
-  xAxis: {
-    type: 'value',
-  },
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'shadow',
+  return {
+    title: state.title,
+    legend: state.legend,
+    tooltip: state.tooltip,
+    grid: {
+      left: '3%',
+      right: '4%',
+      // Room for the axis titles, which are drawn outside the labels.
+      top: state.yAxisLabel ? 80 : 60,
+      bottom: state.xAxisLabel ? 40 : '3%',
+      containLabel: true,
     },
-  },
-  dataset: {
-    source: [],
-  },
-  series: [],
+    xAxis: {
+      ...(vertical ? categoryAxis : valueAxis),
+      // Below the labels of the axis, which always have the height of a single line.
+      ...(state.xAxisLabel ? { name: state.xAxisLabel, nameLocation: 'middle', nameGap: 30 } : {}),
+    },
+    yAxis: {
+      ...(vertical ? valueAxis : categoryAxis),
+      // Above the axis: the width of its labels is not known, the title could cover them on its left.
+      ...(state.yAxisLabel ? { name: state.yAxisLabel, nameLocation: 'end' } : {}),
+    },
+    series: (state.data ?? []).map((serie) => ({ type: 'bar', name: serie.name, data: serie.value })),
+  }
 }

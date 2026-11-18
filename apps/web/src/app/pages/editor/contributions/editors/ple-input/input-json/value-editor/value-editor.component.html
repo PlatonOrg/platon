@@ -1,1 +1,15 @@
-<json-editor [options]="editorOptions" [data]="$any(value)" (change)="notifyValueChange?.($event)" />
+@if (!disabled) {
+<div class="json-toolbar">
+  <button
+    nz-button
+    nzType="default"
+    nzSize="small"
+    nz-tooltip="Remplace le contenu par le JSON du presse-papier"
+    (click)="pasteJson()"
+  >
+    <mat-icon>content_paste</mat-icon>
+    Coller un JSON
+  </button>
+</div>
+}
+<json-editor [options]="editorOptions" [data]="$any(value)" (change)="onEditorChange($event)" />

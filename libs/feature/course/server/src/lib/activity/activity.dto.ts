@@ -6,11 +6,13 @@ import {
   ActivityFilters,
   ActivityOpenStates,
   CreateActivity,
+  EXERCISE_MERGE_RULES,
+  ExerciseMergeRule,
   ReloadActivity,
   UpdateActivity,
 } from '@platon/feature/course/common'
 import { Exclude, Transform, Type } from 'class-transformer'
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, IsUUID, Matches } from 'class-validator'
+import { IsArray, IsBoolean, IsDate, IsIn, IsNumber, IsOptional, IsString, IsUUID, Matches } from 'class-validator'
 import { ActivityPermissionsDTO } from '../permissions/permissions.dto'
 import { RestrictionListDTO } from './activity-restriction.dto'
 
@@ -187,6 +189,23 @@ export class ReloadCourseActivityDTO implements ReloadActivity {
   @IsOptional()
   @ApiProperty()
   readonly version?: string
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  @ApiProperty()
+  readonly exerciseKeys?: string[]
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  @ApiProperty()
+  readonly keepAnswersKeys?: string[]
+
+  @IsIn(EXERCISE_MERGE_RULES)
+  @IsOptional()
+  @ApiProperty({ enum: EXERCISE_MERGE_RULES })
+  readonly mergeRule?: ExerciseMergeRule
 }
 
 export class CreateCourseActivitiesBatchDTO {

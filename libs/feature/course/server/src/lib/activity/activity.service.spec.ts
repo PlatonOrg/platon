@@ -22,7 +22,7 @@ describe('ActivityService', () => {
   let resourceRepository: MockRepository<ResourceEntity>
   let courseGroupMemberRepository: MockRepository<CourseGroupMemberEntity>
   let fileService: jest.Mocked<Pick<ResourceFileService, 'compile'>>
-  let eventService: jest.Mocked<Pick<EventService, 'emit'>>
+  let eventService: jest.Mocked<Pick<EventService, 'emit' | 'emitAsync'>>
   let databaseService: jest.Mocked<Pick<DatabaseService, 'resolveVirtualColumns'>>
   let notificationService: jest.Mocked<Pick<CourseNotificationService, 'notifyActivityBeingClosed'>>
   let activityMemberService: jest.Mocked<Pick<ActivityMemberService, 'isPrivateMember' | 'isMember'>>
@@ -50,7 +50,7 @@ describe('ActivityService', () => {
     resourceRepository.find.mockResolvedValue([])
     courseGroupMemberRepository = mockRepository<CourseGroupMemberEntity>()
     fileService = { compile: jest.fn() }
-    eventService = { emit: jest.fn() }
+    eventService = { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) }
     databaseService = { resolveVirtualColumns: jest.fn().mockResolvedValue(undefined) }
     notificationService = { notifyActivityBeingClosed: jest.fn().mockResolvedValue(undefined) }
     activityMemberService = { isPrivateMember: jest.fn(), isMember: jest.fn() }
@@ -336,7 +336,63 @@ describe('ActivityService', () => {
 
       expect(fileService.compile).toHaveBeenCalledWith({ resourceId: 'res-1', version: 'v2' })
       expect(result.source.variables.settings).toEqual({ foo: 'bar' })
-      expect(eventService.emit).toHaveBeenCalledWith(ON_RELOAD_ACTIVITY_EVENT, expect.anything())
+      expect(eventService.emitAsync).toHaveBeenCalledWith(ON_RELOAD_ACTIVITY_EVENT, expect.anything())
+    })
+
+    it("ne devrait pas enregistrer l'activité si la mise à jour des sessions échoue", async () => {
+      const activity = buildActivity({
+        source: { resource: 'res-1', variables: { settings: {} } } as never,
+      })
+      repository.findOne.mockResolvedValue(activity)
+      fileService.compile.mockResolvedValue({ source: { variables: {} } } as never)
+      eventService.emitAsync.mockRejectedValue(new Error('boom'))
+
+      await expect(service.reload('course-1', 'activity-1', {} as never)).rejects.toThrow('boom')
+      expect(repository.save).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('reloadPreview', () => {
+    const variables = (statement: string) => ({
+      exerciseGroups: {
+        0: {
+          name: 'Groupe',
+          grader: { type: 'empty' },
+          exercises: [
+            {
+              id: 'e1',
+              groupId: 0,
+              resource: 'r1',
+              version: 'latest',
+              source: { dependencies: [], variables: { title: 'A faire', statement } },
+            },
+          ],
+        },
+      },
+    })
+
+    beforeEach(() => {
+      Object.assign(repository, { manager: { query: jest.fn().mockResolvedValue([]) } })
+      repository.findOne.mockResolvedValue(
+        buildActivity({ source: { resource: 'res-1', variables: variables('avant') } as never })
+      )
+      fileService.compile.mockResolvedValue({ source: { variables: variables('après') } } as never)
+    })
+
+    it('devrait nommer un exercice par sa ressource, le titre pouvant venir de son modèle', async () => {
+      resourceRepository.find.mockResolvedValue([{ id: 'r1', name: 'Listes chainées' } as ResourceEntity])
+
+      const { exercises } = await service.reloadPreview('course-1', 'activity-1')
+
+      expect(exercises.map(({ title, status }) => [title, status])).toEqual([['Listes chainées', 'modified']])
+    })
+
+    it('devrait se rabattre sur le titre si la ressource est introuvable', async () => {
+      resourceRepository.find.mockResolvedValue([])
+
+      const { exercises } = await service.reloadPreview('course-1', 'activity-1')
+
+      expect(exercises[0].title).toEqual('A faire')
     })
   })
 

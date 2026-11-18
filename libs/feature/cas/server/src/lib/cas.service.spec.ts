@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm'
 import { NotFoundResponse } from '@platon/core/common'
 import { MockRepository, mockRepository, mockSelectQueryBuilder } from '@platon/core/testing/server'
 import { CasOrdering, CasVersions } from '@platon/feature/cas/common'
-import { LTIService } from '@platon/feature/lti/server'
+import { LTIOldService } from '@platon/feature/lti/server'
 import { Optional } from 'typescript-optional'
 import { CasEntity } from './entities/cas.entity'
 import { CasService } from './cas.service'
@@ -11,20 +11,20 @@ import { CasService } from './cas.service'
 describe('CasService', () => {
   let service: CasService
   let repository: MockRepository<CasEntity>
-  let ltiService: jest.Mocked<LTIService>
+  let ltiService: jest.Mocked<LTIOldService>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CasService,
         { provide: getRepositoryToken(CasEntity), useValue: mockRepository<CasEntity>() },
-        { provide: LTIService, useValue: { findLmsById: jest.fn() } },
+        { provide: LTIOldService, useValue: { findLmsById: jest.fn() } },
       ],
     }).compile()
 
     service = module.get(CasService)
     repository = module.get(getRepositoryToken(CasEntity))
-    ltiService = module.get(LTIService)
+    ltiService = module.get(LTIOldService)
   })
 
   describe('findCasById', () => {

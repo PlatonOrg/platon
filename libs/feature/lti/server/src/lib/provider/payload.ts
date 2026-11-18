@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LTIRoles } from './roles'
+import { Lti11Roles } from './roles.lti11'
 
 export interface LTIPayload {
   // Auth
@@ -41,7 +41,7 @@ export interface LTIPayload {
 
   // Recommended Parameters
   user_id: string
-  roles: LTIRoles[]
+  roles: Lti11Roles[]
   lis_person_name_full: string
   lis_person_name_given: string
   lis_person_name_family: string

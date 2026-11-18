@@ -64,16 +64,21 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
 
     exerciseSessions.forEach((exerciseSession) => {
       this.exerciseSessions.set(exerciseSession.id, exerciseSession)
+      // Sessions without user are attached to the owner of their activity session in `next`.
+      // `user` is not null for these sessions: TypeORM hydrates it with null fields because of
+      // the `hasPassword` virtual column, so the check must be done on its id.
+      const { user } = exerciseSession
+      if (!user?.id) return
       this.userResults.set(
-        exerciseSession.user?.id ?? this.anonymous,
+        user.id,
         emptyUserResults({
-          id: exerciseSession.user?.id ?? this.anonymous,
-          email: exerciseSession.user?.email ?? this.anonymous,
-          firstName: exerciseSession.user?.firstName ?? this.anonymous,
-          lastName: exerciseSession.user?.lastName ?? this.anonymous,
-          username: exerciseSession.user?.username ?? this.anonymous,
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
           activitySessionId: exerciseSession.parentId,
-          groupIds: exerciseSession.user ? groupIdsByUser?.get(exerciseSession.user.id) ?? [] : [],
+          groupIds: groupIdsByUser?.get(user.id) ?? [],
         })
       )
     })
@@ -103,7 +108,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
       const exerciseSession = this.exerciseSessions.get(exercise.sessionId)
       if (!exerciseSession) return
 
-      const userId = exerciseSession.userId ?? this.anonymous
+      const userId = exerciseSession.userId ?? input.userId ?? this.anonymous
       const userResult =
         this.userResults.get(userId) ??
         emptyUserResults({

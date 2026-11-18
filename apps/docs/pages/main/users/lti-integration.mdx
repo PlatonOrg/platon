@@ -1,24 +1,145 @@
 ---
 title: Intégration LTI
-description: Guide d'intégration de PLaTon avec des systèmes LMS via le standard LTI. Explique la configuration côté PLaTon et LMS, avec un exemple détaillé pour Moodle, facilitant la connexion transparente des utilisateurs.
+description: Connecter PLaTon à un LMS (Moodle, Canvas…) par LTI 1.3 ou LTI 1.1 et à un serveur CAS - déclaration de la plateforme, URL de l'outil, paramètres personnalisés, création automatique des comptes, des cours et des groupes.
 ---
 
-import { Callout } from 'nextra/components'
+import { Callout, Steps } from 'nextra/components'
 
 # Intégration LTI
 
-## Explication du Fonctionnement de LTI (Learning Tools Interoperability)
+[LTI (Learning Tools Interoperability)](https://www.1edtech.org/standards/lti) est une norme qui permet à un LMS
+(Moodle, Canvas, Blackboard…) d'ouvrir un outil externe en y connectant automatiquement l'utilisateur. PLaTon est un
+**outil LTI** : depuis un lien placé dans leur cours Moodle, enseignants et étudiants arrivent dans PLaTon sans saisir
+d'identifiant.
 
-Learning Tools Interoperability (LTI) est une norme développée par [l'IMS Global Learning Consortium.](https://www.imsglobal.org)
-Elle permet l'intégration transparente de divers outils d'apprentissage et de contenus dans des systèmes de gestion de l'apprentissage (LMS).
-LTI facilite la communication entre les plateformes d'apprentissage et les outils externes, permettant aux utilisateurs de bénéficier d'une expérience d'apprentissage unifiée sans avoir à se connecter séparément à chaque outil.
+PLaTon prend en charge **LTI 1.3** (recommandé) et **LTI 1.1** (obsolète, conservé pour les installations
+existantes). La configuration se fait dans **Administration** › **LMS** et est réservée aux administrateurs.
 
-## PLaTon en tant qu'Outil LTI
+## LTI 1.3
 
-PLaTon est conçu comme un outil LTI, ce qui signifie qu'il peut s'intégrer facilement dans n'importe quel LMS compatible LTI, comme Moodle, Canvas ou Blackboard.
-Cette intégration permet aux enseignants et aux étudiants d'accéder à PLaTon directement à partir de leur LMS habituel, en utilisant leurs identifiants existants.
+### 1. Déclarer PLaTon dans le LMS
 
-## Ajouter un LMS à PLaTon
+L'onglet **LTI 1.3** de **Administration** › **LMS** affiche les adresses à renseigner dans le LMS lors de la
+déclaration de l'outil :
+
+| Champ affiché par PLaTon                         | Valeur                                    |
+| ------------------------------------------------ | ----------------------------------------- |
+| **URL de connexion (login initiation)**          | `https://<votre-plateforme>/lti/login`    |
+| **URL de redirection / de lancement (launch)**   | `https://<votre-plateforme>/lti/launch`   |
+| **URL du JWKS (clés publiques)**                 | `https://<votre-plateforme>/lti/keys`     |
+
+L'enregistrement dynamique n'est pas proposé : la plateforme doit être déclarée manuellement des deux côtés.
+
+### 2. Déclarer le LMS dans PLaTon
+
+<Steps>
+
+### Ajouter une plateforme
+
+Dans l'onglet **LTI 1.3**, cliquez sur le bouton d'ajout (**Ajouter une plateforme LTI 1.3**).
+
+### Renseigner les informations fournies par le LMS
+
+| Champ                                   | Contenu                                                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Reprendre un LMS LTI 1.1** (optionnel) | LMS déjà déclaré en LTI 1.1 que cette plateforme remplace : les comptes et les cours déjà créés via LTI 1.1 sont conservés. |
+| **Nom**                                 | Nom de la plateforme dans PLaTon.                                                                              |
+| **Issuer (URL de la plateforme)**       | Valeur du champ « iss » envoyée par le LMS (par exemple `https://moodle.exemple.fr`).                         |
+| **Client ID**                           | Identifiant du client généré par le LMS lors de la déclaration de l'outil.                                    |
+| **URL d'authentification**              | URL d'authentification OIDC du LMS.                                                                            |
+| **URL du jeton d'accès**                | URL de délivrance des jetons du LMS.                                                                           |
+| **Serveur d'autorisation** (optionnel)  | Si le LMS en indique un.                                                                                       |
+| **URL du JWKS de la plateforme**        | Utilisée pour vérifier la signature des lancements envoyés par le LMS.                                        |
+| **Plateforme active**                   | Désactivez-la pour refuser temporairement les lancements de ce LMS.                                            |
+
+### Enregistrer
+
+La plateforme apparaît dans le tableau ; elle peut y être modifiée ou supprimée.
+
+</Steps>
+
+<Callout type="warning">
+  Si votre établissement utilisait PLaTon en LTI 1.1, choisissez le LMS correspondant dans **Reprendre un LMS LTI
+  1.1**. Sans cela, les utilisateurs arrivant en LTI 1.3 obtiendraient de nouveaux comptes, sans leurs cours ni leurs
+  résultats.
+</Callout>
+
+### 3. Paramètres personnalisés de l'outil
+
+Dans le LMS, les **paramètres personnalisés** (custom parameters) de l'outil ou d'une activité précisent où mener
+l'utilisateur :
+
+| Paramètre   | Effet                                                                                                                                          |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `next`      | Page de PLaTon à ouvrir, sous forme de chemin relatif (par exemple `/courses/<id>`). Une adresse vers un autre site est ignorée.               |
+| `course`    | Identifiant du cours PLaTon à ouvrir (et dans lequel inscrire l'utilisateur).                                                                  |
+| `activity`  | Identifiant d'une activité de ce cours : l'utilisateur est envoyé directement dans l'activité.                                                 |
+| `groups`    | Liste de groupes, séparés par des virgules, dans lesquels placer l'utilisateur. Avec Moodle : `groups=$Moodle.Person.userGroupIds`.             |
+| `username`  | Identifiant de l'utilisateur dans le LMS, utilisé pour construire son nom d'utilisateur PLaTon. Avec Moodle : `username=$User.username`.      |
+
+Pour relier un lien du LMS à un cours PLaTon précis, indiquez par exemple `course=<identifiant du cours>` ou
+`next=/courses/<identifiant du cours>` ; l'identifiant figure dans l'adresse de la page du cours.
+
+<Callout type="info">
+  Le **Lien LTI** proposé par le bouton **Partager** d'un cours
+  (`…/api/v1/lti/launch?next=/courses/<id>`, voir [Partager un cours](/main/courses/create#partager-un-cours)) est
+  au format **LTI 1.1** : il s'utilise comme URL d'outil avec un LMS déclaré en LTI 1.1. En LTI 1.3, l'adresse de
+  lancement est toujours la même et la destination passe par les paramètres personnalisés ci-dessus.
+</Callout>
+
+## Ce qui se passe au lancement
+
+À chaque lancement depuis le LMS (LTI 1.3) :
+
+1. **Compte** : l'utilisateur est retrouvé grâce à son identifiant dans le LMS, ou un compte PLaTon est créé
+   (prénom, nom, e-mail transmis par le LMS). Un utilisateur ayant un rôle d'enseignant dans le LMS reçoit un compte
+   **enseignant** ; un compte étudiant existant est promu enseignant si le LMS le désigne comme enseignant.
+2. **Cours** :
+   - si le lancement vise un cours (`course` ou `next` vers `/courses/<id>`), l'utilisateur y est inscrit ;
+   - sinon, PLaTon cherche le cours rattaché au cours du LMS. Si aucun n'existe et que l'utilisateur est
+     **enseignant**, un cours PLaTon est **créé automatiquement**, nommé d'après le cours du LMS et rattaché à lui :
+     les étudiants qui utiliseront ensuite le même lien y seront inscrits. Un étudiant qui arrive avant cette création
+     est envoyé vers une page « cours introuvable ».
+3. **Rôle dans le cours** : l'utilisateur est inscrit comme **Enseignant** s'il est enseignant dans le LMS, sinon comme
+   **Étudiant**. Si son rôle dans le LMS change, son rôle dans le cours est mis à jour au lancement suivant.
+4. **Groupes** : avec le paramètre `groups`, les groupes correspondants sont créés dans le cours PLaTon si besoin et
+   l'utilisateur y est ajouté (voir [Gestion des groupes](/main/courses/groups)).
+5. **Redirection** : l'utilisateur arrive sur le cours, ou directement dans l'activité indiquée par `activity`.
+
+<Callout type="info">
+  Un utilisateur créé par LTI n'a pas de mot de passe PLaTon. Il peut en définir un depuis son profil pour se
+  connecter aussi directement (voir [Profil utilisateur](/main/users/profile)).
+</Callout>
+
+## Connexion CAS
+
+Un serveur **CAS** (service d'authentification centralisé de l'établissement) permet aux utilisateurs de se connecter
+directement à PLaTon, sans passer par le LMS, avec leurs identifiants de l'établissement. Il se déclare dans
+**Administration** › **CAS** › **Ajouter un CAS** :
+
+| Champ                            | Contenu                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Nom du CAS**                   | Nom affiché sur le bouton de connexion.                                                     |
+| **URL de connexion**             | Adresse de la page de connexion du CAS.                                                     |
+| **URL du service de validation** | Adresse du service de validation des tickets du CAS.                                        |
+| **Version du CAS**               | Version du protocole utilisée par le CAS.                                                   |
+| **LMS**                          | Le ou les LMS par lesquels les utilisateurs de ce CAS ont été créés.                        |
+
+Chaque CAS déclaré ajoute un bouton sous le formulaire de la page de connexion.
+
+<Callout type="warning">
+  La connexion CAS **ne crée pas de compte** : elle retrouve l'utilisateur dont l'identifiant dans un des LMS associés
+  correspond à son identifiant CAS. Un utilisateur doit donc s'être connecté au moins une fois depuis ce LMS ; sinon,
+  il est redirigé vers la page « Vous n'avez pas de compte sur PLaTon ? ».
+</Callout>
+
+## LTI 1.1 (obsolète)
+
+L'onglet **LTI 1.1 (obsolète)** de **Administration** › **LMS** gère les LMS déclarés avec l'ancienne version de la
+norme. Préférez LTI 1.3 pour toute nouvelle installation, et faites migrer les LMS existants avec **Reprendre un LMS
+LTI 1.1**.
+
+### Déclarer un LMS en LTI 1.1
 
 ![Configuration LMS dans PLaTon](../../../public/screens/admin/lms-config.png)
 
@@ -32,11 +153,11 @@ Pour intégrer un LMS avec PLaTon, vous devez fournir les informations suivantes
 
 Ces informations permettent une communication sécurisée entre PLaTon et le LMS, garantissant que les données des utilisateurs sont protégées et que l'interaction entre les deux systèmes est fluide.
 
-## Se Connecter à PLaTon depuis un LMS : Exemple avec Moodle
+### Exemple avec Moodle (LTI 1.1)
 
 Pour vous connecter à PLaTon depuis Moodle :
 
-### Configuration dans Moodle :
+#### Configuration dans Moodle
 
 ![Configuration LTI dans Moodle](../../../public/screens/admin/moodle-lti-tool-config.png)
 
@@ -44,7 +165,7 @@ Pour vous connecter à PLaTon depuis Moodle :
 - Ajoutez un nouvel outil externe en spécifiant l'URL de PLaTon (https://platon.example.com/api/v1/lti/launch), la clé et le secret fournis.
 - Pour plus de détails sur la configuration de l'outil externe dans Moodle, consultez [la documentation Moodle](https://docs.moodle.org/403/en/LTI_External_tools) :
 
-### Utilisation par les Enseignants et les Étudiants :
+#### Utilisation par les enseignants et les étudiants
 
 ![Configuration Cours LTI dans Moodle](../../../public/screens/admin/moodle-lti-course.png)
 

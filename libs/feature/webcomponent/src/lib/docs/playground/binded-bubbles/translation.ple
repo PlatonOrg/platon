@@ -20,10 +20,16 @@ form ==
 ==
 
 grader == #!lang=js
+// Une paire trouvée a l'état « achieved », ou « disabled » pour les dernières paires.
+// On vérifie que toutes les paires sont trouvées : sinon une validation à vide serait « sans erreur ».
+const trouvees = bubbles.items.filter((p) => ['achieved', 'disabled'].includes(p.item1.state)).length
 grade = 0
 feedback.type = "error"
 feedback.content = "Mauvaise réponse"
-if (bubbles.nbError == 0) {
+if (trouvees < bubbles.items.length) {
+  feedback.type = "warning"
+  feedback.content = `Associez toutes les paires avant de valider (${trouvees} sur ${bubbles.items.length}).`
+} else if (bubbles.nbError == 0) {
   grade = 100
   feedback.type = "success"
   feedback.content = "Bravo !"

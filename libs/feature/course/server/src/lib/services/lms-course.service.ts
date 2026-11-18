@@ -15,7 +15,9 @@ export class LmsCourseService {
     return this.lmsCourseRepository.save(data)
   }
 
-  async findLmsCourseFromLTI(lmsCourseId: string, lmsId: string): Promise<Optional<LmsCourseEntity>> {
-    return Optional.ofNullable(await this.lmsCourseRepository.findOne({ where: { lmsCourseId, lmsId } }))
+  async findLmsCourseFromLTI(lmsCourseId: string, ltiPlatformId: string): Promise<Optional<LmsCourseEntity>> {
+    // TypeORM ignores `undefined` conditions: without an id, findOne would return any course of the platform
+    if (!lmsCourseId || !ltiPlatformId) return Optional.empty()
+    return Optional.ofNullable(await this.lmsCourseRepository.findOne({ where: { lmsCourseId, ltiPlatformId } }))
   }
 }

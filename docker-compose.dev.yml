@@ -34,7 +34,7 @@ services:
     image: dpage/pgadmin4
     container_name: platon_pgadmin
     ports:
-      - "5050:80"
+      - '5050:80'
     volumes:
       - pgadmindata:/var/lib/pgadmin
       - .docker/db/servers.json:/pgadmin4/servers.json
@@ -62,6 +62,7 @@ services:
       - .docker/nginx/ssl/dhparam/dhparam.pem:/etc/nginx/dhparam.pem
       - .docker/nginx/ssl/certs/localhost.crt:/etc/nginx/ssl/localhost.crt
       - .docker/nginx/ssl/certs/localhost.key:/etc/nginx/ssl/localhost.key
+      - .docker/nginx/ssl/certs/rootCA.crt:/etc/nginx/ssl/rootCA.crt
       - ./dist/apps/docs:/usr/share/nginx/dist/apps/docs
 
     networks:

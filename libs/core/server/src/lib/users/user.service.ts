@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { NotFoundResponse, UserFilters, UserOrderings, USER_ORDERING_DIRECTIONS, UserRoles } from '@platon/core/common'
 import { isUUID4 } from '@platon/shared/server'
-import { Repository } from 'typeorm'
+import { EntityManager, Repository } from 'typeorm'
+import { isUniqueViolation } from '../database/database.errors'
 import { Optional } from 'typescript-optional'
 import { UserEntity } from './user.entity'
 import { EventEmitter2 } from '@nestjs/event-emitter'
@@ -44,7 +45,7 @@ export class UserService {
     }
 
     if (filters.lmses?.length) {
-      query.innerJoin('LmsUsers', 'lms_user', 'lms_user.user_id = user.id AND lms_user.lms_id IN (:...ids)', {
+      query.innerJoin('LmsUsers', 'lms_user', 'lms_user.user_id = user.id AND lms_user.lti_platform_id IN (:...ids)', {
         ids: filters.lmses,
       })
     }
@@ -100,6 +101,51 @@ export class UserService {
 
   async create(user: Partial<UserEntity>): Promise<UserEntity> {
     return this.repository.save(user)
+  }
+
+  /**
+   * Creates a user with the first free username among `baseUsername`, `baseUsername1`, `baseUsername2`…
+   * If another user takes the same username between the lookup and the insert (unique index),
+   * it retries with the next free username.
+   *
+   * `manager`: enclosing transaction. Each attempt is then isolated in a SAVEPOINT, otherwise
+   * PostgreSQL would abort the whole transaction on the first conflict.
+   */
+  async createWithAvailableUsername(
+    user: Partial<UserEntity>,
+    baseUsername: string,
+    manager?: EntityManager
+  ): Promise<UserEntity> {
+    const repository = manager?.getRepository(UserEntity) ?? this.repository
+    const save = (username: string) =>
+      manager
+        ? manager.transaction((savepoint) => savepoint.getRepository(UserEntity).save({ ...user, username }))
+        : repository.save({ ...user, username })
+
+    const maxAttempts = 5
+    for (let attempt = 1; ; attempt++) {
+      const username = await this.findAvailableUsername(baseUsername, repository)
+      try {
+        return await save(username)
+      } catch (error) {
+        if (!isUniqueViolation(error) || attempt >= maxAttempts) throw error
+      }
+    }
+  }
+
+  /** A single query: fetches the usernames starting with `base`, then looks for the first free suffix. */
+  private async findAvailableUsername(base: string, repository: Repository<UserEntity>): Promise<string> {
+    const pattern = base.replace(/[\\%_]/g, '\\$&') + '%'
+    const rows = await repository
+      .createQueryBuilder('user')
+      .select('user.username', 'username')
+      .where('user.username LIKE :pattern', { pattern })
+      .getRawMany<{ username: string }>()
+    const taken = new Set(rows.map((row) => row.username))
+    if (!taken.has(base)) return base
+    let count = 1
+    while (taken.has(`${base}${count}`)) count++
+    return `${base}${count}`
   }
 
   async update(userIdOrName: string, changes: Partial<UserEntity>): Promise<UserEntity> {

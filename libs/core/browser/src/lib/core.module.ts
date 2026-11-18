@@ -8,9 +8,21 @@ import { HttpParamEncoderInterceptor } from './http/http-param-encoder.intercept
 import { NgZorroProviders } from './vendors/ng-zorro/ng-zorro.'
 import { NgeDocProviders } from './vendors/nge-doc/nge-doc'
 import { NgeIconProviders } from './vendors/nge-icon/nge-icon'
-import { NgeMarkdownProviders } from './vendors/nge-markdown/nge-markdown'
 import { NgeMonacoImports, NgeMonacoProviders } from './vendors/nge-monaco/nge-monaco'
 import { NgxEChartsProviders } from './vendors/ngx-echarts/ngx-echarts'
+import {
+  provideNgeMarkdown,
+  withAdmonitions,
+  withConfig,
+  withEmoji,
+  withHighlighter,
+  withIcons,
+  withKatex,
+  withLinkAnchor,
+  withTabbedSet,
+  withThemes,
+} from '@cisstech/nge/markdown'
+import { ThomasColorizerService } from './vendors/nge-markdown/thomas-colorizer.service'
 
 @NgModule({
   imports: [RouterModule, NgeMonacoImports, GraphQLModule],
@@ -23,7 +35,26 @@ import { NgxEChartsProviders } from './vendors/ngx-echarts/ngx-echarts'
     NgeIconProviders,
     NgeMonacoProviders,
     NgxEChartsProviders,
-    NgeMarkdownProviders,
+    provideNgeMarkdown(
+      withKatex({
+        baseUrl: 'assets/vendors/katex',
+      }),
+      withIcons(),
+      withEmoji({
+        url: 'assets/vendors/emoji-toolkit/joypixels.min.js',
+      }),
+      withTabbedSet(),
+      withLinkAnchor(),
+      withAdmonitions(),
+      withHighlighter(ThomasColorizerService),
+      withConfig({
+        darkThemeClassName: 'dark-theme',
+      }),
+      withThemes({
+        name: 'github',
+        styleUrl: 'assets/vendors/nge/markdown/themes/github.css',
+      })
+    ),
   ],
 })
 export class CoreBrowserModule {}

@@ -3,7 +3,7 @@ title: Evaluator
 description: Carte permettant de donner une note à un élément avec des étoiles ou autres icônes personnalisées.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -70,7 +70,12 @@ Vous pouvez déninir la propriété `filledIcons = true` pour avoir des icônes 
       name: 'Visualisation',
       url: 'playground/components/wc-evaluator',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Auto-évaluation",
+    "url": "/playground/exercises/evaluator/self-assessment.ple"
+  }
+]
   ]}
 />
 

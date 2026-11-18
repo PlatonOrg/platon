@@ -6,14 +6,14 @@ import { Repository } from 'typeorm'
 import { Optional } from 'typescript-optional'
 import { CasEntity } from './entities/cas.entity'
 import { CreateCasDTO, UpdateCasDTO } from './cas.dto'
-import { LTIService } from '@platon/feature/lti/server'
+import { LTIOldService } from '@platon/feature/lti/server'
 
 @Injectable()
 export class CasService {
   constructor(
     @InjectRepository(CasEntity)
     private readonly casRepo: Repository<CasEntity>,
-    private readonly LtiService: LTIService
+    private readonly LtiService: LTIOldService
   ) {}
 
   async findCasById(id: string): Promise<Optional<CasEntity>> {
@@ -28,6 +28,20 @@ export class CasService {
         .leftJoinAndSelect('cas.lmses', 'lmses')
         .getOne()
     )
+  }
+
+  /**
+   * Ids of the LMSes linked to the CAS, read directly from the join table: unlike `cas.lmses`,
+   * they include deleted LTI 1.1 LMSes whose id was taken over by an LTI 1.3 platform.
+   */
+  async findLmsIds(casId: string): Promise<string[]> {
+    const rows = await this.casRepo.manager
+      .createQueryBuilder()
+      .select('link."lmsesId"', 'id')
+      .from('cas_lmses_lmses', 'link')
+      .where('link."casId" = :casId', { casId })
+      .getRawMany<{ id: string }>()
+    return rows.map((row) => row.id)
   }
 
   async searchCas(filters: CasFilters = {}): Promise<[CasEntity[], number]> {

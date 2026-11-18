@@ -17,7 +17,12 @@ export class CasEntity extends BaseEntity {
   @Column({ name: 'version', type: 'enum', enum: CasVersions, nullable: false, default: CasVersions.V3 })
   version!: CasVersions
 
-  @ManyToMany(() => LmsEntity)
+  /**
+   * No foreign keys: deleting an LTI 1.1 LMS must not delete the link, so the LTI 1.3 platform that
+   * takes over its id keeps the CAS -> LMS users mapping (see `CasService.findLmsIds`).
+   * TypeORM cannot drop only one of the two keys of the join table.
+   */
+  @ManyToMany(() => LmsEntity, { createForeignKeyConstraints: false })
   @JoinTable()
   lmses!: LmsEntity[]
 }

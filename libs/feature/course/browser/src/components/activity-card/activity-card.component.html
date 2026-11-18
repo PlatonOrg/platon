@@ -130,7 +130,7 @@
           @if (activity().permissions.viewResource) {
           <li nz-menu-item [routerLink]="['/resources', activity().resourceId]">Ouvrir la ressource associée</li>
           }
-          <li nz-menu-item (click)="qrModal.open()">Partarger</li>
+          <li nz-menu-item (click)="qrModal.open()">Partager</li>
           @if (activity().permissions.update) {
           <li nz-menu-item (click)="settingsDrawer.open()">Paramètres</li>
           }

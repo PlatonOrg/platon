@@ -93,6 +93,16 @@ describe('ActivityAggregators', () => {
   })
 
   describe('ActivityUserResults', () => {
+    // What TypeORM loads for `user` when `user_id` is NULL (because of the `hasPassword` virtual column).
+    const userWithoutRow = {
+      id: null,
+      username: null,
+      email: null,
+      firstName: null,
+      lastName: null,
+      hasPassword: false,
+    }
+
     it("devrait pré-remplir les résultats à partir des membres de l'activité", () => {
       const aggregator = new ActivityUserResults({
         activityMembers: [
@@ -162,6 +172,76 @@ describe('ActivityAggregators', () => {
       expect(results[0].correcting).toBe(true)
       expect(results[0].exercises['ex-1'].grade).toBe(-1)
       expect(results[0].exercises['ex-1'].state).toBe(AnswerStates.ANSWERED)
+    })
+
+    it("devrait rattacher les sessions d'exercice sans utilisateur au propriétaire de la session d'activité", () => {
+      const user = { id: 'u1', username: 'alice', email: 'a@test.local', firstName: 'A', lastName: 'A' }
+      const generatedSession = {
+        id: 'generated-session',
+        userId: null,
+        user: userWithoutRow,
+        grade: 42,
+        attempts: 1,
+        parentId: 'activity-session-1',
+      } as unknown as SessionDataEntity
+      const exerciseSession = {
+        id: 'exercise-session-1',
+        userId: 'u1',
+        user,
+        grade: 80,
+        attempts: 2,
+        parentId: 'activity-session-1',
+      } as unknown as SessionDataEntity
+
+      const aggregator = new ActivityUserResults({
+        exerciseSessions: [generatedSession, exerciseSession],
+      })
+
+      aggregator.next({
+        id: 'activity-session-1',
+        userId: 'u1',
+        activityNavigation: {
+          exercises: [
+            { id: 'ex-1', sessionId: 'exercise-session-1' },
+            { id: 'generated', sessionId: 'generated-session' },
+          ],
+        },
+      } as never)
+
+      const results = aggregator.complete()
+
+      expect(results).toHaveLength(1)
+      expect(results[0].id).toBe('u1')
+      expect(results[0].exercises['ex-1'].grade).toBe(80)
+      expect(results[0].exercises['generated'].grade).toBe(42)
+    })
+
+    it("devrait regrouper sous 'anonymous' une session d'activité sans utilisateur (prévisualisation)", () => {
+      const exerciseSession = {
+        id: 'exercise-session-1',
+        userId: null,
+        user: userWithoutRow,
+        grade: 80,
+        attempts: 2,
+        parentId: 'activity-session-1',
+      } as unknown as SessionDataEntity
+
+      const aggregator = new ActivityUserResults({
+        exerciseSessions: [exerciseSession],
+      })
+
+      aggregator.next({
+        id: 'activity-session-1',
+        userId: null,
+        activityNavigation: { exercises: [{ id: 'ex-1', sessionId: 'exercise-session-1' }] },
+      } as never)
+
+      const results = aggregator.complete()
+
+      expect(results).toHaveLength(1)
+      expect(results[0].id).toBe('anonymous')
+      expect(results[0].activitySessionId).toBe('activity-session-1')
+      expect(results[0].exercises['ex-1'].grade).toBe(80)
     })
 
     it("devrait ignorer les sessions d'exercice passées directement à next()", () => {

@@ -86,4 +86,7 @@ export const TextSelectComponentDefinition = defineWebComponent({
         Dignissimos laboriosam, quibusdam voluptates doloremque voluptatem animi. Si
         `,
   },
+  playgrounds: {
+    'Repérer les verbes': 'verbs.ple',
+  },
 })

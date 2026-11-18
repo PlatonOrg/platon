@@ -56,5 +56,7 @@ export const answerStateFromGrade = (grade?: number | null): AnswerStates => {
   if (grade === 0) return AnswerStates.FAILED
   if (grade <= 99 && grade >= 1) return AnswerStates.PART_SUCC
   if (grade === -1) return AnswerStates.ERROR
+  // Below -1, a grader did not validate the exercise (a penalty, or a deliberate -100): the student still answered.
+  if (grade < 0) return AnswerStates.STARTED
   return AnswerStates.NOT_STARTED
 }

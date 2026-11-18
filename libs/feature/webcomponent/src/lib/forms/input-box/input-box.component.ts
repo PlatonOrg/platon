@@ -13,7 +13,7 @@ import {
 } from '@angular/core'
 import { FormControl } from '@angular/forms'
 import { Observable, Subscription } from 'rxjs'
-import { debounceTime, map, startWith } from 'rxjs/operators'
+import { map, startWith } from 'rxjs/operators'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
 import { InputBoxComponentDefinition, type InputBoxState } from './input-box'
@@ -34,7 +34,8 @@ import { CssPipeModule } from '../../shared/pipes/css.pipe'
   styleUrls: ['input-box.component.scss'],
   host: {
     '[style.display]': `state.width === 'auto' || state.appearance === 'inline' ? 'inline-flex' : ''`,
-    '[style.width]': `state.width !== 'auto' ? (state.width ? state.width : '100%') : ''`,
+    // Inline, the field takes the width of its content instead of the whole line.
+    '[style.width]': `state.width === 'auto' ? '' : state.width || (state.appearance === 'inline' ? '' : '100%')`,
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -69,7 +70,6 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
   protected containerStyles: Record<string, string> = {}
 
   protected readonly form = new FormControl()
-  private dueTime = 50
 
   protected specialCharactersGrid: string[][][] = []
   private hasToUpdateCharacters = true
@@ -89,7 +89,8 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
   async ngOnInit() {
     this.state.isFilled = false
 
-    this.subscription = this.form.valueChanges.pipe(debounceTime(this.dueTime)).subscribe(async (value) => {
+    // No debounce: the player reads the state as soon as the learner submits, the value must already be there.
+    this.subscription = this.form.valueChanges.subscribe(async (value) => {
       value = value || ''
       if (this.state.type === 'number') {
         value = ('' + value).replace(/,/g, '.')
@@ -170,9 +171,8 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
     }
   }
 
-  protected async autoValidate() {
+  protected autoValidate() {
     if (this.state.autoValidation) {
-      await new Promise((resolve) => setTimeout(resolve, this.dueTime)) // wait for the last value change
       this.webComponentService.submit(this)
     }
   }

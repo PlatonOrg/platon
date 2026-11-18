@@ -1,6 +1,15 @@
 import { Injectable, inject } from '@angular/core'
 import { ListResponse } from '@platon/core/common'
-import { CreateLms, Lms, LmsFilters, UpdateLms } from '@platon/feature/lti/common'
+import {
+  CreateLms,
+  CreateLtiPlatform,
+  Lms,
+  LmsFilters,
+  LtiPlatform,
+  LtiToolConfig,
+  UpdateLms,
+  UpdateLtiPlatform,
+} from '@platon/feature/lti/common'
 import { Observable } from 'rxjs'
 import { LTIProvider } from '../models/lms-provider'
 
@@ -22,5 +31,29 @@ export class LTIService {
 
   createLms(input: CreateLms): Observable<Lms> {
     return this.provider.createLms(input)
+  }
+
+  deleteLms(id: string): Observable<void> {
+    return this.provider.deleteLms(id)
+  }
+
+  searchLtiPlatforms(search?: string): Observable<ListResponse<LtiPlatform>> {
+    return this.provider.searchLtiPlatforms(search)
+  }
+
+  createLtiPlatform(input: CreateLtiPlatform): Observable<LtiPlatform> {
+    return this.provider.createLtiPlatform(input)
+  }
+
+  updateLtiPlatform(id: string, input: UpdateLtiPlatform): Observable<LtiPlatform> {
+    return this.provider.updateLtiPlatform(id, input)
+  }
+
+  deleteLtiPlatform(id: string): Observable<void> {
+    return this.provider.deleteLtiPlatform(id)
+  }
+
+  getLtiToolConfig(): Observable<LtiToolConfig> {
+    return this.provider.getLtiToolConfig()
   }
 }

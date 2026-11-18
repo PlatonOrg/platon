@@ -5,8 +5,10 @@ import { ItemResponse, ListResponse, NoContentResponse } from '@platon/core/comm
 import {
   Activity,
   ActivityFilters,
+  ActivityReloadPreview,
   Course,
   CreateActivity,
+  ReloadActivity,
   RestrictionList,
   UpdateActivity,
 } from '@platon/feature/course/common'
@@ -57,12 +59,17 @@ export class RemoteActivityProvider extends ActivityProvider {
       .pipe(map(() => undefined))
   }
 
-  reload(activity: Activity, version?: string): Observable<Activity> {
+  reloadPreview(activity: Activity): Observable<ActivityReloadPreview> {
     return this.http
-      .put<ItemResponse<Activity>>(
-        `/api/v1/courses/${activity.courseId}/activities/${activity.id}`,
-        version ? { version } : {}
+      .get<ItemResponse<ActivityReloadPreview>>(
+        `/api/v1/courses/${activity.courseId}/activities/${activity.id}/reload-preview`
       )
+      .pipe(map((response) => response.resource))
+  }
+
+  reload(activity: Activity, input: ReloadActivity = {}): Observable<Activity> {
+    return this.http
+      .put<ItemResponse<Activity>>(`/api/v1/courses/${activity.courseId}/activities/${activity.id}`, input)
       .pipe(map((response) => response.resource))
   }
 

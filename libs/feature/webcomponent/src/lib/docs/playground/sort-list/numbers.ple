@@ -1,0 +1,37 @@
+sandbox = "node"
+
+liste = :wc-sort-list
+liste.alignment = "left"
+
+builder == #!lang=js
+valeurs = []
+while (valeurs.length < 5) {
+  const v = Math.round((Math.random() * 20 - 10) * 10) / 10
+  if (!valeurs.includes(v)) valeurs.push(v)
+}
+liste.items = valeurs.map(String)
+==
+
+title ==
+Ranger des nombres décimaux
+==
+
+statement ==
+Rangez les nombres dans l'ordre **croissant** (du plus petit en haut au plus grand en bas).
+==
+
+form ==
+{{ liste }}
+==
+
+grader == #!lang=js
+// Après réponse, chaque élément est un objet { id, content }.
+const obtenu = liste.items.map((item) => Number(typeof item === 'string' ? item : item.content))
+const attendu = [...valeurs].sort((x, y) => x - y)
+
+// Nombre d'éléments à la bonne place.
+const places = obtenu.filter((v, i) => v === attendu[i]).length
+grade = Math.round((100 * places) / attendu.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${places} nombre(s) à la bonne place sur ${attendu.length}.`
+==

@@ -5,22 +5,22 @@ import { DataSource, QueryFailedError, Repository } from 'typeorm'
 import { LmsUserEntity } from './entities/lms-user.entity'
 import { LmsEntity } from './entities/lms.entity'
 import { LTIPayload } from './provider/payload'
-import { StudentRoles } from './provider/roles'
-import { LTIService } from './lti.service'
+import { Lti11StudentRoles } from './provider/roles.lti11'
+import { LTIOldService } from './lti.service.old'
+import { LmsUserKey, LmsUserService, NewLmsUser } from './lms-user.service'
 
 /**
- * Contrairement aux specs unitaires (repository/query builder mockés), ce fichier fait tourner
- * LTIService contre un vrai Postgres (Testcontainers) avec un vrai UserService, pour exercer les
- * contraintes uniques déclarées sur les entités et la boucle d'unicité de username de withLmsUser
- * contre de vraies requêtes plutôt que des mocks qui ne peuvent jamais échouer.
+ * Unlike the unit specs (mocked repository/query builder), this file runs LTIOldService against a real
+ * Postgres (Testcontainers) with a real UserService, to exercise the unique constraints declared on the
+ * entities and the username uniqueness loop of withLmsUser against real queries rather than mocks that can never fail.
  */
-describe('LTIService (integration)', () => {
+describe('LTIOldService (integration)', () => {
   let testDb: TestDatabase
   let dataSource: DataSource
   let userRepo: Repository<UserEntity>
   let lmsRepo: Repository<LmsEntity>
   let lmsUserRepo: Repository<LmsUserEntity>
-  let service: LTIService
+  let service: LTIOldService
   let userService: UserService
 
   const discovery = { providersWithMetaAtKey: jest.fn().mockResolvedValue([]) }
@@ -33,7 +33,7 @@ describe('LTIService (integration)', () => {
     lmsUserRepo = dataSource.getRepository(LmsUserEntity)
 
     userService = new UserService(userRepo, { emit: jest.fn() } as never)
-    service = new LTIService(lmsRepo, lmsUserRepo, userService, discovery as never)
+    service = new LTIOldService(lmsRepo, lmsUserRepo, new LmsUserService(lmsUserRepo, userService), discovery as never)
   }, 60_000)
 
   afterAll(async () => {
@@ -81,16 +81,17 @@ describe('LTIService (integration)', () => {
       await expect(seedLms({ consumerKey: 'duplicate-key' })).rejects.toBeInstanceOf(QueryFailedError)
     })
 
-    it('devrait rejeter deux LmsUser identiques (même lms/lmsUserId/user)', async () => {
+    it('devrait rejeter un second compte pour le même utilisateur LMS (même plateforme/lmsUserId)', async () => {
       const lms = await seedLms()
       const user = await seedUser()
+      const otherUser = await seedUser()
 
       await lmsUserRepo.save(
-        lmsUserRepo.create({ lmsId: lms.id, lmsUserId: 'ext-1', userId: user.id, username: 'ext-user' })
+        lmsUserRepo.create({ ltiPlatformId: lms.id, lmsUserId: 'ext-1', userId: user.id, username: 'ext-user' })
       )
 
       await expect(
-        lmsUserRepo.save(lmsUserRepo.create({ lmsId: lms.id, lmsUserId: 'ext-1', userId: user.id }))
+        lmsUserRepo.save(lmsUserRepo.create({ ltiPlatformId: lms.id, lmsUserId: 'ext-1', userId: otherUser.id }))
       ).rejects.toBeInstanceOf(QueryFailedError)
     })
   })
@@ -121,7 +122,7 @@ describe('LTIService (integration)', () => {
 
   describe('withLmsUser', () => {
     const buildPayload = (overrides: Partial<LTIPayload> = {}): LTIPayload =>
-      ({ user_id: 'ext-user-1', roles: [StudentRoles.Student], ...overrides } as LTIPayload)
+      ({ user_id: 'ext-user-1', roles: [Lti11StudentRoles.Student], ...overrides } as LTIPayload)
 
     it('devrait créer un nouvel utilisateur et un LmsUser liés en base', async () => {
       const lms = await seedLms()
@@ -134,7 +135,7 @@ describe('LTIService (integration)', () => {
 
       const persistedLmsUser = await lmsUserRepo.findOne({ where: { id: lmsUser.id } })
       expect(persistedLmsUser?.userId).toBe(persistedUser?.id)
-      expect(persistedLmsUser?.lmsId).toBe(lms.id)
+      expect(persistedLmsUser?.ltiPlatformId).toBe(lms.id)
     })
 
     it('devrait suffixer le username avec un compteur si déjà pris en base réelle', async () => {
@@ -147,11 +148,57 @@ describe('LTIService (integration)', () => {
       expect(persistedUser?.username).toBe('john1')
     })
 
+    /**
+     * Runs two launches through `findOrCreate` at the same time: each waits for the other after looking up the
+     * account (neither finds it), then both create their account in parallel. Without the barrier, the second
+     * lookup often happens after the first account is created and the test would prove nothing.
+     */
+    const launchTogether = (keys: LmsUserKey[], username: string) => {
+      const lmsUserService = new LmsUserService(lmsUserRepo, userService)
+      let release!: () => void
+      const allSearched = new Promise<void>((resolve) => (release = resolve))
+      let searched = 0
+      const describeNewUser = async (): Promise<NewLmsUser> => {
+        if (++searched === keys.length) release()
+        await allSearched
+        return { lmsUsername: username, baseUsername: username, user: {} }
+      }
+      return Promise.all(keys.map((key) => lmsUserService.findOrCreate(key, UserRoles.student, describeNewUser)))
+    }
+
+    it("ne devrait créer qu'un compte pour deux premiers lancements simultanés du même utilisateur", async () => {
+      const lms = await seedLms()
+      const key = { ltiPlatformId: lms.id, lmsUserId: 'ext-user-1' }
+
+      const [first, second] = await launchTogether([key, key], 'john')
+
+      expect(first.userId).toBe(second.userId)
+      expect(await userRepo.count()).toBe(1)
+      expect(await lmsUserRepo.count()).toBe(1)
+    })
+
+    it('devrait donner des usernames distincts à deux utilisateurs LMS homonymes lancés simultanément', async () => {
+      const lms = await seedLms()
+
+      const lmsUsers = await launchTogether(
+        [
+          { ltiPlatformId: lms.id, lmsUserId: 'ext-a' },
+          { ltiPlatformId: lms.id, lmsUserId: 'ext-b' },
+        ],
+        'john'
+      )
+
+      const usernames = await Promise.all(
+        lmsUsers.map(async (lmsUser) => (await userRepo.findOne({ where: { id: lmsUser.userId } }))?.username)
+      )
+      expect(usernames.sort()).toEqual(['john', 'john1'])
+    })
+
     it('devrait upgrader le rôle en base pour un utilisateur existant recevant un rôle enseignant', async () => {
       const user = await seedUser({ role: UserRoles.student })
       const lms = await seedLms()
       await lmsUserRepo.save(
-        lmsUserRepo.create({ lmsId: lms.id, lmsUserId: 'ext-user-1', userId: user.id, username: 'john' })
+        lmsUserRepo.create({ ltiPlatformId: lms.id, lmsUserId: 'ext-user-1', userId: user.id, username: 'john' })
       )
 
       await service.withLmsUser(lms, buildPayload({ roles: ['urn:lti:role:ims/lis/Instructor' as never] }))

@@ -1,0 +1,88 @@
+sandbox = "python"
+
+editeur = :wc-code-editor
+editeur.language = "python"
+editeur.height = 200
+editeur.code ==
+def maximum(liste):
+    # Écrivez votre code ici
+    pass
+==
+
+title ==
+Maximum d'une liste (Python)
+==
+
+statement ==
+Écrivez la fonction `maximum(liste)` qui renvoie le plus grand élément d'une liste non vide,
+**sans utiliser** la fonction prédéfinie `max`.
+==
+
+form ==
+{{ editeur }}
+==
+
+grader == #!lang=py
+import ast
+import builtins
+import random
+
+tests = [[3, 1, 2], [-5, -2, -9], [7]]
+tests.append([random.randint(-50, 50) for _ in range(8)])
+
+
+def utilise_max(code):
+    """Cherche `max` dans le code, quelle que soit l'écriture : max(...), max (...), m = max..."""
+    try:
+        arbre = ast.parse(code)
+    except SyntaxError:
+        return False
+    return any(
+        (isinstance(noeud, ast.Name) and noeud.id == "max")
+        or (isinstance(noeud, ast.Attribute) and noeud.attr == "max")
+        for noeud in ast.walk(arbre)
+    )
+
+
+def max_interdit(*args, **kwargs):
+    raise RuntimeError("La fonction max est interdite.")
+
+
+details = []
+reussis = 0
+# Le code de l'élève s'exécute avec une fonction max qui lève une erreur : un appel indirect
+# (par exemple getattr(__builtins__, "max")) échoue donc aussi.
+espace = {"__builtins__": {**vars(builtins), "max": max_interdit}}
+
+try:
+    exec(editeur["code"], espace)
+except Exception as e:
+    details.append({"name": "Exécution du code", "type": "error", "description": repr(e), "display": True})
+
+fonction = espace.get("maximum")
+if utilise_max(editeur["code"]):
+    details.append({
+        "name": "Contrainte",
+        "type": "warning",
+        "description": "La fonction max est interdite.",
+        "display": True,
+    })
+elif callable(fonction):
+    for liste in tests:
+        try:
+            obtenu = fonction(list(liste))
+        except Exception as e:
+            obtenu = repr(e)
+        ok = obtenu == max(liste)
+        reussis += 1 if ok else 0
+        details.append({
+            "name": f"maximum({liste})",
+            "type": "success" if ok else "error",
+            "expected": str(max(liste)),
+            "obtained": str(obtenu),
+        })
+
+grade = round(100 * reussis / len(tests))
+feedback["type"] = "success" if grade == 100 else "error"
+feedback["content"] = details
+==

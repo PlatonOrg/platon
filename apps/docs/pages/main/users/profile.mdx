@@ -1,42 +1,45 @@
 ---
-title: Gestion des Profils Utilisateurs
-description: Guide pour les administrateurs sur la gestion des profils utilisateurs, incluant l'affichage, le tri et le filtrage des utilisateurs, l'activation/désactivation de comptes, et la modification des rôles pour maintenir l'ordre sur la plateforme.
+title: Profil utilisateur
+description: La page « Mon compte » de PLaTon - informations personnelles, centres d'intérêt, création ou modification du mot de passe et règles de sécurité du mot de passe.
 ---
 
-# Gestion des Profils Utilisateurs
+import { Callout } from 'nextra/components'
 
-![Page utilisateurs PLaTon](../../../public/screens/admin/users.png)
+# Profil utilisateur
 
-Ce chapitre détaille les actions réalisables par les administrateurs dans la section dédiée à la gestion des profils utilisateurs sur PLaTon.
-Cette gestion est cruciale pour maintenir l'ordre et l'efficacité au sein de la plateforme, en permettant aux administrateurs de contrôler l'accès et les rôles des utilisateurs.
+La page **Mon compte** s'ouvre depuis le menu de votre avatar, en haut à droite. Elle comporte deux onglets.
 
-## Liste des Utilisateurs
+## À propos
 
-### Fonctionnalités de la Liste
+| Champ                                 | Modifiable | Remarque                                                                                          |
+| ------------------------------------- | :--------: | ------------------------------------------------------------------------------------------------- |
+| **Prénom**, **Nom**, **Email**        |            | Fournis à la création du compte (par un administrateur ou par votre LMS).                         |
+| **Rôle**                              |            | Administrateur, Enseignant ou Élève ; seul un administrateur peut le changer.                     |
+| **Discord ID**                        |            | Identifiant du compte Discord associé, s'il y en a un.                                            |
+| **Centre d'intérêt** (sujets, niveaux) |     ✔      | Topics et niveaux qui vous intéressent.                                                           |
 
-- **Affichage et Tri** : Les utilisateurs sont listés dans une table facilement navigable. Les administrateurs peuvent trier cette liste par différents critères tels que le nom, ou la date de création du compte en cliquant sur les en-têtes de colonne.
-- **Filtres Avancés** : Des filtres sont disponibles pour affiner la recherche d'utilisateurs selon leur rôle (enseignant, étudiant, administrateur, etc.) ou leur statut. Cela permet une gestion plus rapide et plus précise.
+Pour corriger votre nom ou votre adresse e-mail, adressez-vous à un administrateur de la plateforme, ou corrigez-les
+dans votre LMS si votre compte a été créé par LTI.
 
-## Gestion de l'Activité des Utilisateurs
+## Sécurité : votre mot de passe
 
-### Actions sur les Comptes Utilisateurs
+L'onglet **Sécurité** permet de **créer un mot de passe** (si votre compte n'en a pas encore, par exemple parce qu'il
+a été créé par LTI ou CAS) ou de **modifier votre mot de passe** (le mot de passe actuel est alors demandé).
 
-- **Désactivation d'un Utilisateur** : Cette action bloque l'accès à l'application pour l'utilisateur concerné. Un utilisateur désactivé ne pourra plus se connecter ni accéder à ses cours ou ressources jusqu'à ce que son compte soit réactivé.
-- **Activation d'un Utilisateur** : Si un compte a été désactivé, cette action permet de rétablir l'accès de l'utilisateur à l'application. Une fois activé, l'utilisateur récupère ses accès et peut reprendre ses activités normalement sur la plateforme.
+Le nouveau mot de passe doit contenir :
 
-## Modification des Rôles Utilisateurs
+- au moins **12 caractères** ;
+- au moins une **majuscule** et une **minuscule** ;
+- au moins un **chiffre** ;
+- au moins un **caractère spécial**.
 
-### Changement de Rôle
+<Callout type="info">
+  Définir un mot de passe vous permet de vous connecter directement sur la page de connexion de PLaTon, avec votre nom
+  d'utilisateur, en plus de l'accès depuis votre LMS.
+</Callout>
 
-- **Changer le Rôle d'un Utilisateur** : Les administrateurs ont la capacité de modifier le rôle d'un utilisateur (par exemple, de passer un étudiant à enseignant ou vice versa). Ce changement peut être nécessaire pour refléter l'évolution du statut de l'utilisateur dans l'établissement ou pour corriger des attributions de rôles initiales.
+## Gestion des comptes par les administrateurs
 
-## Interface Administrateur
-
-Conception et Accessibilité
-
-- **Interface Conviviale** : L'interface de gestion des profils est conçue pour être intuitive et facile à utiliser, permettant aux administrateurs de gérer efficacement les comptes sans difficulté technique.
-- **Accès Sécurisé** : Seuls les utilisateurs ayant des privilèges administratifs peuvent accéder à cette section, garantissant la sécurité et la confidentialité des informations des utilisateurs.
-
-En résumé, la gestion des profils utilisateurs dans PLaTon donne aux administrateurs le pouvoir de superviser efficacement
-les comptes utilisateurs, en assurant que l'accès à la plateforme est accordé de manière appropriée et que les rôles des utilisateurs sont correctement attribués.
-Cette gestion joue un rôle crucial dans le maintien de l'ordre et de la sécurité sur la plateforme.
+La création des comptes, le changement de rôle et l'activation ou la désactivation d'un compte se font dans
+**Administration** › **Utilisateurs** : voir [Tableau de bord administrateur](/main/dashboard/admin). Un compte désactivé
+ne peut plus se connecter tant qu'il n'est pas réactivé.

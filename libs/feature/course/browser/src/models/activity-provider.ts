@@ -2,8 +2,10 @@ import { ListResponse } from '@platon/core/common'
 import {
   Activity,
   ActivityFilters,
+  ActivityReloadPreview,
   Course,
   CreateActivity,
+  ReloadActivity,
   RestrictionList,
   UpdateActivity,
 } from '@platon/feature/course/common'
@@ -16,7 +18,8 @@ export abstract class ActivityProvider {
   abstract createActivities(course: Course, inputs: CreateActivity[]): Observable<ListResponse<Activity>>
   abstract update(activity: Activity, input: UpdateActivity): Observable<Activity>
   abstract updateOrder(course: Course, sortedActivityIds: string[]): Observable<void>
-  abstract reload(activity: Activity, version?: string): Observable<Activity>
+  abstract reloadPreview(activity: Activity): Observable<ActivityReloadPreview>
+  abstract reload(activity: Activity, input?: ReloadActivity): Observable<Activity>
   abstract delete(activity: Activity, version?: string): Observable<void>
   abstract close(activity: Activity): Observable<Activity>
   abstract reopen(activity: Activity): Observable<Activity>

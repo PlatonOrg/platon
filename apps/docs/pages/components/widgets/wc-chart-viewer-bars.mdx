@@ -3,7 +3,7 @@ title: ChartViewer-Bars
 description: Graphique à barres horizontales ou verticales pour la visualisation comparative de données. Particulièrement utile pour les exercices d'économie, de statistiques, d'analyse de données séquentielles, de comparaison de performances sur différentes périodes, ou pour illustrer des distributions et tendances dans diverses disciplines scientifiques.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -33,12 +33,14 @@ Chaque élément du tableau `value` correspond à une catégorie définie dans l
 ### Configuration des axes
 
 - **labels**: Tableau de chaînes définissant les catégories (axe des abscisses en mode vertical, ordonnées en mode horizontal)
-- **xAxisLabel**: Titre de l'axe horizontal
-- **yAxisLabel**: Titre de l'axe vertical
+- **xAxisLabel**: Titre de l'axe horizontal, quel que soit le mode
+- **yAxisLabel**: Titre de l'axe vertical, quel que soit le mode
+
+En mode horizontal, les catégories passent sur l'axe vertical : pensez à échanger les deux titres si vous changez de mode.
 
 ### Modes d'affichage
 
-- **vertical**: Barres verticales (classique)
+- **vertical** (par défaut): Barres verticales (classique)
 - **horizontal**: Barres horizontales (utile pour les étiquettes longues ou nombreuses)
 
 ### Exemple pratique
@@ -83,7 +85,12 @@ Ce composant est particulièrement adapté pour:
       name: 'Visualisation',
       url: 'playground/components/wc-chart-viewer-bars',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Lire un diagramme en barres",
+    "url": "/playground/exercises/chart-viewer-bars/best-month.ple"
+  }
+]
   ]}
 />
 
@@ -101,8 +108,8 @@ Ce composant est particulièrement adapté pour:
   "properties": {
     "mode": {
       "type": "string",
-      "default": "horizontal",
-      "description": "Mode d'affichage du graphe : horizontal ou vertical",
+      "default": "vertical",
+      "description": "Sens des barres : vertical (barres verticales, les labels sous l'axe horizontal) ou horizontal",
       "enum": [
         "horizontal",
         "vertical"
@@ -111,12 +118,12 @@ Ce composant est particulièrement adapté pour:
     "xAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe X"
+      "description": "Titre de l'axe horizontal"
     },
     "yAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe Y"
+      "description": "Titre de l'axe vertical"
     },
     "labels": {
       "type": "array",
@@ -124,6 +131,132 @@ Ce composant est particulièrement adapté pour:
       "description": "Liste des labels",
       "items": {
         "type": "string"
+      }
+    },
+    "title": {
+      "type": "object",
+      "default": {
+        "text": "Title",
+        "subtext": "SubTitle",
+        "left": "center"
+      },
+      "description": "Titre du graphique",
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "Title",
+          "description": "Titre du graphique"
+        },
+        "subtext": {
+          "type": "string",
+          "default": "SubTitle",
+          "description": "Sous-titre du graphique"
+        },
+        "left": {
+          "type": "string",
+          "default": "center",
+          "description": "Position du titre sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position du titre sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "default": {
+        "orient": "vertical",
+        "left": "left"
+      },
+      "description": "Légende du graphique",
+      "properties": {
+        "orient": {
+          "type": "string",
+          "default": "vertical",
+          "description": "Orientation de la légende",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        "left": {
+          "type": "string",
+          "default": "left",
+          "description": "Position de la légende sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position de la légende sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "tooltip": {
+      "type": "object",
+      "default": {
+        "trigger": "item"
+      },
+      "description": "Tooltip du graphique",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "default": "item",
+          "description": "Type de tooltip",
+          "enum": [
+            "item",
+            "axis"
+          ]
+        }
+      }
+    },
+    "dataTitle": {
+      "type": "string",
+      "default": "Valeur de la donnée",
+      "description": "Titre à afficher sur chaque donnée"
+    },
+    "data": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des données du graphique",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "",
+            "description": "Nom de l'indicateur"
+          },
+          "value": {
+            "type": "array",
+            "default": [],
+            "description": "Valeur de l'indicateur",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
       }
     }
   }
@@ -141,8 +274,8 @@ Ce composant est particulièrement adapté pour:
   "properties": {
     "mode": {
       "type": "string",
-      "default": "horizontal",
-      "description": "Mode d'affichage du graphe : horizontal ou vertical",
+      "default": "vertical",
+      "description": "Sens des barres : vertical (barres verticales, les labels sous l'axe horizontal) ou horizontal",
       "enum": [
         "horizontal",
         "vertical"
@@ -151,12 +284,12 @@ Ce composant est particulièrement adapté pour:
     "xAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe X"
+      "description": "Titre de l'axe horizontal"
     },
     "yAxisLabel": {
       "type": "string",
       "default": "",
-      "description": "Label de l'axe Y"
+      "description": "Titre de l'axe vertical"
     },
     "labels": {
       "type": "array",
@@ -164,6 +297,132 @@ Ce composant est particulièrement adapté pour:
       "description": "Liste des labels",
       "items": {
         "type": "string"
+      }
+    },
+    "title": {
+      "type": "object",
+      "default": {
+        "text": "Title",
+        "subtext": "SubTitle",
+        "left": "center"
+      },
+      "description": "Titre du graphique",
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "Title",
+          "description": "Titre du graphique"
+        },
+        "subtext": {
+          "type": "string",
+          "default": "SubTitle",
+          "description": "Sous-titre du graphique"
+        },
+        "left": {
+          "type": "string",
+          "default": "center",
+          "description": "Position du titre sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position du titre sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "default": {
+        "orient": "vertical",
+        "left": "left"
+      },
+      "description": "Légende du graphique",
+      "properties": {
+        "orient": {
+          "type": "string",
+          "default": "vertical",
+          "description": "Orientation de la légende",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        "left": {
+          "type": "string",
+          "default": "left",
+          "description": "Position de la légende sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position de la légende sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "tooltip": {
+      "type": "object",
+      "default": {
+        "trigger": "item"
+      },
+      "description": "Tooltip du graphique",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "default": "item",
+          "description": "Type de tooltip",
+          "enum": [
+            "item",
+            "axis"
+          ]
+        }
+      }
+    },
+    "dataTitle": {
+      "type": "string",
+      "default": "Valeur de la donnée",
+      "description": "Titre à afficher sur chaque donnée"
+    },
+    "data": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des données du graphique",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "",
+            "description": "Nom de l'indicateur"
+          },
+          "value": {
+            "type": "array",
+            "default": [],
+            "description": "Valeur de l'indicateur",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
       }
     }
   }

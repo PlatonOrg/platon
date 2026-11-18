@@ -3,7 +3,7 @@ title: CodeEditor
 description: Éditeur de code complet avec coloration syntaxique pour multiples langages de programmation, indentation automatique et suggestions. Adapté aux exercices d'informatique comme la programmation, le débogage, la complétion de code, les algorithmes, ou l'analyse de code avec une interface professionnelle similaire aux IDE modernes.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -79,7 +79,16 @@ Pour une expérience optimale, adaptez la hauteur de l'éditeur en fonction de l
       name: 'Visualisation',
       url: 'playground/components/wc-code-editor',
     },
-    ...[]
+    ...[
+  {
+    "name": "Exemple: Fonction JavaScript testée",
+    "url": "/playground/exercises/code-editor/sum-function.ple"
+  },
+  {
+    "name": "Exemple: Fonction Python testée",
+    "url": "/playground/exercises/code-editor/python-function.ple"
+  }
+]
   ]}
 />
 

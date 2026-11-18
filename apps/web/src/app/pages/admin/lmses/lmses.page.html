@@ -1,19 +1,61 @@
-<lms-search-bar #searchbar [(ngModel)]="lmses" [autoSelect]="true" [filters]="filters" />
+<nz-tabs>
+  <nz-tab nzTitle="LTI 1.3">
+    @if (toolConfig) {
+    <div class="tool-config">
+      <p>À renseigner dans le LMS pour déclarer PLaTon comme outil LTI 1.3 :</p>
+      <ul>
+        <li>
+          <strong>URL de connexion (login initiation)</strong> : <code>{{ toolConfig.loginUrl }}</code>
+        </li>
+        <li>
+          <strong>URL de redirection / de lancement (launch)</strong> : <code>{{ toolConfig.launchUrl }}</code>
+        </li>
+        <li>
+          <strong>URL du JWKS (clés publiques)</strong> : <code>{{ toolConfig.keysetUrl }}</code>
+        </li>
+        @if (toolConfig.dynamicRegistrationUrl) {
+        <li>
+          <strong>URL d'enregistrement dynamique</strong> : <code>{{ toolConfig.dynamicRegistrationUrl }}</code>
+        </li>
+        }
+      </ul>
+    </div>
+    }
 
-<div nz-flex nzGap="small">
-  <button (click)="createDrawer.open()" nz-button nzType="primary" nz-tooltip="Ajouter un LMS">
-    <span nz-icon nzType="plus" nzTheme="outline"></span>
-  </button>
-</div>
+    <div nz-flex nzGap="small">
+      <button (click)="platformDrawer.open()" nz-button nzType="primary" nz-tooltip="Ajouter une plateforme LTI 1.3">
+        <span nz-icon nzType="plus" nzTheme="outline"></span>
+      </button>
+    </div>
 
-<lms-table
-  [total]="searchbar.total"
-  [loading]="searchbar.searching"
-  [lmses]="lmses"
-  [selectable]="false"
-  [(filters)]="filters"
-  (openDetails)="detailsDrawer.open($event)"
-/>
+    <lms-lti-platform-table
+      [platforms]="platforms"
+      [loading]="loadingPlatforms"
+      (openDetails)="platformDrawer.open($event)"
+    />
 
-<lms-drawer (updated)="onUpdateLms($event)" #detailsDrawer />
-<lms-create-drawer #createDrawer (created)="insert($event)" />
+    <lms-lti-platform-drawer #platformDrawer (saved)="loadPlatforms()" (deleted)="loadPlatforms()" />
+  </nz-tab>
+
+  <nz-tab nzTitle="LTI 1.1 (obsolète)">
+    <lms-search-bar #searchbar [(ngModel)]="lmses" [autoSelect]="true" [filters]="filters" />
+
+    <div nz-flex nzGap="small">
+      <button (click)="createDrawer.open()" nz-button nzType="primary" nz-tooltip="Ajouter un LMS">
+        <span nz-icon nzType="plus" nzTheme="outline"></span>
+      </button>
+    </div>
+
+    <lms-table
+      [total]="searchbar.total"
+      [loading]="searchbar.searching"
+      [lmses]="lmses"
+      [selectable]="false"
+      [(filters)]="filters"
+      (openDetails)="detailsDrawer.open($event)"
+    />
+
+    <lms-drawer (updated)="onUpdateLms($event)" (deleted)="onDeleteLms($event)" #detailsDrawer />
+    <lms-create-drawer #createDrawer (created)="insert($event)" />
+  </nz-tab>
+</nz-tabs>

@@ -12,6 +12,7 @@ import {
   QueryList,
   ViewChildren,
   AfterViewInit,
+  OnDestroy,
   inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
@@ -30,7 +31,7 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
   imports: [BaseModule, CssPipeModule, MatButtonModule, NgeMarkdownModule],
 })
 @WebComponent(BindedBubblesComponentDefinition)
-export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesState>, OnInit, AfterViewInit {
+export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesState>, OnInit, AfterViewInit, OnDestroy {
   readonly injector = inject(Injector)
   private cd = inject(ChangeDetectorRef)
 
@@ -47,6 +48,7 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   clickedList: (BubbleItem | undefined)[] = [undefined, undefined]
   achieveList: PairBubbleItem[] = []
   timeoutID: NodeJS.Timeout | undefined
+  private refillTimeouts: NodeJS.Timeout[] = []
 
   constructor() {
     const injector = this.injector
@@ -58,14 +60,23 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   ngOnInit() {
     let cmp = 0
     this.numberPairToShow = this.state.numberPairToShow
+    // After a submission, the component is created again with the submitted state:
+    // the pairs already found stay found, the other bubbles are reset.
     this.state.items.forEach((element) => {
+      const found = this.isFound(element)
       element.item1.id = cmp++ + ''
-      element.item1.state = 'unchecked'
+      element.item1.state = found ? 'achieved' : 'unchecked'
       element.item2.id = cmp++ + ''
-      element.item2.state = 'unchecked'
+      element.item2.state = found ? 'achieved' : 'unchecked'
+      if (found) this.achieveList.push(element)
     })
     this.state.isFilled = false
     this.constructShuffleList()
+  }
+
+  ngOnDestroy() {
+    clearTimeout(this.timeoutID)
+    this.refillTimeouts.forEach((id) => clearTimeout(id))
   }
 
   onChangeState(): void {
@@ -162,12 +173,10 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
       }
     })
 
-    switch (this.state.mode) {
-      case 'shuffle':
-        break
-      case 'ordered':
-        this.handleOrderedAchievedPair(pair)
-        break
+    if (this.state.mode === 'shuffle') {
+      this.handleShuffleAchievedPair(pair)
+    } else {
+      this.handleOrderedAchievedPair(pair)
     }
   }
 
@@ -222,8 +231,77 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
     return randomPair
   }
 
+  /**
+   * Shuffle mode: once the timeout is over, the slots of the found pair are refilled with an item1
+   * and an item2 drawn independently, so the two new bubbles do not necessarily form a pair.
+   */
+  private handleShuffleAchievedPair(pair: PairBubbleItem) {
+    const index1 = this.list1.findIndex((item) => item.id === pair.item1.id)
+    const index2 = this.list2.findIndex((item) => item.id === pair.item2.id)
+    // Each pending refill will take one of the hidden bubbles: when none is left for this pair,
+    // its bubbles are greyed out at once, as in ordered mode, to show that the game is ending.
+    if (this.hiddenItems().hidden1.length <= this.refillTimeouts.length) {
+      this.list1[index1] = { ...this.list1[index1], state: 'disabled' }
+      this.list2[index2] = { ...this.list2[index2], state: 'disabled' }
+      return
+    }
+    const timeoutID = setTimeout(() => {
+      this.refillTimeouts = this.refillTimeouts.filter((id) => id !== timeoutID)
+      this.fillShuffled(index1, index2)
+      this.cd.markForCheck()
+    }, this.state.timeout)
+    this.refillTimeouts.push(timeoutID)
+  }
+
+  /** Pairs not found yet, and their bubbles that are not displayed. */
+  private hiddenItems() {
+    const displayed = new Set([...this.list1, ...this.list2].map((item) => item.id))
+    const remaining = this.state.items.filter((pair) => !this.isFound(pair))
+    return {
+      remaining,
+      hidden1: remaining.map((pair) => pair.item1).filter((item) => !displayed.has(item.id)),
+      hidden2: remaining.map((pair) => pair.item2).filter((item) => !displayed.has(item.id)),
+    }
+  }
+
+  private fillShuffled(index1: number, index2: number) {
+    const { remaining, hidden1, hidden2 } = this.hiddenItems()
+    // As many item1 as item2 remain hidden (checked before the timeout).
+    if (!hidden1.length || !hidden2.length) return
+
+    this.list1[index1] = this.pickRandom(hidden1)
+    let next2 = this.pickRandom(hidden2)
+
+    // The learner must always be able to form a pair: if the drawn bubbles leave no pair on the
+    // screen, the new item2 is replaced by the partner of a displayed item1 (which is hidden then).
+    const partnerOf = (item: BubbleItem) => remaining.find((pair) => pair.item1.id === item.id)?.item2
+    const playable = (item: BubbleItem) => item.state !== 'achieved' && item.state !== 'disabled'
+    const shown1 = this.list1.filter(playable)
+    const shown2 = new Set(this.list2.filter(playable).map((item) => item.id)).add(next2.id)
+    if (!shown1.some((item) => shown2.has(partnerOf(item)?.id ?? ''))) {
+      next2 = partnerOf(this.pickRandom(shown1)) ?? next2
+    }
+    this.list2[index2] = next2
+  }
+
+  private pickRandom<T>(array: T[]): T {
+    return array[Math.floor(Math.random() * array.length)]
+  }
+
+  /** A found pair is `achieved`, or `disabled` for the last pairs in ordered mode. */
+  private isFound(pair: PairBubbleItem): boolean {
+    return pair.item1.state === 'achieved' || pair.item1.state === 'disabled'
+  }
+
   constructShuffleList() {
-    const cuttedList = this.state.items.slice(0, this.numberPairToShow)
+    const remaining = this.state.items.filter((pair) => !this.isFound(pair))
+    // Once every pair is found, the last pairs stay displayed, greyed out, as at the end of a game.
+    const cuttedList = remaining.length
+      ? remaining.slice(0, this.numberPairToShow)
+      : this.state.items.slice(-this.numberPairToShow).map((pair) => ({
+          item1: { ...pair.item1, state: 'disabled' as const },
+          item2: { ...pair.item2, state: 'disabled' as const },
+        }))
     cuttedList.forEach((element) => {
       this.shuffledList.push(element.item1)
       this.shuffledList.push(element.item2)
@@ -232,11 +310,8 @@ export class BindedBubblesComponent implements WebComponentHooks<BindedBubblesSt
   }
 
   shuffleByMode() {
-    if (this.state.mode === 'ordered') {
-      this.splitListAndShuffle(this.shuffledList)
-    } else {
-      this.shuffledList = this.shuffle(this.shuffledList)
-    }
+    // Both modes display the item1 in a column and the item2 in the other one.
+    this.splitListAndShuffle(this.shuffledList)
   }
 
   shuffle(array: BubbleItem[]): BubbleItem[] {

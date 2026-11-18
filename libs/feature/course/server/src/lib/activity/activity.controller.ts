@@ -9,6 +9,7 @@ import {
   isTeacherRole,
 } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
+import { ActivityReloadPreview } from '@platon/feature/course/common'
 import { CoursePermissionsService } from '../permissions/permissions.service'
 import {
   ActivityDTO,
@@ -149,6 +150,19 @@ export class ActivityController {
     return new ItemResponse({
       resource: Mapper.map(activity, ActivityDTO),
     })
+  }
+
+  @Roles(UserRoles.teacher, UserRoles.admin)
+  @Get('/:activityId/reload-preview')
+  async reloadPreview(
+    @Req() req: IRequest,
+    @UUIDParam('courseId') courseId: string,
+    @UUIDParam('activityId') activityId: string
+  ): Promise<ItemResponse<ActivityReloadPreview>> {
+    const resource = await this.activityService.reloadPreview(courseId, activityId, (activity) =>
+      this.permissionsService.ensureActivityWritePermission(activity, req)
+    )
+    return new ItemResponse({ resource })
   }
 
   @Roles(UserRoles.teacher, UserRoles.admin)

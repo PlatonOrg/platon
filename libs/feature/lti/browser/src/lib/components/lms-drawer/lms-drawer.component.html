@@ -51,5 +51,6 @@
 </ui-modal-drawer>
 
 <ng-template #infoTabFooter>
+  <button nz-button nzType="default" nzDanger (click)="delete()">Supprimer</button>
   <button nz-button nzType="primary" (click)="update()" [disabled]="!form.valid">Enregistrer</button>
 </ng-template>
