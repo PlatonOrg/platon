@@ -1,0 +1,57 @@
+---
+title: Évaluation par les pairs
+description: Le mode de navigation « Comparaison par les pairs » de PLaTon - principe du tournoi de copies, groupes d'exercices à créer, variables échangées avec l'exercice de comparaison et limites.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Évaluation par les pairs
+
+Le mode de navigation **Comparaison par les pairs** fait juger les productions des apprenants par d'autres
+apprenants. Chaque apprenant répond d'abord à un exercice, puis compare des **paires de copies** de ses camarades et
+désigne la meilleure. Les copies s'affrontent ainsi dans un **tournoi** : une copie qui gagne une comparaison passe au
+niveau suivant.
+
+## Mettre en place l'activité
+
+<Steps>
+
+### Choisir le mode
+
+Dans l'onglet des paramètres de `main.pla`, choisissez le mode **Comparaison par les pairs**.
+
+### Créer les groupes d'exercices
+
+Le mode repose sur des [groupes d'exercices](/main/programing/activity/exercices) dont le **nom** est imposé :
+
+| Nom du groupe     | Contenu                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------- |
+| `exercice`        | L'exercice à réaliser par chaque apprenant (le premier exercice du groupe est utilisé).                       |
+| `comparaison`     | L'exercice qui présente deux copies et demande de choisir la meilleure (premier exercice du groupe).          |
+| `attente`         | Exercice proposé quand il n'y a pas de copie à comparer ni d'exercice d'entraînement disponible.              |
+| `entrainement`    | Exercices d'entraînement proposés en attendant que des copies soient disponibles.                             |
+
+### Écrire l'exercice de comparaison
+
+Quand une paire de copies est disponible, PLaTon place dans l'exercice de comparaison les variables
+`__peer_copy_1` et `__peer_copy_2`, qui contiennent le rendu des deux copies. Le grader de cet exercice doit indiquer
+la copie gagnante dans la variable **`peer_winner_`** : `1` pour la première copie, `2` pour la seconde. Sans gagnant,
+la validation est refusée.
+
+</Steps>
+
+## Déroulement pour l'apprenant
+
+1. Il réalise l'exercice du groupe `exercice` ; sa réponse entre dans le tournoi.
+2. PLaTon lui propose ensuite une paire de copies à comparer (exercice `comparaison`). Il n'évalue jamais sa propre
+   copie.
+3. S'il n'y a pas de paire disponible, il reçoit un exercice d'`entrainement`, puis l'exercice d'`attente`.
+
+Dans la page [Statistiques](/main/courses/statistics) de l'activité, l'enseignant visualise l'**arbre du tournoi** :
+les matchs par niveau, les vainqueurs et les matchs en cours.
+
+<Callout type="warning">
+  Ce mode ne fonctionne qu'avec de vrais apprenants dans un cours : il est **indisponible en prévisualisation**. Dans
+  un cours, les exercices d'une activité en mode pairs ne peuvent pas être rechargés séparément (voir
+  [Recharger une activité](/main/courses/activities#recharger-une-activité)).
+</Callout>
