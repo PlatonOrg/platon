@@ -31,7 +31,7 @@ deposes = [f["name"] for f in fichier.get("uploadedFiles", []) if f.get("status"
 chemin = os.path.join("submission", os.path.basename(deposes[-1])) if deposes else None
 
 if chemin is None or not os.path.isfile(chemin):
-    grade = -1
+    grade = -2  // Donner une note inférieure à 0 permet de ne pas compter la soumission comme une tentative.
     feedback["type"] = "warning"
     feedback["content"] = "Aucun fichier reçu : déposez un fichier avant de valider."
 else:

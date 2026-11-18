@@ -1,15 +1,176 @@
 ---
-title: Ajouter des activités dans un cours
-description: Instructions pour l'intégration d'activités pédagogiques dans les cours PLaTon, incluant la sélection, la configuration et la personnalisation des activités pour les apprenants.
+title: Ajouter et paramétrer des activités
+description: Ajouter des activités à un cours PLaTon (entraînement, TP noté, challenge), définir des périodes d'accès par groupe ou par étudiant, régler les paramètres (durée, tentatives, boutons, sécurité), fermer, rouvrir, recharger ou supprimer une activité.
 ---
 
-import { Callout } from 'nextra/components'
+import { Callout, Steps } from 'nextra/components'
 
-# Ajouter des activités dans un cours
+# Ajouter et paramétrer des activités
+
+Une activité de cours est une [activité](/main/resources/activities) de l'espace de travail publiée dans une section
+du cours. Chaque activité de cours a ses **propres** dates, règles d'accès et paramètres : la même ressource peut être
+utilisée dans plusieurs cours avec des réglages différents.
+
+## Ajouter une activité
 
 ![Ajout d'une activité](../../../public/screens/courses/add-activity-1.png)
 
-Cette page est en cours de construction
+Le bouton **Ajouter une activité** se trouve dans le menu d'une section (voir
+[Sections](/main/courses/sections)) ou en haut de la vue tableau du cours. Il ouvre un assistant en quatre étapes.
+
+<Steps>
+
+### Section
+
+Choisissez la section du cours dans laquelle ajouter l'activité. Cette étape est déjà remplie si vous êtes parti du
+menu d'une section.
+
+### Activité
+
+Recherchez l'activité dans l'espace de travail (barre de recherche et filtres par cercle, thème, niveau,
+auteur…). Vous pouvez **sélectionner plusieurs activités** : elles seront toutes ajoutées avec les mêmes réglages. Le
+bandeau en haut de la liste rappelle la sélection ; **Tout désélectionner** la vide et **Suivant** passe à l'étape
+suivante.
+
+### Fonction
+
+Choisissez le type d'activité ; les étapes suivantes s'adaptent à ce choix.
+
+| Fonction                 | Usage                                                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Entraînement**         | Activité simple, sans réglage particulier, pour que les élèves s'entraînent librement.                                       |
+| **TP noté / Examen**     | Activité évaluée : durée maximale, nombre de tentatives, sécurité anti-triche et correction par les enseignants (voir plus bas). |
+| **Challenge**            | Activité dont le classement est visible par tous les membres du cours (voir [Challenges](/main/courses/challenges)).        |
+
+### Configuration
+
+- **Cacher aux étudiants** : l'activité est ajoutée masquée ; il faudra la réafficher manuellement.
+- **Dates d'ouverture et de fermeture** (facultatives) : en dehors de cette plage, les étudiants voient l'activité
+  mais ne peuvent pas la lancer.
+- Pour un **TP noté / Examen**, les paramètres de l'examen décrits ci-dessous.
+
+Cliquez sur **Créer** : vous revenez au cours, sur la carte de la nouvelle activité.
+
+</Steps>
+
+<Callout type="info">
+  L'activité ajoutée est la dernière version (`latest`) de la ressource au moment de l'ajout. Si vous modifiez ensuite
+  l'activité ou ses exercices, utilisez [Recharger](#recharger-une-activité) pour mettre à jour le cours.
+</Callout>
+
+### Paramètres d'un TP noté
+
+Pour la fonction **TP noté / Examen**, les boutons **Aides**, **Théories**, **Solution** et **Autre question** sont
+automatiquement désactivés, et un cadre **Paramètres de l'examen** apparaît :
+
+| Paramètre                          | Effet                                                                                                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Durée maximale**                 | Temps dont dispose chaque étudiant à partir du moment où il démarre l'activité (heures, minutes, secondes). 0 = durée illimitée.                                          |
+| **Tentatives maximales**           | Nombre maximal de validations par exercice. 0 = illimité.                                                                                                                |
+| **Code de déblocage**              | Code de 6 caractères généré automatiquement (bouton pour en générer un autre). Il permet à un étudiant de reprendre l'activité après un arrêt dû aux règles de sécurité. |
+| **Désactiver copier-coller**       | Interdit le copier-coller dans l'activité (coché par défaut).                                                                                                           |
+| **Terminer si changement d'onglet**| Termine l'activité si l'étudiant quitte la page (changement d'onglet ou de fenêtre). Coché par défaut.                                                                  |
+| **Terminer si perte de focus**     | Termine l'activité si la page perd le focus (clic en dehors de la page, autre fenêtre…). Coché par défaut.                                                              |
+
+Tous les membres du cours qui ont un compte **enseignant** deviennent automatiquement les **correcteurs** de
+l'activité : les copies leur sont attribuées dans l'espace [Corrections](/main/courses/corrections). La liste des
+correcteurs se modifie ensuite dans les [périodes d'accès](#onglet-restrictions).
+
+#### Arrêt et déblocage côté étudiant
+
+Quand une règle de sécurité est enfreinte, l'activité de l'étudiant est **terminée** et un message lui en indique la
+raison. Un cadre **Code de déblocage** lui demande alors de saisir le code que l'enseignant lui communique : un code
+correct rouvre sa session et il peut reprendre là où il en était.
+
+L'enseignant retrouve le code (masqué, à révéler d'un clic) dans la page de [suivi de l'activité](/main/courses/monitoring),
+où il peut aussi le régénérer : l'ancien code cesse alors de fonctionner.
+
+## Les actions d'une carte d'activité
+
+| Bouton / menu                         | Visible par                 | Effet                                                                                       |
+| ------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------- |
+| **Lancer** / **Voir mes résultats**   | Membres du cours            | Ouvre l'activité dans un nouvel onglet ; une fois l'activité fermée, affiche les résultats. |
+| **Editer**                            | Membres ayant accès à la ressource | Ouvre la ressource de l'activité dans l'éditeur.                                      |
+| ⋮ › **Suivi de l'activité**           | Enseignants                 | Suivi en direct et modération (voir [Suivi en direct](/main/courses/monitoring)).           |
+| ⋮ › **Statistiques**                  | Enseignants                 | Résultats détaillés (voir [Statistiques](/main/courses/statistics)).                        |
+| ⋮ › **Télécharger les notes au format CSV** | Enseignants           | Export des notes de cette activité (voir [Téléchargement des notes](/main/courses/grades-csv)). |
+| ⋮ › **Ouvrir la ressource associée**  | Membres ayant accès à la ressource | Page de la ressource dans l'espace de travail.                                       |
+| ⋮ › **Partager**                      | Enseignants                 | Affiche le lien direct vers l'activité et son QR code.                                      |
+| ⋮ › **Paramètres**                    | Enseignants                 | Ouvre le panneau de paramètres décrit ci-dessous.                                           |
+
+La carte affiche aussi l'avancement de l'utilisateur sur les exercices et les dates d'ouverture et de fermeture.
+Une activité cachée porte la mention **Caché aux étudiants**.
+
+## Paramétrer une activité
+
+Le panneau **Paramètres** d'une activité comporte trois onglets. Les modifications ne sont prises en compte qu'après
+enregistrement.
+
+### Onglet Restrictions
+
+Cet onglet définit **qui a accès à l'activité, et quand**.
+
+Le bouton **Cacher aux étudiants** / **Montrer aux étudiants** masque ou réaffiche l'activité.
+
+Par défaut, une activité suit ses **dates d'ouverture et de fermeture**, identiques pour tous les membres du cours :
+cliquez sur une date pour la modifier.
+
+Pour donner des dates différentes selon les étudiants (groupes de TP, tiers-temps, rattrapage…), créez des
+**périodes d'accès** avec **Créer la première période d'accès**, puis **Ajouter une nouvelle période d'accès**. Chaque
+période combine :
+
+| Critère                       | Rôle                                                                                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Période temporelle**        | Dates d'ouverture et de fermeture de la période.                                                                                             |
+| **Utilisateurs spécifiques**  | Membres du cours concernés par la période.                                                                                                   |
+| **Groupes spécifiques**       | [Groupes du cours](/main/courses/groups) concernés.                                                                                          |
+| **Correcteurs**               | Membres qui ont accès pendant la période **et** qui deviennent correcteurs de l'activité. Sans correcteur, l'activité est auto-corrigée.     |
+| **Tous les autres**           | Tous les membres qui ne sont concernés par aucune autre période.                                                                              |
+
+Les règles d'attribution sont les suivantes :
+
+1. Les périodes sont examinées **dans l'ordre affiché** (réorganisable par glisser-déposer) ; un étudiant obtient les
+   dates de la **première** période qui le concerne (utilisateur, groupe ou correcteur de la période).
+2. Si aucune période ne le concerne, il obtient les dates de la période **Tous les autres**.
+3. S'il n'existe pas de période **Tous les autres**, il n'a **pas accès** à l'activité.
+
+<Callout type="warning">
+  Créer la première période d'accès remplace les dates communes : seuls les utilisateurs et groupes indiqués dans des
+  périodes gardent l'accès. Ajoutez une période **Tous les autres** pour conserver l'accès du reste du cours.
+</Callout>
+
+### Onglet Paramètres
+
+Ces réglages sont repris de la [configuration de l'activité](/main/programing/activity/config) et peuvent être
+modifiés pour ce cours uniquement.
+
+| Rubrique       | Réglage                                       | Effet                                                                                                  |
+| -------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Temps**      | Durée                                         | Durée maximale d'une session, à partir de son démarrage.                                               |
+| **Aléatoire**  | Seed aléatoire par exercice                   | Chaque exercice reçoit sa propre graine aléatoire au lieu de partager celle de l'activité.             |
+| **Actions**    | Tentatives maximales                          | Nombre maximal de validations par exercice (0 = illimité).                                             |
+|                | Afficher le bouton « Aides »                  | Autorise l'affichage des indices.                                                                       |
+|                | Afficher le bouton « Autre question »         | Autorise l'apprenant à tirer une nouvelle version de l'exercice.                                       |
+|                | Afficher le bouton « Théories »               | Autorise l'accès aux documents de théorie des exercices.                                               |
+|                | Afficher le bouton « Solution »               | Autorise l'affichage de la solution.                                                                   |
+| **Feedback**   | Feedback de validation                        | Affiche un retour après chaque validation.                                                             |
+|                | Révision des exercices                        | Permet de revoir les exercices et leurs retours après la fin de l'activité.                           |
+| **Sécurité**   | Désactiver copier-coller, Terminer si changement d'onglet, Terminer si perte de focus | Voir les [paramètres d'un TP noté](#paramètres-dun-tp-noté). |
+
+### Onglet Gestion
+
+- **Apparence de l'activité** : couleur de la carte dans le cours.
+- **Fermer l'activité** : les étudiants ne peuvent plus y accéder. La date de fermeture de l'activité **et de toutes
+  ses périodes d'accès** est fixée à l'instant présent.
+- **Rouvrir pour tous** : supprime la date de fin de l'activité **et de toutes ses périodes d'accès** ; si aucune
+  période ne concerne « Tous les autres », une telle période est ajoutée pour rouvrir l'activité à tout le cours.
+- **Recharger** : met à jour l'activité avec la dernière version de la ressource (voir ci-dessous).
+- **Supprimer** : retire l'activité du cours (irréversible).
+
+<Callout type="warning">
+  **Fermer** puis **Rouvrir** ne restaure pas les dates de fin d'origine des périodes d'accès : elles sont
+  supprimées. Pensez à les redéfinir si nécessaire.
+</Callout>
 
 ## Recharger une activité
 
