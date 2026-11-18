@@ -1,8 +1,25 @@
 ---
-title: Événements
-description: Documentation sur le système de suivi des événements dans PLaTon permettant de monitorer les activités et modifications apportées aux ressources pédagogiques par les utilisateurs.
+title: Événements d'une ressource
+description: L'historique des événements d'une ressource PLaTon (création de ressources, changements de statut, arrivées et départs de membres) et les notifications associées.
 ---
 
-# Suivi des événements
+import { Callout } from 'nextra/components'
 
-Cette page est en cours de rédaction.
+# Événements d'une ressource
+
+L'onglet **Événements** d'une ressource retrace son historique, du plus récent au plus ancien. Chaque ligne indique le
+type d'événement, sa date et l'utilisateur à l'origine de l'action.
+
+## Les types d'événements
+
+| Événement             | Enregistré quand…                                                                   | Notifié à                                                       |
+| --------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Nouvelle ressource** | une ressource est créée dans le cercle.                                             | Les [observateurs](/main/resources/watchers).                   |
+| **Nouveau status**    | le statut de la ressource change.                                                   | Les observateurs de la ressource concernée.                    |
+| **Nouveau membre**    | un utilisateur devient membre du cercle, ou demande à l'être.                       | Les observateurs ; pour une demande d'adhésion, les administrateurs. |
+| **Membre supprimé**   | un membre est retiré du cercle.                                                     | L'utilisateur à l'origine du retrait.                          |
+
+<Callout type="info">
+  L'utilisateur à l'origine d'une action n'est pas notifié de sa propre action. Les notifications apparaissent dans
+  le panneau de notifications de la barre du haut.
+</Callout>

@@ -1,0 +1,56 @@
+---
+title: La page d'une ressource
+description: Les actions disponibles sur la page d'une ressource PLaTon (suivre, rejoindre, éditer, prévisualiser, partager, dupliquer, déplacer, supprimer, templates certifiés) et ses onglets vue d'ensemble, explorateur, événements et paramètres.
+---
+
+import { Callout } from 'nextra/components'
+
+# La page d'une ressource
+
+Chaque cercle, activité ou exercice a une page qui regroupe ses informations, ses statistiques et les actions
+possibles. On y accède depuis la [recherche](/main/resources/search), l'arbre des cercles ou un lien.
+
+## Les actions de l'en-tête
+
+Les boutons affichés dépendent du type de ressource et de vos [droits](/main/resources/permissions).
+
+| Bouton                                  | Ressources              | Effet                                                                                                                                         |
+| --------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Suivre** / **Ne plus suivre**         | Toutes                  | Devenir [observateur](/main/resources/watchers) de la ressource.                                                                               |
+| **Demander à rejoindre**                | Cercles                 | Envoie une demande pour devenir [membre](/main/resources/members) du cercle ; **Annuler la demande de rejoindre** la retire.                    |
+| **Éditer** / **Paramétrer**             | Toutes                  | Ouvre l'[éditeur](/main/programing/ide), ou le [builder](/main/resources/builder) pour un exercice créé à partir d'un modèle (**Paramétrer**). |
+| **Prévisualiser**                       | Activités, exercices    | Joue la ressource dans une fenêtre plein écran, hors de tout cours.                                                                           |
+| **Partager**                            | Activités, exercices    | Lien de prévisualisation et QR code, choix de la version et de la visibilité (voir ci-dessous).                                                |
+| **Dupliquer**                           | Activités, exercices    | Crée une copie dans votre cercle personnel, que vous pouvez modifier librement.                                                               |
+| **Déplacer**                            | Activités, exercices    | Range la ressource dans un autre cercle (voir les conditions dans [Gestion des droits](/main/resources/permissions)).                          |
+| **Supprimer**                           | Activités, exercices d'un cercle personnel | Supprime la ressource, après confirmation.                                                                                    |
+| **Renvoyer dans le cercle du créateur** | Activités, exercices (administrateurs) | Retire une ressource d'un cercle partagé pour la remettre dans le cercle personnel de son auteur.                                    |
+| **Marquer comme template certifié**     | Exercices configurables (administrateurs) | Met en avant le modèle comme template certifié (voir [Rendre un exercice configurable](/main/programing/exercise/config)). |
+
+<Callout type="warning">
+  Une ressource dont d'autres ressources dépendent (par exemple un exercice utilisé dans une activité, ou un modèle
+  utilisé par des exercices) ne peut pas être supprimée : PLaTon indique le nombre de ressources qui en dépendent.
+</Callout>
+
+### Partager une ressource
+
+Le panneau **Partager** fournit l'adresse de prévisualisation de la ressource, à copier ou à scanner avec le QR code :
+
+- **Version** : `latest` (toujours la dernière version) ou une version figée de la ressource ;
+- **Visibilité** :
+  - **Visible uniquement dans PLaTon** : seuls les enseignants et administrateurs connectés peuvent ouvrir le lien ;
+  - **Visible en dehors de PLaTon** : n'importe qui peut ouvrir le lien et jouer la ressource, sans compte.
+
+La visibilité ne peut être changée que par les utilisateurs qui ont le droit d'écriture sur la ressource.
+
+## Les onglets
+
+| Onglet              | Contenu                                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vue d'ensemble**  | Description, statut, tags et **statistiques d'utilisation** : pour un exercice ou une activité, les indicateurs calculés sur toutes les sessions des apprenants (note moyenne, taux de réussite, durée…) ; pour un cercle, le nombre de ressources qu'il contient. |
+| **Explorer**        | Les fichiers de la ressource, en lecture (voir [Explorateur](/main/resources/explorer)).                                                                                                       |
+| **Évènements**      | L'historique de la ressource (voir [Événements](/main/resources/events)).                                                                                                                      |
+| **Paramètres**      | **Informations** (nom, description, statut, topics, niveaux), **Template** pour un exercice (modèle dont il hérite) et **Collaborateurs** pour un cercle (voir [Membres](/main/resources/members)). |
+
+Les définitions des indicateurs statistiques sont les mêmes que dans les
+[statistiques d'une activité de cours](/main/courses/statistics).

@@ -1,8 +1,41 @@
 ---
 title: Tags et Classification
-description: Documentation sur le système de classification par tags dans PLaTon qui permet d'organiser et rechercher efficacement les ressources pédagogiques selon différents critères thématiques et niveaux.
+description: Les topics et les niveaux qui classent les ressources PLaTon - à quoi ils servent, comment les attribuer à une ressource et comment les administrateurs gèrent leurs listes.
 ---
 
-# Tags et Classification
+import { Callout } from 'nextra/components'
 
-Cette page est en cours de rédaction.
+# Tags et classification
+
+PLaTon classe les ressources avec deux listes de **tags** :
+
+| Tag         | Usage                                                                                   | Exemples                                |
+| ----------- | --------------------------------------------------------------------------------------- | --------------------------------------- |
+| **Topics**  | Thèmes abordés par la ressource.                                                        | Boucles, Récursivité, Probabilités…     |
+| **Niveaux** | Niveau d'études visé.                                                                   | L1, L2, Master…                         |
+
+Ils servent à **retrouver** les ressources : la [recherche](/main/resources/search) accepte un topic ou un niveau comme
+mot-clé, et la recherche avancée permet de filtrer par topics (ou d'exclure des topics) et par niveaux.
+
+## Attribuer des tags à une ressource
+
+Les topics et niveaux d'une ressource se choisissent dans ses **paramètres** (onglet **Paramètres** de la page de la
+ressource, réservé aux utilisateurs qui ont le droit d'écriture), ou dans le panneau **Option sauvegarde** du
+[builder](/main/resources/builder). Une ressource peut avoir plusieurs topics et plusieurs niveaux.
+
+Pour utiliser un tag qui n'existe pas encore, tapez son nom dans le champ et validez : il est créé immédiatement et
+ajouté à la liste commune. Si un tag au nom proche existe déjà (différence d'accents ou de majuscules par exemple),
+PLaTon vous propose d'utiliser le tag existant plutôt que d'en créer un doublon.
+
+## Gérer les listes de tags (administrateurs)
+
+Les listes de topics et de niveaux sont communes à toute la plateforme. Les administrateurs les gèrent dans
+**Administration** › **Tags** :
+
+- **Nouveau** ajoute un tag à la liste ;
+- la croix d'un tag le supprime.
+
+<Callout type="info">
+  La suppression ou le renommage d'un tag concerne toutes les ressources qui l'utilisent. Préférez des intitulés
+  stables et partagés par tous les enseignants, pour que la recherche reste efficace.
+</Callout>
