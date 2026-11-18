@@ -1,8 +1,44 @@
 ---
 title: Tableau de bord administrateur
-description: Vue d'ensemble du tableau de bord administrateur de PLaTon qui centralise les outils de gestion de la plateforme, des utilisateurs et des ressources.
+description: Vue d'ensemble des outils réservés aux administrateurs PLaTon - menu Administration (utilisateurs, groupes, LMS, CAS, tags, annonces) et accès étendu aux cours et ressources.
 ---
+
+import { Callout } from 'nextra/components'
 
 # Tableau de bord administrateur
 
-Cette page est en cours de construction.
+Un administrateur dispose du [tableau de bord enseignant](/main/dashboard/teacher) et d'une entrée supplémentaire
+**Administration** dans le menu latéral. Il peut aussi accéder à tous les cours de la plateforme, y compris ceux dont il
+n'est pas membre.
+
+## Le menu Administration
+
+| Onglet            | Usage                                                                                                                                                | Documentation                                         |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **Utilisateurs**  | Rechercher les comptes ; depuis le menu d'une ligne, assigner le rôle Admin, Enseignant ou Élève, activer ou désactiver un compte ; créer un compte avec **+ Ajouter utilisateur** (prénom, nom, nom d'utilisateur, e-mail, rôle et mot de passe, généré automatiquement et régénérable). | [Types de compte](/main/users/account-types)          |
+| **Groupes**       | Créer des groupes d'utilisateurs, y ajouter des membres, les supprimer.                                                                              | [Groupes d'utilisateurs](/main/users/groups)          |
+| **LMS**           | Déclarer les plateformes d'enseignement (Moodle…) qui ouvrent PLaTon par LTI 1.3 ou LTI 1.1.                                                          | [Intégration LTI](/main/users/lti-integration)        |
+| **CAS**           | Déclarer des serveurs d'authentification CAS, associés à des LMS.                                                                                    | [Intégration LTI](/main/users/lti-integration)        |
+| **Tags**          | Gérer les listes de **Topics** et de **Niveaux** utilisées pour classer les ressources.                                                             | [Tags](/main/resources/tags)                          |
+| **Annonces**      | Créer, activer ou désactiver des annonces, éventuellement ciblées sur certains rôles.                                                               | voir ci-dessous                                       |
+
+<Callout type="warning">
+  Supprimer un groupe d'utilisateurs supprime aussi les droits associés à ses membres, comme l'accès aux cours et aux
+  activités dans lesquels le groupe était inscrit. Cette action est irréversible.
+</Callout>
+
+## Les annonces
+
+L'onglet **Annonces** liste les annonces avec leur titre, leur description, leur état (**Actif** / **Inactif**), leur
+date de création et les **rôles ciblés** (ou « Tous les utilisateurs »).
+
+Le bouton **Créer une annonce** ouvre un formulaire avec :
+
+- **Titre** et **Description brève** (obligatoires) ;
+- le contenu détaillé de l'annonce, avec un bouton **Prévisualiser** ;
+- **Actif** : seules les annonces actives sont affichées ;
+- **Durée (jours)** : nombre de jours d'affichage ;
+- **Rôles ciblés** : administrateurs, enseignants et/ou étudiants (aucun rôle coché = tous les utilisateurs) ;
+- **Icône** de l'annonce.
+
+Les annonces actives sont visibles par les utilisateurs concernés dans la page **Annonces** du menu latéral.
