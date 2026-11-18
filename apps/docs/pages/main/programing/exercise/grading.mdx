@@ -1,0 +1,195 @@
+---
+title: Évaluation - note et feedback
+description: Référence du grader d'un exercice PLaTon - variables grade et feedback, signification des notes (dont -1 et les notes négatives), décompte des tentatives, feedbacks multiples et dépliables, modification des composants et différences entre les sandboxes Node et Python.
+---
+
+import { Callout } from 'nextra/components'
+
+# Évaluation : note et feedback
+
+Le script `grader` est exécuté chaque fois que l'apprenant clique sur **Valider**. Il lit la réponse dans les
+composants du formulaire et renseigne deux variables : **`grade`** (la note) et **`feedback`** (le retour affiché).
+
+```ple
+grader == #!lang=js
+grade = 0
+feedback.type = "error"
+feedback.content = "Mauvaise réponse"
+
+if (Number(reponse.value) === attendu) {
+  grade = 100
+  feedback.type = "success"
+  feedback.content = "Bonne réponse !"
+}
+==
+```
+
+## Ce que reçoit le grader
+
+- Toutes les variables de l'exercice, telles que laissées par le `builder` (ou par la précédente évaluation).
+- L'état des **composants du formulaire** (`form`), mis à jour avec la saisie de l'apprenant. Les composants affichés
+  ailleurs (énoncé, solution) ne renvoient pas leur état. Voir
+  [Utiliser un composant dans un exercice](/components#utiliser-un-composant-dans-un-exercice).
+- La variable `feedback`, réinitialisée à `{ type: "info", content: "" }` avant chaque évaluation.
+- Les [métadonnées](/main/programing/exercise/metadata) de l'exercice dans la variable `meta` (nombre de
+  tentatives, notes précédentes…).
+
+Toutes les variables modifiées par le grader sont conservées pour la suite : un compteur incrémenté dans le grader
+garde sa valeur à la validation suivante.
+
+<Callout type="warning">
+  En JavaScript, affectez `grade`, `feedback` et les variables à conserver **sans** `let`, `const` ni `var` :
+  une variable déclarée avec ces mots-clés reste locale au script et n'est pas enregistrée. En Python, toutes les
+  variables globales du script sont conservées (sauf les modules et les fonctions).
+</Callout>
+
+## La note `grade`
+
+La note est lue avec `parseInt` : elle est convertie en **nombre entier** (une note de `87.5` devient `87`).
+
+| Valeur de `grade`            | Effet                                                                                                                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `100`                        | Exercice **réussi**. Compte comme une tentative.                                                                                                                       |
+| de `1` à `99`                | Exercice **partiellement réussi**. Compte comme une tentative.                                                                                                         |
+| `0`                          | Exercice **échoué**. Compte comme une tentative.                                                                                                                       |
+| `-1` ou non numérique        | Considérée comme une **erreur** : l'exercice est marqué en erreur dans la navigation et la soumission ne compte pas comme une tentative.                             |
+| inférieure à `-1` (ex. `-2`) | Soumission **refusée sans pénalité** : elle ne compte pas comme une tentative et l'exercice reste « commencé ». Utile pour une réponse vide ou incomplète.             |
+
+<Callout type="warning">
+  Affectez `grade` à **chaque** exécution du grader : comme les autres variables, `grade` conserve sa valeur
+  précédente si le grader ne la modifie pas.
+</Callout>
+
+La note retenue pour l'exercice est la **meilleure** note obtenue. Elle peut être remplacée ensuite par une note de
+[correction](/main/courses/corrections).
+
+```ple
+grader == #!lang=js
+if (!reponse.value) {
+  // Réponse vide : on demande de répondre, sans consommer de tentative.
+  grade = -2
+  feedback.type = "warning"
+  feedback.content = "Saisissez une réponse avant de valider."
+} else {
+  grade = Number(reponse.value) === attendu ? 100 : 0
+}
+==
+```
+
+### Tentatives
+
+Chaque soumission dont la note est supérieure ou égale à 0 compte comme une tentative. Si l'activité limite le nombre
+de tentatives (paramètre **Tentatives maximales**), le bouton **Valider** indique les tentatives restantes. Le nombre
+de tentatives déjà faites est disponible dans `meta.attempts` (voir [Métadonnées](/main/programing/exercise/metadata)).
+
+## Le retour `feedback`
+
+### Un seul message
+
+`feedback` est un objet avec deux propriétés :
+
+| Propriété | Valeurs                                                         |
+| --------- | --------------------------------------------------------------- |
+| `type`    | `"success"`, `"info"`, `"warning"`, `"error"` ou `"none"`       |
+| `content` | Texte affiché (Markdown, HTML et variables `{{ … }}` acceptés)  |
+
+Le contenu est rendu comme l'énoncé : il peut afficher des variables avec `{{ … }}`. Les composants y étant
+remplacés par leur rendu HTML, lisez plutôt leurs propriétés dans le script :
+
+```ple
+grader == #!lang=js
+feedback.type = "error"
+feedback.content = `Vous avez répondu ${reponse.value}, la bonne réponse était {{ attendu }}.`
+==
+```
+
+### Plusieurs messages
+
+Affectez une **liste** d'objets pour afficher plusieurs encadrés :
+
+```ple
+grader == #!lang=js
+feedback = [
+  { type: "success", content: "La fonction renvoie le bon résultat." },
+  { type: "warning", content: "Pensez à commenter votre code." }
+]
+==
+```
+
+### Feedbacks dépliables
+
+Lorsque `content` est une **liste**, le retour est affiché sous forme de **feedbacks dépliables**
+([wc-foldable-feedback](/components/widgets/wc-foldable-feedback)), idéals pour présenter des résultats de tests :
+
+```ple
+grader == #!lang=js
+feedback.type = "error"
+feedback.content = [
+  {
+    name: "Tests de base",
+    type: "success",
+    description: "Cas simples",
+    feedbacks: [
+      { name: "somme([1, 2])", type: "success", expected: "3", obtained: "3" }
+    ]
+  },
+  {
+    name: "Tableau vide",
+    type: "error",
+    arguments: "[]",
+    expected: "0",
+    obtained: "undefined",
+    display: true
+  }
+]
+==
+```
+
+| Propriété              | Rôle                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `name`                 | Titre de la ligne.                                                                       |
+| `type`                 | `success`, `info`, `warning` ou `error` (icône et couleur).                              |
+| `description`          | Texte explicatif.                                                                        |
+| `arguments`            | Arguments du test.                                                                       |
+| `expected`, `obtained` | Valeur attendue et valeur obtenue.                                                       |
+| `showHiddenCharacters` | Rend visibles les espaces, tabulations et retours à la ligne dans les valeurs.           |
+| `display`              | `true` pour que la ligne soit dépliée d'emblée.                                          |
+| `feedbacks`            | Sous-lignes : la ligne devient une catégorie (ne renseignez alors pas `expected`, `obtained`, `arguments`). |
+
+Les exemples du playground des composants [wc-code-editor](/components/forms/wc-code-editor) et
+[wc-foldable-feedback](/components/widgets/wc-foldable-feedback) utilisent ce format.
+
+### Quand le feedback est-il affiché ?
+
+Dans une activité, l'affichage du feedback dépend des paramètres de l'activité :
+
+- **Feedback de validation** : affiche le feedback juste après chaque validation ;
+- **Révision des exercices** : affiche le feedback lorsque l'apprenant revoit ses réponses après l'activité.
+
+En prévisualisation, le feedback est toujours affiché.
+
+## Modifier les composants dans le grader
+
+Le grader peut modifier n'importe quel composant ; le changement est visible dès l'affichage du résultat :
+
+```ple
+grader == #!lang=js
+const ok = Number(reponse.value) === attendu
+reponse.css = ok ? "success-state" : "error-state"   // coloration (voir API CSS)
+reponse.disabled = ok                                  // bloquer la saisie une fois réussi
+==
+```
+
+## Particularités des sandboxes
+
+| Aspect                         | Node (`sandbox = "node"`)                                        | Python (`sandbox = "python"`)                                                     |
+| ------------------------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Accès à un composant           | `reponse.value`                                                  | `reponse["value"]`                                                                |
+| Accès au feedback              | `feedback.type = "success"`                                      | `feedback["type"] = "success"`                                                    |
+| Créer un composant             | `component("wc-input-box")`                                      | `component("wc-input-box")`                                                       |
+| Arrêter le script plus tôt     | Structurer le code avec des conditions                           | `raise StopExec()` : le script s'arrête sans erreur                               |
+| Erreur dans le script          | L'évaluation échoue et une erreur est affichée                   | L'exception est journalisée (type ERROR) et l'exercice est marqué en erreur       |
+| Journalisation                 | Non disponible                                                   | `platon_log(...)` (voir [Débogage](/main/programing/exercise/logger))             |
+| Fichiers                       | `readFile(chemin)`                                                | `open(chemin)`, `import` ; fichiers déposés dans `submission/`                    |
+
+Avec la sandbox Python, chaque script (builder ou grader) dispose de **10 secondes** d'exécution.
