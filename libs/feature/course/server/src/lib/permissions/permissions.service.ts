@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { ForbiddenResponse, NotFoundResponse } from '@platon/core/common'
+import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
 import { IRequest } from '@platon/core/server'
 import { ActivityMemberService } from '../activity-member/activity-member.service'
 import { ActivityEntity } from '../activity/activity.entity'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { ActivityService } from '../activity/activity.service'
+import { ActivityDatesService } from '../activity/activity-dates.service'
 
 @Injectable()
 export class CoursePermissionsService {
@@ -13,7 +14,8 @@ export class CoursePermissionsService {
     private readonly courseMemberService: CourseMemberService,
     private readonly activityMemberService: ActivityMemberService,
     private readonly activityGroupService: ActivityGroupService,
-    private readonly activityService: ActivityService
+    private readonly activityService: ActivityService,
+    private readonly activityDatesService: ActivityDatesService
   ) {}
 
   /** return the edition right on the course
@@ -76,6 +78,11 @@ export class CoursePermissionsService {
 
     if (!(isPrivateMember || isInGroup || (isMember && numGroups === 0))) {
       throw new ForbiddenResponse('You are not a member of this activity')
+    }
+
+    const isOpenForUser = await this.activityDatesService.isActivityOpenForUser(activityEntity, req.user)
+    if (!isOpenForUser) {
+      throw new ForbiddenResponse('This activity is not currently accessible')
     }
   }
 

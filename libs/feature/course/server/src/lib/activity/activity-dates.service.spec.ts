@@ -28,6 +28,8 @@ const period = (...restrictions: RestrictionList['restriction']): RestrictionLis
 const START = new Date('2026-01-23T08:00:00.000Z')
 const END = new Date('2026-06-23T18:00:00.000Z')
 
+const NOW = new Date('2026-01-15T12:00:00.000Z')
+
 // --- Tests ---
 
 describe('ActivityDatesService', () => {
@@ -37,6 +39,9 @@ describe('ActivityDatesService', () => {
   const user = makeUser()
 
   beforeEach(async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(NOW)
+
     memberService = { getByUserIdAndCourseId: jest.fn() }
     groupService = { isMember: jest.fn() }
 
@@ -50,6 +55,10 @@ describe('ActivityDatesService', () => {
     }).compile()
 
     service = module.get(ActivityDatesService)
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   describe('reopenOrCloseAllRestrictions()', () => {
@@ -68,7 +77,10 @@ describe('ActivityDatesService', () => {
     describe('fermeture (isOpen=false)', () => {
       it('définit end à maintenant pour chaque DateRange', async () => {
         const before = new Date()
-        const config = { start: new Date('2026-01-01T00:00:00.000Z'), end: undefined }
+        const config = {
+          start: new Date('2026-01-01T00:00:00.000Z'),
+          end: undefined,
+        }
         const activity = makeActivity({
           restrictions: [period({ type: 'DateRange', config })],
         })
@@ -287,6 +299,23 @@ describe('ActivityDatesService', () => {
         expect(isNaN((result.start as Date).getTime())).toBe(true)
         expect(groupService.isMember).not.toHaveBeenCalled()
       })
+
+      it("autorise l'utilisateur s'il appartient à au moins un des groupes configurés", async () => {
+        groupService.isMember.mockImplementation(async (groupId) => groupId === 'group-2')
+
+        const activity = makeActivity({
+          restrictions: [
+            period(
+              { type: 'Groups', config: { groups: ['group-1', 'group-2'] } },
+              { type: 'DateRange', config: { start: START, end: END } }
+            ),
+          ],
+        })
+
+        const result = await service.updateActivitiesDates([activity])
+
+        expect(result).toEqual({ start: START, end: END })
+      })
     })
 
     describe('accès via Others', () => {
@@ -348,6 +377,108 @@ describe('ActivityDatesService', () => {
         // Pas de DateRange dans la période → start/end undefined (ouvert sans contrainte)
         expect(result.start).toBeUndefined()
         expect(result.end).toBeUndefined()
+      })
+    })
+
+    describe('sélection de la période', () => {
+      it('sélectionne la prochaine période si la période spécifique est terminée', async () => {
+        memberService.getByUserIdAndCourseId.mockResolvedValue(Optional.of(makeMemberEntity('member-1') as any))
+
+        const pastStart = new Date('2026-01-01T00:00:00.000Z')
+        const pastEnd = new Date('2026-01-10T00:00:00.000Z')
+        const nextStart = new Date('2026-02-01T00:00:00.000Z')
+        const nextEnd = new Date('2026-03-01T00:00:00.000Z')
+
+        const activity = makeActivity({
+          restrictions: [
+            period(
+              { type: 'Members', config: { members: ['member-1'] } },
+              { type: 'DateRange', config: { start: pastStart, end: pastEnd } }
+            ),
+            period(
+              { type: 'Members', config: { members: ['member-1'] } },
+              { type: 'DateRange', config: { start: nextStart, end: nextEnd } }
+            ),
+          ],
+        })
+
+        const result = await service.updateActivitiesDates([activity])
+
+        expect(result).toEqual({ start: nextStart, end: nextEnd })
+        expect(activity.openAt).toEqual(nextStart)
+        expect(activity.closeAt).toEqual(nextEnd)
+      })
+
+      it('privilégie la période actuellement ouverte à une période future', async () => {
+        memberService.getByUserIdAndCourseId.mockResolvedValue(Optional.of(makeMemberEntity('member-1') as any))
+
+        const currentStart = new Date('2026-01-10T00:00:00.000Z')
+        const currentEnd = new Date('2026-01-20T00:00:00.000Z')
+        const futureStart = new Date('2026-02-01T00:00:00.000Z')
+
+        const activity = makeActivity({
+          restrictions: [
+            period(
+              { type: 'Members', config: { members: ['member-1'] } },
+              { type: 'DateRange', config: { start: currentStart, end: currentEnd } }
+            ),
+            period(
+              { type: 'Members', config: { members: ['member-1'] } },
+              { type: 'DateRange', config: { start: futureStart, end: undefined } }
+            ),
+          ],
+        })
+
+        const result = await service.updateActivitiesDates([activity])
+
+        expect(result).toEqual({ start: currentStart, end: currentEnd })
+      })
+
+      it('sélectionne la période future dont la date de début est la plus proche', async () => {
+        memberService.getByUserIdAndCourseId.mockResolvedValue(Optional.of(makeMemberEntity('member-1') as any))
+
+        const laterStart = new Date('2026-03-01T00:00:00.000Z')
+        const laterEnd = new Date('2026-04-01T00:00:00.000Z')
+        const soonerStart = new Date('2026-02-01T00:00:00.000Z')
+        const soonerEnd = new Date('2026-02-15T00:00:00.000Z')
+
+        const activity = makeActivity({
+          restrictions: [
+            period(
+              { type: 'Members', config: { members: ['member-1'] } },
+              { type: 'DateRange', config: { start: laterStart, end: laterEnd } }
+            ),
+            period(
+              { type: 'Members', config: { members: ['member-1'] } },
+              { type: 'DateRange', config: { start: soonerStart, end: soonerEnd } }
+            ),
+          ],
+        })
+
+        const result = await service.updateActivitiesDates([activity])
+
+        expect(result).toEqual({ start: soonerStart, end: soonerEnd })
+      })
+
+      it('retourne no-access si toutes les périodes spécifiques sont terminées', async () => {
+        memberService.getByUserIdAndCourseId.mockResolvedValue(Optional.of(makeMemberEntity('member-1') as any))
+
+        const pastStart = new Date('2025-12-01T00:00:00.000Z')
+        const pastEnd = new Date('2026-01-10T00:00:00.000Z')
+
+        const activity = makeActivity({
+          restrictions: [
+            period(
+              { type: 'Members', config: { members: ['member-1'] } },
+              { type: 'DateRange', config: { start: pastStart, end: pastEnd } }
+            ),
+          ],
+        })
+
+        const result = await service.updateActivitiesDates([activity])
+
+        expect(isNaN((result.start as Date).getTime())).toBe(true)
+        expect(isNaN((result.end as Date).getTime())).toBe(true)
       })
     })
 

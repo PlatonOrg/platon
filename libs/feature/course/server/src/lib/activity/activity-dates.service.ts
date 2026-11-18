@@ -7,6 +7,12 @@ import { CourseGroupService } from '../course-group/course-group.service'
 import { IRequest } from '@platon/core/server'
 import { CLS_REQ } from 'nestjs-cls'
 
+/** Type pour la date d'ouverture et de fermeture d'une période d'accès */
+type ActivityDateRange = {
+  start: Date | undefined
+  end: Date | undefined
+}
+
 @Injectable()
 export class ActivityDatesService {
   private readonly logger = new Logger(ActivityDatesService.name)
@@ -18,72 +24,142 @@ export class ActivityDatesService {
     private readonly courseGroupService: CourseGroupService
   ) {}
 
+  /** Donne la  plage d'ouverture de base de l'activité.*/
+  private getBaseDateRange(activity: ActivityEntity): ActivityDateRange {
+    return {
+      start: activity.openAt ?? undefined,
+      end: activity.closeAt ?? undefined,
+    }
+  }
+
+  /** Donne la liste de toutes les périodes d'accès pour un utilisateur sur une activité
+   * cas où il appartient à deux groupes avec deux périodes différentes
+   */
+  private async getActivityDateRangesForUser(activity: ActivityEntity, user: User): Promise<ActivityDateRange[]> {
+    if (activity.ignoreRestrictions) {
+      return [this.getBaseDateRange(activity)]
+    }
+
+    const restrictionLists = activity.restrictions ?? []
+
+    if (restrictionLists.length === 0) {
+      return [this.getBaseDateRange(activity)]
+    }
+
+    const eligibleRanges: ActivityDateRange[] = []
+
+    for (const restrictionList of restrictionLists) {
+      const restrictions = restrictionList.restriction ?? []
+
+      // Others est traité séparément comme période de repli.
+      if (restrictions.some((r) => r.type === 'Others')) {
+        continue
+      }
+
+      const resultAccess = await this.checkUserAccessInPeriod(activity, restrictions, user)
+
+      if (resultAccess.hasAccess && resultAccess.dateRange) {
+        eligibleRanges.push(resultAccess.dateRange)
+      }
+    }
+
+    // Une période Others s'applique uniquement si aucune période
+    // spécifique ou universelle n'a été trouvée.
+    if (eligibleRanges.length === 0) {
+      const othersRange = await this.checkOthersAccess(activity, user)
+
+      if (othersRange) {
+        eligibleRanges.push(othersRange)
+      }
+    }
+
+    return eligibleRanges
+  }
+
   /**
    * Met à jour les dates d'ouverture et de fermeture des activités en fonction des restrictions
-   */
-  async updateActivitiesDates(
-    activities: ActivityEntity[]
-  ): Promise<{ start: Date | undefined; end: Date | undefined }> {
-    const globalDateRange: { start: Date | undefined; end: Date | undefined } = {
+   * Renvoie la date d'ouverture la plus proche. Si on a plusieurs dates
+   * */
+  async updateActivitiesDates(activities: ActivityEntity[]): Promise<ActivityDateRange> {
+    const globalDateRange: ActivityDateRange = {
       start: undefined,
       end: undefined,
     }
 
+    const now = Date.now()
+
     for (const activity of activities) {
-      if (!activity.ignoreRestrictions) {
-        const dateRange = await this.getActivityDatesForUser(activity, this.request.user)
-        if (dateRange) {
-          activity.openAt = dateRange.start
-          activity.closeAt = dateRange.end
-          globalDateRange.start = dateRange.start
-          globalDateRange.end = dateRange.end
-        }
+      if (activity.ignoreRestrictions) {
+        continue
       }
+
+      const ranges = await this.getActivityDateRangesForUser(activity, this.request.user)
+
+      // Priorité à une période déjà ouverte.
+      const currentRange = ranges.find((range) => this.isDateRangeOpen(range, now))
+
+      // Sinon, rechercher la prochaine période à venir.
+      const nextRange = ranges
+        .filter((range) => {
+          if (!range.start) {
+            return false
+          }
+
+          const start = new Date(range.start).getTime()
+          const end = range.end ? new Date(range.end).getTime() : undefined
+
+          return Number.isFinite(start) && start > now && (end === undefined || (Number.isFinite(end) && end >= start))
+        })
+        .sort((a, b) => {
+          return new Date(a.start!).getTime() - new Date(b.start!).getTime()
+        })[0]
+
+      // Période actuelle, prochaine période, ou activité fermée.
+      const dateRange = currentRange ?? nextRange ?? this.getNoAccessDates(activity)
+
+      activity.openAt = dateRange.start
+      activity.closeAt = dateRange.end
+
+      globalDateRange.start = dateRange.start
+      globalDateRange.end = dateRange.end
     }
 
     return globalDateRange
   }
 
+  /**Indique si l'on est actuellement dans la fenêtre d'ouverture de l'activité */
+  private isDateRangeOpen(range: ActivityDateRange, now: number): boolean {
+    const start = range.start ? new Date(range.start).getTime() : undefined
+    const end = range.end ? new Date(range.end).getTime() : undefined
+
+    if (start !== undefined && !Number.isFinite(start)) {
+      return false
+    }
+
+    if (end !== undefined && !Number.isFinite(end)) {
+      return false
+    }
+
+    if (start !== undefined && now < start) {
+      return false
+    }
+
+    if (end !== undefined && now > end) {
+      return false
+    }
+
+    return true
+  }
+
   /**
-   * Détermine les dates d'accès pour un utilisateur et une activité donnés
+   * Vérifie si l'utilisateur a le droit d'accéder à l'activité à l'instant T
+   * selon ses dates d'ouverture/fermeture et ses restrictions.
    */
-  private async getActivityDatesForUser(
-    activity: ActivityEntity,
-    user: User
-  ): Promise<{ start: Date | undefined; end: Date | undefined } | null> {
-    // Si ignoreRestrictions est activé, utiliser les dates de base de l'activité
-    if (activity.ignoreRestrictions) {
-      return {
-        start: activity.openAt !== null ? activity.openAt : undefined,
-        end: activity.closeAt !== null ? activity.closeAt : undefined,
-      }
-    }
+  async isActivityOpenForUser(activity: ActivityEntity, user: User): Promise<boolean> {
+    const ranges = await this.getActivityDateRangesForUser(activity, user)
+    const now = Date.now()
 
-    // Si pas de restrictions, utiliser les dates de base
-    if (!activity.restrictions || activity.restrictions.length === 0) {
-      return {
-        start: activity.openAt !== null ? activity.openAt : undefined,
-        end: activity.closeAt !== null ? activity.closeAt : undefined,
-      }
-    }
-
-    // Chercher l'accès de l'utilisateur dans les périodes d'accès
-    for (const restrictionList of activity.restrictions) {
-      const accessResult = await this.checkUserAccessInPeriod(activity, restrictionList.restriction, user)
-
-      if (accessResult.hasAccess) {
-        return accessResult.dateRange
-      }
-    }
-
-    // Si l'utilisateur n'a accès à aucune période spécifique, vérifier "Others"
-    const othersAccess = await this.checkOthersAccess(activity, user)
-    if (othersAccess) {
-      return othersAccess
-    }
-
-    // Aucun accès trouvé - retourner les dates de l'activité avec fermeture dans le passé
-    return this.getNoAccessDates(activity)
+    return ranges.some((range) => this.isDateRangeOpen(range, now))
   }
 
   /**
@@ -95,7 +171,7 @@ export class ActivityDatesService {
     user: User
   ): Promise<{
     hasAccess: boolean
-    dateRange: { start: Date | undefined; end: Date | undefined } | null
+    dateRange: ActivityDateRange | null
   }> {
     // Si la période contient "Others", on ne la traite pas ici
     if (restrictions.some((r) => r.type === 'Others')) {
@@ -146,10 +222,7 @@ export class ActivityDatesService {
   /**
    * Vérifie l'accès "Others" pour un utilisateur
    */
-  private async checkOthersAccess(
-    activity: ActivityEntity,
-    user: User
-  ): Promise<{ start: Date | undefined; end: Date | undefined } | null> {
+  private async checkOthersAccess(activity: ActivityEntity, user: User): Promise<ActivityDateRange | null> {
     if (!activity.restrictions) {
       return null
     }
@@ -196,7 +269,7 @@ export class ActivityDatesService {
   /**
    * Extrait la date range d'une liste de restrictions
    */
-  private extractDateRange(restrictions: Restriction[]): { start: Date | undefined; end: Date | undefined } {
+  private extractDateRange(restrictions: Restriction[]): ActivityDateRange {
     const dateRestriction = restrictions.find((r) => r.type === 'DateRange')
 
     if (dateRestriction) {
@@ -209,7 +282,7 @@ export class ActivityDatesService {
   /**
    * Retourne les dates pour un utilisateur sans accès
    */
-  private getNoAccessDates(_activity: ActivityEntity): { start: Date | undefined; end: Date | undefined } {
+  private getNoAccessDates(_activity: ActivityEntity): ActivityDateRange {
     const pastDate = new Date('Invalid Date')
     return {
       start: pastDate,
@@ -262,15 +335,11 @@ export class ActivityDatesService {
     if (!config.groups?.length) {
       return false
     }
+    const memberships = await Promise.all(
+      config.groups.map((groupId) => this.courseGroupService.isMember(groupId, user.id))
+    )
 
-    for (const groupId of config.groups) {
-      const isMember = await this.courseGroupService.isMember(groupId, user.id)
-      if (isMember) {
-        return true
-      }
-    }
-
-    return false
+    return memberships.some(Boolean)
   }
 
   /**

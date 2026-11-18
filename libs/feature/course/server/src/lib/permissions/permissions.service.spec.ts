@@ -8,6 +8,7 @@ import { ActivityEntity } from '../activity/activity.entity'
 import { ActivityService } from '../activity/activity.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { CoursePermissionsService } from './permissions.service'
+import { ActivityDatesService } from '../activity/activity-dates.service'
 
 describe('CoursePermissionsService', () => {
   let service: CoursePermissionsService
@@ -15,6 +16,7 @@ describe('CoursePermissionsService', () => {
   let activityMemberService: jest.Mocked<Pick<ActivityMemberService, 'isPrivateMember' | 'isMember'>>
   let activityGroupService: jest.Mocked<Pick<ActivityGroupService, 'isUserInActivityGroup' | 'numberOfGroups'>>
   let activityService: jest.Mocked<Pick<ActivityService, 'findByActivityId' | 'isHidden'>>
+  let activityDatesService: jest.Mocked<Pick<ActivityDatesService, 'isActivityOpenForUser'>>
 
   const req = { user: { id: 'user-1', role: 'student' } } as IRequest
 
@@ -26,6 +28,9 @@ describe('CoursePermissionsService', () => {
       findByActivityId: jest.fn(),
       isHidden: jest.fn().mockResolvedValue(false), // Par défaut, l'activité et sa section sont visibles.
     }
+    activityDatesService = {
+      isActivityOpenForUser: jest.fn().mockResolvedValue(true), // Par défaut, l'activité est ouverte.
+    }
 
     const module = await Test.createTestingModule({
       providers: [
@@ -34,6 +39,7 @@ describe('CoursePermissionsService', () => {
         { provide: ActivityMemberService, useValue: activityMemberService },
         { provide: ActivityGroupService, useValue: activityGroupService },
         { provide: ActivityService, useValue: activityService },
+        { provide: ActivityDatesService, useValue: activityDatesService },
       ],
     }).compile()
 
@@ -118,6 +124,12 @@ describe('CoursePermissionsService', () => {
       },
     } as ActivityEntity
 
+    it("devrait lever une ForbiddenResponse si aucun utilisateur n'est authentifié", async () => {
+      await expect(service.ensureActivityReadPermission(activity, {} as IRequest)).rejects.toBeInstanceOf(
+        ForbiddenResponse
+      )
+    })
+
     it("devrait lever une NotFoundResponse si l'activité (passée par id) est introuvable", async () => {
       activityService.findByActivityId.mockResolvedValue(Optional.empty())
 
@@ -140,27 +152,33 @@ describe('CoursePermissionsService', () => {
 
       await expect(service.ensureActivityReadPermission(activity, req)).rejects.toBeInstanceOf(NotFoundResponse)
       expect(activityMemberService.isMember).not.toHaveBeenCalled()
+      expect(activityDatesService.isActivityOpenForUser).not.toHaveBeenCalled()
     })
 
     it("devrait passer pour un utilisateur ayant les droits d'écriture sur le cours (court-circuité par hasWritePermission)", async () => {
       const teacherReq = { user: { id: 'u1', role: 'teacher' } } as IRequest
 
       courseMemberService.hasWritePermission.mockResolvedValue(true)
+      activityDatesService.isActivityOpenForUser.mockResolvedValue(false)
 
       await expect(service.ensureActivityReadPermission(activity, teacherReq)).resolves.toBeUndefined()
 
       expect(courseMemberService.hasWritePermission).toHaveBeenCalledWith(activity.courseId, teacherReq.user)
+      expect(activityDatesService.isActivityOpenForUser).not.toHaveBeenCalled()
     })
 
-    it('devrait passer si membre privé', async () => {
+    it('devrait passer si membre privé et activité ouverte', async () => {
       activityMemberService.isPrivateMember.mockResolvedValue(true)
+      activityDatesService.isActivityOpenForUser.mockResolvedValue(true)
 
       await expect(service.ensureActivityReadPermission(activity, req)).resolves.toBeUndefined()
+      expect(activityDatesService.isActivityOpenForUser).toHaveBeenCalledWith(activity, req.user)
     })
 
-    it('devrait passer si membre du groupe activité', async () => {
+    it('devrait passer si membre du groupe activité et activité ouverte', async () => {
       activityMemberService.isPrivateMember.mockResolvedValue(false)
       activityGroupService.isUserInActivityGroup.mockResolvedValue(true)
+      activityDatesService.isActivityOpenForUser.mockResolvedValue(true)
 
       await expect(service.ensureActivityReadPermission(activity, req)).resolves.toBeUndefined()
     })
@@ -170,8 +188,43 @@ describe('CoursePermissionsService', () => {
       activityGroupService.isUserInActivityGroup.mockResolvedValue(false)
       activityMemberService.isMember.mockResolvedValue(true)
       activityGroupService.numberOfGroups.mockResolvedValue(0)
+      activityDatesService.isActivityOpenForUser.mockResolvedValue(true)
 
       await expect(service.ensureActivityReadPermission(activity, req)).resolves.toBeUndefined()
+    })
+
+    it("devrait rejeter si l'activité n'est pas ouverte pour l'utilisateur (restrictions de dates/groupes)", async () => {
+      const restrictedActivity = {
+        ...activity,
+        restrictions: [
+          {
+            restriction: [
+              {
+                type: 'Groups',
+                config: { groups: ['group-1'] },
+              },
+              {
+                type: 'DateRange',
+                config: {
+                  start: new Date('2026-01-01T08:00:00Z'),
+                  end: new Date('2026-01-01T10:00:00Z'),
+                },
+              },
+            ],
+          },
+        ],
+      } as ActivityEntity
+
+      activityMemberService.isPrivateMember.mockResolvedValue(false)
+      activityGroupService.isUserInActivityGroup.mockResolvedValue(false)
+      activityMemberService.isMember.mockResolvedValue(true)
+      activityGroupService.numberOfGroups.mockResolvedValue(0)
+      activityDatesService.isActivityOpenForUser.mockResolvedValue(false)
+
+      await expect(service.ensureActivityReadPermission(restrictedActivity, req)).rejects.toBeInstanceOf(
+        ForbiddenResponse
+      )
+      expect(activityDatesService.isActivityOpenForUser).toHaveBeenCalledWith(restrictedActivity, req.user)
     })
 
     it("devrait rejeter si membre mais que l'activité a des groupes (accès restreint au groupe)", async () => {
@@ -194,6 +247,14 @@ describe('CoursePermissionsService', () => {
   })
 
   describe('ensureActivityWritePermission', () => {
+    it("devrait lever une ForbiddenResponse si aucun utilisateur n'est authentifié", async () => {
+      const activity = { id: 'activity-1', courseId: 'course-1', creatorId: 'user-1' } as ActivityEntity
+
+      await expect(service.ensureActivityWritePermission(activity, {} as IRequest)).rejects.toBeInstanceOf(
+        ForbiddenResponse
+      )
+    })
+
     it("devrait passer directement si l'utilisateur est le créateur de l'activité", async () => {
       const activity = { id: 'activity-1', courseId: 'course-1', creatorId: 'user-1' } as ActivityEntity
 
