@@ -19,7 +19,7 @@ import { NzListModule } from 'ng-zorro-antd/list'
 
 import { NgeUiIconModule } from '@cisstech/nge/ui/icon'
 import { DialogModule } from '@platon/core/browser'
-import { HIDDEN_NOTIFICATION_TYPES, Notification, NotificationType } from '@platon/feature/notification/common'
+import { HIDDEN_NOTIFICATION_TYPES, Notification } from '@platon/feature/notification/common'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NotificationService } from '../../api/notification.service'
 import {

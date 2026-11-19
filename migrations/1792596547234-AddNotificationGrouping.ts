@@ -22,7 +22,7 @@ export class AddNotificationGrouping1792596547234 implements MigrationInterface 
         )
 
         // set the group_id
-        // MODERATION-ACTIVITY-CHANGES and SESSION-STATE-CHANGES must not be display so they can be null
+        // MODERATION-ACTIVITY-CHANGES, SESSION-STATE-CHANGES and EXERCISE_CHANGES must not be display so they can be null
         await queryRunner.query(`
             UPDATE "Notifications" SET "group_id" = CASE "type"
             WHEN 'COURSE-MEMBER-CREATION'       THEN 'CMC_'  || ("data"->>'courseId')   || '_' || "user_id"
@@ -33,7 +33,6 @@ export class AddNotificationGrouping1792596547234 implements MigrationInterface 
             WHEN 'CORRECTION-AVAILABLE'         THEN 'CA_'   || ("data"->>'activityId') || '_' || "user_id"
             WHEN 'ACTIVITY-CLOSED'              THEN 'AC_'   || ("data"->>'activityId')
             WHEN 'RESOURCE-MOVED-BY-ADMIN'      THEN 'RMBA_' || ("data"->>'resourceId')
-            WHEN 'EXERCISE-CHANGES'             THEN 'EC_'   || ("data"->>'resourceId')
             WHEN 'RESOURCE-INVITATION'          THEN 'RI_'   || ("data"->>'resourceId')
             WHEN 'MEMBER-CREATE'                THEN 'REMM_'  || ("data"#>>'{eventInfo,resourceId}') || '_' || ("data"#>>'{eventInfo,data,userId}')
             WHEN 'MEMBER-REMOVE'                THEN 'REMM_'  || ("data"#>>'{eventInfo,resourceId}') || '_' || ("data"#>>'{eventInfo,actorId}')
@@ -56,6 +55,7 @@ export class AddNotificationGrouping1792596547234 implements MigrationInterface 
         await queryRunner.query(`ALTER TABLE "Notifications" ALTER COLUMN "type" SET NOT NULL`)
         await queryRunner.query(`CREATE INDEX "Notifications_user_id_group_id_created_at_idx" ON "Notifications" ("user_id", "group_id", "created_at")`)
         await queryRunner.query(`CREATE INDEX "Notifications_user_id_created_at_idx" ON "Notifications" ("user_id", "created_at")`)
+        await queryRunner.query(`DROP INDEX IF EXISTS "public"."Notifications_user_id_idx"`)
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
@@ -64,5 +64,6 @@ export class AddNotificationGrouping1792596547234 implements MigrationInterface 
         await queryRunner.query(`ALTER TABLE "Notifications" DROP COLUMN "type"`)
         await queryRunner.query(`ALTER TABLE "Notifications" DROP COLUMN "group_id"`)
         await queryRunner.query(`DROP TYPE "public"."notification_type_enum"`)
+        await queryRunner.query(`CREATE INDEX "Notifications_user_id_idx" ON "Notifications" ("user_id") `)
     }
 }

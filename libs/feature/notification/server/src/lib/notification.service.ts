@@ -12,6 +12,24 @@ import { EntityManager, In, IsNull, Repository } from 'typeorm'
 import { NotificationEntity } from './notification.entity'
 import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notification.provider'
 import { ON_CHANGE_NOTIFICATIONS, OnChangeNotificationsPayload } from './notification.pubsub'
+import {
+  ActivityClosedNotification,
+  ActivityMemberCreationNotification,
+  CorrectionAvailableNotification,
+  CorrectionPendingNotification,
+  CorrectorCreatedNotification,
+  CourseMemberCreationNotification,
+  ResourceMovedByAdminNotification,
+} from '@platon/feature/course/common'
+
+import {
+  ResourceEventNotification,
+  ResourceMemberRemoveEvent,
+  ResourceMemberCreateEvent,
+  ResourceStatusChangeEvent,
+  ResourceCreateEvent,
+  ResourceInvitationNotification,
+} from '@platon/feature/resource/common'
 
 type Data = Record<string, any>
 
@@ -39,10 +57,9 @@ export class NotificationService {
    *
    * @param prefix the regroup prefix that identifie the notification type
    * @param parts all other information needed (course_id, user_id, resource_id, ... ) to join
-   * @throws Error if an element is undefined, null or empty
-   * @returns the group id
+   * @returns the group id or null if something is missing
    */
-  private groupIdToString(prefix: string, ...parts: unknown[]): string {
+  private groupIdToString(prefix: string, ...parts: unknown[]): string | null {
     for (const element of parts) {
       if (element === undefined || element === null || element === '') {
         this.logger.error(
@@ -50,7 +67,7 @@ export class NotificationService {
             parts
           )} for prefix : ${prefix}`
         )
-        throw new Error(`Missing required element to generate group_id for prefix : ${prefix}`)
+        return null
       }
     }
     return [prefix, ...parts].join('_')
@@ -63,53 +80,72 @@ export class NotificationService {
    * @param date the notification data
    * @return the group_id or null if not necessery or somethings is missing
    */
-  private resolveGroupId(type: NotificationType, userId: string, data: Data): string | null {
+  private resolveGroupId(type: NotificationType, userId: string, data: object): string | null {
     switch (type) {
-      case NotificationType.COURSE_MEMBER_CREATION:
-        return this.groupIdToString('CMC', data?.['courseId'], userId)
+      case NotificationType.COURSE_MEMBER_CREATION: {
+        const typedData = data as CourseMemberCreationNotification
+        return this.groupIdToString('CMC', typedData.courseId, userId)
+      }
 
-      case NotificationType.ACTIVITY_MEMBER_CREATION:
-        return this.groupIdToString('AMC', data?.['activityId'], userId)
+      case NotificationType.ACTIVITY_MEMBER_CREATION: {
+        const typedData = data as ActivityMemberCreationNotification
+        return this.groupIdToString('AMC', typedData.activityId, userId)
+      }
+
       case NotificationType.CORRECTOR_CREATED:
-        return this.groupIdToString('CM', data?.['activityId'], userId)
+      case NotificationType.CORRECTOR_REMOVED: {
+        const typedData = data as CorrectorCreatedNotification
+        return this.groupIdToString('CM', typedData.activityId, userId)
+      }
 
-      case NotificationType.CORRECTOR_REMOVED:
-        return this.groupIdToString('CM', data?.['activityId'], userId)
+      case NotificationType.CORRECTION_PENDING: {
+        const typedData = data as CorrectionPendingNotification
+        return this.groupIdToString('CP', typedData.activityId, userId)
+      }
 
-      case NotificationType.CORRECTION_PENDING:
-        return this.groupIdToString('CP', data?.['activityId'], userId)
+      case NotificationType.CORRECTION_AVAILABLE: {
+        const typedData = data as CorrectionAvailableNotification
+        return this.groupIdToString('CA', typedData.activityId, userId)
+      }
 
-      case NotificationType.CORRECTION_AVAILABLE:
-        return this.groupIdToString('CA', data?.['activityId'], userId)
+      case NotificationType.ACTIVITY_CLOSED: {
+        const typedData = data as ActivityClosedNotification
+        return this.groupIdToString('AC', typedData.activityId)
+      }
 
-      case NotificationType.ACTIVITY_CLOSED:
-        return this.groupIdToString('AC', data?.['activityId'])
+      case NotificationType.RESOURCE_MOVED_BY_ADMIN: {
+        const typedData = data as ResourceMovedByAdminNotification
+        return this.groupIdToString('RMBA', typedData.resourceId)
+      }
 
-      case NotificationType.RESOURCE_MOVED_BY_ADMIN:
-        return this.groupIdToString('RMBA', data?.['resourceId'])
+      case NotificationType.RESOURCE_INVITATION: {
+        const typedData = data as ResourceInvitationNotification
+        return this.groupIdToString('RI', typedData.resourceId)
+      }
 
-      case NotificationType.EXERCISE_CHANGES:
-        return this.groupIdToString('EC', data?.['resourceId'])
+      case NotificationType.MEMBER_CREATE: {
+        const typedData = data as ResourceEventNotification
+        const eventInfo = typedData.eventInfo as unknown as ResourceMemberCreateEvent
+        return this.groupIdToString('REMM', eventInfo?.resourceId, eventInfo?.data.userId)
+      }
 
-      case NotificationType.RESOURCE_INVITATION:
-        return this.groupIdToString('RI', data?.['resourceId'])
+      case NotificationType.MEMBER_REMOVE: {
+        const typedData = data as ResourceEventNotification
+        const eventInfo = typedData.eventInfo as unknown as ResourceMemberRemoveEvent
+        return this.groupIdToString('REMM', eventInfo?.resourceId, eventInfo?.actorId)
+      }
 
-      case NotificationType.MEMBER_CREATE:
-        return this.groupIdToString(
-          'REMM',
-          data?.['eventInfo']?.['resourceId'],
-          data?.['eventInfo']?.['data']?.['userId']
-        )
+      case NotificationType.RESOURCE_STATUS_CHANGE: {
+        const typedData = data as ResourceEventNotification
+        const eventInfo = typedData.eventInfo as unknown as ResourceStatusChangeEvent
+        return this.groupIdToString('RERSC', eventInfo?.resourceId)
+      }
 
-      case NotificationType.MEMBER_REMOVE:
-        return this.groupIdToString('REMM', data?.['eventInfo']?.['resourceId'], data?.['eventInfo']?.['actorId'])
-
-      case NotificationType.RESOURCE_STATUS_CHANGE:
-        return this.groupIdToString('RERSC', data?.['eventInfo']?.['resourceId'])
-
-      case NotificationType.RESOURCE_CREATE:
-        return this.groupIdToString('RERC', data?.['eventInfo']?.['resourceId'])
-
+      case NotificationType.RESOURCE_CREATE: {
+        const typedData = data as ResourceEventNotification
+        const eventInfo = typedData.eventInfo as unknown as ResourceCreateEvent
+        return this.groupIdToString('RERC', eventInfo?.resourceId)
+      }
       default:
         return null
     }
@@ -149,7 +185,6 @@ export class NotificationService {
           data
         )}`
       )
-      throw new Error(`Missing required data to generate group ID for notification type : ${type}`)
     }
 
     const completedData = { userId, data, type, groupId }

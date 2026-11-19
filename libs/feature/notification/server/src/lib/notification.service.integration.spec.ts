@@ -24,6 +24,28 @@ describe('NotificationService (integration)', () => {
 
   const discovery = { providersWithMetaAtKey: jest.fn().mockResolvedValue([]) } as unknown as DiscoveryService
 
+  const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000)
+  const monthsAgo = (m: number) => {
+    const d = new Date()
+    d.setMonth(d.getMonth() - m)
+    return d
+  }
+
+  const send = async (userId: string, data: object, createdAt = new Date()) => {
+    const n = await service.sendToUser(userId, data)
+    await dataSource.query(`UPDATE "Notifications" SET "created_at" = $1 WHERE "id" = $2`, [createdAt, n.id])
+    return n
+  }
+
+  const pending = (activityId: string) => ({ type: 'CORRECTION-PENDING', courseId: 'course-1', activityId })
+  const closed = (activityId: string) => ({ type: 'ACTIVITY-CLOSED', courseId: 'course-1', activityId })
+  const exerciseChanges = (activityId: string) => ({
+    type: 'EXERCISE-CHANGES',
+    userId: 'student-1',
+    activityId,
+    changes: {},
+  })
+
   beforeAll(async () => {
     testDb = await createTestDatabase([UserEntity, NotificationEntity])
     dataSource = testDb.dataSource
@@ -64,7 +86,7 @@ describe('NotificationService (integration)', () => {
   describe('cascade DB', () => {
     it("devrait supprimer automatiquement les notifications d'un utilisateur supprimé", async () => {
       const user = await seedUser()
-      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
+      await send(user.id, closed('act-1'))
 
       await userRepo.delete(user.id)
 
@@ -76,24 +98,24 @@ describe('NotificationService (integration)', () => {
   describe('deleteWhere', () => {
     it('devrait supprimer uniquement les notifications correspondant à une expression additionnelle réelle', async () => {
       const user = await seedUser()
-      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
-      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-2' })
+      await send(user.id, closed('act-1'))
+      await send(user.id, pending('act-1'))
 
       const affected = await service.deleteWhere(user.id, (qb) =>
-        qb.andWhere(`data->>'activityId' = :actId`, { actId: 'act-1' })
+        qb.andWhere(`data->>'type' = :notifType`, { notifType: 'ACTIVITY-CLOSED' })
       )
 
       expect(affected).toBe(1)
       const remaining = await notificationRepo.find({ where: { userId: user.id } })
       expect(remaining).toHaveLength(1)
-      expect(remaining[0].data['activityId']).toBe('act-2')
+      expect(remaining[0].data['type']).toBe('CORRECTION-PENDING')
     })
 
     it("ne devrait pas supprimer les notifications d'un autre utilisateur", async () => {
       const user1 = await seedUser()
       const user2 = await seedUser()
-      await service.sendToUser(user1.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
-      await service.sendToUser(user2.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
+      await send(user1.id, closed('act-1'))
+      await send(user2.id, closed('act-1'))
 
       await service.deleteWhere(user1.id)
 
@@ -105,9 +127,8 @@ describe('NotificationService (integration)', () => {
   describe('ofUser', () => {
     it('devrait trier par date décroissante, filtrer les non lues et paginer', async () => {
       const user = await seedUser()
-      const n1 = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
-      await new Promise((resolve) => setTimeout(resolve, 5))
-      const n2 = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-2' })
+      const n1 = await send(user.id, closed('act-1'), minutesAgo(10))
+      const n2 = await send(user.id, closed('act-2'), minutesAgo(5))
       await notificationRepo.update(n1.id, { readAt: new Date() })
 
       const [unread] = await service.ofUser(user.id, { unread: true })
@@ -124,8 +145,8 @@ describe('NotificationService (integration)', () => {
   describe('markAsRead / markAllAsRead / unreadCount', () => {
     it('devrait marquer une notification comme lue puis refléter le compteur', async () => {
       const user = await seedUser()
-      const n1 = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-1' })
-      await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-2' })
+      const n1 = await send(user.id, closed('act-1'))
+      await send(user.id, closed('act-2'))
 
       expect(await service.unreadCount(user.id)).toBe(2)
 
@@ -137,25 +158,103 @@ describe('NotificationService (integration)', () => {
     })
   })
 
-  describe('deleteOldNotifications (Cron)', () => {
-    it("devrait supprimer uniquement les notifications de plus d'un an", async () => {
+  describe('regroupement', () => {
+    it('ofUser ne renvoie que la plus récente de chaque groupe', async () => {
       const user = await seedUser()
-      const oldNotification = await service.sendToUser(user.id, { type: 'ACTIVITY-CLOSED', activityId: 'act-old' })
+      await send(user.id, pending('act-1'), minutesAgo(30))
+      const latest = await send(user.id, pending('act-1'), minutesAgo(10))
+      const other = await send(user.id, pending('act-2'), minutesAgo(20))
 
-      const pastDate = new Date()
-      pastDate.setFullYear(pastDate.getFullYear() - 2)
-      await notificationRepo.update(oldNotification.id, { createdAt: pastDate })
+      const [items, count] = await service.ofUser(user.id)
 
-      const recentNotification = await service.sendToUser(user.id, {
-        type: 'ACTIVITY-CLOSED',
-        activityId: 'act-recent',
-      })
+      expect(items.map((n) => n.id)).toEqual([latest.id, other.id])
+      expect(count).toBe(2)
+    })
+
+    it('ne mélange pas les groupes de deux utilisateurs (AC_<activité> sans userId)', async () => {
+      const user1 = await seedUser()
+      const user2 = await seedUser()
+      await send(user1.id, closed('act-1'), minutesAgo(10))
+      const older = await send(user2.id, closed('act-1'), minutesAgo(20))
+
+      const [items] = await service.ofUser(user2.id)
+
+      expect(items.map((n) => n.id)).toEqual([older.id])
+    })
+
+    it('unreadCount compte un élément par groupe et ignore les types techniques', async () => {
+      const user = await seedUser()
+      await send(user.id, pending('act-1'), minutesAgo(30))
+      await send(user.id, pending('act-1'), minutesAgo(10))
+      await send(user.id, pending('act-2'))
+      await send(user.id, exerciseChanges('act-1'))
+
+      expect(await service.unreadCount(user.id)).toBe(2)
+    })
+
+    it('markAsRead marque les plus anciennes du groupe mais pas une plus récente', async () => {
+      const user = await seedUser()
+      const oldest = await send(user.id, pending('act-1'), minutesAgo(30))
+      const middle = await send(user.id, pending('act-1'), minutesAgo(20))
+      const newest = await send(user.id, pending('act-1'), minutesAgo(10))
+
+      await service.markAsRead(user.id, [middle.id])
+
+      const rows = await notificationRepo.find({ where: { userId: user.id } })
+      const readAt = Object.fromEntries(rows.map((r) => [r.id, r.readAt]))
+      expect(readAt[oldest.id]).not.toBeNull()
+      expect(readAt[middle.id]).not.toBeNull()
+      expect(readAt[newest.id]).toBeNull()
+    })
+
+    it('delete supprime aussi les plus anciennes du groupe, sans toucher aux autres groupes', async () => {
+      const user = await seedUser()
+      await send(user.id, pending('act-1'), minutesAgo(30))
+      const newest = await send(user.id, pending('act-1'), minutesAgo(10))
+      const other = await send(user.id, pending('act-2'), minutesAgo(20))
+
+      await expect(service.delete(user.id, [newest.id])).resolves.toBe(2)
+
+      const remaining = await notificationRepo.find({ where: { userId: user.id } })
+      expect(remaining.map((n) => n.id)).toEqual([other.id])
+    })
+
+    it("delete ne supprime pas les notifications d'un autre utilisateur", async () => {
+      const user1 = await seedUser()
+      const user2 = await seedUser()
+      const n = await send(user2.id, pending('act-1'))
+
+      await expect(service.delete(user1.id, [n.id])).resolves.toBe(0)
+
+      expect(await notificationRepo.find({ where: { userId: user2.id } })).toHaveLength(1)
+    })
+
+    it('ne regroupe pas EXERCISE-CHANGES : en supprimer une ne supprime pas les autres', async () => {
+      const user = await seedUser()
+      const first = await send(user.id, exerciseChanges('act-1'), minutesAgo(20))
+      const second = await send(user.id, exerciseChanges('act-1'), minutesAgo(10))
+
+      await expect(service.delete(user.id, [second.id])).resolves.toBe(1)
+
+      const remaining = await notificationRepo.find({ where: { userId: user.id } })
+      expect(remaining.map((n) => n.id)).toEqual([first.id])
+    })
+  })
+
+  describe('purgeExpired', () => {
+    it("supprime les notifications de plus d'un an, lues ou non, et garde les autres", async () => {
+      const user = await seedUser()
+      await send(user.id, pending('act-1'), monthsAgo(13))
+      const oldRead = await send(user.id, closed('act-2'), monthsAgo(13))
+      await notificationRepo.update(oldRead.id, { readAt: new Date() })
+      const recentRead = await send(user.id, closed('act-3'), monthsAgo(8))
+      await notificationRepo.update(recentRead.id, { readAt: monthsAgo(7) })
+      const recentUnread = await send(user.id, pending('act-4'))
 
       await service.deleteOldNotifications()
 
       const remaining = await notificationRepo.find({ where: { userId: user.id } })
-      expect(remaining).toHaveLength(1)
-      expect(remaining[0].id).toBe(recentNotification.id)
+      expect(remaining.map((n) => n.id).sort()).toEqual([recentRead.id, recentUnread.id].sort())
     })
   })
 })

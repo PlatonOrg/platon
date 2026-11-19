@@ -68,7 +68,7 @@ export const NOTIFICATION_QUERIES = gql`
 const toNotificationType = (graphqlName: string): NotificationType => {
   const type = NotificationType[graphqlName as keyof typeof NotificationType]
   if (!type) {
-    throw new Error(`Unknown notification type from l'API : ${graphqlName}`)
+    throw new Error(`Unknown notification type from API : ${graphqlName}`)
   }
   return type
 }

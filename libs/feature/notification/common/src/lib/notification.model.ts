@@ -21,6 +21,7 @@ export enum NotificationType {
 export const HIDDEN_NOTIFICATION_TYPES: readonly NotificationType[] = [
   NotificationType.MODERATION_ACTIVITY_CHANGES,
   NotificationType.SESSION_STATE_CHANGES,
+  NotificationType.EXERCISE_CHANGES,
 ]
 
 export interface Notification<TData = unknown> {

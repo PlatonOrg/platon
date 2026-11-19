@@ -9,6 +9,30 @@ import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notifi
 import { ON_CHANGE_NOTIFICATIONS } from './notification.pubsub'
 import { NotificationService } from './notification.service'
 import { HIDDEN_NOTIFICATION_TYPES } from '@platon/feature/notification/common'
+import {
+  EXERCISE_CHANGES_NOTIFICATION,
+  ExerciseChangesNotification,
+  COURSE_MEMBER_CREATION_NOTIFICATION,
+  CourseMemberCreationNotification,
+  ACTIVITY_MEMBER_CREATION_NOTIFICATION,
+  ActivityMemberCreationNotification,
+  CORRECTOR_CREATED_NOTIFICATION,
+  CorrectorCreatedNotification,
+  CORRECTOR_REMOVED_NOTIFICATION,
+  CorrectorRemovedNotification,
+  CORRECTION_PENDING_NOTIFICATION,
+  CorrectionPendingNotification,
+  CORRECTION_AVAILABLE_NOTIFICATION,
+  CorrectionAvailableNotification,
+  ACTIVITY_CLOSED_NOTIFICATION,
+  ActivityClosedNotification,
+  RESOURCE_MOVED_BY_ADMIN_NOTIFICATION,
+  ResourceMovedByAdminNotification,
+  MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
+  ModerationActivityChangesNotification,
+  SESSION_STATE_CHANGES_NOTIFICATION,
+  SessionStateChangesNotification,
+} from '@platon/feature/course/common'
 
 describe('NotificationService', () => {
   let service: NotificationService
@@ -61,8 +85,14 @@ describe('NotificationService', () => {
 
   describe('sendToUser', () => {
     it('devrait créer la notification via le repository et publier le changement', async () => {
-      const data = { type: 'ACTIVITY-CLOSED', activityId: 'activity-1' }
-      const dateGenerated = { groupId: 'AC_activity-1', type: 'ACTIVITY-CLOSED' }
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
+      const dateGenerated = { groupId: 'AC_activity-1', type: ACTIVITY_CLOSED_NOTIFICATION }
 
       const notification = {
         id: '1',
@@ -86,8 +116,14 @@ describe('NotificationService', () => {
     })
 
     it('devrait utiliser un EntityManager fourni au lieu du repository', async () => {
-      const data = { type: 'ACTIVITY-CLOSED', activityId: 'activity-1' }
-      const dateGenerated = { groupId: 'AC_activity-1', type: 'ACTIVITY-CLOSED' }
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
+      const dateGenerated = { groupId: 'AC_activity-1', type: ACTIVITY_CLOSED_NOTIFICATION }
 
       const notification = { id: '1', userId: 'user-1', data: data, ...dateGenerated } as unknown as NotificationEntity
       const entityManager = {
@@ -114,13 +150,19 @@ describe('NotificationService', () => {
         save: jest.fn().mockResolvedValue(notification),
       } as unknown as EntityManager
 
-      await expect(service.sendToUser('user-1', { type: 'FOO' }, entityManager)).rejects.toThrow(
+      await expect(service.sendToUser('user-1', { type: 'FOO' } as never, entityManager)).rejects.toThrow(
         'Unknown type of notification : FOO'
       )
     })
 
     it('ne devrait pas faire échouer la requête si la publication pubsub échoue', async () => {
-      const data = { type: 'ACTIVITY-CLOSED', activityId: 'activity-1' }
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
       const notification = { id: '1', userId: 'user-1', data: data } as unknown as NotificationEntity
       repository.create.mockReturnValue(notification)
       repository.save.mockResolvedValue(notification)
@@ -132,8 +174,14 @@ describe('NotificationService', () => {
 
   describe('sendToAllUsers', () => {
     it('devrait envoyer une notification à chaque utilisateur', async () => {
-      const data = { type: 'ACTIVITY-CLOSED', activityId: 'activity-1' }
-      const dateGenerated = { groupId: 'AC_activity-1', type: 'ACTIVITY-CLOSED' }
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
+      const dateGenerated = { groupId: 'AC_activity-1', type: ACTIVITY_CLOSED_NOTIFICATION }
 
       const notification = { id: '1', userId: '', data: data } as unknown as NotificationEntity
       repository.create.mockReturnValue(notification)
@@ -159,43 +207,115 @@ describe('NotificationService', () => {
       repository.save.mockImplementation(async (entity: any) => entity)
     })
 
-    // label type read from the notification | strucure expected for the group_id creation | type as define in NotificationType | group_id expected
-    const cases: [label: string, data: Record<string, unknown>, type: string, groupId: string | null][] = [
+    const exerciseChanges: ExerciseChangesNotification = {
+      type: EXERCISE_CHANGES_NOTIFICATION,
+      userId: 'student-1',
+      activityId: 'act-1',
+      changes: {},
+    }
+
+    const cases: [label: string, data: object, type: string, groupId: string | null][] = [
       [
         'COURSE-MEMBER-CREATION',
-        { type: 'COURSE-MEMBER-CREATION', courseId: 'course-1' },
-        'COURSE-MEMBER-CREATION',
+        {
+          type: COURSE_MEMBER_CREATION_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+        } as CourseMemberCreationNotification,
+        COURSE_MEMBER_CREATION_NOTIFICATION,
         'CMC_course-1_user-1',
       ],
       [
         'ACTIVITY-MEMBER-CREATION',
-        { type: 'ACTIVITY-MEMBER-CREATION', activityId: 'act-1' },
-        'ACTIVITY-MEMBER-CREATION',
+        {
+          type: ACTIVITY_MEMBER_CREATION_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as ActivityMemberCreationNotification,
+        ACTIVITY_MEMBER_CREATION_NOTIFICATION,
         'AMC_act-1_user-1',
       ],
-      ['CORRECTOR-CREATED', { type: 'CORRECTOR-CREATED', activityId: 'act-1' }, 'CORRECTOR-CREATED', 'CM_act-1_user-1'],
-      ['CORRECTOR-REMOVED', { type: 'CORRECTOR-REMOVED', activityId: 'act-1' }, 'CORRECTOR-REMOVED', 'CM_act-1_user-1'],
+      [
+        'CORRECTOR-CREATED',
+        {
+          type: CORRECTOR_CREATED_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectorCreatedNotification,
+        CORRECTOR_CREATED_NOTIFICATION,
+        'CM_act-1_user-1',
+      ],
+      [
+        'CORRECTOR-REMOVED',
+        {
+          type: CORRECTOR_REMOVED_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectorRemovedNotification,
+        CORRECTOR_REMOVED_NOTIFICATION,
+        'CM_act-1_user-1',
+      ],
       [
         'CORRECTION-PENDING',
-        { type: 'CORRECTION-PENDING', activityId: 'act-1' },
-        'CORRECTION-PENDING',
+        {
+          type: CORRECTION_PENDING_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectionPendingNotification,
+        CORRECTION_PENDING_NOTIFICATION,
         'CP_act-1_user-1',
       ],
       [
         'CORRECTION-AVAILABLE',
-        { type: 'CORRECTION-AVAILABLE', activityId: 'act-1' },
-        'CORRECTION-AVAILABLE',
+        {
+          type: CORRECTION_AVAILABLE_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectionAvailableNotification,
+        CORRECTION_AVAILABLE_NOTIFICATION,
         'CA_act-1_user-1',
       ],
-      ['ACTIVITY-CLOSED', { type: 'ACTIVITY-CLOSED', activityId: 'act-1' }, 'ACTIVITY-CLOSED', 'AC_act-1'],
+      [
+        'ACTIVITY-CLOSED',
+        {
+          type: ACTIVITY_CLOSED_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Activity 1',
+        } as ActivityClosedNotification,
+        ACTIVITY_CLOSED_NOTIFICATION,
+        'AC_act-1',
+      ],
       [
         'RESOURCE-MOVED-BY-ADMIN',
-        { type: 'RESOURCE-MOVED-BY-ADMIN', resourceId: 'res-1' },
-        'RESOURCE-MOVED-BY-ADMIN',
+        {
+          type: RESOURCE_MOVED_BY_ADMIN_NOTIFICATION,
+          resourceId: 'res-1',
+          resourceName: 'Res 1',
+          circleId: 'circle-1',
+          circleName: 'Circle 1',
+        } as ResourceMovedByAdminNotification,
+        RESOURCE_MOVED_BY_ADMIN_NOTIFICATION,
         'RMBA_res-1',
       ],
-      ['EXERCISE-CHANGES', { type: 'EXERCISE-CHANGES', resourceId: 'res-1' }, 'EXERCISE-CHANGES', 'EC_res-1'],
-      ['RESOURCE-INVITATION', { type: 'RESOURCE-INVITATION', resourceId: 'res-1' }, 'RESOURCE-INVITATION', 'RI_res-1'],
+      ['EXERCISE-CHANGES', { ...exerciseChanges }, EXERCISE_CHANGES_NOTIFICATION, null],
+      [
+        'RESOURCE-INVITATION',
+        { type: 'RESOURCE-INVITATION', resourceId: 'res-1', resourceName: 'Res 1' },
+        'RESOURCE-INVITATION',
+        'RI_res-1',
+      ],
       [
         'MEMBER-CREATE',
         event('MEMBER_CREATE', { resourceId: 'circle-1', data: { userId: 'user-2' } }),
@@ -215,9 +335,28 @@ describe('NotificationService', () => {
         'RERSC_res-1',
       ],
       ['RESOURCE-CREATE', event('RESOURCE_CREATE', { resourceId: 'circle-1' }), 'RESOURCE-CREATE', 'RERC_circle-1'],
-      // following type are utilitary and never regroup.
-      ['MODERATION-ACTIVITY-CHANGES', { type: 'MODERATION-ACTIVITY-CHANGES' }, 'MODERATION-ACTIVITY-CHANGES', null],
-      ['SESSION-STATE-CHANGES', { type: 'SESSION-STATE-CHANGES' }, 'SESSION-STATE-CHANGES', null],
+      [
+        'MODERATION-ACTIVITY-CHANGES',
+        {
+          type: MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
+          activity: {},
+        } as ModerationActivityChangesNotification,
+        MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
+        null,
+      ],
+      [
+        'SESSION-STATE-CHANGES',
+        {
+          type: SESSION_STATE_CHANGES_NOTIFICATION,
+          userId: 'user-1',
+          activityId: 'act-1',
+          activitySessionId: 'sess-1',
+          terminated: false,
+          extraTime: 0,
+        } as SessionStateChangesNotification,
+        SESSION_STATE_CHANGES_NOTIFICATION,
+        null,
+      ],
     ]
 
     it.each(cases)('%s : calcule le type et le groupId', async (_label, data, type, groupId) => {
@@ -227,8 +366,20 @@ describe('NotificationService', () => {
     })
 
     it('devrait regrouper CORRECTOR-CREATED et CORRECTOR-REMOVED d’une même activité', async () => {
-      await service.sendToUser('user-1', { type: 'CORRECTOR-CREATED', activityId: 'act-1' })
-      await service.sendToUser('user-1', { type: 'CORRECTOR-REMOVED', activityId: 'act-1' })
+      await service.sendToUser('user-1', {
+        type: CORRECTOR_CREATED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'act-1',
+        activityName: 'Act 1',
+      } as CorrectorCreatedNotification)
+      await service.sendToUser('user-1', {
+        type: CORRECTOR_REMOVED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'act-1',
+        activityName: 'Act 1',
+      } as CorrectorRemovedNotification)
 
       const [created, removed] = repository.create.mock.calls.map((call) => (call[0] as any).groupId)
       expect(created).toBe(removed)
@@ -242,14 +393,31 @@ describe('NotificationService', () => {
       expect(joined).toBe(left)
     })
 
-    it('devrait rejeter une notification si un identifiant manque', async () => {
-      await expect(service.sendToUser('user-1', { type: 'CORRECTION-PENDING' })).rejects.toThrow(
-        'Missing required element to generate group_id for prefix : CP'
-      )
+    it("ne devrait pas rejeter l'envoi si un identifiant de groupe manque, mais affecter un groupId à null", async () => {
+      const data = {
+        type: CORRECTION_PENDING_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        // activityId manquant intentionnellement
+      }
+
+      const notification = { id: '1', userId: 'user-1', data, type: CORRECTION_PENDING_NOTIFICATION, groupId: null }
+      repository.create.mockReturnValue(notification as never)
+      repository.save.mockResolvedValue(notification as never)
+
+      const result = await service.sendToUser('user-1', data as never)
+
+      expect(repository.create).toHaveBeenCalledWith({
+        userId: 'user-1',
+        data,
+        type: CORRECTION_PENDING_NOTIFICATION,
+        groupId: null, // Le groupId doit être forcé à null
+      })
+      expect(result).toBe(notification)
     })
 
     it('devrait rejeter un RESOURCE-EVENT sans sous-type', async () => {
-      await expect(service.sendToUser('user-1', { type: 'RESOURCE-EVENT' })).rejects.toThrow(
+      await expect(service.sendToUser('user-1', { type: 'RESOURCE-EVENT' } as never)).rejects.toThrow(
         'Unknown type of notification : undefined'
       )
     })
@@ -270,7 +438,7 @@ describe('NotificationService', () => {
 
       expect(qb.where).toHaveBeenCalledWith('notification.user_id = :userId', { userId: 'user-1' })
       expect(qb.orderBy).toHaveBeenCalledWith('notification.created_at', 'DESC')
-      expect(qb.andWhere).toHaveBeenCalledTimes(2) // One for time, the other for group
+      expect(qb.andWhere).toHaveBeenCalledTimes(2)
       expect(qb.andWhere).not.toHaveBeenCalledWith('notification.read_at IS NULL')
       expect(qb.offset).not.toHaveBeenCalled()
       expect(qb.limit).not.toHaveBeenCalled()

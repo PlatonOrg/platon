@@ -28,7 +28,6 @@ export class NotificationGraphModel extends BaseGraphModel implements Notificati
   groupId!: string | null
 
   @Field(() => NotificationType)
-  @IsEnum(NotificationType)
   type!: NotificationType
 
   userId!: string
