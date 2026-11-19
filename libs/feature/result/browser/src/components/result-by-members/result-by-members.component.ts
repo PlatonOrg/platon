@@ -1,14 +1,5 @@
 import { CommonModule } from '@angular/common'
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostListener,
-  Input,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 
 import { MatIconModule } from '@angular/material/icon'
@@ -50,21 +41,20 @@ import { fromEvent, filter } from 'rxjs'
 export class ResultByMembersComponent implements OnInit {
   private route = inject(ActivatedRoute)
 
-  @Input({ required: true }) results: UserResults[] = []
-  @Input() columnOrder?: string[] = []
+  readonly results = input.required<UserResults[]>()
+  readonly columnOrder = input<string[] | undefined>([])
+  readonly groups = input<ActivityGroup[]>()
 
   protected answerStates = Object.values(AnswerStates)
   private activityId: string | null = null
   private courseId: string | null = null
   protected copyUrl = ''
   readonly open = signal(false)
-
-  @Input() groups?: ActivityGroup[]
   readonly selectedGroup = signal<string[] | null>(null)
 
   readonly filteredResults = computed(() => {
     const selected = this.selectedGroup()
-    const users = this.results
+    const users = this.results()
     if (!selected || selected.length === 0) {
       return users
     }
@@ -91,8 +81,9 @@ export class ResultByMembersComponent implements OnInit {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trackByColumnOrder = (a: any, b: any): number => {
-    const indexA = this.columnOrder?.indexOf(a.value.title)
-    const indexB = this.columnOrder?.indexOf(b.value.title)
+    const columnOrder = this.columnOrder()
+    const indexA = columnOrder?.indexOf(a.value.title)
+    const indexB = columnOrder?.indexOf(b.value.title)
     if (indexA === undefined || indexB === undefined) {
       return 0
     }
