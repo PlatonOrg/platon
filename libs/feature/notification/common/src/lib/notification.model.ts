@@ -39,4 +39,6 @@ export interface NotificationFilters {
   readonly unread?: boolean
   readonly offset?: number
   readonly limit?: number
+  /**true to remove all notifications types that are in HIDDEN_NOTIFICATION_TYPES*/
+  readonly excludeHidden?: boolean
 }

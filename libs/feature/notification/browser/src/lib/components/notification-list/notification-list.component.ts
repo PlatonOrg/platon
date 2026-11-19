@@ -78,7 +78,8 @@ export class NotificationListComponent implements OnChanges {
       })
       .map((notification) => {
         const previous = this.cache.get(notification.id)
-        const item = previous ? { ...previous, notification } : this.createItem(notification)
+        // Check if the item exists and the notification didn't change
+        const item = previous && previous.notification === notification ? previous : this.createItem(notification)
         next.set(notification.id, item)
         return item
       })

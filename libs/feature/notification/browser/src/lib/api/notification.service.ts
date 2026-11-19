@@ -13,6 +13,7 @@ import {
   MarkAllAsReadGQL,
   MarkAsReadGQL,
   NotifFragment,
+  NotificationFiltersInput,
   OnChangeNotificationsGQL,
   OnChangeNotificationsSubscription,
 } from '../models/notification.graphql.generated'
@@ -33,10 +34,15 @@ export class NotificationService {
    * The emitted value will contains a fetchMore function to load more notifications from the last cursor.
    *
    * @param limit The maximum number of notifications to return (default to 20).
+   * @param filters The filter to apply on the notifications. (default no filter)
    * @returns An observable of the list of notifications, the unread count and a function to fetch more notifications.
    */
-  paginate(limit = 20): Observable<NotificationPagination> {
-    const pagination = this.listNotificationsGQL.watch({ filters: null, first: limit, after: null })
+  paginate(limit = 20, filters?: NotificationFiltersInput): Observable<NotificationPagination> {
+    const pagination = this.listNotificationsGQL.watch({
+      filters: (filters ?? undefined) as never,
+      first: limit,
+      after: null,
+    })
 
     const counter = new BehaviorSubject(0)
 
@@ -101,11 +107,15 @@ export class NotificationService {
   /**
    * List the most recent `limit` unread notifications.
    * @param limit The maximum number of notifications to return (default to 5).
+   * @param excludeHidden Option for the filter, hide utility notification.
    * @returns An observable of the list of notifications
    */
-  listUnreads(limit = 5): Observable<Notification[]> {
+  listUnreads(limit = 5, excludeHidden?: boolean): Observable<Notification[]> {
     const query = this.listNotificationsGQL.watch({
-      filters: { unread: true },
+      filters: {
+        unread: true,
+        excludeHidden: excludeHidden ? excludeHidden : false,
+      },
       first: limit,
       after: null,
     })

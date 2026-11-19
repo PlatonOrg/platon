@@ -220,10 +220,10 @@ export class NotificationService {
 
   /**Regroup the notification by type to hide the similar ones
    * @param userId receive notification of this user
-   * @param includeUtility optional if set to false it removes all notifications where their types are in HIDDEN_NOTIFICATION_TYPES
+   * @param excludeUtility optional if set to true it removes all notifications types that are in HIDDEN_NOTIFICATION_TYPES
    * @Return the most recent for each group
    */
-  private visibleQuery(userId: string, includeUtility = true) {
+  private visibleQuery(userId: string, excludeUtility = false) {
     const query = this.repository
       .createQueryBuilder('notification')
       .where('notification.user_id = :userId', { userId })
@@ -233,7 +233,7 @@ export class NotificationService {
           AND newer.group_id = notification.group_id
           AND (newer.created_at, newer.id) > (notification.created_at, notification.id)
         )`)
-    if (!includeUtility) {
+    if (excludeUtility) {
       query.andWhere('notification.type NOT IN (:...hidden)', { hidden: HIDDEN_NOTIFICATION_TYPES })
     }
     return query
@@ -241,7 +241,8 @@ export class NotificationService {
 
   async ofUser(userId: string, filters: NotificationFilters = {}): Promise<[NotificationEntity[], number]> {
     // include all notification types even utility ones (those in HIDDEN_NOTIFICATION_TYPES)
-    const query = this.visibleQuery(userId).orderBy('notification.created_at', 'DESC')
+    const excludeUtility = filters.excludeHidden ? filters.excludeHidden : false
+    const query = this.visibleQuery(userId, excludeUtility).orderBy('notification.created_at', 'DESC')
 
     if (filters.unread) {
       query.andWhere('notification.read_at IS NULL')
@@ -362,7 +363,7 @@ export class NotificationService {
    * It doesn't take in count the notifications where the type is in HIDDEN_NOTIFICATION_TYPES
    */
   async unreadCount(userId: string): Promise<number> {
-    return this.visibleQuery(userId, false).andWhere('notification.read_at IS NULL').getCount()
+    return this.visibleQuery(userId, true).andWhere('notification.read_at IS NULL').getCount()
   }
 
   async withExtraData(notification: NotificationEntity): Promise<Record<string, unknown> | undefined> {

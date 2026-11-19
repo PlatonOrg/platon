@@ -59,4 +59,10 @@ export class NotificationFiltersInput implements NotificationFilters {
   @IsBoolean()
   @IsOptional()
   readonly unread?: boolean
+
+  @Field(() => Boolean, { nullable: true })
+  @Transform(({ value }) => toBoolean(value))
+  @IsBoolean()
+  @IsOptional()
+  readonly excludeHidden?: boolean
 }
