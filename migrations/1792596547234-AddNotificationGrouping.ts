@@ -22,7 +22,7 @@ export class AddNotificationGrouping1792596547234 implements MigrationInterface 
         )
 
         // set the group_id
-        // MODERATION-ACTIVITY-CHANGES, SESSION-STATE-CHANGES and EXERCISE_CHANGES must not be display so they can be null
+        // MODERATION-ACTIVITY-CHANGES, SESSION-STATE-CHANGES and EXERCISE-CHANGES must not be display so they can be null
         await queryRunner.query(`
             UPDATE "Notifications" SET "group_id" = CASE "type"
             WHEN 'COURSE-MEMBER-CREATION'       THEN 'CMC_'  || ("data"->>'courseId')   || '_' || "user_id"
@@ -41,7 +41,7 @@ export class AddNotificationGrouping1792596547234 implements MigrationInterface 
             END`
         )
 
-        // mark the not readed notifications to readed if an more recent one is grouped with them
+        // mark the not read notifications to read if a more recent one is grouped with them
         await queryRunner.query(`
             UPDATE "Notifications" n SET "read_at" = now()
             WHERE n."read_at" IS NULL AND n."group_id" IS NOT NULL

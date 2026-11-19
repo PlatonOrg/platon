@@ -53,20 +53,15 @@ export class NotificationService {
     }
   }
 
-  /** transforme the given information into a string with every element separeted by '_'
+  /** transform the given information into a string with every element separated by '_'
    *
-   * @param prefix the regroup prefix that identifie the notification type
+   * @param prefix the regroup prefix that identifies the notification type
    * @param parts all other information needed (course_id, user_id, resource_id, ... ) to join
    * @returns the group id or null if something is missing
    */
   private groupIdToString(prefix: string, ...parts: unknown[]): string | null {
     for (const element of parts) {
       if (element === undefined || element === null || element === '') {
-        this.logger.error(
-          `Failed to generate group_id: Missing required element in parts: ${JSON.stringify(
-            parts
-          )} for prefix : ${prefix}`
-        )
         return null
       }
     }
@@ -78,7 +73,7 @@ export class NotificationService {
    * @param type the notification type
    * @param userId the user_id destination
    * @param date the notification data
-   * @return the group_id or null if not necessery or somethings is missing
+   * @return the group_id or null if not necessary or something is missing
    */
   private resolveGroupId(type: NotificationType, userId: string, data: object): string | null {
     switch (type) {
@@ -126,7 +121,7 @@ export class NotificationService {
       case NotificationType.MEMBER_CREATE: {
         const typedData = data as ResourceEventNotification
         const eventInfo = typedData.eventInfo as unknown as ResourceMemberCreateEvent
-        return this.groupIdToString('REMM', eventInfo?.resourceId, eventInfo?.data.userId)
+        return this.groupIdToString('REMM', eventInfo?.resourceId, eventInfo?.data?.userId)
       }
 
       case NotificationType.MEMBER_REMOVE: {
@@ -151,7 +146,7 @@ export class NotificationService {
     }
   }
 
-  /** retrive the notification type from the notification data.
+  /** Retrieve the notification type from the notification data.
    * @param data the notification data with an 'type' field or an 'eventInfo' with an 'type' inside.
    * @return the NotificationType detected or raise an error if it's an unknown type.
    */
@@ -164,14 +159,6 @@ export class NotificationService {
     return type
   }
 
-  private requireGroupId(type: NotificationType): boolean {
-    const utilityTypes: string[] = [
-      NotificationType.MODERATION_ACTIVITY_CHANGES,
-      NotificationType.SESSION_STATE_CHANGES,
-    ]
-    return !utilityTypes.includes(type)
-  }
-
   async sendToUser<T extends object>(
     userId: string,
     data: T,
@@ -179,9 +166,9 @@ export class NotificationService {
   ): Promise<NotificationEntity> {
     const type = this.resolveNotificationType(data)
     const groupId = this.resolveGroupId(type, userId, data)
-    if (groupId === null && this.requireGroupId(type)) {
-      this.logger.error(
-        `Failed to send notification: Missing required parameters for type '${type}' and user '${userId}'. Data received: ${JSON.stringify(
+    if (groupId === null && !HIDDEN_NOTIFICATION_TYPES.includes(type)) {
+      this.logger.warn(
+        `Notification: Missing required groupId for type '${type}' and user '${userId}'. Data received: ${JSON.stringify(
           data
         )}`
       )
