@@ -19,7 +19,7 @@ import { NzListModule } from 'ng-zorro-antd/list'
 
 import { NgeUiIconModule } from '@cisstech/nge/ui/icon'
 import { DialogModule } from '@platon/core/browser'
-import { Notification } from '@platon/feature/notification/common'
+import { HIDDEN_NOTIFICATION_TYPES, Notification } from '@platon/feature/notification/common'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NotificationService } from '../../api/notification.service'
 import {
@@ -67,25 +67,45 @@ export class NotificationListComponent implements OnChanges {
   @Input() hasMore = false
   @Output() loadMore = new EventEmitter()
 
-  protected items: Item[] = []
+  protected items: Item[] = [] // utility notifications have been removed
+  private cache = new Map<string, Item>() // Doesn't store utility notifications
+
+  private sameNotification(notication: Notification, otherNotification: Notification): boolean {
+    return (
+      notication.updatedAt.getTime() === otherNotification.updatedAt.getTime() &&
+      notication.readAt?.getTime() === otherNotification.readAt?.getTime()
+    )
+  }
 
   ngOnChanges(): void {
-    this.items = this.notifications.map((notification) => {
-      const injector = Injector.create({
-        parent: this.injector,
-        providers: [
-          {
-            provide: NOTIFICATION,
-            useValue: notification,
-          },
-        ],
+    const next = new Map<string, Item>()
+    this.items = this.notifications
+      .filter((notification) => {
+        return !HIDDEN_NOTIFICATION_TYPES.includes(notification.type)
       })
-      return {
-        injector,
-        renderer: this.parsers?.find((parser) => parser.support(notification))?.renderer(notification, injector),
-        notification,
-      } as Item
+      .map((notification) => {
+        const previous = this.cache.get(notification.id)
+        // Check if the item exists and the notification didn't change
+        const item =
+          previous && this.sameNotification(previous.notification, notification)
+            ? previous
+            : this.createItem(notification)
+        next.set(notification.id, item)
+        return item
+      })
+    this.cache = next
+  }
+
+  private createItem(notification: Notification): Item {
+    const injector = Injector.create({
+      parent: this.injector,
+      providers: [{ provide: NOTIFICATION, useValue: notification }],
     })
+    return {
+      injector,
+      renderer: this.parsers?.find((p) => p.support(notification))?.renderer(notification, injector),
+      notification,
+    } as Item
   }
 
   protected delete(notification: Notification): void {

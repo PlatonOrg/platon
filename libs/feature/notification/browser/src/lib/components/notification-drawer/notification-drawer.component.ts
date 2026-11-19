@@ -42,13 +42,15 @@ export class NotificationDrawerComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.notificationSerivce.paginate().subscribe(({ unreadCount, notifications, hasMore, fetchMore }) => {
-        this.notifications = notifications
-        this.counter.next(unreadCount)
-        this.hasMore = hasMore
-        this.fetchMore = fetchMore
-        this.changeDetectorRef.markForCheck()
-      })
+      this.notificationSerivce
+        .paginate(undefined, { excludeHidden: true })
+        .subscribe(({ unreadCount, notifications, hasMore, fetchMore }) => {
+          this.notifications = notifications
+          this.counter.next(unreadCount)
+          this.hasMore = hasMore
+          this.fetchMore = fetchMore
+          this.changeDetectorRef.markForCheck()
+        })
     )
   }
 

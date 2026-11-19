@@ -8,6 +8,31 @@ import { NotificationEntity } from './notification.entity'
 import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notification.provider'
 import { ON_CHANGE_NOTIFICATIONS } from './notification.pubsub'
 import { NotificationService } from './notification.service'
+import {
+  EXERCISE_CHANGES_NOTIFICATION,
+  ExerciseChangesNotification,
+  COURSE_MEMBER_CREATION_NOTIFICATION,
+  CourseMemberCreationNotification,
+  ACTIVITY_MEMBER_CREATION_NOTIFICATION,
+  ActivityMemberCreationNotification,
+  CORRECTOR_CREATED_NOTIFICATION,
+  CorrectorCreatedNotification,
+  CORRECTOR_REMOVED_NOTIFICATION,
+  CorrectorRemovedNotification,
+  CORRECTION_PENDING_NOTIFICATION,
+  CorrectionPendingNotification,
+  CORRECTION_AVAILABLE_NOTIFICATION,
+  CorrectionAvailableNotification,
+  ACTIVITY_CLOSED_NOTIFICATION,
+  ActivityClosedNotification,
+  RESOURCE_MOVED_BY_ADMIN_NOTIFICATION,
+  ResourceMovedByAdminNotification,
+  MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
+  ModerationActivityChangesNotification,
+  SESSION_STATE_CHANGES_NOTIFICATION,
+  SessionStateChangesNotification,
+} from '@platon/feature/course/common'
+import { HIDDEN_NOTIFICATION_TYPES } from '@platon/feature/notification/common'
 
 describe('NotificationService', () => {
   let service: NotificationService
@@ -60,13 +85,28 @@ describe('NotificationService', () => {
 
   describe('sendToUser', () => {
     it('devrait créer la notification via le repository et publier le changement', async () => {
-      const notification = { id: '1', userId: 'user-1', data: { type: 'FOO' } } as unknown as NotificationEntity
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
+      const dateGenerated = { groupId: 'AC_activity-1', type: ACTIVITY_CLOSED_NOTIFICATION }
+
+      const notification = {
+        id: '1',
+        userId: 'user-1',
+        data: data,
+        ...dateGenerated,
+      } as unknown as NotificationEntity
+
       repository.create.mockReturnValue(notification)
       repository.save.mockResolvedValue(notification)
 
-      const result = await service.sendToUser('user-1', { type: 'FOO' })
+      const result = await service.sendToUser('user-1', data)
 
-      expect(repository.create).toHaveBeenCalledWith({ userId: 'user-1', data: { type: 'FOO' } })
+      expect(repository.create).toHaveBeenCalledWith({ userId: 'user-1', data: data, ...dateGenerated })
       expect(repository.save).toHaveBeenCalledWith(notification)
       expect(result).toBe(notification)
       expect(pubSubService.publish).toHaveBeenCalledWith(ON_CHANGE_NOTIFICATIONS, {
@@ -76,41 +116,310 @@ describe('NotificationService', () => {
     })
 
     it('devrait utiliser un EntityManager fourni au lieu du repository', async () => {
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
+      const dateGenerated = { groupId: 'AC_activity-1', type: ACTIVITY_CLOSED_NOTIFICATION }
+
+      const notification = { id: '1', userId: 'user-1', data: data, ...dateGenerated } as unknown as NotificationEntity
+      const entityManager = {
+        create: jest.fn().mockReturnValue(notification),
+        save: jest.fn().mockResolvedValue(notification),
+      } as unknown as EntityManager
+
+      const result = await service.sendToUser('user-1', data, entityManager)
+
+      expect(entityManager.create).toHaveBeenCalledWith(NotificationEntity, {
+        userId: 'user-1',
+        data: data,
+        ...dateGenerated,
+      })
+      expect(entityManager.save).toHaveBeenCalledWith(notification)
+      expect(repository.save).not.toHaveBeenCalled()
+      expect(result).toBe(notification)
+    })
+
+    it('devrait échouer la requête si le type de notification est inconnu', async () => {
       const notification = { id: '1', userId: 'user-1', data: { type: 'FOO' } } as unknown as NotificationEntity
       const entityManager = {
         create: jest.fn().mockReturnValue(notification),
         save: jest.fn().mockResolvedValue(notification),
       } as unknown as EntityManager
 
-      const result = await service.sendToUser('user-1', { type: 'FOO' }, entityManager)
-
-      expect(entityManager.create).toHaveBeenCalledWith(NotificationEntity, { userId: 'user-1', data: { type: 'FOO' } })
-      expect(entityManager.save).toHaveBeenCalledWith(notification)
-      expect(repository.save).not.toHaveBeenCalled()
-      expect(result).toBe(notification)
+      await expect(service.sendToUser('user-1', { type: 'FOO' } as never, entityManager)).rejects.toThrow(
+        'Unknown type of notification : FOO'
+      )
     })
 
     it('ne devrait pas faire échouer la requête si la publication pubsub échoue', async () => {
-      const notification = { id: '1', userId: 'user-1', data: { type: 'FOO' } } as unknown as NotificationEntity
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
+      const notification = { id: '1', userId: 'user-1', data: data } as unknown as NotificationEntity
       repository.create.mockReturnValue(notification)
       repository.save.mockResolvedValue(notification)
       pubSubService.publish.mockRejectedValue(new Error('boom'))
 
-      await expect(service.sendToUser('user-1', { type: 'FOO' })).resolves.toBe(notification)
+      await expect(service.sendToUser('user-1', data)).resolves.toBe(notification)
     })
   })
 
   describe('sendToAllUsers', () => {
     it('devrait envoyer une notification à chaque utilisateur', async () => {
-      const notification = { id: '1', userId: '', data: { type: 'FOO' } } as unknown as NotificationEntity
+      const data: ActivityClosedNotification = {
+        type: ACTIVITY_CLOSED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'activity-1',
+        activityName: 'Activity 1',
+      }
+      const dateGenerated = { groupId: 'AC_activity-1', type: ACTIVITY_CLOSED_NOTIFICATION }
+
+      const notification = { id: '1', userId: '', data: data } as unknown as NotificationEntity
       repository.create.mockReturnValue(notification)
       repository.save.mockResolvedValue(notification)
 
-      await service.sendToAllUsers(['user-1', 'user-2'], { type: 'FOO' })
+      await service.sendToAllUsers(['user-1', 'user-2'], data)
 
       expect(repository.create).toHaveBeenCalledTimes(2)
-      expect(repository.create).toHaveBeenCalledWith({ userId: 'user-1', data: { type: 'FOO' } })
-      expect(repository.create).toHaveBeenCalledWith({ userId: 'user-2', data: { type: 'FOO' } })
+      expect(repository.create).toHaveBeenCalledWith({ userId: 'user-1', data: data, ...dateGenerated })
+      expect(repository.create).toHaveBeenCalledWith({ userId: 'user-2', data: data, ...dateGenerated })
+    })
+  })
+
+  describe('notification', () => {
+    const event = (subType: string, info: Record<string, unknown>) => ({
+      type: 'RESOURCE-EVENT',
+      eventInfo: { type: subType, ...info },
+    })
+
+    beforeEach(() => {
+      // sendToUser read newNotification.data['type']for his log then send it.
+      repository.create.mockImplementation((entity: any) => entity)
+      repository.save.mockImplementation(async (entity: any) => entity)
+    })
+
+    const exerciseChanges: ExerciseChangesNotification = {
+      type: EXERCISE_CHANGES_NOTIFICATION,
+      userId: 'student-1',
+      activityId: 'act-1',
+      changes: {},
+    }
+
+    const cases: [label: string, data: object, type: string, groupId: string | null][] = [
+      [
+        'COURSE-MEMBER-CREATION',
+        {
+          type: COURSE_MEMBER_CREATION_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+        } as CourseMemberCreationNotification,
+        COURSE_MEMBER_CREATION_NOTIFICATION,
+        'CMC_course-1_user-1',
+      ],
+      [
+        'ACTIVITY-MEMBER-CREATION',
+        {
+          type: ACTIVITY_MEMBER_CREATION_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as ActivityMemberCreationNotification,
+        ACTIVITY_MEMBER_CREATION_NOTIFICATION,
+        'AMC_act-1_user-1',
+      ],
+      [
+        'CORRECTOR-CREATED',
+        {
+          type: CORRECTOR_CREATED_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectorCreatedNotification,
+        CORRECTOR_CREATED_NOTIFICATION,
+        'CM_act-1_user-1',
+      ],
+      [
+        'CORRECTOR-REMOVED',
+        {
+          type: CORRECTOR_REMOVED_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectorRemovedNotification,
+        CORRECTOR_REMOVED_NOTIFICATION,
+        'CM_act-1_user-1',
+      ],
+      [
+        'CORRECTION-PENDING',
+        {
+          type: CORRECTION_PENDING_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectionPendingNotification,
+        CORRECTION_PENDING_NOTIFICATION,
+        'CP_act-1_user-1',
+      ],
+      [
+        'CORRECTION-AVAILABLE',
+        {
+          type: CORRECTION_AVAILABLE_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Act 1',
+        } as CorrectionAvailableNotification,
+        CORRECTION_AVAILABLE_NOTIFICATION,
+        'CA_act-1_user-1',
+      ],
+      [
+        'ACTIVITY-CLOSED',
+        {
+          type: ACTIVITY_CLOSED_NOTIFICATION,
+          courseId: 'course-1',
+          courseName: 'Course 1',
+          activityId: 'act-1',
+          activityName: 'Activity 1',
+        } as ActivityClosedNotification,
+        ACTIVITY_CLOSED_NOTIFICATION,
+        'AC_act-1',
+      ],
+      [
+        'RESOURCE-MOVED-BY-ADMIN',
+        {
+          type: RESOURCE_MOVED_BY_ADMIN_NOTIFICATION,
+          resourceId: 'res-1',
+          resourceName: 'Res 1',
+          circleId: 'circle-1',
+          circleName: 'Circle 1',
+        } as ResourceMovedByAdminNotification,
+        RESOURCE_MOVED_BY_ADMIN_NOTIFICATION,
+        'RMBA_res-1',
+      ],
+      ['EXERCISE-CHANGES', { ...exerciseChanges }, EXERCISE_CHANGES_NOTIFICATION, null],
+      [
+        'RESOURCE-INVITATION',
+        { type: 'RESOURCE-INVITATION', resourceId: 'res-1', resourceName: 'Res 1' },
+        'RESOURCE-INVITATION',
+        'RI_res-1',
+      ],
+      [
+        'MEMBER-CREATE',
+        event('MEMBER_CREATE', { resourceId: 'circle-1', data: { userId: 'user-2' } }),
+        'MEMBER-CREATE',
+        'REMM_circle-1_user-2',
+      ],
+      [
+        'MEMBER-REMOVE',
+        event('MEMBER_REMOVE', { resourceId: 'circle-1', actorId: 'user-2' }),
+        'MEMBER-REMOVE',
+        'REMM_circle-1_user-2',
+      ],
+      [
+        'RESOURCE-STATUS-CHANGE',
+        event('RESOURCE_STATUS_CHANGE', { resourceId: 'res-1' }),
+        'RESOURCE-STATUS-CHANGE',
+        'RERSC_res-1',
+      ],
+      ['RESOURCE-CREATE', event('RESOURCE_CREATE', { resourceId: 'circle-1' }), 'RESOURCE-CREATE', 'RERC_circle-1'],
+      [
+        'MODERATION-ACTIVITY-CHANGES',
+        {
+          type: MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
+          activity: {},
+        } as ModerationActivityChangesNotification,
+        MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
+        null,
+      ],
+      [
+        'SESSION-STATE-CHANGES',
+        {
+          type: SESSION_STATE_CHANGES_NOTIFICATION,
+          userId: 'user-1',
+          activityId: 'act-1',
+          activitySessionId: 'sess-1',
+          terminated: false,
+          extraTime: 0,
+        } as SessionStateChangesNotification,
+        SESSION_STATE_CHANGES_NOTIFICATION,
+        null,
+      ],
+    ]
+
+    it.each(cases)('%s : calcule le type et le groupId', async (_label, data, type, groupId) => {
+      await service.sendToUser('user-1', data)
+
+      expect(repository.create).toHaveBeenCalledWith({ userId: 'user-1', data, type, groupId })
+    })
+
+    it('devrait regrouper CORRECTOR-CREATED et CORRECTOR-REMOVED d’une même activité', async () => {
+      await service.sendToUser('user-1', {
+        type: CORRECTOR_CREATED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'act-1',
+        activityName: 'Act 1',
+      } as CorrectorCreatedNotification)
+      await service.sendToUser('user-1', {
+        type: CORRECTOR_REMOVED_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        activityId: 'act-1',
+        activityName: 'Act 1',
+      } as CorrectorRemovedNotification)
+
+      const [created, removed] = repository.create.mock.calls.map((call) => (call[0] as any).groupId)
+      expect(created).toBe(removed)
+    })
+
+    it('devrait regrouper MEMBER-CREATE et MEMBER-REMOVE d’un même cercle et d’un même utilisateur', async () => {
+      await service.sendToUser('user-1', event('MEMBER-CREATE', { resourceId: 'circle-1', data: { userId: 'user-2' } }))
+      await service.sendToUser('user-1', event('MEMBER-REMOVE', { resourceId: 'circle-1', actorId: 'user-2' }))
+
+      const [joined, left] = repository.create.mock.calls.map((call) => (call[0] as any).groupId)
+      expect(joined).toBe(left)
+    })
+
+    it("ne devrait pas rejeter l'envoi si un identifiant de groupe manque, mais affecter un groupId à null", async () => {
+      const data = {
+        type: CORRECTION_PENDING_NOTIFICATION,
+        courseId: 'course-1',
+        courseName: 'Course 1',
+        // activityId manquant intentionnellement
+      }
+
+      const notification = { id: '1', userId: 'user-1', data, type: CORRECTION_PENDING_NOTIFICATION, groupId: null }
+      repository.create.mockReturnValue(notification as never)
+      repository.save.mockResolvedValue(notification as never)
+
+      const result = await service.sendToUser('user-1', data as never)
+
+      expect(repository.create).toHaveBeenCalledWith({
+        userId: 'user-1',
+        data,
+        type: CORRECTION_PENDING_NOTIFICATION,
+        groupId: null, // Le groupId doit être forcé à null
+      })
+      expect(result).toBe(notification)
+    })
+
+    it('devrait rejeter un RESOURCE-EVENT sans sous-type', async () => {
+      await expect(service.sendToUser('user-1', { type: 'RESOURCE-EVENT' } as never)).rejects.toThrow(
+        'Unknown type of notification : undefined'
+      )
     })
   })
 
@@ -127,9 +436,10 @@ describe('NotificationService', () => {
 
       await service.ofUser('user-1')
 
-      expect(qb.where).toHaveBeenCalledWith('user_id = :userId', { userId: 'user-1' })
-      expect(qb.orderBy).toHaveBeenCalledWith('created_at', 'DESC')
-      expect(qb.andWhere).not.toHaveBeenCalled()
+      expect(qb.where).toHaveBeenCalledWith('notification.user_id = :userId', { userId: 'user-1' })
+      expect(qb.orderBy).toHaveBeenCalledWith('notification.created_at', 'DESC')
+      expect(qb.andWhere).toHaveBeenCalledTimes(2)
+      expect(qb.andWhere).not.toHaveBeenCalledWith('notification.read_at IS NULL')
       expect(qb.offset).not.toHaveBeenCalled()
       expect(qb.limit).not.toHaveBeenCalled()
     })
@@ -139,7 +449,7 @@ describe('NotificationService', () => {
 
       await service.ofUser('user-1', { unread: true })
 
-      expect(qb.andWhere).toHaveBeenCalledWith('read_at IS NULL')
+      expect(qb.andWhere).toHaveBeenCalledWith('notification.read_at IS NULL')
     })
 
     it('devrait appliquer offset et limit quand fournis', async () => {
@@ -150,18 +460,46 @@ describe('NotificationService', () => {
       expect(qb.offset).toHaveBeenCalledWith(10)
       expect(qb.limit).toHaveBeenCalledWith(5)
     })
+
+    it('ne devrait pas exclure les types utilitaires', async () => {
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+      await service.ofUser('user-1')
+      expect(qb.andWhere).not.toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', expect.anything())
+    })
+
+    it('devrait exclure les types cachés quand excludeHidden est activé', async () => {
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+
+      await service.ofUser('user-1', { excludeHidden: true })
+      expect(qb.andWhere).toHaveBeenCalledTimes(3)
+      expect(qb.andWhere).toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', {
+        hidden: HIDDEN_NOTIFICATION_TYPES,
+      })
+    })
   })
+
+  function mockQueryBuilder() {
+    const qb: Record<string, jest.Mock> = {}
+    for (const method of ['where', 'andWhere', 'orderBy', 'offset', 'limit', 'update', 'set', 'delete', 'from']) {
+      qb[method] = jest.fn().mockReturnValue(qb)
+    }
+    qb['execute'] = jest.fn().mockResolvedValue({ affected: 0 })
+    qb['getManyAndCount'] = jest.fn().mockResolvedValue([[], 0])
+    qb['getCount'] = jest.fn().mockResolvedValue(0)
+    return qb as any
+  }
 
   describe('markAsRead', () => {
     it('devrait mettre à jour readAt et notifier', async () => {
-      repository.update.mockResolvedValue({ affected: 1 } as never)
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
 
       await service.markAsRead('user-1', ['id-1', 'id-2'])
 
-      expect(repository.update).toHaveBeenCalledWith(
-        { userId: 'user-1', id: expect.anything() },
-        { readAt: expect.any(Date) }
-      )
+      expect(qb['set']).toHaveBeenCalledWith({ readAt: expect.any(Date) })
+      expect(qb['where']).toHaveBeenCalledWith('user_id = :userId', { userId: 'user-1' })
+      expect(qb['andWhere']).toHaveBeenCalledWith(expect.stringContaining('IN (:...ids)'), { ids: ['id-1', 'id-2'] })
+      expect(qb['andWhere']).toHaveBeenCalledWith('read_at IS NULL')
       expect(pubSubService.publish).toHaveBeenCalledWith(ON_CHANGE_NOTIFICATIONS, { userId: 'user-1' })
     })
   })
@@ -193,18 +531,20 @@ describe('NotificationService', () => {
 
   describe('delete', () => {
     it('devrait supprimer les notifications et notifier si des lignes ont été affectées', async () => {
-      repository.delete.mockResolvedValue({ affected: 2 } as never)
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      qb['execute'].mockResolvedValue({ affected: 2 })
 
-      const result = await service.delete('user-1', ['id-1', 'id-2'])
-
-      expect(repository.delete).toHaveBeenCalledWith(['id-1', 'id-2'])
-      expect(result).toBe(2)
+      await expect(service.delete('user-1', ['n1'])).resolves.toBe(2)
+      expect(qb['from']).toHaveBeenCalledWith(NotificationEntity)
+      expect(qb['where']).toHaveBeenCalledWith('user_id = :userId', { userId: 'user-1' })
       expect(pubSubService.publish).toHaveBeenCalled()
     })
 
     it('ne devrait pas notifier si aucune ligne affectée', async () => {
-      repository.delete.mockResolvedValue({ affected: 0 } as never)
-
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      qb['execute'].mockResolvedValue({ affected: 0 })
       const result = await service.delete('user-1', ['id-1'])
 
       expect(result).toBe(0)
@@ -274,13 +614,32 @@ describe('NotificationService', () => {
   })
 
   describe('unreadCount', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-21T12:00:00Z'))
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
     it("devrait compter les notifications non lues de l'utilisateur", async () => {
-      repository.count.mockResolvedValue(4)
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      qb['getCount'].mockResolvedValue(4)
 
-      const result = await service.unreadCount('user-1')
-
-      expect(repository.count).toHaveBeenCalledWith({ where: { userId: 'user-1', readAt: expect.anything() } })
-      expect(result).toBe(4)
+      await expect(service.unreadCount('user-1')).resolves.toBe(4)
+      expect(qb['andWhere']).toHaveBeenCalledWith('notification.read_at IS NULL')
+      expect(qb['andWhere']).toHaveBeenCalledWith('notification.created_at > :maxAge', {
+        maxAge: new Date('2025-10-21T12:00:00Z'),
+      })
+    })
+    it('devrait exclure les types utilitaires', async () => {
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      await service.unreadCount('user-1')
+      expect(qb['andWhere']).toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', {
+        hidden: ['MODERATION-ACTIVITY-CHANGES', 'SESSION-STATE-CHANGES', 'EXERCISE-CHANGES'],
+      })
     })
   })
 
@@ -289,6 +648,51 @@ describe('NotificationService', () => {
       const notification = { data: { type: 'FOO' } } as unknown as NotificationEntity
 
       await expect(service.withExtraData(notification)).resolves.toBeUndefined()
+    })
+  })
+
+  describe('deleteOldNotifications', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-21T12:00:00Z'))
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it("devrait supprimer les notifications de plus d'un an", async () => {
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+
+      await service.deleteOldNotifications()
+
+      expect(qb['from']).toHaveBeenCalledWith(NotificationEntity)
+      expect(qb['where']).toHaveBeenCalledWith('created_at < :maxAge', {
+        maxAge: new Date('2025-10-21T12:00:00Z'),
+      })
+      expect(qb['execute']).toHaveBeenCalledTimes(1)
+    })
+
+    it('devrait journaliser le nombre de notifications supprimées', async () => {
+      const logSpy = jest.spyOn(service['logger'], 'log').mockImplementation()
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      qb['execute'].mockResolvedValue({ affected: 7 })
+
+      await service.deleteOldNotifications()
+
+      expect(logSpy).toHaveBeenCalledWith('Done deleting 7 notifications that were created at least 12 months ago')
+    })
+
+    it("devrait journaliser 0 si rien n'est supprimé", async () => {
+      const logSpy = jest.spyOn(service['logger'], 'log').mockImplementation()
+      const qb = mockQueryBuilder()
+      repository.createQueryBuilder.mockReturnValue(qb)
+      qb['execute'].mockResolvedValue({ affected: undefined })
+
+      await service.deleteOldNotifications()
+
+      expect(logSpy).toHaveBeenCalledWith('Done deleting 0 notifications that were created at least 12 months ago')
     })
   })
 })
