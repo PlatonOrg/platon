@@ -70,6 +70,13 @@ export class NotificationListComponent implements OnChanges {
   protected items: Item[] = [] // utility notifications have been removed
   private cache = new Map<string, Item>() // Doesn't store utility notifications
 
+  private sameNotification(notication: Notification, otherNotification: Notification): boolean {
+    return (
+      notication.updatedAt.getTime() === otherNotification.updatedAt.getTime() &&
+      notication.readAt?.getTime() === otherNotification.readAt?.getTime()
+    )
+  }
+
   ngOnChanges(): void {
     const next = new Map<string, Item>()
     this.items = this.notifications
@@ -79,7 +86,10 @@ export class NotificationListComponent implements OnChanges {
       .map((notification) => {
         const previous = this.cache.get(notification.id)
         // Check if the item exists and the notification didn't change
-        const item = previous && previous.notification === notification ? previous : this.createItem(notification)
+        const item =
+          previous && this.sameNotification(previous.notification, notification)
+            ? previous
+            : this.createItem(notification)
         next.set(notification.id, item)
         return item
       })

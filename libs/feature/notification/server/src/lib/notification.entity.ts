@@ -6,7 +6,6 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 @Index('Notifications_user_id_group_id_created_at_idx', ['userId', 'groupId', 'createdAt'])
 @Index('Notifications_user_id_created_at_idx', ['userId', 'createdAt'])
 export class NotificationEntity extends BaseEntity {
-  @Index('Notifications_user_id_idx')
   @Column({ name: 'user_id' })
   userId!: string
 
