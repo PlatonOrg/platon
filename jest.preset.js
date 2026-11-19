@@ -2,6 +2,9 @@ const nxPreset = require('@nx/jest/preset').default
 
 module.exports = {
   ...nxPreset,
+  // Jest recycle un worker dès qu'il dépasse cette mémoire après un fichier de test : sans ça, chaque worker
+  // garde en mémoire tout ce que ses fichiers de test ont importé et grossit jusqu'à la fin du run.
+  workerIdleMemoryLimit: '1GB',
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|echarts|zrender|@angular|ng-zorro-antd|@nestjs)'],
   // Sans collectCoverageFrom, Jest n'instrumente que les fichiers importés par un test qui s'exécute :
   // un fichier jamais testé n'apparaît pas du tout dans le rapport au lieu de compter comme 0%.

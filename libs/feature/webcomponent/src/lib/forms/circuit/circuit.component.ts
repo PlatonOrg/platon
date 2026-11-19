@@ -12,7 +12,7 @@ import { deepEqual } from '@cisstech/nge/utils'
 import { BaseModule } from '../../shared/components/base/base.module'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { CircuitComponentDefinition, CircuitState } from './circuit'
+import { CircuitComponentDefinition, type CircuitState } from './circuit'
 import {
   Drawing,
   DrawnElement,

@@ -64,6 +64,30 @@ jobs:
 
       - run: yarn affected:lint --parallel --base=${{ env.NX_BASE }}
 
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn-setup
+
+      - name: 'NX: SHAs for affected'
+        uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: ${{ github.base_ref || github.ref_name }}
+
+      - name: Generate Graphql Types
+        shell: bash
+        run: ./bin/graphql/generate.sh
+
+      # Les tests Jest transpilent sans vérifier les types (isolatedModules) : c'est ici qu'on vérifie les .spec.ts
+      - run: yarn affected:typecheck --parallel --base=${{ env.NX_BASE }}
+
   test:
     name: Test
     runs-on: ubuntu-latest

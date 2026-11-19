@@ -12,6 +12,7 @@
         "lintFilePatterns": ["libs/feature/cas/common/**/*.ts"]
       }
     },
+    "typecheck": {},
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],

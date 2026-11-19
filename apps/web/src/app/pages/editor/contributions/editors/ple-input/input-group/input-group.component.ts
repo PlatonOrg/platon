@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, booleanAttribute, forwardRef } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
-import { PleInput } from '@platon/feature/compiler'
-import { PleInputMode } from '../ple-input'
+import type { PleInput } from '@platon/feature/compiler'
+import type { PleInputMode } from '../ple-input'
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop'
 
 import { MatIconModule } from '@angular/material/icon'
