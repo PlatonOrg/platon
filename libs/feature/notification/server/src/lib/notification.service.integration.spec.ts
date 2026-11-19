@@ -140,6 +140,20 @@ describe('NotificationService (integration)', () => {
       const [paged] = await service.ofUser(user.id, { offset: 1, limit: 1 })
       expect(paged.map((n) => n.id)).toEqual([n1.id])
     })
+
+    it('devrait exclure EXERCISE-CHANGES avec excludeHidden: true mais le garder par défaut', async () => {
+      const user = await seedUser()
+      const visible = await send(user.id, closed('act-1'))
+      const technical = await send(user.id, exerciseChanges('act-1'))
+
+      const [drawerItems, drawerCount] = await service.ofUser(user.id, { excludeHidden: true })
+      expect(drawerItems.map((n) => n.id)).toEqual([visible.id])
+      expect(drawerCount).toBe(1)
+
+      const [monitorItems, monitorCount] = await service.ofUser(user.id)
+      expect(monitorItems.map((n) => n.id).sort()).toEqual([technical.id, visible.id].sort())
+      expect(monitorCount).toBe(2)
+    })
   })
 
   describe('markAsRead / markAllAsRead / unreadCount', () => {

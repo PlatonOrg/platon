@@ -8,7 +8,6 @@ import { NotificationEntity } from './notification.entity'
 import { NOTIFICATION_EXTRA_DATA, NotificationExtraDataProvider } from './notification.provider'
 import { ON_CHANGE_NOTIFICATIONS } from './notification.pubsub'
 import { NotificationService } from './notification.service'
-import { HIDDEN_NOTIFICATION_TYPES } from '@platon/feature/notification/common'
 import {
   EXERCISE_CHANGES_NOTIFICATION,
   ExerciseChangesNotification,
@@ -33,6 +32,7 @@ import {
   SESSION_STATE_CHANGES_NOTIFICATION,
   SessionStateChangesNotification,
 } from '@platon/feature/course/common'
+import { HIDDEN_NOTIFICATION_TYPES } from '@platon/feature/notification/common'
 
 describe('NotificationService', () => {
   let service: NotificationService
@@ -466,6 +466,16 @@ describe('NotificationService', () => {
       await service.ofUser('user-1')
       expect(qb.andWhere).not.toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', expect.anything())
     })
+
+    it('devrait exclure les types cachés quand excludeHidden est activé', async () => {
+      qb.getManyAndCount.mockResolvedValue([[], 0])
+
+      await service.ofUser('user-1', { excludeHidden: true })
+      expect(qb.andWhere).toHaveBeenCalledTimes(3)
+      expect(qb.andWhere).toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', {
+        hidden: HIDDEN_NOTIFICATION_TYPES,
+      })
+    })
   })
 
   function mockQueryBuilder() {
@@ -628,7 +638,7 @@ describe('NotificationService', () => {
       repository.createQueryBuilder.mockReturnValue(qb)
       await service.unreadCount('user-1')
       expect(qb['andWhere']).toHaveBeenCalledWith('notification.type NOT IN (:...hidden)', {
-        hidden: Object.values(HIDDEN_NOTIFICATION_TYPES),
+        hidden: ['MODERATION-ACTIVITY-CHANGES', 'SESSION-STATE-CHANGES', 'EXERCISE-CHANGES'],
       })
     })
   })
