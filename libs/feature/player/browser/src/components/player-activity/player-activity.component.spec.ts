@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
-import { of, throwError } from 'rxjs'
+import { Subject, of, throwError } from 'rxjs'
 
 import { DialogService } from '@platon/core/browser'
 import { NotificationService } from '@platon/feature/notification/browser'
@@ -165,6 +165,28 @@ describe('PlayerActivityComponent', () => {
         expect(playerService.terminate).toHaveBeenCalledWith('session-id')
       })
 
+      it('ne termine pas une seconde fois une page déjà terminée', () => {
+        component.player = startedPlayer({ terminated: true })
+
+        component['onModerationActivityChanges'](startedPlayer({ terminated: true }))
+
+        expect(playerService.terminate).not.toHaveBeenCalled()
+      })
+
+      it('partage la requête de fin en cours avec la notification qu’elle déclenche', async () => {
+        component.player = startedPlayer({ terminated: false })
+        const response = new Subject<{ activity: ActivityPlayer }>()
+        playerService.terminate.mockReturnValue(response)
+
+        const ownTermination = component['terminate']()
+        component['onModerationActivityChanges'](startedPlayer({ terminated: true }))
+        response.next({ activity: startedPlayer({ terminated: true }) })
+        response.complete()
+        await ownTermination
+
+        expect(playerService.terminate).toHaveBeenCalledTimes(1)
+      })
+
       it('recharge l’activité et reprend si ce navigateur obtient la reprise', async () => {
         const reloaded = startedPlayer({ resumeGranted: true })
         playerService.playActivity.mockReturnValue(of({ activity: reloaded }))
@@ -192,6 +214,86 @@ describe('PlayerActivityComponent', () => {
 
         await component['resumeIfGranted']()
 
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(component.player.navigation.terminated).toBe(true)
+      })
+
+      it("ne démarre pas si l'activité a été fermée entre-temps", async () => {
+        const reloaded = createPlayer({
+          ...startedPlayer({ resumeGranted: true }),
+          state: 'closed',
+        })
+        playerService.playActivity.mockReturnValue(of({ activity: reloaded }))
+
+        await component['resumeIfGranted']()
+
+        expect(component['state']).toBe('closed')
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(playerService.terminate).not.toHaveBeenCalled()
+      })
+
+      it("affiche le compte à rebours si l'activité a été reportée entre-temps", async () => {
+        const serverTime = new Date()
+        const reloaded = createPlayer({
+          ...startedPlayer({ resumeGranted: true }),
+          state: 'planned',
+          serverTime,
+          openAt: new Date(serverTime.getTime() + 60 * 60 * 1000),
+        })
+        playerService.playActivity.mockReturnValue(of({ activity: reloaded }))
+
+        await component['resumeIfGranted']()
+
+        expect(component['state']).toBe('planned')
+        expect(component['countdown']).toBeGreaterThan(Date.now() + 59 * 60 * 1000)
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(playerService.terminate).not.toHaveBeenCalled()
+      })
+
+      it('termine au lieu de démarrer si le temps est écoulé entre-temps', async () => {
+        const reloaded = createPlayer({
+          ...startedPlayer({ resumeGranted: true }),
+          closeAt: new Date(Date.now() - 60 * 1000),
+        })
+        playerService.playActivity.mockReturnValue(of({ activity: reloaded }))
+
+        await component['resumeIfGranted']()
+
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(playerService.terminate).toHaveBeenCalledWith('session-id')
+      })
+
+      it("oublie la raison de l'ancienne fin automatique une fois la reprise obtenue", async () => {
+        component['terminatedAfterLeavePage'] = true
+        component['terminatedAfterLoseFocus'] = true
+        const reloaded = createPlayer({
+          ...startedPlayer({ resumeGranted: true }),
+          closeAt: new Date(Date.now() - 60 * 1000),
+        })
+        playerService.playActivity.mockReturnValue(of({ activity: reloaded }))
+
+        await component['resumeIfGranted']()
+
+        // Ended by its time limit: the end screen must not blame leaving the page any more.
+        expect(component['terminatedAfterLeavePage']).toBe(false)
+        expect(component['terminatedAfterLoseFocus']).toBe(false)
+      })
+
+      it('garde la raison de la fin automatique quand la reprise est prise ailleurs', async () => {
+        component['terminatedAfterLoseFocus'] = true
+        playerService.playActivity.mockReturnValue(of({ activity: startedPlayer() }))
+
+        await component['resumeIfGranted']()
+
+        expect(component['terminatedAfterLoseFocus']).toBe(true)
+      })
+
+      it("garde l'écran de fin sans recharger quand le player n'a pas d'activité", async () => {
+        component.player = { ...component.player, activityId: null }
+
+        await component['resumeIfGranted']()
+
+        expect(playerService.playActivity).not.toHaveBeenCalled()
         expect(startSpy).not.toHaveBeenCalled()
         expect(component.player.navigation.terminated).toBe(true)
       })

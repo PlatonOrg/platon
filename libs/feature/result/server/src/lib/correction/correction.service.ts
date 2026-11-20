@@ -315,7 +315,9 @@ export class CorrectionService {
     if (terminated) {
       if (grade && activityExerciseSessions.length) {
         activitySession.grade = grade / activityExerciseSessions.length
-        await this.sessionRepository.save(activitySession)
+        // Only the grade: saving the whole parent loaded above would overwrite any change made to the
+        // session since (variables, resume permission granted by a teacher...).
+        await this.sessionRepository.update(activitySession.id, { grade: activitySession.grade })
       }
 
       if (exerciseSession.activity && exerciseSession.userId) {

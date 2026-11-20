@@ -229,7 +229,7 @@ describe('CorrectionService', () => {
 
       await service.upsert('session-1', { grade: 8 })
 
-      expect(sessionRepository.save).not.toHaveBeenCalled()
+      expect(sessionRepository.update).not.toHaveBeenCalledWith('parent-1', expect.anything())
       expect(eventService.emit).not.toHaveBeenCalled()
     })
 
@@ -243,11 +243,12 @@ describe('CorrectionService', () => {
       } as never)
       sessionRepository.find.mockResolvedValue([{ correction: { grade: 6 } }, { correction: { grade: 10 } }] as never)
       correctionRepository.save.mockResolvedValue({ id: 'c1', grade: 8 } as CorrectionEntity)
-      sessionRepository.save.mockImplementation(async (s) => s as SessionEntity)
 
       await service.upsert('session-1', { grade: 8 })
 
-      expect(sessionRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'parent-1', grade: 8 }))
+      // Only the grade is written, so a stale parent cannot overwrite newer session changes.
+      expect(sessionRepository.update).toHaveBeenCalledWith('parent-1', { grade: 8 })
+      expect(sessionRepository.save).not.toHaveBeenCalled()
       expect(eventService.emit).toHaveBeenCalledWith(ON_CORRECT_ACTIVITY_EVENT, {
         userId: 'user-1',
         activity: { id: 'activity-1' },
