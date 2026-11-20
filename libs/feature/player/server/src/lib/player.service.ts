@@ -181,7 +181,19 @@ export class PlayerService extends PlayerManager {
       await this.checkActivityDateRestrictions(activitySession.activity)
     }
     await this.updateSettingsSession(activitySession)
+    await this.consumeResumeGrant(activitySession)
     return { activity: withActivityPlayer(activitySession) }
+  }
+
+  /**
+   * Consumes the one-shot resume permission granted when a teacher reopened the session, if any.
+   *
+   * The consumption is atomic, so when several browsers load the activity at the same time only one
+   * response keeps `navigation.resumeGranted`; the player resumes only with that response.
+   */
+  private async consumeResumeGrant(activitySession: SessionEntity): Promise<void> {
+    if (!activitySession.resumeGranted) return
+    activitySession.resumeGranted = await this.sessionService.consumeResumeGrant(activitySession.id)
   }
 
   async playExercises(

@@ -221,8 +221,10 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
       }
       const { navigation } = this.player
       if (navigation.started && !navigation.terminated) {
-        if (this.player.settings?.security?.terminateOnLeavePage) {
-          // happens when the user opens the activity twice or closed the tab and comes back
+        if (this.player.settings?.security?.terminateOnLeavePage && !navigation.resumeGranted) {
+          // happens when the user opens the activity twice or closed the tab and comes back.
+          // `resumeGranted` is only set on the load that consumed the permission given by a
+          // teacher who reopened the session, so a second browser still ends up here.
           this.terminatedAfterLeavePage = true
           this.terminate().catch(console.error)
           return
@@ -261,13 +263,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
             return
           }
 
-          this.player = { ...this.player, ...activity }
-
-          if (this.player.navigation.terminated) {
-            this.terminate().catch(console.error)
-          } else {
-            this.start().catch(console.error)
-          }
+          this.onModerationActivityChanges(activity)
 
           await firstValueFrom(this.notificationService.deleteNotification(notification.id))
           this.changeDetectorRef.markForCheck()
@@ -361,6 +357,67 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     this.stopCountdown()
     this.terminate().catch(console.error)
     this.modal?.destroy()
+  }
+
+  /**
+   * Applies a session change made by a teacher (or by a code unlock) to this page.
+   *
+   * When this page shows a protected session as terminated and the change reopens it, the page may
+   * only take the session back through a teacher's one-shot resume permission (`resumeGranted`).
+   * Without it, the reopening comes from an unlock code typed in some browser: the page where it was
+   * typed resumes through `open()`, so every page, this one included while its request is still in
+   * flight, keeps its end screen instead of starting a second copy of the session.
+   */
+  private onModerationActivityChanges(activity: ActivityPlayer): void {
+    const reopensProtectedSession =
+      this.player.navigation.terminated &&
+      !activity.navigation.terminated &&
+      !!this.player.settings?.security?.terminateOnLeavePage
+
+    if (reopensProtectedSession) {
+      if (activity.navigation.resumeGranted) {
+        // The notification's `resumeGranted` only says the permission is not consumed yet:
+        // reloading the activity tells whether this browser is the one that gets it.
+        this.resumeIfGranted()
+          .catch(console.error)
+          .finally(() => this.changeDetectorRef.markForCheck())
+      }
+      return
+    }
+
+    this.player = { ...this.player, ...activity }
+    if (this.player.navigation.terminated) {
+      this.terminate().catch(console.error)
+    } else {
+      this.start().catch(console.error)
+    }
+  }
+
+  /**
+   * Resumes the session after a teacher reopened it, if this browser is the first to take it back.
+   *
+   * The activity is reloaded because loading it consumes the one-shot resume permission: only the
+   * first browser gets `resumeGranted` back. The others keep showing the session as terminated
+   * without terminating it, which would also close it for the browser that did resume it.
+   */
+  private async resumeIfGranted(): Promise<void> {
+    const { activityId } = this.player
+    try {
+      const { activity } = activityId
+        ? await firstValueFrom(this.playerService.playActivity({ activityId }))
+        : { activity: undefined }
+      if (activity?.navigation.resumeGranted && !activity.navigation.terminated) {
+        this.player = activity
+        await this.start()
+        return
+      }
+    } catch (error) {
+      console.error(error)
+    }
+    this.player = {
+      ...this.player,
+      navigation: { ...this.player.navigation, terminated: true, resumeGranted: undefined },
+    }
   }
 
   protected async terminate(): Promise<void> {

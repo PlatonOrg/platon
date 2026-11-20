@@ -65,8 +65,10 @@ export abstract class PlayerManager {
 
     activityVariables.navigation.terminated = true
     activitySession.variables = activityVariables
+    activitySession.resumeGranted = false
     await this.updateSession(activitySession.id, {
       variables: activitySession.variables,
+      resumeGranted: false,
     })
 
     if (activitySession.activity) {
@@ -139,8 +141,11 @@ export abstract class PlayerManager {
     }
     activityVariables.navigation.terminated = false
     activitySession.variables = activityVariables
+    // Lets the student's next player load resume the session despite `terminateOnLeavePage`.
+    activitySession.resumeGranted = !!activityVariables.navigation.started
     await this.updateSession(activitySession.id, {
       variables: activitySession.variables,
+      resumeGranted: activitySession.resumeGranted,
     })
 
     const result = {
@@ -169,12 +174,20 @@ export abstract class PlayerManager {
     }
 
     if (!activityVariables.navigation.terminated) {
+      // Already reopened by a teacher whose notification did not reach this page: the browser that
+      // types the code takes the session back, so the pending resume must not let another one in.
+      if (activitySession.resumeGranted) {
+        activitySession.resumeGranted = false
+        await this.updateSession(activitySession.id, { resumeGranted: false })
+      }
       return { activity: withActivityPlayer(activitySession) }
     }
     activityVariables.navigation.terminated = false
     activitySession.variables = activityVariables
+    activitySession.resumeGranted = false
     await this.updateSession(activitySession.id, {
       variables: activitySession.variables,
+      resumeGranted: false,
     })
 
     const result = {

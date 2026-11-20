@@ -30,6 +30,11 @@ export interface Session<TVariables = any> {
 
   source: PLSourceFile<TVariables>
   isBuilt: boolean
+  /**
+   * One-shot permission of a root activity session, granted when a teacher reopens it after it was
+   * started, letting the next player load resume it despite `terminateOnLeavePage`.
+   */
+  resumeGranted?: boolean
 }
 
 export type ExerciseSession = Session<ExerciseVariables>

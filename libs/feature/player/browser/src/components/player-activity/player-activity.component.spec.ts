@@ -35,13 +35,14 @@ const createPlayer = (overrides: Partial<ActivityPlayer> = {}): ActivityPlayer =
 describe('PlayerActivityComponent', () => {
   let fixture: ComponentFixture<PlayerActivityComponent>
   let component: PlayerActivityComponent
-  let playerService: { openSessionWithCode: jest.Mock; terminate: jest.Mock }
+  let playerService: { openSessionWithCode: jest.Mock; terminate: jest.Mock; playActivity: jest.Mock }
   let dialogErrorSpy: jest.SpyInstance
 
   beforeEach(async () => {
     playerService = {
       openSessionWithCode: jest.fn(),
       terminate: jest.fn().mockReturnValue(of({ activity: createPlayer() })),
+      playActivity: jest.fn(),
     }
     // DialogModule fournit DialogService via son propre @NgModule({ providers: [DialogService] }).
     // Comme PlayerActivityComponent importe DialogModule directement, cette instance est fournie
@@ -70,6 +71,131 @@ describe('PlayerActivityComponent', () => {
 
   afterEach(() => {
     dialogErrorSpy.mockRestore()
+  })
+
+  describe('reprise après réouverture par un enseignant', () => {
+    const startedPlayer = (navigation: Record<string, unknown> = {}) =>
+      createPlayer({
+        navigation: { started: true, terminated: false, exercises: [], ...navigation } as any,
+        settings: { security: { terminateOnLeavePage: true } } as any,
+      })
+
+    const initWith = (player: ActivityPlayer) => {
+      fixture = TestBed.createComponent(PlayerActivityComponent)
+      component = fixture.componentInstance
+      component.player = player
+    }
+
+    it('reprend au chargement quand la réponse porte la reprise consommée', () => {
+      initWith(startedPlayer({ resumeGranted: true }))
+      const startSpy = jest.spyOn(component as any, 'start').mockResolvedValue(undefined)
+
+      fixture.detectChanges()
+
+      expect(startSpy).toHaveBeenCalled()
+      expect(playerService.terminate).not.toHaveBeenCalled()
+    })
+
+    it('termine au chargement sans reprise (page quittée ou second navigateur)', () => {
+      initWith(startedPlayer())
+      const startSpy = jest.spyOn(component as any, 'start').mockResolvedValue(undefined)
+
+      fixture.detectChanges()
+
+      expect(startSpy).not.toHaveBeenCalled()
+      expect(playerService.terminate).toHaveBeenCalledWith('session-id')
+      expect(component['terminatedAfterLeavePage']).toBe(true)
+    })
+
+    describe('sur notification de déblocage', () => {
+      let startSpy: jest.SpyInstance
+
+      beforeEach(() => {
+        component.player = startedPlayer({ terminated: true })
+        startSpy = jest.spyOn(component as any, 'start').mockResolvedValue(undefined)
+      })
+
+      it('passe par la reprise unique quand un enseignant a rouvert la session', () => {
+        const resumeSpy = jest.spyOn(component as any, 'resumeIfGranted').mockResolvedValue(undefined)
+
+        component['onModerationActivityChanges'](startedPlayer({ resumeGranted: true }))
+
+        expect(resumeSpy).toHaveBeenCalled()
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(component.player.navigation.terminated).toBe(true)
+      })
+
+      it('garde l’écran de fin sur un déblocage par code (pas de reprise accordée)', () => {
+        const resumeSpy = jest.spyOn(component as any, 'resumeIfGranted').mockResolvedValue(undefined)
+
+        component['onModerationActivityChanges'](startedPlayer())
+
+        expect(resumeSpy).not.toHaveBeenCalled()
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(playerService.playActivity).not.toHaveBeenCalled()
+        expect(component.player.navigation.terminated).toBe(true)
+      })
+
+      it('démarre directement quand la page a déjà repris (sa propre notification de code)', () => {
+        component.player = startedPlayer({ terminated: false })
+
+        component['onModerationActivityChanges'](startedPlayer())
+
+        expect(startSpy).toHaveBeenCalled()
+      })
+
+      it('démarre directement sans protection « quitter la page »', () => {
+        component.player = createPlayer({
+          navigation: { started: true, terminated: true, exercises: [] } as any,
+          settings: { security: {} } as any,
+        })
+
+        component['onModerationActivityChanges'](
+          createPlayer({ navigation: { started: true, terminated: false, exercises: [] } as any })
+        )
+
+        expect(startSpy).toHaveBeenCalled()
+      })
+
+      it('termine la page quand la modération termine la session', () => {
+        component.player = startedPlayer({ terminated: false })
+
+        component['onModerationActivityChanges'](startedPlayer({ terminated: true }))
+
+        expect(playerService.terminate).toHaveBeenCalledWith('session-id')
+      })
+
+      it('recharge l’activité et reprend si ce navigateur obtient la reprise', async () => {
+        const reloaded = startedPlayer({ resumeGranted: true })
+        playerService.playActivity.mockReturnValue(of({ activity: reloaded }))
+
+        await component['resumeIfGranted']()
+
+        expect(playerService.playActivity).toHaveBeenCalledWith({ activityId: 'activity-id' })
+        expect(component.player).toBe(reloaded)
+        expect(startSpy).toHaveBeenCalled()
+      })
+
+      it("reste sur l'écran de fin sans terminer quand la reprise est déjà prise ailleurs", async () => {
+        playerService.playActivity.mockReturnValue(of({ activity: startedPlayer() }))
+
+        await component['resumeIfGranted']()
+
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(playerService.terminate).not.toHaveBeenCalled()
+        expect(component.player.navigation.terminated).toBe(true)
+      })
+
+      it("reste sur l'écran de fin si le rechargement échoue", async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined)
+        playerService.playActivity.mockReturnValue(throwError(() => new Error('network')))
+
+        await component['resumeIfGranted']()
+
+        expect(startSpy).not.toHaveBeenCalled()
+        expect(component.player.navigation.terminated).toBe(true)
+      })
+    })
   })
 
   describe('onCodeComplete / open', () => {

@@ -68,6 +68,9 @@ export class SessionEntity<TVariables = any> extends BaseEntity implements Sessi
 
   @Column({ name: 'is_built', default: false })
   isBuilt!: boolean
+
+  @Column({ name: 'resume_granted', default: false })
+  resumeGranted!: boolean
 }
 
 export type ExerciseSessionEntity = SessionEntity<ExerciseVariables>

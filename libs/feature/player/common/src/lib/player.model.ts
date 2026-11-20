@@ -38,6 +38,16 @@ export interface PlayerNavigation {
   terminated: boolean
   /** Extra time (in seconds) granted by a teacher to this session. */
   extraTime?: number
+  /**
+   * One-shot permission, granted when a teacher reopens an already started session, letting the next
+   * player load resume it even with `terminateOnLeavePage` enabled.
+   *
+   * Response-only: it mirrors the session's `resume_granted` column and is never stored in the
+   * variables. `/player/play/activity` consumes it atomically: only the response of the call that
+   * consumed it carries `true`, so a second browser is still terminated. Anywhere else (moderation
+   * notifications, teacher responses) it only means "not consumed yet" and must not be used to resume.
+   */
+  resumeGranted?: boolean
   current?: PlayerExercise
   exercises: PlayerExercise[]
 
