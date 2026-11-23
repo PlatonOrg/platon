@@ -59,10 +59,7 @@ export class CasService {
         this.logger.warn(`CAS ${name} answered neither a success nor a failure`)
         return { outcome: 'failed' }
       }
-      const lmsUser = await this.LtiService.findLmsUserByUsername(
-        username.get(),
-        await this.findLmsIds(cas.id)
-      )
+      const lmsUser = await this.LtiService.findLmsUserByUsername(username.get(), await this.findLmsIds(cas.id))
       if (lmsUser.isEmpty()) return { outcome: 'no-account' }
       const user = await this.userService.findById(lmsUser.get().userId)
       if (user.isEmpty()) return { outcome: 'no-account' }

@@ -11,12 +11,13 @@ import { CorrectionService } from './correction.service'
  */
 const SCHEMA = [
   `CREATE TABLE "ActivityCorrectorView" (id uuid, activity_id uuid, activity_name text, course_id uuid, course_name text)`,
-  `CREATE TABLE "Sessions" (id uuid PRIMARY KEY, parent_id uuid, activity_id uuid, user_id uuid, variables jsonb, correction_id uuid, source jsonb, terminated_at timestamptz, grade float DEFAULT -1)`,
+  `CREATE TABLE "Sessions" (id uuid PRIMARY KEY, parent_id uuid, activity_id uuid, user_id uuid, variables jsonb, correction_id uuid, source jsonb, terminated_at timestamptz, started_at timestamptz, grade float DEFAULT -1)`,
   `CREATE TABLE "Corrections" (id uuid PRIMARY KEY, author_id uuid DEFAULT '00000000-0000-0000-0000-00000000000c', grade float DEFAULT 50, created_at timestamptz DEFAULT now(), updated_at timestamptz)`,
-  `CREATE TABLE "Answers" (session_id uuid, variables jsonb)`,
+  `CREATE TABLE "Answers" (session_id uuid, variables jsonb, id uuid DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now())`,
   `CREATE TABLE "Resources" (id uuid PRIMARY KEY, name text)`,
   `CREATE TABLE "Activities" (id uuid PRIMARY KEY, course_id uuid, source jsonb)`,
   `CREATE TABLE "Courses" (id uuid PRIMARY KEY, name text)`,
+  `CREATE TABLE "CourseMembers" (course_id uuid, user_id uuid, archived boolean DEFAULT false)`,
   `CREATE TABLE "CorrectionLabels" (session_id uuid, label_id uuid)`,
   `CREATE TABLE "Labels" (id uuid PRIMARY KEY, name text, color text, description text)`,
   `CREATE TABLE "StudentSubmissions" (session_id uuid)`,
@@ -85,6 +86,7 @@ describe('CorrectionService.listSummary (integration)', () => {
     ])
     await dataSource.query(`INSERT INTO "Resources" VALUES ($1, 'Exercice')`, [EXERCISE])
     await dataSource.query(`INSERT INTO "Courses" VALUES ($1, 'AP1')`, [COURSE])
+    await dataSource.query(`INSERT INTO "CourseMembers" (course_id, user_id) VALUES ($1, $2)`, [COURSE, CORRECTOR])
     await dataSource.query(`INSERT INTO "Activities" VALUES ($1, $2, $3)`, [ACTIVITY, COURSE, { variables: {} }])
     for (const { id, userId, terminated, terminatedAt } of COPIES) {
       await dataSource.query(
@@ -127,7 +129,7 @@ describe('CorrectionService.listSummary (integration)', () => {
 
   beforeEach(async () => {
     await dataSource.query(
-      'TRUNCATE "ActivityCorrectorView", "Sessions", "Corrections", "Answers", "Resources", "Activities", "Courses"'
+      'TRUNCATE "ActivityCorrectorView", "Sessions", "Corrections", "Answers", "Resources", "Activities", "Courses", "CourseMembers"'
     )
     await seed()
   })

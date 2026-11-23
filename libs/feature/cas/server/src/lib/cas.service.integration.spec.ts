@@ -26,7 +26,7 @@ describe('CasService (integration)', () => {
     casRepo = dataSource.getRepository(CasEntity)
     lmsRepo = dataSource.getRepository(LmsEntity)
 
-    service = new CasService(casRepo, fakeLtiService)
+    service = new CasService(casRepo, fakeLtiService, {} as never, {} as never, {} as never)
   }, 60_000)
 
   afterAll(async () => {
