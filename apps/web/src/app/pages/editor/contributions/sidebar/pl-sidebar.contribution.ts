@@ -3,7 +3,7 @@ import {
   CONTRIBUTION,
   EditorService,
   IContribution,
-  PreviewTypes,
+  type PreviewTypes,
   SidebarContainer,
   ViewContainerService,
 } from '@cisstech/nge-ide/core'
@@ -33,7 +33,7 @@ export class Contribution implements IContribution {
               editorService
                 .open(monaco.Uri.parse('docs://embed'), {
                   preview: {
-                    type: PreviewTypes.URL,
+                    type: 'URL' as PreviewTypes,
                     data: 'docs/main/programing/ide',
                   },
                   title: 'Documentation',
@@ -47,7 +47,7 @@ export class Contribution implements IContribution {
               editorService
                 .open(monaco.Uri.parse('docs://embed'), {
                   preview: {
-                    type: PreviewTypes.URL,
+                    type: 'URL' as PreviewTypes,
                     data: 'docs/components',
                   },
                   title: 'Documentation',
@@ -61,7 +61,7 @@ export class Contribution implements IContribution {
               editorService
                 .open(monaco.Uri.parse('docs://embed'), {
                   preview: {
-                    type: PreviewTypes.URL,
+                    type: 'URL' as PreviewTypes,
                     data: 'docs/main/programing/exercise/langage',
                   },
                   title: 'Documentation',

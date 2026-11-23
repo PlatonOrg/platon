@@ -14,7 +14,7 @@ import {
 } from '@angular/core'
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { DialogService, NzTableColumn, UserAvatarComponent } from '@platon/core/browser'
-import { CourseMember, CourseMemberFilters } from '@platon/feature/course/common'
+import { CourseMember, type CourseMemberFilters } from '@platon/feature/course/common'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'

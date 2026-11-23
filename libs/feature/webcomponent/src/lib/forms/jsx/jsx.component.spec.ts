@@ -1,3 +1,4 @@
+/// <reference types="jsxgraph" />
 import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ResourceLoaderService } from '@cisstech/nge/services'
@@ -62,7 +63,7 @@ describe('JsxComponent', () => {
   })
 
   const state = () => fixture.componentInstance.state
-  const board = () => Object.values(JXG.boards).at(-1) as JXG.Board
+  const board = () => Object.values(JXG.boards as Record<string, JXG.Board>).at(-1) as JXG.Board
   const point = (name: string) => board().objectsList.find((o) => JXG.isPoint(o) && o.name === name) as JXG.Point
   const position = (name: string) => [point(name).X(), point(name).Y()]
 
@@ -81,7 +82,7 @@ describe('JsxComponent', () => {
     await setup({ points: { M: { x: 1, y: -1 } } })
 
     expect(position('M')).toEqual([1, -1])
-    expect(state().points.M).toEqual({ x: 1, y: -1 })
+    expect(state().points['M']).toEqual({ x: 1, y: -1 })
     expect(state().isFilled).toBe(false)
   })
 
@@ -90,7 +91,7 @@ describe('JsxComponent', () => {
 
     expect(position('A')).toEqual([2, 3])
     expect(position('I')).toEqual([0.5, 2])
-    expect(state().points.A).toEqual({ x: 2, y: 3 })
+    expect(state().points['A']).toEqual({ x: 2, y: 3 })
   })
 
   it('place les points aux positions du nouveau script quand le script change', async () => {
@@ -99,7 +100,7 @@ describe('JsxComponent', () => {
     await fixture.whenStable()
 
     expect(position('M')).toEqual([3, -2])
-    expect(state().points.M).toEqual({ x: 3, y: -2 })
+    expect(state().points['M']).toEqual({ x: 3, y: -2 })
   })
 
   it('suit les déplacements de l’apprenant', async () => {
@@ -107,7 +108,7 @@ describe('JsxComponent', () => {
     point('M').setPosition(JXG.COORDS_BY_USER, [2, 2])
     board().update()
 
-    expect(state().points.M).toEqual({ x: 2, y: 2 })
+    expect(state().points['M']).toEqual({ x: 2, y: 2 })
     expect(state().isFilled).toBe(true)
   })
 })

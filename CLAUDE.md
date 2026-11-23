@@ -22,7 +22,7 @@ that breaks a rule is debt to fix when touched, never a pattern to copy.
 Shell setup first, in the same command: `source ~/.nvm/nvm.sh && nvm use`, and `env -u
 NX_WORKSPACE_ROOT_PATH NX_DAEMON=false NX_TUI=false` in front of nx (see `transverse/environment.md`).
 
-- `yarn nx run-many -t lint,test -p <touched projects>`
+- `yarn nx run-many -t lint,test,typecheck -p <touched projects>`: Jest transpiles without checking types, `typecheck` checks the `.spec.ts`
 - `yarn lint:design` after a change in the new interface, the design system or the docs it covers
 - `yarn format:check` on the touched files (`npx prettier --check <files>`)
 - `yarn nx run web:build:production` after a template or input change: `tsc` does not check templates

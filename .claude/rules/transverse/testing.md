@@ -7,7 +7,9 @@ paths:
 
 # Tests
 
-- Jest everywhere; a spec sits next to what it tests. The new interface and the design system ship
+- Jest everywhere; a spec sits next to what it tests. Jest transpiles without checking types
+  (`isolatedModules`): `yarn nx run <project>:typecheck` type-checks the specs, and CI runs it on the
+  affected projects. A type used in a decorated signature is imported with `import type`. The new interface and the design system ship
   their specs with the change, and every library component also has its stories.
 - Test names are in English, like the code. Older server specs are in French (`devrait ...`): a file
   keeps one language, and a spec written or rewritten is in English.

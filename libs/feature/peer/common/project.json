@@ -9,6 +9,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
     },
+    "typecheck": {},
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],

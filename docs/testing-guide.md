@@ -51,6 +51,7 @@ nx run <project>:test               # unit
 nx run <project>:test:integration   # integration
 nx run <project>:test:e2e           # end to end
 nx run <project>:test:all           # the three
+nx run <project>:typecheck          # the types of the specs, which Jest does not check
 
 yarn affected:test:integration --base=origin/main   # every project the branch touches
 yarn affected:test:e2e --base=origin/main

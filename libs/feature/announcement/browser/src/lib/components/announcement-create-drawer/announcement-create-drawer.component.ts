@@ -36,7 +36,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
 
 import { DialogModule, DialogService } from '@platon/core/browser'
 import { emptyEditorJsData, UiEditorJsModule } from '@platon/shared/ui'
-import { Announcement, EditorOutputData, UpdateAnnouncementInput } from '@platon/feature/announcement/common'
+import { type Announcement, EditorOutputData, UpdateAnnouncementInput } from '@platon/feature/announcement/common'
 import { UserRoles } from '@platon/core/common'
 
 import { firstValueFrom } from 'rxjs'

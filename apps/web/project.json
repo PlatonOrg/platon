@@ -267,6 +267,7 @@
     "lint": {
       "executor": "@nx/eslint:lint"
     },
+    "typecheck": {},
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
