@@ -1,8 +1,59 @@
 ---
 title: Tableau de bord enseignant
-description: Présentation du tableau de bord enseignant sur PLaTon, offrant un accès centralisé aux outils de création de cours, de gestion des ressources pédagogiques et de suivi des progrès des apprenants.
+description: Le tableau de bord d'un enseignant PLaTon - création rapide d'exercices à partir de modèles, menu de création, indicateurs personnels et accès à l'espace de travail, aux cours, aux corrections et aux tests d'entrée.
 ---
+
+import { Callout } from 'nextra/components'
 
 # Tableau de bord enseignant
 
-Cette page est en cours de construction.
+Les enseignants (et les administrateurs) disposent du même tableau de bord que les apprenants, enrichi d'outils de
+création.
+
+![Interface](../../../public/screens/dashboard/interface.png)
+
+## Choisir un modèle d'exercice
+
+En haut du tableau de bord, la section **Choisir un modèle d'exercice** propose les modèles (templates) disponibles.
+Un clic sur un modèle crée immédiatement un nouvel exercice et ouvre le [builder](/main/resources/builder), qui
+permet de le personnaliser sans écrire de code.
+
+## Indicateurs personnels
+
+Sous les modèles, les mêmes indicateurs que pour les apprenants résument **vos propres** réponses aux exercices (taux
+de réussite, note moyenne, temps estimé…) : voir [Tableau de bord apprenant](/main/dashboard/student). Les résultats
+de vos étudiants se consultent dans chaque cours, avec le [suivi](/main/courses/monitoring) et les
+[statistiques](/main/courses/statistics) des activités.
+
+## Le bouton « + » : créer une ressource
+
+Le bouton **+** de la barre du haut ouvre un menu de création :
+
+| Entrée                 | Effet                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Créer un cours**     | Ouvre la [création d'un cours](/main/courses/create).                                                   |
+| **Créer un cercle**    | Crée un [cercle](/main/resources/circles) (regroupement de ressources).                                 |
+| **Créer une activité** | Crée une [activité](/main/resources/activities) dans l'espace de travail.                               |
+| **Créer un exercice**  | Crée un [exercice](/main/resources/exercises) dans l'espace de travail.                                 |
+
+À côté, le bouton de **tutoriels** lance des visites guidées de l'interface.
+
+## Le menu latéral
+
+| Entrée                 | Contenu                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Tableau de bord**    | Cette page.                                                                                                               |
+| **Annonces**           | Messages publiés par les administrateurs.                                                                                |
+| **Cours**              | Vos cours : voir [Gestion des cours](/main/courses/overview).                                                             |
+| **Corrections**        | Copies à corriger qui vous sont attribuées : voir [Corriger les copies](/main/courses/corrections).                       |
+| **Espace de travail**  | Recherche et gestion des ressources (cercles, activités, exercices) : voir [Gestion des ressources](/main/resources/types). |
+| **Tests d'entrée**     | Tests passés par des candidats sans compte PLaTon : voir [Tests d'entrée](/main/courses/tests).                             |
+| **Documentation**      | Ouvre cette documentation.                                                                                               |
+
+Le menu de l'avatar donne accès à **Mon compte**, à **Mon cercle** (votre [cercle personnel](/main/resources/circles))
+et à la déconnexion.
+
+<Callout type="info">
+  Les entrées **Espace de travail**, **Tests d'entrée** et **Documentation** ne sont visibles que des enseignants et
+  des administrateurs.
+</Callout>

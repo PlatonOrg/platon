@@ -9,7 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core'
-import { ActivityExercise, PleInput, Variables } from '@platon/feature/compiler'
+import { type ActivityExercise, PleInput, Variables } from '@platon/feature/compiler'
 import { ResourceService } from '@platon/feature/resource/browser'
 import { ExerciseResourceMeta, Resource } from '@platon/feature/resource/common'
 import { NzModalService } from 'ng-zorro-antd/modal'

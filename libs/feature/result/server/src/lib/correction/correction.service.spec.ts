@@ -64,9 +64,7 @@ describe('CorrectionService', () => {
       await service.list('corrector-1')
 
       const [queryText] = sessionRepository.query.mock.calls[0]
-      expect(queryText).toContain(
-        `(answer.id IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`
-      )
+      expect(queryText).toContain(`(exercise_session.variables->'.meta'->>'error')::boolean IS TRUE`)
     })
 
     it('should expose the latest answer in viewer mode without requiring an answer', async () => {
@@ -149,14 +147,14 @@ describe('CorrectionService', () => {
       await service.listSummary('corrector-1', CorrectionStatus.pending)
 
       const [queryText] = sessionRepository.query.mock.calls[0]
-      expect(queryText).toContain('HAVING COUNT(exercise_session.id) > COUNT(correction.id)')
+      expect(queryText).toContain('HAVING SUM(copy.total) > SUM(copy.corrected)')
     })
 
     it('devrait ajouter une clause HAVING pour ne garder que les activités entièrement corrigées', async () => {
       await service.listSummary('corrector-1', CorrectionStatus.available)
 
       const [queryText] = sessionRepository.query.mock.calls[0]
-      expect(queryText).toContain('HAVING COUNT(exercise_session.id) = COUNT(correction.id)')
+      expect(queryText).toContain('HAVING SUM(copy.total) = SUM(copy.corrected)')
     })
 
     it('ne devrait ajouter aucune clause HAVING sans statut', async () => {
@@ -229,7 +227,7 @@ describe('CorrectionService', () => {
 
       await service.upsert('session-1', { grade: 8 })
 
-      expect(sessionRepository.save).not.toHaveBeenCalled()
+      expect(sessionRepository.update).not.toHaveBeenCalledWith('parent-1', expect.anything())
       expect(eventService.emit).not.toHaveBeenCalled()
     })
 
@@ -243,11 +241,12 @@ describe('CorrectionService', () => {
       } as never)
       sessionRepository.find.mockResolvedValue([{ correction: { grade: 6 } }, { correction: { grade: 10 } }] as never)
       correctionRepository.save.mockResolvedValue({ id: 'c1', grade: 8 } as CorrectionEntity)
-      sessionRepository.save.mockImplementation(async (s) => s as SessionEntity)
 
       await service.upsert('session-1', { grade: 8 })
 
-      expect(sessionRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'parent-1', grade: 8 }))
+      // Only the grade is written, so a stale parent cannot overwrite newer session changes.
+      expect(sessionRepository.update).toHaveBeenCalledWith('parent-1', { grade: 8 })
+      expect(sessionRepository.save).not.toHaveBeenCalled()
       expect(eventService.emit).toHaveBeenCalledWith(ON_CORRECT_ACTIVITY_EVENT, {
         userId: 'user-1',
         activity: { id: 'activity-1' },

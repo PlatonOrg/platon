@@ -74,15 +74,14 @@ describe('AuthController', () => {
   })
 
   describe('refresh', () => {
-    it("devrait émettre un nouveau token d'accès à partir du refresh token de la requête", async () => {
+    it('devrait renouveler la session du jeton de rafraîchissement de la requête', async () => {
       service.refresh.mockResolvedValue(authToken)
       const user = createUserEntity({ id: 'user-1', username: 'testuser' })
       const req = { user, headers: { authorization: 'Bearer refresh-token' } } as unknown as IRequest
 
       const result = await controller.refresh(req)
 
-      expect(service.refresh).toHaveBeenCalledWith('user-1', 'testuser', 'refresh-token')
-      expect(service.authenticate).not.toHaveBeenCalled()
+      expect(service.refresh).toHaveBeenCalledWith(user, 'refresh-token')
       expect(result.resource).toEqual(authToken)
     })
   })

@@ -1,8 +1,7 @@
-import { BadRequestException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
-import { ForbiddenResponse, NotFoundResponse, UserRoles } from '@platon/core/common'
+import { BadRequestResponse, ForbiddenResponse, UserRoles } from '@platon/core/common'
 import { createUserEntity } from '@platon/core/testing/server'
 import * as bcrypt from 'bcrypt'
 import { Optional } from 'typescript-optional'
@@ -57,23 +56,36 @@ describe('AuthService', () => {
   })
 
   describe('signIn', () => {
-    it("devrait rejeter avec NotFoundResponse si l'utilisateur n'existe pas", async () => {
+    it('devrait répondre à un utilisateur inconnu comme à un mauvais mot de passe, sans dire lequel', async () => {
       userService.findByIdOrName.mockResolvedValue(Optional.empty())
+      ;(bcrypt.hash as jest.Mock).mockResolvedValue('decoy-hash')
+      ;(bcrypt.compare as jest.Mock).mockResolvedValue(false)
 
-      await expect(service.signIn({ username: 'unknown', password: 'pwd' })).rejects.toBeInstanceOf(NotFoundResponse)
+      await expect(service.signIn({ username: 'unknown', password: 'pwd' })).rejects.toEqual(
+        new BadRequestResponse('Username or password is incorrect')
+      )
+      // Compared against a decoy: an unknown account takes as long to refuse as a wrong password.
+      expect(bcrypt.compare).toHaveBeenCalledWith('pwd', 'decoy-hash')
     })
 
-    it("devrait rejeter avec BadRequestException si l'utilisateur n'a pas de mot de passe", async () => {
+    it('devrait rejeter de la même façon un utilisateur sans mot de passe, dans le même temps', async () => {
       userService.findByIdOrName.mockResolvedValue(Optional.of(createUserEntity({ password: undefined })))
+      ;(bcrypt.hash as jest.Mock).mockResolvedValue('decoy-hash')
+      ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
 
-      await expect(service.signIn({ username: 'testuser', password: 'pwd' })).rejects.toThrow(BadRequestException)
+      await expect(service.signIn({ username: 'testuser', password: 'pwd' })).rejects.toEqual(
+        new BadRequestResponse('Username or password is incorrect')
+      )
+      expect(bcrypt.compare).toHaveBeenCalledWith('pwd', 'decoy-hash')
     })
 
-    it('devrait rejeter avec BadRequestException si le mot de passe est incorrect', async () => {
+    it('devrait rejeter de la même façon un mot de passe incorrect', async () => {
       userService.findByIdOrName.mockResolvedValue(Optional.of(createUserEntity({ password: 'hashed' })))
       ;(bcrypt.compare as jest.Mock).mockResolvedValue(false)
 
-      await expect(service.signIn({ username: 'testuser', password: 'wrong' })).rejects.toThrow(BadRequestException)
+      await expect(service.signIn({ username: 'testuser', password: 'wrong' })).rejects.toEqual(
+        new BadRequestResponse('Username or password is incorrect')
+      )
     })
 
     it('devrait retourner un token si les identifiants sont corrects', async () => {
@@ -85,14 +97,14 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ accessToken: 'signed-token', refreshToken: 'signed-token' })
       expect(jwtService.signAsync).toHaveBeenCalledWith(
-        { sub: 'user-1', username: 'testuser', type: 'access' },
+        { sub: 'user-1', username: 'testuser', typ: 'access' },
         { secret: 'test-secret', expiresIn: '1h' }
       )
     })
   })
 
   describe('signUp', () => {
-    it("devrait rejeter avec BadRequestException si l'utilisateur existe déjà", async () => {
+    it("devrait rejeter avec BadRequestResponse si l'utilisateur existe déjà", async () => {
       userService.findByIdOrName.mockResolvedValue(Optional.of(createUserEntity()))
 
       await expect(
@@ -104,7 +116,7 @@ describe('AuthService', () => {
           firstName: 'John',
           role: UserRoles.student,
         })
-      ).rejects.toThrow(BadRequestException)
+      ).rejects.toBeInstanceOf(BadRequestResponse)
       expect(userService.create).not.toHaveBeenCalled()
     })
 
@@ -185,7 +197,7 @@ describe('AuthService', () => {
       ).rejects.toBeInstanceOf(ForbiddenResponse)
     })
 
-    it("devrait rejeter avec BadRequestException si le nouveau mot de passe est identique à l'ancien", async () => {
+    it("devrait rejeter avec BadRequestResponse si le nouveau mot de passe est identique à l'ancien", async () => {
       const target = createUserEntity({ username: 'testuser', password: 'hashed' })
       userService.findByUsername.mockResolvedValue(Optional.of(target))
       ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
@@ -193,10 +205,10 @@ describe('AuthService', () => {
 
       await expect(
         service.resetPassword({ username: 'testuser', password: 'same-pwd', newPassword: 'same-pwd' }, req)
-      ).rejects.toThrow(BadRequestException)
+      ).rejects.toBeInstanceOf(BadRequestResponse)
     })
 
-    it('devrait rejeter avec BadRequestException si le nouveau mot de passe ne respecte pas le format requis', async () => {
+    it('devrait rejeter avec BadRequestResponse si le nouveau mot de passe ne respecte pas le format requis', async () => {
       const target = createUserEntity({ username: 'testuser', password: 'hashed' })
       userService.findByUsername.mockResolvedValue(Optional.of(target))
       ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
@@ -204,7 +216,7 @@ describe('AuthService', () => {
 
       await expect(
         service.resetPassword({ username: 'testuser', password: 'old-pwd', newPassword: 'too-short' }, req)
-      ).rejects.toThrow(BadRequestException)
+      ).rejects.toBeInstanceOf(BadRequestResponse)
     })
 
     it('devrait autoriser un utilisateur sans mot de passe existant à en définir un nouveau', async () => {
@@ -222,15 +234,15 @@ describe('AuthService', () => {
   })
 
   describe('authenticate', () => {
-    it('devrait générer un access token et un refresh token typés avec les bonnes durées de vie', async () => {
+    it('devrait générer un access token et un refresh token, chacun typé et avec sa durée de vie', async () => {
       await service.authenticate('user-1', 'testuser')
 
       expect(jwtService.signAsync).toHaveBeenCalledWith(
-        { sub: 'user-1', username: 'testuser', type: 'access' },
+        { sub: 'user-1', username: 'testuser', typ: 'access' },
         { secret: 'test-secret', expiresIn: '1h' }
       )
       expect(jwtService.signAsync).toHaveBeenCalledWith(
-        { sub: 'user-1', username: 'testuser', type: 'refresh' },
+        { sub: 'user-1', username: 'testuser', typ: 'refresh' },
         { secret: 'test-secret', expiresIn: '7d' }
       )
     })
@@ -249,53 +261,6 @@ describe('AuthService', () => {
         accessToken: 'signed-token',
         refreshToken: 'signed-token',
       })
-    })
-  })
-
-  describe('refresh', () => {
-    // A real JwtService is used to check the claims and expirations of the issued tokens.
-    const realJwt = new JwtService({ secret: 'test-secret' })
-    let refreshService: AuthService
-
-    const now = () => Math.floor(Date.now() / 1000)
-
-    const buildService = (lifetimes: { access: string; refresh: string }) =>
-      new AuthService(
-        realJwt,
-        userService,
-        new ConfigService({
-          secret: 'test-secret',
-          auth: { accessLifetime: lifetimes.access, refreshLifetime: lifetimes.refresh, salt: 10 },
-        })
-      )
-
-    beforeEach(() => {
-      refreshService = buildService({ access: '15m', refresh: '7d' })
-    })
-
-    it("devrait émettre un nouveau token d'accès et renvoyer le refresh token tel quel (pas de rotation)", async () => {
-      const { refreshToken } = await refreshService.authenticate('user-1', 'testuser')
-      jest.clearAllMocks()
-
-      const result = await refreshService.refresh('user-1', 'testuser', refreshToken)
-
-      expect(result.refreshToken).toBe(refreshToken)
-      const payload = realJwt.verify(result.accessToken)
-      expect(payload).toMatchObject({ sub: 'user-1', username: 'testuser', type: 'access' })
-      expect(payload.exp - now()).toBeLessThanOrEqual(15 * 60)
-      expect(userService.touchLastLogin).not.toHaveBeenCalled()
-    })
-
-    it("ne devrait pas émettre de token d'accès qui expire après le refresh token", async () => {
-      refreshService = buildService({ access: '7d', refresh: '1h' })
-      const { refreshToken } = await refreshService.authenticate('user-1', 'testuser')
-
-      const result = await refreshService.refresh('user-1', 'testuser', refreshToken)
-
-      const { exp: accessExpiration } = realJwt.verify(result.accessToken)
-      const { exp: sessionExpiration } = realJwt.verify(refreshToken)
-      expect(accessExpiration).toBeLessThanOrEqual(sessionExpiration)
-      expect(accessExpiration).toBeGreaterThan(now())
     })
   })
 

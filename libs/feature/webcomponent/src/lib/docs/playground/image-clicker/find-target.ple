@@ -48,7 +48,7 @@ grader == #!lang=js
 // quelle que soit la taille d'affichage de l'image.
 const points = cible.clickPoints || []
 if (points.length === 0) {
-  grade = -1
+  grade = -2  // Donner une note inférieure à 0 permet de ne pas compter la soumission comme une tentative.
   feedback.type = 'warning'
   feedback.content = "Cliquez sur l'image avant de valider."
 } else {

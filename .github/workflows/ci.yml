@@ -39,11 +39,10 @@ jobs:
         with:
           main-branch-name: ${{ github.base_ref || github.ref_name }}
 
-      - name: Generate Graphql Types
-        shell: bash
-        run: ./bin/graphql/generate.sh
-
       - run: yarn affected:build --parallel --base=${{ env.NX_BASE }}
+
+      - name: Build Storybook of the design system
+        run: yarn nx affected --target=build-storybook --base=${{ env.NX_BASE }}
 
   lint:
     name: Lint
@@ -81,12 +80,14 @@ jobs:
         with:
           main-branch-name: ${{ github.base_ref || github.ref_name }}
 
-      - name: Generate Graphql Types
-        shell: bash
-        run: ./bin/graphql/generate.sh
-
       # Les tests Jest transpilent sans vérifier les types (isolatedModules) : c'est ici qu'on vérifie les .spec.ts
       - run: yarn affected:typecheck --parallel --base=${{ env.NX_BASE }}
+
+      - name: Design lints of the new interface
+        run: yarn lint:design
+
+      - name: Coherence of the design spec
+        run: yarn design:check
 
   test:
     name: Test

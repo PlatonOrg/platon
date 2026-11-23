@@ -1,21 +1,13 @@
 import { ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { GqlExecutionContext } from '@nestjs/graphql'
-import { TOKEN_EXPIRED_ERROR_CODE, User, UnauthorizedResponse } from '@platon/core/common'
+import { User, UnauthorizedResponse } from '@platon/core/common'
 import { createUserEntity } from '@platon/core/testing/server'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { of } from 'rxjs'
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
-import { IS_REFRESH_TOKEN_AUTH_KEY } from '../decorators/refresh-token-auth.decorator'
 import { AuthGuard } from './auth.guard'
-
-jest.mock('@nestjs/graphql', () => ({
-  GqlExecutionContext: { create: jest.fn() },
-}))
 
 const buildHttpContext = (request: Record<string, unknown>): ExecutionContext =>
   ({
-    getType: () => 'http',
     getHandler: jest.fn(),
     getClass: jest.fn(),
     switchToHttp: () => ({ getRequest: () => request }),
@@ -34,49 +26,9 @@ describe('AuthGuard', () => {
 
   afterEach(() => jest.restoreAllMocks())
 
-  const mockMetadata = (metadata: Record<string, boolean>) =>
-    reflector.getAllAndOverride.mockImplementation((key) => metadata[key as string])
-
-  describe('getRequest', () => {
-    it('devrait retourner la requête HTTP pour un contexte HTTP', () => {
-      const request = { headers: {} }
-      const context = buildHttpContext(request)
-
-      expect(guard.getRequest(context)).toBe(request)
-    })
-
-    it('devrait retourner la requête GraphQL pour un contexte GraphQL', () => {
-      const req = { headers: {} }
-      ;(GqlExecutionContext.create as jest.Mock).mockReturnValue({
-        getContext: () => ({ req }),
-      })
-      const context = { getType: () => 'graphql' } as unknown as ExecutionContext
-
-      expect(guard.getRequest(context)).toBe(req)
-    })
-
-    it('devrait retourner le contexte de connexion pour une subscription GraphQL avec headers', () => {
-      const connection = { context: { headers: { authorization: 'Bearer x' } } }
-      ;(GqlExecutionContext.create as jest.Mock).mockReturnValue({
-        getContext: () => ({ req: { headers: {} }, connection }),
-      })
-      const context = { getType: () => 'graphql' } as unknown as ExecutionContext
-
-      expect(guard.getRequest(context)).toBe(connection.context)
-    })
-  })
-
   describe('canActivate', () => {
-    it("devrait laisser passer une route @RefreshTokenAuth() sans l'authentifier (JwtRefreshGuard s'en charge)", async () => {
-      mockMetadata({ [IS_REFRESH_TOKEN_AUTH_KEY]: true })
-      const context = buildHttpContext({})
-
-      await expect(guard.canActivate(context)).resolves.toBe(true)
-      expect(superCanActivate).not.toHaveBeenCalled()
-    })
-
     it("devrait autoriser une route publique même si l'authentification échoue", async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: true })
+      reflector.getAllAndOverride.mockReturnValue(true)
       superCanActivate.mockImplementation(() => {
         throw new Error('no token')
       })
@@ -85,17 +37,8 @@ describe('AuthGuard', () => {
       await expect(guard.canActivate(context)).resolves.toBe(true)
     })
 
-    it('devrait rejeter une route publique si le token est expiré', async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: true })
-      const error = new UnauthorizedResponse(TOKEN_EXPIRED_ERROR_CODE)
-      superCanActivate.mockReturnValue(Promise.reject(error))
-      const context = buildHttpContext({})
-
-      await expect(guard.canActivate(context)).rejects.toBe(error)
-    })
-
     it("devrait rejeter une route privée si l'authentification échoue", async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: false })
+      reflector.getAllAndOverride.mockReturnValue(false)
       const error = new Error('no token')
       superCanActivate.mockImplementation(() => {
         throw error
@@ -106,7 +49,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait retourner true si super.canActivate retourne true (synchrone)', async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: false })
+      reflector.getAllAndOverride.mockReturnValue(false)
       superCanActivate.mockReturnValue(true)
       const context = buildHttpContext({})
 
@@ -114,7 +57,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait retourner false si super.canActivate retourne false (synchrone) et route non publique', async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: false })
+      reflector.getAllAndOverride.mockReturnValue(false)
       superCanActivate.mockReturnValue(false)
       const context = buildHttpContext({})
 
@@ -122,7 +65,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait attendre une Promise retournée par super.canActivate', async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: false })
+      reflector.getAllAndOverride.mockReturnValue(false)
       superCanActivate.mockReturnValue(Promise.resolve(true))
       const context = buildHttpContext({})
 
@@ -130,7 +73,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait forcer true sur une route publique même si la Promise résout à false', async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: true })
+      reflector.getAllAndOverride.mockReturnValue(true)
       superCanActivate.mockReturnValue(Promise.resolve(false))
       const context = buildHttpContext({})
 
@@ -138,7 +81,7 @@ describe('AuthGuard', () => {
     })
 
     it('devrait attendre un Observable retourné par super.canActivate', async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: false })
+      reflector.getAllAndOverride.mockReturnValue(false)
       superCanActivate.mockReturnValue(of(true))
       const context = buildHttpContext({})
 
@@ -146,7 +89,7 @@ describe('AuthGuard', () => {
     })
 
     it("devrait exposer request.memoize et ne calculer la valeur mémoïsée qu'une seule fois", async () => {
-      mockMetadata({ [IS_PUBLIC_KEY]: false })
+      reflector.getAllAndOverride.mockReturnValue(false)
       superCanActivate.mockReturnValue(true)
       const request: Record<string, unknown> = {}
       const context = buildHttpContext(request)

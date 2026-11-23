@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request } from 'express'
 import { UserEntity } from '../users/user.entity'
 
 /**
@@ -32,19 +32,10 @@ export interface IRequest extends Request {
   [key: string]: unknown
 }
 
-export interface AuthExecutionContext {
-  req: IRequest
-  res: Response
-
-  payload?: unknown
-
-  /**
-   * Connection is only available for subscriptions and websockets.
-   * This is defined in the graphql module config.
-   */
-  connection?: {
-    context?: {
-      headers?: Record<string, string>
-    }
-  }
+/** The claims of a session token; older tokens have no `typ`. */
+export interface TokenPayload {
+  sub: string
+  username: string
+  typ?: 'access' | 'refresh'
+  exp?: number
 }

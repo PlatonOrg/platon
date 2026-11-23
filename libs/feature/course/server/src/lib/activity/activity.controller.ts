@@ -129,7 +129,7 @@ export class ActivityController {
     @Body() input: string[]
   ): Promise<NoContentResponse> {
     await this.permissionsService.ensureCourseWritePermission(courseId, req)
-    await this.activityService.updateActivitesOrder(input)
+    await this.activityService.updateActivitesOrder(courseId, input)
     return new NoContentResponse()
   }
 

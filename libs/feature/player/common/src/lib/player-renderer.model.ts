@@ -207,7 +207,7 @@ export const withActivityPlayer = (session: ActivitySession): ActivityPlayer => 
     introduction: variables.introduction,
     conclusion: variables.conclusion,
     settings: variables.settings,
-    navigation: variables.navigation,
+    navigation: session.resumeGranted ? { ...variables.navigation, resumeGranted: true } : variables.navigation,
   }
 }
 

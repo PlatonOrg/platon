@@ -65,6 +65,9 @@ export class ActivityEntity extends BaseEntity implements Activity {
   @Column({ default: false })
   hidden!: boolean
 
+  @Column({ default: false })
+  graded!: boolean
+
   // VIRTUAL COLUMNS
   // TODO: use expanders instead of virtual columns
 

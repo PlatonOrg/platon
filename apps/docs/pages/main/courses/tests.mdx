@@ -1,0 +1,107 @@
+---
+title: Tests d'entrée
+description: Organiser un test d'entrée PLaTon pour des candidats sans compte - création du test, ajout des candidats (formulaire ou CSV), mail d'invitation et termes personnalisables, paramètres de l'épreuve, suivi et résultats.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Tests d'entrée
+
+Un **test d'entrée** permet de faire passer une activité à des **candidats extérieurs**, qui n'ont pas de compte
+PLaTon : candidats à une formation, tests de positionnement… Chaque candidat reçoit par e-mail un lien personnel qui le
+connecte directement au test.
+
+Les tests d'entrée se trouvent dans le menu latéral **Tests d'entrée**, réservé aux enseignants et aux
+administrateurs.
+
+## Créer un test
+
+<Steps>
+
+### Lancer la création
+
+Dans **Tests d'entrée**, cliquez sur **Créer un test**, puis renseignez le **Nom** et la **Description** du test.
+
+### Ajouter l'activité
+
+Dans l'onglet **Vue d'ensemble** du test, cliquez sur **Ajouter une activité** et choisissez l'activité à faire passer,
+comme pour un cours (voir [Ajouter des activités](/main/courses/activities)). Un test contient **une seule** activité.
+
+### Régler l'épreuve
+
+Le bouton **Paramètres** ouvre les **Paramètres du test d'entrée** : dates d'ouverture et de fermeture, **Durée
+maximale** (0 = illimitée), nombre maximal de tentatives par exercice et options de **Sécurité** (blocage du
+copier-coller, fin de l'épreuve en cas de changement d'onglet ou de perte de focus).
+
+</Steps>
+
+## Ajouter les candidats
+
+L'onglet **Candidats** liste les candidats du test.
+
+- **Ajouter un candidat** : saisissez son **Prénom**, son **Nom** et son **Email** (obligatoires).
+- **Ajouter des candidats avec un CSV** : importez un fichier, puis associez ses colonnes aux champs **Prénom**,
+  **Nom** et **Email** avant de cliquer sur **Valider et importer les candidats**.
+
+Un compte candidat est créé pour chaque personne ; il ne sert qu'à passer le test.
+
+<Callout type="info">
+  Les enseignants qui doivent suivre ou corriger le test s'ajoutent depuis la vue d'ensemble du test.
+</Callout>
+
+## Personnaliser les textes
+
+Deux textes sont modifiables depuis la carte **Configuration** de la vue d'ensemble :
+
+| Bouton                     | Contenu                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Termes et conditions**   | Texte que le candidat doit lire et accepter avant de commencer le test.                                       |
+| **Mail d'invitation**      | Objet et contenu de l'e-mail envoyé aux candidats ; c'est aussi depuis cette fenêtre qu'on envoie les invitations. |
+
+Ces textes peuvent contenir des **variables**, écrites entre doubles accolades et remplacées pour chaque candidat
+(l'éditeur affiche la liste et permet de copier chaque variable) :
+
+| Variable                                           | Valeur                                                        |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| `{{ testName }}`                                   | Nom du test                                                   |
+| `{{ testLink }}`                                   | Lien d'accès personnel du candidat *(mail uniquement)*        |
+| `{{ startDate }}`, `{{ startTime }}`               | Date et heure d'ouverture du test                             |
+| `{{ endDate }}`, `{{ endTime }}`                   | Date et heure de fermeture du test                            |
+| `{{ duration }}`                                   | Durée du test, en toutes lettres (ex. « 2 heures 30 minutes ») |
+| `{{ firstName }}`, `{{ lastName }}`, `{{ email }}` | Identité du candidat                                          |
+| `{{ currentFirstName }}`, `{{ currentLastName }}`, `{{ currentEmail }}` | Identité de l'enseignant qui envoie le mail *(mail uniquement)* |
+| `{{ date }}`, `{{ time }}`                         | Date et heure actuelles                                       |
+
+<Callout type="warning">
+  Le mail ne peut être envoyé que si le test contient une activité : ses dates et sa durée alimentent les variables.
+  Vérifiez aussi que l'envoi d'e-mails est configuré sur votre plateforme.
+</Callout>
+
+## Envoyer les invitations
+
+Dans la fenêtre **Mail d'invitation**, **Envoyer** adresse l'invitation à un candidat et **Envoyer à tous les
+candidats** l'adresse à l'ensemble des candidats du test. Chaque e-mail contient le lien personnel du candidat
+(`{{ testLink }}`).
+
+## Le parcours du candidat
+
+1. Le candidat ouvre le lien reçu par e-mail : PLaTon vérifie l'invitation et le connecte automatiquement.
+2. Il lit les **Termes et conditions**, coche « J'ai lu et compris les termes et conditions » et clique sur
+   **Accepter**.
+3. Il passe l'activité aux dates prévues, avec les règles de l'épreuve.
+
+<Callout type="info">
+  Le lien d'invitation est personnel : toute personne qui l'ouvre est connectée avec le compte du candidat. Recommandez
+  aux candidats de ne pas le transmettre.
+</Callout>
+
+## Suivre et exploiter les résultats
+
+- Le bouton de suivi de la vue d'ensemble ouvre le **suivi des candidats en cours de passage**, identique au
+  [suivi en direct](/main/courses/monitoring) d'une activité de cours (déblocage, temps supplémentaire, code de
+  déblocage).
+- L'onglet **Résultats** présente les indicateurs de l'activité (note moyenne, durée moyenne, taux de réussite…) et
+  permet de **télécharger les notes au format CSV** (voir [Téléchargement des notes](/main/courses/grades-csv)) ;
+  seuls les candidats y figurent.
+- Si des enseignants ont été désignés correcteurs, les copies se corrigent comme pour un cours (voir
+  [Corriger les copies](/main/courses/corrections)).

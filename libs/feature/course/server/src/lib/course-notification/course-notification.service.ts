@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import {
   ActivityClosedNotification,
   ActivityMemberCreationNotification,
@@ -6,8 +6,11 @@ import {
   CorrectionPendingNotification,
   CorrectorCreatedNotification,
   CorrectorRemovedNotification,
+  COURSE_SIGNAL_NOTIFICATIONS,
   CourseMemberCreationNotification,
+  EXERCISE_CHANGES_NOTIFICATION,
   ExerciseChangesNotification,
+  MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
   ModerationActivityChangesNotification,
   SessionStateChangesNotification,
 } from '@platon/feature/course/common'
@@ -19,7 +22,7 @@ import { CourseMemberView } from '../course-member/course-member.view'
 import { PlayActivityOuput, PlayerExercise } from '@platon/feature/player/common'
 import { CourseMonitorPresenceService } from '../course-monitor-presence/course-monitor-presence.service'
 @Injectable()
-export class CourseNotificationService {
+export class CourseNotificationService implements OnModuleInit {
   private readonly logger = new Logger(CourseNotificationService.name)
 
   constructor(
@@ -27,6 +30,10 @@ export class CourseNotificationService {
     private readonly notificationService: NotificationService,
     private readonly monitorPresenceService: CourseMonitorPresenceService
   ) {}
+
+  onModuleInit(): void {
+    this.notificationService.declareSignals(...COURSE_SIGNAL_NOTIFICATIONS)
+  }
 
   async notifyCourseMemberBeingCreated(members: CourseMemberView[]) {
     try {
@@ -235,7 +242,7 @@ export class CourseNotificationService {
         )
 
         await this.notificationService.sendToAllUsers<ExerciseChangesNotification>(activeMonitors, {
-          type: 'EXERCISE-CHANGES',
+          type: EXERCISE_CHANGES_NOTIFICATION,
           userId: userId,
           activityId,
           changes: {
@@ -276,7 +283,7 @@ export class CourseNotificationService {
   async notifyModerationActivityChanges(userId: string, activity: PlayActivityOuput): Promise<void> {
     try {
       await this.notificationService.sendToUser<ModerationActivityChangesNotification>(userId, {
-        type: 'MODERATION-ACTIVITY-CHANGES',
+        type: MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
         activity: activity.activity,
       })
     } catch (error) {

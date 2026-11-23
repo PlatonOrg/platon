@@ -335,14 +335,39 @@ WHERE session.id = $1;
 
   @OnEvent(ON_REOPEN_ACTIVITY_EVENT)
   async onReopenActivity({ activityId }: OnReopenActivityEventPayload): Promise<void> {
+    // Sessions that were started then terminated also get a one-shot resume permission, so the
+    // student's next player load is not terminated again by `terminateOnLeavePage`.
     await this.repository
       .createQueryBuilder()
       .update(SessionEntity)
       .set({
+        // Both expressions read the row as it was before the update.
+        resumeGranted: () => `CASE
+          WHEN variables->'navigation'->>'started' = 'true' AND variables->'navigation'->>'terminated' = 'true'
+          THEN true
+          ELSE resume_granted
+        END`,
         variables: () => `jsonb_set(variables, '{navigation,terminated}', 'false', false)`,
+        terminatedAt: null,
       })
       .where('activity_id = :activityId and parent_id is null', { activityId })
       .execute()
+  }
+
+  /**
+   * Atomically consumes the one-shot resume permission of an activity session.
+   * Concurrent callers are serialized by the row lock, so only one of them gets `true`.
+   * @param sessionId Id of the root activity session.
+   * @returns `true` if the permission was present and has been removed by this call.
+   */
+  async consumeResumeGrant(sessionId: string): Promise<boolean> {
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(SessionEntity)
+      .set({ resumeGranted: false })
+      .where('id = :sessionId and parent_id is null and resume_granted', { sessionId })
+      .execute()
+    return (result.affected ?? 0) > 0
   }
 
   @OnEvent(ON_CLOSE_ACTIVITY_EVENT)
@@ -352,6 +377,8 @@ WHERE session.id = $1;
       .update(SessionEntity)
       .set({
         variables: () => `jsonb_set(variables, '{navigation,terminated}', 'true', false)`,
+        resumeGranted: false,
+        terminatedAt: () => 'COALESCE(terminated_at, now())',
       })
       .where('activity_id = :activityId and parent_id is null', { activityId })
       .execute()

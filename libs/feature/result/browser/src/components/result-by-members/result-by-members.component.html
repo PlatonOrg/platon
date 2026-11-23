@@ -1,4 +1,4 @@
-@if(groups) {
+@if(groups()) {
 <span cdkScrollable>
   Groupe(s) :
   <nz-select
@@ -11,7 +11,7 @@
     (nzOpenChange)="open.set($event)"
     (ngModelChange)="selectedGroup.set($event)"
   >
-    @for (group of groups; track group.id) {
+    @for (group of groups(); track group.id) {
     <nz-option [nzValue]="group.id" [nzLabel]="group.name" />
     }
   </nz-select>

@@ -9,7 +9,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { ResourceVersionComponent, ResourceVersioningComponent } from '@platon/feature/resource/browser'
-import { FileVersion, FileVersions, Resource } from '@platon/feature/resource/common'
+import { FileVersion, type FileVersions, type Resource } from '@platon/feature/resource/common'
 
 @Component({
   selector: 'app-resource-browse-header',

@@ -31,6 +31,108 @@ export interface Activity {
   readonly hidden?: boolean
   readonly activitySettings?: ActivitySettings
   readonly code: string
+
+  /** Whether the activity counts in the grades. False until a teacher says otherwise. */
+  readonly graded?: boolean
+}
+
+/** Which activities `GET /activities/mine` and `GET /activities/taught` give: those of one course, else of every course. */
+export interface CourseActivitiesFilter {
+  /** The identifier of the course. */
+  readonly course?: string
+}
+
+/**
+ * An activity a person can play, as their home lists it (`GET /activities/mine`), and the page of its
+ * course with `course`.
+ */
+export interface PlayableActivity {
+  readonly id: string
+  readonly courseId: string
+  readonly courseName: string
+  /** Where it sits in its course: its section, and its place in that section. */
+  readonly sectionId: string
+  readonly order: number
+  readonly title: string
+
+  /**
+   * Their dates: those of the restriction period that concerns them (none when it has no date
+   * range), or the activity's own when it has no restriction.
+   */
+  readonly openAt?: Date | null
+  readonly closeAt?: Date | null
+  readonly state: ActivityOpenStates
+
+  readonly isChallenge: boolean
+  readonly graded: boolean
+  /** In seconds, absent when unlimited. */
+  readonly duration?: number
+  /** Absent when unlimited. */
+  readonly attempts?: number
+
+  readonly exerciseCount: number
+  /** Exercises of their copy that they answered. */
+  readonly exercisesDone: number
+  readonly started: boolean
+  readonly terminated: boolean
+
+  /** For the activities of one course: their copy, handed in, waits for its correctors. */
+  readonly correcting?: boolean
+  /**
+   * For the activities of one course: the grade on 100 of their copy, once handed in and corrected,
+   * when the activity shows it.
+   */
+  readonly grade?: number
+}
+
+/**
+ * An activity of a course a person teaches, as their home lists it (`GET /activities/taught`), and the
+ * page of its course with `course`.
+ */
+export interface TaughtActivity {
+  readonly id: string
+  readonly courseId: string
+  readonly courseName: string
+  /** Where it sits in its course: its section, and its place in that section. */
+  readonly sectionId: string
+  readonly order: number
+  readonly title: string
+  /** The resource it was made from, absent once deleted. */
+  readonly resourceId?: string
+
+  /** The activity's own dates, whatever its restrictions. */
+  readonly openAt?: Date | null
+  readonly closeAt?: Date | null
+  readonly state: ActivityOpenStates
+  /** Whether restriction periods give its students their own dates, in place of the dates above. */
+  readonly restricted: boolean
+
+  readonly isChallenge: boolean
+  readonly graded: boolean
+  /** In seconds, absent when unlimited. */
+  readonly duration?: number
+  /** Absent when unlimited. */
+  readonly attempts?: number
+  /** The exercises of its source. */
+  readonly exerciseCount: number
+
+  /**
+   * Students of the course who can play it, by its members, its groups and its restriction periods;
+   * a person who also teaches the course is not one of them.
+   */
+  readonly studentCount: number
+  /** Those of them who started it. */
+  readonly startedCount: number
+  /** Average on 100 of their started copies, absent when none started. */
+  readonly averageGrade?: number
+
+  /**
+   * For the activities of one course: the copies handed in with an exercise still to correct, for an
+   * activity that has correctors.
+   */
+  readonly pendingCopies?: number
+  /** For the activities of one course: the names of its correctors. */
+  readonly correctors?: string[]
 }
 
 export interface ActivityFilters {
@@ -57,6 +159,7 @@ export interface UpdateActivity {
   readonly ignoreRestrictions?: boolean
   readonly activitySettings?: ActivitySettings
   readonly code?: string
+  readonly graded?: boolean
 }
 
 export interface ReloadActivity {

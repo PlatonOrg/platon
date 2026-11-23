@@ -11,6 +11,7 @@ import {
   PLSourceFile,
   Variables,
   extractExercisesFromActivityVariables,
+  normalizeExerciseGroups,
 } from '@platon/feature/compiler'
 import { Activity } from '@platon/feature/course/common'
 import {
@@ -181,7 +182,19 @@ export class PlayerService extends PlayerManager {
       await this.checkActivityDateRestrictions(activitySession.activity)
     }
     await this.updateSettingsSession(activitySession)
+    await this.consumeResumeGrant(activitySession)
     return { activity: withActivityPlayer(activitySession) }
+  }
+
+  /**
+   * Consumes the one-shot resume permission granted when a teacher reopened the session, if any.
+   *
+   * The consumption is atomic, so when several browsers load the activity at the same time only one
+   * response keeps `navigation.resumeGranted`; the player resumes only with that response.
+   */
+  private async consumeResumeGrant(activitySession: SessionEntity): Promise<void> {
+    if (!activitySession.resumeGranted) return
+    activitySession.resumeGranted = await this.sessionService.consumeResumeGrant(activitySession.id)
   }
 
   async playExercises(
@@ -215,12 +228,15 @@ export class PlayerService extends PlayerManager {
         } else {
           if (activitySession?.variables.settings?.navigation?.mode === 'peer') {
             // If the activity is in peer mode, we need to always rebuild the compare exercise
-            const exercice = Object.entries(activitySession.variables.exerciseGroups).reduce((acc, [_, value]) => {
-              if (value.name === 'comparaison') {
-                acc = value.exercises.at(0)!.id
-              }
-              return acc
-            }, '')
+            const exercice = Object.entries(normalizeExerciseGroups(activitySession.variables.exerciseGroups)).reduce(
+              (acc, [_, value]) => {
+                if (value.name === 'comparaison') {
+                  acc = value.exercises.at(0)!.id
+                }
+                return acc
+              },
+              ''
+            )
             const exerciceSessionId = activitySession.variables.navigation.exercises
               .filter((e) => e.id === exercice)
               .pop()?.sessionId
@@ -403,19 +419,20 @@ export class PlayerService extends PlayerManager {
     let trainingExercises: string[] = []
     let waitingExercise = ''
 
-    for (const group of Object.keys(activitySession.variables.exerciseGroups)) {
-      const groupName = activitySession.variables.exerciseGroups[group].name
-      if (groupName === 'exercice' && activitySession.variables.exerciseGroups[group].exercises.length > 0) {
-        exercice = activitySession.variables.exerciseGroups[group].exercises.at(0)!.id
+    const exerciseGroups = normalizeExerciseGroups(activitySession.variables.exerciseGroups)
+    for (const group of Object.keys(exerciseGroups)) {
+      const groupName = exerciseGroups[group].name
+      if (groupName === 'exercice' && exerciseGroups[group].exercises.length > 0) {
+        exercice = exerciseGroups[group].exercises.at(0)!.id
       }
-      if (groupName === 'comparaison' && activitySession.variables.exerciseGroups[group].exercises.length > 0) {
-        comparison = activitySession.variables.exerciseGroups[group].exercises.at(0)!.id
+      if (groupName === 'comparaison' && exerciseGroups[group].exercises.length > 0) {
+        comparison = exerciseGroups[group].exercises.at(0)!.id
       }
-      if (groupName === 'attente' && activitySession.variables.exerciseGroups[group].exercises.length > 0) {
-        waitingExercise = activitySession.variables.exerciseGroups[group].exercises.at(0)!.id
+      if (groupName === 'attente' && exerciseGroups[group].exercises.length > 0) {
+        waitingExercise = exerciseGroups[group].exercises.at(0)!.id
       }
-      if (groupName === 'entrainement' && activitySession.variables.exerciseGroups[group].exercises.length > 0) {
-        trainingExercises = activitySession.variables.exerciseGroups[group].exercises.map((e) => e.id)
+      if (groupName === 'entrainement' && exerciseGroups[group].exercises.length > 0) {
+        trainingExercises = exerciseGroups[group].exercises.map((e) => e.id)
       }
     }
 
@@ -833,7 +850,7 @@ export class PlayerService extends PlayerManager {
     // Launch the next
     const { envid, variables } = await this.sandboxService.buildNext(sources)
 
-    variables.exerciseGroups = sources.variables.exerciseGroups
+    variables.exerciseGroups = normalizeExerciseGroups(sources.variables.exerciseGroups)
 
     // If the activity has generated an exercise, create it and add it to the navigation
     if (variables.generatedExerciseHash) {

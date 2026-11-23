@@ -6,7 +6,7 @@ import { NzSpaceModule } from 'ng-zorro-antd/space'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 
-import { CourseSection } from '@platon/feature/course/common'
+import { type CourseSection } from '@platon/feature/course/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 
 @Component({

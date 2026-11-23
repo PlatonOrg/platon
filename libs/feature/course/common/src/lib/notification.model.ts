@@ -93,3 +93,11 @@ export interface SessionStateChangesNotification {
   /** Extra time (in seconds) granted to the user. */
   extraTime: number
 }
+/**
+ * Notifications that drive a screen (the activity monitor, the player) and that a person never
+ * reads: never shown in a list of notifications, never counted as unread.
+ */
+export const COURSE_SIGNAL_NOTIFICATIONS: readonly string[] = [
+  EXERCISE_CHANGES_NOTIFICATION,
+  MODERATION_ACTIVITY_CHANGES_NOTIFICATION,
+]

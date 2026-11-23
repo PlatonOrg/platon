@@ -18,6 +18,44 @@ Le contenu d'une zone remplie peut aussi être glissé vers une autre zone :
 
 Pour limiter quels éléments peuvent être déposés dans quelles zones, utilisez la propriété `group`. Les éléments ne peuvent être déposés que dans les zones ayant le même identifiant de groupe.
 
+### Créer un exercice avec plusieurs zones
+
+Un composant `wc-drag-drop` représente **un seul** élément : une étiquette ou une zone. Un exercice en utilise donc
+toujours plusieurs, déclarés un par un ou générés par le `builder` avec la fonction `component` :
+
+```ple
+etiquette1 = :wc-drag-drop
+etiquette1.draggable = true
+etiquette1.content = "Chat"
+
+etiquette2 = :wc-drag-drop
+etiquette2.draggable = true
+etiquette2.content = "Aigle"
+
+mammifere = :wc-drag-drop
+oiseau = :wc-drag-drop
+
+form ==
+{{ etiquette1 }} {{ etiquette2 }}
+
+Mammifère : {{ mammifere }}
+
+Oiseau : {{ oiseau }}
+==
+
+grader == #!lang=js
+grade = (mammifere.content === "Chat" && oiseau.content === "Aigle") ? 100 : 0
+==
+```
+
+Le grader lit la propriété `content` de chaque **zone de dépôt**. L'exemple interactif en bas de page génère les
+étiquettes et les zones à partir d'une liste.
+
+### Une seule réponse par zone
+
+Une zone contient **un seul** contenu à la fois : déposer une étiquette dans une zone déjà remplie remplace son
+contenu. Pour accepter plusieurs réponses dans une même catégorie, prévoyez plusieurs zones.
+
 ### Réinitialisation des zones
 
 Pour vider une zone de dépôt, deux méthodes sont possibles:

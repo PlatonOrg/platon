@@ -14,7 +14,7 @@ import {
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { NzTableColumn } from '@platon/core/browser'
-import { Lms, LmsFilters } from '@platon/feature/lti/common'
+import { Lms, type LmsFilters } from '@platon/feature/lti/common'
 
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table'
 

@@ -23,38 +23,63 @@ Pour ce faire, ouvrez le fichier `main.pla` de votre activité pour afficher un 
 
 ![Onglet paramètres d'une activité](../../../../public/screens/resources/ide/activity-settings.png)
 
-### Réglez le Temps :
+Ces paramètres sont les valeurs par défaut de l'activité. Dans un cours, ils peuvent être modifiés pour une activité
+de cours sans toucher à la ressource (voir [Paramétrer une activité](/main/courses/activities#paramétrer-une-activité)).
 
-- **Durée** : Définissez la durée totale accordée pour l'activité (hh:mm:ss). Laisser vide pour illimité.
+### Temps et aléatoire
 
-### Configurez la Navigation :
+| Paramètre                              | Effet                                                                                                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Durée**                              | Temps dont dispose l'apprenant à partir du démarrage de l'activité (hh:mm:ss). Laissez vide pour ne pas limiter la durée.                               |
+| **Exercices avec des seeds aléatoires**| Par défaut, tous les exercices partagent la même graine aléatoire ; cochez pour que chaque exercice ait sa propre graine (voir [Aléatoire et graine](/main/programing/exercise/workflow#aléatoire-et-graine-seed)). |
 
-- **Mode** : Choisissez entre les modes de navigation :
-  - **Composée** : Tous les exercices sont affichés sur une seule page.
-  - **Séquentielle** : Les exercices sont affichés un par un.
-  - **Intelligente** : Les exercices sont affichés un par un et ordonnés en fonction des réponses précédentes. Voir [Navigation Intelligente](/doc/programing/activity/next-navigation/next).
+### Navigation
 
-### Définissez les Actions :
+Le **Mode** détermine l'enchaînement des exercices :
 
-- **Tentatives** : Indiquez le nombre de tentatives autorisées (-1 pour illimité).
-- **Aides** : Cochez si vous souhaitez activer l'affichage des aides.
-- **Autre question** : Autorisez ou non la génération d'une autre question.
-- **Théories** : Activez l'affichage des théories associées aux questions.
-- **Solution** : Permettez l'accès à la solution des exercices.
+| Mode                            | Fonctionnement                                                                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Progressive** *(par défaut)*  | Les exercices sont affichés un à un ; l'apprenant passe de l'un à l'autre avec la navigation de l'activité.                                           |
+| **Composée**                    | Tous les exercices sont affichés simultanément, sur une seule page.                                                                                    |
+| **Intelligente**                | L'exercice suivant est choisi par un script `next` que vous écrivez. Voir [Navigation intelligente](/main/programing/activity/next-navigation/next).    |
+| **Comparaison par les pairs**   | Les apprenants comparent les copies de leurs camarades. Voir [Évaluation par les pairs](/main/programing/activity/peer).                                |
+| **Validation**                  | L'apprenant valide successivement des groupes d'exercices. Voir [Navigation par validation](/main/programing/activity/next-navigation/validation). L'option **Groupe Aléatoire** fait parcourir les groupes dans un ordre aléatoire. |
 
-### Ajustez l'affichage de Feedback :
+Pour le mode **Intelligente**, des réglages supplémentaires apparaissent :
 
-- **Validation** : Cochez pour fournir un feedback après chaque tentative si défini dans l'exercice.
-- **Correction** : Activez pour que les feedbacks soient affichées à la fin de l'activité si défini dans l'exercice.
+| Réglage                                          | Effet                                                                                         |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| **Sandbox**                                      | Langage du script : Python (`next.py`) ou Node (`next.js`).                                   |
+| **Passer automatiquement**                       | Passe automatiquement à l'exercice suivant après une soumission.                              |
+| **Note minimum pour passer automatiquement**     | Note nécessaire pour passer automatiquement à l'exercice suivant.                             |
+| **Navigation libre**                             | Permet à l'apprenant de revenir à un exercice précédent.                                      |
+| **Variables d'exercices**                        | Donne au script `next` un accès en lecture seule aux variables de tous les exercices.         |
 
-## Paramètres de Sécurité :
+### Actions
+
+| Paramètre          | Effet                                                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| **Tentatives**     | Nombre maximal de validations par exercice, avant la désactivation du bouton **Valider**. `0` = nombre illimité.            |
+| **Aides**          | Affiche le bouton **Aides** des exercices qui en ont.                                                                       |
+| **Autre question** | Affiche le bouton de nouvelle question (**Recharger** dans le lecteur d'exercice), qui tire une nouvelle version de l'exercice. |
+| **Théories**       | Affiche le bouton **Théories** des exercices qui en ont.                                                                    |
+| **Solution**       | Affiche le bouton **Solution** des exercices qui en ont.                                                                    |
+
+### Feedback
+
+| Paramètre       | Effet                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| **Validation**  | Affiche le feedback des exercices après chaque validation.                                |
+| **Correction**  | Affiche le feedback des exercices lorsque l'apprenant revoit l'activité, après sa fin.    |
+
+## Paramètres de sécurité
 
 La configuration d'une activité sur PLaTon comporte plusieurs options de sécurité qui contrôlent le comportement de l'activité en cas d'interactions spécifiques de l'utilisateur avec la plateforme ou l'appareil.
 Voici les détails de ces options :
 
-- **Blocage du copier/coller** :
-  Empêchez la copie et le collage de contenu dans toute la page web de l'activité.
-- **Terminer si clic en dehors** :
+- **Blocage du copier coller** :
+  Désactive le copier-coller dans l'activité, y compris les raccourcis clavier (Ctrl/Cmd + C, V, X) et le clic droit.
+- **Terminer si clique en dehors** :
   Lorsque cette option est activée, si l'utilisateur clique en dehors de la fenêtre de l'activité – par exemple,
   s'il passe à une autre application ou consulte une autre fenêtre – l'activité en cours sera automatiquement terminée.
   Cette option vise à maintenir la concentration de l'utilisateur sur l'activité et à prévenir la triche ou la distraction.
@@ -96,6 +121,11 @@ Cas d'usage :
 
 - **Actualisation de la page** : Si l'apprenant actualise la page de l'activité.
   _Exemple_ : L'apprenant rafraîchit la page pour essayer de résoudre un problème d'affichage.
+
+### Si un apprenant est arrêté par erreur
+
+Une activité terminée par une règle de sécurité peut être reprise : l'enseignant communique le **code de déblocage**
+de l'activité ou rouvre la session depuis le [suivi en direct](/main/courses/monitoring).
 
 ### Conseils pour les Apprenants
 

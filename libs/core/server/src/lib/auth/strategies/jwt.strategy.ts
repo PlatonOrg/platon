@@ -1,15 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
+import { UnauthorizedResponse } from '@platon/core/common'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { Configuration } from '../../config/configuration'
 import { UserEntity } from '../../users/user.entity'
 import { UserService } from '../../users/user.service'
-import { isTokenOfType, JwtPayload } from './jwt-payload'
+import { TokenPayload } from '../auth.types'
 
-/**
- * Authenticates requests bearing an access token. Refresh tokens are rejected.
- */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private readonly userService: UserService, configService: ConfigService<Configuration>) {
@@ -19,13 +17,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     })
   }
 
-  async validate(payload: JwtPayload): Promise<UserEntity> {
-    if (!isTokenOfType(payload, 'access')) {
-      throw new UnauthorizedException('An access token is required')
+  async validate(payload: TokenPayload): Promise<UserEntity> {
+    // An untyped token reads as an access token until it expires: older sessions go on without signing in again.
+    if (payload.typ !== undefined && payload.typ !== 'access') {
+      throw new UnauthorizedResponse('An access token is expected')
     }
-
     const user = (await this.userService.findByIdOrName(payload.sub)).orElseThrow(
-      () => new UnauthorizedException(`Failed to authentificate user: ${payload.sub}`)
+      () => new UnauthorizedResponse('The user of the token no longer exists')
     )
     await this.userService.updateLastActivity(user)
     return user

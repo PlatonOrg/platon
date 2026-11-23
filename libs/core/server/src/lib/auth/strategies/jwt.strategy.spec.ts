@@ -1,5 +1,5 @@
-import { UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { UnauthorizedResponse } from '@platon/core/common'
 import { createUserEntity } from '@platon/core/testing/server'
 import { Optional } from 'typescript-optional'
 import { JwtStrategy } from './jwt.strategy'
@@ -21,37 +21,34 @@ describe('JwtStrategy', () => {
     strategy = new JwtStrategy(userService, configService)
   })
 
-  it("devrait retourner l'utilisateur et mettre à jour sa dernière activité si le token d'accès est valide", async () => {
+  it("devrait retourner l'utilisateur et mettre à jour sa dernière activité si le token est valide", async () => {
     const user = createUserEntity({ id: 'user-1', username: 'testuser' })
     userService.findByIdOrName.mockResolvedValue(Optional.of(user))
 
-    const result = await strategy.validate({ sub: 'user-1', username: 'testuser', type: 'access' })
+    const result = await strategy.validate({ sub: 'user-1', username: 'testuser', typ: 'access' })
 
     expect(userService.findByIdOrName).toHaveBeenCalledWith('user-1')
     expect(userService.updateLastActivity).toHaveBeenCalledWith(user)
     expect(result).toBe(user)
   })
 
-  it("devrait rejeter avec UnauthorizedException si l'utilisateur du token n'existe plus", async () => {
+  it("devrait rejeter le jeton d'un utilisateur qui n'existe plus", async () => {
     userService.findByIdOrName.mockResolvedValue(Optional.empty())
 
-    await expect(strategy.validate({ sub: 'unknown', username: 'ghost', type: 'access' })).rejects.toThrow(
-      UnauthorizedException
+    await expect(strategy.validate({ sub: 'unknown', username: 'ghost', typ: 'access' })).rejects.toEqual(
+      new UnauthorizedResponse('The user of the token no longer exists')
     )
     expect(userService.updateLastActivity).not.toHaveBeenCalled()
   })
 
-  it('devrait rejeter un refresh token avec UnauthorizedException', async () => {
-    userService.findByIdOrName.mockResolvedValue(Optional.of(createUserEntity({ id: 'user-1' })))
-
-    await expect(strategy.validate({ sub: 'user-1', username: 'testuser', type: 'refresh' })).rejects.toThrow(
-      UnauthorizedException
+  it('devrait refuser un jeton de rafraîchissement', async () => {
+    await expect(strategy.validate({ sub: 'user-1', username: 'testuser', typ: 'refresh' })).rejects.toEqual(
+      new UnauthorizedResponse('An access token is expected')
     )
     expect(userService.findByIdOrName).not.toHaveBeenCalled()
-    expect(userService.updateLastActivity).not.toHaveBeenCalled()
   })
 
-  it("devrait accepter un token émis avant l'ajout du claim type (transition)", async () => {
+  it("devrait lire un jeton sans type comme un jeton d'accès, jusqu'à son expiration", async () => {
     const user = createUserEntity({ id: 'user-1', username: 'testuser' })
     userService.findByIdOrName.mockResolvedValue(Optional.of(user))
 

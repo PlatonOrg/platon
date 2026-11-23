@@ -19,7 +19,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 import { DEFAULT_SEARCH_BAR_LIMIT } from '@platon/core/common'
-import { Lms, LmsFilters } from '@platon/feature/lti/common'
+import { Lms, type LmsFilters } from '@platon/feature/lti/common'
 import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { LTIService } from '../../api/lti.service'
 

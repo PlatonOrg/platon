@@ -203,6 +203,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   private countdownInterval: NodeJS.Timeout | undefined
   private autoChoiceTimeout: NodeJS.Timeout | undefined
   private notificationSeen: Set<string> = new Set()
+  private terminating?: Promise<void>
 
   @ViewChild('modalFooter', { static: true }) modalFooter!: TemplateRef<object>
 
@@ -211,28 +212,8 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.calculateAnswerStates(this.player.navigation)
 
-    this.state = this.player.state
     this.empty = !this.player.navigation.exercises?.length
-
-    if (this.state === 'opened') {
-      if (isTimeouted(this.player) && !this.player.navigation.terminated) {
-        this.terminate().catch(console.error)
-        return
-      }
-      const { navigation } = this.player
-      if (navigation.started && !navigation.terminated) {
-        if (this.player.settings?.security?.terminateOnLeavePage) {
-          // happens when the user opens the activity twice or closed the tab and comes back
-          this.terminatedAfterLeavePage = true
-          this.terminate().catch(console.error)
-          return
-        }
-        this.start().catch(console.error)
-      }
-    } else if (this.state === 'planned') {
-      const delta = new Date(this.player.openAt as Date).getTime() - new Date(this.player.serverTime).getTime()
-      this.countdown = Date.now() + delta
-    }
+    this.enterActivityState()
 
     this.subscriptions.push(
       this.notificationService.paginate(1).subscribe(async ({ notifications }) => {
@@ -261,13 +242,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
             return
           }
 
-          this.player = { ...this.player, ...activity }
-
-          if (this.player.navigation.terminated) {
-            this.terminate().catch(console.error)
-          } else {
-            this.start().catch(console.error)
-          }
+          this.onModerationActivityChanges(activity)
 
           await firstValueFrom(this.notificationService.deleteNotification(notification.id))
           this.changeDetectorRef.markForCheck()
@@ -283,12 +258,14 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe())
     this.stopCountdown()
     this.enableCopyPasteIfNeeded()
     this.stopWatchingVisibilityChange()
   }
 
   protected async start(): Promise<void> {
+    this.clearTerminationReason()
     this.isLoading = true
     if (this.composed) {
       await this.playComposed()
@@ -363,7 +340,133 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
     this.modal?.destroy()
   }
 
-  protected async terminate(): Promise<void> {
+  /**
+   * Forgets why the session was automatically terminated before, once it is taken back (code unlock
+   * or teacher reopen), so the end screen does not show an outdated reason later.
+   */
+  private clearTerminationReason(): void {
+    this.terminatedAfterLeavePage = false
+    this.terminatedAfterLoseFocus = false
+  }
+
+  /**
+   * Shows `this.player` according to its open state: an opened activity is resumed (or terminated),
+   * a planned one counts down to its opening, which then starts it.
+   */
+  private enterActivityState(): void {
+    this.state = this.player.state
+    if (this.state === 'opened') {
+      this.resumeOpenedActivity()
+    } else if (this.state === 'planned') {
+      const delta = new Date(this.player.openAt as Date).getTime() - new Date(this.player.serverTime).getTime()
+      this.countdown = Date.now() + delta
+    }
+  }
+
+  /**
+   * Resumes an opened activity that was already started, unless its time is over or the security
+   * settings forbid coming back to it, in which case the session is terminated.
+   */
+  private resumeOpenedActivity(): void {
+    if (isTimeouted(this.player) && !this.player.navigation.terminated) {
+      this.terminate().catch(console.error)
+      return
+    }
+    const { navigation } = this.player
+    if (navigation.started && !navigation.terminated) {
+      if (this.player.settings?.security?.terminateOnLeavePage && !navigation.resumeGranted) {
+        // happens when the user opens the activity twice or closed the tab and comes back.
+        // `resumeGranted` is only set on the load that consumed the permission given by a
+        // teacher who reopened the session, so a second browser still ends up here.
+        this.terminatedAfterLeavePage = true
+        this.terminate().catch(console.error)
+        return
+      }
+      this.start().catch(console.error)
+    }
+  }
+
+  /**
+   * Applies a session change made by a teacher (or by a code unlock) to this page.
+   *
+   * When this page shows a protected session as terminated and the change reopens it, the page may
+   * only take the session back through a teacher's one-shot resume permission (`resumeGranted`).
+   * Without it, the reopening comes from an unlock code typed in some browser: the page where it was
+   * typed resumes through `open()`, so every page, this one included while its request is still in
+   * flight, keeps its end screen instead of starting a second copy of the session.
+   */
+  private onModerationActivityChanges(activity: ActivityPlayer): void {
+    const reopensProtectedSession =
+      this.player.navigation.terminated &&
+      !activity.navigation.terminated &&
+      !!this.player.settings?.security?.terminateOnLeavePage
+
+    if (reopensProtectedSession) {
+      if (activity.navigation.resumeGranted) {
+        // The notification's `resumeGranted` only says the permission is not consumed yet:
+        // reloading the activity tells whether this browser is the one that gets it.
+        this.resumeIfGranted()
+          .catch(console.error)
+          .finally(() => this.changeDetectorRef.markForCheck())
+      }
+      return
+    }
+
+    const wasTerminated = this.player.navigation.terminated
+    this.player = { ...this.player, ...activity }
+    if (this.player.navigation.terminated) {
+      // Already terminated here (e.g. the echo of this page's own termination by a teacher account):
+      // nothing left to close.
+      if (!wasTerminated) {
+        this.terminate().catch(console.error)
+      }
+    } else {
+      this.start().catch(console.error)
+    }
+  }
+
+  /**
+   * Resumes the session after a teacher reopened it, if this browser is the first to take it back.
+   *
+   * The activity is reloaded because loading it consumes the one-shot resume permission: only the
+   * first browser gets `resumeGranted` back. The others keep showing the session as terminated
+   * without terminating it, which would also close it for the browser that did resume it.
+   * Without an activity id there is nothing to reload, so the page keeps its end screen too.
+   */
+  private async resumeIfGranted(): Promise<void> {
+    const { activityId } = this.player
+    if (activityId) {
+      try {
+        const { activity } = await firstValueFrom(this.playerService.playActivity({ activityId }))
+        if (activity.navigation.resumeGranted && !activity.navigation.terminated) {
+          // The activity may have closed, been postponed or run out of time since the teacher reopened
+          // the session: it is shown exactly as on a page load.
+          this.player = activity
+          // Whatever happens next (start, closed, planned or timed out), the previous termination is over.
+          this.clearTerminationReason()
+          this.enterActivityState()
+          return
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    this.player = {
+      ...this.player,
+      navigation: { ...this.player.navigation, terminated: true, resumeGranted: undefined },
+    }
+  }
+
+  /**
+   * Terminates the session. Concurrent calls share the request in flight: a teacher account playing its
+   * own activity gets a moderation notification for its own termination before the response arrives.
+   */
+  protected terminate(): Promise<void> {
+    this.terminating ??= this.requestTermination().finally(() => (this.terminating = undefined))
+    return this.terminating
+  }
+
+  private async requestTermination(): Promise<void> {
     this.showLeaveWarning.set(false)
     this.countdownBreakpoints = []
 

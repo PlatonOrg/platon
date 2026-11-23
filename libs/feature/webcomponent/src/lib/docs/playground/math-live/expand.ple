@@ -63,7 +63,7 @@ function estReduite(latex) {
 }
 
 if (!saisie.trim()) {
-  grade = -1
+  grade = -2 // Donner une note inférieure à 0 permet de ne pas compter la soumission comme une tentative.
   feedback.type = 'warning'
   feedback.content = 'Saisissez une expression avant de valider.'
 } else if (!valide) {

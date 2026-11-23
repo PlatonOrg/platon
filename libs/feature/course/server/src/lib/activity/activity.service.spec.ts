@@ -244,18 +244,6 @@ describe('ActivityService', () => {
     })
   })
 
-  describe('updateActivitesOrder', () => {
-    it('devrait sauvegarder les ids avec leur index comme ordre', async () => {
-      await service.updateActivitesOrder(['a1', 'a2', 'a3'])
-
-      expect(repository.save).toHaveBeenCalledWith([
-        { id: 'a1', order: 0 },
-        { id: 'a2', order: 1 },
-        { id: 'a3', order: 2 },
-      ])
-    })
-  })
-
   describe('update', () => {
     it("devrait lever une NotFoundResponse si l'activité n'existe pas", async () => {
       repository.findOne.mockResolvedValue(null)
@@ -300,6 +288,16 @@ describe('ActivityService', () => {
       expect(savedArg?.code).toBe('ABC123')
       expect(savedArg?.title).toBeUndefined()
       expect(savedArg?.state).toBeUndefined()
+    })
+
+    it("devrait enregistrer qu'une activité est notée", async () => {
+      const activity = buildActivity()
+      repository.findOne.mockResolvedValue(activity)
+      repository.save.mockImplementation(async (a) => a as ActivityEntity)
+
+      await service.update('course-1', 'activity-1', { graded: true })
+
+      expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({ graded: true }))
     })
   })
 

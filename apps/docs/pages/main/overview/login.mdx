@@ -7,30 +7,56 @@ import { Callout } from 'nextra/components'
 
 # Connexion à la plateforme
 
-Conçue pour être simple et sécurisée, PLaTon offre plusieurs méthodes de connexion adaptées aux besoins variés des utilisateurs.
+PLaTon propose plusieurs façons de se connecter. La page de connexion s'affiche automatiquement lorsque vous ouvrez
+PLaTon sans être connecté.
 
-Lorsque vous accédez à PLaTon, vous êtes accueilli par une page de connexion, invitant à entrer vos identifiants.
+![Page de connexion](../../../public/screens/login/login.png)
 
-## Vous n'avez pas de compte sur PLaTon ?
+## Les modes de connexion
+
+| Mode                                 | Pour qui                                                                 | Comment                                                                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Depuis votre LMS (Moodle…)**       | Étudiants et enseignants dont l'établissement a relié PLaTon à son LMS  | Cliquez sur le lien PLaTon placé dans un cours du LMS : vous êtes connecté automatiquement et votre compte est créé lors de la première visite. |
+| **Nom d'utilisateur et mot de passe**| Utilisateurs qui ont un mot de passe PLaTon                              | Remplissez **Nom d'utilisateur** et **Mot de passe** sur la page de connexion.                                                                |
+| **CAS**                              | Établissements qui ont déclaré un serveur CAS                            | Cliquez sur le bouton CAS de votre établissement, sous le formulaire de connexion.                                                            |
+| **Lien d'accès démo**                | Personnes invitées à découvrir un cours                                  | Ouvrez le lien fourni par l'enseignant : un compte temporaire est créé (voir [Accès démo](/main/courses/demo)).                              |
+| **Lien d'invitation à un test**      | Candidats à un test d'entrée                                             | Ouvrez le lien reçu par e-mail (voir [Tests d'entrée](/main/courses/tests)).                                                                   |
+
+## Première connexion, étape par étape
 
 ### Vous êtes à l'Université Gustave Eiffel
 
-Connectez-vous sur [E-learning](https://elearning.univ-eiffel.fr/) et recherchez un lien PLaTon dans vos cours. Cliquez dessus pour être automatiquement connecté à la plateforme.
+1. Connectez-vous à [E-learning](https://elearning.univ-eiffel.fr/) avec vos identifiants de l'université.
+2. Ouvrez un cours qui contient un lien PLaTon (votre enseignant vous l'indique) et cliquez sur ce lien.
+3. PLaTon s'ouvre : votre compte est créé et vous êtes connecté. Si le lien vise un cours PLaTon, vous y êtes
+   inscrit automatiquement.
+4. Facultatif : pour pouvoir vous connecter ensuite directement à PLaTon, définissez un mot de passe dans
+   **Mon compte** › **Sécurité** (voir [Profil utilisateur](/main/users/profile)).
 
 <Callout type="info">
-  Une fois connecté à PLaTon, vous pouvez définir un mot de passe pour votre compte en accédant à la page de profil.
+  **Enseignants** : votre compte est créé avec le rôle enseignant si vous êtes enseignant dans le cours du LMS d'où
+  vous venez. Si votre compte a été créé comme étudiant, il sera promu enseignant dès que vous ouvrirez PLaTon depuis un
+  cours où vous enseignez.
 </Callout>
 
 ### Vous êtes extérieur à l'Université Gustave Eiffel
 
-Pour obtenir un accès à PLaTon, contactez Dominique Revuz par mail : [dominique.revuz@univ-eiffel.fr](mailto:dominique.revuz@univ-eiffel.fr).
+Un administrateur de PLaTon doit vous créer un compte. Contactez Dominique Revuz par mail :
+[dominique.revuz@univ-eiffel.fr](mailto:dominique.revuz@univ-eiffel.fr).
 
-## Modes de Connexion
+## En cas de problème
 
-- **Pour les utilisateurs avec un compte PLaTon** : Vous devez entrer votre identifiant et le mot de passe que vous avez défini.
+| Situation                                                     | Que faire                                                                                                                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| « Une erreur est survenue lors de la connexion ! »            | Vérifiez votre nom d'utilisateur et votre mot de passe. Si votre compte a été créé par votre LMS et que vous n'avez jamais défini de mot de passe, passez par le lien du LMS. |
+| Vous ne connaissez pas votre nom d'utilisateur                | Continuez à vous connecter depuis votre LMS, ou demandez-le à un administrateur de la plateforme.                                         |
+| Le lien du LMS mène à une page « cours introuvable »          | Le cours PLaTon n'a pas encore été créé par l'enseignant : prévenez-le (voir [Intégration LTI](/main/users/lti-integration)).              |
+| Le bouton CAS mène à « Vous n'avez pas de compte sur PLaTon ? » | La connexion CAS ne fonctionne qu'après une première connexion depuis le LMS de votre établissement (voir [Connexion CAS](/main/users/lti-integration#connexion-cas)). |
+| Vous êtes déconnecté pendant votre travail                    | Votre session a expiré : reconnectez-vous, ou rouvrez le lien depuis votre LMS.                                                           |
+| Vous n'avez pas de compte                                     | Le lien **Vous n'avez pas de compte sur PLaTon ?** de la page de connexion mène à cette page.                                              |
 
-- **Pour les utilisateurs avec un compte LMS** : Si vous utilisez PLaTon dans le cadre d'un LMS comme Moodle ou Canvas, la connexion se fait sans effort grâce à l'intégration LTI.
-  En vous connectant à votre LMS habituel, vous trouverez un lien ou un bouton spécifique pour accéder directement à PLaTon.
-  Cette méthode simplifie l'accès en éliminant le besoin de se souvenir de multiples identifiants.
+## Mot de passe oublié ?
 
-![Page de connexion](../../../public/screens/login/login.png)
+Connectez-vous sans mot de passe, par votre établissement : le bouton « Continuer avec le compte université » de la page de connexion, ou le lien PLaTon d'un de vos cours sur Moodle. Définissez ensuite un nouveau mot de passe depuis la page de votre compte.
+
+Si votre compte n'est relié à aucun établissement, demandez un nouveau mot de passe à l'administration de PLaTon.

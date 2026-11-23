@@ -312,7 +312,7 @@ describe('SessionService', () => {
   })
 
   describe('onReopenActivity', () => {
-    it("devrait mettre à jour les sessions racine terminées de l'activité", async () => {
+    const mockQueryBuilder = () => {
       const qb = {
         update: jest.fn().mockReturnThis(),
         set: jest.fn().mockReturnThis(),
@@ -320,12 +320,61 @@ describe('SessionService', () => {
         execute: jest.fn().mockResolvedValue(undefined),
       }
       repository.createQueryBuilder.mockReturnValue(qb as never)
+      return qb
+    }
 
+    it("devrait mettre à jour les sessions racine terminées de l'activité", async () => {
+      const qb = mockQueryBuilder()
       await service.onReopenActivity({ activityId: 'activity-1' })
 
+      expect(qb.set).toHaveBeenCalledWith(expect.objectContaining({ terminatedAt: null }))
       expect(qb.where).toHaveBeenCalledWith('activity_id = :activityId and parent_id is null', {
         activityId: 'activity-1',
       })
+    })
+
+    it('accorde la reprise uniquement aux sessions démarrées et terminées, dans sa propre colonne', async () => {
+      const qb = mockQueryBuilder()
+      await service.onReopenActivity({ activityId: 'activity-1' })
+
+      const setArgument = qb.set.mock.calls[0][0] as { variables: () => string; resumeGranted: () => string }
+      const grantSql = setArgument.resumeGranted().replace(/\s+/g, ' ')
+
+      expect(grantSql).toContain(
+        "WHEN variables->'navigation'->>'started' = 'true' AND variables->'navigation'->>'terminated' = 'true' THEN true"
+      )
+      // Sessions not started, or still open, keep their current permission.
+      expect(grantSql).toContain('ELSE resume_granted')
+      expect(setArgument.variables()).toBe("jsonb_set(variables, '{navigation,terminated}', 'false', false)")
+    })
+  })
+
+  describe('consumeResumeGrant', () => {
+    const mockQueryBuilder = (affected: number) => {
+      const qb = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({ affected }),
+      }
+      repository.createQueryBuilder.mockReturnValue(qb as never)
+      return qb
+    }
+
+    it('renvoie true quand la reprise était présente et a été retirée', async () => {
+      const qb = mockQueryBuilder(1)
+
+      await expect(service.consumeResumeGrant('session-1')).resolves.toBe(true)
+      expect(qb.set).toHaveBeenCalledWith({ resumeGranted: false })
+      expect(qb.where).toHaveBeenCalledWith('id = :sessionId and parent_id is null and resume_granted', {
+        sessionId: 'session-1',
+      })
+    })
+
+    it("renvoie false quand aucune ligne n'a été modifiée (reprise absente ou déjà consommée)", async () => {
+      mockQueryBuilder(0)
+
+      await expect(service.consumeResumeGrant('session-1')).resolves.toBe(false)
     })
   })
 
@@ -341,6 +390,7 @@ describe('SessionService', () => {
 
       await service.onCloseActivity({ activityId: 'activity-1' })
 
+      expect(qb.set).toHaveBeenCalledWith(expect.objectContaining({ resumeGranted: false }))
       expect(qb.execute).toHaveBeenCalled()
     })
   })

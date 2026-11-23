@@ -22,12 +22,6 @@ export interface Configuration {
     accessLifetime: string
     refreshLifetime: string
   }
-  graphql: {
-    playground: boolean
-  }
-  server: {
-    url: string
-  }
   sandbox: {
     url: string
     envLifespan: number
@@ -44,6 +38,9 @@ export interface Configuration {
     tlsRejectUnauthorized: boolean
     from: string
     technicalTeam: string[]
+  }
+  server: {
+    url: string
   }
   lti: {
     encryptionKey: string
@@ -79,12 +76,6 @@ export const configuration = (): Configuration => ({
     accessLifetime: process.env['JWT_ACCESS_TOKEN_LIFETIME'] || '15m',
     refreshLifetime: process.env['JWT_REFRESH_TOKEN_LIFETIME'] || '7d',
   },
-  graphql: {
-    playground: process.env['GRAPHQL_PLAYGROUND'] ? process.env['GRAPHQL_PLAYGROUND'].toLowerCase() === 'true' : false,
-  },
-  server: {
-    url: toPublicUrl(process.env['SERVER_HOST']),
-  },
   sandbox: {
     url: process.env['SANDBOX_URL'] as string,
     // 1 week = 7 * 24 * 60 * 60 = 604800 seconds.
@@ -106,6 +97,9 @@ export const configuration = (): Configuration => ({
     technicalTeam: process.env['EMAIL_TECHNICAL_TEAM']
       ? process.env['EMAIL_TECHNICAL_TEAM'].split(',').map((email) => email.trim())
       : [],
+  },
+  server: {
+    url: toPublicUrl(process.env['SERVER_HOST']),
   },
   lti: {
     encryptionKey: process.env['LTI_ENCRYPTION_KEY'] as string,

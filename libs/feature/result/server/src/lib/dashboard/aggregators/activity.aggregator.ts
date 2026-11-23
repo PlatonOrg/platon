@@ -9,6 +9,7 @@ import {
   ACTIVITY_TOTAL_COMPLETIONS,
   ACTIVITY_USER_RESULTS,
   AnswerStates,
+  isExerciseDone,
   ExerciseDetails,
   ExerciseResults,
   UserActivityResultsDistribution,
@@ -299,11 +300,7 @@ export class ActivityDropoutRate implements SessionDataAggregator<number> {
 
     this.totalSessions++
 
-    if (
-      input.activityNavigation?.exercises?.some((exercise) =>
-        [AnswerStates.NOT_STARTED, AnswerStates.STARTED].includes(exercise.state)
-      )
-    ) {
+    if (input.activityNavigation?.exercises?.some((exercise) => !isExerciseDone(exercise.state))) {
       this.totalDropOuts++
     }
   }

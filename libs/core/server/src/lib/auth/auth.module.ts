@@ -8,8 +8,8 @@ import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { AuthGuard } from './guards/auth.guard'
 import { RolesGuard, RolesIfBodyHasKeyGuard } from './guards/roles.guard'
-import { JwtStrategy } from './strategies/jwt.strategy'
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy'
+import { JwtStrategy } from './strategies/jwt.strategy'
 
 @Module({
   imports: [

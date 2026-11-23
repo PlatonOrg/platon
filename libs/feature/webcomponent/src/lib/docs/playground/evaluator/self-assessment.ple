@@ -22,7 +22,7 @@ grader == #!lang=js
 // Il n'y a pas de bonne réponse : on valide dès qu'une note est donnée
 // et on adapte le message à la réponse.
 if (!note.value) {
-  grade = -1
+  grade = -2 // Donner une note inférieure à 0 permet de ne pas compter la soumission comme une tentative.
   feedback.type = 'warning'
   feedback.content = 'Choisissez un nombre d\'étoiles avant de valider.'
 } else {

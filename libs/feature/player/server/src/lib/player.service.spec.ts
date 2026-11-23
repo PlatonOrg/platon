@@ -18,6 +18,7 @@ import {
   // createMockExercisePlayer,
   // createMockActivityPlayer,
 } from './factories/player.factory'
+import { withActivityPlayer } from '@platon/feature/player/common'
 
 jest.mock('@platon/feature/compiler', () => ({
   ...jest.requireActual('@platon/feature/compiler'),
@@ -88,6 +89,7 @@ describe('PlayerService', () => {
           useValue: {
             findById: jest.fn(),
             findUserActivity: jest.fn(),
+            consumeResumeGrant: jest.fn(),
             create: jest.fn(),
             update: jest.fn(),
             findAllWithParent: jest.fn(),
@@ -345,6 +347,58 @@ describe('PlayerService', () => {
       await service.playActivity('activity-test-id', user as any)
 
       expect(activityService.updateActivitiesDates).toHaveBeenCalledWith([activity])
+    })
+
+    describe('reprise accordée par un enseignant', () => {
+      const createReopenedSession = () =>
+        createMockActivitySession({
+          activity: createMockActivityEntity(),
+          resumeGranted: true,
+          variables: {
+            navigation: {
+              started: true,
+              terminated: false,
+              exercises: [],
+              nextExercisesHistory: [],
+              nextExercisesHistoryPosition: -1,
+            },
+            settings: {},
+            exerciseGroups: {},
+          },
+        })
+
+      it('consomme la reprise et la renvoie au premier chargement', async () => {
+        const session = createReopenedSession()
+        sessionService.findUserActivity.mockResolvedValue(session as any)
+        sessionService.consumeResumeGrant.mockResolvedValue(true)
+
+        await service.playActivity('activity-test-id', createUserEntity() as any)
+
+        expect(sessionService.consumeResumeGrant).toHaveBeenCalledWith('activity-session-id')
+        expect(withActivityPlayer).toHaveBeenLastCalledWith(session)
+        expect(session.resumeGranted).toBe(true)
+      })
+
+      it('ne renvoie pas la reprise quand un autre chargement l’a déjà consommée', async () => {
+        const session = createReopenedSession()
+        sessionService.findUserActivity.mockResolvedValue(session as any)
+        sessionService.consumeResumeGrant.mockResolvedValue(false)
+
+        await service.playActivity('activity-test-id', createUserEntity() as any)
+
+        expect(withActivityPlayer).toHaveBeenLastCalledWith(session)
+        expect(session.resumeGranted).toBe(false)
+      })
+
+      it('ne touche pas à la base quand aucune reprise n’est accordée', async () => {
+        sessionService.findUserActivity.mockResolvedValue(
+          createMockActivitySession({ activity: createMockActivityEntity() }) as any
+        )
+
+        await service.playActivity('activity-test-id', createUserEntity() as any)
+
+        expect(sessionService.consumeResumeGrant).not.toHaveBeenCalled()
+      })
     })
   })
 

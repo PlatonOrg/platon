@@ -1,11 +1,11 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { JwtService, JwtSignOptions } from '@nestjs/jwt'
+import { JwtService } from '@nestjs/jwt'
 import {
   AuthToken,
+  BadRequestResponse,
   CreateCandidateAccountInput,
   ForbiddenResponse,
-  NotFoundResponse,
   ResetPasswordInput,
   SignInDemoOutput,
   SignInInput,
@@ -16,12 +16,14 @@ import { Configuration } from '../config/configuration'
 import { UserService } from '../users/user.service'
 import { UserRoles } from '@platon/core/common'
 import { randomUUID } from 'crypto'
-import { IRequest } from './auth.types'
-import { JwtPayload, JwtTokenType } from './strategies/jwt-payload'
+import { UserEntity } from '../users/user.entity'
+import { IRequest, TokenPayload } from './auth.types'
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name)
+  /** Hashed once, the first time a sign-in has no password to compare against. */
+  private decoy?: Promise<string>
 
   constructor(
     private readonly jwtService: JwtService,
@@ -29,11 +31,18 @@ export class AuthService {
     private readonly configService: ConfigService<Configuration>
   ) {}
 
+  /**
+   * One answer, in the same time, for an unknown account and a wrong password: a different one would
+   * tell which accounts exist. An account without a password is compared against a decoy hash.
+   */
   async signIn(input: SignInInput): Promise<AuthToken> {
-    const optionalUser = await this.userService.findByIdOrName(input.username)
-    const user = optionalUser.orElseThrow(() => new NotFoundResponse(`User not found: ${input.username}`))
-    if (!user.password || !(await bcrypt.compare(input.password, user.password))) {
-      throw new BadRequestException('Password is incorrect')
+    const user = (await this.userService.findByIdOrName(input.username)).orUndefined()
+    const matches = await bcrypt.compare(
+      input.password,
+      user?.password || (await (this.decoy ??= this.hash(randomUUID())))
+    )
+    if (!user?.password || !matches) {
+      throw new BadRequestResponse('Username or password is incorrect')
     }
 
     return this.authenticate(user.id, user.username)
@@ -42,7 +51,7 @@ export class AuthService {
   async signUp(input: SignUpInput): Promise<AuthToken> {
     const optionalUser = await this.userService.findByIdOrName(input.username)
     if (optionalUser.isPresent()) {
-      throw new BadRequestException(`User already found: ${input.username}`)
+      throw new BadRequestResponse(`User already found: ${input.username}`)
     }
 
     const user = await this.userService.create({
@@ -80,24 +89,21 @@ export class AuthService {
       throw new ForbiddenResponse('Password is incorrect')
     }
     if (input.newPassword === input.password) {
-      throw new BadRequestException('New password must be different from the old one')
+      throw new BadRequestResponse('New password must be different from the old one')
     }
     const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?([^\w\s]|_)).{12,}$/
     if (!passwordRegex.test(input.newPassword.trim())) {
-      throw new BadRequestException('Invalid password format')
+      throw new BadRequestResponse('Invalid password format')
     }
     user.password = await this.hash(input.newPassword.trim())
     await this.userService.update(input.username, user)
     return this.authenticate(user.id, user.username)
   }
 
-  /**
-   * Signs in the user: issues a new access token and a new refresh token, and records the login.
-   */
   async authenticate(userId: string, username: string): Promise<AuthToken> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.signToken(userId, username, 'access', this.configService.get('auth.accessLifetime', { infer: true })),
-      this.signToken(userId, username, 'refresh', this.configService.get('auth.refreshLifetime', { infer: true })),
+      this.sign({ sub: userId, username, typ: 'access' }),
+      this.sign({ sub: userId, username, typ: 'refresh' }),
     ])
     // Intentionally not blocking authentication if login tracking fails
     this.userService.touchLastLogin(userId).catch((error) => {
@@ -111,46 +117,30 @@ export class AuthService {
   }
 
   /**
-   * Issues a new access token from a refresh token that has already been verified.
-   *
-   * The refresh token is not renewed (no rotation): a session lasts at most `auth.refreshLifetime` from the
-   * sign-in, after which the user has to sign in again. The new access token never outlives the refresh token,
-   * so a session cannot be extended by refreshing.
-   *
-   * @param refreshToken The verified refresh token, returned as is.
+   * A new access token for the session of a refresh token, which stays the same: the session ends when
+   * the refresh token expires, and the access token never outlives it. An untyped token gets a typed
+   * refresh token that ends when it ends.
    */
-  async refresh(userId: string, username: string, refreshToken: string): Promise<AuthToken> {
-    const { exp: sessionExpiration } = this.jwtService.decode<JwtPayload>(refreshToken)
-
-    let accessToken = await this.signToken(
-      userId,
-      username,
-      'access',
-      this.configService.get('auth.accessLifetime', { infer: true })
-    )
-    const { exp: accessExpiration } = this.jwtService.decode<JwtPayload>(accessToken)
-    if (sessionExpiration && accessExpiration && accessExpiration > sessionExpiration) {
-      const remainingSeconds = Math.max(sessionExpiration - Math.floor(Date.now() / 1000), 0)
-      accessToken = await this.signToken(userId, username, 'access', remainingSeconds)
-    }
-
+  async refresh(user: UserEntity, refreshToken: string): Promise<AuthToken> {
+    const { typ, exp: end } = this.jwtService.decode<TokenPayload>(refreshToken)
+    const claims = { sub: user.id, username: user.username }
+    const accessToken = await this.sign({ ...claims, typ: 'access' })
+    const accessEnd = this.jwtService.decode<TokenPayload>(accessToken).exp
     return {
-      accessToken,
-      refreshToken,
+      accessToken:
+        end !== undefined && accessEnd !== undefined && accessEnd > end
+          ? await this.sign({ ...claims, typ: 'access' }, end)
+          : accessToken,
+      refreshToken: typ === 'refresh' ? refreshToken : await this.sign({ ...claims, typ: 'refresh' }, end),
     }
   }
 
-  private signToken(
-    userId: string,
-    username: string,
-    type: JwtTokenType,
-    expiresIn: JwtSignOptions['expiresIn']
-  ): Promise<string> {
-    const payload: JwtPayload = { sub: userId, username, type }
-    return this.jwtService.signAsync(payload, {
-      secret: this.configService.get('secret', { infer: true }),
-      expiresIn,
-    })
+  /** Signs a token for its configured lifetime, or until the given end, in seconds since the epoch. */
+  private sign(payload: TokenPayload, end?: number): Promise<string> {
+    const secret = this.configService.get('secret', { infer: true })
+    if (end !== undefined) return this.jwtService.signAsync({ ...payload, exp: end }, { secret })
+    const lifetime = payload.typ === 'access' ? 'auth.accessLifetime' : 'auth.refreshLifetime'
+    return this.jwtService.signAsync(payload, { secret, expiresIn: this.configService.get(lifetime, { infer: true }) })
   }
 
   private async hash(data: string): Promise<string> {

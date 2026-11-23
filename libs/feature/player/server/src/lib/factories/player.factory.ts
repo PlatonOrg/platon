@@ -44,6 +44,7 @@ export const createMockSession = (overrides: Record<string, unknown> = {}) => ({
     seed: 42,
   },
   isBuilt: true,
+  resumeGranted: false,
   envid: 'env-test-id',
   source: createMockSource(),
   startedAt: null,

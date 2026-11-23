@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ConflictResponse, ForbiddenResponse } from '@platon/core/common'
+import { ConflictResponse, ForbiddenResponse, User, UserRoles } from '@platon/core/common'
 import { ExerciseSession, Session } from '@platon/feature/result/common'
 import { PlayerManager } from './player-manager.model'
 import { SandboxManager } from './sandbox-manager.model'
@@ -206,6 +206,40 @@ describe('PlayerManager', () => {
     })
   })
 
+  describe('date de fin de la copie', () => {
+    it('date la copie quand elle est terminée', async () => {
+      manager.findSessionById.mockResolvedValue(createActivitySession())
+
+      await manager.terminate('session-id', { id: 'user-id', role: UserRoles.student } as User)
+
+      expect(manager.updateSession).toHaveBeenCalledWith(
+        'activity-session-id',
+        expect.objectContaining({ terminatedAt: expect.any(Date) })
+      )
+    })
+
+    it('efface la date quand la copie est rouverte, avec ou sans code', async () => {
+      const terminated = () =>
+        createActivitySession({ variables: { navigation: createNavigation({ terminated: true }), settings: {} } })
+      manager.findSessionById.mockResolvedValueOnce(terminated()).mockResolvedValueOnce(terminated())
+
+      await manager.openSession('session-id')
+      await manager.openSessionWithCode('session-id', 'ABC123')
+
+      expect(manager.updateSession).toHaveBeenCalledTimes(2)
+      expect(manager.updateSession).toHaveBeenNthCalledWith(
+        1,
+        'activity-session-id',
+        expect.objectContaining({ terminatedAt: null })
+      )
+      expect(manager.updateSession).toHaveBeenNthCalledWith(
+        2,
+        'activity-session-id',
+        expect.objectContaining({ terminatedAt: null })
+      )
+    })
+  })
+
   describe('openSession (sans code)', () => {
     it("rejette avec un conflit explicite si la durée de l'activité est dépassée", async () => {
       const duration = 60
@@ -216,6 +250,114 @@ describe('PlayerManager', () => {
       manager.findSessionById.mockResolvedValue(session)
 
       await expect(manager.openSession('session-id')).rejects.toBeInstanceOf(ConflictResponse)
+    })
+
+    it('accorde une reprise unique quand la session rouverte avait déjà commencé', async () => {
+      const session = createActivitySession({
+        variables: { navigation: createNavigation({ started: true, terminated: true }), settings: {} },
+      })
+      manager.findSessionById.mockResolvedValue(session)
+
+      const result = await manager.openSession('session-id')
+
+      expect(result.activity.navigation.terminated).toBe(false)
+      expect(result.activity.navigation.resumeGranted).toBe(true)
+      expect(manager.updateSession).toHaveBeenCalledWith(
+        'activity-session-id',
+        expect.objectContaining({
+          resumeGranted: true,
+          variables: expect.objectContaining({
+            navigation: expect.objectContaining({ terminated: false }),
+          }),
+        })
+      )
+      // The permission lives in its own column, never in the variables.
+      expect(session.variables.navigation).not.toHaveProperty('resumeGranted')
+    })
+
+    it("n'accorde pas de reprise si la session n'avait jamais commencé", async () => {
+      const session = createActivitySession({
+        variables: { navigation: createNavigation({ started: false, terminated: true }), settings: {} },
+      })
+      manager.findSessionById.mockResolvedValue(session)
+
+      const result = await manager.openSession('session-id')
+
+      expect(result.activity.navigation.resumeGranted).toBeUndefined()
+      expect(manager.updateSession).toHaveBeenCalledWith(
+        'activity-session-id',
+        expect.objectContaining({ resumeGranted: false })
+      )
+    })
+  })
+
+  describe('openSessionWithCode (reprise)', () => {
+    it("n'accorde pas de reprise : le joueur qui saisit le code reprend directement", async () => {
+      const session = createActivitySession({
+        variables: { navigation: createNavigation({ started: true, terminated: true }), settings: {} },
+      })
+      manager.findSessionById.mockResolvedValue(session)
+
+      const result = await manager.openSessionWithCode('session-id', 'ABC123')
+
+      expect(result.activity.navigation.resumeGranted).toBeUndefined()
+    })
+
+    it('retire la reprise en attente quand la session a déjà été rouverte par un enseignant', async () => {
+      const session = createActivitySession({
+        resumeGranted: true,
+        variables: { navigation: createNavigation({ started: true, terminated: false }), settings: {} },
+      })
+      manager.findSessionById.mockResolvedValue(session)
+
+      const result = await manager.openSessionWithCode('session-id', 'ABC123')
+
+      expect(result.activity.navigation.resumeGranted).toBeUndefined()
+      expect(manager.updateSession).toHaveBeenCalledWith('activity-session-id', { resumeGranted: false })
+    })
+
+    it('retire une reprise en attente quand le code rouvre une session terminée', async () => {
+      const session = createActivitySession({
+        resumeGranted: true,
+        variables: { navigation: createNavigation({ started: true, terminated: true }), settings: {} },
+      })
+      manager.findSessionById.mockResolvedValue(session)
+
+      const result = await manager.openSessionWithCode('session-id', 'ABC123')
+
+      expect(result.activity.navigation.resumeGranted).toBeUndefined()
+      expect(manager.updateSession).toHaveBeenCalledWith(
+        'activity-session-id',
+        expect.objectContaining({ resumeGranted: false })
+      )
+    })
+
+    it("ne réécrit rien sans reprise en attente quand la session n'est pas terminée", async () => {
+      manager.findSessionById.mockResolvedValue(createActivitySession())
+
+      await manager.openSessionWithCode('session-id', 'ABC123')
+
+      expect(manager.updateSession).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('terminate', () => {
+    it('retire la reprise accordée quand la session est terminée', async () => {
+      const session = createActivitySession({
+        userId: null,
+        resumeGranted: true,
+        variables: { navigation: createNavigation({ terminated: false }), settings: {} },
+      })
+      manager.findSessionById.mockResolvedValue(session)
+
+      const result = await manager.terminate('session-id')
+
+      expect(result.activity.navigation.terminated).toBe(true)
+      expect(result.activity.navigation.resumeGranted).toBeUndefined()
+      expect(manager.updateSession).toHaveBeenCalledWith(
+        'activity-session-id',
+        expect.objectContaining({ resumeGranted: false })
+      )
     })
   })
 

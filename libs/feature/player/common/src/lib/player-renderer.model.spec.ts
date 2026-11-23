@@ -1,5 +1,6 @@
 import { ExerciseVariables } from '@platon/feature/compiler'
-import { withRenderedTemplates } from './player-renderer.model'
+import { ActivitySession } from '@platon/feature/result/common'
+import { withActivityPlayer, withRenderedTemplates } from './player-renderer.model'
 
 const picker = { cid: 'picker-cid', selector: 'wc-picker', items: ['cm', 'km'] }
 const input = { cid: 'input-cid', selector: 'wc-input-box' }
@@ -57,5 +58,37 @@ describe('withRenderedTemplates', () => {
   it('ne modifie pas un template sans composant', () => {
     const { form } = render({ picker, form: 'Texte sans composant' })
     expect(form).toBe('Texte sans composant')
+  })
+})
+
+describe('withActivityPlayer', () => {
+  const createSession = (resumeGranted?: boolean) =>
+    ({
+      id: 'activity-session-id',
+      activityId: 'activity-id',
+      resumeGranted,
+      variables: {
+        title: 'Activity',
+        settings: {},
+        navigation: { started: true, terminated: false, exercises: [] },
+      },
+    } as unknown as ActivitySession)
+
+  it('expose la reprise accordée dans la navigation sans modifier les variables', () => {
+    const session = createSession(true)
+
+    const player = withActivityPlayer(session)
+
+    expect(player.navigation.resumeGranted).toBe(true)
+    expect(session.variables['navigation']).not.toHaveProperty('resumeGranted')
+  })
+
+  it("n'expose pas de reprise quand elle n'est pas accordée", () => {
+    const session = createSession(false)
+
+    const player = withActivityPlayer(session)
+
+    expect(player.navigation.resumeGranted).toBeUndefined()
+    expect(player.navigation).toBe(session.variables['navigation'])
   })
 })

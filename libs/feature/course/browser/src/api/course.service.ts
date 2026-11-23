@@ -29,6 +29,8 @@ import {
   CreateTestMember,
   ActivityReloadPreview,
   ReloadActivity,
+  PlayableActivity,
+  TaughtActivity,
 } from '@platon/feature/course/common'
 import { Observable, Subject, tap } from 'rxjs'
 import { ActivityCorrectorProvider } from '../models/activity-corrector.provider'
@@ -170,6 +172,19 @@ export class CourseService {
 
   listActivities(course: Course, filters?: ActivityFilters): Observable<ListResponse<Activity>> {
     return this.activityProvider.search(course, filters)
+  }
+
+  /** The activities the user plays, in every course they study or in the one given, with their own dates and progress. */
+  playableActivities(courseId?: string): Observable<PlayableActivity[]> {
+    return this.activityProvider.playable(courseId)
+  }
+
+  /**
+   * The activities of every course the user teaches, or of the one given, with the participation of
+   * their students.
+   */
+  taughtActivities(courseId?: string): Observable<TaughtActivity[]> {
+    return this.activityProvider.taught(courseId)
   }
 
   createActivity(course: Course, input: CreateActivity): Observable<Activity> {

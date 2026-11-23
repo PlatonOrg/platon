@@ -1,140 +1,258 @@
-import { HttpErrorResponse, HttpHandler, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http'
+import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { TestBed } from '@angular/core/testing'
 import { AuthToken, TOKEN_EXPIRED_ERROR_CODE } from '@platon/core/common'
-import { firstValueFrom, of, throwError } from 'rxjs'
+import { of } from 'rxjs'
+import { StorageService } from '../../services/storage.service'
 import { TokenService } from '../api/token.service'
-import { AuthGuard } from '../guards/auth.guard'
+import { TokenProvider } from '../models/token-provider'
+import { RemoteTokenProvider } from '../providers/remote-token.provider'
 import { AuthInterceptor } from './auth.interceptor'
 
-const tokenExpiredError = () =>
-  new HttpErrorResponse({ status: 401, error: { statusCode: 401, message: TOKEN_EXPIRED_ERROR_CODE } })
+const KEY = 'auth-token'
+const REFRESH = '/api/v1/auth/refresh/'
+const EXPIRED = { statusCode: 401, message: TOKEN_EXPIRED_ERROR_CODE }
+
+const base64url = (value: object) =>
+  btoa(JSON.stringify(value)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+/** A token the browser can read; only the API checks the signature. */
+const jwt = (claims: object) => `${base64url({ alg: 'HS256' })}.${base64url(claims)}.signature`
+const inSeconds = (seconds: number) => Math.floor(Date.now() / 1000) + seconds
+
+const access = (name: string, expiresIn = 900) =>
+  jwt({ sub: 'u1', username: 'ib', typ: 'access', exp: inSeconds(expiresIn), name })
+const untypedAccess = (name: string) => jwt({ sub: 'u1', username: 'ib', exp: inSeconds(900), name })
+const refresh = (expiresIn = 3600) => jwt({ sub: 'u1', typ: 'refresh', exp: inSeconds(expiresIn) })
+
+/** The tokens of the session, as IndexedDB keeps them. */
+class MemoryStorage {
+  readonly values = new Map<string, unknown>()
+  get = (key: string) => of(this.values.get(key))
+  set = (key: string, value: unknown) => {
+    this.values.set(key, value)
+    return of(undefined)
+  }
+  remove = (key: string) => {
+    this.values.delete(key)
+    return of(undefined)
+  }
+}
 
 describe('AuthInterceptor', () => {
-  const token: AuthToken = { accessToken: 'access', refreshToken: 'refresh' }
+  let http: HttpClient
+  let api: HttpTestingController
+  let storage: MemoryStorage
+  let session: AuthToken
+  let renewed: AuthToken
 
-  let interceptor: AuthInterceptor
-  let tokenService: { token: jest.Mock; refresh: jest.Mock }
-  let authGuard: { redirectIfProtected: jest.Mock }
-  let authorizations: (string | null)[]
+  /** Lets the stored token be read and the requests go out. */
+  const settle = () => new Promise<void>((resolve) => setTimeout(resolve))
 
-  /** Rejects every request with an expired token error, except those using `validToken`. */
-  const handlerAccepting = (validToken: string | null): HttpHandler => ({
-    handle: (req) => {
-      const authorization = req.headers.get('Authorization')
-      authorizations.push(authorization)
-      return authorization === validToken ? of(new HttpResponse({ status: 200 })) : throwError(tokenExpiredError)
-    },
-  })
+  const expire = (url: string) => api.expectOne(url).flush(EXPIRED, { status: 401, statusText: 'Unauthorized' })
+
+  const bearer = (url: string, method = 'GET') => {
+    const request = api.expectOne({ url, method })
+    return { request, authorization: request.request.headers.get('Authorization') }
+  }
+
+  const renew = (answer: AuthToken = renewed) => {
+    const post = bearer(REFRESH, 'POST')
+    expect(post.authorization).toBe(`Bearer ${session.refreshToken}`)
+    post.request.flush({ resource: answer })
+  }
 
   beforeEach(() => {
-    tokenService = { token: jest.fn().mockResolvedValue(token), refresh: jest.fn() }
-    authGuard = { redirectIfProtected: jest.fn().mockResolvedValue(undefined) }
+    jest.spyOn(console, 'error').mockImplementation(() => undefined)
+    storage = new MemoryStorage()
+    session = { accessToken: access('first'), refreshToken: refresh() }
+    renewed = { accessToken: access('renewed'), refreshToken: session.refreshToken }
+    storage.values.set(KEY, session)
     TestBed.configureTestingModule({
       providers: [
-        AuthInterceptor,
-        { provide: TokenService, useValue: tokenService },
-        { provide: AuthGuard, useValue: authGuard },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+        { provide: TokenProvider, useClass: RemoteTokenProvider },
+        { provide: StorageService, useValue: storage },
       ],
     })
-    interceptor = TestBed.inject(AuthInterceptor)
-    authorizations = []
+    http = TestBed.inject(HttpClient)
+    api = TestBed.inject(HttpTestingController)
   })
 
-  it('devrait rejouer la requête avec le token rafraîchi', async () => {
-    tokenService.refresh.mockResolvedValue({ ...token, accessToken: 'refreshed' })
-
-    await firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/api'), handlerAccepting('Bearer refreshed')))
-
-    expect(authorizations).toEqual(['Bearer access', 'Bearer refreshed'])
+  afterEach(() => {
+    api.verify()
+    localStorage.clear()
+    jest.restoreAllMocks()
   })
 
-  it('devrait rejouer la requête sans token si le rafraîchissement échoue', async () => {
-    tokenService.refresh.mockRejectedValue(new Error('auth/refresh-token-expired'))
+  it('sends the access token with each request, and leaves alone a request that names its own', async () => {
+    http.get('/api/v1/courses').subscribe()
+    http.get('/api/v1/other', { headers: { Authorization: 'Bearer given' } }).subscribe()
+    await settle()
 
-    await firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/api'), handlerAccepting(null)))
-
-    expect(authorizations).toEqual(['Bearer access', null])
+    expect(bearer('/api/v1/courses').authorization).toBe(`Bearer ${session.accessToken}`)
+    expect(bearer('/api/v1/other').authorization).toBe('Bearer given')
   })
 
-  describe('fin de session', () => {
-    it("devrait demander la redirection si le rafraîchissement a mis fin à la session, sans l'attendre", async () => {
-      // A guard may be waiting for this very request: waiting for the navigation here would never end.
-      authGuard.redirectIfProtected.mockReturnValue(new Promise(() => undefined))
-      tokenService.token.mockResolvedValueOnce(token).mockResolvedValue(undefined)
-      tokenService.refresh.mockRejectedValue(new Error('auth/refresh-token-expired'))
+  /** A request with this stored access token goes out only after a renewal, with the renewed token. */
+  const renewsBeforeSending = async (accessToken: string) => {
+    session = { accessToken, refreshToken: refresh() }
+    renewed = { accessToken: access('renewed'), refreshToken: session.refreshToken }
+    storage.values.set(KEY, session)
 
-      await firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/api'), handlerAccepting(null)))
+    http.post('/api/v1/player/evaluate', {}).subscribe()
+    await settle()
+    api.expectNone('/api/v1/player/evaluate')
+    renew()
+    await settle()
 
-      expect(authGuard.redirectIfProtected).toHaveBeenCalledTimes(1)
-      expect(authorizations).toEqual(['Bearer access', null])
-    })
+    expect(bearer('/api/v1/player/evaluate', 'POST').authorization).toBe(`Bearer ${renewed.accessToken}`)
+  }
 
-    it('ne devrait pas demander la redirection si la session est conservée (erreur réseau)', async () => {
-      tokenService.refresh.mockRejectedValue(new HttpErrorResponse({ status: 0 }))
+  it('renews before sending an access token that has expired, which a public route would serve as nobody', () =>
+    renewsBeforeSending(access('expired', -60)))
 
-      await firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/api'), handlerAccepting(null)))
+  it('renews before sending an access token that has no type', () => renewsBeforeSending(untypedAccess('untyped')))
 
-      expect(authGuard.redirectIfProtected).not.toHaveBeenCalled()
-    })
+  it('renews once for requests the API finds expired together, then sends each again', async () => {
+    const answers: unknown[] = []
+    http.get('/api/v1/a').subscribe((body) => answers.push(body))
+    http.get('/api/v1/b').subscribe((body) => answers.push(body))
+    await settle()
 
-    it('ne devrait pas demander la redirection si le rafraîchissement réussit', async () => {
-      tokenService.refresh.mockResolvedValue({ ...token, accessToken: 'refreshed' })
+    expire('/api/v1/a')
+    expire('/api/v1/b')
+    await settle()
+    renew()
+    await settle()
 
-      await firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/api'), handlerAccepting('Bearer refreshed')))
-
-      expect(authGuard.redirectIfProtected).not.toHaveBeenCalled()
-    })
+    const a = bearer('/api/v1/a')
+    const b = bearer('/api/v1/b')
+    expect([a.authorization, b.authorization]).toEqual([
+      `Bearer ${renewed.accessToken}`,
+      `Bearer ${renewed.accessToken}`,
+    ])
+    a.request.flush('a')
+    b.request.flush('b')
+    expect(answers).toEqual(['a', 'b'])
   })
 
-  it('devrait rejouer les requêtes en attente une fois le rafraîchissement terminé', async () => {
-    let resolveRefresh!: (token: AuthToken) => void
-    tokenService.refresh.mockReturnValue(new Promise((resolve) => (resolveRefresh = resolve)))
-    const next = handlerAccepting('Bearer refreshed')
+  it('sends again with the token another request has renewed meanwhile, without renewing twice', async () => {
+    http.get('/api/v1/a').subscribe()
+    http.get('/api/v1/b').subscribe()
+    await settle()
+    expire('/api/v1/a')
+    await settle()
+    renew()
+    await settle()
+    bearer('/api/v1/a').request.flush('a')
 
-    const first = firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/first'), next))
-    const second = firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/second'), next))
-    await Promise.resolve()
-    resolveRefresh({ ...token, accessToken: 'refreshed' })
+    expire('/api/v1/b')
+    await settle()
 
-    await expect(Promise.all([first, second])).resolves.toHaveLength(2)
-    expect(authorizations.filter((authorization) => authorization === 'Bearer refreshed')).toHaveLength(2)
+    api.expectNone(REFRESH)
+    expect(bearer('/api/v1/b').authorization).toBe(`Bearer ${renewed.accessToken}`)
   })
 
-  it('ne devrait jamais envoyer le refresh token, même aux requêtes émises pendant un rafraîchissement', async () => {
-    let resolveRefresh!: (token: AuthToken) => void
-    tokenService.refresh.mockReturnValue(new Promise((resolve) => (resolveRefresh = resolve)))
-    const next = handlerAccepting('Bearer refreshed')
+  it('sends a request made during a renewal with the new token', async () => {
+    http.get('/api/v1/a').subscribe()
+    await settle()
+    expire('/api/v1/a')
+    await settle()
 
-    const first = firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/first'), next))
-    await new Promise((resolve) => setTimeout(resolve))
-    expect(tokenService.refresh).toHaveBeenCalledTimes(1)
+    http.get('/api/v1/c').subscribe()
+    await settle()
+    api.expectNone('/api/v1/c')
+    renew()
+    await settle()
 
-    // Sent while the refresh is in progress: waits for the new access token instead of being sent.
-    const second = firstValueFrom(interceptor.intercept(new HttpRequest('GET', '/second'), next))
-    await new Promise((resolve) => setTimeout(resolve))
-    expect(authorizations).toEqual(['Bearer access'])
-
-    resolveRefresh({ ...token, accessToken: 'refreshed' })
-
-    await expect(Promise.all([first, second])).resolves.toHaveLength(2)
-    expect(authorizations).toEqual(['Bearer access', 'Bearer refreshed', 'Bearer refreshed'])
-    expect(authorizations).not.toContain('Bearer refresh')
+    expect(bearer('/api/v1/c').authorization).toBe(`Bearer ${renewed.accessToken}`)
+    expect(bearer('/api/v1/a').authorization).toBe(`Bearer ${renewed.accessToken}`)
   })
 
-  it('devrait laisser intactes les requêtes qui définissent leur propre en-tête Authorization', async () => {
-    const req = new HttpRequest(
-      'POST',
-      '/api/v1/auth/refresh/',
-      {},
-      { headers: new HttpHeaders({ Authorization: 'Bearer refresh' }) }
-    )
+  it('keeps both tokens the API gives back, where both the requests and the subscriptions read them', async () => {
+    const typed = refresh(600)
+    http.get('/api/v1/a').subscribe()
+    await settle()
+    expire('/api/v1/a')
+    await settle()
 
-    await expect(firstValueFrom(interceptor.intercept(req, handlerAccepting(null)))).rejects.toBeInstanceOf(
-      HttpErrorResponse
-    )
+    renew({ accessToken: renewed.accessToken, refreshToken: typed })
+    await settle()
+    bearer('/api/v1/a').request.flush('a')
 
-    expect(authorizations).toEqual(['Bearer refresh'])
-    expect(tokenService.token).not.toHaveBeenCalled()
-    expect(tokenService.refresh).not.toHaveBeenCalled()
+    expect(storage.values.get(KEY)).toEqual({ accessToken: renewed.accessToken, refreshToken: typed })
+    expect(TestBed.inject(TokenService).tokenSync()).toEqual({ accessToken: renewed.accessToken, refreshToken: typed })
+  })
+
+  it('fails every waiting request and ends the session when the API refuses the renewal, with one renewal', async () => {
+    const failures: number[] = []
+    http.get('/api/v1/a').subscribe({ error: (error) => failures.push(error.status) })
+    await settle()
+    expire('/api/v1/a')
+    await settle()
+    http.get('/api/v1/c').subscribe({ error: (error) => failures.push(error.status) })
+    await settle()
+
+    bearer(REFRESH, 'POST').request.flush({ statusCode: 401 }, { status: 401, statusText: 'Unauthorized' })
+    await settle()
+    bearer('/api/v1/c').request.flush({ statusCode: 401 }, { status: 401, statusText: 'Unauthorized' })
+    await settle()
+
+    expect(failures).toEqual([401, 401])
+    expect(storage.values.has(KEY)).toBe(false)
+  })
+
+  it('keeps the session when the API does not answer the renewal, for the next request to try again', async () => {
+    const failures: number[] = []
+    http.get('/api/v1/a').subscribe({ error: (error) => failures.push(error.status) })
+    await settle()
+    expire('/api/v1/a')
+    await settle()
+
+    bearer(REFRESH, 'POST').request.flush(null, { status: 502, statusText: 'Bad Gateway' })
+    await settle()
+
+    expect(failures).toEqual([401])
+    expect(storage.values.get(KEY)).toEqual(session)
+  })
+
+  it('ends the session without asking the API when the refresh token has expired', async () => {
+    storage.values.set(KEY, { accessToken: access('expired', -60), refreshToken: refresh(-60) })
+
+    http.get('/api/v1/a').subscribe()
+    await settle()
+
+    api.expectNone(REFRESH)
+    expect(bearer('/api/v1/a').authorization).toBeNull()
+    expect(storage.values.has(KEY)).toBe(false)
+  })
+
+  it('lets a sign-in during a renewal win: its session stays', async () => {
+    const signedIn: AuthToken = { accessToken: access('signed-in'), refreshToken: refresh(7200) }
+    http.get('/api/v1/a').subscribe()
+    await settle()
+    expire('/api/v1/a')
+    await settle()
+
+    await TestBed.inject(TokenService).save(signedIn)
+    renew()
+    await settle()
+
+    expect(bearer('/api/v1/a').authorization).toBe(`Bearer ${signedIn.accessToken}`)
+    expect(storage.values.get(KEY)).toEqual(signedIn)
+  })
+
+  it('renews for a request that asked for text, whose error body is text too', async () => {
+    http.get('/api/v1/files/a', { responseType: 'text' }).subscribe()
+    await settle()
+
+    api.expectOne('/api/v1/files/a').flush(JSON.stringify(EXPIRED), { status: 401, statusText: 'Unauthorized' })
+    await settle()
+    renew()
+    await settle()
+
+    expect(bearer('/api/v1/files/a').authorization).toBe(`Bearer ${renewed.accessToken}`)
   })
 })
