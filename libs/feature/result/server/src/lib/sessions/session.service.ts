@@ -348,6 +348,7 @@ WHERE session.id = $1;
           ELSE resume_granted
         END`,
         variables: () => `jsonb_set(variables, '{navigation,terminated}', 'false', false)`,
+        terminatedAt: null,
       })
       .where('activity_id = :activityId and parent_id is null', { activityId })
       .execute()
@@ -377,6 +378,7 @@ WHERE session.id = $1;
       .set({
         variables: () => `jsonb_set(variables, '{navigation,terminated}', 'true', false)`,
         resumeGranted: false,
+        terminatedAt: () => 'COALESCE(terminated_at, now())',
       })
       .where('activity_id = :activityId and parent_id is null', { activityId })
       .execute()

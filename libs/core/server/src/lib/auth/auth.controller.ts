@@ -1,13 +1,13 @@
-import { Body, Controller, Post, Req } from '@nestjs/common'
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ExtractJwt } from 'passport-jwt'
 import { CreatedResponse, ItemResponse, UserRoles } from '@platon/core/common'
 import { AuthTokenDTO, ResetPasswordInputDTO, SignInInputDTO, SignUpInputDTO } from './auth.dto'
 import { AuthService } from './auth.service'
 import type { IRequest } from './auth.types'
 import { Public } from './decorators/public.decorator'
-import { RefreshTokenAuth } from './decorators/refresh-token-auth.decorator'
 import { Roles } from './decorators/roles.decorator'
+import { RefreshGuard } from './guards/refresh.guard'
+import { bearerToken } from '../utils/http-utils'
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -37,16 +37,12 @@ export class AuthController {
     })
   }
 
-  /**
-   * Issues a new access token. Requires the refresh token (not the access token) as Bearer token.
-   */
+  /** The global guard lets only access tokens through: this route checks a refresh token with its own guard. */
+  @Public()
+  @UseGuards(RefreshGuard)
   @ApiBearerAuth()
-  @RefreshTokenAuth()
   @Post('refresh')
   async refresh(@Req() req: IRequest): Promise<ItemResponse<AuthTokenDTO>> {
-    const refreshToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req) as string
-    return new ItemResponse({
-      resource: await this.authService.refresh(req.user.id, req.user.username, refreshToken),
-    })
+    return new ItemResponse({ resource: await this.authService.refresh(req.user, bearerToken(req) as string) })
   }
 }

@@ -64,9 +64,7 @@ describe('CorrectionService', () => {
       await service.list('corrector-1')
 
       const [queryText] = sessionRepository.query.mock.calls[0]
-      expect(queryText).toContain(
-        `(answer.id IS NOT NULL OR (exercise_session.variables->'.meta'->>'error')::boolean IS TRUE)`
-      )
+      expect(queryText).toContain(`(exercise_session.variables->'.meta'->>'error')::boolean IS TRUE`)
     })
 
     it('should expose the latest answer in viewer mode without requiring an answer', async () => {
@@ -149,14 +147,14 @@ describe('CorrectionService', () => {
       await service.listSummary('corrector-1', CorrectionStatus.pending)
 
       const [queryText] = sessionRepository.query.mock.calls[0]
-      expect(queryText).toContain('HAVING COUNT(exercise_session.id) > COUNT(correction.id)')
+      expect(queryText).toContain('HAVING SUM(copy.total) > SUM(copy.corrected)')
     })
 
     it('devrait ajouter une clause HAVING pour ne garder que les activités entièrement corrigées', async () => {
       await service.listSummary('corrector-1', CorrectionStatus.available)
 
       const [queryText] = sessionRepository.query.mock.calls[0]
-      expect(queryText).toContain('HAVING COUNT(exercise_session.id) = COUNT(correction.id)')
+      expect(queryText).toContain('HAVING SUM(copy.total) = SUM(copy.corrected)')
     })
 
     it('ne devrait ajouter aucune clause HAVING sans statut', async () => {

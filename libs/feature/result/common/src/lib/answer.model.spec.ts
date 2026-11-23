@@ -1,4 +1,4 @@
-import { AnswerStates, answerStateFromGrade } from './answer.model'
+import { AnswerStates, answerStateFromGrade, isExerciseDone } from './answer.model'
 
 describe('answerStateFromGrade', () => {
   it('should return AnswerStates.NOT_STARTED if grade is null', () => {
@@ -33,5 +33,24 @@ describe('answerStateFromGrade', () => {
 
   it.each([-2, -4, -50, -100])('should return AnswerStates.STARTED if grade is %i', (grade) => {
     expect(answerStateFromGrade(grade)).toBe(AnswerStates.STARTED)
+  })
+})
+
+describe('isExerciseDone', () => {
+  it('counts an exercise as done once answered, whatever its grade', () => {
+    const done = [
+      AnswerStates.ANSWERED,
+      AnswerStates.SUCCEEDED,
+      AnswerStates.PART_SUCC,
+      AnswerStates.FAILED,
+      AnswerStates.ERROR,
+    ]
+
+    expect(done.filter(isExerciseDone)).toEqual(done)
+  })
+
+  it('does not count an exercise not answered yet, opened or not', () => {
+    expect(isExerciseDone(AnswerStates.NOT_STARTED)).toBe(false)
+    expect(isExerciseDone(AnswerStates.STARTED)).toBe(false)
   })
 })

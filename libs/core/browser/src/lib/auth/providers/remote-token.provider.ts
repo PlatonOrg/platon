@@ -1,9 +1,9 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http'
+import { HttpClient } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
 import { JwtHelperService } from '@auth0/angular-jwt'
 import { AuthToken, ItemResponse } from '@platon/core/common'
 import { firstValueFrom, lastValueFrom } from 'rxjs'
-import { StorageService } from '../../services'
+import { StorageService } from '../../services/storage.service'
 import { TokenProvider } from '../models/token-provider'
 
 const KEY = 'auth-token'
@@ -63,13 +63,10 @@ export class RemoteTokenProvider extends TokenProvider {
   }
 
   /**
-   * Refreshs the current auth token.
-   *
-   * The refresh token is only sent to the refresh endpoint. The server does not renew it (the session lasts
-   * at most the refresh token lifetime from the sign-in), but the returned pair is stored as is so that
-   * renewing it on the server side would not require any change here.
-   *
-   * @returns A promise that resolves with an auth token.
+   * Renews the access token with the refresh token, sent as the Bearer by this request itself. The API
+   * gives back the same refresh token, or a typed one for an untyped token: both are kept. A sign-in or
+   * a sign-out during the renewal wins: the renewed tokens are then dropped. Whether a failure ends the
+   * session is for `TokenService` to decide.
    */
   async refresh(): Promise<AuthToken> {
     const token = await this.token()
@@ -77,9 +74,7 @@ export class RemoteTokenProvider extends TokenProvider {
       throw new Error('auth/no-token')
     }
 
-    const helper = new JwtHelperService()
-    if (helper.isTokenExpired(token.refreshToken)) {
-      await this.remove()
+    if (new JwtHelperService().isTokenExpired(token.refreshToken)) {
       throw new Error('auth/refresh-token-expired')
     }
 
@@ -88,21 +83,18 @@ export class RemoteTokenProvider extends TokenProvider {
         this.http.post<ItemResponse<AuthToken>>(
           '/api/v1/auth/refresh/',
           {},
-          { headers: new HttpHeaders({ Authorization: `Bearer ${token.refreshToken}` }) }
+          { headers: { Authorization: `Bearer ${token.refreshToken}` } }
         )
       )
-      const refreshed: AuthToken = {
-        accessToken: response.resource.accessToken,
-        refreshToken: response.resource.refreshToken || token.refreshToken,
+      const current = await this.token()
+      if (current?.refreshToken !== token.refreshToken) {
+        if (!current) throw new Error('auth/no-token')
+        return current
       }
-      await this.save(refreshed)
-      return refreshed
+      await this.save(response.resource)
+      return response.resource
     } catch (error) {
-      console.error('Unable to refresh token', error)
-      // The server refused the refresh token: the session is over. Other errors (network, ...) may be temporary.
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        await this.remove()
-      }
+      console.error('Unable to renew the session', error)
       throw error
     }
   }

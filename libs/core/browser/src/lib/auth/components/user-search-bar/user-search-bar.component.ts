@@ -63,7 +63,7 @@ export class UserSearchBarComponent implements OnInit, OnChanges, ControlValueAc
         this.selection = []
       }
 
-      this.selection = [...this.selection, item]
+      this.selection.push(item)
       this.onChangeSelection()
     },
   }

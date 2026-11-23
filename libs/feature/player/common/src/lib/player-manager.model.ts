@@ -69,6 +69,7 @@ export abstract class PlayerManager {
     await this.updateSession(activitySession.id, {
       variables: activitySession.variables,
       resumeGranted: false,
+      terminatedAt: new Date(),
     })
 
     if (activitySession.activity) {
@@ -146,6 +147,7 @@ export abstract class PlayerManager {
     await this.updateSession(activitySession.id, {
       variables: activitySession.variables,
       resumeGranted: activitySession.resumeGranted,
+      terminatedAt: null,
     })
 
     const result = {
@@ -188,6 +190,7 @@ export abstract class PlayerManager {
     await this.updateSession(activitySession.id, {
       variables: activitySession.variables,
       resumeGranted: false,
+      terminatedAt: null,
     })
 
     const result = {

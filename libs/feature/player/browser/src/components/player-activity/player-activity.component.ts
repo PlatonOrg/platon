@@ -258,6 +258,7 @@ export class PlayerActivityComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe())
     this.stopCountdown()
     this.enableCopyPasteIfNeeded()
     this.stopWatchingVisibilityChange()

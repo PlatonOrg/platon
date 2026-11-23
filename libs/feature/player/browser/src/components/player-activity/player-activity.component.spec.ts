@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { Subject, of, throwError } from 'rxjs'
 
-import { DialogService } from '@platon/core/browser'
+import { NzDialogService } from '@platon/core/browser'
 import { NotificationService } from '@platon/feature/notification/browser'
 import { NzModalService } from 'ng-zorro-antd/modal'
 
@@ -44,11 +44,11 @@ describe('PlayerActivityComponent', () => {
       terminate: jest.fn().mockReturnValue(of({ activity: createPlayer() })),
       playActivity: jest.fn(),
     }
-    // DialogModule fournit DialogService via son propre @NgModule({ providers: [DialogService] }).
+    // DialogModule fournit NzDialogService via son propre @NgModule({ providers: [...] }).
     // Comme PlayerActivityComponent importe DialogModule directement, cette instance est fournie
     // à l'échelle du composant et masque tout override fourni au niveau racine de TestBed.
     // On patch donc directement le prototype plutôt que de tenter un override de provider inefficace.
-    dialogErrorSpy = jest.spyOn(DialogService.prototype, 'error').mockImplementation(() => undefined as any)
+    dialogErrorSpy = jest.spyOn(NzDialogService.prototype, 'error').mockImplementation(() => undefined as any)
 
     await TestBed.configureTestingModule({
       imports: [PlayerActivityComponent],
@@ -298,6 +298,19 @@ describe('PlayerActivityComponent', () => {
         expect(component.player.navigation.terminated).toBe(true)
       })
     })
+  })
+
+  it('cesse de suivre les notifications quand le lecteur se ferme', () => {
+    const notifications = new Subject()
+    ;(TestBed.inject(NotificationService).paginate as jest.Mock).mockReturnValue(notifications)
+    const other = TestBed.createComponent(PlayerActivityComponent)
+    other.componentInstance.player = createPlayer()
+    other.detectChanges()
+    expect(notifications.observed).toBe(true)
+
+    other.destroy()
+
+    expect(notifications.observed).toBe(false)
   })
 
   describe('onCodeComplete / open', () => {
