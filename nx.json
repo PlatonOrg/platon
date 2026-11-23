@@ -37,7 +37,7 @@
         "ci": {
           "ci": true,
           "codeCoverage": true,
-          "maxWorkers": "50%"
+          "maxWorkers": "100%"
         }
       }
     },

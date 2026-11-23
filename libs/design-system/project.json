@@ -6,6 +6,7 @@
   "prefix": "pl",
   "tags": ["scope:design-system"],
   "targets": {
+    "typecheck": {},
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],

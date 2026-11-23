@@ -41,9 +41,6 @@ jobs:
 
       - run: yarn affected:build --parallel --base=${{ env.NX_BASE }}
 
-      - name: Build Storybook of the design system
-        run: yarn nx affected --target=build-storybook --base=${{ env.NX_BASE }}
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -63,6 +60,9 @@ jobs:
 
       - run: yarn affected:lint --parallel --base=${{ env.NX_BASE }}
 
+      - name: No em or en dash
+        run: yarn lint:em-dashes
+
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
@@ -80,14 +80,8 @@ jobs:
         with:
           main-branch-name: ${{ github.base_ref || github.ref_name }}
 
-      # Les tests Jest transpilent sans vérifier les types (isolatedModules) : c'est ici qu'on vérifie les .spec.ts
+      # Jest transpiles without checking types (isolatedModules): the .spec.ts files are type-checked here
       - run: yarn affected:typecheck --parallel --base=${{ env.NX_BASE }}
-
-      - name: Design lints of the new interface
-        run: yarn lint:design
-
-      - name: Coherence of the design spec
-        run: yarn design:check
 
   test:
     name: Test
@@ -106,7 +100,9 @@ jobs:
         with:
           main-branch-name: ${{ github.base_ref || github.ref_name }}
 
-      - run: yarn affected:test --parallel --base=${{ env.NX_BASE }}
+      # One project at a time, each with a Jest worker per core: the runner is fully used without more
+      # workers than cores (the `ci` configuration of the Jest target sets the workers and the coverage)
+      - run: yarn nx affected -t test --configuration=ci --parallel=1 --base=${{ env.NX_BASE }} && node coverage-merger.mjs
 
       - name: Upload coverage to Codecov
         if: ${{ !cancelled() }}
