@@ -22,7 +22,7 @@
     "cli": "TS_NODE_PROJECT=./apps/api/tsconfig.app.json ts-node -r tsconfig-paths/register ./apps/api/src/cli.ts",
     "repl": "TS_NODE_PROJECT=./apps/api/tsconfig.app.json ts-node -r tsconfig-paths/register ./apps/api/src/repl.ts",
     "serve:web": "nx serve web --host 0.0.0.0 --disable-host-check",
-    "serve:api": "NODE_EXTRA_CA_CERTS=.docker/nginx/ssl/certs/rootCA.crt DEBUG=ltijs:* nx serve api",
+    "serve:api": "NODE_EXTRA_CA_CERTS=.docker/nginx/ssl/certs/rootCA.crt DEBUG='ltijs:*' nx serve api",
     "serve:api:genkit": "genkit start -- nx serve api",
     "serve:docs": "./bin/cli/wc-docs.sh && cd apps/docs && yarn serve",
     "serve:home": "nx serve home",
