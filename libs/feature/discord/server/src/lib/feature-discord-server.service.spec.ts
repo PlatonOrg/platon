@@ -34,15 +34,35 @@ describe('FeatureDiscordServerService', () => {
     expect(options.discordClientOptions.ws?.proxyAgentOptions).toEqual(httpsproxyagent)
   })
 
-  it('should not define agent and httpsproxyagent if process.env[PROXY_URL] is not defined', () => {
-    delete process.env['PROXY_URL']
-    expect(agent).toBeNull()
-    expect(httpsproxyagent).toBeNull()
-  })
+  describe('proxy variables', () => {
+    const variables = ['https_proxy', 'HTTPS_PROXY']
+    const previous = new Map(variables.map((name) => [name, process.env[name]]))
 
-  it('should define agent and httpsproxyagent if process.env[PROXY_URL] is defined', () => {
-    process.env['PROXY_URL'] = 'https://example.com'
-    expect(agent).toBeDefined()
-    expect(httpsproxyagent).toBeDefined()
+    // The proxy is chosen when the module is loaded
+    const loadProxy = async (env: Record<string, string>) => {
+      variables.forEach((name) => delete process.env[name])
+      Object.assign(process.env, env)
+      let loaded: typeof import('./feature-discord-server.service') | undefined
+      await jest.isolateModulesAsync(async () => {
+        loaded = await import('./feature-discord-server.service')
+      })
+      return loaded?.httpsproxyagent as unknown as { proxy: { host: string } } | null
+    }
+
+    afterEach(() => {
+      previous.forEach((value, name) => {
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+      })
+    })
+
+    it('should follow https_proxy', async () => {
+      const proxyAgent = await loadProxy({ https_proxy: 'http://standard.invalid:3128' })
+      expect(proxyAgent?.proxy.host).toBe('standard.invalid')
+    })
+
+    it('should use no proxy when none is set', async () => {
+      expect(await loadProxy({})).toBeNull()
+    })
   })
 })

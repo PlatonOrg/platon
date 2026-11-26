@@ -1,9 +1,13 @@
+import { HttpService } from '@nestjs/axios'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService, UserService } from '@platon/core/server'
 import { NotFoundResponse } from '@platon/core/common'
 import { LTIOldService } from '@platon/feature/lti/server'
+import axios from 'axios'
+import { Agent, createServer, Server } from 'http'
+import { AddressInfo } from 'net'
+import { of, throwError } from 'rxjs'
 import { Optional } from 'typescript-optional'
-import { AxiosService } from './axios.service'
 import { CasController } from './cas.controller'
 import { CasEntity } from './entities/cas.entity'
 import { CasService } from './cas.service'
@@ -14,7 +18,7 @@ describe('CasController', () => {
   let ltiService: jest.Mocked<LTIOldService>
   let authService: jest.Mocked<AuthService>
   let userService: jest.Mocked<UserService>
-  let https: jest.Mocked<AxiosService>
+  let http: jest.Mocked<HttpService>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,7 +40,7 @@ describe('CasController', () => {
         { provide: LTIOldService, useValue: { findLmsUserByUsername: jest.fn() } },
         { provide: AuthService, useValue: { authenticate: jest.fn() } },
         { provide: UserService, useValue: { findById: jest.fn() } },
-        { provide: AxiosService, useValue: { get: jest.fn() } },
+        { provide: HttpService, useValue: { get: jest.fn() } },
       ],
     }).compile()
 
@@ -45,14 +49,16 @@ describe('CasController', () => {
     ltiService = module.get(LTIOldService)
     authService = module.get(AuthService)
     userService = module.get(UserService)
-    https = module.get(AxiosService)
+    http = module.get(HttpService)
   })
 
   describe('checkCasTicket', () => {
     it('devrait retourner le username en cas de succès', async () => {
-      https.get.mockResolvedValue({
-        data: { serviceResponse: { authenticationSuccess: { user: 'jdoe' } } },
-      } as never)
+      http.get.mockReturnValue(
+        of({
+          data: { serviceResponse: { authenticationSuccess: { user: 'jdoe' } } },
+        }) as never
+      )
 
       const result = await controller.checkCasTicket('https://cas.test/validate', 'ST-1', 'https://app.test')
 
@@ -60,11 +66,13 @@ describe('CasController', () => {
     })
 
     it("devrait lever une erreur avec la description en cas d'échec d'authentification CAS", async () => {
-      https.get.mockResolvedValue({
-        data: {
-          serviceResponse: { authenticationFailure: { code: 'INVALID_TICKET', description: 'Ticket invalide' } },
-        },
-      } as never)
+      http.get.mockReturnValue(
+        of({
+          data: {
+            serviceResponse: { authenticationFailure: { code: 'INVALID_TICKET', description: 'Ticket invalide' } },
+          },
+        }) as never
+      )
 
       await expect(controller.checkCasTicket('https://cas.test/validate', 'ST-1', 'https://app.test')).rejects.toThrow(
         'Ticket invalide'
@@ -72,7 +80,7 @@ describe('CasController', () => {
     })
 
     it('devrait retourner Optional.empty() si la réponse ne contient ni succès ni échec', async () => {
-      https.get.mockResolvedValue({ data: { serviceResponse: {} } } as never)
+      http.get.mockReturnValue(of({ data: { serviceResponse: {} } }) as never)
 
       const result = await controller.checkCasTicket('https://cas.test/validate', 'ST-1', 'https://app.test')
 
@@ -80,11 +88,60 @@ describe('CasController', () => {
     })
 
     it('devrait lever une erreur explicite quand le fournisseur CAS est injoignable (erreur réseau)', async () => {
-      https.get.mockRejectedValue(new Error('ECONNREFUSED'))
+      http.get.mockReturnValue(throwError(() => new Error('ECONNREFUSED')))
 
       await expect(controller.checkCasTicket('https://cas.test/validate', 'ST-1', 'https://app.test')).rejects.toThrow(
         'Your CAS provider is not accessible'
       )
+    })
+  })
+
+  describe('variables de proxy', () => {
+    const variables = ['http_proxy', 'HTTP_PROXY', 'no_proxy', 'NO_PROXY']
+    const previous = new Map(variables.map((name) => [name, process.env[name]]))
+    const servers: Server[] = []
+
+    // Un serveur qui répond au ticket en donnant son propre nom comme utilisateur
+    const listen = async (user: string): Promise<number> => {
+      const server = createServer((_request, response) => {
+        response.setHeader('content-type', 'application/json')
+        response.end(JSON.stringify({ serviceResponse: { authenticationSuccess: { user } } }))
+      })
+      servers.push(server)
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+      return (server.address() as AddressInfo).port
+    }
+
+    beforeEach(async () => {
+      variables.forEach((name) => delete process.env[name])
+      process.env['http_proxy'] = `http://127.0.0.1:${await listen('proxy')}`
+      // Un agent dédié laisse axios lire les variables posées par le test, même quand le shell
+      // confie le proxy à Node
+      const client = new HttpService(axios.create({ httpAgent: new Agent() }))
+      http.get.mockImplementation((url, config) => client.get(url, config))
+    })
+
+    afterEach(async () => {
+      previous.forEach((value, name) => {
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+      })
+      await Promise.all(servers.splice(0).map((server) => new Promise((resolve) => server.close(resolve))))
+    })
+
+    it('devrait joindre le CAS par le proxy de http_proxy', async () => {
+      const result = await controller.checkCasTicket('http://cas.invalid/validate', 'ST-1', 'https://app.test')
+
+      expect(result.get()).toBe('proxy')
+    })
+
+    it('devrait joindre directement un CAS listé dans no_proxy', async () => {
+      const port = await listen('direct')
+      process.env['no_proxy'] = '127.0.0.1'
+
+      const result = await controller.checkCasTicket(`http://127.0.0.1:${port}/validate`, 'ST-1', 'https://app.test')
+
+      expect(result.get()).toBe('direct')
     })
   })
 

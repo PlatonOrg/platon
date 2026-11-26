@@ -87,6 +87,12 @@ Pour relier un lien du LMS à un cours PLaTon précis, indiquez par exemple `cou
   lancement est toujours la même et la destination passe par les paramètres personnalisés ci-dessus.
 </Callout>
 
+### Serveur derrière un proxy
+
+En LTI 1.3, le serveur PLaTon appelle lui-même le LMS, en premier lieu pour récupérer ses clés publiques. S'il
+n'accède à l'extérieur que par un proxy, définissez les variables `http_proxy`, `https_proxy` et `no_proxy` de
+l'API, puis recréez son conteneur. Un LMS joignable sans proxy doit figurer dans `no_proxy`.
+
 ## Ce qui se passe au lancement
 
 À chaque lancement depuis le LMS (LTI 1.3) :

@@ -11,6 +11,7 @@ import {
   Req,
   HttpRedirectResponse,
 } from '@nestjs/common'
+import { HttpService } from '@nestjs/axios'
 import { CreateCasDTO, UpdateCasDTO } from './cas.dto'
 import { AuthService, Mapper, Public, Roles, UserService, UUIDParam } from '@platon/core/server'
 import { CasService } from './cas.service'
@@ -21,9 +22,9 @@ import { CasServiceValidateResponse } from './payloads'
 import { AxiosError, AxiosResponse } from 'axios'
 import { Optional } from 'typescript-optional'
 import { LTIOldService } from '@platon/feature/lti/server'
-import { AxiosService } from './axios.service'
 import { ApiBearerAuth } from '@nestjs/swagger'
 import { URL } from 'url'
+import { firstValueFrom } from 'rxjs'
 
 @Controller('cas')
 export class CasController {
@@ -32,25 +33,25 @@ export class CasController {
     private readonly LtiService: LTIOldService,
     private readonly authService: AuthService,
     private readonly userService: UserService,
-    private readonly https: AxiosService
+    private readonly http: HttpService
   ) {}
 
   async checkCasTicket(serviceValidateURL: string, ticket: string, service: string): Promise<Optional<string>> {
-    const data = await this.https
-      .get<CasServiceValidateResponse>(serviceValidateURL, {
+    const data = await firstValueFrom(
+      this.http.get<CasServiceValidateResponse>(serviceValidateURL, {
         params: {
           ticket: ticket,
           service: service,
           format: 'JSON',
         },
       })
-      .catch((_error: AxiosError) => {
-        return {
-          serviceResponse: {
-            authenticationFailure: { code: 'NO_RESPONSE', description: 'Your CAS provider is not accessible' },
-          },
-        }
-      })
+    ).catch((_error: AxiosError) => {
+      return {
+        serviceResponse: {
+          authenticationFailure: { code: 'NO_RESPONSE', description: 'Your CAS provider is not accessible' },
+        },
+      }
+    })
 
     let response: CasServiceValidateResponse
     if (Object.prototype.hasOwnProperty.call(data, 'data')) {
