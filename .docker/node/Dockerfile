@@ -84,6 +84,9 @@ RUN apk add --no-cache --update \
 
 WORKDIR /src
 
+# Makes `fetch` and the `http`/`https` modules follow http_proxy, https_proxy and no_proxy
+ENV NODE_USE_ENV_PROXY=1
+
 COPY --chown=node:node --from=build /src/node_modules ./node_modules
 COPY --chown=node:node --from=build /src/dist/apps/api ./dist/apps/api
 COPY --chown=node:node --from=build /src/dist/migrations ./dist/migrations

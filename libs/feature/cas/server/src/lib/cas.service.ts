@@ -1,15 +1,16 @@
+import { HttpService } from '@nestjs/axios'
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AuthToken, NotFoundResponse, OrderingDirections } from '@platon/core/common'
 import { AuthService, UserService } from '@platon/core/server'
 import { CasFilters, CasOrdering } from '@platon/feature/cas/common'
+import { firstValueFrom } from 'rxjs'
 import { Repository } from 'typeorm'
 import { Optional } from 'typescript-optional'
 import { CasEntity } from './entities/cas.entity'
 import { CreateCasDTO, UpdateCasDTO } from './cas.dto'
 import { LTIOldService } from '@platon/feature/lti/server'
 import { AxiosError, AxiosResponse } from 'axios'
-import { AxiosService } from './axios.service'
 import { CasServiceValidateResponse } from './payloads'
 
 /** How a sign-in through an institution account ended. */
@@ -28,7 +29,7 @@ export class CasService {
     private readonly LtiService: LTIOldService,
     private readonly userService: UserService,
     private readonly authService: AuthService,
-    private readonly https: AxiosService
+    private readonly http: HttpService
   ) {}
 
   /**
@@ -74,21 +75,21 @@ export class CasService {
   }
 
   async checkCasTicket(serviceValidateURL: string, ticket: string, service: string): Promise<Optional<string>> {
-    const data = await this.https
-      .get<CasServiceValidateResponse>(serviceValidateURL, {
+    const data = await firstValueFrom(
+      this.http.get<CasServiceValidateResponse>(serviceValidateURL, {
         params: {
           ticket: ticket,
           service: service,
           format: 'JSON',
         },
       })
-      .catch((_error: AxiosError) => {
-        return {
-          serviceResponse: {
-            authenticationFailure: { code: 'NO_RESPONSE', description: 'Your CAS provider is not accessible' },
-          },
-        }
-      })
+    ).catch((_error: AxiosError) => {
+      return {
+        serviceResponse: {
+          authenticationFailure: { code: 'NO_RESPONSE', description: 'Your CAS provider is not accessible' },
+        },
+      }
+    })
 
     let response: CasServiceValidateResponse
     if (Object.prototype.hasOwnProperty.call(data, 'data')) {

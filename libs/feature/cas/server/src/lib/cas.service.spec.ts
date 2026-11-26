@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { NotFoundResponse } from '@platon/core/common'
@@ -5,8 +6,11 @@ import { AuthService, UserService } from '@platon/core/server'
 import { MockRepository, mockRepository, mockSelectQueryBuilder } from '@platon/core/testing/server'
 import { CasOrdering, CasVersions } from '@platon/feature/cas/common'
 import { LTIOldService } from '@platon/feature/lti/server'
+import axios from 'axios'
+import { Agent, createServer, Server } from 'http'
+import { AddressInfo } from 'net'
+import { of, throwError } from 'rxjs'
 import { Optional } from 'typescript-optional'
-import { AxiosService } from './axios.service'
 import { CasEntity } from './entities/cas.entity'
 import { CasService } from './cas.service'
 
@@ -16,7 +20,7 @@ describe('CasService', () => {
   let ltiService: jest.Mocked<LTIOldService>
   let userService: jest.Mocked<Pick<UserService, 'findById'>>
   let authService: jest.Mocked<Pick<AuthService, 'authenticate'>>
-  let https: jest.Mocked<Pick<AxiosService, 'get'>>
+  let http: jest.Mocked<Pick<HttpService, 'get'>>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,7 +30,7 @@ describe('CasService', () => {
         { provide: LTIOldService, useValue: { findLmsById: jest.fn(), findLmsUserByUsername: jest.fn() } },
         { provide: UserService, useValue: { findById: jest.fn() } },
         { provide: AuthService, useValue: { authenticate: jest.fn() } },
-        { provide: AxiosService, useValue: { get: jest.fn() } },
+        { provide: HttpService, useValue: { get: jest.fn() } },
       ],
     }).compile()
 
@@ -35,12 +39,12 @@ describe('CasService', () => {
     ltiService = module.get(LTIOldService)
     userService = module.get(UserService)
     authService = module.get(AuthService)
-    https = module.get(AxiosService)
+    http = module.get(HttpService)
   })
 
   describe('signIn', () => {
     const cas = { name: 'univ', serviceValidateURL: 'https://cas.test/validate', lmses: [] } as unknown as CasEntity
-    const validated = (serviceResponse: object) => https.get.mockResolvedValue({ data: { serviceResponse } } as never)
+    const validated = (serviceResponse: object) => http.get.mockReturnValue(of({ data: { serviceResponse } }) as never)
 
     let qb: ReturnType<typeof mockSelectQueryBuilder<CasEntity>>
 
@@ -59,7 +63,7 @@ describe('CasService', () => {
 
       const result = await service.signIn('univ', 'ST-1', 'https://app.test/cas/login/univ')
 
-      expect(https.get).toHaveBeenCalledWith('https://cas.test/validate', {
+      expect(http.get).toHaveBeenCalledWith('https://cas.test/validate', {
         params: { ticket: 'ST-1', service: 'https://app.test/cas/login/univ', format: 'JSON' },
       })
       expect(authService.authenticate).toHaveBeenCalledWith('user-1', 'jdoe')
@@ -81,7 +85,7 @@ describe('CasService', () => {
         'un ticket refusé',
         () => validated({ authenticationFailure: { code: 'INVALID_TICKET', description: 'Ticket invalide' } }),
       ],
-      ['un fournisseur injoignable', () => https.get.mockRejectedValue(new Error('ECONNREFUSED'))],
+      ['un fournisseur injoignable', () => http.get.mockReturnValue(throwError(() => new Error('ECONNREFUSED')))],
       ['une réponse sans succès ni échec', () => validated({})],
       ['un CAS inconnu', () => qb.getOne.mockResolvedValue(null)],
       [
@@ -95,6 +99,55 @@ describe('CasService', () => {
       arrange()
 
       expect(await service.signIn('univ', 'ST-1', 'https://app.test')).toEqual({ outcome: 'failed' })
+    })
+  })
+
+  describe('variables de proxy', () => {
+    const variables = ['http_proxy', 'HTTP_PROXY', 'no_proxy', 'NO_PROXY']
+    const previous = new Map(variables.map((name) => [name, process.env[name]]))
+    const servers: Server[] = []
+
+    // Un serveur qui répond au ticket en donnant son propre nom comme utilisateur
+    const listen = async (user: string): Promise<number> => {
+      const server = createServer((_request, response) => {
+        response.setHeader('content-type', 'application/json')
+        response.end(JSON.stringify({ serviceResponse: { authenticationSuccess: { user } } }))
+      })
+      servers.push(server)
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+      return (server.address() as AddressInfo).port
+    }
+
+    beforeEach(async () => {
+      variables.forEach((name) => delete process.env[name])
+      process.env['http_proxy'] = `http://127.0.0.1:${await listen('proxy')}`
+      // Un agent dédié laisse axios lire les variables posées par le test, même quand le shell
+      // confie le proxy à Node
+      const client = new HttpService(axios.create({ httpAgent: new Agent() }))
+      http.get.mockImplementation((url, config) => client.get(url, config))
+    })
+
+    afterEach(async () => {
+      previous.forEach((value, name) => {
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+      })
+      await Promise.all(servers.splice(0).map((server) => new Promise((resolve) => server.close(resolve))))
+    })
+
+    it('devrait joindre le CAS par le proxy de http_proxy', async () => {
+      const result = await service.checkCasTicket('http://cas.invalid/validate', 'ST-1', 'https://app.test')
+
+      expect(result.get()).toBe('proxy')
+    })
+
+    it('devrait joindre directement un CAS listé dans no_proxy', async () => {
+      const port = await listen('direct')
+      process.env['no_proxy'] = '127.0.0.1'
+
+      const result = await service.checkCasTicket(`http://127.0.0.1:${port}/validate`, 'ST-1', 'https://app.test')
+
+      expect(result.get()).toBe('direct')
     })
   })
 
