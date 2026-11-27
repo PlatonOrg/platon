@@ -12,8 +12,12 @@ type Obj = Record<string, any>
 export const deepMerge = <T extends Obj>(target: T, source: any, replace = false): Obj => {
   const targetObj = target as any
   for (const key in source) {
+    // Assigning this key would replace the prototype of the target
+    if (key === '__proto__') continue
+
     if (typeof source[key] === 'object' && source[key] !== null) {
-      if (!(key in target)) {
+      // Never merged into an inherited property: `constructor` would lead to `Object.prototype`
+      if (!Object.prototype.hasOwnProperty.call(target, key)) {
         Object.assign(target, { [key]: Array.isArray(source[key]) ? [] : {} })
       }
       if (Array.isArray(source[key])) {
