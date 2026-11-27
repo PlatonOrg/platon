@@ -3,81 +3,31 @@ import { WebComponent, WebComponentHooks } from '../../web-component'
 import { EChartsOption } from 'echarts'
 import {
   ChartViewerBarsComponentDefinition,
-  ChartViewerBarsState,
-  horizontalChartViewerBarsState,
-  verticalChartViewerBarsState,
+  type ChartViewerBarsState,
+  chartViewerBarsOption,
 } from './chart-viewer-bars'
-import { deepCopy } from '@cisstech/nge/utils'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgxEchartsModule } from 'ngx-echarts'
 
 @Component({
   selector: 'wc-chart-viewer-bars, wc-cv-bars',
   templateUrl: './chart-viewer-bars.component.html',
   styleUrls: ['chart-viewer-bars.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMonacoModule, NgxEchartsModule],
 })
 @WebComponent(ChartViewerBarsComponentDefinition)
 export class ChartViewerBarsComponent implements WebComponentHooks<ChartViewerBarsState> {
   readonly injector = inject(Injector)
   readonly changeDetectorRef = inject(ChangeDetectorRef)
 
-  protected commonOption = horizontalChartViewerBarsState
-  protected mergedOption: EChartsOption = {}
+  /** Replaces the whole option at each change, so that nothing remains from the previous mode. */
+  protected option: EChartsOption = {}
 
   @Input() state!: ChartViewerBarsState
 
   onChangeState() {
-    this.state.mode = this.state.mode ?? 'simple'
-
-    this.mergedOption = {
-      horizontal: deepCopy(horizontalChartViewerBarsState),
-      vertical: deepCopy(verticalChartViewerBarsState),
-    }[this.state.mode]
-
-    if (this.state.mode === 'horizontal') {
-      this.mergedOption = {
-        ...this.mergedOption,
-        xAxis: {
-          ...this.mergedOption.xAxis,
-          type: 'category',
-          data: this.state.labels,
-          axisLabel: { interval: 0, rotate: 0 },
-        },
-        yAxis: {
-          ...this.mergedOption.yAxis,
-          type: 'value',
-        },
-      }
-    } else {
-      this.mergedOption = {
-        ...this.mergedOption,
-        yAxis: {
-          ...this.mergedOption.yAxis,
-          type: 'category',
-          data: this.state.labels,
-          axisLabel: { interval: 0, rotate: 0 },
-        },
-        xAxis: {
-          ...this.mergedOption.xAxis,
-          type: 'value',
-        },
-      }
-    }
-    this.mergedOption.series = []
-    this.state.data.forEach((data) => {
-      if (Array.isArray(this.mergedOption.series)) {
-        this.mergedOption.series.push({
-          type: 'bar',
-          name: data.name,
-          data: data.value,
-        })
-      }
-    })
-
-    this.mergedOption = {
-      ...this.mergedOption,
-      title: this.state.title,
-      legend: this.state.legend,
-      tooltip: this.state.tooltip,
-    }
+    this.option = chartViewerBarsOption(this.state)
   }
 }

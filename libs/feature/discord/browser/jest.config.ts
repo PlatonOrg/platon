@@ -1,17 +1,16 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'feature-discord-browser',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-      stringifyContentPathRegex: '\\.(html|svg)$',
-    },
-  },
   coverageDirectory: '../../../../coverage/libs/feature/discord/browser',
   transform: {
-    '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
+    '^.+\\.(ts|mjs|js|html)$': [
+      'jest-preset-angular',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        stringifyContentPathRegex: '\\.(html|svg)$',
+      },
+    ],
   },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   snapshotSerializers: [

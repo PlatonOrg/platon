@@ -1,8 +1,10 @@
 <section>
-  <button *ngIf="canEdit" (click)="addGroup()" nz-button nzType="primary" nz-tooltip="Ajouter un groupe">
+  @if (canEdit) {
+  <button (click)="addGroup()" nz-button nzType="primary" nz-tooltip="Ajouter un groupe">
     <span nz-icon nzType="plus" nzTheme="outline"></span><span>Ajouter un groupe</span>
   </button>
-  <mat-card *ngIf="context.courseGroups && context.courseGroups.length > 0; else noGroup">
+  } @if (context.courseGroups && context.courseGroups.length > 0) {
+  <mat-card>
     <mat-card-content>
       <nz-collapse>
         @for (group of context.courseGroups; track group) {
@@ -15,14 +17,14 @@
             <span
               (click)="$event.stopPropagation()"
               nz-typography
-              [nzEditable]="context.course?.permissions?.update"
+              [nzEditable]="$safeNavigationMigration(context.course?.permissions?.update)"
               [nzContent]="group.courseGroup.name"
               (nzContentChange)="updateGroupName($event, group.courseGroup.groupId)"
             ></span>
           </ng-template>
           <ng-template #extraTpl>
+            @if (canEdit) {
             <button
-              *ngIf="canEdit"
               class="has-margin"
               nz-button
               nzDanger
@@ -37,8 +39,8 @@
             >
               <i nz-icon nzType="delete"></i>
             </button>
+            } @if (canEdit) {
             <button
-              *ngIf="canEdit"
               class="has-margin"
               (click)="$event.stopPropagation(); addModal.open()"
               nz-button
@@ -47,6 +49,7 @@
             >
               <span nz-icon nzType="plus" nzTheme="outline"></span>
             </button>
+            }
           </ng-template>
           <course-member-table
             [members]="group.members"
@@ -71,9 +74,9 @@
       </nz-collapse>
     </mat-card-content>
   </mat-card>
-  <ng-template #noGroup>
-    <nz-empty [nzNotFoundContent]="noGroupContent">
-      <ng-template #noGroupContent> Ce cours ne contient aucun groupe. </ng-template>
-    </nz-empty>
-  </ng-template>
+  } @else {
+  <nz-empty [nzNotFoundContent]="noGroupContent">
+    <ng-template #noGroupContent> Ce cours ne contient aucun groupe. </ng-template>
+  </nz-empty>
+  }
 </section>

@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core'
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
@@ -16,30 +15,31 @@ import { Level, Topic, User, UserPrefs, UserRoles } from '@platon/core/common'
 import { MatIconModule } from '@angular/material/icon'
 
 @Component({
-  standalone: true,
   selector: 'app-account-about-me',
   templateUrl: './about-me.page.html',
   styleUrls: ['./about-me.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     ReactiveFormsModule,
-
     MatCardModule,
     MatInputModule,
     MatSelectModule,
     MatFormFieldModule,
     MatIconModule,
-
     NzSelectModule,
     NzButtonModule,
-
     DialogModule,
     ProtectedComponent,
   ],
 })
 export class AccountAboutMePage {
+  private readonly fb = inject(FormBuilder)
+  private readonly tagService = inject(TagService)
+  private readonly userService = inject(UserService)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected readonly form = this.fb.group({
     firstName: this.fb.control({ value: '', disabled: true }),
     lastName: this.fb.control({ value: '', disabled: true }),
@@ -56,14 +56,6 @@ export class AccountAboutMePage {
   protected topics: Topic[] = []
   protected levels: Level[] = []
   protected icon = 'lock'
-
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly tagService: TagService,
-    private readonly userService: UserService,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   protected async onConnect(user: User): Promise<void> {
     this.user = user

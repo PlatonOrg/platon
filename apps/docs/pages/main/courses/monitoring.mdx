@@ -1,0 +1,72 @@
+---
+title: Suivi en direct d'une activité
+description: Suivre les étudiants pendant une activité PLaTon, débloquer ou arrêter des sessions, accorder du temps supplémentaire (tiers-temps) et gérer le code de déblocage d'un examen.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Suivi en direct d'une activité
+
+La page **Suivi de l'activité** permet à un enseignant de surveiller une activité pendant qu'elle se déroule,
+typiquement pendant un TP noté ou un examen. On l'ouvre depuis le menu ⋮ d'une carte d'activité, entrée
+**Suivi de l'activité** (réservée aux enseignants du cours).
+
+<Callout type="info">
+  Le suivi n'est disponible que pendant que l'activité est **ouverte** (au moins une période d'accès en cours). Quand
+  elle est fermée, la page n'affiche que le code de déblocage, s'il existe.
+</Callout>
+
+## Modération de l'activité
+
+Le cadre **Modération de l'activité** liste les membres du cours sous forme de vignettes. Une pastille indique l'état
+de chacun ; le compteur en haut permet de filtrer la liste :
+
+| Filtre             | Étudiants concernés                                                       |
+| ------------------ | ------------------------------------------------------------------------- |
+| **Actifs**         | Ont démarré l'activité et peuvent encore répondre.                        |
+| **Bloqués**        | Ont démarré l'activité mais leur session est terminée (fin volontaire, temps écoulé, règle de sécurité enfreinte). |
+| **Temps supp.**    | Ont reçu du temps supplémentaire (la durée ajoutée est affichée sur la vignette). |
+| **Non démarrés**   | N'ont pas encore lancé l'activité.                                        |
+| **Total**          | Tous les membres.                                                          |
+
+Vous pouvez aussi filtrer par **groupe** du cours et rechercher un étudiant par son nom.
+
+### Agir sur des étudiants
+
+Sélectionnez une ou plusieurs vignettes (ou **Tout sélectionner**), puis utilisez les boutons d'action :
+
+| Bouton                                                   | Effet                                                                                                                                  |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ouvrir l'activité pour les utilisateurs sélectionnés** | Rouvre la session des étudiants bloqués : ils peuvent reprendre là où ils en étaient (sans code de déblocage).                         |
+| **Fermer l'activité pour les utilisateurs sélectionnés** | Termine la session des étudiants : ils ne peuvent plus répondre.                                                                       |
+| **Ajouter du temps aux utilisateurs sélectionnés**       | Ouvre une fenêtre pour accorder 5, 10, 15 ou 30 minutes, ou une durée personnalisée (de 1 à 600 minutes).                              |
+
+Ces actions ne s'appliquent qu'aux étudiants qui ont **déjà démarré** l'activité.
+
+### Temps supplémentaire et tiers-temps
+
+Le temps ajouté se cumule et prolonge à la fois :
+
+- la **durée maximale** de l'activité pour cet étudiant ;
+- la **date de fermeture** de l'activité pour cet étudiant.
+
+C'est la façon d'appliquer un tiers-temps : une fois que l'étudiant a démarré, ajoutez-lui le temps correspondant. Pour
+des dates d'ouverture complètement différentes (rattrapage…), utilisez plutôt une
+[période d'accès](/main/courses/activities#onglet-restrictions) dédiée.
+
+## Code de déblocage
+
+Pour une activité avec règles de sécurité (voir [TP noté / Examen](/main/courses/activities#paramètres-dun-tp-noté)), le
+**code de déblocage** est affiché masqué en haut du cadre :
+
+- cliquez dessus pour le révéler, puis copiez-le pour le communiquer à un étudiant bloqué ;
+- le bouton de régénération crée un nouveau code : **l'ancien ne fonctionne plus**. C'est utile si le code a circulé.
+
+L'étudiant bloqué saisit ce code dans le cadre **Code de déblocage** de son écran de fin d'activité pour reprendre.
+Vous pouvez aussi le débloquer directement avec **Ouvrir l'activité pour les utilisateurs sélectionnés**.
+
+## Tableau des résultats
+
+Sous la modération, le tableau des **résultats par apprenant** affiche l'état et la note de chaque étudiant pour
+chaque exercice. Il se met à jour au fil des réponses des étudiants. Le même tableau figure dans les
+[statistiques](/main/courses/statistics) de l'activité.

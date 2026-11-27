@@ -18,7 +18,13 @@ Le composant fonctionne avec une liste de paires d'éléments que l'apprenant de
 
 Plusieurs paramètres permettent d'ajuster l'expérience d'apprentissage:
 
-- Mode d'affichage: Choisissez entre `ordered` (présentation séquentielle) ou `shuffle` (mélange aléatoire des paires)
+- Mode d'affichage (`mode`) :
+
+  - `ordered` (par défaut) : quand une paire est trouvée, elle est remplacée par une nouvelle paire complète : le nouvel élément de gauche et le nouvel élément de droite vont ensemble.
+  - `shuffle` : les nouveaux éléments de gauche et de droite sont tirés indépendamment ; un élément n'arrive donc pas forcément avec celui qui forme sa paire. Il reste toujours au moins une paire à former à l'écran.
+
+  Dans les deux modes, les premiers éléments des paires sont affichés dans une colonne et les seconds dans l'autre.
+
 - Nombre de paires: Contrôlez combien de paires sont affichées simultanément avec `numberPairToShow`
 - Timing: Ajustez le délai entre les associations réussies avec `timeout` (en millisecondes)
 

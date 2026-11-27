@@ -16,7 +16,7 @@ import {
 import { MatIconModule } from '@angular/material/icon'
 import { NzBadgeModule } from 'ng-zorro-antd/badge'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { v4 as uuidv4 } from 'uuid'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
@@ -38,7 +38,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 export const getPreviewOverridesStorageKey = (sessionId: string) => `preview.overrides.${sessionId}`
 
 @Component({
-  standalone: true,
   selector: 'app-exercise-card',
   templateUrl: './exercise-card.component.html',
   styleUrls: ['./exercise-card.component.scss'],
@@ -46,20 +45,16 @@ export const getPreviewOverridesStorageKey = (sessionId: string) => `preview.ove
   imports: [
     CommonModule,
     RouterModule,
-
     MatIconModule,
-
     NzIconModule,
     NzBadgeModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzPopoverModule,
     NzSpinModule,
-
     NgeUiListModule,
     NgeMarkdownModule,
     UiModalIFrameComponent,
-
     ResourcePipesModule,
   ],
 })
@@ -74,6 +69,11 @@ export class ExerciseCardComponent implements OnChanges, AfterViewInit {
 
   protected configurable = false
   protected readme?: ResourceFile
+
+  // use for blocking the opening of the resource if drag by the resource name.
+  protected startX = 0
+  protected startY = 0
+  protected isDrag = false
 
   @Input() item!: Resource
   @Input({ transform: booleanAttribute }) modalMode = false
@@ -120,6 +120,9 @@ export class ExerciseCardComponent implements OnChanges, AfterViewInit {
   }
 
   protected openTab(url: string): void {
+    if (this.isDrag) {
+      return
+    }
     window.open(url, '_blank')
   }
 
@@ -139,5 +142,22 @@ export class ExerciseCardComponent implements OnChanges, AfterViewInit {
     this.fileService.read(`${this.item.id}`, 'readme.md').subscribe((file) => {
       this.readme = file
     })
+  }
+
+  // take coordinate when clic on the resource name
+  protected onMouseDown(event: MouseEvent): void {
+    this.startX = event.clientX
+    this.startY = event.clientY
+    this.isDrag = false
+  }
+
+  // update isDrag to see if the card as been drag or not
+  protected onMouseUp(event: MouseEvent): void {
+    const deltaX = Math.abs(event.clientX - this.startX)
+    const deltaY = Math.abs(event.clientY - this.startY)
+    const limit = 5 // if the mouse mouve more than limit px we don't open the resource
+    if (deltaX > limit || deltaY > limit) {
+      this.isDrag = true
+    }
   }
 }

@@ -1,12 +1,16 @@
-<nz-table #nzTable [nzSize]="'small'" [nzShowSizeChanger]="false" [nzShowPagination]="false" [nzData]="dataSource">
+<nz-table
+  #nzTable
+  [nzSize]="'small'"
+  [nzShowSizeChanger]="false"
+  [nzShowPagination]="false"
+  [nzFrontPagination]="false"
+  [nzData]="dataSource"
+>
   <thead>
     <tr>
-      <th
-        *ngIf="selectable && !disabled"
-        [nzChecked]="checked"
-        [nzIndeterminate]="indeterminate"
-        (nzCheckedChange)="onAllChecked($event)"
-      ></th>
+      @if (selectable && !disabled) {
+      <th [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
+      }
       <th>Titre</th>
       <th>Section</th>
       <th>Nombre d'exercices</th>
@@ -19,31 +23,51 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let model of nzTable.data; trackBy: trackByFn">
+    @for (model of nzTable.data; track trackByFn($index, model)) {
+    <tr [id]="model.activity.id" [class.hidden-activity]="model.section?.hidden">
+      @if (selectable && !disabled) {
       <td
-        *ngIf="selectable && !disabled"
         [nzChecked]="selection.has(model.activity.id)"
         (nzCheckedChange)="onItemChecked(model.activity.id, $event)"
       ></td>
-      <td nzAlign="center">{{ model.activity.title }}</td>
-      <td nzAlign="center">{{ model.section?.name }}</td>
+      }
+      <td nzAlign="center">
+        @if(model.activity.hidden) {
+        <div class="hidden-student-message">
+          <span nz-icon [nzType]="'eye-invisible'" nzTheme="outline"></span>
+          Caché aux étudiants
+        </div>
+        }
+        {{ model.activity.title }}
+      </td>
+      <td nzAlign="center">
+        @if (model.section?.hidden) {
+        <span
+          class="hidden-section"
+          nz-icon
+          [nzType]="'eye-invisible'"
+          nzTheme="outline"
+          nz-tooltip="Cacher aux étudiants"
+        ></span>
+        }
+        {{ model.section?.name }}
+      </td>
       <td nzAlign="center">
         <nz-tag>{{ model.activity.exerciseCount }}</nz-tag>
       </td>
       <td nzAlign="center">
         <nz-tag>{{ model.activity.createdAt | date }}</nz-tag>
       </td>
-      <td nzAlign="center" class="clickable" (click)="settingsSelectedActivity = model.activity; modal.open()">
+      <td nzAlign="center" class="clickable" (click)="openSettings(model.activity)">
         <nz-tag>{{ (model.activity.openAt | date) || 'Non définie' }}</nz-tag>
       </td>
-      <td nzAlign="center" class="clickable" (click)="settingsSelectedActivity = model.activity; modal.open()">
+      <td nzAlign="center" class="clickable" (click)="openSettings(model.activity)">
         <nz-tag>{{ (model.activity.closeAt | date) || 'Non définie' }}</nz-tag>
       </td>
-
       <td nzAlign="center">
-        <ng-container *ngIf="model.activity | courseActivityState as state">
-          <nz-tag [nzColor]="state.color"> {{ state.label }}</nz-tag>
-        </ng-container>
+        @if (model.activity | courseActivityState; as state) {
+        <nz-tag [nzColor]="state.color"> {{ state.label }}</nz-tag>
+        }
       </td>
       <td nzAlign="center">
         @if (model.activity.permissions.answer) {
@@ -57,9 +81,10 @@
         ></span>
         }
       </td>
-      <td nzAlign="center" *ngIf="!disabled">
+      @if (!disabled) {
+      <td nzAlign="center">
+        @if (model.activity.isChallenge) {
         <a
-          *ngIf="model.activity.isChallenge"
           nz-button
           nzShape="round"
           [routerLink]="['/courses', model.activity.courseId, 'challenges']"
@@ -70,8 +95,8 @@
         >
           <span nz-tooltip="Afficher les résultats du challenge" nz-icon nzType="trophy" nzTheme="twotone"></span>
         </a>
+        } @if (model.activity.permissions.viewResource) {
         <a
-          *ngIf="model.activity.permissions.viewResource"
           nz-tooltip="Ouvrir la ressource associée"
           nz-button
           nzShape="round"
@@ -79,8 +104,8 @@
         >
           <span nz-icon nzType="paper-clip" nzTheme="outline"></span>
         </a>
+        } @if (model.activity.permissions.answer) {
         <a
-          *ngIf="model.activity.permissions.answer"
           nz-tooltip="Lancer"
           nz-button
           nzShape="round"
@@ -90,8 +115,8 @@
         >
           <i nz-icon nzType="play-circle" nzTheme="outline"></i>
         </a>
+        } @if (model.activity.permissions.viewStats) {
         <a
-          *ngIf="model.activity.permissions.viewStats"
           nz-tooltip="Statistiques"
           nz-button
           nzShape="round"
@@ -100,28 +125,21 @@
         >
           <i nz-icon nzType="bar-chart" nzTheme="outline"></i>
         </a>
+        }
         <div class="spacer"></div>
-        <a
-          *ngIf="model.activity.permissions.update"
-          nz-tooltip="Paramètres"
-          nz-button
-          nzShape="round"
-          nzType="default"
-          (click)="settingsSelectedActivity = model.activity; modal.open()"
-        >
+        @if (model.activity.permissions.update) {
+        <a nz-tooltip="Paramètres" nz-button nzShape="round" nzType="default" (click)="openSettings(model.activity)">
           <i nz-icon nzType="setting" nzTheme="outline"></i>
         </a>
+        }
       </td>
+      }
     </tr>
+    }
   </tbody>
 </nz-table>
-<ui-modal-drawer
-  size="large"
-  [title]="settingsSelectedActivity?.title || ''"
-  (closed)="settingsSelectedActivity = undefined"
-  #modal
->
-  <ng-template>
-    <course-activity-settings [(activity)]="settingsSelectedActivity!" />
-  </ng-template>
-</ui-modal-drawer>
+<course-activity-settings-drawer
+  [activity]="settingsSelectedActivity"
+  (activityChange)="onActivityChange($event)"
+  #settingsDrawer
+/>

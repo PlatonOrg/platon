@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
 
@@ -15,15 +15,8 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
 
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import { User } from '@platon/core/common'
-import {
-  CircleTreeComponent,
-  ResourceItemComponent,
-  ResourcePipesModule,
-  ResourceSearchBarComponent,
-  ResourceService,
-} from '@platon/feature/resource/browser'
+import { CircleTreeComponent, ResourcePipesModule, ResourceService } from '@platon/feature/resource/browser'
 import { CircleTree, Resource, ResourceTypes, branchFromCircleTree } from '@platon/feature/resource/common'
-import { UiStepDirective, UiStepperComponent } from '@platon/shared/ui'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { NzTagModule } from 'ng-zorro-antd/tag'
@@ -38,7 +31,6 @@ type TemplateSource = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-resource-move',
   templateUrl: './move.page.html',
   styleUrls: ['./move.page.scss'],
@@ -48,11 +40,9 @@ type TemplateSource = {
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzTagModule,
     NzSpinModule,
     NzIconModule,
@@ -62,18 +52,19 @@ type TemplateSource = {
     NzSkeletonModule,
     NzPageHeaderModule,
     NzAlertModule,
-
-    UiStepDirective,
-    UiStepperComponent,
     DialogModule,
-
     CircleTreeComponent,
     ResourcePipesModule,
-    ResourceItemComponent,
-    ResourceSearchBarComponent,
   ],
 })
 export class ResourceMovePage implements OnInit {
+  private readonly router = inject(Router)
+  private readonly authService = inject(AuthService)
+  private readonly dialogService = inject(DialogService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly resourceService = inject(ResourceService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected type!: ResourceTypes
   protected resourceId!: string
   protected parentId?: string
@@ -89,14 +80,6 @@ export class ResourceMovePage implements OnInit {
   protected selectedTemplateSources = new SelectionModel<TemplateSource>(true, [])
 
   protected tree!: CircleTree
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly dialogService: DialogService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly resourceService: ResourceService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes

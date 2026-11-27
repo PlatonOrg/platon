@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core'
+import { Injectable, Injector, ProviderToken, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { AuthToken, CreatedResponse, ResetPasswordInput, SignUpInput, User } from '@platon/core/common'
 import { firstValueFrom, Observable, of } from 'rxjs'
@@ -11,20 +11,18 @@ import { AuthProvider } from '../models/auth-provider'
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly router = inject(Router)
+  private readonly injector = inject(Injector)
+  private readonly authProvider = inject(AuthProvider)
+
   private user?: User
   private request?: Observable<User | undefined>
 
   private get observers(): AuthObserver[] {
-    return this.injector.get<object[]>(AUTH_OBSERVER, []).map((type) => {
-      return this.injector.get(type, [])
+    return this.injector.get<ProviderToken<AuthObserver>[]>(AUTH_OBSERVER, []).map((type) => {
+      return this.injector.get(type)
     })
   }
-
-  constructor(
-    private readonly router: Router,
-    private readonly injector: Injector,
-    private readonly authProvider: AuthProvider
-  ) {}
 
   signUp(newUser: SignUpInput): Promise<CreatedResponse<AuthToken>> {
     return this.authProvider.signUp(newUser)

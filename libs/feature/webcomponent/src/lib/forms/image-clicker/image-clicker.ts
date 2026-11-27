@@ -154,4 +154,7 @@ export const ImageClickerComponentDefinition = defineWebComponent({
     disabled: false,
     clickPoints: [],
   },
+  playgrounds: {
+    'Cliquer sur une cible': 'find-target.ple',
+  },
 })

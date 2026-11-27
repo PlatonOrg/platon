@@ -7,6 +7,7 @@ import {
   Output,
   TemplateRef,
   inject,
+  signal,
 } from '@angular/core'
 import { ActivityExercise, PleInput, Variables } from '@platon/feature/compiler'
 import { ResourceService } from '@platon/feature/resource/browser'
@@ -14,11 +15,30 @@ import { ExerciseResourceMeta, Resource } from '@platon/feature/resource/common'
 import { NzModalService } from 'ng-zorro-antd/modal'
 import { firstValueFrom } from 'rxjs'
 
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { PleInputEditorModule } from '../../ple-input/ple-input.module'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { ExerciseCardComponent } from '../exercise-card/exercise-card.component'
+import { MatIconModule } from '@angular/material/icon'
+
+type ExerciseStatut = 'public' | 'private' | 'error' | 'loading'
+
 @Component({
   selector: 'app-pla-exercise-editor',
   templateUrl: './exercise-editor.component.html',
   styleUrls: ['./exercise-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    NzButtonModule,
+    NzIconModule,
+    NzTooltipModule,
+    PleInputEditorModule,
+    NzListModule,
+    ExerciseCardComponent,
+    MatIconModule,
+  ],
 })
 export class PlaExerciseEditorComponent {
   private readonly resourceService = inject(ResourceService)
@@ -30,6 +50,7 @@ export class PlaExerciseEditorComponent {
   protected inputs?: PleInput[] = []
   protected resource?: Resource
   protected overrides: Variables = {}
+  protected loadState = signal<ExerciseStatut>('loading')
 
   get exercise(): ActivityExercise {
     return this._exercise
@@ -38,6 +59,10 @@ export class PlaExerciseEditorComponent {
   @Input()
   set exercise(value: ActivityExercise) {
     this._exercise = value
+    this.load(this._exercise)
+  }
+
+  private load(value: ActivityExercise) {
     // TODO: read from file system instead of using metadata since they contains only metadata
     // for latest version of the resource
     firstValueFrom(
@@ -48,6 +73,7 @@ export class PlaExerciseEditorComponent {
     )
       .then((resource) => {
         this.resource = resource
+        this.loadState.set('public')
         const metadata = resource.metadata as ExerciseResourceMeta | undefined
         this.inputs = []
         this.overrides = {}
@@ -57,7 +83,7 @@ export class PlaExerciseEditorComponent {
           }
           this.inputs.push({
             ...input,
-            value: this.overrides[input.name],
+            value: this.overrides[input.name] ?? input.value,
           })
         }
         if (!this.inputs.length) {
@@ -66,8 +92,18 @@ export class PlaExerciseEditorComponent {
         this.changeDetectorRef.detectChanges()
       })
       .catch((error) => {
-        console.error('Unable to load resource metadata', error)
-        this.exerciseLoadFailed.emit(value)
+        if (error?.status === 403) {
+          this.resource = undefined
+          this.inputs = undefined
+          this.loadState.set('private')
+          console.log("You don't have the read permission for the resource: ", value.resource)
+        } else if (error?.status === 404) {
+          console.error('Unable to load resource metadata', error)
+          this.exerciseLoadFailed.emit(value)
+        } else {
+          this.loadState.set('error')
+          console.error('Unable to load resource metadata', error)
+        }
       })
   }
 
@@ -83,6 +119,10 @@ export class PlaExerciseEditorComponent {
   protected onOverrideVariable(name: string, value: unknown) {
     this.overrides[name] = value
     this.exercise.overrides = this.overrides
+    const input = this.inputs?.find((i) => i.name === name)
+    if (input) {
+      input.value = value
+    }
     this.exerciseChange.emit(this.exercise)
   }
 
@@ -101,5 +141,12 @@ export class PlaExerciseEditorComponent {
         this.changeDetectorRef.detectChanges()
       },
     })
+  }
+
+  protected reloadExercise() {
+    this.loadState.set('loading')
+    if (this._exercise) {
+      this.load(this._exercise)
+    }
   }
 }

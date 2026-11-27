@@ -39,6 +39,23 @@ type Node = ResourceFile
 
 const removeLeadingSlash = (path: string) => (path.startsWith('/') ? path.slice(1) : path)
 
+const isInside = (root: string, path: string) => path.startsWith(root + Path.sep)
+
+// Git reads commands to run from its directory, whose name some file systems match whatever the case
+const isInGitDir = (root: string, path: string) =>
+  Path.relative(root, path)
+    .split(Path.sep)
+    .some((segment) => segment.toLowerCase() === '.git')
+
+const exists = (path: string): boolean => {
+  try {
+    fs.lstatSync(path)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export class Repo {
   private ignoreCommits = false
   private readonly resource = this.root.split('/').pop() as string
@@ -48,6 +65,17 @@ export class Repo {
   }
 
   private constructor(private readonly root: string, private readonly user: User) {}
+
+  private async gitClient(dir: string) {
+    const client = simpleGit(dir)
+    if (this.user.name) {
+      await client.addConfig('user.name', this.user.name, false, 'local')
+    }
+    if (this.user.email) {
+      await client.addConfig('user.email', this.user.email, false, 'local')
+    }
+    return client
+  }
 
   static async get(
     name: string,
@@ -338,6 +366,7 @@ export class Repo {
     const dstpath = Path.dirname(abspath)
 
     const zip = new AdmZip(abspath)
+    this.checkEntries(dstpath, zip.getEntries())
 
     const asyncUnzip = promisify(zip.extractAllToAsync.bind(zip))
     await asyncUnzip(dstpath, true, false)
@@ -369,6 +398,14 @@ export class Repo {
       throw new FileNotFoundError(file)
     }
 
+    // A directory comes with everything under it
+    const extracted = zip
+      .getEntries()
+      .filter(
+        ({ entryName }) => entryName === entry.entryName || (entry.isDirectory && entryName.startsWith(entry.entryName))
+      )
+    this.checkEntries(dstpath, extracted)
+
     zip.extractEntryTo(entry, dstpath, true, true)
 
     await this.commit(`unzip ${path}`)
@@ -380,12 +417,16 @@ export class Repo {
     return zip.getEntries().map((entry) => entry.entryName)
   }
 
-  async upload(src: string, dst: string) {
+  async upload(src: string, dst: string): Promise<string> {
     const abspath = this.abspath(dst)
     const dirname = Path.dirname(abspath)
     const basename = Path.basename(abspath)
-    await fs.promises.rename(src, uniquifyFileName(dirname, basename))
+    const pathWithNewName = uniquifyFileName(dirname, basename)
+    await fs.promises.rename(src, pathWithNewName)
     await this.commit(`upload ${dst}`)
+    const parts = pathWithNewName.split(/[/\\]/)
+    const fileName = parts.pop()
+    return fileName === undefined ? '' : fileName // return '' if cannot parse the new name should not append
   }
 
   // Git
@@ -393,16 +434,14 @@ export class Repo {
   async commit(message: string): Promise<boolean> {
     if (this.ignoreCommits) return false
 
-    // add all
-    await git
-      .statusMatrix(this.repo)
-      .then((status) =>
-        Promise.all(
-          status.map(([filepath, , worktreeStatus]) =>
-            worktreeStatus ? git.add({ ...this.repo, filepath }) : git.remove({ ...this.repo, filepath })
-          )
-        )
-      )
+    const status = await git.statusMatrix(this.repo)
+    const toAdd = status.filter(([, , worktreeStatus]) => worktreeStatus).map(([filepath]) => filepath)
+    const toRemove = status.filter(([, , worktreeStatus]) => !worktreeStatus).map(([filepath]) => filepath)
+
+    if (toAdd.length) await git.add({ ...this.repo, filepath: toAdd })
+    for (const filepath of toRemove) {
+      await git.remove({ ...this.repo, filepath })
+    }
 
     await git.commit({
       ...this.repo,
@@ -417,7 +456,8 @@ export class Repo {
   async bundle(version = LATEST) {
     return await withTempFile(
       async (path) => {
-        await simpleGit(this.root).raw('bundle', 'create', path, 'HEAD', version === LATEST ? DEFAULT_BRANCH : 'latest')
+        const client = await this.gitClient(this.root)
+        await client.raw('bundle', 'create', path, 'HEAD', version === LATEST ? DEFAULT_BRANCH : 'latest')
         return path
       },
       { prefix: 'bundles', suffix: '.git', cleanup: false }
@@ -425,18 +465,14 @@ export class Repo {
   }
 
   async mergeBundle(name: string) {
-    await simpleGit(this.repo.dir).pull(['--rebase', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`)])
+    const client = await this.gitClient(this.repo.dir)
+    await client.pull(['--rebase', Path.join(RESOURCES_DIR, 'bundles', `${name}.git`)])
   }
 
   async copy(to: Repo) {
     try {
-      await simpleGit(this.root).raw(
-        'bundle',
-        'create',
-        Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`),
-        'HEAD',
-        'main'
-      )
+      const client = await this.gitClient(this.root)
+      await client.raw('bundle', 'create', Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`), 'HEAD', 'main')
       await to.mergeBundle(this.resource)
       await fs.promises.rm(Path.join(RESOURCES_DIR, 'bundles', `${this.resource}.git`))
     } catch (error) {
@@ -447,9 +483,11 @@ export class Repo {
 
   async archive(path = ROOT, version = LATEST) {
     version = version === LATEST ? 'HEAD' : version
+    const treeish = path === ROOT ? version : `${version}:${path}`
     return withTempFile(
       async (tmppath) => {
-        await simpleGit(this.repo.dir).raw(['archive', '-o', tmppath, `${version}:${path}`])
+        const client = await this.gitClient(this.repo.dir)
+        await client.raw(['archive', '-o', tmppath, treeish])
         return tmppath
       },
       { prefix: 'archives', suffix: '.zip', cleanup: false }
@@ -479,11 +517,13 @@ export class Repo {
       args.push('-i')
     }
 
-    return simpleGit(this.root).grep(query, args)
+    const client = await this.gitClient(this.root)
+    return client.grep(query, args)
   }
 
   async versions(): Promise<FileVersions> {
-    const tags = await simpleGit(this.repo.dir).tags({
+    const client = await this.gitClient(this.repo.dir)
+    const tags = await client.tags({
       '--format': '%(refname:lstrip=2) %(taggername) %(taggeremail) %(creatordate:iso-strict) %(subject)',
     })
 
@@ -516,7 +556,8 @@ export class Repo {
   }
 
   async describe(): Promise<string> {
-    return simpleGit(this.root).raw('describe', '--always')
+    const client = await this.gitClient(this.root)
+    return client.raw('describe', '--always')
   }
 
   async withNoCommit<T = unknown>(consumer: () => Promise<T>): Promise<T> {
@@ -528,27 +569,49 @@ export class Repo {
     }
   }
 
+  /**
+   * The absolute form of `path`, relative to the repository or already absolute.
+   * @throws `PermissionError` if it leads outside the repository or into its git directory.
+   */
   private abspath(path = ROOT, authorizeRoot = false) {
     path = (path || ROOT).trim()
-    if (path.startsWith('/')) {
-      // ensure that path does not point to a file outside of self.root
-      if (!path.startsWith(this.root + '/')) {
-        throw new PermissionError(`${path}: points to an invalid file`)
-      }
-      return path
-    }
 
-    if (path === '.') {
+    if (path === ROOT || (authorizeRoot && Path.resolve(this.root, path) === this.root)) {
       if (authorizeRoot) return this.root
       throw new PermissionError('path should not points to root.')
     }
 
-    // ensure that path does not point to a file outside of self.root
-    const abspath = Path.resolve(Path.join(this.root, path))
-    if (!abspath.startsWith(this.root + '/')) {
+    // Resolved first: `..` segments must not survive the check, even in an absolute path
+    const abspath = Path.resolve(this.root, path)
+    if (!isInside(this.root, abspath) || isInGitDir(this.root, abspath) || this.linksAway(abspath)) {
       throw new PermissionError(`${path}: points to an invalid file`)
     }
     return abspath
+  }
+
+  /** Whether a symbolic link on the way to `abspath` leads outside the repository or into its git directory. */
+  private linksAway(abspath: string): boolean {
+    let existing = abspath
+    while (existing !== this.root && !exists(existing)) {
+      existing = Path.dirname(existing)
+    }
+    if (existing === this.root) return false
+
+    try {
+      const root = fs.realpathSync(this.root)
+      const target = fs.realpathSync(existing)
+      return (target !== root && !isInside(root, target)) || isInGitDir(root, target)
+    } catch {
+      return true // a link to nothing: writing to it would create its target
+    }
+  }
+
+  private checkEntries(dstpath: string, entries: AdmZip.IZipEntry[]): void {
+    entries.forEach(({ entryName }) => {
+      // The name under which AdmZip writes the entry: `\` read as `/`, `..` stopping at the destination
+      const written = Path.posix.normalize(`/${entryName.split('\\').join('/')}`)
+      this.abspath(Path.join(dstpath, written), true)
+    })
   }
 
   async log() {
@@ -576,26 +639,32 @@ export class Repo {
   }
 
   async getCurrentBranch() {
-    return (await simpleGit(this.root).branch()).current
+    const client = await this.gitClient(this.root)
+    return (await client.branch()).current
   }
 
   async checkout(branch: string) {
-    await simpleGit(this.root).checkout(branch)
+    const client = await this.gitClient(this.root)
+    await client.checkout(branch)
   }
 
   async checkoutTag(tag: string) {
-    await simpleGit(this.root).checkout('tags/' + tag, ['-f'])
+    const client = await this.gitClient(this.root)
+    await client.checkout('tags/' + tag, ['-f'])
   }
 
   async moveTag(tag: string) {
-    await simpleGit(this.root).raw('tag', '-f', tag, 'HEAD')
+    const client = await this.gitClient(this.root)
+    await client.raw('tag', '-f', tag, 'HEAD')
   }
 
   async checkoutLocalBranch(branch: string) {
-    await simpleGit(this.root).checkoutLocalBranch(branch)
+    const client = await this.gitClient(this.root)
+    await client.checkoutLocalBranch(branch)
   }
 
   async deleteLocalBranch(branch: string) {
-    await simpleGit(this.root).deleteLocalBranch(branch, true)
+    const client = await this.gitClient(this.root)
+    await client.deleteLocalBranch(branch, true)
   }
 }

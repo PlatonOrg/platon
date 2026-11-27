@@ -1,14 +1,14 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common'
 import { AuthService } from '@platon/core/server'
 import { NextFunction, Request, Response } from 'express'
-import { LTIService } from './lti.service'
+import { LTIOldService } from './lti.service.old'
 import { LTIProvider } from './provider'
 
 @Injectable()
 export class LTIMiddleware implements NestMiddleware {
   private readonly logger = new Logger(LTIMiddleware.name)
 
-  constructor(private readonly lti: LTIService, private readonly authService: AuthService) {}
+  constructor(private readonly lti: LTIOldService, private readonly authService: AuthService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     if (!req.body?.oauth_consumer_key) {
@@ -54,7 +54,14 @@ export class LTIMiddleware implements NestMiddleware {
       const args = {
         lms,
         lmsUser,
-        payload: provider.body,
+        payload: {
+          id: provider.body.context_id,
+          title: provider.body.context_title,
+          groups: provider.body['custom_groups'],
+          custom_course: provider.body['custom_course'],
+          custom_activity: provider.body['custom_activity'],
+          is_instructor: provider.body.is_instructor,
+        },
         nextUrl,
       }
 

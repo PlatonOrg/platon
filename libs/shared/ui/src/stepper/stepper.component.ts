@@ -10,6 +10,7 @@ import {
   Output,
   QueryList,
   TemplateRef,
+  inject,
 } from '@angular/core'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzStepsModule } from 'ng-zorro-antd/steps'
@@ -17,7 +18,6 @@ import { Subscription } from 'rxjs'
 import { UiStepDirective } from './step.directive'
 
 @Component({
-  standalone: true,
   selector: 'ui-stepper',
   templateUrl: './stepper.component.html',
   styleUrls: ['./stepper.component.scss'],
@@ -25,6 +25,8 @@ import { UiStepDirective } from './step.directive'
   imports: [CommonModule, NzIconModule, NzStepsModule],
 })
 export class UiStepperComponent implements AfterContentInit, OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly suscriptions: Subscription[] = []
 
   protected items: UiStepDirective[] = []
@@ -51,8 +53,6 @@ export class UiStepperComponent implements AfterContentInit, OnDestroy {
   get isValid(): boolean {
     return !!(this.activeStep?.stepValidator ?? true)
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngAfterContentInit() {
     this.step = 0

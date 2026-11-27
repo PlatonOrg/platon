@@ -14,6 +14,12 @@ export interface CourseMember {
   readonly user?: User
   readonly group?: UserGroup
   readonly role?: CourseMemberRoles
+  readonly archived?: boolean
+}
+
+export interface UpdateCourseMember {
+  readonly id: string
+  readonly archived?: boolean
 }
 
 export interface CourseMemberView {

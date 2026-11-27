@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import {
   EvalExerciseInput,
   EvalExerciseOutput,
@@ -11,13 +11,14 @@ import {
   PlayExerciseOuput,
   PreviewInput,
   PreviewOuput,
+  Feedback,
 } from '@platon/feature/player/common'
 import { Observable } from 'rxjs'
 import { PlayerProvider } from '../models/player-provider'
 
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
-  constructor(private readonly provider: PlayerProvider) {}
+  private readonly provider = inject(PlayerProvider)
 
   get(sessionId: string): Observable<PlayExerciseOuput> {
     return this.provider.get(sessionId)
@@ -53,5 +54,21 @@ export class PlayerService {
 
   saveTemporaryAnswer(input: EvalExerciseInput): Observable<void> {
     return this.provider.saveTemporaryAnswer(input)
+  }
+
+  openSession(sessionId: string): Observable<PlayActivityOuput> {
+    return this.provider.openSession(sessionId)
+  }
+
+  addExtraTime(sessionId: string, seconds: number): Observable<PlayActivityOuput> {
+    return this.provider.addExtraTime(sessionId, seconds)
+  }
+
+  openSessionWithCode(sessionId: string, code: string): Observable<PlayActivityOuput> {
+    return this.provider.openSessionWithCode(sessionId, code)
+  }
+
+  submitFeedback(feedback: Feedback): Observable<void> {
+    return this.provider.submitFeedback(feedback)
   }
 }

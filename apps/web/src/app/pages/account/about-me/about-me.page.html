@@ -21,13 +21,12 @@
           <mat-form-field appearance="fill">
             <mat-label>Rôle</mat-label>
             <mat-select formControlName="role">
-              <mat-option *ngFor="let role of ['admin', 'teacher', 'student']" [value]="role">
-                <ng-container [ngSwitch]="role">
-                  <ng-container *ngSwitchCase="'admin'">Admin</ng-container>
-                  <ng-container *ngSwitchCase="'student'">Élève</ng-container>
-                  <ng-container *ngSwitchCase="'teacher'">Enseignant</ng-container>
-                </ng-container>
+              @for (role of ['admin', 'teacher', 'student']; track role) {
+              <mat-option [value]="role">
+                @switch (role) { @case ('admin') { Admin } @case ('student') { Élève } @case ('teacher') { Enseignant }
+                }
               </mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="fill">
@@ -44,10 +43,14 @@
         </mat-card-header>
         <mat-card-content>
           <nz-select nzMode="multiple" nzPlaceHolder="Sujets" formControlName="topics">
-            <nz-option *ngFor="let option of topics || []" [nzLabel]="option.name" [nzValue]="option.id" />
+            @for (option of topics || []; track option) {
+            <nz-option [nzLabel]="option.name" [nzValue]="option.id" />
+            }
           </nz-select>
           <nz-select nzMode="multiple" nzPlaceHolder="Niveaux" formControlName="levels">
-            <nz-option *ngFor="let option of levels || []" [nzLabel]="option.name" [nzValue]="option.id" />
+            @for (option of levels || []; track option) {
+            <nz-option [nzLabel]="option.name" [nzValue]="option.id" />
+            }
           </nz-select>
         </mat-card-content>
       </mat-card>

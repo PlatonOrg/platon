@@ -11,13 +11,9 @@
 >
   <thead>
     <tr>
-      <th
-        *ngIf="selectable && !disabled"
-        [nzChecked]="checked"
-        [nzIndeterminate]="indeterminate"
-        (nzCheckedChange)="onAllChecked($event)"
-      ></th>
-      @for (column of columns; track column.key) {
+      @if (selectable && !disabled) {
+      <th [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
+      } @for (column of columns; track column.key) {
       <th
         [nzColumnKey]="column.key"
         [(nzSortOrder)]="column.sortOrder!"
@@ -28,52 +24,50 @@
       >
         {{ column.name }}
       </th>
+      } @if (editable) {
+      <th nzAlign="center">Actions</th>
       }
-      <th *ngIf="editable" nzAlign="center">Actions</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let user of nzTable.data">
-      <td
-        *ngIf="selectable && !disabled"
-        [nzChecked]="selection.has(user.id)"
-        (nzCheckedChange)="onItemChecked(user.id, $event)"
-      ></td>
+    @for (user of nzTable.data; track user) {
+    <tr>
+      @if (selectable && !disabled) {
+      <td [nzChecked]="selection.has(user.id)" (nzCheckedChange)="onItemChecked(user.id, $event)"></td>
+      }
       <td>
         <user-avatar #avatar [user]="user" />
       </td>
       <td>{{ user.createdAt | date }}</td>
       <td>{{ user.email }}</td>
       <td>
-        <ng-container [ngSwitch]="user.role">
-          <ng-container *ngSwitchCase="'admin'">Admin</ng-container>
-          <ng-container *ngSwitchCase="'student'">Élève</ng-container>
-          <ng-container *ngSwitchCase="'teacher'">Enseignant</ng-container>
-          <ng-container *ngSwitchCase="'demo'">Démo</ng-container>
-        </ng-container>
+        @switch (user.role) { @case ('admin') { Admin } @case ('student') { Élève } @case ('teacher') { Enseignant }
+        @case ('demo') { Démo } }
       </td>
       <td>
-        <nz-tag *ngIf="user.active" nzColor="green">Active</nz-tag>
-        <nz-tag *ngIf="!user.active" nzColor="red">Inactive</nz-tag>
+        @if (user.active) {
+        <nz-tag nzColor="green">Active</nz-tag>
+        } @if (!user.active) {
+        <nz-tag nzColor="red">Inactive</nz-tag>
+        }
       </td>
-      <td *ngIf="editable" nzAlign="center">
+      @if (editable) {
+      <td nzAlign="center">
         <a nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight">
           <span nz-icon nzType="more"></span>
         </a>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
-            <li *ngIf="user.role !== 'admin'" nz-menu-item (click)="update.next([user, { role: 'admin' }])">
-              Assigner le rôle Admin
-            </li>
-            <li *ngIf="user.role !== 'student'" nz-menu-item (click)="update.next([user, { role: 'student' }])">
-              Assigner le rôle Élève
-            </li>
-            <li *ngIf="user.role !== 'teacher'" nz-menu-item (click)="update.next([user, { role: 'teacher' }])">
-              Assigner le rôle Enseignant
-            </li>
-            <li *ngIf="!user.active" nz-menu-item (click)="update.next([user, { active: true }])">Activer</li>
+            @if (user.role !== 'admin') {
+            <li nz-menu-item (click)="update.next([user, { role: 'admin' }])">Assigner le rôle Admin</li>
+            } @if (user.role !== 'student') {
+            <li nz-menu-item (click)="update.next([user, { role: 'student' }])">Assigner le rôle Élève</li>
+            } @if (user.role !== 'teacher') {
+            <li nz-menu-item (click)="update.next([user, { role: 'teacher' }])">Assigner le rôle Enseignant</li>
+            } @if (!user.active) {
+            <li nz-menu-item (click)="update.next([user, { active: true }])">Activer</li>
+            } @if (user.active) {
             <li
-              *ngIf="user.active"
               nz-menu-item
               nz-popconfirm
               nzOkText="Désactiver"
@@ -88,10 +82,13 @@
             >
               Désactiver
             </li>
+            }
           </ul>
         </nz-dropdown-menu>
       </td>
+      }
     </tr>
+    }
   </tbody>
 </nz-table>
 

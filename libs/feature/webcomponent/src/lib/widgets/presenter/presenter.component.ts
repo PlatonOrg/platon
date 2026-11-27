@@ -3,11 +3,13 @@ import {
   AfterViewInit,
   ElementRef,
   OnDestroy,
-  Inject,
   HostListener,
   Input,
   Injector,
   ViewChild,
+  DOCUMENT,
+  inject,
+  ChangeDetectionStrategy,
 } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import Reveal from 'reveal.js'
@@ -16,18 +18,28 @@ import RevealMath from 'reveal.js/plugin/math/math.esm.js'
 import RevealHighlight from 'reveal.js/plugin/highlight/highlight.esm.js'
 import { firstValueFrom } from 'rxjs'
 import { ResourceLoaderService } from '@cisstech/nge/services'
-import { DOCUMENT } from '@angular/common'
-import { PresenterComponentDefinition, PresenterState } from './presenter'
+
+import { PresenterComponentDefinition, type PresenterState } from './presenter'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { Locale } from 'discord-api-types/v10'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
 
 @Component({
   selector: 'wc-presenter',
   templateUrl: 'presenter.component.html',
   styleUrls: ['presenter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [BaseModule, NzButtonModule, NzIconModule],
 })
 @WebComponent(PresenterComponentDefinition)
 export class PresenterComponent implements AfterViewInit, OnDestroy, WebComponentHooks<PresenterState> {
+  private el = inject(ElementRef)
+  private readonly sanitizer = inject(DomSanitizer)
+  private readonly resourceLoader = inject(ResourceLoaderService)
+  private document = inject<Document>(DOCUMENT)
+  readonly injector = inject(Injector)
+
   fullscreen = false
   content: SafeHtml = ''
   private _reveal: Reveal.Api | undefined
@@ -35,18 +47,10 @@ export class PresenterComponent implements AfterViewInit, OnDestroy, WebComponen
   @ViewChild('presenterContainer') presenterContainer!: ElementRef<HTMLElement>
   @ViewChild('revealContainer') revealContainer!: ElementRef<HTMLElement>
 
-  constructor(
-    private el: ElementRef,
-    private readonly sanitizer: DomSanitizer,
-    private readonly resourceLoader: ResourceLoaderService,
-    @Inject(DOCUMENT) private document: Document,
-    readonly injector: Injector
-  ) {}
-
-  @HostListener('document:fullscreenchange', ['$event'])
-  @HostListener('document:webkitfullscreenchange', ['$event'])
-  @HostListener('document:mozfullscreenchange', ['$event'])
-  @HostListener('document:MSFullscreenChange', ['$event'])
+  @HostListener('document:fullscreenchange')
+  @HostListener('document:webkitfullscreenchange')
+  @HostListener('document:mozfullscreenchange')
+  @HostListener('document:MSFullscreenChange')
   fullscreenChange() {
     this.fullscreen = this.document.fullscreenElement ? true : false
     this._reveal?.layout()

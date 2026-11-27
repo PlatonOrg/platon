@@ -18,26 +18,24 @@
     [articleTitle]="title"
     [articleDescription]="desc"
     [articleIconTemplate]="image"
-    [articleUrl]="['/courses/', item.id]"
+    (didClick)="navigate()"
+    (didClickTitle)="navigate()"
+    (didClickTag)="navigate()"
     class="tuto-course-article"
   >
-    <ui-list-item-article-action
-      *ngIf="item.statistic"
-      [actionTitle]="item.statistic.teacherCount"
-      nz-tooltip="Enseignants"
-    >
+    @if (item.statistic) {
+    <ui-list-item-article-action [actionTitle]="item.statistic.teacherCount" nz-tooltip="Enseignants">
       <mat-icon>supervised_user_circle</mat-icon>
     </ui-list-item-article-action>
-    <ui-list-item-article-action *ngIf="item.statistic" [actionTitle]="item.statistic.studentCount" nz-tooltip="Élèves">
+    } @if (item.statistic) {
+    <ui-list-item-article-action [actionTitle]="item.statistic.studentCount" nz-tooltip="Élèves">
       <mat-icon>people</mat-icon>
     </ui-list-item-article-action>
-    <ui-list-item-article-action
-      *ngIf="item.statistic"
-      [actionTitle]="item.statistic.activityCount"
-      nz-tooltip="Activités"
-    >
+    } @if (item.statistic) {
+    <ui-list-item-article-action [actionTitle]="item.statistic.activityCount" nz-tooltip="Activités">
       <mat-icon>widgets</mat-icon>
     </ui-list-item-article-action>
+    }
     <div class="spacer"></div>
     <ui-list-item-article-action
       [actionTitle]="item.updatedAt | date : 'dd/MM/yyyy'"
@@ -45,13 +43,24 @@
     >
       <i nz-icon nzType="history" nzTheme="outline"></i>
     </ui-list-item-article-action>
+    @if (showArchiveButton()) {
+    <button
+      nz-button
+      nzType="text"
+      nzSize="small"
+      [nz-tooltip]="isArchived() ? 'Désarchiver ce cours' : 'Archiver ce cours'"
+      (click)="$event.stopPropagation(); archiveToggle.emit()"
+    >
+      <i nz-icon [nzType]="isArchived() ? 'reload' : 'inbox'" nzTheme="outline"></i>
+    </button>
+    }
   </ui-list-item-article>
 </ng-template>
 
 <ng-template #ribbon>
   <nz-progress
     nz-tooltip="Votre avancement sur les activités"
-    [nzPercent]="item.statistic?.progression"
+    [nzPercent]="$safeNavigationMigration(item.statistic?.progression)"
     [nzSteps]="5"
     nzSize="small"
   />
@@ -62,8 +71,12 @@
 </ng-template>
 
 <ng-template #title>
-  {{ name }}
-  <a *ngIf="item.statistic?.challengeCount" nz-button nzType="link" [routerLink]="['/courses', item.id, 'challenges']">
+  <span nz-tooltip [nzTooltipTitle]="isTitleTruncated ? name : null" (mouseenter)="checkTitleTruncation($event)">{{
+    name
+  }}</span>
+  @if (item.statistic?.challengeCount) {
+  <a nz-button nzType="link" [routerLink]="['/courses', item.id, 'challenges']">
     <span nz-tooltip="Afficher les challenges du cours" nz-icon nzType="trophy" nzTheme="twotone"></span>
   </a>
+  }
 </ng-template>

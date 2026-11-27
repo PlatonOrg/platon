@@ -7,6 +7,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  inject,
 } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 
@@ -25,7 +26,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select'
 import { Level, OrderingDirections, Topic, User } from '@platon/core/common'
 import {
   CircleTree,
-  ResourceFilters,
+  type ResourceFilters,
   ResourceOrderings,
   ResourceStatus,
   ResourceTypes,
@@ -36,7 +37,6 @@ import { MatIconModule } from '@angular/material/icon'
 import { UserAvatarComponent } from '@platon/core/browser'
 
 @Component({
-  standalone: true,
   selector: 'resource-filters',
   templateUrl: './resource-filters.component.html',
   styleUrls: ['./resource-filters.component.scss'],
@@ -45,9 +45,7 @@ import { UserAvatarComponent } from '@platon/core/browser'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatIconModule,
-
     MatChipsModule,
     MatInputModule,
     MatRadioModule,
@@ -56,15 +54,15 @@ import { UserAvatarComponent } from '@platon/core/browser'
     MatCheckboxModule,
     MatFormFieldModule,
     MatAutocompleteModule,
-
     NzDrawerModule,
     NzSelectModule,
-
     ResourcePipesModule,
     UserAvatarComponent,
   ],
 })
 export class ResourceFiltersComponent implements OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
 
   protected form = this.createForm()
@@ -78,8 +76,6 @@ export class ResourceFiltersComponent implements OnDestroy {
   @Input() circles: CircleTree[] = []
   @Input() filters: ResourceFilters = {}
   @Output() triggered = new EventEmitter<ResourceFilters>()
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())

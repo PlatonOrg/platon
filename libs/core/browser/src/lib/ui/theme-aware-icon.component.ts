@@ -1,15 +1,14 @@
 import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { Subscription } from 'rxjs'
 import { ThemeService } from '../services/theme.service'
 
 @Component({
-  standalone: true,
   selector: 'core-theme-aware-icon',
   template: `<img [src]="currentSrc" [alt]="alt" [style.width]="size" [style.height]="size" />`,
   styleUrls: ['./theme-aware-icon.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [],
 })
 export class ThemeAwareIconComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService)

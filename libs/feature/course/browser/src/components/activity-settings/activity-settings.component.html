@@ -1,7 +1,11 @@
-<nz-tabset nzType="card" class="activity-settings-tabs">
+<nz-tabs nzType="card" class="activity-settings-tabs">
   <!-- Onglet 1: Apparence & Restrictions -->
   <nz-tab nzTitle="Restrictions">
     <div class="tab-content">
+      <!-- option : caché pour les étudiants-->
+      <button nz-button (click)="updateHidden()" class="hidde-button" nzType="primary">
+        {{ this.hidden ? 'Montrer aux étudiants' : 'Cacher aux étudiants' }}
+      </button>
       <!-- Section Périodes d'accès -->
       <div class="access-periods-section" (click)="$event.stopPropagation()">
         <div class="section-header">
@@ -28,14 +32,17 @@
                     <span class="date-label">Ouverture</span>
 
                     <!-- Mode affichage -->
-                    <span class="date-value" *ngIf="!editOpenDate">
+                    @if (!editOpenDate) {
+                    <span class="date-value">
                       {{ tempOpenDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-                      <ng-container *ngIf="!tempOpenDate">Aucune date définie</ng-container>
+                      @if (!tempOpenDate) { Aucune date définie }
                       <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                     </span>
+                    }
 
                     <!-- Mode édition -->
-                    <div class="date-edit" *ngIf="editOpenDate">
+                    @if (editOpenDate) {
+                    <div class="date-edit">
                       <nz-date-picker
                         [nzShowTime]="true"
                         [(ngModel)]="tempOpenDate"
@@ -46,6 +53,7 @@
                         #openDatePicker
                       />
                     </div>
+                    }
                   </div>
                 </div>
 
@@ -57,14 +65,17 @@
                     <span class="date-label">Fermeture</span>
 
                     <!-- Mode affichage -->
-                    <span class="date-value" *ngIf="!editCloseDate">
+                    @if (!editCloseDate) {
+                    <span class="date-value">
                       {{ tempCloseDate | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-                      <ng-container *ngIf="!tempCloseDate">Aucune date définie</ng-container>
+                      @if (!tempCloseDate) { Aucune date définie }
                       <i nz-icon nzType="edit" nzTheme="outline" class="edit-icon"></i>
                     </span>
+                    }
 
                     <!-- Mode édition -->
-                    <div class="date-edit" *ngIf="editCloseDate">
+                    @if (editCloseDate) {
+                    <div class="date-edit">
                       <nz-date-picker
                         [nzShowTime]="true"
                         [(ngModel)]="tempCloseDate"
@@ -75,6 +86,7 @@
                         #closeDatePicker
                       />
                     </div>
+                    }
                   </div>
                 </div>
               </div>
@@ -84,7 +96,7 @@
                 <span
                   >Tous les membres du cours ont accès à cette activité aux dates indiquées ci-dessus.<br />
                   Cliquez sur une date si vous souhaitez la changer.
-                  <b>N'oubliez pas d'enregister vos changement.</b></span
+                  <b>N'oubliez pas d'enregistrer vos changement.</b></span
                 >
               </div>
             </div>
@@ -122,7 +134,7 @@
         <div class="add-period-section">
           <button nz-button nzType="dashed" nzBlock (click)="newAccessPeriod()" class="add-period-btn">
             <i nz-icon nzType="plus"></i>
-            Ajouter une nouvelle période d'accès
+            <span class="label">Ajouter une nouvelle période d'accès</span>
           </button>
           <div class="add-period-hint">
             <i nz-icon nzType="info-circle" nzTheme="outline"></i>
@@ -213,40 +225,6 @@
             </nz-form-control>
           </nz-form-item>
         </nz-collapse-panel>
-
-        <!-- Navigation -->
-        <nz-collapse-panel nzHeader="Navigation" [nzExpandedIcon]="navigationIcon">
-          <ng-template #navigationIcon>
-            <span nz-icon nzType="compass" nzTheme="outline"></span>
-          </ng-template>
-
-          <nz-form-item>
-            <nz-form-label
-              nzFor="navigationMode"
-              nzTooltipTitle="Détermine comment les exercices sont présentés aux étudiants"
-            >
-              Mode de navigation
-            </nz-form-label>
-            <nz-form-control>
-              <nz-select [(ngModel)]="navigation.mode" id="navigationMode">
-                <nz-option nzValue="manual" nzLabel="Progressive"></nz-option>
-                <nz-option nzValue="composed" nzLabel="Composée"></nz-option>
-                <nz-option nzValue="next" nzLabel="Intelligente (Bêta)"></nz-option>
-                <nz-option nzValue="peer" nzLabel="Comparaison par les pairs (Bêta)"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-          @if (navigation.mode === 'peer' || navigation.mode === 'next') {
-          <nz-alert
-            nzType="warning"
-            nzMessage="Cette fonctionnalité est en cours de développement."
-            nzShowIcon
-            class="beta-warning"
-          />
-          }
-        </nz-collapse-panel>
-
         <!-- Actions -->
         <nz-collapse-panel nzHeader="Actions" [nzExpandedIcon]="actionsIcon">
           <ng-template #actionsIcon>
@@ -413,15 +391,7 @@
           <div class="action-group">
             <h4>Actions avancées</h4>
             <div class="action-buttons">
-              <button
-                nz-button
-                nzDanger
-                nz-popconfirm
-                [nzPopconfirmTitle]="confirmReload"
-                nzPopconfirmPlacement="top"
-                (nzOnConfirm)="reload()"
-                class="action-btn"
-              >
+              <button nz-button nzDanger (click)="reload()" class="action-btn">
                 <i nz-icon nzType="reload" nzTheme="outline"></i>
                 Recharger
               </button>
@@ -445,7 +415,7 @@
       </div>
     </div>
   </nz-tab>
-</nz-tabset>
+</nz-tabs>
 
 <!-- Templates de confirmation -->
 <ng-template #confirmClose>
@@ -462,13 +432,6 @@
   </div>
 </ng-template>
 
-<ng-template #confirmReload>
-  <div class="confirm-content">
-    <h4>Recharger l'activité</h4>
-    <p>L'activité sera remplacée par sa dernière version publiée.</p>
-  </div>
-</ng-template>
-
 <ng-template #confirmDelete>
   <div class="confirm-content">
     <h4>Supprimer l'activité</h4>
@@ -479,7 +442,6 @@
 <ng-template #confirmFirstPeriod>
   <div class="confirm-content">
     <div class="warning-header">
-      <i nz-icon nzType="exclamation-circle" nzTheme="fill" style="color: #faad14; margin-right: 8px"></i>
       <h4 style="margin: 0; color: #faad14">Attention - Première période d'accès</h4>
     </div>
 
@@ -491,7 +453,7 @@
           <span class="date-label">Ouverture : </span>
           <span class="date-value">
             {{ activity.openAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-            <ng-container *ngIf="!activity.openAt">Aucune date définie</ng-container>
+            @if (!activity.openAt) { Aucune date définie }
           </span>
         </div>
       </div>
@@ -502,7 +464,7 @@
           <span class="date-label">Fermeture : </span>
           <span class="date-value">
             {{ activity.closeAt | date : "d MMM yyyy, HH'h'mm" : '' : 'fr-FR' }}
-            <ng-container *ngIf="!activity.closeAt">Aucune date définie</ng-container>
+            @if (!activity.closeAt) { Aucune date définie }
           </span>
         </div>
       </div>

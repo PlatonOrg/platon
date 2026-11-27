@@ -9,14 +9,24 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { FormControl } from '@angular/forms'
 import { Observable, Subscription } from 'rxjs'
-import { debounceTime, map, startWith } from 'rxjs/operators'
+import { map, startWith } from 'rxjs/operators'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { InputBoxComponentDefinition, InputBoxState } from './input-box'
+import { InputBoxComponentDefinition, type InputBoxState } from './input-box'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { MatAutocompleteModule } from '@angular/material/autocomplete'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { IconGrPipe } from '@cisstech/nge/pipes'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { MatIconModule } from '@angular/material/icon'
+import { NzPopoverModule } from 'ng-zorro-antd/popover'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 @Component({
   selector: 'wc-input-box',
@@ -24,12 +34,32 @@ import { WebComponentChangeDetectorService } from '../../web-component-change-de
   styleUrls: ['input-box.component.scss'],
   host: {
     '[style.display]': `state.width === 'auto' || state.appearance === 'inline' ? 'inline-flex' : ''`,
-    '[style.width]': `state.width !== 'auto' ? (state.width ? state.width : '100%') : ''`,
+    // Inline, the field takes the width of its content instead of the whole line.
+    '[style.width]': `state.width === 'auto' ? '' : state.width || (state.appearance === 'inline' ? '' : '100%')`,
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BaseModule,
+    IconGrPipe,
+
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatInputModule,
+    MatFormFieldModule,
+    MatAutocompleteModule,
+    MatIconModule,
+
+    CssPipeModule,
+
+    NzPopoverModule,
+  ],
 })
 @WebComponent(InputBoxComponentDefinition)
 export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<InputBoxState> {
+  readonly injector = inject(Injector)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private readonly webComponentService!: WebComponentService
 
   @Input() state!: InputBoxState
@@ -40,7 +70,6 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
   protected containerStyles: Record<string, string> = {}
 
   protected readonly form = new FormControl()
-  private dueTime = 50
 
   protected specialCharactersGrid: string[][][] = []
   private hasToUpdateCharacters = true
@@ -51,14 +80,17 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
     map((value) => this.getSuggestions(value))
   )
 
-  constructor(readonly injector: Injector, readonly changeDetector: WebComponentChangeDetectorService) {
+  constructor() {
+    const injector = this.injector
+
     this.webComponentService = injector.get(WebComponentService)!
   }
 
   async ngOnInit() {
     this.state.isFilled = false
 
-    this.subscription = this.form.valueChanges.pipe(debounceTime(this.dueTime)).subscribe(async (value) => {
+    // No debounce: the player reads the state as soon as the learner submits, the value must already be there.
+    this.subscription = this.form.valueChanges.subscribe(async (value) => {
       value = value || ''
       if (this.state.type === 'number') {
         value = ('' + value).replace(/,/g, '.')
@@ -139,9 +171,8 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
     }
   }
 
-  protected async autoValidate() {
+  protected autoValidate() {
     if (this.state.autoValidation) {
-      await new Promise((resolve) => setTimeout(resolve, this.dueTime)) // wait for the last value change
       this.webComponentService.submit(this)
     }
   }

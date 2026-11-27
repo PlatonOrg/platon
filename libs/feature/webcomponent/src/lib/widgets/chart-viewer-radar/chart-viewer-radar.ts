@@ -75,6 +75,9 @@ export const ChartViewerRadarComponentDefinition = defineWebComponent({
       { name: 'Marketing', max: 25000 },
     ],
   },
+  playgrounds: {
+    'Lire un radar': 'skills.ple',
+  },
 })
 
 export const simpleChartViewerRadarState: EChartsOption = {

@@ -5,6 +5,7 @@ import { DisplayCourseMemberRolePipe } from './display-course-member-role.pipe'
 
 @NgModule({
   exports: [CourseOrderingPipe, CourseActivityStatePipe, DisplayCourseMemberRolePipe],
-  declarations: [CourseOrderingPipe, CourseActivityStatePipe, DisplayCourseMemberRolePipe],
+  declarations: [],
+  imports: [CourseOrderingPipe, CourseActivityStatePipe, DisplayCourseMemberRolePipe],
 })
 export class CoursePipesModule {}

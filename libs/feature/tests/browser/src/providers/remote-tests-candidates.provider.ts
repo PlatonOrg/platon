@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -8,9 +8,7 @@ import { CandidateSignInResponse, CreateTestsCandidates, TestsCandidates } from 
 
 @Injectable()
 export class RemoteTestsCandidatesProvider extends TestsCandidatesProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   createMany(input: CreateTestsCandidates[]): Observable<ListResponse<TestsCandidates>> {
     return this.http

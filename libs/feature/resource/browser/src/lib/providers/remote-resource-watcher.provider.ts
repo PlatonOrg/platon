@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse, User } from '@platon/core/common'
 import { Resource, ResourceWatcherFilters } from '@platon/feature/resource/common'
 import { Observable } from 'rxjs'
@@ -8,9 +8,7 @@ import { ResourceWatcherProvider } from '../models/resource-watcher-provider'
 
 @Injectable()
 export class RemoteResourceWatcherProvider extends ResourceWatcherProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   findWatcher(resource: Resource, userId: string): Observable<User> {
     return this.http

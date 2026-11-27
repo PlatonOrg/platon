@@ -1,0 +1,135 @@
+---
+title: Organiser un cours en sections
+description: Comment structurer un cours PLaTon avec des sections - ajout, renommage, déplacement, masquage aux étudiants, réorganisation des activités et suppression.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Organiser un cours en sections
+
+Les **sections** découpent le contenu d'un cours en thématiques (chapitres, semaines, séances de TP…). Chaque activité
+appartient à une section, et une section peut être masquée aux étudiants tant qu'elle n'est pas prête.
+
+Tout se passe dans l'onglet **Vue d'ensemble** du cours. Les actions décrites ici sont réservées aux
+[enseignants du cours](/main/courses/members) et aux administrateurs ; un étudiant voit uniquement les sections
+visibles et leurs activités.
+
+## L'onglet « Vue d'ensemble »
+
+L'onglet présente, de haut en bas :
+
+- une **barre de recherche** qui filtre l'affichage sur le nom d'une activité ou d'une section ;
+- les boutons **Ajouter une section** et **Télécharger les notes au format CSV**
+  (voir [Téléchargement des notes](/main/courses/grades-csv)) ;
+- un sélecteur de **mode d'affichage** : cartes (par défaut) ou tableau. Le choix est mémorisé dans votre navigateur ;
+- la liste des sections, chacune dans un panneau repliable contenant ses activités.
+
+Le mode **tableau** liste toutes les activités du cours sur une seule page avec leur section, leur nombre d'exercices,
+leurs dates et leur statut. Dans ce mode, un bouton **Ajouter une activité** est affiché en haut de la page.
+
+À droite, quatre indicateurs résument le cours : votre **avancement sur les activités**, le **temps passé sur les
+activités**, le nombre d'**enseignants** et le nombre d'**élèves**.
+
+## Ajouter une section
+
+Un cours est créé avec une première section nommée « Section 1 ».
+
+- Le bouton **Ajouter une section**, en haut de l'onglet, crée une section **après la dernière**.
+- Pour insérer une section à un endroit précis, ouvrez le menu **⋯** d'une section existante et choisissez
+  **Insérer une section après**.
+
+La nouvelle section reçoit un nom automatique (« Section 2 », « Section 3 »…) et la page défile jusqu'à elle.
+
+<Callout type="info">
+  Si toutes les sections ont été supprimées, le message « Ce cours ne contient aucune section » s'affiche avec un
+  bouton **Ajouter une section**. Une activité ne peut pas être ajoutée à un cours sans section.
+</Callout>
+
+## Renommer une section
+
+Cliquez sur l'icône crayon qui suit le nom de la section, saisissez le nouveau nom puis validez avec la touche Entrée.
+Le nom et la description du cours, en haut de la page, se modifient de la même façon.
+
+## Actions d'une section
+
+Chaque section dispose, à droite de son titre, d'un bouton **Ajouter une activité** et d'un menu **⋯** regroupant les
+actions suivantes :
+
+| Action                                             | Effet                                                                                                        |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Monter** / **Descendre**                         | Déplace la section d'un cran vers le haut ou vers le bas.                                                    |
+| **Ajouter une activité**                           | Ouvre l'assistant d'[ajout d'activité](/main/courses/activities) avec cette section présélectionnée.         |
+| **Cacher aux étudiants** / **Montrer aux étudiants** | Masque ou réaffiche la section pour les étudiants (voir ci-dessous).                                       |
+| **Insérer une section après**                      | Crée une nouvelle section juste en dessous.                                                                  |
+| **Modifier l'ordre des activités**                 | Passe la section en mode réorganisation (voir ci-dessous).                                                   |
+| **Supprimer la section**                           | Supprime la section et tout son contenu.                                                                     |
+
+## Masquer une section aux étudiants
+
+L'action **Cacher aux étudiants** permet de préparer une section à l'avance sans la dévoiler.
+
+- Pour les **étudiants**, la section et les activités qu'elle contient n'apparaissent plus dans la page du cours.
+- Pour les **enseignants**, la section reste visible et porte la mention « Caché aux étudiants ».
+
+Choisissez **Montrer aux étudiants** dans le même menu pour la rendre de nouveau visible.
+
+<Callout type="warning">
+  Masquer une section retire son contenu de la page du cours, mais ce n'est pas une restriction d'accès : un étudiant
+  qui possède déjà le lien direct d'une activité ouverte peut toujours la lancer. Pour interdire réellement l'accès à
+  une activité, utilisez ses [dates d'ouverture et de fermeture ou ses périodes d'accès](/main/courses/activities#onglet-restrictions).
+</Callout>
+
+Il est également possible de masquer une activité seule, sans masquer toute sa section : voir
+[Paramétrer une activité](/main/courses/activities#paramétrer-une-activité).
+
+## Réorganiser les activités d'une section
+
+Dans une section, les activités s'affichent dans l'ordre où elles ont été ajoutées. Pour changer cet ordre :
+
+<Steps>
+
+### Passer en mode réorganisation
+
+Ouvrez le menu **⋯** de la section et choisissez **Modifier l'ordre des activités**.
+
+### Déplacer les cartes
+
+Faites glisser les cartes d'activité pour les placer dans l'ordre voulu.
+
+### Valider
+
+Rouvrez le menu **⋯** et choisissez **Valider l'ordre des activités**. Sans cette validation, le nouvel ordre n'est
+pas enregistré.
+
+</Steps>
+
+Une activité ne peut pas être déplacée d'une section à une autre : il faut l'ajouter de nouveau dans la section
+voulue.
+
+## Filtrer les activités d'une section
+
+En mode cartes, chaque section propose quatre filtres au-dessus de ses activités :
+
+| Filtre      | Activités affichées                                         |
+| ----------- | ----------------------------------------------------------- |
+| **Tout**    | Toutes les activités de la section.                         |
+| **Ouvert**  | Les activités actuellement accessibles.                     |
+| **À venir** | Les activités dont la date d'ouverture n'est pas atteinte.  |
+| **Fermé**   | Les activités dont la date de fermeture est dépassée.       |
+
+L'état d'une activité est calculé pour l'utilisateur connecté : avec des
+[périodes d'accès](/main/courses/activities#onglet-restrictions) différentes selon les groupes, une même activité peut être ouverte pour
+un étudiant et fermée pour un autre.
+
+## Supprimer une section
+
+Dans le menu **⋯** de la section, choisissez **Supprimer la section**.
+
+- Si la section est vide, elle est supprimée immédiatement.
+- Si elle contient des activités, une confirmation est demandée.
+
+<Callout type="error">
+  La suppression d'une section supprime aussi **toutes ses activités et les données qui y sont liées** : sessions,
+  réponses, notes et corrections des étudiants. Cette opération est irréversible. Pensez à
+  [télécharger les notes](/main/courses/grades-csv) avant de supprimer une section qui a été utilisée.
+</Callout>

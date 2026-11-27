@@ -3,7 +3,7 @@ title: Presenter
 description: Outil de présentation avancé basé sur Reveal.js permettant de créer des diaporamas interactifs avec support pour Markdown, code avec coloration syntaxique, et formules mathématiques. Idéal pour les exercices nécessitant des explications visuelles progressives, des tutoriels étape par étape, ou des présentations de concepts théoriques complexes.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -103,16 +103,22 @@ Pour explorer toutes les fonctionnalités disponibles:
 
 Ce composant est particulièrement adapté aux explications qui nécessitent une progression logique et visuelle, permettant aux apprenants de suivre un raisonnement étape par étape.
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-presenter',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Diaporama de cours",
+    "url": "/playground/exercises/presenter/slides.ple"
+  }
+]
   ]}
 />
 

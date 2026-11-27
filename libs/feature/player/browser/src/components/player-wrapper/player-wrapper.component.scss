@@ -1,7 +1,6 @@
 :host {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   width: 100vw;
   height: 100vh;
   background-color: var(--brand-background-secondary);
@@ -11,15 +10,14 @@
   box-sizing: border-box;
 }
 
+// Centre verticalement le contenu court (margin auto) sans jamais couper le
+// contenu plus grand que l'écran : contrairement à `justify-content: center`,
+// les marges auto se résolvent à 0 quand il n'y a pas de place, donc le haut
+// (titre, auteur) reste toujours accessible en faisant défiler vers le haut.
 player-exercise {
   display: block;
-  margin: 0 8rem;
-  flex-grow: 1;
+  margin: auto 8rem;
   box-sizing: border-box;
-}
-
-.spacer {
-  height: 20%;
 }
 
 @media (max-width: 920px) {

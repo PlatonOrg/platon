@@ -33,3 +33,12 @@ div {
     color: var(--color-username);
   }
 }
+
+.name-primary {
+  font-weight: 500;
+}
+
+.name-secondary {
+  font-weight: 400;
+  opacity: 0.75;
+}

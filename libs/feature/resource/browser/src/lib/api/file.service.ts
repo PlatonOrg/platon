@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs'
 
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ActivityExerciseGroup, PLSourceFile } from '@platon/feature/compiler'
 import {
   ExerciseTransformInput,
@@ -16,10 +16,11 @@ import {
   ResourceFile,
 } from '@platon/feature/resource/common'
 import { ResourceFileProvider } from '../models/resource-file-provider'
+import { CreatedResponse } from '@platon/core/common'
 
 @Injectable({ providedIn: 'root' })
 export class ResourceFileService {
-  constructor(private readonly provider: ResourceFileProvider) {}
+  private readonly provider = inject(ResourceFileProvider)
 
   compileExercise(resource: string, version?: string): Observable<PLSourceFile> {
     return this.provider.compileExercise(resource, version)
@@ -53,7 +54,8 @@ export class ResourceFileService {
     return this.provider.create(resource, input)
   }
 
-  upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<void> {
+  /** return the file name or '' if cannot parse the name */
+  upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<CreatedResponse<string>> {
     return this.provider.upload(file, data)
   }
 

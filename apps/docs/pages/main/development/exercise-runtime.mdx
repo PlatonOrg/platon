@@ -1,0 +1,92 @@
+---
+title: Compilation et exécution des exercices
+description: Fonctionnement interne de PLaTon pour les développeurs - compilation des fichiers PLE, dépendances et dossier includes/, stockage des fichiers inclus, préparation des sandboxes Node et Python, fusion des réponses et calcul de la note.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Compilation et exécution des exercices
+
+Cette page décrit, pour les développeurs, le chemin d'un exercice entre ses fichiers et l'écran de l'apprenant. Les
+noms de fichiers sont relatifs à la racine du dépôt.
+
+<Steps>
+
+### Compilation
+
+`PLCompiler` (`libs/feature/compiler/src/lib/pl.compiler.ts`) analyse `main.ple` avec le parseur généré depuis
+`pl.jison`, puis visite l'arbre :
+
+- `@extends` compile récursivement la ressource parente (avec détection des cycles) et fusionne ses variables ;
+- `@copyurl` et `@copycontent` sont résolus immédiatement en adresse ou en contenu, via un `PLReferenceResolver`
+  (côté serveur : `libs/feature/resource/server/src/lib/files/file.service.ts`) ;
+- `@include chemin [as alias]` ajoute une **dépendance** au `PLSourceFile` produit.
+
+Les références de fichiers sont résolues par `resolveFileReference` (`libs/core/common/src/lib/utils/file.ts`) :
+`chemin` (ressource courante), `:version/chemin`, `/ressource/chemin` ou `/ressource:version/chemin`.
+
+### Sortie et dossier `includes/`
+
+`PLCompiler.output()` produit la source finale :
+
+1. si la ressource contient un dossier `includes/`, `listDir` en liste **récursivement** les fichiers ; chacun devient
+   une dépendance dont l'**alias est son chemin** (`includes/…`), ce qui conserve l'arborescence ;
+2. les surcharges du `main.plc` (valeurs par défaut) puis celles du `main.plo` ou de l'activité sont appliquées.
+
+Seul le dossier `includes/` de la ressource compilée est lu : celui d'une ressource parente (`@extends`) n'est pas
+ajouté.
+
+### Stockage des fichiers inclus
+
+Une dépendance ne transporte pas son contenu mais son **empreinte SHA-1** (`hash`). À la création d'une session,
+`SessionService.linkDependencies` (`libs/feature/result/server/src/lib/sessions/session.service.ts`) copie le fichier
+dans `resources/media/<premier caractère du hash>/<hash>`, s'il n'y est pas déjà. Un même fichier utilisé par plusieurs
+exercices n'est donc stocké qu'une fois.
+
+### Construction (builder)
+
+`SandboxManager.build` (`libs/feature/player/common/src/lib/sandbox-manager.model.ts`) choisit la sandbox selon la
+variable `sandbox` et lui transmet les variables et la liste des fichiers :
+`{ path: alias || basename(abspath), hash }`. Le builder n'est exécuté que s'il existe un script `builder` ou des
+dépendances. Le résultat contient les nouvelles variables et un **identifiant d'environnement** (`envid`),
+réutilisé pour les évaluations suivantes.
+
+### Rendu
+
+`withExercisePlayer` / `withRenderedTemplates` (`libs/feature/player/common/src/lib/player-renderer.model.ts`)
+remplacent chaque composant (`{ cid, selector }`) par son élément HTML et une balise `<script type="application/json">`
+portant son état, puis rendent avec Nunjucks les clés `statement`, `form`, `solution`, `feedback` et `hint`. Les
+gardes (`player-guards.model.ts`) retirent les aides, la solution, les théories ou les feedbacks selon les paramètres
+de l'activité.
+
+### Évaluation (grader)
+
+Le navigateur envoie l'état de chaque composant présent dans `#form`, indexé par `cid`. `withAnswersInSession`
+(`player-answer.model.ts`) fusionne ces états dans les variables de la session, puis le `grader` est exécuté dans
+l'environnement existant. La note est `Number.parseInt(grade)`, ramenée à `-1` si elle n'est pas numérique ; seules
+les notes positives ou nulles incrémentent les tentatives (`player-manager.model.ts`).
+
+</Steps>
+
+## Les sandboxes
+
+| Sandbox  | Implémentation                                                   | Fichiers                                                                                               |
+| -------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Node     | `libs/feature/player/server/src/lib/sandboxes/node/` : `vm2` (`NodeVM`) dans le processus de l'API | Copiés dans `envs/<envid>/` à la première construction ; l'API du script expose `readFile` et `component`. Seules les variables globales qui ne sont pas des fonctions sont renvoyées. Les environnements plus anciens que `sandbox.envLifespan` sont supprimés chaque semaine. |
+| Python   | `libs/feature/player/server/src/lib/sandboxes/python/` : appel HTTP au serveur de sandbox (`SANDBOX_URL`) | Envoyés dans une archive `tar.gz` avec `script.py`, `variables.json` et le script `runner.py` (`python-scripts.ts`), qui injecte `component`, `StopExec` et `platon_log`. Les fichiers déposés par l'apprenant sont ajoutés sous `submission/`. |
+
+Les nouvelles sandboxes s'enregistrent avec le décorateur `@RegisterSandbox()` et implémentent l'interface `Sandbox`
+(`supports`, `run`, `runNext`, `downloadEnvironment`).
+
+<Callout type="warning">
+  La sandbox Node écrit les fichiers directement dans `envs/<envid>/` sans créer de sous-dossiers : un fichier dont le
+  chemin contient un dossier (comme ceux de `includes/`) fait échouer la construction. La sandbox Python, qui transmet
+  une archive, conserve l'arborescence.
+</Callout>
+
+## Graine aléatoire
+
+À la création d'une session (`createNewSession`, `libs/feature/player/server/src/lib/player.service.ts`), la variable
+`seed` vaut `(parseInt(seed) || randomInt(100)) % 100`. Dans une activité, les exercices reçoivent la graine de
+l'activité, ou une graine aléatoire chacun si `settings.seedPerExercise` est vrai. Un `reroll` affecte
+`Date.now() % 100`. Aucune sandbox n'initialise elle-même son générateur aléatoire.

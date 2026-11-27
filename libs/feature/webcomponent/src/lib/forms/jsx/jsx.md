@@ -77,8 +77,6 @@ Une fonctionnalité essentielle pour l'évaluation est la propriété `points`, 
 
 Cette propriété est particulièrement utile dans votre script d'évaluation (grader) pour vérifier si l'apprenant a correctement positionné les éléments de la figure.
 
-Cette propriété est particulièrement utile dans votre script d'évaluation (grader) pour vérifier si l'apprenant a correctement positionné les éléments de la figure.
-
 ### Applications pédagogiques
 
 Le composant JSX est parfaitement adapté pour:

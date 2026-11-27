@@ -100,9 +100,29 @@ export interface UserResults {
   correcting?: boolean
 
   /**
+   * Activity Session Id
+   */
+  activitySessionId: string
+
+  /**
+   * A value indicating whether the user's activity session is terminated (blocked).
+   */
+  terminated?: boolean
+
+  /**
+   * Extra time (in seconds) granted to the user.
+   */
+  extraTime?: number
+
+  /**
    * A map of exercise results for the user.
    */
   exercises: Record<string, UserExerciseResults>
+
+  /**
+   * All groups id that contains the user
+   */
+  groupIds: string[]
 }
 
 export interface UserActivityResultsDistribution {
@@ -256,6 +276,16 @@ export interface ActivityResults {
    * Results for all exercises in the activity.
    */
   exercises: ExerciseResults[]
+
+  /**
+   * List of all groups in an activity
+   */
+  groups: ActivityGroup[]
+}
+
+export interface ActivityGroup {
+  id: string
+  name: string
 }
 
 export interface ActivityDistributionData {
@@ -331,5 +361,7 @@ export const emptyUserResults = (defaults?: Partial<UserResults>): UserResults =
   email: '',
   correcting: false,
   exercises: {},
+  activitySessionId: '',
+  groupIds: [],
   ...defaults,
 })

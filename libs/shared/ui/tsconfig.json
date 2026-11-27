@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "lib": ["dom", "es2022"],
+    "ignoreDeprecations": "6.0"
   },
   "references": [
     {

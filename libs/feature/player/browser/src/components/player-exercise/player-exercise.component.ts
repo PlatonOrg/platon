@@ -34,7 +34,7 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
 import { DialogModule, DialogService, UserAvatarComponent, AuthService } from '@platon/core/browser'
-import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
+import { type ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
@@ -50,11 +50,16 @@ import {
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
 import { PlayerCommentsComponent } from '../player-comments/player-comments.component'
+import { PlayerQuestionFeedbackComponent } from '../player-question-feedback/player-question-feedback.component'
 import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
+import { PlayerTerminalLogsComponent } from '../player-terminal-logs/player-terminal-logs.component'
+import { PlayerErrorComponent } from '../player-error/player-error.component'
+import { User } from '@platon/core/common'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 type Action = {
   id?: string
@@ -83,26 +88,23 @@ type FullscreenElement = HTMLElement & {
 }
 
 @Component({
-  standalone: true,
   selector: 'player-exercise',
   templateUrl: './player-exercise.component.html',
   styleUrls: ['./player-exercise.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     NzSpinModule,
     NzAlertModule,
     MatIconModule,
     MatCardModule,
     MatMenuModule,
     MatButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     MatDividerModule,
     NzSkeletonModule,
     NzStatisticModule,
     MatExpansionModule,
-
     IsUUIDPipe,
     DialogModule,
     UserAvatarComponent,
@@ -113,6 +115,9 @@ type FullscreenElement = HTMLElement & {
     FilePreviewSupportedPipe,
     AnswerStatePipesModule,
     PlayerCommentsComponent,
+    PlayerTerminalLogsComponent,
+    PlayerQuestionFeedbackComponent,
+    PlayerErrorComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -127,6 +132,8 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   private readonly webComponentService = inject(WebComponentService)
 
   protected readonly playerSignal = signal<ExercisePlayer | undefined>(undefined)
+  protected readonly errorsDismissed = signal(false)
+  protected user: User | undefined = undefined
 
   @Input() state?: AnswerStates
   @Input() player?: ExercisePlayer
@@ -149,7 +156,7 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
   protected container!: ElementRef<FullscreenElement>
 
   @ViewChild('errorTemplate', { read: TemplateRef, static: true })
-  protected errorTemplate!: TemplateRef<object>
+  protected errorTemplate!: TemplateRef<{ $implicit: NzNotificationComponent; data: any }>
 
   @ViewChild('containerFeedbacks', { read: ElementRef })
   protected containerFeedbacks!: ElementRef<HTMLElement>
@@ -199,13 +206,14 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
           if (this.player?.feedbacks && this.player.feedbacks.some((feedback) => feedback.content)) {
             this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
           }
+          this.errorsDismissed.set(false)
         },
       },
       {
         icon: 'save',
         label: 'Sauvegarder',
         tooltip: 'Sauvegarder',
-        visible: !this.reviewMode,
+        visible: !this.reviewMode && !this.previewMode,
         disabled: !!this.runningAction,
         playerAction: PlayerActions.SAVE_ANSWER,
         showLabel: this.showLabelIfEnoughSpace,
@@ -387,6 +395,14 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       this.player = this.players[this.index]
     }
 
+    this.authService
+      .ready()
+      .then((user) => {
+        this.user = user
+        this.changeDetectorRef.markForCheck()
+      })
+      .catch(console.error)
+
     this.playerSignal.set(this.player)
 
     this.subscriptions.push(
@@ -428,7 +444,6 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       this.player = this.players[this.index]
 
       this.playerSignal.set(this.player)
-
       this.clearNotification?.()
       this.clearNotification = undefined
     }
@@ -584,7 +599,9 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
       })
     } finally {
       this.runningAction = undefined
-      this.changeDetectorRef.markForCheck()
+      // detectChanges (not markForCheck) so the view reflects the new player data
+      // (e.g. platon_logs) immediately instead of waiting for the next unrelated CD trigger
+      this.changeDetectorRef.detectChanges()
     }
   }
 
@@ -621,67 +638,35 @@ export class PlayerExerciseComponent implements OnInit, OnDestroy, OnChanges, Af
     }
   }
 
-  protected isErrorLog(log: string): boolean {
-    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
-    return errorPattern.test(log)
-  }
-
-  protected readonly errorServerSignal = computed(() => {
-    const player = this.playerSignal()
-    if (!player) return ''
-    return this.getErrorLogsFromPlayer(player).join('')
-  })
-
   readonly hasErrors = computed(() => {
+    if (this.errorsDismissed()) return false
     const player = this.playerSignal()
     if (!player) return false
-
     const errorLogs = this.getErrorLogsFromPlayer(player)
     return !this.editorPreview && errorLogs.length > 0
   })
 
-  private getErrorLogsFromPlayer(player: ExercisePlayer): string[] {
-    const errorPattern = /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/
-    return player.platon_logs?.filter((log) => errorPattern.test(log)) || []
+  protected onDismissErrors(): void {
+    this.errorsDismissed.set(true)
   }
 
-  get mailtoLink(): string {
-    const subject = encodeURIComponent(`Problème avec l'exercice: ${this.player?.title || 'Exercice'}`)
-
-    const body = encodeURIComponent(`
-    Bonjour,
-
-    J'ai rencontré un problème avec l'exercice "${this.player?.title || 'Exercice'}" dans PLaTon.
-
-    Détails de l'erreur:
-    ${this.errorServerSignal()}
-
-    Pourriez-vous m'aider à résoudre ce problème ?
-
-    Merci,
-    Nom Prenom
-    `)
-
-    const teacherEmail = this.getTeacherEmail()
-    return `mailto:${teacherEmail}?subject=${subject}&body=${body}`
+  private getErrorLogsFromPlayer(player: ExercisePlayer): PlatonLog[] {
+    return player.platon_logs?.filter((log) => log.type === LogType.ERROR) || []
   }
 
   protected retryExercise(): void {
     window.location.reload()
   }
 
-  private getTeacherEmail(): string {
-    return ''
+  protected execRetryExercise = () => {
+    this.retryExercise()
   }
 
-  protected async copyToClipboard(text: string | undefined): Promise<void> {
-    if (!text) return
+  protected execGoToNextPlayer = () => {
+    this.goToNextPlayer.emit()
+  }
 
-    try {
-      await navigator.clipboard.writeText(text)
-      this.dialogService.success('Contenu copié dans le presse-papier')
-    } catch (err) {
-      this.dialogService.error('Impossible de copier le contenu')
-    }
+  get firstNameAndLastName(): { firstName: string | undefined; lastName: string | undefined } {
+    return { firstName: this.user?.firstName, lastName: this.user?.lastName }
   }
 }

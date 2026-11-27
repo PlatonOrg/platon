@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, Input, ViewChild, ElementRef } from '@angular/core'
 
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzSegmentedModule } from 'ng-zorro-antd/segmented'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
+import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { Activity } from '@platon/feature/course/common'
@@ -11,17 +11,16 @@ import { CourseActivityCardComponent } from '../activity-card/activity-card.comp
 import { CdkDragDrop, CdkDragMove, CdkDragStart, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-grid',
   templateUrl: './activity-grid.component.html',
   styleUrls: ['./activity-grid.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     NzGridModule,
     NzTabsModule,
     NzSegmentedModule,
+    NzIconModule,
     DragDropModule,
     ReactiveFormsModule,
     CourseActivityCardComponent,
@@ -30,7 +29,7 @@ import { CdkDragDrop, CdkDragMove, CdkDragStart, DragDropModule, moveItemInArray
 export class CourseActivityGridComponent {
   protected tabs: Tab[] = []
   protected empty = false
-  protected tabTitles: string[] = []
+  protected tabTitles: Array<{ label: string; value: string | number }> = []
   protected selectedIndex = 0
   protected state = {
     words: ['Hello', 'World'],
@@ -48,7 +47,13 @@ export class CourseActivityGridComponent {
       { title: 'Fermé', items: value.filter((item) => item.state === 'closed') },
     ]
 
-    this.tabTitles = this.tabs.map((tab) => tab.title)
+    this.tabTitles = []
+    for (let i = 0; i < this.tabs.length; i++) {
+      this.tabTitles.push({
+        label: this.tabs[i].title,
+        value: i,
+      })
+    }
 
     this.empty = !value.length
   }
@@ -63,8 +68,6 @@ export class CourseActivityGridComponent {
     event.source.element.nativeElement.style.backgroundColor = 'red'
     event.source.element.nativeElement.style.width = '20px'
     event.source.element.nativeElement.style.maxWidth = '40px'
-
-    event.source.previewContainer
   }
 
   setStyle(event: MouseEvent): void {

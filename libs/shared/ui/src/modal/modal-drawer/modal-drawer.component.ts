@@ -13,10 +13,9 @@ import {
   booleanAttribute,
   inject,
 } from '@angular/core'
-import { NzDrawerModule, NzDrawerPlacement, NzDrawerSize } from 'ng-zorro-antd/drawer'
+import { NzDrawerModule, type NzDrawerPlacement, type NzDrawerSize } from 'ng-zorro-antd/drawer'
 
 @Component({
-  standalone: true,
   selector: 'ui-modal-drawer',
   templateUrl: './modal-drawer.component.html',
   styleUrls: ['./modal-drawer.component.scss'],
@@ -24,6 +23,8 @@ import { NzDrawerModule, NzDrawerPlacement, NzDrawerSize } from 'ng-zorro-antd/d
   imports: [CommonModule, NzDrawerModule],
 })
 export class UiModalDrawerComponent {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly breakpointObserver = inject(BreakpointObserver)
   protected visible = false
 
@@ -47,8 +48,6 @@ export class UiModalDrawerComponent {
   get isVisible(): boolean {
     return this.visible
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   open(): void {
     this.visible = true

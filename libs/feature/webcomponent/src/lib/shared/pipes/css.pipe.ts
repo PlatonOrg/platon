@@ -23,7 +23,8 @@ export class CssPipe implements PipeTransform {
 }
 
 @NgModule({
-  declarations: [CssPipe],
+  declarations: [],
+  imports: [CssPipe],
   exports: [CssPipe],
 })
 export class CssPipeModule {}

@@ -17,7 +17,7 @@ import {
   ON_REOPEN_ACTIVITY_EVENT,
   OnReopenActivityEventPayload,
 } from '@platon/feature/course/server'
-import { ActivityVariables } from '@platon/feature/compiler'
+import { ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 
 @Injectable()
 export class SessionService {
@@ -38,13 +38,12 @@ export class SessionService {
 
   private async updateSettingsSession(session: SessionEntity): Promise<void> {
     if (
-      session?.activity &&
+      session?.activity?.source &&
       session?.variables &&
       typeof session.variables === 'object' &&
       'settings' in session.variables
     ) {
-      // eslint-disable-next-line prettier/prettier
-      (session.variables as ActivityVariables).settings = session.activity.source.variables.settings
+      ;(session.variables as ActivityVariables).settings = session.activity.source.variables.settings
     } else if (session?.parent) {
       await this.updateSettingsSession(session.parent)
     }
@@ -70,7 +69,7 @@ export class SessionService {
   }
 
   async findUserActivity(activityId: string, userId: string): Promise<SessionEntity | null> {
-    const session = this.repository.findOne({
+    const session = await this.repository.findOne({
       where: { parentId: IsNull(), activityId, userId },
       relations: {
         activity: true,
@@ -108,26 +107,40 @@ export class SessionService {
     return session
   }
 
+  /**
+   * Copies the files included by the given source in the media folder, so they can be served to the students.
+   */
+  async linkDependencies(source?: Pick<PLSourceFile, 'resource' | 'dependencies'> | null): Promise<void> {
+    await Promise.all(
+      (source?.dependencies ?? []).map(async (dependency) => {
+        const hash = dependency.hash
+        const newPath = path.join('resources/media', dependency.hash[0], hash)
+
+        const alreadyExists = await fs
+          .access(newPath)
+          .then(() => true)
+          .catch(() => false)
+        if (alreadyExists) return
+
+        const { resource, relpath, version } = resolveFileReference('/' + dependency.abspath, {
+          resource: source?.resource || '',
+        })
+
+        try {
+          await fs.mkdir(path.dirname(newPath), { recursive: true })
+          await fs.writeFile(newPath, await this.ressourceFileService.getFileContent(resource, relpath, version))
+        } catch (error: unknown) {
+          console.error('Link creation error: ', error)
+        }
+      })
+    )
+  }
+
   async create<TVariables>(
     input: Partial<SessionEntity<TVariables>>,
     entityManager?: EntityManager
   ): Promise<SessionEntity<TVariables>> {
-    input.source?.dependencies?.forEach(async (dependency) => {
-      const hash = dependency.hash
-      const { resource, relpath, version } = resolveFileReference('/' + dependency.abspath, {
-        resource: input.source?.resource || '',
-      })
-      const newPath = path.join('resources/media', dependency.hash[0], hash)
-
-      try {
-        await fs.mkdir(path.dirname(newPath), { recursive: true })
-        await fs.writeFile(newPath, await this.ressourceFileService.getFileContent(resource, relpath, version))
-      } catch (error: unknown) {
-        if (!(error instanceof Error && (error as NodeJS.ErrnoException).code === 'EEXIST')) {
-          console.error('Link creation error: ', error)
-        }
-      }
-    })
+    await this.linkDependencies(input.source)
 
     if (entityManager) {
       return entityManager.save(entityManager.create(this.repository.target, input as SessionEntity<TVariables>))
@@ -139,9 +152,9 @@ export class SessionService {
   async update(id: string, changes: PartialDeep<Session>, entityManager?: EntityManager): Promise<void> {
     if (entityManager) {
       await entityManager.update(this.repository.target, { id }, changes as QueryDeepPartialEntity<SessionEntity>)
+    } else {
+      await this.repository.update({ id }, changes as QueryDeepPartialEntity<SessionEntity>)
     }
-
-    await this.repository.update({ id }, changes as QueryDeepPartialEntity<SessionEntity>)
     //////////////////////// UPDATE SESSIONDATA ////////////////////////////////////
     const sessionDatasNewValues: SessionDataEntity[] = await this.retrieveSessionDataWithoutManager(id)
     const sessionDatasToUpdate: SessionDataEntity[] = await this.repositoryData.findBy({ id: id })

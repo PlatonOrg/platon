@@ -44,7 +44,7 @@ export class ErrorTrackingService {
     if (typeof error === 'object' && error !== null) {
       try {
         errorString = JSON.stringify(error, Object.getOwnPropertyNames(error))
-      } catch (e) {
+      } catch (_ignoredError) {
         errorString = error instanceof Error ? `${error.name}: ${error.message}\n${error.stack}` : String(error)
       }
     } else {

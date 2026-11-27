@@ -4,9 +4,12 @@
       <course-item
         [item]="item"
         [simple]="simple"
+        [showArchiveButton]="showArchiveButton()"
+        [isArchived]="isArchived()"
         class="tuto-course-item"
         [id]="'tuto-courses-course-' + index"
         [attr.data-course-id]="item.id"
+        (archiveToggle)="archiveToggle.emit(item)"
       />
     </ng-template>
   </ui-list-template>

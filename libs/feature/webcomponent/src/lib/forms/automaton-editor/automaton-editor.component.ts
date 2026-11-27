@@ -1,16 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
-  Inject,
   Injector,
   Input,
   OnDestroy,
   OnInit,
   Output,
   ViewChild,
+  OnChanges,
+  SimpleChanges,
+  inject,
 } from '@angular/core'
 import {
   BrowserJsPlumbInstance,
@@ -37,8 +38,12 @@ import { ActionSetNonInitialProvider } from './actions/states/set-non-initial'
 import { ActionDeleteTransitionProvider } from './actions/transitions/delete-transition'
 import { ActionRenameTransitionProvider } from './actions/transitions/rename-transition'
 import { State, Transition } from './automaton'
-import { AutomatonEditorComponentDefinition, AutomatonEditorState } from './automaton-editor'
+import { AutomatonEditorComponentDefinition, type AutomatonEditorState } from './automaton-editor'
 import { AutomatonEditorService } from './automaton-editor.service'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { DialogModule } from '@platon/core/browser'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 
 declare type Connection = JsPlumbConnection & { canvas?: HTMLElement }
 
@@ -62,6 +67,7 @@ const BASIC_CONNECTION = {
   templateUrl: 'automaton-editor.component.html',
   styleUrls: ['automaton-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, DialogModule, NzIconModule, NzButtonModule],
   providers: [
     AutomatonEditorService,
     ActionSetInitialProvider,
@@ -75,7 +81,12 @@ const BASIC_CONNECTION = {
   ],
 })
 @WebComponent(AutomatonEditorComponentDefinition)
-export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponentHooks<AutomatonEditorState> {
+export class AutomatonEditorComponent implements OnInit, OnDestroy, OnChanges, WebComponentHooks<AutomatonEditorState> {
+  readonly injector = inject(Injector)
+  readonly editor = inject(AutomatonEditorService)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+  readonly editorActions = inject(AUTOMATON_EDITOR_ACTIONS)
+
   private readonly subs: Subscription[] = []
   private readonly context: AutomatonEditorActionContext = {
     state: undefined,
@@ -96,14 +107,6 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
   private get canvas() {
     return this.container.nativeElement.querySelector('.automaton-editor-canvas')
   }
-
-  constructor(
-    readonly injector: Injector,
-    readonly editor: AutomatonEditorService,
-    readonly changeDetector: WebComponentChangeDetectorService,
-    @Inject(AUTOMATON_EDITOR_ACTIONS)
-    readonly editorActions: AutomatonEditorAction[]
-  ) {}
 
   ngOnInit() {
     this.jsp = newInstance({
@@ -146,79 +149,28 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
       container: this.canvas || undefined,
     })
 
-    this.jsp.bind(EVENT_DRAG_STOP, (dragStopPayload: DragStopPayload) => {
-      this.changeDetector
-        .ignore(this, () => {
-          const el = dragStopPayload.elements.at(0)
-          if (!el) {
-            return
-          }
-          this.editor.moveState(dragStopPayload.el.id, el.pos.x, el.pos.y)
-        })
-        .catch(console.error)
-    })
-
-    this.jsp.registerConnectionType('basic', BASIC_CONNECTION)
     this.state.isFilled = false
 
     return new Promise<void>((resolve) => {
       ready(() => {
-        this.addListeners()
+        this.setupPermanentListeners()
+        this.setupJsPlumbConfig()
         resolve()
       })
     })
   }
 
   ngOnDestroy() {
-    this.removeListeners()
+    this.jsp?.off(this.container.nativeElement, 'click', this.onClickContainer)
+    this.jsp?.off(this.container.nativeElement, 'dblclick', this.onDblClickContainer)
+    this.subs.forEach((s) => s.unsubscribe())
+    this.subs.splice(0)
+    this.jsp?.reset()
   }
 
-  onChangeState() {
-    this.editor.sync(this.state)
-    this.jsp.reset()
-    this.jsp.getContainer().innerHTML = ''
-    this.jsp.batch(() => {
-      this.editor.forEachState(this.renderEndpoint.bind(this))
-      this.editor.forEachTransition(this.createConnection.bind(this))
-    })
-    this.unfocus()
-    this.state.isFilled = false
-  }
-
-  run(action: AutomatonEditorAction) {
-    this.changeDetector
-      .ignore(this, () => {
-        return action.run(this.context)
-      })
-      .catch(console.error)
-  }
-
-  zoomIn(e: MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    this.zoom += 0.1
-    if (this.zoom >= 1) {
-      this.zoom = 1
-    }
-    this.setZoom(this.zoom)
-  }
-
-  zoomOut(e: MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    this.zoom -= 0.1
-    if (this.zoom <= 0.2) {
-      this.zoom = 0.2
-    }
-    this.setZoom(this.zoom)
-  }
-
-  private addListeners() {
-    this.jsp.bind(EVENT_CONNECTION_CLICK, this.onClickConnection.bind(this))
-    this.jsp.bind(INTERCEPT_BEFORE_DROP, this.onWillCreateConnection.bind(this))
-
-    this.jsp.on(this.container.nativeElement, 'click', this.onClickContainer.bind(this))
-    this.jsp.on(this.container.nativeElement, 'dblclick', this.onDblClickContainer.bind(this))
+  private setupPermanentListeners() {
+    this.jsp.on(this.container.nativeElement, 'click', this.onClickContainer)
+    this.jsp.on(this.container.nativeElement, 'dblclick', this.onDblClickContainer)
 
     // CREATE EVENTS
     this.subs.push(this.editor.onCreateState.subscribe(this.renderEndpoint.bind(this)))
@@ -310,12 +262,77 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
     )
   }
 
-  private removeListeners() {
-    this.jsp?.reset()
-    this.jsp?.off(this.container.nativeElement, 'click', this.onClickContainer.bind(this))
-    this.jsp?.off(this.container.nativeElement, 'dblclick', this.onDblClickContainer.bind(this))
-    this.subs.forEach((s) => s.unsubscribe())
-    this.subs.splice(0)
+  /**
+   * jsPlumb bind setup to reset after jsp.reset()
+   */
+  private setupJsPlumbConfig() {
+    this.jsp.registerConnectionType('basic', BASIC_CONNECTION)
+
+    this.jsp.bind(EVENT_DRAG_STOP, (dragStopPayload: DragStopPayload) => {
+      this.changeDetector
+        .ignore(this, () => {
+          const el = dragStopPayload.elements.at(0)
+          if (!el) return
+          this.editor.moveState(dragStopPayload.el.id, el.pos.x, el.pos.y)
+        })
+        .catch(console.error)
+    })
+
+    this.jsp.bind(EVENT_CONNECTION_CLICK, this.onClickConnection)
+    this.jsp.bind(INTERCEPT_BEFORE_DROP, this.onWillCreateConnection)
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['state'] && !changes['state'].firstChange) {
+      this.onChangeState()
+    }
+  }
+
+  onChangeState() {
+    if (!this.jsp || !this.state) {
+      return
+    }
+
+    this.editor.sync(this.state)
+    this.jsp.reset()
+
+    this.setupJsPlumbConfig()
+    this.jsp.batch(() => {
+      this.editor.forEachState(this.renderEndpoint.bind(this))
+      this.editor.forEachTransition(this.createConnection.bind(this))
+    })
+
+    this.unfocus()
+    this.state.isFilled = false
+    this.jsp.repaintEverything()
+  }
+
+  run(action: AutomatonEditorAction) {
+    this.changeDetector
+      .ignore(this, () => {
+        return action.run(this.context)
+      })
+      .catch(console.error)
+  }
+
+  zoomIn(e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.zoom += 0.1
+    if (this.zoom >= 1) {
+      this.zoom = 1
+    }
+    this.setZoom(this.zoom)
+  }
+
+  zoomOut(e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.zoom -= 0.1
+    if (this.zoom <= 0.2) {
+      this.zoom = 0.2
+    }
+    this.setZoom(this.zoom)
   }
 
   private setZoom(zoom: number, _transformOrigin: [number, number] = [0.5, 0.5]) {
@@ -390,7 +407,7 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
     this.jsp.revalidate(node)
   }
 
-  private onClickConnection(conn: JsPlumbConnection, originalEvent: MouseEvent) {
+  private onClickConnection = (conn: JsPlumbConnection, originalEvent: MouseEvent) => {
     originalEvent.stopPropagation()
     this.changeDetector
       .ignore(this, () => {
@@ -400,7 +417,7 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
       .catch(console.error)
   }
 
-  private onClickContainer(_e: MouseEvent) {
+  private onClickContainer = (_e: MouseEvent) => {
     this.unfocus()
   }
 
@@ -410,7 +427,7 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
     this.editor.addState(name, x * this.zoom, y * this.zoom)
   }
 
-  private onDblClickContainer(e: MouseEvent) {
+  private onDblClickContainer = (e: MouseEvent) => {
     const target = e.target as HTMLElement
     if (!(target instanceof HTMLElement)) {
       return
@@ -426,7 +443,7 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
       .catch(console.error)
   }
 
-  private onWillCreateConnection(params: BeforeDropParams): boolean {
+  private onWillCreateConnection = (params: BeforeDropParams): boolean => {
     const sourceName = params.connection.source.id
     const targetName = params.connection.target.id
     this.changeDetector

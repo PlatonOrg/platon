@@ -1,5 +1,6 @@
 <nz-list nzSize="small" nzHeader="Légende">
-  <nz-list-item *ngFor="let state of answerStates">
+  @for (state of answerStates; track state) {
+  <nz-list-item>
     <mat-icon [nz-tooltip]="state | answerStateLabel" [style.color]="state | answerStateColor">
       {{ state | answerStateIcon }}
     </mat-icon>
@@ -7,4 +8,5 @@
       {{ state | answerStateLabel }}
     </span>
   </nz-list-item>
+  }
 </nz-list>

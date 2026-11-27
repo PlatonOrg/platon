@@ -1,4 +1,13 @@
-import { AfterContentInit, Directive, ElementRef, EventEmitter, OnDestroy, Output, Renderer2 } from '@angular/core'
+import {
+  AfterContentInit,
+  Directive,
+  ElementRef,
+  EventEmitter,
+  OnDestroy,
+  Output,
+  Renderer2,
+  inject,
+} from '@angular/core'
 
 type EventHandler = (event: unknown) => boolean | undefined
 export interface DragDropEvent {
@@ -11,6 +20,9 @@ export interface DragDropEvent {
   selector: '[dragNdrop]',
 })
 export class DragDropDirective implements OnDestroy, AfterContentInit {
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef)
+  private readonly renderer = inject(Renderer2)
+
   private static NODE_ID = 0
   private readonly events: (() => void)[] = []
 
@@ -29,7 +41,7 @@ export class DragDropDirective implements OnDestroy, AfterContentInit {
   @Output()
   dropped = new EventEmitter<DragDropEvent>()
 
-  constructor(private readonly el: ElementRef<HTMLElement>, private readonly renderer: Renderer2) {
+  constructor() {
     this.id = 'dnd-' + ++DragDropDirective.NODE_ID
   }
 

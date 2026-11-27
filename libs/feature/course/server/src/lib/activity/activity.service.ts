@@ -1,22 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { randomInt } from 'crypto'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { ForbiddenResponse, NotFoundResponse, User } from '@platon/core/common'
+import { ForbiddenResponse, NotFoundResponse, User, UserRoles } from '@platon/core/common'
 import { DatabaseService, EventService, IRequest, buildSelectQuery } from '@platon/core/server'
 import { ActivityExerciseGroup, ActivitySettings, ActivityVariables, PLSourceFile } from '@platon/feature/compiler'
 import {
   ActivityFilters,
+  ActivityReloadPreview,
   CreateActivity,
   ReloadActivity,
   RestrictionList,
   UpdateActivity,
   calculateActivityOpenState,
 } from '@platon/feature/course/common'
-import { ResourceEntity, ResourceFileService } from '@platon/feature/resource/server'
+import { ResourceEntity, ResourceFileService, ResourceService } from '@platon/feature/resource/server'
 import { CLS_REQ } from 'nestjs-cls'
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm'
 import { Optional } from 'typescript-optional'
-import { ActivityCorrectorService } from '../activity-corrector/activity-corrector.service'
 import { ActivityMemberService } from '../activity-member/activity-member.service'
 import { ActivityMemberView } from '../activity-member/activity-member.view'
 import { CourseNotificationService } from '../course-notification/course-notification.service'
@@ -35,10 +36,21 @@ import { ActivityGroupEntity } from '../activity-group/activity-group.entity'
 import { ActivityGroupService } from '../activity-group/activity-group.service'
 import { CourseMemberService } from '../course-member/course-member.service'
 import { ActivityDatesService } from './activity-dates.service'
-
-import { CourseGroupService } from '../course-group/course-group.service'
+import { diffActivityExercises, planActivityReload } from './activity-reload'
+import { changedExerciseVariables, exerciseReloadRisks } from './exercise-merge'
 
 type ActivityGuard = (activity: ActivityEntity) => void | Promise<void>
+
+const ACCESS_CODE_CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const ACCESS_CODE_LENGTH = 6
+
+function generateAccessCode(): string {
+  let code = ''
+  for (let i = 0; i < ACCESS_CODE_LENGTH; i++) {
+    code += ACCESS_CODE_CHARSET[randomInt(ACCESS_CODE_CHARSET.length)]
+  }
+  return code
+}
 
 @Injectable()
 export class ActivityService {
@@ -52,9 +64,7 @@ export class ActivityService {
     private readonly databaseService: DatabaseService,
     private readonly notificationService: CourseNotificationService,
     private readonly activityMemberService: ActivityMemberService,
-    private readonly activityCorrectorService: ActivityCorrectorService,
     private readonly courseMemberService: CourseMemberService,
-    private readonly courseGroup: CourseGroupService,
     private readonly activityDatesService: ActivityDatesService,
     @InjectRepository(ActivityEntity)
     private readonly repository: Repository<ActivityEntity>,
@@ -62,10 +72,16 @@ export class ActivityService {
     private readonly resourceRepository: Repository<ResourceEntity>,
     @InjectRepository(CourseGroupMemberEntity)
     private readonly courseGroupMemberRepository: Repository<CourseGroupMemberEntity>,
-    private readonly activityGroupService: ActivityGroupService
+    private readonly activityGroupService: ActivityGroupService,
+    private readonly resourceService: ResourceService
   ) {}
 
   async search(courseId: string, filters?: ActivityFilters): Promise<[ActivityEntity[], number]> {
+    let showhidden = false
+    if (this.request.user) {
+      showhidden = await this.courseMemberService.hasWritePermission(courseId, this.request.user)
+    }
+
     const qb = this.createQueryBuilder(courseId)
 
     if (filters?.sectionId) {
@@ -74,6 +90,9 @@ export class ActivityService {
 
     if (filters?.challenge != null) {
       qb.andWhere(`is_challenge = :isChallenge`, { isChallenge: !!filters.challenge })
+    }
+    if (!showhidden) {
+      qb.andWhere('hidden = false')
     }
 
     qb.orderBy('activity.createdAt')
@@ -156,6 +175,18 @@ export class ActivityService {
       1
     const result = await this.repository.save({ ...activity, order })
     await this.addVirtualColumns(result)
+    return result
+  }
+
+  async createActivities(activities: Partial<ActivityEntity>[]): Promise<ActivityEntity[]> {
+    const maxOrder =
+      (await this.repository.maximum('order', {
+        courseId: activities[0].courseId,
+        sectionId: activities[0].sectionId,
+      })) ?? 0
+    const activitiesWithOrder = activities.map((activity, index) => ({ ...activity, order: maxOrder + index + 1 }))
+    const result = await this.repository.save(activitiesWithOrder)
+    await this.addVirtualColumns(...result)
     return result
   }
 
@@ -246,17 +277,97 @@ export class ActivityService {
       resourceId: activity.source.resource,
       version: input.version,
     })
-    activity.source = source as PLSourceFile<ActivityVariables>
+    const next = source as PLSourceFile<ActivityVariables>
+    const isPeer = activitySettings?.navigation?.mode === 'peer'
+    // The students of a peer activity compare their answers with each other: their data cannot be split.
+    const plan = isPeer
+      ? planActivityReload(activity.source.variables, next.variables)
+      : planActivityReload(activity.source.variables, next.variables, input.exerciseKeys, input.keepAnswersKeys)
+    const hasChanges = plan.resetExerciseIds.length > 0 || plan.removedExerciseIds.length > 0
+    const hasAdditions = diffActivityExercises(activity.source.variables, plan.variables).some(
+      (diff) => diff.status === 'added'
+    )
+
+    activity.source = { ...next, variables: plan.variables }
     activity.source.variables.settings = activitySettings
 
-    activity = await this.repository.save(activity)
+    // The sessions of the students are updated before saving the activity:
+    // if it fails, the activity keeps its previous version and the reload can be done again.
+    await this.eventService.emitAsync<OnReloadActivityEventPayload>(ON_RELOAD_ACTIVITY_EVENT, {
+      activity,
+      changes:
+        isPeer && (hasChanges || hasAdditions)
+          ? undefined
+          : {
+              resetExerciseIds: plan.resetExerciseIds,
+              removedExerciseIds: plan.removedExerciseIds,
+              patchedExercises: plan.patchedExercises,
+              mergeRule: input.mergeRule,
+            },
+    })
 
-    this.eventService.emit<OnReloadActivityEventPayload>(ON_RELOAD_ACTIVITY_EVENT, { activity })
+    activity = await this.repository.save(activity)
 
     await this.updateActivitiesDates([activity])
     await this.addVirtualColumns(activity)
 
     return activity
+  }
+
+  /**
+   * Compares the activity with its last published version, without changing anything.
+   */
+  async reloadPreview(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityReloadPreview> {
+    const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
+    if (!activity) {
+      throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
+    }
+    if (guard) {
+      await guard(activity)
+    }
+
+    const { source } = await this.fileService.compile({ resourceId: activity.source.resource })
+    // The state of the navigation is not reliable: only the answers tell who really answered.
+    const started: { id: string; count: number }[] = await this.repository.manager.query(
+      `SELECT exercise->>'id' AS id, COUNT(*)::int AS count
+       FROM "Sessions" session, jsonb_array_elements(session.variables->'navigation'->'exercises') exercise
+       WHERE session.activity_id = $1 AND session.parent_id IS NULL
+         AND EXISTS (SELECT 1 FROM "Answers" answer WHERE answer.session_id = (exercise->>'sessionId')::uuid)
+       GROUP BY 1`,
+      [activityId]
+    )
+
+    const settings = activity.source.variables.settings as ActivitySettings
+    const diffs = diffActivityExercises(
+      activity.source.variables,
+      (source as PLSourceFile<ActivityVariables>).variables
+    )
+    // The title variable can be a default value inherited from a template: it does not identify the exercise.
+    const resources = await this.resourceRepository.find({
+      where: { id: In(diffs.map((diff) => (diff.next ?? diff.previous)?.resource as string)) },
+    })
+    return {
+      fullReset: settings?.navigation?.mode === 'peer',
+      exercises: diffs.map((diff) => {
+        const exercise = diff.next ?? diff.previous
+        return {
+          key: diff.key,
+          status: diff.status,
+          title:
+            resources.find((resource) => resource.id === exercise?.resource)?.name ??
+            String(exercise?.source.variables['title'] ?? ''),
+          startedCount: started.find((item) => item.id === diff.previous?.id)?.count ?? 0,
+          changedVariables:
+            diff.status === 'modified' && diff.previous && diff.next
+              ? changedExerciseVariables(diff.previous.source.variables, diff.next.source.variables)
+              : [],
+          risks:
+            diff.status === 'modified' && diff.previous && diff.next
+              ? exerciseReloadRisks(diff.previous.source, diff.next.source)
+              : [],
+        }
+      }),
+    }
   }
 
   async close(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityEntity> {
@@ -287,6 +398,17 @@ export class ActivityService {
     await this.activityDatesService.reopenOrCloseAllRestrictions(activity, true)
     this.eventService.emit<OnReopenActivityEventPayload>(ON_REOPEN_ACTIVITY_EVENT, { activityId })
     return this.update(courseId, activityId, { closeAt: null, restrictions: activity.restrictions })
+  }
+
+  async regenerateCode(courseId: string, activityId: string, guard?: ActivityGuard): Promise<ActivityEntity> {
+    const activity = await this.repository.findOne({ where: { courseId, id: activityId } })
+    if (!activity) {
+      throw new NotFoundResponse(`CourseActivity not found: ${activityId}`)
+    }
+    if (guard) {
+      await guard(activity)
+    }
+    return this.update(courseId, activityId, { code: generateAccessCode() }, guard)
   }
 
   async delete(courseId: string, activityId: string, guard?: ActivityGuard) {
@@ -323,18 +445,32 @@ export class ActivityService {
   async fromInput(input: CreateActivity | UpdateActivity): Promise<ActivityEntity> {
     const activity = new ActivityEntity()
 
-    if ('resourceId' in input) {
-      const { source } = await this.fileService.compile({
-        resourceId: input.resourceId,
-        version: input.resourceVersion,
-      })
-      activity.source = source as PLSourceFile<ActivityVariables>
-      delete (input as any).resourceId
-      delete (input as any).resourceVersion
+    try {
+      if ('resourceId' in input) {
+        const { source } = await this.fileService.compile({
+          resourceId: input.resourceId,
+          version: input.resourceVersion,
+        })
+        activity.source = source as PLSourceFile<ActivityVariables>
+        delete (input as any).resourceId
+        delete (input as any).resourceVersion
+      }
+    } catch (error) {
+      if ('resourceId' in input) {
+        const activityFailure = await this.findByActivityId(input.resourceId)
+        activityFailure.ifPresent((activity) => {
+          throw new NotFoundResponse(`Resource not found: ${activity.title} version ${input.resourceVersion}`)
+        })
+
+        const resource = await this.resourceService.findByIdOrCode(input.resourceId)
+        resource.ifPresent((resource) => {
+          throw new NotFoundResponse(`Erreur lord du chargement de l'activité: ${resource.name}`)
+        })
+      }
+      throw error
     }
 
     Object.assign(activity, input)
-
     return activity
   }
 

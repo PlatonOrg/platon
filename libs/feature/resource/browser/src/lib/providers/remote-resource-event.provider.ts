@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse } from '@platon/core/common'
 import { Resource, ResourceEvent, ResourceEventFilters } from '@platon/feature/resource/common'
 import { Observable } from 'rxjs'
@@ -7,9 +7,7 @@ import { ResourceEventProvider } from '../models/resource-event-provider'
 
 @Injectable()
 export class RemoteResourceEventProvider extends ResourceEventProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   listEvents(resource: Resource, filters?: ResourceEventFilters): Observable<ListResponse<ResourceEvent>> {
     filters = filters || {}

@@ -3,7 +3,7 @@ title: ImageClicker
 description: Composant permettant de cliquer sur une image et d'afficher les points de clic selon différents modes d'affichage.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -186,16 +186,22 @@ Ce composant est idéal pour:
 
 La normalisation des coordonnées garantit que les exercices fonctionnent de manière identique quelle que soit la taille d'écran de l'apprenant.
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-image-clicker',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Cliquer sur une cible",
+    "url": "/playground/exercises/image-clicker/find-target.ple"
+  }
+]
   ]}
 />
 

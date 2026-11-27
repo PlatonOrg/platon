@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 
 @Component({
   selector: 'core-dialog-prompt',
   templateUrl: './prompt.component.html',
   styleUrls: ['./prompt.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule],
 })
 export class PromptDialogComponent {
   @Input() value? = ''

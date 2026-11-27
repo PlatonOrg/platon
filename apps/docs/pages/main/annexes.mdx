@@ -1,26 +1,46 @@
 ---
 title: Annexes
-description: Glossaire des termes techniques et spécifiques utilisés dans PLaTon, incluant les concepts fondamentaux comme les activités, exercices, composants, et éléments de l'architecture technique pour faciliter la compréhension de la documentation.
+description: Glossaire des termes utilisés dans PLaTon et dans sa documentation - ressources, cercles, activités, exercices, fichiers PLE/PLA/PLC/PLO, builder, grader, sandbox, sessions, corrections, LTI, CAS…
 ---
 
-Annexes : Glossaire des Termes Utilisés
+# Glossaire
 
-Voici un glossaire des termes employés tout au long de la documentation pour faciliter la compréhension et l'usage de la plateforme PLaTon :
-
-- **Activité** : Ensemble structuré d'exercices que les apprenants doivent réaliser. Une activité peut être composée d'un ou plusieurs exercices.
-- **API** : Interface de programmation d'applications (Application Programming Interface) qui permet la communication entre différents logiciels.
-- **Builder** : Script ou partie de code dans PLaTon dédié à la construction d'un exercice, préparant les données avant que l'étudiant ne commence l'exercice.
-- **Composant** : Élément d'interface utilisateur ou bloc fonctionnel utilisé dans la création d'exercices sur PLaTon.
-- **Configurable** : Attribut d'un exercice qui peut être modifié ou personnalisé à l'aide de paramètres spécifiques.
-- **Exercice** : Tâche ou problème posé aux apprenants pour évaluation ou pratique.
-- **Grader** : Script ou partie de code qui évalue les réponses des apprenants et attribue des scores.
-- **IDE** : Environnement de développement intégré (Integrated Development Environment) où les utilisateurs peuvent écrire et tester leur code.
-- Navigation Dynamique : Capacité d'une activité à guider l'apprenant à travers les exercices de manière adaptative, basée sur son progrès ou ses réponses.
-- **Player** : Composant au sein de PLaTon qui permet aux apprenants de visualiser et interagir avec les exercices et les activités.
-- **Sandbox** : Environnement virtuel sécurisé où le code des exercices est exécuté isolément pour éviter tout effet indésirable sur le reste du système.
-- **Session** : Période de temps pendant laquelle un apprenant est activement engagé dans un exercice ou une activité.
-- **Template Nunjucks** : Langage de templating utilisé dans PLaTon pour insérer des variables et des logiques de programmation dans le contenu textuel d'un exercice.
-- **Variable** : Élément de programmation qui stocke une valeur pouvant être modifiée et utilisée dans différents contextes au sein d'un exercice.
-- **WYSIWYG** : Acronyme pour "What You See Is What You Get", désignant un éditeur qui permet de composer le contenu dans une forme qui ressemble à sa présentation finale.
-
-Ce glossaire vise à fournir une référence rapide pour les termes techniques et spécifiques à PLaTon rencontrés par les utilisateurs lors de la création et de la gestion d'exercices et d'activités éducatives.
+| Terme                       | Définition                                                                                                                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Activité**                | Ressource qui enchaîne des exercices avec des règles (durée, tentatives, navigation…). Son code est dans `main.pla`. Voir [Activités](/main/resources/activities).                              |
+| **Activité de cours**       | Copie d'une activité publiée dans une section de cours, avec ses propres dates, restrictions et paramètres. Voir [Ajouter des activités](/main/courses/activities).                            |
+| **Builder**                 | 1. Script `builder` d'un exercice, exécuté une fois avant l'affichage pour préparer les données. 2. [Éditeur graphique](/main/resources/builder) qui personnalise un exercice créé à partir d'un modèle. |
+| **CAS**                     | Service d'authentification centralisé d'un établissement, utilisable pour se connecter à PLaTon. Voir [Connexion CAS](/main/users/lti-integration#connexion-cas).                              |
+| **Cercle**                  | Ressource qui regroupe d'autres ressources (sous-cercles, activités, exercices) et porte les droits d'écriture. Voir [Cercles](/main/resources/circles).                                        |
+| **Cercle personnel**        | Cercle propre à chaque enseignant, visible uniquement par lui et les membres qu'il accepte.                                                                                                    |
+| **Challenge**               | Activité de cours dont le classement est visible par tous les membres. Voir [Challenges](/main/courses/challenges).                                                                            |
+| **Code de déblocage**       | Code de 6 caractères qui permet à un étudiant de reprendre un TP noté arrêté par une règle de sécurité.                                                                                        |
+| **Composant**               | Élément interactif (`wc-…`) affiché dans un exercice : champ de saisie, QCM, éditeur de code, graphique… Voir [Composants](/components).                                                         |
+| **Correcteur**              | Membre d'un cours chargé de corriger les copies d'une activité. Voir [Corriger les copies](/main/courses/corrections).                                                                          |
+| **Correction**              | Note (et étiquettes, commentaires) attribuée manuellement par un correcteur ; elle remplace la note du grader.                                                                                  |
+| **Cours**                   | Espace où un enseignant diffuse des activités à des membres. Voir [Gestion des cours](/main/courses/overview).                                                                                 |
+| **Exercice**                | Ressource contenant une question et sa correction automatique. Son code est dans `main.ple`. Voir [Exercices](/main/resources/exercises).                                                       |
+| **Exercice configurable / modèle (template)** | Exercice possédant un `main.plc`, dont les variables peuvent être personnalisées pour créer d'autres exercices. Voir [Rendre un exercice configurable](/main/programing/exercise/config). |
+| **Feedback**                | Retour affiché après une validation, défini par le grader. Voir [Évaluation](/main/programing/exercise/grading).                                                                               |
+| **Grader**                  | Script `grader` d'un exercice, exécuté à chaque validation pour lire la réponse et calculer la note.                                                                                            |
+| **Graine (seed)**           | Nombre entre 0 et 99 fourni à chaque exercice pour rendre les tirages aléatoires reproductibles. Voir [Aléatoire et graine](/main/programing/exercise/workflow#aléatoire-et-graine-seed).       |
+| **Groupe de cours**         | Sous-ensemble des étudiants d'un cours (TD, TP…). Voir [Gestion des groupes](/main/courses/groups).                                                                                             |
+| **Groupe d'utilisateurs**   | Groupe de comptes géré par les administrateurs, inscriptible en bloc dans un cours. Voir [Groupes d'utilisateurs](/main/users/groups).                                                          |
+| **LMS**                     | Plateforme d'enseignement de l'établissement (Moodle, Canvas…), reliée à PLaTon par LTI.                                                                                                        |
+| **LTI**                     | Norme qui permet d'ouvrir PLaTon depuis un LMS avec connexion automatique. Voir [Intégration LTI](/main/users/lti-integration).                                                                 |
+| **Navigation**              | Manière dont l'apprenant passe d'un exercice à l'autre dans une activité : progressive, composée, intelligente, par validation ou par les pairs. Voir [Configuration d'une activité](/main/programing/activity/config). |
+| **Nunjucks**                | Langage de gabarits utilisé dans `statement`, `form`, `solution`, `hint` et `feedback` pour afficher des variables avec `{{ … }}`.                                                              |
+| **Observateur**             | Utilisateur qui suit une ressource et reçoit des notifications. Voir [Observateurs](/main/resources/watchers).                                                                                 |
+| **Période d'accès**         | Restriction d'une activité de cours qui donne des dates d'ouverture différentes selon les étudiants ou les groupes.                                                                            |
+| **PLA, PLE, PLC, PLO**      | Fichiers `main.pla` (activité), `main.ple` (exercice), `main.plc` (configuration d'un modèle), `main.plo` (valeurs choisies pour un exercice issu d'un modèle). Voir [Fichiers d'un exercice](/main/programing/exercise/files). |
+| **Player**                  | Partie de PLaTon qui affiche et fait jouer les exercices et les activités aux apprenants.                                                                                                       |
+| **Prévisualisation**        | Exécution d'une ressource hors de tout cours, pour la tester.                                                                                                                                    |
+| **Ressource**               | Terme générique désignant un cercle, une activité ou un exercice. Voir [Types de ressources](/main/resources/types).                                                                             |
+| **Sandbox**                 | Environnement isolé où s'exécutent le builder et le grader : Node (JavaScript) ou Python.                                                                                                      |
+| **Section**                 | Partie d'un cours regroupant des activités. Voir [Sections](/main/courses/sections).                                                                                                           |
+| **Session**                 | Passage d'un apprenant sur une activité ou un exercice, avec ses réponses, ses tentatives et sa note.                                                                                          |
+| **Statut**                  | État d'une ressource : brouillon, prêt à l'utilisation, besoin d'être testé, contient des bugs, ne pas utiliser.                                                                                |
+| **Tentative**               | Validation d'un exercice ayant reçu une note supérieure ou égale à 0.                                                                                                                           |
+| **Test d'entrée**           | Épreuve passée par des candidats sans compte, invités par e-mail. Voir [Tests d'entrée](/main/courses/tests).                                                                                  |
+| **Topic, niveau**           | Tags qui classent les ressources par thème et par niveau d'études. Voir [Tags](/main/resources/tags).                                                                                          |
+| **Version**                 | État figé d'une ressource ; `latest` désigne toujours la dernière version.                                                                                                                      |

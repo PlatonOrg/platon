@@ -20,14 +20,11 @@ import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton'
 import { firstValueFrom } from 'rxjs'
 
 @Component({
-  standalone: true,
   imports: [
     NzIconModule,
     NzButtonModule,
     NzSkeletonComponent,
-
     NgeMonacoModule,
-
     DialogModule,
     UiError404Component,
     UiModalIFrameComponent,

@@ -3,7 +3,7 @@ title: Crossword
 description: Composant de grille interactive de mots croisés. Conçu pour la saisie mot par mot, il est idéal pour les exercices de vocabulaire ciblés et l'association terme-définition.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -50,16 +50,22 @@ Vous pouvez ajuster certains paramètres visuels du composant :
 
 - `correctionColor` : Les cases sont coloriées en vert si la saisie est correcte et en rouge dans le cas contraire. Cet affichage apparaît lors de la validation et disparaît dès que l'apprenant effectue une nouvelle saisie.
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-crossword',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Vocabulaire de la programmation",
+    "url": "/playground/exercises/crossword/programming.ple"
+  }
+]
   ]}
 />
 

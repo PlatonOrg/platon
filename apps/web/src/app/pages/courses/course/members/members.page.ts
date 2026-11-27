@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Subscription } from 'rxjs'
 
@@ -6,10 +5,10 @@ import { MatCardModule } from '@angular/material/card'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
-import { UserSearchModalComponent } from '@platon/core/browser'
-import { User, UserGroup } from '@platon/core/common'
+import { DialogService, UserSearchModalComponent } from '@platon/core/browser'
+import { isTeacherRole, isUser, isUserGroup, User, UserFilters, UserGroup, UserRoles } from '@platon/core/common'
 import {
   ChangeRoleEvent,
   CourseMemberSearchBarComponent,
@@ -24,22 +23,17 @@ import { CoursePresenter } from '../course.presenter'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 
 @Component({
-  standalone: true,
   selector: 'app-course-members',
   templateUrl: './members.page.html',
   styleUrls: ['./members.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
-
     MatCardModule,
-
     NzIconModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzSelectModule,
-
     CoursePipesModule,
     UserSearchModalComponent,
     CourseMemberTableComponent,
@@ -50,6 +44,7 @@ export class CourseMembersPage implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly dialogService = inject(DialogService)
 
   protected context = this.presenter.defaultContext()
   protected members: CourseMember[] = []
@@ -58,7 +53,8 @@ export class CourseMembersPage implements OnInit, OnDestroy {
   protected searchModalTitle = 'Ajouter un membre'
   protected loading = true
   protected filters: CourseMemberFilters = {}
-  @Input() roles: (keyof typeof CourseMemberRoles)[] | undefined = []
+  protected modalFilters: UserFilters = {}
+  @Input() memberRoles: (keyof typeof CourseMemberRoles)[] | undefined = []
   protected role: CourseMemberRoles = CourseMemberRoles.student
 
   protected get canEdit(): boolean {
@@ -68,7 +64,7 @@ export class CourseMembersPage implements OnInit, OnDestroy {
   }
 
   protected get allowGroup(): boolean {
-    return !!this.roles?.includes(CourseMemberRoles.student)
+    return !!this.memberRoles?.includes(CourseMemberRoles.student)
   }
 
   ngOnInit(): void {
@@ -79,19 +75,23 @@ export class CourseMembersPage implements OnInit, OnDestroy {
       })
     )
 
-    this.roles = this.roles?.length ? this.roles : [CourseMemberRoles.student, CourseMemberRoles.teacher]
+    this.memberRoles = this.memberRoles?.length
+      ? this.memberRoles
+      : [CourseMemberRoles.student, CourseMemberRoles.teacher]
 
     this.filters = {
-      roles: this.roles as CourseMemberRoles[],
+      roles: this.memberRoles as CourseMemberRoles[],
       limit: 5,
     }
 
-    if (this.roles.length > 1) {
+    this.modalFilters = { roles: this.memberRoles as unknown as UserRoles[] }
+
+    if (this.memberRoles.length > 1) {
       this.searchModalTitle = 'Ajouter des membres'
     } else {
-      if (this.roles.includes(CourseMemberRoles.student)) {
+      if (this.memberRoles.includes(CourseMemberRoles.student)) {
         this.searchModalTitle = 'Ajouter des élèves'
-      } else if (this.roles.includes(CourseMemberRoles.teacher)) {
+      } else if (this.memberRoles.includes(CourseMemberRoles.teacher)) {
         this.searchModalTitle = 'Ajouter des enseignants'
       }
     }
@@ -102,11 +102,18 @@ export class CourseMembersPage implements OnInit, OnDestroy {
   }
 
   protected async addMembers(userOrGroups: (User | UserGroup)[]) {
+    if (this.role === CourseMemberRoles.teacher && userOrGroups.filter(isUser).some((u) => !isTeacherRole(u.role))) {
+      this.dialogService.error(
+        "Seuls les utilisateurs avec un rôle enseignant peuvent être ajoutés en tant qu'enseignants"
+      )
+      return
+    }
+
     await Promise.all(
       userOrGroups.map(async (userOrGroup) => {
         return this.presenter.addMember({
           id: userOrGroup.id,
-          isGroup: !('username' in userOrGroup),
+          isGroup: isUserGroup(userOrGroup),
           role: this.role,
         })
       })
@@ -121,11 +128,20 @@ export class CourseMembersPage implements OnInit, OnDestroy {
     const { member, newRole, previousRole } = event
     try {
       await this.presenter.updateMemberRole(member, newRole)
-    } catch (error) {
+    } catch (_error) {
       const updatedMember = { ...member, role: previousRole }
       this.members = this.members.map((m) => (m.id === member.id ? updatedMember : m))
       this.changeDetectorRef.markForCheck()
     }
+  }
+
+  protected onRoleChange(role: CourseMemberRoles | null): void {
+    if (role === CourseMemberRoles.teacher) {
+      this.modalFilters = { roles: [UserRoles.teacher, UserRoles.admin] }
+    } else {
+      this.modalFilters = { roles: this.memberRoles as unknown as UserRoles[] }
+    }
+    this.changeDetectorRef.markForCheck()
   }
 
   protected async onUpdateMembers(members: CourseMember[]): Promise<void> {

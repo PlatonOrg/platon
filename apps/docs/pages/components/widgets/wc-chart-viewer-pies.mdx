@@ -3,7 +3,7 @@ title: ChartViewer-Pies
 description: Graphique circulaire avec plusieurs variantes (simple, donut, demi-donut, diagramme de Nightingale) pour visualiser des proportions. Adapté aux exercices de statistiques, d'analyse de données, de répartition de budgets, de démographie, ou pour toute représentation de données où la proportion relative des parties par rapport au tout est importante.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -63,16 +63,22 @@ Pour une visualisation optimale:
 
 > Les différents modes offrent des perspectives visuelles complémentaires sur les mêmes données, permettant d'explorer différentes façons de communiquer l'information.
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-chart-viewer-pies',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Calculer un pourcentage",
+    "url": "/playground/exercises/chart-viewer-pies/percentage.ple"
+  }
+]
   ]}
 />
 
@@ -98,6 +104,129 @@ Pour une visualisation optimale:
         "half-donut",
         "nightingale"
       ]
+    },
+    "title": {
+      "type": "object",
+      "default": {
+        "text": "Title",
+        "subtext": "SubTitle",
+        "left": "center"
+      },
+      "description": "Titre du graphique",
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "Title",
+          "description": "Titre du graphique"
+        },
+        "subtext": {
+          "type": "string",
+          "default": "SubTitle",
+          "description": "Sous-titre du graphique"
+        },
+        "left": {
+          "type": "string",
+          "default": "center",
+          "description": "Position du titre sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position du titre sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "default": {
+        "orient": "vertical",
+        "left": "left"
+      },
+      "description": "Légende du graphique",
+      "properties": {
+        "orient": {
+          "type": "string",
+          "default": "vertical",
+          "description": "Orientation de la légende",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        "left": {
+          "type": "string",
+          "default": "left",
+          "description": "Position de la légende sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position de la légende sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "tooltip": {
+      "type": "object",
+      "default": {
+        "trigger": "item"
+      },
+      "description": "Tooltip du graphique",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "default": "item",
+          "description": "Type de tooltip",
+          "enum": [
+            "item",
+            "axis"
+          ]
+        }
+      }
+    },
+    "dataTitle": {
+      "type": "string",
+      "default": "Valeur de la donnée",
+      "description": "Titre à afficher sur chaque donnée"
+    },
+    "data": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des données du graphique",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "",
+            "description": "Nom de l'indicateur"
+          },
+          "value": {
+            "type": "number",
+            "default": 0,
+            "description": "Valeur de l'indicateur"
+          }
+        }
+      }
     }
   }
 }} />
@@ -122,6 +251,129 @@ Pour une visualisation optimale:
         "half-donut",
         "nightingale"
       ]
+    },
+    "title": {
+      "type": "object",
+      "default": {
+        "text": "Title",
+        "subtext": "SubTitle",
+        "left": "center"
+      },
+      "description": "Titre du graphique",
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "Title",
+          "description": "Titre du graphique"
+        },
+        "subtext": {
+          "type": "string",
+          "default": "SubTitle",
+          "description": "Sous-titre du graphique"
+        },
+        "left": {
+          "type": "string",
+          "default": "center",
+          "description": "Position du titre sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position du titre sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "default": {
+        "orient": "vertical",
+        "left": "left"
+      },
+      "description": "Légende du graphique",
+      "properties": {
+        "orient": {
+          "type": "string",
+          "default": "vertical",
+          "description": "Orientation de la légende",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        "left": {
+          "type": "string",
+          "default": "left",
+          "description": "Position de la légende sur l'axe horizontal, ne peut pas être combiné avec top",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "top": {
+          "type": "string",
+          "default": "top",
+          "description": "Position de la légende sur l'axe vertical, ne peut pas être combiné avec left",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ]
+        }
+      }
+    },
+    "tooltip": {
+      "type": "object",
+      "default": {
+        "trigger": "item"
+      },
+      "description": "Tooltip du graphique",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "default": "item",
+          "description": "Type de tooltip",
+          "enum": [
+            "item",
+            "axis"
+          ]
+        }
+      }
+    },
+    "dataTitle": {
+      "type": "string",
+      "default": "Valeur de la donnée",
+      "description": "Titre à afficher sur chaque donnée"
+    },
+    "data": {
+      "type": "array",
+      "default": [],
+      "description": "Liste des données du graphique",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "",
+            "description": "Nom de l'indicateur"
+          },
+          "value": {
+            "type": "number",
+            "default": 0,
+            "description": "Valeur de l'indicateur"
+          }
+        }
+      }
     }
   }
 }

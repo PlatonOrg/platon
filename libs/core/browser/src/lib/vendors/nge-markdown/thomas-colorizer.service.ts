@@ -1,20 +1,52 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { NgeMonacoLoaderService } from '@cisstech/nge/monaco'
 import { NgeMonacoThemeService } from '@cisstech/nge/monaco'
 
+/** Height of a line of code, shared by the lines and their numbers so that they stay aligned. */
+const LINE_HEIGHT = '18px'
+
 @Injectable({ providedIn: 'root' })
 export class ThomasColorizerService {
-  constructor(private readonly loader: NgeMonacoLoaderService, private readonly theming: NgeMonacoThemeService) {}
+  private readonly loader = inject(NgeMonacoLoaderService)
+  private readonly theming = inject(NgeMonacoThemeService)
+
+  /** Number of the latest call for each element (see `colorizeElement`). */
+  private readonly calls = new WeakMap<HTMLElement, number>()
 
   async colorizeElement(options: NgeMonacoColorizeOptions) {
+    const { element } = options
+
+    // nge-markdown does not wait for a rendering to end before starting the next one: two
+    // renderings close in time (a component that receives its state, for example) can colorize
+    // the same element at the same time. Only the latest call writes its result.
+    const call = (this.calls.get(element) ?? 0) + 1
+    this.calls.set(element, call)
+    const outdated = () => this.calls.get(element) !== call
+
     await this.loader.loadAsync()
     if (options.theme) {
       await this.theming.defineTheme(options.theme)
     }
 
-    const { element } = options
+    // Colorized apart, so that the element keeps its code until the result is written.
+    const colorized = document.createElement('code')
+    colorized.innerHTML = this.escapeHtml(options.code || '')
 
-    element.innerHTML = this.escapeHtml(options.code || '')
+    const languages = monaco.languages.getLanguages()
+    const language = languages.find((e) => {
+      return e.id === options.language || e.aliases?.find((a) => a === options.language)
+    })?.id
+
+    await monaco.editor.colorizeElement(colorized, {
+      mimeType: language || 'plaintext',
+      theme: options.theme || this.theming.theme?.themeName || 'vs',
+    })
+
+    if (outdated()) {
+      return
+    }
+
+    element.replaceChildren(...Array.from(colorized.childNodes))
     element.style.padding = '4px'
     element.style.display = 'block'
 
@@ -29,16 +61,6 @@ export class ThomasColorizerService {
     }
 
     element.className = ''
-
-    const languages = monaco.languages.getLanguages()
-    const language = languages.find((e) => {
-      return e.id === options.language || e.aliases?.find((a) => a === options.language)
-    })?.id
-
-    await monaco.editor.colorizeElement(element, {
-      mimeType: language || 'plaintext',
-      theme: options.theme || this.theming.theme?.themeName || 'vs',
-    })
 
     this.highlightLines(options)
     this.showLineNumbers(options)
@@ -55,36 +77,43 @@ export class ThomasColorizerService {
     return input.replace(/[<>]/g, (tag) => map[tag] || tag)
   }
 
+  /**
+   * Puts each line of the colorized code (separated by `<br>`) in its own row of `LINE_HEIGHT`,
+   * highlighted or not, so that the line numbers written next to them stay aligned.
+   */
   private highlightLines(options: NgeMonacoColorizeOptions): void {
-    if (!options.highlights) {
+    if (!options.highlights && !options.lines) {
       return
     }
 
     const { element } = options
+    const linesToHighlight = this.lineNumbersFromString(options.highlights?.toString() ?? '')
 
-    const linesToHighlight = this.lineNumbersFromString(options.highlights.toString())
-
-    let newLine = true
-    let lineNumber = 1
-    element.childNodes.forEach((e) => {
-      const node = e as HTMLElement
-      if (newLine) {
-        const div = document.createElement('div')
-        div.style.height = '18px'
-        if (linesToHighlight.includes(lineNumber)) {
-          div.classList.add('rangeHighlight')
-          div.classList.add('selected-text')
-        }
-        element.insertBefore(div, node)
-        element.removeChild(node)
-        div.appendChild(node)
-        newLine = false
-      } else if (node.tagName === 'BR') {
-        lineNumber++
-        newLine = true
+    const lines: Node[][] = [[]]
+    for (const node of Array.from(element.childNodes)) {
+      if (node.nodeName === 'BR') {
+        lines.push([])
+      } else {
+        lines[lines.length - 1].push(node)
       }
-    })
-    Array.from(element.getElementsByTagName('br')).forEach((node) => node.remove())
+    }
+    // The colorized code may end with a `<br>`: it does not start a new line.
+    if (lines.length > 1 && !lines[lines.length - 1].some((node) => node.textContent)) {
+      lines.pop()
+    }
+
+    element.replaceChildren(
+      ...lines.map((nodes, index) => {
+        const div = document.createElement('div')
+        div.style.height = LINE_HEIGHT
+        div.style.lineHeight = LINE_HEIGHT
+        if (linesToHighlight.includes(index + 1)) {
+          div.classList.add('rangeHighlight', 'selected-text')
+        }
+        div.append(...nodes)
+        return div
+      })
+    )
   }
 
   private showLineNumbers(options: NgeMonacoColorizeOptions): void {
@@ -94,7 +123,8 @@ export class ThomasColorizerService {
 
     const { element } = options
     const lines = this.lineNumbersFromString(options.lines.toString())
-    const length = (options.code || '').split('\n').length
+    // One row per line of code (see `highlightLines`).
+    const length = element.children.length
     if (lines.length === 1) {
       for (let i = lines[0] + 1; i <= length; i++) {
         lines.push(i)
@@ -107,7 +137,7 @@ export class ThomasColorizerService {
       if (lines.includes(i + 1)) {
         num = '' + (i + 1)
       }
-      side.push(`<div class="line-numbers" style="height: 18px">${num}</div>`)
+      side.push(`<div class="line-numbers" style="height: ${LINE_HEIGHT}; line-height: ${LINE_HEIGHT}">${num}</div>`)
     }
     side.push('</div>')
 

@@ -109,6 +109,19 @@ export class EmailService {
   }
 
   /**
+   * Envoie un e-mail à l'équipe PLaTOn, sans le dédoublonnage/throttling réservé aux alertes techniques
+   * @param options Les options de l'e-mail (sans le destinataire, résolu automatiquement)
+   * @returns Promise<boolean> true si l'envoi a réussi, false sinon
+   */
+  async sendToPlatonTeam(options: Omit<EmailOptions, 'to'>): Promise<boolean> {
+    if (!this.isConfigured || !this.technicalTeamEmail.length) {
+      this.logger.error(`Impossible d'envoyer l'e-mail "${options.subject}" à l'équipe PLaTOn : service non configuré`)
+      return false
+    }
+    return this.send({ ...options, to: this.technicalTeamEmail })
+  }
+
+  /**
    * Envoie un e-mail à l'équipe technique
    * @param options Les options de l'e-mail technique
    * @returns Promise<boolean> true si l'envoi a réussi, false sinon

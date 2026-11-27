@@ -1,3 +1,4 @@
+export * from './charter'
 export * from './groups'
 export * from './prefs'
 export * from './user.dto'

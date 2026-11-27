@@ -19,9 +19,9 @@ import { MatInputModule } from '@angular/material/input'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
-import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message'
+import { NzMessageService } from 'ng-zorro-antd/message'
 
 export interface CsvHeaderOption {
   value: string
@@ -37,7 +37,6 @@ export interface CsvImportError {
 }
 
 @Component({
-  standalone: true,
   selector: 'ui-csv-import',
   templateUrl: './csv-import.component.html',
   styleUrls: ['./csv-import.component.scss'],
@@ -51,9 +50,8 @@ export interface CsvImportError {
     NzButtonModule,
     NzPopconfirmModule,
     NzIconModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzSpinModule,
-    NzMessageModule,
   ],
   providers: [NzMessageService],
 })

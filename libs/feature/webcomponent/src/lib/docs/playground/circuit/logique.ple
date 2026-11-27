@@ -1,0 +1,41 @@
+# Fonction logique : régler les entrées pour obtenir S = 1
+sandbox = "python"
+
+title = "Obtenir S = 1"
+
+circuit = :wc-circuit
+circuit.schema = {
+  "unit": 25,
+  "elements": [
+    {"type": "toggle", "id": "a", "at": [0, -1]},
+    {"type": "toggle", "id": "b", "at": [0, 1]},
+    {"type": "toggle", "id": "c", "at": [0, 4]},
+    {"type": "nand", "id": "P1", "at": [2, 0]},
+    {"type": "wire", "points": [[4, 0], [5, 0], [5, 1], [6, 1]]},
+    {"type": "wire", "points": [[0, 4], [5, 4], [5, 3], [6, 3]]},
+    {"type": "and", "id": "P2", "at": [8, 2]},
+    {"type": "probe", "id": "S", "at": [10, 2]}
+  ]
+}
+
+statement ==
+Le montage réalise $S = \overline{a \cdot b} \cdot c$. Réglez les entrées pour obtenir $S = 1$ avec **a = 1**.
+==
+
+form ==
+{{ circuit }}
+==
+
+grader == #!lang=py
+# ne jamais faire confiance au navigateur : seules les valeurs 0 et 1 sont lues (comme le composant)
+v = circuit.get("value")
+v = v if isinstance(v, dict) else {}
+a, b, c = [1 if v.get(k) in (1, True) else 0 for k in ("a", "b", "c")]
+s = (1 - (a & b)) & c
+if a == 1 and s == 1:
+    grade = 100
+    feedback = {"type": "success", "content": "Juste : a = 1, b = 0, c = 1."}
+else:
+    grade = 0
+    feedback = {"type": "error", "content": "S vaut %d avec a = %d, b = %d, c = %d." % (s, a, b, c)}
+==

@@ -1,21 +1,22 @@
-import { Component, Input } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core'
+
 import { TutorialSelectorService, TutorialOption } from '../../api/tutorial-selector.service'
-import { AuthService } from '@platon/core/browser'
 import { MatIconModule } from '@angular/material/icon'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 
 @Component({
   selector: 'tutorial-selector-modal',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, NzGridModule],
+  imports: [MatIconModule, NzGridModule],
   templateUrl: './tutorial-selector-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tutorial-selector-modal.component.scss',
 })
 export class TutorialSelectorModalComponent {
+  protected tutorialService = inject(TutorialSelectorService)
+
   @Input() tutorials: TutorialOption[] = []
 
-  constructor(protected tutorialService: TutorialSelectorService, private authService: AuthService) {
+  constructor() {
     this.tutorials = this.tutorialService.tutorials
   }
 

@@ -4,9 +4,9 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "ignoreDeprecations": "6.0"
   },
   "files": [],
   "include": [],
@@ -18,11 +18,5 @@
       "path": "./tsconfig.spec.json"
     }
   ],
-  "extends": "../../../../tsconfig.base.json",
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
+  "extends": "../../../../tsconfig.base.json"
 }

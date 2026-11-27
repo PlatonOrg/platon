@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core'
+import { Pipe, PipeTransform, inject } from '@angular/core'
 import { Resource } from '@platon/feature/resource/common'
 import { firstValueFrom } from 'rxjs'
 import { ResourceService } from '../api/resource.service'
@@ -8,7 +8,8 @@ import { ResourceService } from '../api/resource.service'
   pure: true,
 })
 export class ResourceFindPipe implements PipeTransform {
-  constructor(private readonly resourceService: ResourceService) {}
+  private readonly resourceService = inject(ResourceService)
+
   async transform(id: string): Promise<Resource | undefined> {
     try {
       return await firstValueFrom(this.resourceService.find({ id }))

@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import {
   CreateUserGroup,
   ItemResponse,
@@ -15,9 +15,7 @@ import { UserGroupProvider } from '../models/user-group-provider'
 
 @Injectable()
 export class RemoteUserGroupProvider extends UserGroupProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   search(filters: UserGroupFilters): Observable<ListResponse<UserGroup>> {
     filters = filters || {}

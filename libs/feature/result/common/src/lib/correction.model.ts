@@ -1,3 +1,8 @@
+export enum CorrectionStatus {
+  pending = 'pending',
+  available = 'available',
+}
+
 export interface Correction {
   id: string
   createdAt: Date
@@ -6,6 +11,14 @@ export interface Correction {
   grade: number
 }
 
+export interface ActivityCorrectionSummary {
+  activityId: string
+  activityName: string
+  courseId: string
+  courseName: string
+  totalExercises: number
+  correctedExercises: number
+}
 /**
  * Represents a list of corrections assigned to a correctioner.
  */
@@ -59,6 +72,16 @@ export interface ExerciseCorrection {
    * The id of the exercise session.
    */
   exerciseSessionId: string
+
+  /**
+   * The date the exercise session was started, if it was started.
+   */
+  startedAt?: Date | null
+
+  /**
+   * The id of the most recent submitted answer, if any.
+   */
+  answerId?: string | null
 
   /**
    * The id of the exercise in it's activity navigation.

@@ -6,5 +6,7 @@
   [(ngModel)]="value"
   (ngModelChange)="notifyValueChange?.($event)"
 >
-  <nz-option *ngFor="let option of options?.choices ?? []" [nzLabel]="option" [nzValue]="option" />
+  @for (option of options?.choices ?? []; track option) {
+  <nz-option [nzLabel]="option" [nzValue]="option" />
+  }
 </nz-select>

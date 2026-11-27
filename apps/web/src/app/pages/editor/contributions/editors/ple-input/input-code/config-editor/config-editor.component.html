@@ -8,7 +8,9 @@
       [(ngModel)]="options.language"
       (ngModelChange)="notifyOptionsChange?.(options)"
     >
-      <nz-option *ngFor="let language of languages" [nzValue]="language.id" [nzLabel]="language.id"></nz-option>
+      @for (language of languages; track language) {
+      <nz-option [nzValue]="language.id" [nzLabel]="language.id"></nz-option>
+      }
     </nz-select>
   </nz-form-control>
 </nz-form-item>

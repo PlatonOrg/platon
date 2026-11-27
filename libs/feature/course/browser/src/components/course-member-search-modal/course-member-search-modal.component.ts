@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -8,6 +7,7 @@ import {
   Output,
   ViewChild,
   booleanAttribute,
+  inject,
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
@@ -19,21 +19,15 @@ import { CourseMemberSearchBarComponent } from '../course-member-search-bar/cour
 import { CourseMember } from '@platon/feature/course/common'
 
 @Component({
-  standalone: true,
   selector: 'course-member-search-modal',
   templateUrl: './course-member-search-modal.component.html',
   styleUrls: ['./course-member-search-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    FormsModule,
-    NzModalModule,
-    NzButtonModule,
-    CourseMemberSearchBarComponent,
-    UiModalTemplateComponent,
-  ],
+  imports: [FormsModule, NzModalModule, NzButtonModule, CourseMemberSearchBarComponent, UiModalTemplateComponent],
 })
 export class CourseMemberSearchModalComponent {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() title = ''
   @Input() okTitle = 'OK'
   @Input() noTitle = 'Annuler'
@@ -52,8 +46,6 @@ export class CourseMemberSearchModalComponent {
     const n = this.selection.length
     return !this.multi ? n === 1 : n > 0
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   open(): void {
     this.modal.open()

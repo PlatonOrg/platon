@@ -3,18 +3,16 @@ import { UiError403Component } from './error-403.component'
 import { UiError404Component } from './error-404.component'
 import { HttpErrorResponse } from '@angular/common/http'
 import { HTTP_STATUS_CODE } from '@platon/core/common'
-import { CommonModule } from '@angular/common'
+
 import { UiError500Component } from './error-500.component'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { RouterModule } from '@angular/router'
 import { UiError512Component } from './error-512.component'
 
 @Component({
-  standalone: true,
   selector: 'ui-error',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     UiError403Component,
     UiError404Component,
@@ -23,26 +21,19 @@ import { UiError512Component } from './error-512.component'
     NzButtonModule,
   ],
   template: `
-    <ng-container [ngSwitch]="code">
-      <ng-container *ngSwitchCase="'SERVER_ERROR'">
-        <ui-error-500 />
-      </ng-container>
-      <ng-container *ngSwitchCase="'FORBIDDEN'">
-        <ui-error-403 />
-      </ng-container>
-      <ng-container *ngSwitchCase="'NOT_FOUND'">
-        <ui-error-404 />
-      </ng-container>
-      <ng-container *ngSwitchCase="'SANDBOX_ERROR'">
-        <ui-error-512 />
-      </ng-container>
-    </ng-container>
-    <ng-container *ngIf="showMessage">
-      <pre>{{ message }}</pre>
-    </ng-container>
-    <ng-container *ngIf="showButtons">
-      <button [routerLink]="'/'" nz-button nzType="primary">Accueil</button>
-    </ng-container>
+    @switch (code) { @case ('SERVER_ERROR') {
+    <ui-error-500 />
+    } @case ('FORBIDDEN') {
+    <ui-error-403 />
+    } @case ('NOT_FOUND') {
+    <ui-error-404 />
+    } @case ('SANDBOX_ERROR') {
+    <ui-error-512 />
+    } } @if (showMessage) {
+    <pre>{{ message }}</pre>
+    } @if (showButtons) {
+    <button [routerLink]="'/'" nz-button nzType="primary">Accueil</button>
+    }
   `,
   styles: [
     `

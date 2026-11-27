@@ -96,7 +96,7 @@ export class PythonSandbox implements Sandbox {
           )
           return result.data
         },
-        { prefix: 'envs', suffix: '.tgz', cleanup: false }
+        { prefix: 'envs', suffix: '.tgz', cleanup: true }
       )
 
       if (response.status === -2) {
@@ -205,7 +205,15 @@ export class PythonSandbox implements Sandbox {
               const fileContent = await fs.promises.readFile(filePath)
               pack.entry({ name: file.path }, fileContent)
             } catch (error) {
-              console.error(`Error reading file ${filePath}:`, error)
+              this.emailService
+                .sendTechnicalAlert({
+                  subject: 'Python Sandbox File Read Error',
+                  content: `Failed to read file at ${filePath} for sandbox execution.`,
+                  error,
+                })
+                .catch((emailError) => {
+                  console.error('Failed to send technical alert email:', emailError)
+                })
             }
           }
         }

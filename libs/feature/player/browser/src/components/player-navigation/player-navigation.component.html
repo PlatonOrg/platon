@@ -1,21 +1,21 @@
 <mat-card>
   <mat-card-content>
     <nz-timeline nzMode="alternate">
-      <ng-container *ngFor="let page of player.navigation.exercises; trackBy: trackPage">
-        <nz-timeline-item [nzDot]="dot" [nzColor]="$any(page.state | answerStateColor)">
-          <ng-template #dot>
-            <mat-icon [style.color]="page.state | answerStateColor">
-              {{ page.state | answerStateIcon }}
-            </mat-icon>
-          </ng-template>
-          <div class="timeline-content" [class.current]="isActiveSession(page.sessionId)" (click)="navigate.emit(page)">
-            <div class="timeline-title">{{ page.title }}</div>
-            <div class="timeline-status">
-              {{ page.state | answerStateLabel }}
-            </div>
+      @for (page of player.navigation.exercises; track trackPage($index, page)) {
+      <nz-timeline-item [nzDot]="dot" [nzColor]="$any(page.state | answerStateColor)">
+        <ng-template #dot>
+          <mat-icon [style.color]="page.state | answerStateColor">
+            {{ page.state | answerStateIcon }}
+          </mat-icon>
+        </ng-template>
+        <div class="timeline-content" [class.current]="isActiveSession(page.sessionId)" (click)="navigate.emit(page)">
+          <div class="timeline-title">{{ page.title }}</div>
+          <div class="timeline-status">
+            {{ page.state | answerStateLabel }}
           </div>
-        </nz-timeline-item>
-      </ng-container>
+        </div>
+      </nz-timeline-item>
+      }
     </nz-timeline>
   </mat-card-content>
 </mat-card>

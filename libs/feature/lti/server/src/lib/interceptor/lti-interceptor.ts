@@ -1,14 +1,15 @@
 import { SetMetadata } from '@nestjs/common'
 import { LmsUserEntity } from '../entities/lms-user.entity'
-import { LmsEntity } from '../entities/lms.entity'
-import { LTIPayload } from '../provider/payload'
 
 export const LTI_LAUNCH_INTERCEPTOR = Symbol('LTI_LAUNCH_INTERCEPTOR')
 
 export interface LTILaunchInterceptorArgs {
-  lms: LmsEntity
+  lms: {
+    id: string
+    name: string
+  }
   lmsUser: LmsUserEntity
-  payload: LTIPayload
+  payload: Record<string, unknown>
   nextUrl: string
 }
 

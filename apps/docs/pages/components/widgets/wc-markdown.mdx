@@ -3,7 +3,7 @@ title: Markdown
 description: Composant de rendu Markdown avec support pour éléments avancés comme les admonitions, les onglets, et la mise en forme riche. Parfait pour afficher des énoncés d'exercices, des explications théoriques, des guides méthodologiques ou des ressources documentaires avec une mise en forme élégante et structurée.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -92,16 +92,22 @@ Pour explorer toutes les possibilités offertes par ce composant:
 - [Guide complet de nge-markdown](https://cisstech.github.io/nge/docs/nge-markdown/cheatsheet)
 - [Syntaxe Markdown standard](https://www.markdownguide.org/basic-syntax/)
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-markdown',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Lire une fiche de cours",
+    "url": "/playground/exercises/markdown/reading.ple"
+  }
+]
   ]}
 />
 

@@ -7,21 +7,14 @@ on:
     branches:
       - main
 
-  # Exécution les jours de semaine à 6h UTC (7h/8h heure française)
-  schedule:
-    - cron: '0 6 * * 1-5'
-
   # Permet le déclenchement manuel
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branche à builder'
+        description: 'Branche à builder (ex: develop, main, feature/ma-branche)'
         required: true
         default: 'develop'
-        type: choice
-        options:
-          - develop
-          - main
+        type: string
 
 env:
   NODE_VERSION: 22
@@ -58,28 +51,7 @@ jobs:
             echo "PR mergée sur main - Build déclenché"
           fi
 
-          # Cas 2: Cron schedule - vérifier si nouveau commit sur develop
-          if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            git fetch origin develop
-            branch="develop"
-
-            # Récupérer le dernier commit sur develop
-            LATEST_COMMIT=$(git rev-parse origin/develop)
-            COMMIT_DATE=$(git log -1 --format=%ci origin/develop)
-
-            # Vérifier si le commit date de moins de 24h
-            COMMIT_TIMESTAMP=$(date -d "$COMMIT_DATE" +%s 2>/dev/null || date -j -f "%Y-%m-%d %H:%M:%S %z" "$COMMIT_DATE" +%s)
-            YESTERDAY_TIMESTAMP=$(($(date +%s) - 86400))
-
-            if [[ $COMMIT_TIMESTAMP -gt $YESTERDAY_TIMESTAMP ]]; then
-              should_build="true"
-              echo "Nouveau commit sur develop - Build déclenché"
-            else
-              echo "Pas de nouveau commit sur develop - Skip"
-            fi
-          fi
-
-          # Cas 3: Déclenchement manuel
+          # Cas 2: Déclenchement manuel
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             should_build="true"
             branch="${{ github.event.inputs.branch }}"
@@ -88,7 +60,12 @@ jobs:
 
           # Récupérer les infos du commit
           if [[ "$branch" != "" ]]; then
-            git checkout $branch 2>/dev/null || git checkout origin/$branch
+            if ! git checkout "$branch" 2>/dev/null; then
+              if ! git checkout "origin/$branch" 2>/dev/null; then
+                echo "Erreur: branche introuvable: $branch"
+                exit 1
+              fi
+            fi
             short_sha=$(git rev-parse --short HEAD)
             full_sha=$(git rev-parse HEAD)
           else
@@ -125,8 +102,49 @@ jobs:
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
       short_sha: ${{ needs.check-conditions.outputs.short_sha }}
+      images_reused: ${{ steps.check-images.outputs.reuse_images }}
     steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if Docker images already exist
+        id: check-images
+        run: |
+          SHORT_SHA="${{ needs.check-conditions.outputs.short_sha }}"
+          IMAGE_NAME="${{ needs.check-conditions.outputs.image_name }}"
+
+          API_IMAGE="${{ env.REGISTRY }}/$IMAGE_NAME:$SHORT_SHA"
+          FE_IMAGE="${{ env.REGISTRY }}/$IMAGE_NAME:$SHORT_SHA-fe"
+
+          api_exists="false"
+          fe_exists="false"
+          reuse_images="false"
+
+          if docker manifest inspect "$API_IMAGE" >/dev/null 2>&1; then
+            api_exists="true"
+          fi
+
+          if docker manifest inspect "$FE_IMAGE" >/dev/null 2>&1; then
+            fe_exists="true"
+          fi
+
+          if [[ "$api_exists" == "true" && "$fe_exists" == "true" ]]; then
+            reuse_images="true"
+            echo "Images déjà présentes dans GHCR, le build sera sauté."
+          else
+            echo "Au moins une image est absente, le build complet sera exécuté."
+          fi
+
+          echo "api_exists=$api_exists" >> $GITHUB_OUTPUT
+          echo "fe_exists=$fe_exists" >> $GITHUB_OUTPUT
+          echo "reuse_images=$reuse_images" >> $GITHUB_OUTPUT
+
       - name: Free disk space
+        if: steps.check-images.outputs.reuse_images != 'true'
         run: |
           # Supprimer les outils préinstallés non nécessaires
           sudo rm -rf /usr/share/dotnet
@@ -143,22 +161,18 @@ jobs:
           docker system prune -af --volumes || true
 
       - name: Checkout
+        if: steps.check-images.outputs.reuse_images != 'true'
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.check-conditions.outputs.branch }}
           fetch-depth: 0
 
       - name: Set up Docker Buildx
+        if: steps.check-images.outputs.reuse_images != 'true'
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and push frontend-extractor image
+        if: steps.check-images.outputs.reuse_images != 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -182,6 +196,7 @@ jobs:
             type=raw,value=latest,enable=${{ needs.check-conditions.outputs.branch == 'main' }}
 
       - name: Build and push Docker image (production)
+        if: steps.check-images.outputs.reuse_images != 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -194,6 +209,16 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_VERSION=${{ env.NODE_VERSION }}
+
+      - name: Build decision summary
+        run: |
+          if [[ "${{ steps.check-images.outputs.reuse_images }}" == "true" ]]; then
+            echo "## 🔁 Images réutilisées" >> $GITHUB_STEP_SUMMARY
+            echo "Les images Docker existent déjà dans GHCR pour le commit ${{ needs.check-conditions.outputs.short_sha }}." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## 🛠️ Build exécuté" >> $GITHUB_STEP_SUMMARY
+            echo "Les images Docker ont été construites et poussées pour le commit ${{ needs.check-conditions.outputs.short_sha }}." >> $GITHUB_STEP_SUMMARY
+          fi
 
   # ============================================================================
   # Extraction du Frontend

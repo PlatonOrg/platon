@@ -9,3 +9,28 @@ a {
 td.clickable {
   cursor: pointer;
 }
+
+.hidden-student-message {
+  padding: 2px;
+  gap: 0.25rem;
+  background-color: #80808080;
+  border-radius: 8px;
+}
+
+.hidden-section {
+  padding: 2px;
+  gap: 0.25rem;
+  background-color: #80808080;
+  border-radius: 8px;
+}
+
+.hidden-activity {
+  background-color: #dbd9d4;
+  border-radius: 8px;
+  margin-top: 3px;
+  overflow: hidden;
+}
+
+:host-context(.dark-theme) .hidden-activity {
+  background-color: var(--brand-background-alpha-12);
+}

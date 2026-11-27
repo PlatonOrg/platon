@@ -93,17 +93,33 @@ export class AnnouncementService {
   ): Promise<[AnnouncementEntity[], number]> {
     const queryBuilder = this.repository
       .createQueryBuilder('announcement')
-      .leftJoinAndSelect('announcement.publisher', 'publisher')
+      .leftJoin('announcement.publisher', 'publisher')
+      .select([
+        'announcement.id',
+        'announcement.createdAt',
+        'announcement.updatedAt',
+        'announcement.title',
+        'announcement.description',
+        'announcement.active',
+        'announcement.icon',
+        'announcement.version',
+        'announcement.displayUntil',
+        'announcement.displayDurationInDays',
+        'announcement.targetedRoles',
+        'announcement.actions',
+        'publisher.id',
+        'publisher.username',
+        'publisher.firstName',
+        'publisher.lastName',
+        'publisher.role',
+      ])
       .where('announcement.active = :active', { active: true })
-
-    queryBuilder.andWhere(
-      `
-      (announcement."targetedRoles" IS NULL OR
-       array_length(announcement."targetedRoles", 1) IS NULL OR
-       :userRole = ANY(announcement."targetedRoles"))
-    `,
-      { userRole }
-    )
+      .andWhere(
+        `(announcement."targetedRoles" IS NULL OR
+          array_length(announcement."targetedRoles", 1) IS NULL OR
+          :userRole = ANY(announcement."targetedRoles"))`,
+        { userRole }
+      )
 
     if (filters.search) {
       queryBuilder.andWhere('(announcement.title ILIKE :search OR announcement.description ILIKE :search)', {
@@ -111,15 +127,12 @@ export class AnnouncementService {
       })
     }
 
-    if (filters.limit) {
-      queryBuilder.take(filters.limit)
-    }
+    queryBuilder.orderBy('announcement.createdAt', 'DESC')
+    queryBuilder.take(filters.limit ?? 20)
 
     if (filters.offset) {
       queryBuilder.skip(filters.offset)
     }
-
-    queryBuilder.orderBy('announcement.createdAt', 'DESC')
 
     try {
       const [items, count] = await queryBuilder.getManyAndCount()
@@ -129,5 +142,25 @@ export class AnnouncementService {
       this.logger.error(`Erreur lors de la récupération des annonces: ${err.message}`)
       throw err
     }
+  }
+
+  async findByIdForUser(id: string, userRole: UserRoles): Promise<AnnouncementEntity> {
+    const announcement = await this.repository
+      .createQueryBuilder('announcement')
+      .leftJoinAndSelect('announcement.publisher', 'publisher')
+      .where('announcement.id = :id', { id })
+      .andWhere('announcement.active = :active', { active: true })
+      .andWhere(
+        `(announcement."targetedRoles" IS NULL OR
+          array_length(announcement."targetedRoles", 1) IS NULL OR
+          :userRole = ANY(announcement."targetedRoles"))`,
+        { userRole }
+      )
+      .getOne()
+
+    if (!announcement) {
+      throw new NotFoundResponse(`Annonce avec id ${id} non trouvée`)
+    }
+    return announcement
   }
 }

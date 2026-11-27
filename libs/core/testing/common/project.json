@@ -1,0 +1,7 @@
+{
+  "name": "core-testing-common",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/core/testing/common/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:core", "target:common", "purpose:testing"]
+}

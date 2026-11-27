@@ -7,18 +7,13 @@ import { CoursePresenter } from '../../../courses/course/course.presenter'
 import { Activity, CourseMember, CourseMemberRoles, CourseSection } from '@platon/feature/course/common'
 import { MatCardModule } from '@angular/material/card'
 import { MatIconModule } from '@angular/material/icon'
-import {
-  CourseActivityCardComponent,
-  CourseMemberTableComponent,
-  CoursePipesModule,
-  CourseService,
-} from '@platon/feature/course/browser'
+import { CourseMemberTableComponent, CoursePipesModule, CourseService } from '@platon/feature/course/browser'
 import { DialogModule, DialogService, UserSearchModalComponent } from '@platon/core/browser'
-import { User, UserGroup } from '@platon/core/common'
+import { User, UserFilters, UserGroup, UserRoles } from '@platon/core/common'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { ResultService } from '@platon/feature/result/browser'
 import { ActivityResults, AnswerStates } from '@platon/feature/result/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
@@ -32,7 +27,6 @@ import { MatDialog } from '@angular/material/dialog'
 import { UiModalDrawerComponent } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   selector: 'app-test-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
@@ -45,19 +39,23 @@ import { UiModalDrawerComponent } from '@platon/shared/ui'
     CourseMemberTableComponent,
     UserSearchModalComponent,
     NzSelectModule,
-    CourseActivityCardComponent,
     NzIconModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     CoursePipesModule,
     DialogModule,
     NzPopconfirmModule,
-    TestsTermsEditorComponent,
     UiModalDrawerComponent,
     TestsSettingsComponent,
   ],
 })
 export class TestDashboardPage implements OnInit, OnDestroy {
+  private readonly courseService = inject(CourseService)
+  private readonly dialogService = inject(DialogService)
+  private readonly resultService = inject(ResultService)
+  private readonly testsService = inject(TestsService)
+  private readonly dialog = inject(MatDialog)
+
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly subscriptions: Subscription[] = []
@@ -71,6 +69,9 @@ export class TestDashboardPage implements OnInit, OnDestroy {
   protected teachers: CourseMember[] = []
   protected nonDeletables: string[] = []
   protected excludes: string[] = []
+  protected modalFilters: UserFilters = {
+    roles: [UserRoles.teacher],
+  }
 
   protected nbParticipants = 0
   protected nbStarted = 0
@@ -78,14 +79,6 @@ export class TestDashboardPage implements OnInit, OnDestroy {
   protected averageScore = 0
 
   protected context = this.presenter.defaultContext()
-
-  constructor(
-    private readonly courseService: CourseService,
-    private readonly dialogService: DialogService,
-    private readonly resultService: ResultService,
-    private readonly testsService: TestsService,
-    private readonly dialog: MatDialog
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(

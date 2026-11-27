@@ -1,13 +1,11 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { NzResultModule } from 'ng-zorro-antd/result'
 
 @Component({
-  standalone: true,
   selector: 'ui-error-403',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NzResultModule, CommonModule, RouterModule],
+  imports: [NzResultModule, RouterModule],
   template: `
     <nz-result
       nzTitle="403"
@@ -17,9 +15,8 @@ import { NzResultModule } from 'ng-zorro-antd/result'
     >
       <ng-template #nzExtra>
         <div class="ant-result-subtitle">
-          <ng-container *ngIf="reason === 'disabled'">
-            Votre compte a été désactivé. Veuillez contacter un administrateur pour plus d'informations.
-          </ng-container>
+          @if (reason === 'disabled') { Votre compte a été désactivé. Veuillez contacter un administrateur pour plus
+          d'informations. }
         </div>
       </ng-template>
     </nz-result>

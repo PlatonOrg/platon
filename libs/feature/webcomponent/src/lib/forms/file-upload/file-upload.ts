@@ -110,5 +110,7 @@ export const FileUploadComponentDefinition = defineWebComponent({
     multiple: true,
     acceptedFormats: '.pdf,.docx,.txt,.xlsx',
   },
-  playgrounds: {},
+  playgrounds: {
+    "Compter les lignes d'un fichier": 'count-lines.ple',
+  },
 })

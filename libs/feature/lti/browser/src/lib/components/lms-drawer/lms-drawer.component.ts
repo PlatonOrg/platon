@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -7,6 +6,7 @@ import {
   Output,
   TemplateRef,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 
@@ -15,42 +15,41 @@ import { MatInputModule } from '@angular/material/input'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { DialogService, UserSearchBarComponent, UserTableComponent } from '@platon/core/browser'
 import { User, UserFilters } from '@platon/core/common'
-import { Lms, UpdateLms } from '@platon/feature/lti/common'
+import { Lms, LtiPlatform, UpdateLms } from '@platon/feature/lti/common'
 import { UiModalDrawerComponent } from '@platon/shared/ui'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
 import { firstValueFrom } from 'rxjs'
 import { LTIService } from '../../api/lti.service'
 
 @Component({
-  standalone: true,
   selector: 'lms-drawer',
   templateUrl: './lms-drawer.component.html',
   styleUrls: ['./lms-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatFormFieldModule,
-
     NzIconModule,
     NzTabsModule,
     NzButtonModule,
-    NzToolTipModule,
-
+    NzTooltipModule,
     UserTableComponent,
     UserSearchBarComponent,
-
     UiModalDrawerComponent,
   ],
 })
 export class LmsDrawerComponent {
+  private readonly ltiService = inject(LTIService)
+  private readonly formBuilder = inject(FormBuilder)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected form = this.createForm()
   protected lms?: Lms
   protected members: User[] = []
@@ -59,16 +58,10 @@ export class LmsDrawerComponent {
   protected footers: TemplateRef<void>[] = []
 
   @Output() updated = new EventEmitter<Lms>()
+  @Output() deleted = new EventEmitter<Lms>()
 
   @ViewChild(UiModalDrawerComponent, { static: true })
   protected modal!: UiModalDrawerComponent
-
-  constructor(
-    private readonly ltiService: LTIService,
-    private readonly formBuilder: FormBuilder,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   open(lms: Lms): void {
     this.lms = lms
@@ -101,6 +94,40 @@ export class LmsDrawerComponent {
       this.dialogService.error(
         'Une erreur est survenue lors de la mise à jour du LMS, veuillez réessayer un peu plus tard !'
       )
+    } finally {
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
+  protected async delete(): Promise<void> {
+    const lms = this.lms
+    if (!lms) return
+
+    // An LTI 1.3 platform that takes over the LMS id keeps the linked accounts and courses
+    let platform: LtiPlatform | undefined
+    try {
+      const { resources } = await firstValueFrom(this.ltiService.searchLtiPlatforms())
+      platform = resources.find((item) => item.id === lms.id)
+    } catch {
+      platform = undefined
+    }
+
+    const confirmed = await this.dialogService.confirm({
+      nzTitle: 'Supprimer le LMS',
+      nzContent: platform
+        ? `Les lancements LTI 1.1 depuis « ${lms.name} » ne fonctionneront plus. Les comptes et les cours restent rattachés à la plateforme LTI 1.3 « ${platform.name} ». Voulez-vous continuer ?`
+        : `Les lancements LTI 1.1 depuis « ${lms.name} » ne fonctionneront plus. Aucune plateforme LTI 1.3 ne reprend ce LMS : ses utilisateurs ne retrouveront plus leur compte en se connectant depuis le LMS. Voulez-vous continuer ?`,
+      nzOkText: 'Supprimer',
+      nzCancelText: 'Annuler',
+    })
+    if (!confirmed) return
+
+    try {
+      await firstValueFrom(this.ltiService.deleteLms(lms.id))
+      this.deleted.emit(lms)
+      this.modal.close()
+    } catch {
+      this.dialogService.error('Une erreur est survenue lors de la suppression du LMS !')
     } finally {
       this.changeDetectorRef.markForCheck()
     }

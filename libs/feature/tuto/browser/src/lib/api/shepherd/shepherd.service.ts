@@ -1,6 +1,11 @@
-import { Injectable } from '@angular/core'
+import { Injectable, computed, signal } from '@angular/core'
 import Shepherd from 'shepherd.js'
+import type { Step, StepOptions } from 'shepherd.js'
 import { Subject } from 'rxjs'
+
+// Dérivé de Shepherd.Tour (et non importé directement) pour éviter un conflit de type
+// nominal entre les déclarations dupliquées cjs/esm de shepherd.js.
+type Tour = InstanceType<typeof Shepherd.Tour>
 
 export interface TutorialStep {
   id: string
@@ -48,10 +53,25 @@ export interface TutorialOptions {
   providedIn: 'root',
 })
 export class ShepherdService {
-  private currentTour: Shepherd.Tour | null = null
+  private currentTour: Tour | null = null
   private keyboardListener: ((event: KeyboardEvent) => void) | null = null
 
   private tourEndedSubject = new Subject<void>()
+
+  private readonly _currentStepIndex = signal<number>(-1)
+  private readonly _totalSteps = signal<number>(0)
+
+  readonly currentStepIndex = this._currentStepIndex.asReadonly()
+
+  readonly totalSteps = this._totalSteps.asReadonly()
+
+  readonly remainingSteps = computed(() => Math.max(0, this._totalSteps() - this._currentStepIndex() - 1))
+
+  readonly progressPercent = computed(() => {
+    const total = this._totalSteps()
+    if (total === 0) return 0
+    return Math.round(((this._currentStepIndex() + 1) / total) * 100)
+  })
 
   private defaultOptions: TutorialOptions = {
     useModalOverlay: true,
@@ -93,10 +113,14 @@ export class ShepherdService {
     })
 
     // Ajout des étapes
-    steps.forEach((step) => this.addStep(step))
+    steps.forEach((step, index) => this.addStep(step, index, steps.length))
+
+    // Initialisation de la progression
+    this._totalSteps.set(steps.length)
+    this._currentStepIndex.set(0)
 
     // Événements globaux du tour
-    this.currentTour.on('start', () => {
+    this.currentTour?.on('start', () => {
       document.body.classList.add('shepherd-active')
 
       // Configurer la navigation par Entrée si activée
@@ -105,20 +129,31 @@ export class ShepherdService {
       }
     })
 
-    this.currentTour.on('complete', () => {
+    this.currentTour?.on('show', ({ step }: { step: Step }) => {
+      if (this.currentTour) {
+        const idx = this.currentTour.steps.findIndex((s: Step) => s.id === step.id)
+        if (idx >= 0) this._currentStepIndex.set(idx)
+      }
+    })
+
+    this.currentTour?.on('complete', () => {
       document.body.classList.remove('shepherd-active')
       this.removeEnterNavigation()
+      this._currentStepIndex.set(-1)
+      this._totalSteps.set(0)
       this.tourEndedSubject.next()
       this.currentTour = null
     })
 
-    this.currentTour.on('cancel', () => {
+    this.currentTour?.on('cancel', () => {
       document.body.classList.remove('shepherd-active')
       this.removeEnterNavigation()
+      this._currentStepIndex.set(-1)
+      this._totalSteps.set(0)
       this.tourEndedSubject.next()
       this.currentTour = null
     })
-    void this.currentTour.start()
+    void this.currentTour?.start()
   }
 
   /**
@@ -132,7 +167,7 @@ export class ShepherdService {
         // Vérifier si nous sommes sur la dernière étape
         const currentStep = this.currentTour.getCurrentStep()
         if (currentStep) {
-          const currentStepIndex = this.currentTour.steps.findIndex((step) => step.id === currentStep.id)
+          const currentStepIndex = this.currentTour.steps.findIndex((step: Step) => step.id === currentStep.id)
           const isLastStep = currentStepIndex === this.currentTour.steps.length - 1
 
           if (isLastStep) {
@@ -157,18 +192,23 @@ export class ShepherdService {
     }
   }
 
-  /**
-   * Ajoute une étape au tutoriel
-   */
-  private addStep(stepConfig: TutorialStep): void {
+  private addStep(stepConfig: TutorialStep, stepIndex: number, totalSteps: number): void {
     if (!this.currentTour) return
 
     const buttons = this.createButtons(stepConfig.buttons)
+    const fillPercent = Math.round(((stepIndex + 1) / totalSteps) * 100)
+    const progressHtml = `
+      <div class="shepherd-step-progress">
+        <div class="shepherd-step-progress-track">
+          <div class="shepherd-step-progress-fill" style="width:${fillPercent}%"></div>
+        </div>
+        <span class="shepherd-step-progress-label">${stepIndex + 1} / ${totalSteps}</span>
+      </div>`
 
-    const stepOptions: any = {
+    const stepOptions: Partial<TutorialStep> = {
       id: stepConfig.id,
       title: stepConfig.title,
-      text: stepConfig.text,
+      text: stepConfig.text + progressHtml,
       buttons: buttons,
       when: stepConfig.when || {},
       canClickTarget: stepConfig.canClickTarget ?? true,
@@ -201,7 +241,7 @@ export class ShepherdService {
       stepOptions.modalOverlayOpeningRadius = stepConfig.modalOverlayOpeningRadius
     }
 
-    this.currentTour.addStep(stepOptions)
+    this.currentTour.addStep(stepOptions as StepOptions)
   }
 
   /**
@@ -223,8 +263,9 @@ export class ShepherdService {
     // Boutons par défaut
     const currentStepIndex = this.currentTour?.getCurrentStep()?.options?.id
     const totalSteps = this.currentTour?.steps?.length || 0
-    const isFirstStep = this.currentTour?.steps?.findIndex((step) => step.id === currentStepIndex) === 0
-    const isLastStep = this.currentTour?.steps?.findIndex((step) => step.id === currentStepIndex) === totalSteps - 1
+    const isFirstStep = this.currentTour?.steps?.findIndex((step: Step) => step.id === currentStepIndex) === 0
+    const isLastStep =
+      this.currentTour?.steps?.findIndex((step: Step) => step.id === currentStepIndex) === totalSteps - 1
 
     const buttons = []
 
@@ -251,21 +292,21 @@ export class ShepherdService {
    * Passe à l'étape suivante
    */
   next(): void {
-    this.currentTour?.next()
+    void this.currentTour?.next()
   }
 
   /**
    * Revient à l'étape précédente
    */
   previous(): void {
-    this.currentTour?.back()
+    void this.currentTour?.back()
   }
 
   /**
    * Complète le tutoriel
    */
   complete(): void {
-    this.currentTour?.complete()
+    void this.currentTour?.complete()
   }
 
   /**
@@ -281,6 +322,8 @@ export class ShepherdService {
   stopTutorial(): void {
     if (this.currentTour) {
       this.removeEnterNavigation()
+      this._currentStepIndex.set(-1)
+      this._totalSteps.set(0)
       void this.currentTour.cancel()
       this.currentTour = null
     }
@@ -290,9 +333,9 @@ export class ShepherdService {
    * Va à une étape spécifique
    */
   goToStep(stepId: string): void {
-    const step = this.currentTour?.steps?.find((s) => s.id === stepId)
+    const step: Step | undefined = this.currentTour?.steps?.find((s: Step) => s.id === stepId)
     if (step) {
-      this.currentTour?.show(stepId)
+      void this.currentTour?.show(stepId)
     }
   }
 

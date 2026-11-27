@@ -6,8 +6,8 @@ import { LevelService } from '../../levels'
 import { TopicService } from '../../topics'
 import { UserPrefsEntity } from './user-prefs.entity'
 import { OnEvent } from '@nestjs/event-emitter'
-import { ON_LEVEL_FUSION_EVENT, OnLevelFusionEventPayload } from '../../levels/level.event'
-import { ON_TOPIC_FUSION_EVENT, OnTopicFusionEventPayload } from '../../topics/topic.event'
+import { ON_LEVEL_FUSION_EVENT, type OnLevelFusionEventPayload } from '../../levels/level.event'
+import { ON_TOPIC_FUSION_EVENT, type OnTopicFusionEventPayload } from '../../topics/topic.event'
 
 @Injectable()
 export class UserPrefsService {

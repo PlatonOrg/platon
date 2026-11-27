@@ -4,9 +4,8 @@ import { FormsModule } from '@angular/forms'
 import { CoursePresenter } from '../../../courses/course/course.presenter'
 import { Activity, Course } from '@platon/feature/course/common'
 import { firstValueFrom, Subscription } from 'rxjs'
-import { ActivityResults, UserActivityResultsDistribution } from '@platon/feature/result/common'
+import { ActivityResults } from '@platon/feature/result/common'
 import {
-  KCileComponent,
   ResultBoxPlotComponent,
   ResultByExercisesComponent,
   ResultByMembersComponent,
@@ -19,14 +18,13 @@ import { RouterModule } from '@angular/router'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { DurationPipe, UiStatisticCardComponent } from '@platon/shared/ui'
 import { MatCardModule } from '@angular/material/card'
-import { NzSelectModule, NzSelectOptionInterface } from 'ng-zorro-antd/select'
+import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSliderModule } from 'ng-zorro-antd/slider'
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
 import { CsvDownloadButtonComponent } from '@platon/feature/course/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-test-results',
   templateUrl: './results.page.html',
   styleUrls: ['./results.page.scss'],
@@ -35,7 +33,6 @@ import { CsvDownloadButtonComponent } from '@platon/feature/course/browser'
     CommonModule,
     FormsModule,
     RouterModule,
-
     NzPageHeaderModule,
     NzBreadCrumbModule,
     NzGridModule,
@@ -43,21 +40,19 @@ import { CsvDownloadButtonComponent } from '@platon/feature/course/browser'
     NzSliderModule,
     NzInputNumberModule,
     NzDatePickerModule,
-
     MatIconModule,
     MatCardModule,
-
     DurationPipe,
-
     ResultByExercisesComponent,
     ResultByMembersComponent,
     ResultBoxPlotComponent,
-
     UiStatisticCardComponent,
     CsvDownloadButtonComponent,
   ],
 })
 export class TestResultsPage implements OnInit {
+  private readonly resultService = inject(ResultService)
+
   private readonly subscriptions: Subscription[] = []
   private readonly presenter = inject(CoursePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
@@ -69,8 +64,6 @@ export class TestResultsPage implements OnInit {
   protected results?: ActivityResults
 
   protected columnOrder?: string[]
-
-  constructor(private readonly resultService: ResultService) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(

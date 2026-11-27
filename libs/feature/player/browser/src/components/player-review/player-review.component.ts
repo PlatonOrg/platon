@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 
 import { CommonModule } from '@angular/common'
 import {
   CUSTOM_ELEMENTS_SCHEMA,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
+  OutputEmitterRef,
   TemplateRef,
-  ViewChild,
+  computed,
   inject,
+  input,
+  output,
+  signal,
+  viewChild,
 } from '@angular/core'
 import { Subscription, firstValueFrom } from 'rxjs'
 
@@ -31,10 +31,8 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 
-import { SafePipe } from '@cisstech/nge/pipes'
-
 import { DialogModule, DialogService, UserAvatarComponent } from '@platon/core/browser'
-import { ExercisePlayer, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
+import { ExercisePlayer, LogType, PlatonLog, PlayerActions, PlayerNavigation } from '@platon/feature/player/common'
 
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
@@ -42,21 +40,16 @@ import { ExerciseFeedback, ExerciseTheory } from '@platon/feature/compiler'
 import { AnswerStatePipesModule } from '@platon/feature/result/browser'
 import { AnswerStates } from '@platon/feature/result/common'
 import { WebComponentService } from '@platon/feature/webcomponent'
-import {
-  FilePreviewSupportedPipe,
-  IsUUIDPipe,
-  UiModalDrawerComponent,
-  UiModalTemplateComponent,
-} from '@platon/shared/ui'
+import { IsUUIDPipe } from '@platon/shared/ui'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzStatisticModule } from 'ng-zorro-antd/statistic'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { PlayerService } from '../../api/player.service'
 import { PLAYER_EDITOR_PREVIEW } from '../../models/player.model'
-import { PlayerTheoryComponent } from '../player-theory/player-theory.component'
+import { PlayerErrorComponent } from '../player-error/player-error.component'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
-import { NzEmptyModule } from 'ng-zorro-antd/empty'
+import { NzNotificationComponent } from 'ng-zorro-antd/notification'
 
 type Action = {
   id?: string
@@ -85,7 +78,6 @@ type FullscreenElement = HTMLElement & {
 }
 
 @Component({
-  standalone: true,
   selector: 'player-review',
   templateUrl: './player-review.component.html',
   styleUrls: ['./player-review.component.scss'],
@@ -98,24 +90,17 @@ type FullscreenElement = HTMLElement & {
     MatMenuModule,
     MatButtonModule,
     MatDividerModule,
-
     NzSpinModule,
     NzAlertModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzSkeletonModule,
     NzStatisticModule,
     NzTabsModule,
-    NzEmptyModule,
-
-    SafePipe,
     IsUUIDPipe,
     DialogModule,
     UserAvatarComponent,
     NgeMarkdownModule,
-    UiModalDrawerComponent,
-    UiModalTemplateComponent,
-    PlayerTheoryComponent,
-    FilePreviewSupportedPipe,
+    PlayerErrorComponent,
     AnswerStatePipesModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -125,76 +110,74 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
   private readonly dialogService = inject(DialogService)
   private readonly playerService = inject(PlayerService)
   private readonly activatedRoute = inject(ActivatedRoute)
-  private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly webComponentService = inject(WebComponentService)
 
-  @Input() state?: AnswerStates
-  @Input() player?: ExercisePlayer
-  @Input() players: ExercisePlayer[] = []
+  readonly state = input<AnswerStates>()
+  readonly players = input<ExercisePlayer[]>([])
 
-  @Input() reviewMode = true
-  @Input() canComment = false
+  readonly reviewMode = input<boolean>(true)
+  readonly canComment = input<boolean>(false)
 
-  @Input() hasNext?: boolean
-  @Input() hasPrev?: boolean
+  readonly hasNext = input<boolean>()
+  readonly hasPrev = input<boolean>()
 
-  @Input() countdownValue?: number | null
-  @Input() countdownColor?: string | null
+  readonly countdownValue = input<number | null>()
+  readonly countdownColor = input<string | null>()
 
-  @Output() evaluated = new EventEmitter<PlayerNavigation>()
-  @Output() goToPrevPlayer = new EventEmitter<void>()
-  @Output() goToNextPlayer = new EventEmitter<void>()
+  readonly evaluated = output<PlayerNavigation>()
+  readonly goToPrevPlayer = output<void>()
+  readonly goToNextPlayer = output<void>()
 
-  @ViewChild('container', { read: ElementRef, static: true })
-  protected container!: ElementRef<FullscreenElement>
+  protected readonly container = viewChild.required<ElementRef<FullscreenElement>, ElementRef<FullscreenElement>>(
+    'container',
+    { read: ElementRef }
+  )
+  protected readonly errorTemplate =
+    viewChild.required<TemplateRef<{ $implicit: NzNotificationComponent; data: any }>>('errorTemplate')
+  protected readonly containerFeedbacks = viewChild<ElementRef<HTMLElement>>('containerFeedbacks')
+  protected readonly containerHints = viewChild<ElementRef<HTMLElement>>('containerHints')
+  protected readonly containerSolution = viewChild<ElementRef<HTMLElement>>('containerSolution')
+  protected readonly theoriesMenu = viewChild<MatMenu>('theories')
 
-  @ViewChild('errorTemplate', { read: TemplateRef, static: true })
-  protected errorTemplate!: TemplateRef<object>
+  protected readonly player = signal<ExercisePlayer | undefined>(undefined)
+  protected readonly errorsDismissed = signal(false)
 
-  @ViewChild('containerFeedbacks', { read: ElementRef })
-  protected containerFeedbacks!: ElementRef<HTMLElement>
+  protected readonly index = signal(0)
+  protected readonly loading = signal(true)
+  protected readonly fullscreen = signal(false)
+  protected readonly selectedTheory = signal<ExerciseTheory | undefined>(undefined)
+  protected readonly runningAction = signal<PlayerActions | undefined>(undefined)
+  protected readonly requestFullscreen = signal<(() => Promise<void>) | undefined>(undefined)
 
-  @ViewChild('containerHints', { read: ElementRef })
-  protected containerHints!: ElementRef<HTMLElement>
+  protected clearNotification?: () => void
 
-  @ViewChild('containerSolution', { read: ElementRef })
-  protected containerSolution!: ElementRef<HTMLElement>
-
-  @ViewChild('theories')
-  protected theoriesMenu!: MatMenu
-
-  protected index = 0
-  protected loading = true
-  protected fullscreen = false
-  protected selectedTheory?: ExerciseTheory
-  protected runningAction?: PlayerActions
-
-  protected get primaryActions(): Action[] {
-    if (!this.player) return []
+  protected readonly primaryActions = computed<Action[]>(() => {
+    const player = this.player()
+    if (!player) return []
     return [
       {
         id: 'check-answer-button',
         icon: 'check',
-        label: this.player.remainingAttempts ? `Évaluer (${this.player.remainingAttempts})` : 'Évaluer',
+        label: player.remainingAttempts ? `Évaluer (${player.remainingAttempts})` : 'Évaluer',
         tooltip: 'Valider',
         color: 'primary',
-        danger: this.player.remainingAttempts === 1,
-        visible: !this.reviewMode,
-        disabled: this.disabled || !!this.runningAction,
+        danger: player.remainingAttempts === 1,
+        visible: !this.reviewMode(),
+        disabled: this.disabled() || !!this.runningAction(),
         playerAction: PlayerActions.CHECK_ANSWER,
-        showLabel: !!this.player.remainingAttempts,
+        showLabel: !!player.remainingAttempts,
         run: async () => {
           this.removeAnswerFromLocalStorage()
           await this.evaluate(PlayerActions.CHECK_ANSWER)
-          this.scrollIntoNode(this.containerFeedbacks?.nativeElement, 'center')
+          this.scrollIntoNode(this.containerFeedbacks()?.nativeElement, 'center')
         },
       },
       {
         icon: 'refresh',
         label: 'Autre question',
         tooltip: 'Autre question',
-        disabled: !!this.runningAction,
-        visible: !this.reviewMode && !!this.player.settings?.actions?.reroll,
+        disabled: !!this.runningAction(),
+        visible: !this.reviewMode() && !!player.settings?.actions?.reroll,
         playerAction: PlayerActions.REROLL_EXERCISE,
         run: () => this.evaluate(PlayerActions.REROLL_EXERCISE),
       },
@@ -206,57 +189,58 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
         run: () => this.downloadEnvironment(),
       },
     ]
-  }
+  })
 
   private async downloadEnvironment(): Promise<void> {
-    window.open(`/api/v1/player/environment/${this.player?.sessionId}`, '_blank')
+    window.open(`/api/v1/player/environment/${this.player()?.sessionId}`, '_blank')
   }
 
-  protected get secondaryActions(): Action[] {
-    if (!this.player) return []
+  protected readonly secondaryActions = computed<Action[]>(() => {
+    const player = this.player()
+    if (!player) return []
     return [
       {
         icon: 'menu_book',
         label: 'Théorie',
         tooltip: 'Théorie',
-        menu: this.theoriesMenu,
-        visible: !!this.player.theories?.length,
+        menu: this.theoriesMenu(),
+        visible: !!player.theories?.length,
       },
       {
         icon: 'key',
         label: 'Solution',
         tooltip: 'Solution',
-        visible: this.player.settings?.actions?.solution && !this.player.solution,
-        disabled: this.disabled || !!this.runningAction,
+        visible: player.settings?.actions?.solution && !player.solution,
+        disabled: this.disabled() || !!this.runningAction(),
         playerAction: PlayerActions.SHOW_SOLUTION,
         run: async () => {
           await this.evaluate(PlayerActions.SHOW_SOLUTION)
-          this.scrollIntoNode(this.containerSolution?.nativeElement, 'start')
+          this.scrollIntoNode(this.containerSolution()?.nativeElement, 'start')
         },
       },
       {
         icon: 'lightbulb',
         label: 'Aide',
         tooltip: 'Aide',
-        visible: this.player.settings?.actions?.hints && !!this.player.hints,
-        disabled: this.disabled || !!this.runningAction,
+        visible: player.settings?.actions?.hints && !!player.hints,
+        disabled: this.disabled() || !!this.runningAction(),
         playerAction: PlayerActions.NEXT_HINT,
         run: async () => {
           await this.evaluate(PlayerActions.NEXT_HINT)
-          this.scrollIntoNode(this.containerHints?.nativeElement, 'center')
+          this.scrollIntoNode(this.containerHints()?.nativeElement, 'center')
         },
       },
     ]
-  }
+  })
 
-  protected get navigationActions(): Action[] {
-    if (!this.player) return []
+  protected readonly navigationActions = computed<Action[]>(() => {
+    if (!this.player()) return []
     return [
       {
         icon: 'arrow_back',
         label: 'Exercice précédent',
         tooltip: 'Exercice précédent',
-        visible: this.hasPrev,
+        visible: this.hasPrev(),
         id: 'prev-exercise-button',
         run: () => this.showConfirmModalIfAnswered(this.goToPrevPlayer),
       },
@@ -264,53 +248,82 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
         icon: 'arrow_forward',
         label: 'Exercice suivant',
         tooltip: 'Exercice suivant',
-        visible: this.hasNext,
+        visible: this.hasNext(),
         id: 'next-exercise-button',
         run: () => this.showConfirmModalIfAnswered(this.goToNextPlayer),
       },
     ]
-  }
+  })
 
-  protected get reviewModeActions(): Action[] {
-    if (!this.player) return []
+  protected readonly reviewModeActions = computed<Action[]>(() => {
+    if (!this.player()) return []
+    const players = this.players()
+    const index = this.index()
     return [
       {
         icon: 'arrow_back',
         label: 'Réponse précédente',
         tooltip: 'Réponse précédente',
-        visible: this.players.length > 1,
-        disabled: this.players.length > 1 && this.index == 0,
+        visible: players.length > 1,
+        disabled: players.length > 1 && index == 0,
         run: () => this.previousAttempt(),
       },
       {
         icon: 'arrow_forward',
         label: 'Réponse suivante',
         tooltip: 'Réponse suivante',
-        visible: this.players.length > 1,
-        disabled: this.players.length > 1 && this.index == this.players.length - 1,
+        visible: players.length > 1,
+        disabled: players.length > 1 && index == players.length - 1,
         run: () => this.nextAttempt(),
       },
     ]
+  })
+
+  protected readonly disabled = computed(() => {
+    const player = this.player()
+    if (!player) return true
+    return !!player.solution || (player.remainingAttempts != null && player.remainingAttempts <= 0)
+  })
+
+  protected readonly currentAttemptIndex = computed(() => this.index())
+
+  protected readonly canRequestFullscreen = computed(() => {
+    return !!this.requestFullscreen() && this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  })
+
+  protected get editorPreview(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
   }
 
-  protected clearNotification?: () => void
-  protected requestFullscreen?: () => void
+  protected readonly hasErrorLogs = computed(() => {
+    const player = this.player()
+    if (!player) return false
+    return !this.editorPreview && this.getErrorLogsFromPlayer(player).length > 0
+  })
 
-  protected get disabled(): boolean {
-    if (!this.player) return true
-    return !!this.player.solution || (this.player.remainingAttempts != null && this.player.remainingAttempts <= 0)
+  protected readonly errorBannerMessage = computed(() => {
+    return this.player()?.answerId
+      ? "L'étudiant a soumis une réponse, mais une erreur est survenue lors de l'évaluation de cet exercice."
+      : "L'étudiant n'a pas pu soumettre de réponse : l'exercice a rencontré une erreur lors de son exécution."
+  })
+
+  protected readonly hasErrors = computed(() => {
+    if (this.errorsDismissed()) return false
+    return this.hasErrorLogs()
+  })
+
+  protected readonly contentLoading = computed(() => this.loading() && !this.hasErrors())
+
+  protected dismissErrors(): void {
+    this.errorsDismissed.set(true)
   }
 
-  get currentAttemptIndex(): number {
-    return this.index
-  }
-
-  get canRequestFullscreen(): boolean {
-    return !!this.requestFullscreen && this.activatedRoute.snapshot.queryParamMap.has(PLAYER_EDITOR_PREVIEW)
+  private getErrorLogsFromPlayer(player: ExercisePlayer): PlatonLog[] {
+    return player.platon_logs?.filter((log) => log.type === LogType.ERROR) || []
   }
 
   // Function called before the user goes to next/previous exercise
-  private async showConfirmModalIfAnswered(callback: EventEmitter<void>): Promise<void> {
+  private async showConfirmModalIfAnswered(callback: OutputEmitterRef<void>): Promise<void> {
     let hasAnswered = false
     this.forEachComponent((component) => {
       if (component.state?.isFilled) {
@@ -318,7 +331,6 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
       }
     })
     if (!hasAnswered) {
-      console.log('prout')
       callback.emit()
       return
     }
@@ -338,71 +350,77 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  ngOnChanges(): void {
+    const players = this.players()
+    if (players.length) {
+      const index = this.reviewMode() ? players.length - 1 : 0
+      this.index.set(index)
+      this.player.set(players[index])
+      this.errorsDismissed.set(false)
+      this.clearNotification?.()
+      this.clearNotification = undefined
+    } else {
+      this.player.set(undefined)
+    }
+  }
+
   ngOnInit(): void {
-    this.index = this.players.length - 1
-    this.player = this.players[this.index]
-    this.requestFullscreen =
-      this.container.nativeElement.requestFullscreen ||
-      this.container.nativeElement.webkitRequestFullscreen ||
-      this.container.nativeElement.mozRequestFullScreen ||
-      this.container.nativeElement.msRequestFullscreen
+    this.requestFullscreen.set(
+      this.container().nativeElement.requestFullscreen ||
+        this.container().nativeElement.webkitRequestFullscreen ||
+        this.container().nativeElement.mozRequestFullScreen ||
+        this.container().nativeElement.msRequestFullscreen
+    )
 
     this.subscriptions.push(
       this.webComponentService.onSubmit.subscribe((id: string) => {
-        const component = this.container.nativeElement.querySelector(`[id="${id}"]`)
+        const component = this.container().nativeElement.querySelector(`[id="${id}"]`)
         if (component) {
           this.evaluate(PlayerActions.CHECK_ANSWER).catch(console.error)
         }
       })
     )
-    this.changeDetectorRef.markForCheck()
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())
   }
 
-  ngOnChanges(): void {
-    if (this.players?.length) {
-      this.index = this.reviewMode ? this.players.length - 1 : 0
-      this.player = this.players[this.index]
-      this.clearNotification?.()
-      this.clearNotification = undefined
-    } else {
-      this.player = undefined
-    }
-  }
-
   protected previousAttempt(): void {
-    this.player = this.players[--this.index]
-    this.changeDetectorRef.markForCheck()
+    this.index.update((i) => i - 1)
+    this.player.set(this.players()[this.index()])
+    this.errorsDismissed.set(false)
   }
 
   protected nextAttempt(): void {
-    this.player = this.players[++this.index]
-    this.changeDetectorRef.markForCheck()
+    this.index.update((i) => i + 1)
+    this.player.set(this.players()[this.index()])
+    this.errorsDismissed.set(false)
   }
 
   protected onRender(): void {
-    this.loading = false
-    this.changeDetectorRef.markForCheck()
+    this.loading.set(false)
   }
 
   protected async toggleFullscreen(): Promise<void> {
-    if (this.fullscreen) {
-      this.fullscreen = false
+    if (this.fullscreen()) {
+      this.fullscreen.set(false)
       const element = document as unknown as FullscreenElement
-      element.exitFullscreen?.() ||
-        element.webkitExitFullscreen?.() ||
-        element.mozCancelFullScreen?.() ||
-        element.msExitFullscreen?.()
+      const exitFullscreenFunc =
+        element.exitFullscreen ||
+        element.webkitExitFullscreen ||
+        element.mozCancelFullScreen ||
+        element.msExitFullscreen
+      await exitFullscreenFunc?.()
     } else {
-      this.fullscreen = true
-      const element = this.container.nativeElement
-      element.requestFullscreen?.() ||
-        element.webkitRequestFullscreen?.() ||
-        element.mozRequestFullScreen?.() ||
-        element.msRequestFullscreen?.()
+      this.fullscreen.set(true)
+      const element = this.container().nativeElement
+      const requestFullscreenFunc =
+        element.requestFullscreen ||
+        element.webkitRequestFullscreen ||
+        element.mozRequestFullScreen ||
+        element.msRequestFullscreen
+      await requestFullscreenFunc?.()
     }
   }
 
@@ -433,7 +451,7 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private forEachComponent(consumer: (component: any) => void): void {
-    const form = this.container.nativeElement.querySelector('#form')
+    const form = this.container().nativeElement.querySelector('#form')
     if (form) {
       form.querySelectorAll('[cid]').forEach((node) => {
         consumer(node as any)
@@ -456,17 +474,17 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   public async evaluateFromActivity(): Promise<void> {
-    if (!this.disabled) {
+    if (!this.disabled()) {
       await this.evaluate(PlayerActions.CHECK_ANSWER)
     }
   }
 
   private async evaluate(action: PlayerActions): Promise<void> {
-    if (!this.player) return
+    const player = this.player()
+    if (!player) return
 
     try {
-      this.runningAction = action
-      this.changeDetectorRef.markForCheck()
+      this.runningAction.set(action)
 
       this.clearNotification?.()
       this.clearNotification = undefined
@@ -477,27 +495,30 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
         this.playerService.evaluate({
           answers,
           action,
-          sessionId: this.player.sessionId,
+          sessionId: player.sessionId,
         })
       )
 
-      this.player = output.exercise
+      const updatedPlayer = output.exercise
 
       // little hack here to nge-markdown component to detect change in the case where theses
       // values are not modified during the evaluation on the server side
       const markdowns = ['form' as const, 'statement' as const, 'solution' as const]
       markdowns.forEach((key) => {
-        if (this.player?.[key]) {
-          this.player[key] += '\n'
+        if (updatedPlayer[key]) {
+          updatedPlayer[key] += '\n'
         }
       })
 
-      this.player.form = this.player.form + ''
+      updatedPlayer.form = updatedPlayer.form + ''
+      this.player.set(updatedPlayer)
+      this.errorsDismissed.set(false)
+
       if (output.navigation) {
         this.evaluated.emit(output.navigation)
       }
 
-      if (!this.player.feedbacks?.length && action === PlayerActions.CHECK_ANSWER) {
+      if (!updatedPlayer.feedbacks?.length && action === PlayerActions.CHECK_ANSWER) {
         this.dialogService.info('Votre réponse a bien été prise en compte.')
       }
     } catch (error) {
@@ -506,13 +527,12 @@ export class PlayerReviewComponent implements OnInit, OnDestroy, OnChanges {
         message = error.error?.message || error.message || message
       }
 
-      this.clearNotification = this.dialogService.notification(this.errorTemplate, {
+      this.clearNotification = this.dialogService.notification(this.errorTemplate(), {
         duration: 0,
         data: { message },
       })
     } finally {
-      this.runningAction = undefined
-      this.changeDetectorRef.markForCheck()
+      this.runningAction.set(undefined)
     }
   }
 

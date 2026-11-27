@@ -78,4 +78,7 @@ export const MatrixComponentDefinition = defineWebComponent({
     cols: 3,
     resizable: true,
   },
+  playgrounds: {
+    'Somme de matrices': 'sum.ple',
+  },
 })

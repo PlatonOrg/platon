@@ -1,6 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections'
 import { FlatTreeControl } from '@angular/cdk/tree'
-import { CommonModule } from '@angular/common'
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,18 +11,17 @@ import {
   booleanAttribute,
 } from '@angular/core'
 import { RouterModule } from '@angular/router'
-import { CircleTree } from '@platon/feature/resource/common'
+import { type CircleTree } from '@platon/feature/resource/common'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzTreeModule } from 'ng-zorro-antd/tree'
 import { NzTreeFlatDataSource, NzTreeFlattener, NzTreeViewModule } from 'ng-zorro-antd/tree-view'
 
 @Component({
-  standalone: true,
   selector: 'resource-circle-tree',
   templateUrl: './circle-tree.component.html',
   styleUrls: ['./circle-tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, NzIconModule, NzTreeModule, NzTreeViewModule],
+  imports: [RouterModule, NzIconModule, NzTreeModule, NzTreeViewModule],
 })
 export class CircleTreeComponent implements OnInit {
   @Input() tree!: CircleTree
@@ -56,6 +55,11 @@ export class CircleTreeComponent implements OnInit {
    */
   @Output() selectionChange = new EventEmitter<string[]>()
 
+  /**
+   * Emits the id of a clicked node (click-only mode, no checkboxes).
+   */
+  @Output() nodeClick = new EventEmitter<string>()
+
   protected flatNodeMap = new Map<FlatNode, CircleTree>()
   protected nestedNodeMap = new Map<CircleTree, FlatNode>()
   protected checklistSelection = new SelectionModel<FlatNode>(true)
@@ -68,6 +72,10 @@ export class CircleTreeComponent implements OnInit {
 
   protected get selectable(): boolean {
     return this.selectionChange.observed
+  }
+
+  protected get clickable(): boolean {
+    return this.nodeClick.observed
   }
 
   protected treeFlattener = new NzTreeFlattener(
@@ -87,7 +95,7 @@ export class CircleTreeComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataSource.setData([this.tree])
-    if (this.selectable) {
+    if (this.selectable || this.clickable) {
       this.treeControl.expandAll()
     } else {
       const firstNode = this.treeControl.dataNodes[0]
@@ -127,6 +135,10 @@ export class CircleTreeComponent implements OnInit {
   }
 
   protected selectionToggle(node: FlatNode): void {
+    if (this.nodeClick.observed) {
+      this.nodeClick.emit(node.id)
+      return
+    }
     if (this.checklistSelection.isSelected(node)) {
       this.checklistSelection.deselect(node)
     } else {

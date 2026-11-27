@@ -1,11 +1,11 @@
 <div class="activity-card-wrapper" [class.selected]="selected()">
   <div class="radio-wrapper">
     <input
-      type="radio"
-      [id]="'activity-radio-' + item().id"
+      type="checkbox"
+      [id]="'activity-checkbox-' + item().id"
       [checked]="selected()"
       (change)="handleClick()"
-      class="activity-radio"
+      class="activity-checkbox"
     />
   </div>
 

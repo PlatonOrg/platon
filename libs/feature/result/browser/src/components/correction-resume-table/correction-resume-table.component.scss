@@ -89,13 +89,13 @@ table {
       }
 
       // Style for positive adjustments
-      &[style*="color: green"] {
+      &[style*='color: green'] {
         background-color: #f6ffed;
         border-color: #52c41a;
       }
 
       // Style for negative adjustments
-      &[style*="color: red"] {
+      &[style*='color: red'] {
         background-color: #fff2f0;
         border-color: #ff4d4f;
       }

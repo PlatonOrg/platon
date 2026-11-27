@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input } from '@angular/core'
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, Input, inject } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -10,13 +10,12 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 
 import { NgeUiListModule } from '@cisstech/nge/ui/list'
 import { DEFAULT_SEARCH_BAR_LIMIT } from '@platon/core/common'
-import { Course, CourseFilters } from '@platon/feature/course/common'
+import { Course, type CourseFilters } from '@platon/feature/course/common'
 import { SearchBar, UiSearchBarComponent } from '@platon/shared/ui'
 import { CourseService } from '../../api/course.service'
 import { CourseItemComponent } from '../course-item/course-item.component'
 
 @Component({
-  standalone: true,
   selector: 'course-search-bar',
   templateUrl: './course-search-bar.component.html',
   styleUrls: ['./course-search-bar.component.scss'],
@@ -28,9 +27,12 @@ import { CourseItemComponent } from '../course-item/course-item.component'
       multi: true,
     },
   ],
-  imports: [CommonModule, NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent, CourseItemComponent],
+  imports: [NzIconModule, NzButtonModule, NgeUiListModule, UiSearchBarComponent, CourseItemComponent],
 })
 export class CourseSearchBarComponent implements ControlValueAccessor {
+  private readonly courseService = inject(CourseService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() multi = false
   @Input() filters?: CourseFilters = { limit: DEFAULT_SEARCH_BAR_LIMIT }
   @Input() disabled = false
@@ -54,8 +56,6 @@ export class CourseSearchBarComponent implements ControlValueAccessor {
   }
 
   selection: Course[] = []
-
-  constructor(private readonly courseService: CourseService, private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   // ControlValueAccessor methods
 

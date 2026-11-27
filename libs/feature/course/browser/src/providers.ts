@@ -19,6 +19,8 @@ import { RemoteCourseSectionProvider } from './providers/remote-course-section.p
 import { RemoteCourseProvider } from './providers/remote-course.provider'
 import { CourseDemoProvider } from './models/course-demo-provider'
 import { RemoteCourseDemoProvider } from './providers/remote-course-demo.provider'
+import { CourseMonitorPresenceProvider } from './models/course-monitor-presence-provider'
+import { RemoteCourseMonitorPresenceProvider } from './providers/remote-course-monitor-presence.provider'
 
 export const COURSE_PROVIDERS: Provider[] = [
   { provide: ActivityProvider, useClass: RemoteActivityProvider },
@@ -31,6 +33,7 @@ export const COURSE_PROVIDERS: Provider[] = [
   { provide: CourseProvider, useClass: RemoteCourseProvider },
   { provide: CourseMemberProvider, useClass: RemoteCourseMemberProvider },
   { provide: CourseSectionProvider, useClass: RemoteCourseSectionProvider },
+  { provide: CourseMonitorPresenceProvider, useClass: RemoteCourseMonitorPresenceProvider },
   { provide: CourseDemoProvider, useClass: RemoteCourseDemoProvider },
   { provide: CourseGroupProvider, useClass: RemoteCourseGroupProvider },
   { provide: ActivityGroupProvider, useClass: RemoteActivityGroupProvider },

@@ -19,7 +19,7 @@ export class TimePipe implements PipeTransform {
 }
 
 @NgModule({
-  declarations: [TimePipe],
+  imports: [TimePipe],
   exports: [TimePipe],
 })
 export class TimePipeModule {}

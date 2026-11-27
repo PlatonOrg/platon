@@ -1,26 +1,38 @@
-@if (isImage) {
+@if(editService.isEditing()){
+<div style="height: 500px; width: 95%">
+  <nge-monaco-editor (ready)="onCreateEditor($any($event))" [attr.key]="src"></nge-monaco-editor>
+</div>
+} @else {@if (isImage) {
 <img [src]="src" alt="Image Preview" class="image-viewer" />
 } @else if (isVideo) {
 <video controls class="video-player">
   <source [src]="src" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
-} @else if (isText) {
-<nge-markdown [file]="src" />
+} @else if (isText){ @if (this.isMd) {
+<nge-markdown [data]="editService.getCurrentFileContent(this.src)" />
+} @if (!this.isMd) {
+<pre>{{ editService.getCurrentFileContent(this.src) }}</pre>
+} } @else if(isCode){
+<pre>
+    <code>
+      {{ editService.getCurrentFileContent(this.src)}}
+    </code>
+  </pre>
 } @else if (isPdf) {
 <div class="pdf-navigation">
   <button nz-button (click)="onPrevPage()" [disabled]="currentPage <= 1">
     <span nz-icon nzType="left" nzTheme="outline"></span>
   </button>
-  <nz-input-number-group [nzAddOnAfter]="' / ' + totalPages">
-    <nz-input-number
-      [nzMin]="1"
-      [nzMax]="totalPages"
-      [(ngModel)]="currentPage"
-      (ngModelChange)="goToPage($event)"
-      [nzStep]="1"
-    />
-  </nz-input-number-group>
+  <nz-input-number
+    [nzMin]="1"
+    [nzMax]="totalPages"
+    [(ngModel)]="currentPage"
+    (ngModelChange)="goToPage($event)"
+    [nzStep]="1"
+  >
+    <span nzInputSuffix>/ {{ totalPages }}</span>
+  </nz-input-number>
   <button nz-button (click)="onNextPage()" [disabled]="currentPage >= totalPages">
     <span nz-icon nzType="right" nzTheme="outline"></span>
   </button>
@@ -35,7 +47,47 @@
 <div class="pdf-viewer">
   <canvas #pdfCanvas id="pdfCanvas"></canvas>
 </div>
-
-} @else {
-<div>Unsupported file format</div>
-}
+} @else if (isJson) {
+<div style="overflow-x: scroll">
+  @if(dataValid) {
+  <pre><code [innerHTML]="this.editService.getCurrentFileContent(this.src)| jsonSyntaxHighlight"></code></pre>
+  } @else {
+  {{ message }}
+  }
+</div>
+} @else if (isCsv){ @if (dataValid) { @if (isCsv) {
+<div class="csv-container">
+  <nz-table
+    #csvTable
+    [nzData]="csvRows"
+    [nzFrontPagination]="true"
+    [nzPageSize]="15"
+    nzSize="small"
+    nzBordered
+    [nzScroll]="{ x: '100%', y: '100%' }"
+  >
+    <thead>
+      <tr>
+        @for (header of csvHeaders; track header) {
+        <th>{{ header }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of csvTable.data; track row) {
+      <tr>
+        @for (cell of row; track cell) {
+        <td>{{ cell }}</td>
+        }
+      </tr>
+      }
+    </tbody>
+  </nz-table>
+</div>
+} } @else {
+<div class="error-message">
+  {{ message }}
+</div>
+} } @else {
+<div class="error-message">Unsupported file format</div>
+} }

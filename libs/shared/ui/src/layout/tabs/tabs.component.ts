@@ -8,19 +8,19 @@ import {
   Input,
   OnDestroy,
   QueryList,
+  inject,
 } from '@angular/core'
 
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzTabsModule } from 'ng-zorro-antd/tabs'
 
 import { ActivatedRoute, RouterModule } from '@angular/router'
-import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs'
+import { combineLatest, Observable, Subscription } from 'rxjs'
 import { UiError403Component, UiError404Component, UiError500Component } from '../../error'
-import { LayoutState } from '../layout'
+import { type LayoutState } from '../layout'
 import { UiLayoutTabDirective } from './directives/tab-title.directive'
 
 @Component({
-  standalone: true,
   selector: 'ui-layout-tabs',
   templateUrl: './tabs.component.html',
   styleUrls: ['./tabs.component.scss'],
@@ -28,16 +28,17 @@ import { UiLayoutTabDirective } from './directives/tab-title.directive'
   imports: [
     CommonModule,
     RouterModule,
-
     NzTabsModule,
     NzSkeletonModule,
-
     UiError403Component,
     UiError404Component,
     UiError500Component,
   ],
 })
 export class UiLayoutTabsComponent implements AfterContentInit, OnDestroy {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private route = inject(ActivatedRoute)
+
   private readonly subscriptions: Subscription[] = []
 
   @Input() state: LayoutState = 'READY'
@@ -47,8 +48,6 @@ export class UiLayoutTabsComponent implements AfterContentInit, OnDestroy {
 
   protected tabs: UiLayoutTabDirective[] = []
   protected selectedTabIndex = 0
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef, private route: ActivatedRoute) {}
 
   async ngAfterContentInit(): Promise<void> {
     this.query.changes.subscribe(async (changes) => {
@@ -75,10 +74,6 @@ export class UiLayoutTabsComponent implements AfterContentInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s) => s.unsubscribe())
-  }
-
-  protected trackByIndex(index: number): number {
-    return index
   }
 
   private async refreshSelectedTabIndex(): Promise<void> {

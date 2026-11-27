@@ -1,0 +1,52 @@
+sandbox = "python"
+
+qcm = :wc-radio-group
+qcm.horizontal = true
+
+builder == #!lang=py
+import random
+
+random.seed(seed)
+a = random.randint(3, 12)
+b = random.randint(3, 12)
+bonne = a * b
+
+# Distracteurs plausibles, sans doublon.
+propositions = {bonne, bonne + a, bonne - b, a + b}
+while len(propositions) < 4:
+    propositions.add(bonne + random.randint(1, 9))
+propositions = list(propositions)
+random.shuffle(propositions)
+
+# Les propositions sont des chaînes : qcm["selection"] contiendra le texte choisi.
+qcm["items"] = [str(p) for p in propositions]
+==
+
+title ==
+QCM généré en Python
+==
+
+statement ==
+Combien font {{ a }} × {{ b }} ?
+==
+
+form ==
+{{ qcm }}
+==
+
+grader == #!lang=py
+if qcm.get("selection") == str(bonne):
+    grade = 100
+    feedback["type"] = "success"
+    feedback["content"] = "Bonne réponse !"
+else:
+    grade = 0
+    feedback["type"] = "error"
+    # Le message ne donne pas la bonne réponse : l'apprenant n'aurait plus qu'à la cocher.
+    # La réponse reste disponible dans la solution.
+    feedback["content"] = "Mauvaise réponse, vous pouvez réessayer."
+==
+
+solution ==
+{{ a }} × {{ b }} = {{ bonne }}
+==

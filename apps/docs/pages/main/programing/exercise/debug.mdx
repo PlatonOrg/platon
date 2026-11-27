@@ -1,0 +1,117 @@
+---
+title: Déboguer un exercice
+description: Méthodes pour mettre au point un exercice PLaTon (prévisualisation, journal platon_log, propriété debug des composants, affichage des variables, téléchargement de l'environnement) et réponses aux questions fréquentes sur la programmation des exercices.
+---
+
+import { Callout } from 'nextra/components'
+
+# Déboguer un exercice
+
+Cette page rassemble les outils pour comprendre ce que fait un exercice, puis répond aux questions fréquentes.
+
+## Les outils de mise au point
+
+### La prévisualisation
+
+Depuis l'[éditeur](/main/programing/ide), la prévisualisation exécute l'exercice comme le ferait un apprenant, avec
+tous les boutons activés (aides, solution, nouvelle question…) et le feedback toujours affiché. Chaque
+prévisualisation reconstruit l'exercice avec la version courante des fichiers.
+
+### Le journal `platon_log` (sandbox Python)
+
+Avec la sandbox Python, `platon_log(...)` écrit des messages dans un **terminal** affiché sous l'exercice pendant la
+prévisualisation depuis l'éditeur. Les exceptions non rattrapées y apparaissent aussi, avec le numéro de ligne. Voir
+[Journalisation avec platon_log](/main/programing/exercise/logger).
+
+<Callout type="info">
+  Une exception dans le builder ou le grader Python marque l'exercice **en erreur** (`meta.error`), aussi bien en
+  prévisualisation que pour les apprenants.
+</Callout>
+
+### Afficher l'état d'un composant
+
+Tout composant accepte la propriété `debug` : avec `debug = true`, son état complet (au format JSON) est affiché sous
+le composant et se met à jour pendant que vous interagissez avec lui. C'est le moyen le plus simple de savoir quelle
+propriété lire dans le grader.
+
+```ple
+reponse = :wc-sort-list
+reponse.items = ["a", "b", "c"]
+reponse.debug = true
+```
+
+### Afficher des variables
+
+Le filtre Nunjucks `dump` affiche n'importe quelle variable dans l'énoncé ou le formulaire, pendant la mise au point :
+
+```ple
+statement ==
+Valeurs générées : {{ valeurs | dump }}
+
+Métadonnées : {{ meta | dump(2) }}
+==
+```
+
+Avec la sandbox Node, qui n'a pas de journal, c'est aussi le moyen de suivre un calcul : stockez le résultat
+intermédiaire dans une variable (sans `let`/`const`) et affichez-la, par exemple dans le feedback.
+
+### Télécharger l'environnement d'exécution
+
+En prévisualisation, le bouton **Télécharger l'environnement** récupère une archive des fichiers présents dans la
+sandbox (fichiers inclus, fichiers produits par vos scripts…). C'est utile pour vérifier que les fichiers de
+`includes/` ou de `@include` sont bien présents (voir [Fichiers d'un exercice](/main/programing/exercise/files)).
+
+### Tester les composants dans le playground
+
+La documentation de chaque composant propose un playground et des exercices complets dont le code est affiché : partir
+d'un exemple qui fonctionne est souvent le plus rapide.
+
+## Erreurs fréquentes
+
+| Symptôme                                                            | Cause probable                                                                                                         |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| « Lexical error … Unrecognized text » à la compilation              | Chaîne entre apostrophes (`'texte'`) : le langage PLE n'accepte que les guillemets doubles `"texte"` ou les chaînes multilignes `==`. |
+| Une variable du builder est vide dans l'énoncé                      | Elle a été déclarée avec `let`, `const` ou `var` en JavaScript : elle n'est pas conservée.                              |
+| `{{ composant.propriete }}` n'affiche rien                         | Dans les textes, un composant est remplacé par son rendu HTML ; copiez la valeur dans une variable simple.              |
+| Le grader ne voit pas la réponse d'un composant                     | Le composant n'est pas dans `form` (seuls les composants du formulaire renvoient leur état).                           |
+| L'exercice est marqué « Erreur » sans exception                     | Le grader a laissé `grade` à `-1` ou à une valeur non numérique. Voir [Évaluation](/main/programing/exercise/grading). |
+| La note ne change pas d'une validation à l'autre                    | `grade` n'est pas affecté dans toutes les branches du grader : il garde sa valeur précédente.                          |
+| Un fichier n'est pas trouvé dans le grader                          | Il n'est ni dans `includes/` ni inclus avec `@include`, ou il est dans un sous-dossier avec la sandbox Node.           |
+| Le titre affiche `{{ variable }}` tel quel                          | Le titre n'est pas interprété par Nunjucks : seuls `statement`, `form`, `solution`, `hint` et `feedback` le sont.      |
+
+## Questions fréquentes
+
+### Comment empêcher l'apprenant de recharger l'exercice pour obtenir une autre question ?
+
+Le bouton **Recharger** (nouvelle question) est piloté par l'activité, pas par l'exercice : décochez **Afficher le
+bouton « Autre question »** dans les paramètres de l'activité (dans le cours ou dans la
+[configuration de l'activité](/main/programing/activity/config)). Pour un TP noté, il est désactivé automatiquement.
+Le grader peut en revanche détecter qu'une nouvelle question a été tirée : `meta.attempts`, `meta.consumedHints` et
+`meta.showSolution` sont remis à zéro, alors que `meta.totalAttempts` continue de compter.
+
+### Le grader peut-il relancer l'exercice (nouvelle question) ?
+
+Non : un nouveau tirage n'est déclenché que par le bouton **Recharger** de l'apprenant. Le grader peut néanmoins
+modifier les variables de l'exercice (nouvelles valeurs, nouvel énoncé) pour la tentative suivante, puisque toutes les
+variables qu'il modifie sont conservées.
+
+### Comment savoir si l'apprenant a regardé la solution ou les aides ?
+
+Avec les [métadonnées](/main/programing/exercise/metadata) : `meta.showSolution` et `meta.consumedHints`.
+
+### Comment ajouter un lien vers un fichier d'une autre ressource (par exemple un document du cercle) ?
+
+Avec `@copyurl` et un chemin qui commence par l'identifiant ou le code de la ressource :
+`@copyurl /code-de-la-ressource/chemin/fichier.pdf`. Voir
+[Référencer le fichier d'une autre ressource](/main/programing/exercise/files#référencer-le-fichier-dune-autre-ressource).
+
+### Que se passe-t-il si l'exercice n'a pas de `form` ?
+
+L'exercice s'affiche, mais aucun composant ne renvoie de réponse au grader. Pour un exercice purement informatif
+(lecture d'un document, vidéo…), prévoyez quand même un `grader` qui attribue une note, par exemple `grade = 100` :
+sans grader, la validation produit une erreur.
+
+### Les fichiers de `includes/` d'un modèle sont-ils hérités ?
+
+Non. Seul le dossier `includes/` de l'exercice lui-même est copié dans l'environnement. Pour réutiliser les fichiers
+d'un autre exercice ou d'un modèle, incluez-les avec `@include /ressource/chemin`.

@@ -12,7 +12,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzDrawerModule } from 'ng-zorro-antd/drawer'
 
 import { ViewportIntersectionDirective } from '@cisstech/nge/directives'
@@ -60,6 +60,8 @@ import { ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
+// Just metadata is already quite expensive to fetch, dones't need statistic
+const EXPANDS_VIEW: ResourceExpandableFields[] = ['metadata']
 
 interface QueryParams {
   q?: string
@@ -78,7 +80,6 @@ interface QueryParams {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-resources',
   templateUrl: 'resources.page.html',
   styleUrls: ['resources.page.scss'],
@@ -86,25 +87,20 @@ interface QueryParams {
   imports: [
     CommonModule,
     RouterModule,
-
     MatCardModule,
     MatIconModule,
-
     NzSpinModule,
     NzIconModule,
     NzButtonModule,
     NzPopoverModule,
     NzDividerModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzDrawerModule,
-
     ViewportIntersectionDirective,
-
     ResourcePipesModule,
     ResourceItemComponent,
     ResourceListComponent,
     ResourceFiltersComponent,
-
     CircleTreeComponent,
     UiSearchBarComponent,
     UiFilterIndicatorComponent,
@@ -207,7 +203,7 @@ export default class ResourcesPage implements OnInit, OnDestroy {
     const [tree, circle, views, topics, levels, owners] = await Promise.all([
       firstValueFrom(this.resourceService.tree()),
       firstValueFrom(this.resourceService.circle(this.user.username)),
-      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS })),
+      firstValueFrom(this.resourceService.search({ views: true, expands: EXPANDS_VIEW })),
       firstValueFrom(this.tagService.listTopics()),
       firstValueFrom(this.tagService.listLevels()),
       firstValueFrom(this.resourceService.listOwners()),

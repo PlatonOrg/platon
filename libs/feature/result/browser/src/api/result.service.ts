@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse } from '@platon/core/common'
 import {
   ACTIVITY_ANSWER_RATE,
@@ -9,10 +9,12 @@ import {
   ACTIVITY_TOTAL_ATTEMPTS,
   ACTIVITY_TOTAL_COMPLETIONS,
   ActivityCorrection,
+  ActivityCorrectionSummary,
   ActivityLeaderboardEntry,
   ActivityResults,
   AnswerStates,
   Correction,
+  CorrectionStatus,
   CourseLeaderboardEntry,
   CreateLabel,
   CreateSessionComment,
@@ -51,11 +53,9 @@ import { LabelProvider } from '../models/label.provider'
 
 @Injectable({ providedIn: 'root' })
 export class ResultService {
-  constructor(
-    private readonly resultProvider: ResultProvider,
-    private readonly commentProvider: SessionCommentProvider,
-    private readonly labelProvider: LabelProvider
-  ) {}
+  private readonly resultProvider = inject(ResultProvider)
+  private readonly commentProvider = inject(SessionCommentProvider)
+  private readonly labelProvider = inject(LabelProvider)
 
   userDashboard() {
     return this.resultProvider.userDashboard().pipe(
@@ -148,32 +148,18 @@ export class ResultService {
     return this.resultProvider.activityLeaderboard(input)
   }
 
-  findCorrection(activityId: string): Observable<ActivityCorrection> {
-    return this.resultProvider.findCorrection(activityId)
+  //#region Correction
+
+  findCorrection(activityId: string, viewerMode = false): Observable<ActivityCorrection> {
+    return this.resultProvider.findCorrection(activityId, viewerMode)
   }
 
-  listPendingCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.resultProvider.listCorrections().pipe(
-      map((response) => {
-        response.resources = response.resources.filter((correction) => {
-          return correction.exercises.some((exercise) => exercise.correctedAt == null)
-        })
-        response.total = response.resources.length
-        return response
-      })
-    )
+  listPendingCorrections(): Observable<ListResponse<ActivityCorrectionSummary>> {
+    return this.resultProvider.listCorrectionsSummary(CorrectionStatus.pending)
   }
 
-  listAvailableCorrections(): Observable<ListResponse<ActivityCorrection>> {
-    return this.resultProvider.listCorrections().pipe(
-      map((response) => {
-        response.resources = response.resources.filter((correction) => {
-          return correction.exercises.every((exercise) => exercise.correctedAt !== null)
-        })
-        response.total = response.resources.length
-        return response
-      })
-    )
+  listAvailableCorrections(): Observable<ListResponse<ActivityCorrectionSummary>> {
+    return this.resultProvider.listCorrectionsSummary(CorrectionStatus.available)
   }
 
   getLabels(navigationExerciseId: string): Observable<Label[]> {
@@ -235,4 +221,6 @@ export class ResultService {
   ): Observable<{ blob: Blob; fileName: string }> {
     return this.resultProvider.downloadAllSubmissions(activityId, exerciseId, sessionId)
   }
+
+  //#endregion
 }

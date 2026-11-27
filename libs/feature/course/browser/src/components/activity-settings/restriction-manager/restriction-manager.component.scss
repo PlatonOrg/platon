@@ -92,6 +92,8 @@
   padding: 0 12px 8px 12px;
   text-align: center;
   box-sizing: border-box;
+  justify-content: center;
+  width: 100%;
 
   .add-rule-btn {
     height: 32px;
@@ -100,6 +102,12 @@
     border: 1px dashed var(--brand-color-primary);
     color: var(--brand-color-primary);
     background: transparent;
+    justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
 
     &:hover {
       background: var(--brand-background-hover);
@@ -107,9 +115,18 @@
       color: var(--brand-color-primary-shade);
     }
 
+    .label {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     i {
       font-size: 12px;
       margin-right: 6px;
+      flex-shrink: 0;
     }
   }
 }

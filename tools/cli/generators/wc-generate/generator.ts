@@ -1,4 +1,4 @@
-import { Tree, formatFiles, generateFiles, joinPathFragments, names } from '@nrwl/devkit'
+import { Tree, formatFiles, generateFiles, joinPathFragments, names } from '@nx/devkit'
 import * as ts from 'typescript'
 import { WcGenerateGeneratorSchema } from './schema'
 

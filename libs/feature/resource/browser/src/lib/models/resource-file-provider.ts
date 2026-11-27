@@ -14,6 +14,7 @@ import {
   Resource,
   ResourceFile,
 } from '@platon/feature/resource/common'
+import { CreatedResponse } from '@platon/core/common'
 
 export abstract class ResourceFileProvider {
   abstract compileExercise(resource: string, version?: string): Observable<PLSourceFile>
@@ -26,7 +27,7 @@ export abstract class ResourceFileProvider {
   abstract read(resource: string | Resource, path: string, version?: string): Observable<ResourceFile>
   abstract create(resource: string | Resource, input: FileCreate[]): Observable<void>
 
-  abstract upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<void>
+  abstract upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<CreatedResponse<string>>
   abstract delete(file: Pick<ResourceFile, 'url'>): Observable<void>
   abstract move(file: Pick<ResourceFile, 'url'>, input: FileMove): Observable<void>
   abstract update(file: Pick<ResourceFile, 'url'>, input: FileUpdate): Observable<void>

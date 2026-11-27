@@ -3,13 +3,15 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse, NotFoundResponse } from '@platon/core/common'
 import { Mapper, UUIDParam } from '@platon/core/server'
 import { CreateLmsDTO, LmsDTO, LmsFiltersDTO, UpdateLmsDTO } from './lti.dto'
-import { LTIService } from './lti.service'
+import { LTIOldService } from './lti.service.old'
+import { Roles } from '@platon/core/server'
 
 @ApiBearerAuth()
+@Roles('admin')
 @Controller('lti')
 @ApiTags('LTI')
 export class LTIController {
-  constructor(private readonly service: LTIService) {}
+  constructor(private readonly service: LTIOldService) {}
 
   @Get('/lms')
   async searchLms(@Query() filters: LmsFiltersDTO): Promise<ListResponse<LmsDTO>> {

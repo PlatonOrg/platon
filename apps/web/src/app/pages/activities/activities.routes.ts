@@ -22,4 +22,12 @@ export default [
     },
     [UserRoles.admin, UserRoles.teacher]
   ),
+  withAuthGuard({
+    path: 'monitor',
+    loadChildren: () =>
+      import(
+        /* webpackChunkName: "activity-detail" */
+        './monitor/monitor.routes'
+      ),
+  }),
 ] as Routes

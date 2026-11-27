@@ -1,1 +1,3 @@
-<div *ngIf="chart" class="echarts" coreEcharts [autoResize]="false" [options]="chart"></div>
+@if (chart) {
+<div class="echarts" coreEcharts [autoResize]="false" [options]="chart"></div>
+}

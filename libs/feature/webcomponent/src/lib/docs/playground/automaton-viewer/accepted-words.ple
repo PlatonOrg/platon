@@ -1,0 +1,66 @@
+sandbox = "node"
+
+// L'automate peut être donné au format texte (ci-dessous) ou au format objet.
+schema = :wc-automaton-viewer
+schema.automaton ==
+#states
+q0
+q1
+q2
+#initials
+q0
+#accepting
+q2
+#alphabet
+a
+b
+#transitions
+q0:a>q1
+q1:b>q2
+q2:a>q1
+q2:b>q0
+==
+
+choix = :wc-checkbox-group
+choix.items = ["ab", "abab", "aab", "abb", "abbab"]
+
+title ==
+Lire un automate
+==
+
+statement ==
+Voici un automate fini déterministe **incomplet** : certains états n'ont pas de transition pour chaque lettre. Quand aucune transition ne correspond à la lettre lue, le mot est rejeté.
+
+{{ schema }}
+
+Cochez tous les mots **acceptés** par cet automate.
+==
+
+form ==
+{{ choix }}
+==
+
+grader == #!lang=js
+// Simulation de l'automate (déterministe et incomplet, transitions écrites dans l'énoncé) :
+// une lettre sans transition fait rejeter le mot.
+const delta = { q0: { a: 'q1' }, q1: { b: 'q2' }, q2: { a: 'q1', b: 'q0' } }
+function accepte(mot) {
+  let etat = 'q0'
+  for (const lettre of mot) {
+    etat = delta[etat] && delta[etat][lettre]
+    if (!etat) return false
+  }
+  return etat === 'q2'
+}
+
+let erreurs = 0
+for (const item of choix.items) {
+  const ok = !!item.checked === accepte(item.content)
+  if (!ok) erreurs++
+  item.css = ok ? 'success-border' : 'error-border'
+}
+
+grade = erreurs === 0 ? 100 : 0
+feedback.type = erreurs === 0 ? 'success' : 'error'
+feedback.content = erreurs === 0 ? 'Bravo !' : `${erreurs} case(s) mal cochée(s) ou oubliée(s).`
+==

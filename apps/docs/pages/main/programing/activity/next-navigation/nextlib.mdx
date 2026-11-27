@@ -140,6 +140,20 @@ Récupère le nombre d'exercices dans un groupe spécifique.
 
 ---
 
+#### `getGroupName(groupNb: int) -> str`
+Récupère le nom d'un groupe d'exercices à partir de son numéro.
+
+**Arguments** :
+- `groupNb` (*int*): Le numéro du groupe (index) dont on souhaite récupérer le nom.
+
+**Retourne** :
+- (*str*): Le nom complet du groupe tel qu'il est défini dans l'activité.
+
+**Exceptions** :
+- `InvalidGroupError`: Si le numéro de groupe spécifié n'existe pas.
+
+---
+
 #### `getPreviousExerciseId() -> Optional[str]`
 Récupère l'ID du dernier exercice joué.
 
@@ -348,6 +362,17 @@ Vérifie si tous les exercices d'un groupe spécifique ont été joués.
 
 ---
 
+#### `isValidationModeRandom() -> bool`
+Pour le mode de navigation "validation", indique si le paramètre "Groupe Aléatoire" est activé.
+
+**Retourne** :
+- (*bool*): `True` si le choix des groupes est aléatoire entre chaque exercice, `False` si les groupes doivent être validés dans l'ordre séquentiel.
+
+**Exceptions** :
+- `ValueError`: Si le mode de navigation configuré pour l'activité n'est pas "validation".
+
+---
+
 #### `playIfUnplayed(exerciseId: str, params: Optional[dict] = None) -> None`
 Joue l'exercice spécifié s'il n'a pas encore été tenté.
 
@@ -378,6 +403,24 @@ Vérifie si au moins un exercice du groupe spécifié a déjà été joué.
 - `InvalidGroupError`: Si le numéro de groupe spécifié n'existe pas.
 
 ### Gestion des notes
+
+#### `getGroupGradeRules(groupNb: int) -> Optional[dict]`
+Récupère les informations sur les règles d'évaluation et de validation d'un groupe.
+
+**Arguments** :
+- `groupNb` (*int*): Le numéro du groupe (index) dont on souhaite récupérer les règles.
+
+**Retourne** :
+- (*Optional[dict]*): Renvoie `None` si aucune règle n'est définie (type `'empty'`). Sinon, renvoie un dictionnaire contenant les paramètres du barème :
+  - `type` (*str*) : `'mean'` (moyenne) ou `'success'` (succès individuel sur les derniers exercices).
+  - `exercisesCount` (*int*, optionnel) : Le nombre de derniers exercices pris en compte pour valider le groupe.
+  - `targetScore` (*int*, optionnel) : Le score cible à atteindre (entre 0 et 100).
+  - `maxAttempts` (*int*, optionnel) : Le nombre maximum de tentatives autorisées par exercice.
+
+**Exceptions** :
+- `InvalidGroupError`: Si le numéro de groupe spécifié n'existe pas.
+
+---
 
 #### `setActivityGrade(grade_aggregation_strategy: Callable[[], int]) -> None`
 Calcule et stocke la note totale de l'activité en utilisant une stratégie d'agrégation spécifiée.

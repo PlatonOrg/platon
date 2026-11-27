@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormBuilder } from '@angular/forms'
 import { Editor, FileService, OpenRequest } from '@cisstech/nge-ide/core'
@@ -7,6 +6,17 @@ import { ResourceFileService } from '@platon/feature/resource/browser'
 import { editorJsFromRawString, editorJsToRawString } from '@platon/shared/ui'
 import { Subscription, debounceTime, firstValueFrom, skip } from 'rxjs'
 
+import { ReactiveFormsModule } from '@angular/forms'
+import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { UiEditorJsModule } from '@platon/shared/ui'
+import { PleInputEditorModule } from '../ple-input/ple-input.module'
+
 const HIDDEN_VARIABLES = ['author', 'title', 'statement', 'form', 'builder', 'grader']
 
 @Component({
@@ -14,6 +24,18 @@ const HIDDEN_VARIABLES = ['author', 'title', 'statement', 'form', 'builder', 'gr
   templateUrl: './ple-editor.component.html',
   styleUrls: ['./ple-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ReactiveFormsModule,
+    NzCollapseModule,
+    NzFormModule,
+    NzListModule,
+    NzInputModule,
+    NzButtonModule,
+    NzIconModule,
+    NzTooltipModule,
+    UiEditorJsModule,
+    PleInputEditorModule,
+  ],
 })
 export class PleEditorComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder)
@@ -111,25 +133,25 @@ export class PleEditorComponent implements OnInit, OnDestroy {
     ])
 
     const { variables } = source.ast
-    const sandbox = source.variables.sandbox || 'javascript'
+    const sandbox = source.variables['sandbox'] || 'javascript'
 
     this.form.patchValue({
-      title: (variables.title as string) || '',
-      statement: editorJsFromRawString(variables.statement as string),
-      form: editorJsFromRawString(variables.form as string),
+      title: (variables['title'] as string) || '',
+      statement: editorJsFromRawString(variables['statement'] as string),
+      form: editorJsFromRawString(variables['form'] as string),
       builder: {
         name: 'builder',
         type: 'code',
         description: 'The builder is used to generate the exercise',
         options: { language: sandbox },
-        value: variables.builder || '',
+        value: variables['builder'] || '',
       } as PleInput,
       grader: {
         name: 'grader',
         type: 'code',
         description: 'The grader is used to grade the exercise',
         options: { language: sandbox },
-        value: variables.grader || '',
+        value: variables['grader'] || '',
       } as PleInput,
       variables: Object.keys(variables)
         .filter((variable) => !HIDDEN_VARIABLES.includes(variable))

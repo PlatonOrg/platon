@@ -1,0 +1,21 @@
+<div class="sixcode-container" [class.error]="hasError()">
+  <div class="code-inputs">
+    @for (code of codes(); track $index; let i = $index) {
+    <input
+      #codeInput
+      type="password"
+      class="code-input"
+      [value]="code"
+      [disabled]="disabled()"
+      [class.error]="hasError()"
+      [placeholder]="placeholder()"
+      maxlength="1"
+      autocomplete="off"
+      (input)="onInput($event, i)"
+      (keydown)="onKeyDown($event, i)"
+      (paste)="onPaste($event, i)"
+      (focus)="onFocus($event)"
+    />
+    }
+  </div>
+</div>

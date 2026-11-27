@@ -1,0 +1,93 @@
+---
+title: Vue d'ensemble technique
+description: Architecture du code de PLaTon pour les développeurs - applications, bibliothèques par domaine, découpage browser/common/server, services utilisés et démarrage d'un environnement de développement.
+---
+
+import { Callout, FileTree } from 'nextra/components'
+
+# Vue d'ensemble technique
+
+Cette section s'adresse aux personnes qui développent PLaTon ou l'installent. Le code est un **monorepo
+[Nx](https://nx.dev)** écrit en TypeScript.
+
+<FileTree>
+  <FileTree.Folder name="platon" defaultOpen>
+    <FileTree.Folder name="apps" defaultOpen>
+      <FileTree.Folder name="api" />
+      <FileTree.Folder name="web" />
+      <FileTree.Folder name="docs" />
+      <FileTree.Folder name="home" />
+    </FileTree.Folder>
+    <FileTree.Folder name="libs" defaultOpen>
+      <FileTree.Folder name="core" />
+      <FileTree.Folder name="feature" />
+      <FileTree.Folder name="shared" />
+    </FileTree.Folder>
+    <FileTree.Folder name="migrations" />
+    <FileTree.Folder name="bin" />
+    <FileTree.Folder name="tools" />
+  </FileTree.Folder>
+</FileTree>
+
+## Les applications
+
+| Application  | Rôle                                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| `apps/api`   | Serveur [NestJS](https://nestjs.com) : API REST/GraphQL, préfixe `/api`, routes LTI 1.3 sous `/lti`.  |
+| `apps/web`   | Application [Angular](https://angular.dev) utilisée par les apprenants, enseignants et administrateurs. |
+| `apps/docs`  | Cette documentation ([Nextra](https://nextra.site)).                                                  |
+| `apps/home`  | Page d'accueil publique du projet.                                                                    |
+
+## Les bibliothèques
+
+Chaque domaine fonctionnel est une bibliothèque de `libs/feature/`, découpée en trois parties :
+
+| Dossier    | Contenu                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------- |
+| `common`   | Modèles et fonctions partagés par le client et le serveur.                                  |
+| `server`   | Entités, services et contrôleurs NestJS.                                                    |
+| `browser`  | Services, composants et pages Angular.                                                      |
+
+| Bibliothèque       | Domaine                                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `compiler`         | Analyse et compilation des fichiers PLE/PLA (grammaire Jison `pl.jison`).                                  |
+| `player`           | Exécution des exercices et activités, sandboxes Node et Python.                                            |
+| `webcomponent`     | Composants interactifs des exercices (`wc-…`), leur documentation et leurs exercices de playground.        |
+| `resource`         | Cercles, exercices, activités, fichiers (dépôts Git), droits, membres, événements.                          |
+| `course`           | Cours, sections, activités de cours, restrictions, membres, groupes, démo, suivi.                          |
+| `result`           | Sessions, réponses, corrections, étiquettes, statistiques, classements.                                   |
+| `builder`          | Builder graphique des exercices issus d'un modèle.                                                         |
+| `peer`             | Évaluation par les pairs.                                                                                  |
+| `tests`            | Tests d'entrée et candidats.                                                                               |
+| `lti`, `cas`       | Intégration LMS (LTI 1.1 et 1.3) et connexion CAS.                                                         |
+| `notification`, `announcement`, `email`, `discord`, `tuto`, `ai` | Notifications, annonces, envoi d'e-mails, Discord, tutoriels intégrés, assistance IA. |
+
+`libs/core` contient les briques transverses (utilisateurs, authentification, configuration, tags) et `libs/shared`
+les composants et utilitaires d'interface communs.
+
+## Services utilisés
+
+En développement, `docker-compose.dev.yml` démarre **PostgreSQL**, **Redis**, **MailDev** (capture des e-mails) et
+**pgAdmin** ; un serveur **nginx** sert l'application en HTTPS. Les exercices Python s'exécutent dans un serveur de
+sandbox distinct (projet [PremierLangage/sandbox](https://github.com/PremierLangage/sandbox)), configuré par la
+variable `SANDBOX_URL`.
+
+## Démarrer en développement
+
+Les étapes détaillées (prérequis, certificats locaux, dépannage) sont dans le
+[README du dépôt](https://github.com/PlatonOrg/platon#installation). En résumé :
+
+```bash
+yarn                      # dépendances
+./bin/install.sh          # fichiers d'environnement et certificats locaux
+./bin/docker/up.sh        # services Docker
+./bin/migration/run.sh    # migrations de la base
+./bin/init-db.sh          # données initiales
+yarn serve:api            # API
+yarn graphql:generate && yarn serve:web   # application web
+yarn serve:docs           # documentation
+```
+
+<Callout type="info">
+  La version de Node attendue est indiquée dans `package.json` (champ `engines`) et dans `.nvmrc`.
+</Callout>

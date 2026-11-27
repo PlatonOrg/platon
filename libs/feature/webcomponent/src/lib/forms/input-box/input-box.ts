@@ -135,5 +135,7 @@ export const InputBoxComponentDefinition = defineWebComponent({
   },
   playgrounds: {
     Addition: 'sum.ple',
+    'Multiplication en Python': 'python-random.ple',
+    'Réponse textuelle': 'capital.ple',
   },
 })

@@ -1,25 +1,25 @@
+@for (tag of tags; track trackById($index, tag)) {
 <nz-tag
-  *ngFor="let tag of tags; trackBy: trackById"
   [nzMode]="editable ? 'closeable' : 'default'"
   (nzOnClose)="remove.emit(tag)"
   (dblclick)="ondoubleclick($event, tag)"
 >
   {{ tag.name }}
 </nz-tag>
-<ng-container *ngIf="editable">
-  <nz-tag *ngIf="!inputVisible" class="editable-tag" nzNoAnimation (click)="showInput()">
-    <span nz-icon nzType="plus"></span>
-    Nouveau
-  </nz-tag>
-  <input
-    #inputElement
-    nz-input
-    nzSize="small"
-    *ngIf="inputVisible"
-    type="text"
-    [(ngModel)]="inputValue"
-    style="width: 78px"
-    (blur)="handleInputConfirm()"
-    (keydown.enter)="handleInputConfirm()"
-  />
-</ng-container>
+} @if (editable) { @if (!inputVisible) {
+<nz-tag class="editable-tag" nzNoAnimation (click)="showInput()">
+  <span nz-icon nzType="plus"></span>
+  Nouveau
+</nz-tag>
+} @if (inputVisible) {
+<input
+  #inputElement
+  nz-input
+  nzSize="small"
+  type="text"
+  [(ngModel)]="inputValue"
+  style="width: 78px"
+  (blur)="handleInputConfirm()"
+  (keydown.enter)="handleInputConfirm()"
+/>
+} }

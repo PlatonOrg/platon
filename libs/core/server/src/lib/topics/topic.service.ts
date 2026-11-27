@@ -6,7 +6,7 @@ import { Optional } from 'typescript-optional'
 import { TopicEntity } from './topic.entity'
 import { EventService } from '../events'
 import { ON_TOPIC_FUSION_EVENT, OnTopicFusionEventPayload } from './topic.event'
-import { StringUtilsService } from '../utils'
+import { NameSimilarityService } from '../utils'
 
 @Injectable()
 export class TopicService {
@@ -16,7 +16,7 @@ export class TopicService {
     @InjectRepository(TopicEntity)
     private readonly repository: Repository<TopicEntity>,
     private readonly eventService: EventService,
-    private readonly stringUtils: StringUtilsService
+    private readonly nameSimilarity: NameSimilarityService
   ) {}
 
   async findById(id: string): Promise<Optional<TopicEntity>> {
@@ -30,12 +30,12 @@ export class TopicService {
   }
 
   private async findSimilarTopic(newName: string, existingTopics: TopicEntity[]): Promise<TopicEntity | null> {
-    const normalizedNewName = this.stringUtils.normalizeString(newName)
+    const normalizedNewName = this.nameSimilarity.normalizeString(newName)
 
     for (const topic of existingTopics) {
-      const similarity = this.stringUtils.calculateSimilarity(
+      const similarity = this.nameSimilarity.calculateSimilarity(
         normalizedNewName,
-        this.stringUtils.normalizeString(topic.name)
+        this.nameSimilarity.normalizeString(topic.name)
       )
 
       if (similarity >= this.SIMILARITY_THRESHOLD) {

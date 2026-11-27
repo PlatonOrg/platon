@@ -12,6 +12,18 @@ export enum PlayerActions {
   SAVE_ANSWER = 'SAVE_ANSWER',
 }
 
+export enum LogType {
+  INFO = 'info',
+  ERROR = 'error',
+  WARNING = 'warn',
+  DEBUG = 'debug',
+}
+
+export interface PlatonLog {
+  type: LogType
+  message: string
+}
+
 export interface PlayerExercise {
   id: string
   sessionId: string
@@ -24,6 +36,8 @@ export interface PlayerExercise {
 export interface PlayerNavigation {
   started: boolean
   terminated: boolean
+  /** Extra time (in seconds) granted by a teacher to this session. */
+  extraTime?: number
   current?: PlayerExercise
   exercises: PlayerExercise[]
 
@@ -102,6 +116,7 @@ export interface PlayActivityOuput {
 export interface NextOutput {
   nextExerciseId: string
   navigation: PlayerNavigation
+  logs?: PlatonLog[]
 }
 
 export interface EvalExerciseOutput {
@@ -130,7 +145,7 @@ export interface ExercisePlayer {
   solution?: string | null
   settings?: ActivitySettings | null
   feedbacks?: ExerciseFeedback[] | null
-  platon_logs: string[] | null
+  platon_logs?: PlatonLog[] | null
   theories?:
     | {
         url: string
@@ -180,9 +195,10 @@ export interface PlayerActivityVariables extends ActivityVariables {
  * @returns True if the activity is timeouted, false otherwise.
  */
 export const isTimeouted = (player: Partial<ActivityPlayer>): boolean => {
-  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() : null
+  const extraTime = (player.navigation?.extraTime || 0) * 1000
+  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() + extraTime : null
   const startedAt = player.startedAt ? new Date(player.startedAt).getTime() : null
-  const duration = (player.settings?.duration || 0) * 1000
+  const duration = (player.settings?.duration || 0) * 1000 + extraTime
 
   // Get the current timestamp
   const currentTime = new Date().getTime()
@@ -213,8 +229,9 @@ export const isTimeouted = (player: Partial<ActivityPlayer>): boolean => {
  */
 export const getClosingTime = (player: Partial<ActivityPlayer>): number | null => {
   const startedAt = player.startedAt ? new Date(player.startedAt).getTime() : null
-  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() : null
-  const duration = (player.settings?.duration || 0) * 1000
+  const extraTime = (player.navigation?.extraTime || 0) * 1000
+  const closeAt = player.closeAt ? new Date(player.closeAt).getTime() + extraTime : null
+  const duration = (player.settings?.duration || 0) * 1000 + extraTime
   let closingTime: number | null = null
 
   if (duration != 0 && startedAt != null) {
@@ -225,6 +242,16 @@ export const getClosingTime = (player: Partial<ActivityPlayer>): number | null =
   }
 
   return closingTime
+}
+
+/**
+ * Determines if an exercise player contains an error log.
+ *
+ * @param player - The exercise player object to check.
+ * @returns True if the player contains a `platon_logs` with type `error`, false otherwise.
+ */
+export const hasError = (player: Partial<ExercisePlayer>): boolean => {
+  return player.platon_logs?.some((log) => log.type === LogType.ERROR) ?? false
 }
 
 export const NO_COPY_PASTER_CLASS_NAME = 'no-copy-paste'

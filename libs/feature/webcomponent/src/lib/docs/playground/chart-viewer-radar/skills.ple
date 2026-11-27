@@ -1,0 +1,46 @@
+sandbox = "node"
+
+radar = :wc-chart-viewer-radar
+radar.mode = "filled"
+radar.title = { text: "Compétences", subtext: "", left: "center" }
+radar.indicators = [
+  { name: "Algorithmique", max: 20 },
+  { name: "Programmation", max: 20 },
+  { name: "Mathématiques", max: 20 },
+  { name: "Anglais", max: 20 },
+  { name: "Communication", max: 20 }
+]
+
+choix = :wc-radio-group
+choix.items = ["Algorithmique", "Programmation", "Mathématiques", "Anglais", "Communication"]
+
+builder == #!lang=js
+// Une série par élève : value contient une note par indicateur.
+const notes = [4, 8, 11, 14, 17]
+for (let i = notes.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [notes[i], notes[j]] = [notes[j], notes[i]]
+}
+radar.data = [{ name: 'Alice', value: notes }]
+pointFaible = radar.indicators[notes.indexOf(4)].name
+==
+
+title ==
+Lire un diagramme radar
+==
+
+statement ==
+{{ radar }}
+
+Dans quelle compétence Alice a-t-elle la **plus faible** note ?
+==
+
+form ==
+{{ choix }}
+==
+
+grader == #!lang=js
+grade = choix.selection === pointFaible ? 100 : 0
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = grade === 100 ? 'Exact !' : 'Cherchez le sommet le plus proche du centre.'
+==

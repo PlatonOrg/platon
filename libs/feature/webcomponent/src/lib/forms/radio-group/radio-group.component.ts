@@ -9,20 +9,30 @@ import {
   ViewChild,
   ElementRef,
   AfterViewInit,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { RadioGroupComponentDefinition, RadioGroupItem, RadioGroupState } from './radio-group'
+import { RadioGroupComponentDefinition, RadioGroupItem, type RadioGroupState } from './radio-group'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
+import { FormsModule } from '@angular/forms'
+import { MatRadioModule } from '@angular/material/radio'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
+import { CssPipeModule } from '../../shared/pipes/css.pipe'
 
 @Component({
   selector: 'wc-radio-group',
   templateUrl: 'radio-group.component.html',
   styleUrls: ['radio-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, FormsModule, MatRadioModule, NgeMarkdownModule, CssPipeModule],
 })
 @WebComponent(RadioGroupComponentDefinition)
 export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, OnInit, AfterViewInit {
+  readonly injector = inject(Injector)
+  private readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private readonly webComponentService!: WebComponentService
 
   @ViewChild('focusZone', { static: true }) focusZone!: ElementRef
@@ -77,7 +87,9 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroupState>, 
     ],
   ])
 
-  constructor(readonly injector: Injector, private readonly changeDetector: WebComponentChangeDetectorService) {
+  constructor() {
+    const injector = this.injector
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
   }

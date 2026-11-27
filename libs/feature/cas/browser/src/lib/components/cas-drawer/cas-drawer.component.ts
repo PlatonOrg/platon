@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -7,6 +6,7 @@ import {
   Input,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 
@@ -16,7 +16,7 @@ import { MatSelectModule } from '@angular/material/select'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { DialogService } from '@platon/core/browser'
 import { User } from '@platon/core/common'
@@ -27,28 +27,28 @@ import { CasService } from '../../api/cas.service'
 import { Lms } from '@platon/feature/lti/common'
 
 @Component({
-  standalone: true,
   selector: 'cas-drawer',
   templateUrl: './cas-drawer.component.html',
   styleUrls: ['./cas-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
     MatInputModule,
     MatFormFieldModule,
     MatSelectModule,
-
     NzIconModule,
     NzButtonModule,
-    NzToolTipModule,
-
+    NzTooltipModule,
     UiModalDrawerComponent,
   ],
 })
 export class CasDrawerComponent {
+  private readonly casService = inject(CasService)
+  private readonly formBuilder = inject(FormBuilder)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected form = this.createForm()
   protected cas?: Cas
   protected members: User[] = []
@@ -58,13 +58,6 @@ export class CasDrawerComponent {
 
   @ViewChild(UiModalDrawerComponent, { static: true })
   protected modal!: UiModalDrawerComponent
-
-  constructor(
-    private readonly casService: CasService,
-    private readonly formBuilder: FormBuilder,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   open(cas: Cas): void {
     this.cas = cas

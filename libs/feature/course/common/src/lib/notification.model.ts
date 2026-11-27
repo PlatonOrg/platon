@@ -68,3 +68,28 @@ export interface ResourceMovedByAdminNotification {
   circleId: string
   circleName: string
 }
+
+export const EXERCISE_CHANGES_NOTIFICATION = 'EXERCISE-CHANGES' as const
+export interface ExerciseChangesNotification {
+  type: typeof EXERCISE_CHANGES_NOTIFICATION
+  userId: string
+  activityId: string
+  changes: object
+}
+
+export const MODERATION_ACTIVITY_CHANGES_NOTIFICATION = 'MODERATION-ACTIVITY-CHANGES' as const
+export interface ModerationActivityChangesNotification {
+  type: typeof MODERATION_ACTIVITY_CHANGES_NOTIFICATION
+  activity: object
+}
+
+export const SESSION_STATE_CHANGES_NOTIFICATION = 'SESSION-STATE-CHANGES' as const
+export interface SessionStateChangesNotification {
+  type: typeof SESSION_STATE_CHANGES_NOTIFICATION
+  userId: string
+  activityId: string
+  activitySessionId: string
+  terminated: boolean
+  /** Extra time (in seconds) granted to the user. */
+  extraTime: number
+}

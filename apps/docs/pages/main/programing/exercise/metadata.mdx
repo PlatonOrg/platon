@@ -12,8 +12,8 @@ Ces méta-données sont utilisables à l'intérieur de tous les scripts de la sa
 
 ## Nombre total de tentatives
 
-- `meta.attemps` : Le nombre de fois que l'apprenant a essayé de résoudre l'exercice. Seulement les tentatives valides (grade >= 0) sont comptabilisées. Cette valeur est remise à 0 à chaque fois que l'élève choisit de changer la question.
-- `meta.totalAttemps` : La somme de toutes les tentatives valides. Cette valeur n'est pas remise à 0 à chaque fois que l'élève choisit de changer la question.
+- `meta.attempts` : Le nombre de fois que l'apprenant a essayé de résoudre l'exercice. Seulement les tentatives valides (grade >= 0) sont comptabilisées. Cette valeur est remise à 0 à chaque fois que l'élève choisit de changer la question.
+- `meta.totalAttempts` : La somme de toutes les tentatives valides. Cette valeur n'est pas remise à 0 à chaque fois que l'élève choisit de changer la question.
 
 ## La liste des notes obtenues
 
@@ -32,6 +32,10 @@ Ces méta-données sont utilisables à l'intérieur de tous les scripts de la sa
 ## Savoir si l'exercice est la première question de la séance
 
 - `meta.isInitialBuild` : Un booléen à `true` au lancement de l'exercice et défini à `false` à partir du moment où l'apprenant change de question.
+
+## Savoir si la dernière exécution a échoué
+
+- `meta.error` : un booléen à `true` lorsque la dernière évaluation a produit une erreur (exception journalisée avec la sandbox Python).
 
 ## Cas d'usage
 

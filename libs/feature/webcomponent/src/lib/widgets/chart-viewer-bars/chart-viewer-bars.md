@@ -16,12 +16,14 @@ Chaque élément du tableau `value` correspond à une catégorie définie dans l
 ### Configuration des axes
 
 - **labels**: Tableau de chaînes définissant les catégories (axe des abscisses en mode vertical, ordonnées en mode horizontal)
-- **xAxisLabel**: Titre de l'axe horizontal
-- **yAxisLabel**: Titre de l'axe vertical
+- **xAxisLabel**: Titre de l'axe horizontal, quel que soit le mode
+- **yAxisLabel**: Titre de l'axe vertical, quel que soit le mode
+
+En mode horizontal, les catégories passent sur l'axe vertical : pensez à échanger les deux titres si vous changez de mode.
 
 ### Modes d'affichage
 
-- **vertical**: Barres verticales (classique)
+- **vertical** (par défaut): Barres verticales (classique)
 - **horizontal**: Barres horizontales (utile pour les étiquettes longues ou nombreuses)
 
 ### Exemple pratique

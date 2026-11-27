@@ -3,7 +3,7 @@ title: BindedBubbles
 description: Jeu interactif de correspondance entre paires d'éléments, présentés sous forme de bulles à sélectionner. Parfait pour les exercices ludiques d'apprentissage de vocabulaire, de correspondances entre termes et définitions, de relations entre concepts, ou pour des activités de mémorisation comme les jeux de cartes mémoire.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -35,7 +35,13 @@ Le composant fonctionne avec une liste de paires d'éléments que l'apprenant de
 
 Plusieurs paramètres permettent d'ajuster l'expérience d'apprentissage:
 
-- Mode d'affichage: Choisissez entre `ordered` (présentation séquentielle) ou `shuffle` (mélange aléatoire des paires)
+- Mode d'affichage (`mode`) :
+
+  - `ordered` (par défaut) : quand une paire est trouvée, elle est remplacée par une nouvelle paire complète : le nouvel élément de gauche et le nouvel élément de droite vont ensemble.
+  - `shuffle` : les nouveaux éléments de gauche et de droite sont tirés indépendamment ; un élément n'arrive donc pas forcément avec celui qui forme sa paire. Il reste toujours au moins une paire à former à l'écran.
+
+  Dans les deux modes, les premiers éléments des paires sont affichés dans une colonne et les seconds dans l'autre.
+
 - Nombre de paires: Contrôlez combien de paires sont affichées simultanément avec `numberPairToShow`
 - Timing: Ajustez le délai entre les associations réussies avec `timeout` (en millisecondes)
 
@@ -52,22 +58,30 @@ Cette fonctionnalité est particulièrement utile pour identifier les associatio
 
 Pour optimiser l'expérience d'apprentissage, gardez un bon équilibre dans le nombre de paires affichées: trop peu rend l'exercice trop simple, trop nombreuses peuvent surcharger cognitivement l'apprenant. 3 à 5 paires simultanées offrent généralement un bon équilibre.
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-binded-bubbles',
     },
     ...[
-      {
-        name: 'Exemple: Traductions',
-        url: '/playground/exercises/binded-bubbles/translation.ple',
-        code: 'sandbox = "node"\n\nbubbles = :wc-binded-bubbles\nbubbles.items = [\n  { item1: { content: "Bonjour" }, item2: { content: "Hello" } },\n  { item1: { content: "Au revoir" }, item2: { content: "Goodbye" } },\n  { item1: { content: "Merci" }, item2: { content: "Thank you" } }\n]\n\ntitle ==\nMemory de traductions\n==\n\nstatement ==\nAssociez les mots français à leur traduction anglaise.\n==\n\nform ==\n{{ bubbles }}\n==\n\ngrader == #!lang=js\ngrade = 0\nfeedback.type = "error"\nfeedback.content = "Mauvaise réponse"\nif (bubbles.nbError == 0) {\n  grade = 100\n  feedback.type = "success"\n  feedback.content = "Bravo !"\n}\n==\n',
-      },
-    ],
+  {
+    "name": "Exemple: Traductions",
+    "url": "/playground/exercises/binded-bubbles/translation.ple"
+  },
+  {
+    "name": "Exemple: Pays et capitales",
+    "url": "/playground/exercises/binded-bubbles/capitals.ple"
+  },
+  {
+    "name": "Exemple: Mode shuffle",
+    "url": "/playground/exercises/binded-bubbles/shuffle.ple"
+  }
+]
   ]}
 />
 

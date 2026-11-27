@@ -1,5 +1,5 @@
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
-import { ApplicationConfig, importProvidersFrom } from '@angular/core'
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http'
+import { ApplicationConfig, importProvidersFrom, inject, provideAppInitializer } from '@angular/core'
 import { provideAnimations } from '@angular/platform-browser/animations'
 import {
   PreloadAllModules,
@@ -9,14 +9,14 @@ import {
   withComponentInputBinding,
 } from '@angular/router'
 import { ResourceLoaderConfigProvider } from '@cisstech/nge/services'
-import { CoreBrowserModule } from '@platon/core/browser'
+import { CoreBrowserModule, CoreService } from '@platon/core/browser'
 import { FeatureWebComponentModule } from '@platon/feature/webcomponent'
 import { appRoutes } from './app.routes'
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
     importProvidersFrom(CoreBrowserModule, FeatureWebComponentModule),
     ResourceLoaderConfigProvider({
       useDocumentBaseURI: true,
@@ -27,5 +27,9 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withPreloading(PreloadAllModules)
     ),
+    provideAppInitializer(() => {
+      const core = inject(CoreService)
+      return core.init()
+    }),
   ],
 }

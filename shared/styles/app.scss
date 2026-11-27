@@ -4,6 +4,7 @@
 @import 'animations';
 @import 'components';
 @import 'css-variables'; // Import des variables CSS centralisées
+@import '@angular/cdk/overlay-prebuilt.css';
 @import './material/base';
 @import './theme-overrides';
 
@@ -23,7 +24,6 @@ ui-list-item-article {
   border-radius: 0.5rem;
 }
 
-
 nge-markdown {
   background-color: transparent !important;
   color: var(--brand-text-primary) !important;
@@ -38,6 +38,12 @@ nge-markdown {
   padding: 0 !important;
 }
 
+// Preview icon
+
+.preview-icon svg {
+  width: 1.5em !important;
+  height: 1.5em !important;
+}
 // CDK DRAG DROP PREVIEW STATE
 
 .cdk-drag {
@@ -74,5 +80,20 @@ nge-markdown {
 pre.monaco-editor {
   code {
     overflow: auto !important;
+  }
+}
+
+.ui-modal-iframe-wrap.ant-modal-centered {
+  // fix issue, where in "espace de travail", preview was in the middle of the screen for some web browser. (ex: chromium )
+  overflow-x: hidden;
+  &::before {
+    display: none;
+  }
+
+  .ant-modal {
+    top: 0;
+    padding-bottom: 0;
+    vertical-align: initial;
+    max-width: 100%;
   }
 }

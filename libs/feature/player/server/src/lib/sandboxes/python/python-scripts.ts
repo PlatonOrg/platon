@@ -13,8 +13,7 @@ from typing import Optional, Any
 import traceback
 from datetime import datetime, timezone
 
-from PlatonLog import PlatonLog
-from PlatonLogger import platon_log, get_logs, clear_logs
+from PlatonLogger import platon_log, platon_log_exception, get_logs, clear_logs
 
 
 class StopExec(Exception):
@@ -156,8 +155,6 @@ if __name__ == "__main__":
     """
     clear_logs()
 
-    platon_logger = PlatonLog()
-
     with open("script.py", "r") as f:
         script = f.read()
 
@@ -166,22 +163,21 @@ if __name__ == "__main__":
 
     glob = {}
 
+
     # Injecter les helpers dans le namespace du script
     variables['component'] = component
     variables['StopExec'] = StopExec
     variables['platon_log'] = platon_log  # Fonction du module partagé
 
     try:
-        exec(with_try_clause(script, StopExec), variables)
         exec("", glob)
-    except Exception as e:
+        exec(with_try_clause(script, StopExec), variables)
+    except BaseException as e:
         # Ne pas catcher les erreurs de timeout - les laisser se propager
         if is_timeout_error(e):
             raise e
 
-        platon_logger.maxlog_exception(e)
-        val = platon_logger.push2platonlog()
-        platon_log(val)
+        platon_log_exception(e)
     finally:
         variables['platon_logs'] = get_logs()
 

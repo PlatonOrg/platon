@@ -13,4 +13,5 @@ export abstract class AnnouncementProvider {
   abstract update(id: string, input: UpdateAnnouncementInput): Observable<Announcement>
   abstract delete(id: string): Observable<void>
   abstract getVisibleForUser(filter: AnnouncementFilters): Observable<ListResponse<Announcement>>
+  abstract findByIdForUser(id: string): Observable<Announcement>
 }

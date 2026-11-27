@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Editor, OpenRequest } from '@cisstech/nge-ide/core'
 import { Subscription, firstValueFrom } from 'rxjs'
@@ -8,13 +7,20 @@ import { NzFormatEmitEvent, NzTreeNodeOptions } from 'ng-zorro-antd/tree'
 import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown'
 import { ExplorerService } from '@cisstech/nge-ide/explorer'
 
+import { NzTreeModule } from 'ng-zorro-antd/tree'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown'
+
 @Component({
   selector: 'app-zip-editor',
   templateUrl: './zip-editor.component.html',
   styleUrls: ['./zip-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NzTreeModule, NzIconModule, NzDropDownModule],
 })
 export class ZipEditorComponent implements OnInit, OnDestroy {
+  private nzContextMenuService = inject(NzContextMenuService)
+
   private readonly resourceFileService = inject(ResourceFileService)
   private readonly subscriptions: Subscription[] = []
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
@@ -27,8 +33,6 @@ export class ZipEditorComponent implements OnInit, OnDestroy {
   @Input()
   protected editor!: Editor
   protected request!: OpenRequest
-
-  constructor(private nzContextMenuService: NzContextMenuService) {}
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(

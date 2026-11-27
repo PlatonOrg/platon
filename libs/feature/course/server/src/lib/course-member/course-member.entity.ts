@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseEntity, UserEntity, UserGroupEntity } from '@platon/core/server'
 import { Column, Entity, Index, JoinColumn, ManyToOne, Unique } from 'typeorm'
 import { CourseEntity } from '../entites/course.entity'
@@ -34,4 +33,7 @@ export class CourseMemberEntity extends BaseEntity {
 
   @Column({ name: 'role', type: 'enum', enum: ['student', 'teacher'], default: 'student' })
   role!: CourseMemberRoles
+
+  @Column({ name: 'archived', default: false })
+  archived!: boolean
 }

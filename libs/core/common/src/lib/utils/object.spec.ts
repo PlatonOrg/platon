@@ -35,4 +35,24 @@ describe('deepMerge', () => {
     const result = deepMerge(target, source)
     expect(result).toEqual({ a: 1, b: { c: null }, d: undefined })
   })
+
+  describe('prototype pollution', () => {
+    afterEach(() => {
+      delete (Object.prototype as unknown as Record<string, unknown>)['polluted']
+    })
+
+    it.each([false, true])('should ignore a __proto__ key (replace: %s)', (replace) => {
+      const result = deepMerge({}, JSON.parse('{ "__proto__": { "polluted": true } }'), replace)
+
+      expect(({} as Record<string, unknown>)['polluted']).toBeUndefined()
+      expect(Object.getPrototypeOf(result)).toBe(Object.prototype)
+    })
+
+    it('should merge a constructor key into the target only', () => {
+      const result = deepMerge({}, { constructor: { prototype: { polluted: true } } })
+
+      expect(({} as Record<string, unknown>)['polluted']).toBeUndefined()
+      expect(result).toEqual({ constructor: { prototype: { polluted: true } } })
+    })
+  })
 })

@@ -12,6 +12,7 @@ import {
   ActivityExercise,
   ActivityExerciseGroup,
   ActivityVariables,
+  GroupGrader,
 } from '@platon/feature/compiler'
 import {
   CircleFilterIndicator,
@@ -39,6 +40,35 @@ import Fuse from 'fuse.js'
 import { Subscription, debounceTime, firstValueFrom, map, shareReplay, skip } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
 import { ResourceFileImpl, ResourceFileSystemProvider } from '../../file-system'
+import { HttpClient } from '@angular/common/http'
+import { CommonModule } from '@angular/common'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { DragDropModule } from '@angular/cdk/drag-drop'
+import { MatIconModule } from '@angular/material/icon'
+import { MatExpansionModule } from '@angular/material/expansion'
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
+import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzFormModule } from 'ng-zorro-antd/form'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
+import { NzListModule } from 'ng-zorro-antd/list'
+import { NzSelectModule } from 'ng-zorro-antd/select'
+import { NzStepsModule } from 'ng-zorro-antd/steps'
+import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzTypographyModule } from 'ng-zorro-antd/typography'
+import { NzModalModule } from 'ng-zorro-antd/modal'
+import { CircleTreeComponent, ResourceFiltersComponent, ResourcePipesModule } from '@platon/feature/resource/browser'
+import { PleInputEditorModule } from '../ple-input/ple-input.module'
+import { PlaExerciseEditorComponent } from './exercise-editor/exercise-editor.component'
+import { UiFilterIndicatorComponent, UiSearchBarComponent } from '@platon/shared/ui'
+import { ViewportIntersectionDirective } from '@cisstech/nge/directives'
+import { ExerciseListComponent } from './exercise-list/exercise-list.component'
 
 const PAGINATION_LIMIT = 15
 const EXPANDS: ResourceExpandableFields[] = ['metadata', 'statistic']
@@ -62,8 +92,52 @@ interface QueryParams {
   templateUrl: './pla-editor.component.html',
   styleUrls: ['./pla-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+
+    MatIconModule,
+    DragDropModule,
+    MatExpansionModule,
+
+    NzCollapseModule,
+    NzInputModule,
+    NzInputNumberModule,
+    NzSelectModule,
+    NzStepsModule,
+    NzFormModule,
+    NzCheckboxModule,
+    NzTimePickerModule,
+    NzListModule,
+    NzButtonModule,
+    NzIconModule,
+    NzTooltipModule,
+    NzBreadCrumbModule,
+    NzSpinModule,
+    NzTypographyModule,
+
+    ViewportIntersectionDirective,
+    NzAlertModule,
+
+    ResourcePipesModule,
+    ResourceFiltersComponent,
+
+    CircleTreeComponent,
+    UiSearchBarComponent,
+    UiFilterIndicatorComponent,
+
+    ExerciseListComponent,
+
+    PleInputEditorModule,
+    PlaExerciseEditorComponent,
+
+    NzModalModule,
+  ],
 })
 export class PlaEditorComponent implements OnInit, OnDestroy {
+  private http = inject(HttpClient)
+
   private readonly fb = inject(FormBuilder)
   private readonly router = inject(Router)
   private readonly fileService = inject(FileService)
@@ -111,7 +185,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     conclusion: '',
     settings: {
       duration: 0,
-      navigation: { mode: 'manual' },
+      navigation: { mode: 'manual', random: false },
       actions: {
         retry: 0,
         hints: true,
@@ -147,6 +221,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
 
   protected step = 2
 
+  protected expandedGroups: { [index: number]: boolean } = {} // tracking if the grader is expanded for each group
   @Input()
   protected editor!: Editor
 
@@ -158,6 +233,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     seedPerExercise: [!!this.activity.settings?.seedPerExercise],
     navigation: this.fb.group({
       mode: [this.activity.settings?.navigation?.mode || 'manual', [Validators.required]],
+      random: [this.activity.settings?.navigation?.random || false],
     }),
     actions: this.fb.group({
       retry: [this.activity?.settings?.actions?.retry, [Validators.required, Validators.min(0)]],
@@ -197,6 +273,11 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       label: 'Comparaison par les pairs',
       tooltip: "Mode composé que l'on utilise pour afficher deux exercices et les comparer.",
     },
+    {
+      value: 'validation',
+      label: 'Validation',
+      tooltip: "Les groupes permettent de réunir un ensemble d'exercices afin de structurer les étapes de l'activité.",
+    },
   ]
 
   protected exerciseGroups: ActivityExerciseGroup[] = []
@@ -232,6 +313,16 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
 
   protected peer_activity_groups = ['exercice', 'comparaison', 'entrainement', 'attente']
 
+  // default grader for validation mode
+  protected defaultGrader: GroupGrader = {
+    type: 'success',
+    exerciseCount: 3,
+    targetScore: 80,
+    maxAttempts: 5,
+  }
+
+  protected neverEnter = () => false
+
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User
     const direction = localStorage.getItem('order-direction') as OrderingDirections
@@ -260,6 +351,14 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       if (partial.navigation?.mode === 'peer') {
         this.peer_activity_groups.forEach((group) => {
           this.addGroup(group)
+        })
+      }
+      if (partial.navigation?.mode === 'validation') {
+        this.form.get('nextSettings.hasExercisesVariables')?.setValue(true, { emitEvent: false })
+        this.exerciseGroups.forEach((group) => {
+          if (!group.grader || group.grader.type === 'empty') {
+            group.grader = { ...this.defaultGrader }
+          }
         })
       }
     })
@@ -336,7 +435,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     )
 
     this.activatedRoute.params.subscribe(async (params) => {
-      const resource = await firstValueFrom(this.resourceService.find({ id: params.id }))
+      const resource = await firstValueFrom(this.resourceService.find({ id: params['id'] }))
       const parent = resource.parentId
       this.filters = {
         ...this.filters,
@@ -364,7 +463,11 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   protected getToStep(step: number): void {
     this.step = step
     if (step === 2) {
-      this.exerciseGroups.length === 0 ? this.addGroup() : this.selectGroup(0)
+      if (this.exerciseGroups.length === 0) {
+        this.addGroup()
+      } else {
+        this.selectGroup(0)
+      }
       this.updateConnectedTo()
     }
   }
@@ -418,6 +521,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         queryParams,
         relativeTo: this.activatedRoute,
         queryParamsHandling: 'merge',
+        replaceUrl: true,
       })
       .catch(console.error)
   }
@@ -451,6 +555,8 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
   }
 
   protected addGroup(name?: string): void {
+    const initialGrader: GroupGrader =
+      this.activity?.settings?.navigation?.mode === 'validation' ? { ...this.defaultGrader } : { type: 'empty' }
     if (name) {
       if (this.exerciseGroups.find((group) => group.name === name)) {
         return // prevent adding a group with the same name
@@ -460,12 +566,14 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         {
           name,
           exercises: [],
+          grader: initialGrader,
         },
       ]
     } else {
       const newGroup: ActivityExerciseGroup = {
         name: 'Groupe ' + (this.exerciseGroups.length + 1),
         exercises: [],
+        grader: initialGrader,
       }
       this.exerciseGroups = [...this.exerciseGroups, newGroup]
     }
@@ -491,6 +599,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
             id: uuidv4(),
             version: 'latest',
             resource: this.selectedExercise.id,
+            groupId: this.selectedGroupIndex,
           } as ActivityExercise,
         ]
       } else {
@@ -502,6 +611,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
             resource: this.isActivityExercise(this.selectedExercise)
               ? (this.selectedExercise as ActivityExercise).resource
               : this.selectedExercise.id,
+            groupId: this.selectedGroupIndex,
           } as ActivityExercise,
           ...this.selectedGroup.exercises.slice(index),
         ]
@@ -520,6 +630,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.selectedGroup = {
       name: this.selectedGroup?.name || '',
       exercises: this.selectedGroup?.exercises.filter((_, i) => i !== index) ?? [],
+      grader: this.selectedGroup?.grader || { type: 'empty' },
     }
     this.exerciseGroups = this.exerciseGroups.map((group, i) =>
       i === this.selectedGroupIndex
@@ -534,6 +645,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.selectedGroup = {
       name: this.selectedGroup?.name || '',
       exercises: this.selectedGroup?.exercises.map((e) => (e.id === exercise.id ? exercise : e)) ?? [],
+      grader: this.selectedGroup?.grader || { type: 'empty' },
     }
     this.exerciseGroups = this.exerciseGroups.map((group, i) =>
       i === this.selectedGroupIndex
@@ -582,6 +694,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         seedPerExercise: value.seedPerExercise || false,
         navigation: {
           mode: value.navigation?.mode || 'composed',
+          random: value.navigation?.random || false,
         },
         actions: {
           retry: value.actions?.retry || 0,
@@ -604,11 +717,20 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
           autoNext: value.nextSettings?.autoNext || false,
           autoNextGrade: value.nextSettings?.autoNextGrade || 0,
           allowFreeNavigation: value.nextSettings?.allowFreeNavigation || false,
-          hasExercisesVariables: value.nextSettings?.hasExercisesVariables || false,
+          hasExercisesVariables:
+            // mode validation cannot work without hasExercisesVariables set has true
+            value.navigation?.mode === 'validation' ? true : value.nextSettings?.hasExercisesVariables || false,
         },
       },
       exerciseGroups: this.exerciseGroups.reduce((acc, group, index) => {
-        acc[index] = group
+        acc[index] = {
+          // update exercise groupId
+          ...group,
+          exercises: group.exercises.map((exercise) => ({
+            ...exercise,
+            groupId: index,
+          })),
+        }
         return acc
       }, {} as Record<number, ActivityExerciseGroup>),
     }
@@ -618,10 +740,6 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.exerciseGroups = Object.values(this.activity.exerciseGroups)
 
     this.changeDetectorRef.markForCheck()
-  }
-
-  protected trackByIndex(index: number) {
-    return index
   }
 
   protected trackByExerciseId(_: number, exercise: ActivityExercise) {
@@ -650,6 +768,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
       seedPerExercise: this.activity.settings?.seedPerExercise,
       navigation: {
         mode: this.activity.settings?.navigation?.mode,
+        random: this.activity.settings?.navigation?.random,
       },
       actions: {
         retry: this.activity?.settings?.actions?.retry,
@@ -672,7 +791,10 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
         autoNext: this.activity.settings?.nextSettings?.autoNext,
         autoNextGrade: this.activity.settings?.nextSettings?.autoNextGrade,
         allowFreeNavigation: this.activity.settings?.nextSettings?.allowFreeNavigation,
-        hasExercisesVariables: this.activity.settings?.nextSettings?.hasExercisesVariables,
+        hasExercisesVariables:
+          this.activity.settings?.navigation?.mode === 'validation'
+            ? true // mode validation always need hasExercisesVariables to be true
+            : this.activity.settings?.nextSettings?.hasExercisesVariables,
       },
     })
 
@@ -681,6 +803,7 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     }
 
     this.exerciseGroups = Object.values(this.activity.exerciseGroups)
+    this.updateConnectedTo()
     this.changeDetectorRef.markForCheck()
   }
 
@@ -700,6 +823,19 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     this.selectGroup(index)
     if (this.selectedGroup) {
       this.selectedGroup.name = event.substring(0, 30)
+    }
+    this.onChangeData()
+  }
+
+  /** Update infotmation when switching the grade validation mode for validation type of activity*/
+  protected onGraderTypeChange(type: 'empty' | 'mean' | 'success', index: number): void {
+    const group = this.exerciseGroups[index]
+    if (!group) return
+
+    if (type === 'empty') {
+      group.grader = { type: 'empty' }
+    } else if (type === 'mean' || type === 'success') {
+      group.grader = { ...group.grader, type }
     }
     this.onChangeData()
   }
@@ -726,14 +862,20 @@ export class PlaEditorComponent implements OnInit, OnDestroy {
     )
 
     if (!this.resourceFileSystemProvider.exists(nextUri)) {
-      await this.resourceFileSystemProvider.write(
-        nextUri,
-        // this.activity.settings?.nextSettings?.sandbox == 'python'
-        //   ? 'from /utils/libs/platon/NextLib import *\n\n'
-        //   : '// TODO : import NextLib\n\n'
-        '',
-        false
-      )
+      let defaultContent = ''
+
+      if (this.activity.settings?.navigation?.mode === 'validation') {
+        try {
+          defaultContent = await firstValueFrom(
+            this.http.get('assets/templates/validation.py', { responseType: 'text' })
+          )
+        } catch (error) {
+          console.error("cannon't load the template of validation", error)
+          defaultContent = '# Erreur de chargement du template du next nécessaire pour le mode validation.\n'
+        }
+      }
+
+      await this.resourceFileSystemProvider.write(nextUri, defaultContent, false)
     }
 
     this.editorService.open(nextUri).catch(console.log)

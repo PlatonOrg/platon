@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { Restriction, RestrictionConfig } from '@platon/feature/course/common'
+import { Component, EventEmitter, Input, Output, inject, ChangeDetectionStrategy } from '@angular/core'
+
+import { type Restriction, RestrictionConfig } from '@platon/feature/course/common'
 import { CourseGroup, CourseMember } from '@platon/feature/course/common'
 
 import { CourseMemberSelectComponent } from '../../course-member-select/course-member-select.component'
@@ -19,9 +19,7 @@ import { DialogService } from '@platon/core/browser'
 
 @Component({
   selector: 'course-restriction',
-  standalone: true,
   imports: [
-    CommonModule,
     NzDatePickerModule,
     FormsModule,
     NzButtonModule,
@@ -32,17 +30,18 @@ import { DialogService } from '@platon/core/browser'
     CourseGroupSelectComponent,
   ],
   templateUrl: './restriction.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './restriction.component.scss',
 })
 export class RestrictionComponent {
+  private dialogService = inject(DialogService)
+
   @Input() restriction!: Restriction
   @Output() remove = new EventEmitter<void>()
   @Output() update = new EventEmitter<Restriction>()
   @Input() courseMembers: CourseMember[] = []
   @Input() courseGroups: CourseGroup[] = []
   @Input() isMainRestriction = false
-
-  constructor(private dialogService: DialogService) {}
 
   protected disabledDateStart = (current: Date): boolean => differenceInCalendarDays(current, new Date()) < 0
 
@@ -61,8 +60,8 @@ export class RestrictionComponent {
       if (differenceInMilliseconds(end, start) >= 0) {
         return true
       }
-      // eslint-disable-next-line prettier/prettier
-      (this.restriction.config as RestrictionConfig['DateRange']).end = undefined
+
+      ;(this.restriction.config as RestrictionConfig['DateRange']).end = undefined
       this.dialogService.error("La date de fermeture doit être supérieure à la date d'ouverture")
       return false
     }

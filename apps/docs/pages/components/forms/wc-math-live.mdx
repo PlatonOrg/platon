@@ -3,7 +3,7 @@ title: MathLive
 description: Composant avancé pour saisir des expressions mathématiques en notation LaTeX avec rendu visuel en temps réel. Particulièrement adapté aux exercices de calcul différentiel et intégral, algèbre, équations, fractions, racines et expressions complexes où la précision de la notation est essentielle.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -54,16 +54,22 @@ Pour une expérience optimale, pensez à:
 - Utiliser les icônes pour donner des indices visuels sur le type d'expression attendue
 - Adapter la configuration du clavier virtuel au niveau de complexité approprié pour votre exercice
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-math-live',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Développer une expression",
+    "url": "/playground/exercises/math-live/expand.ple"
+  }
+]
   ]}
 />
 

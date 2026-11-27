@@ -10,19 +10,18 @@ import {
   EventEmitter,
   ViewChild,
   AfterViewInit,
+  inject,
 } from '@angular/core'
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms'
 import { ExerciseCorrection } from '@platon/feature/result/common'
 import { MatTableModule, MatTableDataSource } from '@angular/material/table'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
-import { CorrectionLabelComponent } from '../correction-label/correction-label.component'
 import { User } from '@platon/core/common'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { MatSort, MatSortModule } from '@angular/material/sort'
 
 @Component({
-  standalone: true,
   selector: 'correction-resume-table',
   templateUrl: './correction-resume-table.component.html',
   styleUrls: ['./correction-resume-table.component.scss'],
@@ -33,12 +32,14 @@ import { MatSort, MatSortModule } from '@angular/material/sort'
     MatTableModule,
     MatButtonModule,
     MatIconModule,
-    CorrectionLabelComponent,
     ReactiveFormsModule,
     NzInputModule,
   ],
 })
 export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit {
+  private cdr = inject(ChangeDetectorRef)
+  private fb = inject(FormBuilder)
+
   @ViewChild(MatSort) sort: MatSort = new MatSort()
   @Input()
   data: ExerciseCorrection[] = []
@@ -64,7 +65,7 @@ export class CorrectionResumeTableComponent implements OnChanges, AfterViewInit 
   gradeForm: FormGroup
   protected dataSource: MatTableDataSource<ExerciseCorrection> = new MatTableDataSource<ExerciseCorrection>([])
 
-  constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder) {
+  constructor() {
     this.gradeForm = this.fb.group({})
     this.setupCustomSorting()
   }

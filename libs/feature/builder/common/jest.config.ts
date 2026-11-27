@@ -1,9 +1,8 @@
-/* eslint-disable */
-export default {
-  displayName: 'commonT',
+module.exports = {
+  displayName: 'feature-builder-common',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../../coverage/libs/feature/builder/commonT',
+  coverageDirectory: '../../../../coverage/libs/feature/builder/common',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

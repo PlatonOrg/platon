@@ -1,9 +1,14 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Get, Post, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
+import { ForbiddenResponse, ItemResponse, ListResponse, UserRoles } from '@platon/core/common'
 import { IRequest, Mapper, Roles, UUIDParam } from '@platon/core/server'
-import { ActivityCorrection, UpsertCorrection } from '@platon/feature/result/common'
-import { ActivityCorrectionDTO, CorrectionDTO } from './correction.dto'
+import {
+  ActivityCorrection,
+  ActivityCorrectionSummary,
+  CorrectionStatus,
+  UpsertCorrection,
+} from '@platon/feature/result/common'
+import { ActivityCorrectionDTO, ActivityCorrectionSummaryDTO, CorrectionDTO } from './correction.dto'
 import { CorrectionService } from './correction.service'
 import { CorrectionLabelService } from '../label/correction-label/correction-label.service'
 
@@ -17,18 +22,42 @@ export class CorrectionController {
   ) {}
 
   @Get()
-  async list(@Req() req: IRequest): Promise<ListResponse<ActivityCorrection>> {
-    const items = await this.service.list(req.user.id)
+  async list(
+    @Req() req: IRequest,
+    @Query('status') status?: CorrectionStatus
+  ): Promise<ListResponse<ActivityCorrection>> {
+    if (status !== undefined && !Object.values(CorrectionStatus).includes(status)) {
+      throw new BadRequestException(`Invalid status value: ${status}`)
+    }
+    const items = await this.service.list(req.user.id, undefined, false, status)
     const resources = Mapper.mapAll(items, ActivityCorrectionDTO)
+    return new ListResponse({ total: resources.length, resources })
+  }
+
+  @Get('/summary')
+  async listSummary(
+    @Req() req: IRequest,
+    @Query('status') status?: CorrectionStatus
+  ): Promise<ListResponse<ActivityCorrectionSummary>> {
+    if (status !== undefined && !Object.values(CorrectionStatus).includes(status)) {
+      throw new BadRequestException(`Invalid status value: ${status}`)
+    }
+    const items = await this.service.listSummary(req.user.id, status)
+    const resources = Mapper.mapAll(items, ActivityCorrectionSummaryDTO)
     return new ListResponse({ total: resources.length, resources })
   }
 
   @Get('/:activityId')
   async find(
     @Req() req: IRequest,
-    @UUIDParam('activityId') activityId: string
+    @UUIDParam('activityId') activityId: string,
+    @Query('viewer') viewer?: string
   ): Promise<ListResponse<ActivityCorrection>> {
-    const items = await this.service.list(req.user.id, activityId)
+    const viewerMode = viewer === 'true'
+    if (viewerMode && ![UserRoles.teacher, UserRoles.admin].includes(req.user.role)) {
+      throw new ForbiddenResponse('You are not allowed to access viewer mode for corrections')
+    }
+    const items = await this.service.list(req.user.id, activityId, viewerMode)
     const resources = Mapper.mapAll(items, ActivityCorrectionDTO)
     return new ListResponse({ total: resources.length, resources })
   }

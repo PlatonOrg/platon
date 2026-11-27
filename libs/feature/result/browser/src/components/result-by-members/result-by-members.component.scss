@@ -9,3 +9,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.result-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+nz-select {
+  min-width: 200px;
+  max-width: 100%;
+}

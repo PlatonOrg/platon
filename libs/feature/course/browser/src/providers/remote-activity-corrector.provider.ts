@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { Activity, ActivityCorrector, CreateActivityCorrector } from '@platon/feature/course/common'
 import { Observable, map } from 'rxjs'
@@ -8,9 +8,7 @@ import { ActivityCorrectorProvider } from '../models/activity-corrector.provider
 const id = (activity: string | Activity) => (typeof activity === 'string' ? activity : activity.id)
 @Injectable()
 export class RemoteActivityCorrectorProvider extends ActivityCorrectorProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   create(activity: string | Activity, input: CreateActivityCorrector): Observable<ActivityCorrector> {
     return this.http

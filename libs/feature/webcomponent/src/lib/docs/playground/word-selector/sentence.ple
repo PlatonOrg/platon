@@ -1,0 +1,40 @@
+sandbox = "node"
+
+// Les mots disponibles sont mélangés automatiquement par le composant.
+// L'apprenant clique (ou glisse) les mots pour construire la phrase dans selectedWords.
+phrase = :wc-word-selector
+phrase.words = ["The", "cat", "is", "sleeping", "on", "the", "sofa"]
+
+title ==
+Construire une phrase en anglais
+==
+
+statement ==
+Traduisez en anglais : « Le chat dort sur le canapé. »
+==
+
+form ==
+{{ phrase }}
+==
+
+grader == #!lang=js
+// Un mot peut être une chaîne ou un objet { content, css }.
+const texte = (m) => (typeof m === 'string' ? m : m.content)
+const attendu = 'The cat is sleeping on the sofa'
+const obtenu = phrase.selectedWords.map(texte).join(' ')
+
+if (obtenu === attendu) {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Parfait !'
+} else if (obtenu.toLowerCase() === attendu.toLowerCase()) {
+  // « The » et « the » ont été intervertis : l'ordre est bon, seule la majuscule est mal placée.
+  grade = 50
+  feedback.type = 'warning'
+  feedback.content = 'Les mots sont dans le bon ordre, mais la phrase doit commencer par « The », avec une majuscule.'
+} else {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = `Votre phrase : « ${obtenu || '(vide)'} ».`
+}
+==

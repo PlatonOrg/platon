@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core'
 import { RouterModule } from '@angular/router'
 
@@ -11,20 +10,11 @@ import { CourseSection } from '@platon/feature/course/common'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 
 @Component({
-  standalone: true,
   selector: 'app-course-section-actions',
   templateUrl: './section-actions.component.html',
   styleUrls: ['./section-actions.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    RouterModule,
-    NzIconModule,
-    NzSpaceModule,
-    NzButtonModule,
-    NzPopoverModule,
-    NzPopconfirmModule,
-  ],
+  imports: [RouterModule, NzIconModule, NzSpaceModule, NzButtonModule, NzPopoverModule, NzPopconfirmModule],
 })
 export class CourseSectionActionsComponent {
   @Input() section!: CourseSection
@@ -39,6 +29,7 @@ export class CourseSectionActionsComponent {
   @Output() edit = new EventEmitter()
   @Output() save = new EventEmitter()
   @Output() remove = new EventEmitter()
+  @Output() hiddeToStudent = new EventEmitter()
 
   onEdit() {
     this.editMode = true

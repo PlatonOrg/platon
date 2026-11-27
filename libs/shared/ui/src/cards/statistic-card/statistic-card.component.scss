@@ -3,8 +3,13 @@
   width: 100%;
   padding: 20px;
   background-color: var(--brand-background-components, #fff);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--brand-shadow-sm);
   border-radius: 8px;
+  transition: box-shadow var(--brand-motion-base) var(--brand-motion-ease);
+
+  &:hover {
+    box-shadow: var(--brand-shadow-md);
+  }
 }
 
 .value {
@@ -28,7 +33,7 @@
   right: 0;
   width: 32px;
   height: 32px;
-  background-color: #3498db;
+  background-color: var(--brand-color-primary);
   clip-path: polygon(100% 0, 100% 70%, 50% 100%, 0 70%, 0 0);
   border-top-right-radius: 8px;
   display: flex;
@@ -46,8 +51,8 @@
 .editable {
   cursor: pointer;
   user-select: none;
-  ::hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  &:hover {
+    box-shadow: var(--brand-shadow-md);
   }
 }
 

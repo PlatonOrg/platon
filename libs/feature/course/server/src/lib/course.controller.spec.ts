@@ -14,7 +14,6 @@ import { Optional } from 'typescript-optional'
 describe('CourseController', () => {
   let controller: CourseController
   let courseService: CourseService
-  let permissionsService: CoursePermissionsService
   let courseMemberService: CourseMemberService
 
   beforeEach(async () => {
@@ -29,6 +28,7 @@ describe('CourseController', () => {
             create: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
+            duplicate: jest.fn(),
           },
         },
         {
@@ -49,7 +49,6 @@ describe('CourseController', () => {
 
     controller = module.get<CourseController>(CourseController)
     courseService = module.get<CourseService>(CourseService)
-    permissionsService = module.get<CoursePermissionsService>(CoursePermissionsService)
     courseMemberService = module.get<CourseMemberService>(CourseMemberService)
   })
 
@@ -259,6 +258,23 @@ describe('CourseController', () => {
       })
 
       await expect(controller.delete(req, 'course1')).rejects.toBeInstanceOf(ForbiddenResponse)
+    })
+  })
+
+  describe('duplicate', () => {
+    it('devrait dupliquer le cours en passant les guards de permission au service', async () => {
+      const req: IRequest = { user: { id: 'user1', role: UserRoles.teacher } } as IRequest
+      const duplicated = { id: 'target-course' } as CourseEntity
+      jest.spyOn(courseService, 'duplicate').mockResolvedValue(duplicated)
+
+      const result = await controller.duplicate(req, 'target-course', 'source-course')
+
+      expect(courseService.duplicate).toHaveBeenCalledWith(
+        'source-course',
+        'target-course',
+        expect.objectContaining({ sourceGuard: expect.any(Function), targetGuard: expect.any(Function) })
+      )
+      expect(result).toBe(duplicated)
     })
   })
 })

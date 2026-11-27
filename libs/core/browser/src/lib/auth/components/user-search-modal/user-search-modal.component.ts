@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -8,26 +7,28 @@ import {
   Output,
   ViewChild,
   booleanAttribute,
+  inject,
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 
-import { User, UserFilters, UserGroup } from '@platon/core/common'
+import { User, type UserFilters, UserGroup } from '@platon/core/common'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
 
 import { UserSearchBarComponent } from '../user-search-bar/user-search-bar.component'
 
 @Component({
-  standalone: true,
   selector: 'user-search-modal',
   templateUrl: './user-search-modal.component.html',
   styleUrls: ['./user-search-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzModalModule, NzButtonModule, UserSearchBarComponent, UiModalTemplateComponent],
+  imports: [FormsModule, NzModalModule, NzButtonModule, UserSearchBarComponent, UiModalTemplateComponent],
 })
 export class UserSearchModalComponent {
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   @Input() title = ''
   @Input() okTitle = 'OK'
   @Input() noTitle = 'Annuler'
@@ -46,8 +47,6 @@ export class UserSearchModalComponent {
     const n = this.selection.length
     return !this.multi ? n === 1 : n > 0
   }
-
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
   open(): void {
     this.modal.open()

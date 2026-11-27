@@ -9,7 +9,7 @@ import {
   OnChanges,
   Output,
 } from '@angular/core'
-import { ExerciseCorrection, Label } from '@platon/feature/result/common'
+import { type ExerciseCorrection, Label } from '@platon/feature/result/common'
 import { firstValueFrom } from 'rxjs'
 import { ResultService } from '../../api/result.service'
 import { ExercisePlayer } from '@platon/feature/player/common'
@@ -25,19 +25,16 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { FormGroup } from '@angular/forms'
 
 @Component({
-  standalone: true,
   selector: 'correction-label',
   templateUrl: 'correction-label.component.html',
   styleUrls: ['./correction-label.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-
     NzFormModule,
     NzButtonModule,
     NzListModule,
     NzInputModule,
-
     DialogModule,
     FormsModule,
     ReactiveFormsModule,
@@ -46,6 +43,8 @@ import { FormGroup } from '@angular/forms'
   ],
 })
 export class CorrectionLabelComponent implements OnChanges {
+  private readonly resultService = inject(ResultService)
+
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
   private readonly fb = inject(NonNullableFormBuilder)
   private readonly dialogService = inject(DialogService)
@@ -93,8 +92,6 @@ export class CorrectionLabelComponent implements OnChanges {
 
   protected editingLabelId: string | null = null
   protected labelForms: { [labelId: string]: FormGroup } = {}
-
-  constructor(private readonly resultService: ResultService) {}
 
   async ngOnChanges(): Promise<void> {
     if (this.answers.length === 0 || !this.navigationExerciseId) {
@@ -162,21 +159,22 @@ export class CorrectionLabelComponent implements OnChanges {
   }
 
   private async getLabels() {
+    const lastAnswerId = this.answers[this.answers.length - 1]?.answerId
     if (
       !this.activityId ||
       !this.navigationExerciseId ||
       this.answers.length === 0 ||
-      !this.currentExercise?.exerciseSessionId
+      !this.currentExercise?.exerciseSessionId ||
+      !lastAnswerId
     ) {
+      // No answer has been submitted for this session yet (e.g. the exercise crashed before the
+      // student could answer): there is nothing to fetch/attach labels to.
+      this.selectedLabels = []
+      this.currentLabelsChange.emit(this.selectedLabels)
       return
     }
     const [selectedLabels] = await Promise.all([
-      firstValueFrom(
-        this.resultService.listCorrectionLabels(
-          this.currentExercise?.exerciseSessionId,
-          this.answers[this.answers.length - 1].answerId ?? ''
-        )
-      ),
+      firstValueFrom(this.resultService.listCorrectionLabels(this.currentExercise.exerciseSessionId, lastAnswerId)),
       //firstValueFrom(this.resultService.getFavLabels()),
     ])
 
@@ -206,9 +204,12 @@ export class CorrectionLabelComponent implements OnChanges {
     }
     if (this.resumeMode) return
 
-    this.selectedLabels.find((l) => l.id === label.id)
-      ? (this.selectedLabels = this.selectedLabels.filter((l) => l.id !== label.id))
-      : this.selectedLabels.push(label)
+    if (this.selectedLabels.find((l) => l.id === label.id)) {
+      this.selectedLabels = this.selectedLabels.filter((l) => l.id !== label.id)
+    } else {
+      this.selectedLabels.push(label)
+    }
+
     this.currentLabelsChange.emit(this.selectedLabels)
     this.computeGradeChange()
   }

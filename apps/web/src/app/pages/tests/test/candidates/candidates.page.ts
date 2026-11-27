@@ -14,8 +14,8 @@ import { CourseMember, CourseMemberRoles } from '@platon/feature/course/common'
 import { CoursePresenter } from '../../../courses/course/course.presenter'
 import { Subscription } from 'rxjs'
 import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
-import { CommonModule } from '@angular/common'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+
 import { RouterModule } from '@angular/router'
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { UiModalTemplateComponent } from '@platon/shared/ui'
@@ -25,19 +25,17 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { TestPresenter } from '../test.presenter'
 
 @Component({
-  standalone: true,
   selector: 'app-test-candidates',
   templateUrl: './candidates.page.html',
   styleUrls: ['./candidates.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     ReactiveFormsModule,
     MatCardModule,
     TestsCandidatesTableComponent,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzModalModule,
     NzFormModule,
     NzInputModule,

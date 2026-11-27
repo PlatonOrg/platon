@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
 import Fuse from 'fuse.js'
 import { Subscription, firstValueFrom, of, shareReplay } from 'rxjs'
@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzTabsModule } from 'ng-zorro-antd/tabs'
 
 import {
   FilterIndicator,
@@ -33,8 +34,9 @@ import { Course, CourseFilters, CourseOrderings } from '@platon/feature/course/c
 import { UserRoles } from '@platon/core/common'
 import { CourseManagementTutorialService } from '@platon/feature/tuto/browser'
 
+type ActiveTab = 'current' | 'archived'
+
 @Component({
-  standalone: true,
   selector: 'app-courses',
   templateUrl: './courses.page.html',
   styleUrls: ['./courses.page.scss'],
@@ -42,23 +44,27 @@ import { CourseManagementTutorialService } from '@platon/feature/tuto/browser'
   imports: [
     CommonModule,
     RouterModule,
-
     MatCardModule,
     MatIconModule,
-
     NzSpinModule,
     NzIconModule,
     NzButtonModule,
-
+    NzTabsModule,
     CoursePipesModule,
     CourseListComponent,
     CourseFiltersComponent,
-
     UiSearchBarComponent,
     UiFilterIndicatorComponent,
   ],
 })
 export class CoursesPage implements OnInit, OnDestroy {
+  private readonly router = inject(Router)
+  private readonly authService = inject(AuthService)
+  private readonly courseService = inject(CourseService)
+  private readonly courseManagementTutorialService = inject(CourseManagementTutorialService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   private readonly subscriptions: Subscription[] = []
   protected readonly indicators: FilterIndicator<CourseFilters>[] = [
     ...Object.values(CourseOrderings).map(CourseOrderingFilterIndicator),
@@ -86,6 +92,7 @@ export class CoursesPage implements OnInit, OnDestroy {
 
   private user?: User
   protected canCreateCourse = false
+  protected activeTab: ActiveTab = 'current'
 
   protected completion = of([]).pipe(
     // TODO implements server function
@@ -93,19 +100,11 @@ export class CoursesPage implements OnInit, OnDestroy {
   )
 
   protected searching = true
+  protected archiving = false
   protected filters: CourseFilters = {}
   protected items: Course[] = []
   protected totalMatches = 0
   protected displayShowAllButton = false
-
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly courseService: CourseService,
-    private readonly courseManagementTutorialService: CourseManagementTutorialService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.user = (await this.authService.ready()) as User
@@ -141,16 +140,7 @@ export class CoursesPage implements OnInit, OnDestroy {
           this.searchbar.value = e.q
         }
 
-        this.searching = true
-        const response = await firstValueFrom(
-          this.courseService.search({
-            ...this.filters,
-            expands: ['permissions', 'statistic'],
-          })
-        )
-        this.items = response.resources
-        this.totalMatches = response.total
-        this.searching = false
+        await this.loadCourses()
 
         this.checkForCourseTutorial()
 
@@ -201,6 +191,42 @@ export class CoursesPage implements OnInit, OnDestroy {
       .catch(console.error)
   }
 
+  protected async onTabChange(tab: ActiveTab): Promise<void> {
+    this.activeTab = tab
+    await this.loadCourses()
+    this.changeDetectorRef.markForCheck()
+  }
+
+  protected async onArchiveToggle(course: Course): Promise<void> {
+    if (this.archiving) return
+    this.archiving = true
+    const shouldArchive = this.activeTab === 'current'
+    try {
+      await firstValueFrom(this.courseService.archiveMember(course.id, shouldArchive))
+      this.items = this.items.filter((item) => item.id !== course.id)
+      this.totalMatches -= 1
+    } finally {
+      this.archiving = false
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
+  private async loadCourses(): Promise<void> {
+    this.searching = true
+    this.changeDetectorRef.markForCheck()
+    const archived = this.activeTab === 'archived' ? true : false
+    const response = await firstValueFrom(
+      this.courseService.search({
+        ...this.filters,
+        archived,
+        expands: ['permissions', 'statistic'],
+      })
+    )
+    this.items = response.resources
+    this.totalMatches = response.total
+    this.searching = false
+  }
+
   private checkForCourseTutorial(): void {
     this.subscriptions.push(
       this.activatedRoute.queryParams.subscribe((params: any) => {
@@ -215,9 +241,6 @@ export class CoursesPage implements OnInit, OnDestroy {
     )
   }
 
-  /**
-   * Réinitialise le paramètre tutorial dans l'URL
-   */
   private resetTutorialParam(): void {
     this.router
       .navigate([], {
@@ -228,12 +251,13 @@ export class CoursesPage implements OnInit, OnDestroy {
       .catch(console.error)
   }
 
-  /**
-   * Démarre le tutoriel de gestion de cours
-   */
-  startCourseManagementTutorial(): void {
-    if (!this.user) return
+  private startCourseManagementTutorial(): void {
+    if (!this.user || (this.user.role !== UserRoles.admin && this.user.role !== UserRoles.teacher)) return
     this.courseManagementTutorialService.startCourseManagementTutorial(this.user, this.items)
+  }
+
+  protected showArchiveButtonIfNotAdmin(): boolean {
+    return this.user?.role !== UserRoles.admin
   }
 }
 

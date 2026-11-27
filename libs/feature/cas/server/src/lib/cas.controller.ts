@@ -11,47 +11,47 @@ import {
   Req,
   HttpRedirectResponse,
 } from '@nestjs/common'
+import { HttpService } from '@nestjs/axios'
 import { CreateCasDTO, UpdateCasDTO } from './cas.dto'
 import { AuthService, Mapper, Public, Roles, UserService, UUIDParam } from '@platon/core/server'
 import { CasService } from './cas.service'
 import { CasDTO, CasFiltersDTO } from './cas.dto'
 import { CreatedResponse, ItemResponse, ListResponse, NoContentResponse, NotFoundResponse } from '@platon/core/common'
 import { Request } from 'express'
-import { of } from 'rxjs'
 import { CasServiceValidateResponse } from './payloads'
 import { AxiosError, AxiosResponse } from 'axios'
 import { Optional } from 'typescript-optional'
-import { LTIService } from '@platon/feature/lti/server'
-import { AxiosService } from './axios.service'
+import { LTIOldService } from '@platon/feature/lti/server'
 import { ApiBearerAuth } from '@nestjs/swagger'
 import { URL } from 'url'
+import { firstValueFrom } from 'rxjs'
 
 @Controller('cas')
 export class CasController {
   constructor(
     private readonly service: CasService,
-    private readonly LtiService: LTIService,
+    private readonly LtiService: LTIOldService,
     private readonly authService: AuthService,
     private readonly userService: UserService,
-    private readonly https: AxiosService
+    private readonly http: HttpService
   ) {}
 
   async checkCasTicket(serviceValidateURL: string, ticket: string, service: string): Promise<Optional<string>> {
-    const data = await this.https
-      .get<CasServiceValidateResponse>(serviceValidateURL, {
+    const data = await firstValueFrom(
+      this.http.get<CasServiceValidateResponse>(serviceValidateURL, {
         params: {
           ticket: ticket,
           service: service,
           format: 'JSON',
         },
       })
-      .catch((_error: AxiosError) => {
-        return of<CasServiceValidateResponse>({
-          serviceResponse: {
-            authenticationFailure: { code: 'NO_RESPONSE', description: 'Your CAS provider is not accessible' },
-          },
-        })
-      })
+    ).catch((_error: AxiosError) => {
+      return {
+        serviceResponse: {
+          authenticationFailure: { code: 'NO_RESPONSE', description: 'Your CAS provider is not accessible' },
+        },
+      }
+    })
 
     let response: CasServiceValidateResponse
     if (Object.prototype.hasOwnProperty.call(data, 'data')) {
@@ -111,7 +111,10 @@ export class CasController {
           statusCode: 302,
         }
       }
-      const lmsUserEntity = await this.LtiService.findLmsUserByUsername(username.get(), casEntity.lmses)
+      const lmsUserEntity = await this.LtiService.findLmsUserByUsername(
+        username.get(),
+        await this.service.findLmsIds(casEntity.id)
+      )
       if (lmsUserEntity.isEmpty()) {
         return {
           url: `/login/no-account`,

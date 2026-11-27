@@ -99,15 +99,29 @@ export class SyncActivities extends CommandRunner {
 
     // Iterate over each group in the input data
     for (const key in inputData.exerciseGroups) {
-      // eslint-disable-next-line no-prototype-builtins
-      if (inputData.exerciseGroups.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(inputData.exerciseGroups, key)) {
         const group = inputData.exerciseGroups[key]
 
         // Ensure group is an array of ActivityExercise
         if (Array.isArray(group) && group.every((item) => this.isActivityExercise(item))) {
           transformedData[key] = {
             name: `Groupe ${key}`,
-            exercises: group as ActivityExercise[],
+            grader: { type: 'empty' },
+            exercises: group.map((item) => ({
+              ...item,
+              groupId: (item as any).groupId ?? key,
+            })) as ActivityExercise[],
+          }
+        }
+        // Group already existing but missing the groupId
+        else if (group && typeof group === 'object' && 'exercises' in group && Array.isArray(group.exercises)) {
+          transformedData[key] = {
+            name: (group as any).name ?? `Groupe ${key}`,
+            grader: (group as any).grader ?? { type: 'empty' },
+            exercises: group.exercises.map((item) => ({
+              ...item,
+              groupId: (item as any).groupId ?? key,
+            })) as ActivityExercise[],
           }
         }
       }

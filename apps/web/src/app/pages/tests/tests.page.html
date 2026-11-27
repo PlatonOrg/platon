@@ -1,7 +1,7 @@
 <h1>Tests d'entrée</h1>
 <header>
+  @if (canCreateTest) {
   <button
-    *ngIf="canCreateTest"
     nz-button
     nzType="primary"
     nzShape="round"
@@ -13,47 +13,48 @@
   >
     <span nz-icon nzType="plus" nzTheme="outline"></span> Créer un test
   </button>
+  }
 </header>
 <article>
-  <ng-container *ngIf="!searching; else spinner">
-    @if (totalMatches > 0) {
-    <div class="tests-list-container">
-      <a *ngFor="let item of items" class="test-card-link" [routerLink]="['/tests', item.id]" matRipple>
-        <mat-card class="test-card">
-          <div class="test-header">
-            <h3>{{ item.name }}</h3>
-
-            <div class="test-statistics" *ngIf="item.statistic">
-              <div class="statistic-item" nz-tooltip="Nombre d'examinateurs">
-                <mat-icon>supervised_user_circle</mat-icon>
-                <span>{{ item.statistic.teacherCount }}</span>
-              </div>
-              <div class="statistic-item" nz-tooltip="Nombre de candidats">
-                <mat-icon>people</mat-icon>
-                <span>{{ item.statistic.studentCount }}</span>
-              </div>
+  @if (!searching) { @if (totalMatches > 0) {
+  <div class="tests-list-container">
+    @for (item of items; track item) {
+    <a class="test-card-link" [routerLink]="['/tests', item.id]" matRipple>
+      <mat-card class="test-card">
+        <div class="test-header">
+          <h3>{{ item.name }}</h3>
+          @if (item.statistic) {
+          <div class="test-statistics">
+            <div class="statistic-item" nz-tooltip="Nombre d'examinateurs">
+              <mat-icon>supervised_user_circle</mat-icon>
+              <span>{{ item.statistic.teacherCount }}</span>
+            </div>
+            <div class="statistic-item" nz-tooltip="Nombre de candidats">
+              <mat-icon>people</mat-icon>
+              <span>{{ item.statistic.studentCount }}</span>
             </div>
           </div>
-
-          <p *ngIf="item.desc">{{ item.desc }}</p>
-
-          <div class="test-footer">
-            <span class="date">
-              Mis à jour le
-              {{ item.updatedAt | date : 'dd/MM/yyyy' }}</span
-            >
-            <mat-icon class="voir-icon">arrow_forward</mat-icon>
-          </div>
-        </mat-card>
-      </a>
-    </div>
-    } @else {
-    <h2>Aucun test d'entrée n'a été trouvé</h2>
+          }
+        </div>
+        @if (item.desc) {
+        <p>{{ item.desc }}</p>
+        }
+        <div class="test-footer">
+          <span class="date">
+            Mis à jour le
+            {{ item.updatedAt | date : 'dd/MM/yyyy' }}</span
+          >
+          <mat-icon class="voir-icon">arrow_forward</mat-icon>
+        </div>
+      </mat-card>
+    </a>
     }
-  </ng-container>
-</article>
-<ng-template #spinner>
+  </div>
+  } @else {
+  <h2>Aucun test d'entrée n'a été trouvé</h2>
+  } } @else {
   <div class="spinner-container">
     <nz-spin nzSimple nzSize="large"></nz-spin>
   </div>
-</ng-template>
+  }
+</article>

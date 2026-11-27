@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 
 import { NgeIdeModule } from '@cisstech/nge-ide'
@@ -38,27 +37,21 @@ import { Title } from '@angular/platform-browser'
 import { Resource } from '@platon/feature/resource/common'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-editor',
   templateUrl: './editor.page.html',
   styleUrls: ['./editor.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeInOnEnterAnimation(), fadeOutDownOnLeaveAnimation({ duration: 500 })],
   imports: [
-    CommonModule,
-
     NzSpinModule,
     NzButtonModule,
     NzSkeletonModule,
-
     NgeIdeModule,
     NgeIdeExplorerModule,
     NgeIdeSearchModule,
     NgeIdeSettingsModule,
-
     NgeIdeProblemsModule,
     NgeIdeNotificationsModule,
-
     PdfEditorContributionModule,
     PlfEditorContributionModule,
     PlaEditorContributionModule,
@@ -70,7 +63,6 @@ import { Resource } from '@platon/feature/resource/common'
     PlcEditorContributionModule,
     PloEditorContributionModule,
     ZipEditorContributionModule,
-
     DialogModule,
     UiErrorComponent,
   ],

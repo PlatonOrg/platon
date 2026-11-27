@@ -32,6 +32,9 @@ export const TEMPLATE_OVERRIDE_FILE_EXTENSION = '.plo'
 export const ACTIVITY_NEXT_FILE_PYTHON = 'next.py'
 export const ACTIVITY_NEXT_FILE_NODE = 'next.js'
 
+/** Variable name segments that would let an exercise reach a prototype instead of a plain variable. */
+const UNSAFE_VARIABLE_PROPS = new Set(['__proto__', 'constructor', 'prototype'])
+
 /**
  * File reference resolver for the PL compiler.
  * This interface is used to abstract the resolving the files so each plateform (browser, server) can use the PL compiler.
@@ -85,6 +88,7 @@ interface PLCompilerOptions {
   resolver: PLReferenceResolver
   dependencyResolver?: PLDependencyResolver
   withAst?: boolean
+  extendsStack?: string[]
 }
 
 interface ToExerciseOptions {
@@ -114,6 +118,7 @@ const emptySource = (resource: string, version: string, main: string): PLSourceF
 export class PLCompiler implements PLVisitor {
   private readonly urls = new Map<string, string>()
   private readonly contents = new Map<string, string>()
+  private readonly extendsStack: string[]
   private readonly resolver: PLReferenceResolver
   private readonly dependencyResolver?: PLDependencyResolver
   private parent?: PLCompiler
@@ -132,6 +137,7 @@ export class PLCompiler implements PLVisitor {
     this.resolver = options.resolver
     this.withAst = options.withAst
     this.source = emptySource(options.resource, options.version, options.main)
+    this.extendsStack = options.extendsStack ? options.extendsStack.slice() : [this.source.abspath]
     this.dependencyResolver = options.dependencyResolver
   }
 
@@ -245,7 +251,14 @@ export class PLCompiler implements PLVisitor {
 
   async visitExtends(node: ExtendsNode | PLDict, merge: boolean): Promise<PLSourceFile> {
     this.lineno = node.lineno
-    const { resource, version, relpath } = this.resolveReference('path' in node ? node.path : node.value)
+    const { resource, version, relpath, abspath } = this.resolveReference('path' in node ? node.path : node.value)
+
+    const cycleStartIndex = this.extendsStack.indexOf(abspath)
+    if (cycleStartIndex !== -1) {
+      const chain = this.extendsStack.slice(cycleStartIndex).concat(abspath).join(' -> ')
+      this.error(`Compiler: cyclic extends detected: ${chain}`)
+      return emptySource(resource, version, relpath)
+    }
 
     const content = await this.resolver.resolveContent(resource, version, relpath)
     const compiler = new PLCompiler({
@@ -254,6 +267,7 @@ export class PLCompiler implements PLVisitor {
       main: relpath,
       resolver: this.resolver,
       dependencyResolver: undefined, // dependencyResolver is not used in extends
+      extendsStack: this.extendsStack.concat(abspath),
     })
 
     await compiler.compileExercise(content)
@@ -428,8 +442,16 @@ export class PLCompiler implements PLVisitor {
     variables.introduction = introduction || ''
     variables.conclusion = conclusion || ''
 
-    Object.keys(groups).forEach((groupName) => {
-      groups[groupName].exercises.forEach((exercise) => {
+    Object.keys(groups).forEach((groupId) => {
+      groups[groupId].exercises.forEach((exercise) => {
+        const intGroupId = Number(groupId)
+        if (Number.isNaN(intGroupId)) {
+          console.warn(
+            `[Compilation] Échec de la conversion en nombre de l'identifiant pour le groupe "${groupId}". Ce groupe a été ignoré.`
+          )
+          return // ignore this group
+        }
+        exercise.groupId = intGroupId
         exercises.push(exercise)
       })
     })
@@ -461,7 +483,7 @@ export class PLCompiler implements PLVisitor {
       })
     )
 
-    if (variables.settings?.navigation?.mode === 'next') {
+    if (variables.settings?.navigation?.mode === 'next' || variables.settings?.navigation?.mode === 'validation') {
       const file =
         variables.settings.nextSettings?.sandbox === 'python' ? ACTIVITY_NEXT_FILE_PYTHON : ACTIVITY_NEXT_FILE_NODE
       const next = await this.resolveContent(file)
@@ -499,7 +521,9 @@ export class PLCompiler implements PLVisitor {
    */
   private upsertVariable(variables: Variables, name: string, required = false): [string | null, Variables | null] {
     const props = name.split('.')
-    if (props.find((prop) => !prop)) {
+    // `__proto__` lets an assignment reach Object.prototype instead of the variable object; `constructor`
+    // and `prototype` climb to a class and its instances the same way.
+    if (props.find((prop) => !prop || UNSAFE_VARIABLE_PROPS.has(prop))) {
       this.error(`SyntaxError: ${name}`)
       return [null, null]
     }

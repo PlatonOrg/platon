@@ -1,7 +1,7 @@
 import { map, Observable } from 'rxjs'
 
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ActivityExerciseGroup, PLSourceFile } from '@platon/feature/compiler'
 import {
   ExerciseTransformInput,
@@ -17,12 +17,11 @@ import {
   ResourceFile,
 } from '@platon/feature/resource/common'
 import { ResourceFileProvider } from '../models/resource-file-provider'
+import { CreatedResponse } from '@platon/core/common'
 
 @Injectable()
 export class RemoteResourceFileProvider extends ResourceFileProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   compileExercise(resource: string, version?: string): Observable<PLSourceFile> {
     let params = new HttpParams()
@@ -90,13 +89,13 @@ export class RemoteResourceFileProvider extends ResourceFileProvider {
     return this.http.post<void>(`/api/v1/files/${id}/`, input)
   }
 
-  upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<void> {
+  upload(file: Pick<ResourceFile, 'url'>, data: File): Observable<CreatedResponse<string>> {
     const formData = new FormData()
     formData.append('file', data, data.name)
     const headers = new HttpHeaders()
     headers.set('Content-Type', 'null')
     headers.set('Accept', 'multipart/form-data')
-    return this.http.post<void>(file.url, formData, {
+    return this.http.post<CreatedResponse<string>>(file.url, formData, {
       headers: headers,
     })
   }

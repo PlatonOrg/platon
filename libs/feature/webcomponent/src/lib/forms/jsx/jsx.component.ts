@@ -8,12 +8,14 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  inject,
 } from '@angular/core'
 import { ResourceLoaderService } from '@cisstech/nge/services'
 import { firstValueFrom } from 'rxjs'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service'
-import { JsxComponentDefinition, JsxState } from './jsx'
+import { JsxComponentDefinition, type JsxState } from './jsx'
+import { BaseModule } from '../../shared/components/base/base.module'
 
 declare const JXG: any
 
@@ -22,9 +24,14 @@ declare const JXG: any
   templateUrl: 'jsx.component.html',
   styleUrls: ['jsx.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule],
 })
 @WebComponent(JsxComponentDefinition)
 export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxState> {
+  readonly injector = inject(Injector)
+  readonly resourceLoader = inject(ResourceLoaderService)
+  readonly changeDetector = inject(WebComponentChangeDetectorService)
+
   private static NEXT_ID = 0
   private board?: any
 
@@ -32,12 +39,6 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxSta
 
   @Input() state!: JsxState
   @Output() stateChange = new EventEmitter<JsxState>()
-
-  constructor(
-    readonly injector: Injector,
-    readonly resourceLoader: ResourceLoaderService,
-    readonly changeDetector: WebComponentChangeDetectorService
-  ) {}
 
   async ngOnInit() {
     this.state.isFilled = false
@@ -61,7 +62,8 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxSta
         showInfobox: false,
       },
     })
-    this.createBoard()
+    // Created after a submission, the component restores the points moved by the learner.
+    this.createBoard({ restorePoints: true })
   }
 
   ngOnDestroy() {
@@ -70,11 +72,15 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxSta
 
   onChangeState() {
     const changes = this.changeDetector.changes(this)
-    if (changes.includes('script') || changes.includes('attributes')) {
-      this.createBoard()
+    if (!this.board) {
+      return // ngOnInit is still loading JSXGraph: it will create the board from the current state.
     }
 
-    if (changes.includes('points')) {
+    if (changes.includes('script') || changes.includes('attributes')) {
+      // A new script places the points itself: the saved positions, read from the previous board,
+      // are only restored when the same change brings them too.
+      this.createBoard({ restorePoints: changes.includes('points') })
+    } else if (changes.includes('points')) {
       this.writePoints()
     }
 
@@ -85,24 +91,36 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxSta
     }
   }
 
-  private createBoard() {
+  /**
+   * Creates the board from the script of the state.
+   * @param options.restorePoints Moves the movable points to their positions in the state, instead
+   * of the positions of the script.
+   */
+  private createBoard(options: { restorePoints?: boolean } = {}) {
     this.destroyBoard()
     this.board = JXG.JSXGraph.initBoard(this.boardId, {
       axis: true,
       ...(this.state.attributes || {}),
     })
 
+    const code = decodeURIComponent(this.state.script)
+    const exec = new Function('board', code)
+    exec(this.board)
+
+    // When the component is recreated after a submission, the state holds the points moved by the
+    // learner: they replace the initial positions of the script instead of being overwritten by them.
+    if (options.restorePoints) {
+      this.writePoints({ movableOnly: true })
+    }
+    this.readPoints()
+
+    // Listened after the initialization, so that only the moves of the learner fill the component.
     this.board.on('update', () => {
       this.changeDetector.batch(this, () => {
         this.state.isFilled = true
         this.readPoints()
       })
     })
-
-    const code = decodeURIComponent(this.state.script)
-    const exec = new Function('board', code)
-    exec(this.board)
-    this.readPoints()
   }
 
   private destroyBoard() {
@@ -125,14 +143,20 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxSta
     }
   }
 
-  private writePoints() {
+  /**
+   * Moves the named points of the board to their positions in the state.
+   * @param options.movableOnly Only moves the points the learner can drag: the fixed and the
+   * constructed points keep the position computed by the script.
+   */
+  private writePoints(options: { movableOnly?: boolean } = {}) {
     let updateNeeded = false
-    const names = Object.keys(this.state.points)
+    const names = Object.keys(this.state.points || {})
     for (const name of names) {
       const object = this.board.objectsList.find((o: any) => {
         return JXG.isPoint(o) && o.name === name
       })
-      if (object) {
+      const movable = object?.isDraggable && !object.visProp?.fixed
+      if (object && (movable || !options.movableOnly)) {
         const point = this.state.points[name]
         const array = [point.x, point.y]
         object.setPosition(JXG.COORDS_BY_USER, array)

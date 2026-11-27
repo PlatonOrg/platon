@@ -76,7 +76,7 @@ export class SandboxManager {
     let envid: string | undefined
     let variables = source.variables
 
-    variables.sandbox = variables.settings?.nextSettings?.sandbox
+    variables['sandbox'] = variables.settings?.nextSettings?.sandbox
 
     const sandbox = this.sandboxes.find((sandbox) => sandbox.supports(source))
     if (!sandbox) {

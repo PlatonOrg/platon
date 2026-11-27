@@ -26,6 +26,7 @@ type ActivityUserResultsResultsArgs = {
   activityMembers?: ActivityMemberView[] | null
   exerciseSessions: SessionDataEntity[]
   resourceMap?: Map<string, string>
+  groupIdsByUser?: Map<string, string[]>
 }
 
 type ActivityExerciseResultsArgs = {
@@ -43,7 +44,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
   private readonly exerciseSessions = new Map<string, SessionDataEntity>()
 
   constructor(args: ActivityUserResultsResultsArgs) {
-    const { activity, activityMembers, exerciseSessions, resourceMap } = args
+    const { activity, activityMembers, exerciseSessions, resourceMap, groupIdsByUser } = args
 
     activityMembers
       ?.sort((a, b) => a.username.localeCompare(b.username))
@@ -56,20 +57,28 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
             firstName: member.firstName,
             lastName: member.lastName,
             username: member.username,
+            groupIds: groupIdsByUser?.get(member.id) ?? [],
           })
         )
       })
 
     exerciseSessions.forEach((exerciseSession) => {
       this.exerciseSessions.set(exerciseSession.id, exerciseSession)
+      // Sessions without user are attached to the owner of their activity session in `next`.
+      // `user` is not null for these sessions: TypeORM hydrates it with null fields because of
+      // the `hasPassword` virtual column, so the check must be done on its id.
+      const { user } = exerciseSession
+      if (!user?.id) return
       this.userResults.set(
-        exerciseSession.user?.id ?? this.anonymous,
+        user.id,
         emptyUserResults({
-          id: exerciseSession.user?.id ?? this.anonymous,
-          email: exerciseSession.user?.email ?? this.anonymous,
-          firstName: exerciseSession.user?.firstName ?? this.anonymous,
-          lastName: exerciseSession.user?.lastName ?? this.anonymous,
-          username: exerciseSession.user?.username ?? this.anonymous,
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          activitySessionId: exerciseSession.parentId,
+          groupIds: groupIdsByUser?.get(user.id) ?? [],
         })
       )
     })
@@ -99,7 +108,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
       const exerciseSession = this.exerciseSessions.get(exercise.sessionId)
       if (!exerciseSession) return
 
-      const userId = exerciseSession.userId ?? this.anonymous
+      const userId = exerciseSession.userId ?? input.userId ?? this.anonymous
       const userResult =
         this.userResults.get(userId) ??
         emptyUserResults({
@@ -109,8 +118,9 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
           lastName: input.user?.lastName ?? this.anonymous,
           username: input.user?.username ?? this.anonymous,
         })
-
-      if (!userResult) return
+      userResult.activitySessionId = input.id
+      userResult.terminated = !!input.activityNavigation?.terminated
+      userResult.extraTime = input.activityNavigation?.extraTime ?? 0
 
       const userExercise = userResult.exercises[exercise.id] ?? {
         id: exercise.id,
@@ -128,6 +138,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
 
       userExercise.sessionId = exerciseSession.id
       userResult.exercises[exercise.id] = userExercise
+
       this.userResults.set(userId, userResult)
     })
   }
@@ -143,6 +154,7 @@ export class ActivityUserResults implements SessionDataAggregator<UserResults[]>
         })
       }
     })
+
     return results
   }
 }
@@ -191,7 +203,7 @@ export class ActivityExerciseResults implements SessionDataAggregator<ExerciseRe
         const variables = exercise.source.variables as ExerciseVariables
         this.exerciseResults.set(
           exercise.id,
-          emptyExerciseResults({ id: exercise.id, title: exercise.overrides?.title ?? variables.title })
+          emptyExerciseResults({ id: exercise.id, title: exercise.overrides?.['title'] ?? variables.title })
         )
       })
     }

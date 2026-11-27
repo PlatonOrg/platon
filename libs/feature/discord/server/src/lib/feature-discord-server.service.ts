@@ -4,7 +4,8 @@ import { GatewayIntentBits } from 'discord.js'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { ProxyAgent } from 'undici'
 
-const proxy = process.env['PROXY_URL'] as string
+// The Discord clients do not read the standard proxy variables by themselves
+const proxy = process.env['https_proxy'] || process.env['HTTPS_PROXY']
 export let agent: ProxyAgent | null = null
 export let httpsproxyagent: HttpsProxyAgent | null = null
 if (proxy) {

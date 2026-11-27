@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { Course, CourseSection, CreateCourseSection, UpdateCourseSection } from '@platon/feature/course/common'
 import { Observable } from 'rxjs'
@@ -8,9 +8,7 @@ import { CourseSectionProvider } from '../models/course-section-provider'
 
 @Injectable()
 export class RemoteCourseSectionProvider extends CourseSectionProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   find(courseId: string, sectionId: string): Observable<CourseSection> {
     return this.http

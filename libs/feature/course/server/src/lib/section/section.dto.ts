@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { BaseDTO, toNumber } from '@platon/core/server'
 import { CourseSection, CreateCourseSection, UpdateCourseSection } from '@platon/feature/course/common'
 import { Transform } from 'class-transformer'
-import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator'
+import { IsBoolean, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator'
 
 export class CourseSectionDTO extends BaseDTO implements CourseSection {
   @IsString()
@@ -16,6 +16,10 @@ export class CourseSectionDTO extends BaseDTO implements CourseSection {
   @IsUUID()
   @ApiProperty()
   readonly courseId!: string
+
+  @IsBoolean()
+  @ApiProperty()
+  readonly hidden!: boolean
 }
 
 export class CreateCourseSectionDTO implements CreateCourseSection {
@@ -40,4 +44,9 @@ export class UpdateCourseSectionDTO implements UpdateCourseSection {
   @IsNumber()
   @ApiProperty()
   readonly order?: number
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty()
+  readonly hidden?: boolean
 }

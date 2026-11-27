@@ -6,6 +6,7 @@ import {
   CourseMemberFilters,
   CourseMemberRoles,
   CreateCourseMember,
+  UpdateCourseMember,
   UpdateCourseMemberRole,
 } from '@platon/feature/course/common'
 import { Transform, Type } from 'class-transformer'
@@ -27,6 +28,26 @@ export class CourseMemberDTO extends BaseDTO implements CourseMember {
   @IsOptional()
   @IsEnum(CourseMemberRoles)
   readonly role?: CourseMemberRoles
+
+  @IsOptional()
+  @IsBoolean()
+  readonly archived?: boolean
+}
+
+export class UpdateCourseMemberDTO implements UpdateCourseMember {
+  @IsUUID()
+  readonly id!: string
+
+  @Transform(({ value }) => (value === undefined || value === null ? undefined : toBoolean(value)))
+  @IsBoolean()
+  @IsOptional()
+  readonly archived?: boolean
+}
+
+export class ArchiveCourseMemberDTO {
+  @Transform(({ value }) => toBoolean(value))
+  @IsBoolean()
+  readonly archived!: boolean
 }
 
 export class UpdateCourseMemberRoleDTO implements UpdateCourseMemberRole {

@@ -1,5 +1,5 @@
+@if (visible) {
 <nz-drawer
-  *ngIf="visible"
   [nzClosable]="false"
   [nzVisible]="visible"
   nzPlacement="right"
@@ -12,9 +12,18 @@
     <notif-list [(notifications)]="notifications" [hasMore]="hasMore" (loadMore)="fetchMore?.()" (closed)="close()" />
   </ng-container>
   <ng-template #footer>
-    <footer>
-      <button nz-button nzType="primary" (click)="markAllAsRead()">Tout marquer comme lu</button>
-      <button nz-button nzType="primary" nzDanger (click)="deleteAll()">Tout supprimer</button>
+    @if(hasNotifications) {
+    <footer @fade>
+      @if(hasUnreads) {
+      <button @fade nz-button nzType="primary" [nzLoading]="markingAllAsRead" (click)="markAllAsRead()">
+        Tout marquer comme lu
+      </button>
+      }
+      <button @fade nz-button nzType="primary" nzDanger [nzLoading]="deletingAll" (click)="deleteAll()">
+        Tout supprimer
+      </button>
     </footer>
+    }
   </ng-template>
 </nz-drawer>
+}

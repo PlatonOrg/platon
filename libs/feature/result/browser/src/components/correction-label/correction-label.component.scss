@@ -13,16 +13,13 @@
   }
 }
 
-
-
 .label-wrapper {
-
   display: flex;
   flex-direction: column;
   grid-gap: 0.5rem;
   justify-items: center;
   .button-wrapper {
-    position:relative;
+    position: relative;
 
     .label-button {
       position: relative;
@@ -31,7 +28,7 @@
       width: 100%;
 
       &:active {
-        transition: none !important;  /* Supprime les transitions */
+        transition: none !important; /* Supprime les transitions */
         background-color: inherit !important;
       }
 
@@ -47,10 +44,11 @@
       font-size: 10px;
     }
 
-    .favorite-label, .unfavorite-label {
+    .favorite-label,
+    .unfavorite-label {
       display: flex;
       user-select: none;
-      font-family: "Material Icons";
+      font-family: 'Material Icons';
       font-size: 10px;
       position: absolute;
       top: -8px;
@@ -64,12 +62,11 @@
       align-items: center;
       cursor: pointer;
 
-
       transition: transform 0.2s ease-out, opacity 0.2s ease-in, color 0.3s ease-in-out;
     }
 
     .favorite-label {
-      color: #FFA500;
+      color: #ffa500;
       transform: scale(1.2);
     }
 
@@ -78,12 +75,10 @@
       transform: scale(1);
     }
 
-    .favorite-label:active, .unfavorite-label:active {
+    .favorite-label:active,
+    .unfavorite-label:active {
       transform: scale(1.4);
     }
-
-
-
   }
 }
 
@@ -94,7 +89,7 @@
 
 mat-card button#settingButton {
   display: flex;
-  position:absolute;
+  position: absolute;
   right: 10px;
   top: 10px;
   background-color: transparent;
@@ -106,14 +101,13 @@ mat-card button#settingButton {
   align-items: center;
 }
 
-
 .horizontal-button {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  gap:2px;
+  gap: 2px;
 }
 
 .horizontal-button button {

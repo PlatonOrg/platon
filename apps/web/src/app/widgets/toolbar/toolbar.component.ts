@@ -40,7 +40,6 @@ import { FeatureAnnouncementService, FeatureAnnouncementModalComponent } from '@
 import { MatDividerModule } from '@angular/material/divider'
 
 @Component({
-  standalone: true,
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],
@@ -69,6 +68,8 @@ import { MatDividerModule } from '@angular/material/divider'
   ],
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
+  private readonly userService = inject(UserService)
+
   @Input() drawerOpened = false
   @Output() drawerOpenedChange = new EventEmitter<boolean>()
 
@@ -108,7 +109,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   protected get createResourceParentParam(): string | undefined {
     const tree = this.router.parseUrl(this.router.url)
-    const { segments } = tree.root.children.primary
+    const { segments } = tree.root.children['primary']
     if (segments.length > 1 && segments[0].path === 'resources') {
       return segments[1].path
     }
@@ -126,8 +127,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   get tabletOrBelow(): boolean {
     return this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])
   }
-
-  constructor(private readonly userService: UserService) {}
 
   async ngOnInit(): Promise<void> {
     this.drawerOpened = !this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Tablet])

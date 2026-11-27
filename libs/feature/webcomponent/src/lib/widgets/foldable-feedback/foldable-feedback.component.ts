@@ -1,18 +1,26 @@
-import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { FoldableFeedbackComponentDefinition, FoldableFeedbackState } from './foldable-feedback'
+import { FoldableFeedbackComponentDefinition, type FoldableFeedbackState } from './foldable-feedback'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
+
+import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+
+import { BaseModule } from '../../shared/components/base/base.module'
+import { MatIconModule } from '@angular/material/icon'
 
 @Component({
   selector: 'wc-foldable-feedback',
   templateUrl: 'foldable-feedback.component.html',
   styleUrls: ['foldable-feedback.component.scss'],
+  imports: [BaseModule, NzAlertModule, NzIconModule, NgeMarkdownModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(FoldableFeedbackComponentDefinition)
 export class FoldableFeedbackComponent implements WebComponentHooks<FoldableFeedbackState> {
-  @Input() state!: FoldableFeedbackState
+  readonly injector = inject(Injector)
 
-  constructor(readonly injector: Injector) {}
+  @Input() state!: FoldableFeedbackState
 
   formatTextHtml(text: string): string {
     if (!text) return ''

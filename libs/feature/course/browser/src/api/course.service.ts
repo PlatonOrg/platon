@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ListResponse, ItemResponse } from '@platon/core/common'
 import {
   Activity,
@@ -27,6 +27,8 @@ import {
   CourseMemberRoles,
   RestrictionList,
   CreateTestMember,
+  ActivityReloadPreview,
+  ReloadActivity,
 } from '@platon/feature/course/common'
 import { Observable, Subject, tap } from 'rxjs'
 import { ActivityCorrectorProvider } from '../models/activity-corrector.provider'
@@ -42,6 +44,16 @@ import { ActivityGroupProvider } from '../models/activity-group.provider'
 
 @Injectable({ providedIn: 'root' })
 export class CourseService {
+  private readonly courseProvider = inject(CourseProvider)
+  private readonly courseMemberProvider = inject(CourseMemberProvider)
+  private readonly courseSectionProvider = inject(CourseSectionProvider)
+  private readonly courseDemoProvider = inject(CourseDemoProvider)
+  private readonly courseGroupProvider = inject(CourseGroupProvider)
+  private readonly activityProvider = inject(ActivityProvider)
+  private readonly activityMemberProvider = inject(ActivityMemberProvider)
+  private readonly activityCorrectorProvider = inject(ActivityCorrectorProvider)
+  private readonly activityGroupProvider = inject(ActivityGroupProvider)
+
   private readonly deleteActivityEvent = new Subject<Activity>()
   private readonly addMemberEvent = new Subject<CourseMember>()
   private readonly deleteMemberEvent = new Subject<CourseMember>()
@@ -49,18 +61,6 @@ export class CourseService {
   readonly onAddedMember = this.addMemberEvent.asObservable()
   readonly onDeletedMember = this.deleteMemberEvent.asObservable()
   readonly onDeletedActivity = this.deleteActivityEvent.asObservable()
-
-  constructor(
-    private readonly courseProvider: CourseProvider,
-    private readonly courseMemberProvider: CourseMemberProvider,
-    private readonly courseSectionProvider: CourseSectionProvider,
-    private readonly courseDemoProvider: CourseDemoProvider,
-    private readonly courseGroupProvider: CourseGroupProvider,
-    private readonly activityProvider: ActivityProvider,
-    private readonly activityMemberProvider: ActivityMemberProvider,
-    private readonly activityCorrectorProvider: ActivityCorrectorProvider,
-    private readonly activityGroupProvider: ActivityGroupProvider
-  ) {}
 
   //#region Courses
   search(filters?: CourseFilters): Observable<ListResponse<Course>> {
@@ -81,6 +81,11 @@ export class CourseService {
 
   create(input: CreateCourse): Observable<Course> {
     return this.courseProvider.create(input)
+  }
+
+  /** duplicate the sourceCourse sections and activities in the targetCourseId */
+  duplicate(sourceCourseId: string, targetCourseId: string): Observable<Course> {
+    return this.courseProvider.duplicate(sourceCourseId, targetCourseId)
   }
 
   //#endregion
@@ -119,6 +124,10 @@ export class CourseService {
 
   updateMemberRole(member: CourseMember, role: CourseMemberRoles): Observable<CourseMember> {
     return this.courseMemberProvider.updateRole(member, role)
+  }
+
+  archiveMember(courseId: string, archived: boolean): Observable<CourseMember> {
+    return this.courseMemberProvider.archive(courseId, archived)
   }
 
   searchMembers(course: Course | string, filters?: CourseMemberFilters): Observable<ListResponse<CourseMember>> {
@@ -167,6 +176,10 @@ export class CourseService {
     return this.activityProvider.create(course, input)
   }
 
+  createActivities(course: Course, inputs: CreateActivity[]): Observable<ListResponse<Activity>> {
+    return this.activityProvider.createActivities(course, inputs)
+  }
+
   updateActivity(activity: Activity, input: UpdateActivity): Observable<Activity> {
     return this.activityProvider.update(activity, input)
   }
@@ -175,8 +188,12 @@ export class CourseService {
     return this.activityProvider.updateOrder(course, sortedActivityIds)
   }
 
-  reloadActivity(activity: Activity, version?: string): Observable<Activity> {
-    return this.activityProvider.reload(activity, version)
+  reloadActivityPreview(activity: Activity): Observable<ActivityReloadPreview> {
+    return this.activityProvider.reloadPreview(activity)
+  }
+
+  reloadActivity(activity: Activity, input?: ReloadActivity): Observable<Activity> {
+    return this.activityProvider.reload(activity, input)
   }
 
   deleteActivity(activity: Activity): Observable<void> {
@@ -189,6 +206,10 @@ export class CourseService {
 
   reopenActivity(activity: Activity): Observable<Activity> {
     return this.activityProvider.reopen(activity)
+  }
+
+  regenerateActivityCode(activity: Activity): Observable<Activity> {
+    return this.activityProvider.regenerateCode(activity)
   }
 
   getCourseColors(courseId: string): Observable<number[]> {

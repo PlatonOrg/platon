@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { Resource, ResourceMember, ResourceMemberFilters, UpdateResourceMember } from '@platon/feature/resource/common'
 import { Observable } from 'rxjs'
@@ -12,9 +12,7 @@ const getId = (resource: Resource | string): string => {
 
 @Injectable()
 export class RemoteResourceMemberProvider extends ResourceMemberProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   autoJoin(resource: Resource | string): Observable<ResourceMember> {
     return this.http

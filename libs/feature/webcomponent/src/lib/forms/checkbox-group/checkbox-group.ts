@@ -66,5 +66,6 @@ export const CheckboxGroupComponentDefinition = defineWebComponent({
   },
   playgrounds: {
     'Système solaire': 'solar-system.ple',
+    'Nombres premiers (notation partielle)': 'primes.ple',
   },
 })

@@ -2,7 +2,7 @@ import { Notification } from '@platon/feature/notification/common'
 import { gql } from 'apollo-angular'
 import { NotifFragment } from './notification.graphql.generated'
 
-gql`
+export const NOTIFICATION_QUERIES = gql`
   fragment Notif on Notification {
     id
     readAt

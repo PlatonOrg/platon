@@ -5,8 +5,7 @@ import {
   Component,
   OnInit,
   CUSTOM_ELEMENTS_SCHEMA,
-  ElementRef,
-  ViewChild,
+  inject,
 } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, RouterModule } from '@angular/router'
@@ -27,32 +26,23 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzTagModule } from 'ng-zorro-antd/tag'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
 
-import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
-import { Announcement, AnnouncementFilters } from '@platon/feature/announcement/common'
+import { DialogModule, DialogService } from '@platon/core/browser'
+import { Announcement } from '@platon/feature/announcement/common'
 import { AnnouncementService } from '@platon/feature/announcement/browser'
 import { UiEditorJsModule, EditorjsViewerComponent } from '@platon/shared/ui'
 
-import { OutputData } from '@editorjs/editorjs'
-
 import { firstValueFrom } from 'rxjs'
 import { NzCardModule } from 'ng-zorro-antd/card'
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
-import { UiLayoutTabDirective, UiLayoutTabsComponent } from '@platon/shared/ui'
-
-import { NzSpaceComponent } from 'ng-zorro-antd/space'
-
 @Component({
   selector: 'app-announcements',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatIconModule,
     MatIconModule,
     MatFormFieldModule,
@@ -61,7 +51,6 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
     MatDividerModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-
     NzButtonModule,
     NzCardModule,
     NzDividerModule,
@@ -71,9 +60,8 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
     NzSkeletonModule,
     NzSpinModule,
     NzTagModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzTypographyModule,
-
     DialogModule,
     UiEditorJsModule,
     EditorjsViewerComponent,
@@ -84,19 +72,16 @@ import { NzSpaceComponent } from 'ng-zorro-antd/space'
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AnnouncementsPage implements OnInit {
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly announcementService = inject(AnnouncementService)
+  private readonly route = inject(ActivatedRoute)
+
   protected announcements: Announcement[] = []
   protected filteredAnnouncements: Announcement[] = []
   protected loading = true
   protected searchText = ''
   protected selectedAnnouncement: Announcement | null = null
-
-  constructor(
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly announcementService: AnnouncementService,
-    private readonly authService: AuthService,
-    private readonly route: ActivatedRoute
-  ) {}
 
   ngOnInit(): void {
     void this.loadAnnouncements()
@@ -111,24 +96,30 @@ export class AnnouncementsPage implements OnInit {
       this.announcements = result.resources
       this.filteredAnnouncements = [...this.announcements]
 
-      this.route.queryParams.subscribe((params) => {
-        const highlightedId = params['highlight']
+      this.route.queryParams.subscribe(async (params) => {
+        try {
+          const highlightedId = params['highlight']
 
-        if (highlightedId && this.announcements.length > 0) {
-          const foundAnnouncement = this.announcements.find((a) => a.id === highlightedId)
-          if (foundAnnouncement) {
-            this.selectedAnnouncement = foundAnnouncement
-          } else {
-            // Si l'annonce n'est pas trouvée, prendre la première par défaut
-            this.selectedAnnouncement = this.announcements[0]
+          if (highlightedId && this.announcements.length > 0) {
+            try {
+              this.selectedAnnouncement = await firstValueFrom(this.announcementService.findByIdForUser(highlightedId))
+            } catch {
+              this.selectedAnnouncement = await firstValueFrom(
+                this.announcementService.findByIdForUser(this.announcements[0].id)
+              )
+            }
+          } else if (this.announcements.length > 0) {
+            this.selectedAnnouncement = await firstValueFrom(
+              this.announcementService.findByIdForUser(this.announcements[0].id)
+            )
           }
-        } else if (this.announcements.length > 0) {
-          this.selectedAnnouncement = this.announcements[0]
+        } catch (_error) {
+          this.dialogService.error("Erreur lors du chargement de l'annonce")
+        } finally {
+          this.changeDetectorRef.markForCheck()
         }
-
-        this.changeDetectorRef.markForCheck()
       })
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Erreur lors du chargement des annonces')
     } finally {
       this.loading = false
@@ -152,8 +143,9 @@ export class AnnouncementsPage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
-  protected selectAnnouncement(announcement: Announcement): void {
-    this.selectedAnnouncement = announcement
+  protected async selectAnnouncement(announcement: Announcement): Promise<void> {
+    const selected = await firstValueFrom(this.announcementService.findByIdForUser(announcement.id))
+    this.selectedAnnouncement = selected
     this.changeDetectorRef.markForCheck()
   }
 

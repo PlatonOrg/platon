@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
 
 @Component({
-  standalone: true,
   selector: 'app-landing-section-header',
   templateUrl: './section-header.component.html',
   styleUrls: ['./section-header.component.scss'],

@@ -1,41 +1,47 @@
-import { ChangeDetectionStrategy, Component, Injector, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
-import { CodeViewerComponentDefinition, CodeViewerState } from './code-viewer'
-import { generate } from 'ng-zorro-antd/core/color'
-import { number } from 'echarts'
+import {
+  CodeViewerComponentDefinition,
+  type CodeViewerState,
+  codeViewerLanguageSupported,
+  codeViewerMarkdown,
+  codeViewerWarnings,
+} from './code-viewer'
+import { NgeMonacoLoaderService, NgeMonacoModule } from '@cisstech/nge/monaco'
+
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 
 @Component({
   selector: 'wc-code-viewer',
   templateUrl: 'code-viewer.component.html',
-  styleUrls: ['code-viewer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMonacoModule, NgeMarkdownModule],
 })
 @WebComponent(CodeViewerComponentDefinition)
-export class CodeViewerComponent implements WebComponentHooks<CodeViewerState>, OnInit {
+export class CodeViewerComponent implements WebComponentHooks<CodeViewerState> {
+  readonly injector = inject(Injector)
+  private readonly monacoLoader = inject(NgeMonacoLoaderService)
+
   @Input() state!: CodeViewerState
 
-  show: Set<number> = new Set()
+  /** The code as a markdown block: the colorizer writes the line numbers next to each line of code. */
+  protected data = ''
 
-  constructor(readonly injector: Injector) {}
+  onChangeState() {
+    this.data = codeViewerMarkdown(this.state)
+    // The invalid properties are ignored
+    codeViewerWarnings(this.state).forEach((warning) => console.warn(`wc-code-viewer: ${warning}`))
+    void this.checkLanguage(this.state.language)
+  }
 
-  data = '```'
-  lineNumbers: number[] = []
-
-  ngOnInit() {
-    this.data += this.state.language + ' highlights=' + '"' + this.state.highlights + '"\n'
-    this.data += this.state.code
-    this.data += '\n```\n'
-
-    /* line number */
-    const lineCount = this.state.code.split('\n').length
-    this.lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1)
-    if (this.state.lines != '') {
-      const pas = Number(this.state.lines)
-      if (!Number.isNaN(pas) && pas > 0) {
-        for (let i = 0; i <= lineCount; i += pas) {
-          this.show.add(i)
-        }
-      }
+  /** Warns when Monaco can't colorize the language the code is then displayed as plain text. */
+  private async checkLanguage(language: string) {
+    await this.monacoLoader.loadAsync()
+    // The state may have changed while Monaco was loading.
+    if (language !== this.state.language || codeViewerLanguageSupported(language, monaco.languages.getLanguages())) {
+      return
     }
+    console.warn(`wc-code-viewer: Langage « ${language} » non pris en charge : le code est affiché sans coloration.`)
   }
 }

@@ -15,11 +15,7 @@
 <ng-template #template let-node>
   @if(node.origin.key === '__SELECT_ALL__'){
   <span>{{ node.origin.title }}</span>
+  } @if (node.origin.key !== '__SELECT_ALL__') {
+  <user-avatar [size]="24" [user]="node.origin.value.user" [group]="node.origin.value.group" />
   }
-  <user-avatar
-    *ngIf="node.origin.key !== '__SELECT_ALL__'"
-    [size]="24"
-    [user]="node.origin.value.user"
-    [group]="node.origin.value.group"
-  />
 </ng-template>

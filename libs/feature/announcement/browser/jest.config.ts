@@ -1,6 +1,5 @@
-/* eslint-disable */
-export default {
-  displayName: 'browser',
+module.exports = {
+  displayName: 'feature-announcement-browser',
   preset: '../../../../jest.preset.js',
   coverageDirectory: '../../../../coverage/libs/feature/announcement/browser',
   transform: {

@@ -22,17 +22,21 @@
       >
         {{ column.name }}
       </th>
+      } @if (editable) {
+      <th nzAlign="center">Actions</th>
       }
-      <th *ngIf="editable" nzAlign="center">Actions</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let member of nzTable.data">
+    @for (member of nzTable.data; track member) {
+    <tr>
       <td>
         <user-avatar #avatar [user]="$any(member.user)" />
       </td>
       <td>
-        <a [href]="'mailto:' + member.user?.email" class="user-email">{{ member.user?.email }}</a>
+        <a [href]="'mailto:' + $safeNavigationMigration(member.user?.email)" class="user-email">{{
+          member.user?.email
+        }}</a>
       </td>
       <td>{{ member.createdAt | date }}</td>
       <!-- <td>
@@ -44,7 +48,8 @@
         </div>
       </td> -->
       <td>Pas commencé</td>
-      <td nzAlign="center" *ngIf="editable && !disabled">
+      @if (editable && !disabled) {
+      <td nzAlign="center">
         <button
           nz-button
           nzShape="circle"
@@ -53,9 +58,9 @@
           nzOkType="primary"
           [nzPopconfirmTitle]="
             'Voulez-vous vraiment envoyer le mail d\'invitation au candidat “' +
-            member.user?.firstName +
+            $safeNavigationMigration(member.user?.firstName) +
             ' ' +
-            member.user?.lastName +
+            $safeNavigationMigration(member.user?.lastName) +
             '“ ?'
           "
           (nzOnConfirm)="sendMailToCandidate(member.id)"
@@ -71,13 +76,19 @@
           nzOkText="Retirer"
           nzOkType="danger"
           [nzPopconfirmTitle]="
-            'Voulez-vous vraiment retirer le candidat “' + member.user?.firstName + ' ' + member.user?.lastName + '“ ?'
+            'Voulez-vous vraiment retirer le candidat “' +
+            $safeNavigationMigration(member.user?.firstName) +
+            ' ' +
+            $safeNavigationMigration(member.user?.lastName) +
+            '“ ?'
           "
           (nzOnConfirm)="deleted.emit(member)"
         >
           <i nz-icon nzType="delete"></i>
         </button>
       </td>
+      }
     </tr>
+    }
   </tbody>
 </nz-table>

@@ -1,4 +1,5 @@
-<form *ngIf="ready" [formGroup]="form" nz-form>
+@if (ready) {
+<form [formGroup]="form" nz-form>
   <nz-collapse>
     <nz-collapse-panel nzHeader="Titre" nzExpandedIcon="link">
       <nz-form-item>
@@ -24,3 +25,4 @@
     </nz-collapse-panel>
   </nz-collapse>
 </form>
+}

@@ -1,6 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  inject,
+} from '@angular/core'
 
 import { NzTagModule } from 'ng-zorro-antd/tag'
 
@@ -9,20 +16,21 @@ import { Level, Topic } from '@platon/core/common'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzPopoverModule } from 'ng-zorro-antd/popover'
-import { NzModalModule, NzModalService, OnClickCallback } from 'ng-zorro-antd/modal'
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal'
 
 type Tag = Topic | Level
 
 /*  TODO: use ui-tag-list component internally */
 @Component({
-  standalone: true,
   selector: 'tag-list',
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NzTagModule, NzIconModule, NzInputModule, NzPopoverModule, NzModalModule],
+  imports: [FormsModule, NzTagModule, NzIconModule, NzInputModule, NzPopoverModule, NzModalModule],
 })
 export class TagListComponent {
+  private modalService = inject(NzModalService)
+
   @Input() tags: Tag[] = []
   @Input() editable = true
   protected inputValue = ''
@@ -33,8 +41,6 @@ export class TagListComponent {
   @Output() remove = new EventEmitter<Tag>()
   @Output() create = new EventEmitter<string>()
   @Output() update = new EventEmitter<Tag>()
-
-  constructor(private modalService: NzModalService) {}
 
   protected trackById(_: number, tag: Tag) {
     return tag.id

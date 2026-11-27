@@ -146,7 +146,7 @@ export class ContentExtension {
   }
 
   static fromProvider(provider: LTIProvider): ContentExtension | undefined {
-    if (provider.body.ext_content_return_types) {
+    if (provider.body['ext_content_return_types']) {
       return new ContentExtension(provider.body)
     }
     return undefined

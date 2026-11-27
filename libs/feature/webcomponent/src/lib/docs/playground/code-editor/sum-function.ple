@@ -1,0 +1,85 @@
+sandbox = "node"
+
+editeur = :wc-code-editor
+editeur.language = "javascript"
+editeur.height = 220
+editeur.code ==
+function somme(tableau) {
+  // Écrivez votre code ici
+}
+==
+
+title ==
+Somme des éléments d'un tableau
+==
+
+statement ==
+Complétez la fonction `somme(tableau)` pour qu'elle **renvoie** la somme des nombres du tableau.
+Un tableau vide a pour somme `0`.
+==
+
+form ==
+{{ editeur }}
+==
+
+grader == #!lang=js
+const tests = [[[1, 2, 3], 6], [[], 0], [[-4, 4, 10], 10], [[2.5, 2.5], 5]]
+const resultats = []
+let reussis = 0
+
+// Signale dans l'éditeur les lignes qui affichent au lieu de renvoyer.
+const decorations = []
+editeur.code.split('\n').forEach((ligne, i) => {
+  if (ligne.includes('console.log')) {
+    decorations.push({
+      startLineNumber: i + 1,
+      severity: 'warning',
+      message: 'La fonction doit renvoyer le résultat avec return, pas l\'afficher.',
+    })
+  }
+})
+editeur.decorations = decorations
+
+let somme
+try {
+  somme = new Function(editeur.code + '\nreturn somme')()
+} catch (e) {
+  somme = undefined
+  resultats.push({ name: 'Compilation', type: 'error', description: String(e), display: true })
+}
+
+if (typeof somme === 'function') {
+  for (const [entree, attendu] of tests) {
+    let obtenu
+    try {
+      obtenu = somme([...entree])
+    } catch (e) {
+      obtenu = 'Erreur : ' + e.message
+    }
+    const ok = obtenu === attendu
+    if (ok) reussis++
+    resultats.push({
+      name: `somme(${JSON.stringify(entree)})`,
+      type: ok ? 'success' : 'error',
+      arguments: JSON.stringify(entree),
+      expected: JSON.stringify(attendu),
+      obtained: JSON.stringify(obtenu) ?? 'undefined',
+    })
+  }
+}
+
+grade = Math.round((100 * reussis) / tests.length)
+// Un feedback dont le contenu est une liste est affiché sous forme de feedbacks dépliables.
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = resultats
+==
+
+solution ==
+```js
+function somme(tableau) {
+  let total = 0
+  for (const x of tableau) total += x
+  return total
+}
+```
+==

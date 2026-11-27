@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -26,16 +25,14 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { firstValueFrom } from 'rxjs'
 import { ResourceFileService } from '../../api/file.service'
-import { LATEST, Resource } from '@platon/feature/resource/common'
+import { LATEST, type Resource } from '@platon/feature/resource/common'
 
 @Component({
-  standalone: true,
   selector: 'resource-versioning',
   templateUrl: './resource-versioning.component.html',
   styleUrls: ['./resource-versioning.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,

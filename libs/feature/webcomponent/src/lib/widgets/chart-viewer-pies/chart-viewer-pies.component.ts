@@ -4,18 +4,22 @@ import { EChartsOption } from 'echarts'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import {
   ChartViewerPiesComponentDefinition,
-  ChartViewerPiesState,
+  type ChartViewerPiesState,
   donutChartViewerPiesState,
   halfdonutChartViewerPiesState,
   nightingaleChartViewerPiesState,
   simpleChartViewerPiesState,
 } from './chart-viewer-pies'
+import { NgeMonacoModule } from '@cisstech/nge/monaco'
+import { BaseModule } from '../../shared/components/base/base.module'
+import { NgxEchartsModule } from 'ngx-echarts'
 
 @Component({
   selector: 'wc-chart-viewer-pies, wc-cv-pies',
   templateUrl: './chart-viewer-pies.component.html',
   styleUrls: ['chart-viewer-pies.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BaseModule, NgeMonacoModule, NgxEchartsModule],
 })
 @WebComponent(ChartViewerPiesComponentDefinition)
 export class ChartViewerPiesComponent implements WebComponentHooks<ChartViewerPiesState> {

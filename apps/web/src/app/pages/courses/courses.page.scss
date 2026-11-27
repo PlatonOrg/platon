@@ -50,6 +50,10 @@ article {
   padding: 0 1rem;
 }
 
+.courses-content {
+  min-height: 320px;
+}
+
 // Common elements
 li {
   list-style: none;
@@ -87,7 +91,14 @@ ui-search-bar {
 nz-spin {
   display: flex;
   justify-content: center;
-  margin: 10rem 0;
+  margin: 0;
+}
+
+.spinner-wrapper {
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 // Responsive styles

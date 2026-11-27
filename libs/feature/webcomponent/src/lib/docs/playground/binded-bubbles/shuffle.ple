@@ -1,0 +1,52 @@
+sandbox = "node"
+
+bulles = :wc-binded-bubbles
+// En mode shuffle, quand une paire est trouvée, le nouveau mot (à gauche) et la nouvelle
+// traduction (à droite) sont tirés indépendamment : ils ne vont pas forcément ensemble.
+// En mode ordered (par défaut), ils forment toujours une paire.
+bulles.mode = "shuffle"
+// 3 paires sont affichées au départ.
+bulles.numberPairToShow = 3
+bulles.items = [
+  { item1: { content: "chat" }, item2: { content: "cat" } },
+  { item1: { content: "chien" }, item2: { content: "dog" } },
+  { item1: { content: "oiseau" }, item2: { content: "bird" } },
+  { item1: { content: "cheval" }, item2: { content: "horse" } },
+  { item1: { content: "poisson" }, item2: { content: "fish" } },
+  { item1: { content: "lapin" }, item2: { content: "rabbit" } },
+  { item1: { content: "vache" }, item2: { content: "cow" } },
+  { item1: { content: "cochon" }, item2: { content: "pig" } }
+]
+
+title ==
+Animaux en anglais
+==
+
+statement ==
+Associez chaque animal à sa traduction anglaise.
+==
+
+form ==
+{{ bulles }}
+==
+
+grader == #!lang=js
+// Une paire trouvée a l'état « achieved » (ou « disabled » pour les dernières paires en mode ordered).
+const total = bulles.items.length
+const trouvees = bulles.items.filter((p) => ['achieved', 'disabled'].includes(p.item1.state)).length
+const erreurs = bulles.errors.map((e) => e.item1.content + ' / ' + e.item2.content).join(', ')
+
+// L'exercice est soumis automatiquement quand toutes les paires sont trouvées,
+// mais l'apprenant peut aussi valider avant : on vérifie donc que tout est associé.
+grade = Math.max(0, Math.round((100 * trouvees) / total) - 15 * bulles.nbError)
+if (trouvees < total) {
+  feedback.type = 'warning'
+  feedback.content = `Vous avez associé ${trouvees} paire(s) sur ${total}.`
+} else if (bulles.nbError === 0) {
+  feedback.type = 'success'
+  feedback.content = 'Sans faute !'
+} else {
+  feedback.type = 'warning'
+  feedback.content = `${bulles.nbError} erreur(s) : ${erreurs}.`
+}
+==

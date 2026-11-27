@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseEntity } from '@platon/core/server'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { CourseEntity } from '../entites/course.entity'
@@ -10,6 +9,9 @@ export class CourseSectionEntity extends BaseEntity {
 
   @Column({ type: 'int' })
   order!: number
+
+  @Column({ default: false })
+  hidden!: boolean
 
   @Column({ nullable: true })
   desc?: string

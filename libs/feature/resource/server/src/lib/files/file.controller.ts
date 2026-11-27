@@ -18,7 +18,7 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { BadRequestResponse, SuccessResponse, UnauthorizedResponse } from '@platon/core/common'
+import { BadRequestResponse, CreatedResponse, SuccessResponse, UnauthorizedResponse } from '@platon/core/common'
 import { Configuration, EventService, IRequest, Public, getContentDisposition } from '@platon/core/server'
 import { PLSourceFile } from '@platon/feature/compiler'
 import { ExerciseTransformInput, FileTypes, LATEST, ResourceFile, ResourceTypes } from '@platon/feature/resource/common'
@@ -33,6 +33,7 @@ import {
   OnChangeFileEventPayload,
   OnReleaseRepoEventPayload,
 } from './file.event'
+import { JoinPathPipe } from './path.pipe'
 import { ResourceFileService } from './file.service'
 import { RESOURCES_DIR } from './repo'
 import { ResourceDependencyService } from '../dependency'
@@ -154,20 +155,21 @@ export class ResourceFileController {
   }
 
   @Public()
-  @Get('/:resourceId/:path(*)')
+  @Get('/:resourceId/{*path}')
   async get(
     @Req() request: IRequest,
     @Res({ passthrough: true }) res: Response,
     @Param('resourceId') resourceId: string,
-    @Param('path') path?: string,
     @Query() query?: FileRetrieveDTO
   ): Promise<unknown> {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const cacheLifetime = this.configService.get<number>('cache.filesLifetime', { infer: true })
 
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
 
     if (query?.zipList) {
-      return await repo.listZipFiles(path!)
+      return await repo.listZipFiles(path)
     }
 
     const version = query?.version || LATEST
@@ -181,12 +183,11 @@ export class ResourceFileController {
       const bundle = await repo.bundle(version)
       const stream = fs.createReadStream(bundle)
 
-      stream.on('end', () => {
+      stream.once('close', () => {
         fs.promises.rm(bundle, { force: true }).catch(() => {
           this.logger.error(`Failed to remove temporary bundle: ${bundle}`)
         })
       })
-
       return new StreamableFile(stream)
     }
 
@@ -215,7 +216,7 @@ export class ResourceFileController {
         const stream = fs.createReadStream(archive)
         file = new StreamableFile(stream)
 
-        stream.on('end', () => {
+        stream.once('close', () => {
           fs.promises.rm(archive, { force: true }).catch(() => {
             this.logger.error(`Failed to remove temporary archive: ${archive}`)
           })
@@ -292,7 +293,7 @@ export class ResourceFileController {
     return node
   }
 
-  @Put('/:resourceId/:path(*)')
+  @Put('/:resourceId/{*path}')
   @UseInterceptors(
     FileInterceptor('bundle', {
       dest: './resources/bundles',
@@ -302,10 +303,11 @@ export class ResourceFileController {
   async put(
     @Req() request: IRequest,
     @Param('resourceId') resourceId: string,
-    @Param('path') path: string,
     @Body() input: FileUpdateDTO,
     @UploadedFile() bundle: Express.Multer.File
   ) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')
@@ -342,7 +344,7 @@ export class ResourceFileController {
     return new SuccessResponse()
   }
 
-  @Post('/:resourceId/:path(*)')
+  @Post('/:resourceId/{*path}')
   @UseInterceptors(
     FileInterceptor('file', {
       dest: './resources/uploads',
@@ -353,24 +355,32 @@ export class ResourceFileController {
     @Req() request: IRequest,
     @Param('resourceId') resourceId: string,
     @Body() input: FileCreateDTO[],
-    @UploadedFile() file: Express.Multer.File,
-    @Param('path') path?: string
+    @UploadedFile() file: Express.Multer.File
   ) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')
     }
 
     if (file) {
-      const dstpath = join(path || '', basename(file.originalname))
-      await repo.upload(file.path, dstpath)
+      if (path == 'includes/')
+        try {
+          await repo.mkdir(path)
+        } catch {
+          // Failed to create the "includes" folder, maybe it already exists. -> no problem.
+          // or there is another problem -> upload will fail because folder doesn't exist.
+        }
+      const dstpath = join(path, basename(file.originalname))
+      const newName = await repo.upload(file.path, dstpath)
       this.eventService.emit<OnChangeFileEventPayload>(ON_CHANGE_FILE_EVENT, {
         repo,
         resource,
         path: dstpath,
         operation: 'create',
       })
-      return new SuccessResponse()
+      return new CreatedResponse({ resource: newName })
     }
 
     if (input?.length) {
@@ -398,13 +408,10 @@ export class ResourceFileController {
     return new SuccessResponse()
   }
 
-  @Patch('/:resourceId/:path(*)')
-  async patch(
-    @Req() request: IRequest,
-    @Param('resourceId') resourceId: string,
-    @Param('path') path: string,
-    @Body() input: FileMoveDTO
-  ) {
+  @Patch('/:resourceId/{*path}')
+  async patch(@Req() request: IRequest, @Param('resourceId') resourceId: string, @Body() input: FileMoveDTO) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')
@@ -444,8 +451,10 @@ export class ResourceFileController {
     return new SuccessResponse()
   }
 
-  @Delete('/:resourceId/:path(*)')
-  async delete(@Req() request: IRequest, @Param('resourceId') resourceId: string, @Param('path') path: string) {
+  @Delete('/:resourceId/{*path}')
+  async delete(@Req() request: IRequest, @Param('resourceId') resourceId: string) {
+    const path = new JoinPathPipe().transform(request.params['path'])
+
     const { repo, resource, permissions } = await this.fileService.repo(resourceId, request)
     if (!permissions.write) {
       throw new UnauthorizedResponse('You are not allowed to write this resource')

@@ -1,13 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Editor, OpenRequest } from '@cisstech/nge-ide/core'
 import { Subscription } from 'rxjs'
+
+import { UiFilePreviewComponent } from '@platon/shared/ui'
 
 @Component({
   selector: 'app-pdf-editor',
   templateUrl: './pdf-editor.component.html',
   styleUrls: ['./pdf-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [UiFilePreviewComponent],
 })
 export class PdfEditorComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []

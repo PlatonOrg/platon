@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, ViewChild } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  OnInit,
+  ViewChild,
+  inject,
+} from '@angular/core'
 import {
   AbstractControl,
   FormControl,
@@ -18,9 +26,11 @@ import { MatInputModule } from '@angular/material/input'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzCollapseModule } from 'ng-zorro-antd/collapse'
+import { NzPopoverModule } from 'ng-zorro-antd/popover'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 import { SelectionModel } from '@angular/cdk/collections'
 import { AuthService, DialogModule, DialogService, TagService, UserService } from '@platon/core/browser'
@@ -29,7 +39,6 @@ import {
   CircleTreeComponent,
   ResourceItemComponent,
   ResourcePipesModule,
-  ResourceSearchBarComponent,
   ResourceService,
 } from '@platon/feature/resource/browser'
 import {
@@ -56,7 +65,6 @@ type TemplateSource = {
 }
 
 @Component({
-  standalone: true,
   selector: 'app-resource-create',
   templateUrl: './create.page.html',
   styleUrls: ['./create.page.scss'],
@@ -66,11 +74,9 @@ type TemplateSource = {
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-
     MatInputModule,
     MatCheckboxModule,
     MatFormFieldModule,
-
     NzTagModule,
     NzSpinModule,
     NzIconModule,
@@ -79,19 +85,27 @@ type TemplateSource = {
     NzCollapseModule,
     NzSkeletonModule,
     NzPageHeaderModule,
-
+    NzPopoverModule,
+    NzTooltipModule,
     UiStepDirective,
     UiStepperComponent,
     DialogModule,
-
     CircleTreeComponent,
     ResourcePipesModule,
     ResourceItemComponent,
-    ResourceSearchBarComponent,
     UserCharterComponent,
   ],
 })
 export class ResourceCreatePage implements OnInit {
+  private readonly router = inject(Router)
+  private readonly authService = inject(AuthService)
+  private readonly tagService = inject(TagService)
+  private readonly dialogService = inject(DialogService)
+  private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly resourceService = inject(ResourceService)
+  private readonly userService = inject(UserService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
   protected type!: ResourceTypes
   protected parentId?: string
   protected parentName?: string
@@ -115,6 +129,8 @@ export class ResourceCreatePage implements OnInit {
   protected levels: Level[] = []
   protected templateSources: TemplateSource[] = []
   protected selectedTemplateSources = new SelectionModel<TemplateSource>(true, [])
+  protected circlePickerVisible = false
+  protected loadingAdditionalTemplates = false
   protected infos = new FormGroup({
     name: new FormControl('', [Validators.required]),
     code: new FormControl(''),
@@ -131,20 +147,13 @@ export class ResourceCreatePage implements OnInit {
   @HostListener('window:keydown.meta.enter')
   protected async handleKeyDown(): Promise<void> {
     if (this.stepper.isValid) {
-      this.stepper.isLast ? await this.create() : this.stepper.nextStep()
+      if (this.stepper.isLast) {
+        await this.create()
+      } else {
+        this.stepper.nextStep()
+      }
     }
   }
-
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly tagService: TagService,
-    private readonly dialogService: DialogService,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly resourceService: ResourceService,
-    private readonly userService: UserService,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
 
   async ngOnInit(): Promise<void> {
     this.type = (this.activatedRoute.snapshot.queryParamMap.get('type') || ResourceTypes.CIRCLE) as ResourceTypes
@@ -225,10 +234,14 @@ export class ResourceCreatePage implements OnInit {
           topics: tags.topics as string[],
         })
       )
-      if (resource.type === 'EXERCISE' || resource.type === 'ACTIVITY') {
-        window.open(`/editor/${resource.id}?version=latest`, '_blank')
+      if (resource.type === 'EXERCISE' && resource.templateId) {
+        await this.router.navigate(['/builder', resource.id], { replaceUrl: true })
+      } else {
+        if (resource.type === 'EXERCISE' || resource.type === 'ACTIVITY') {
+          window.open(`/editor/${resource.id}?version=latest`, '_blank', 'noopener,noreferrer')
+        }
+        this.router.navigate(['/resources', resource.id, 'overview'], { replaceUrl: true }).catch(console.error)
       }
-      this.router.navigate(['/resources', resource.id, 'overview'], { replaceUrl: true }).catch(console.error)
     } catch {
       this.dialogService.error('Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !')
     } finally {
@@ -283,6 +296,52 @@ export class ResourceCreatePage implements OnInit {
     this.changeDetectorRef.markForCheck()
   }
 
+  protected async addTemplateSourceFromCircle(circleId: string): Promise<void> {
+    this.circlePickerVisible = false
+    if (this.templateSources.some((s) => s.circle.id === circleId)) {
+      return
+    }
+
+    this.loadingAdditionalTemplates = true
+    this.changeDetectorRef.markForCheck()
+
+    try {
+      const response = await firstValueFrom(
+        this.resourceService.search({
+          types: ['EXERCISE'],
+          configurable: true,
+          parents: [circleId],
+          expands: ['metadata', 'statistic'],
+        })
+      )
+
+      response.resources = response.resources
+        .map((r) => ({
+          ...r,
+          exerciseLength: r.statistic?.exercise?.references?.total ?? 0,
+        }))
+        .sort((a, b) => b.exerciseLength - a.exerciseLength)
+
+      const circleNode = branchFromCircleTree(this.tree, circleId)
+      if (!circleNode) return
+
+      const templates = response.resources
+      if (!templates.length) {
+        this.dialogService.error('Aucun template trouvé dans ce cercle.')
+        return
+      }
+
+      const newSource: TemplateSource = { circle: circleNode, count: templates.length, templates }
+      this.templateSources = [...this.templateSources, newSource]
+      this.selectedTemplateSources.select(newSource)
+    } catch {
+      this.dialogService.error('Une erreur est survenue lors du chargement des templates.')
+    } finally {
+      this.loadingAdditionalTemplates = false
+      this.changeDetectorRef.markForCheck()
+    }
+  }
+
   private codeValidator(codes: string[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const forbidden = [...codes, 'relative'].includes(control.value)
@@ -291,7 +350,7 @@ export class ResourceCreatePage implements OnInit {
   }
 
   protected openTemplateResource(templateId: string): void {
-    window.open(`/resources/${templateId}`, '_blank')
+    window.open(`/resources/${templateId}`, '_blank', 'noopener,noreferrer')
   }
 
   protected selectEditionMode(mode: 'scratch' | 'template', stepper: UiStepperComponent): void {

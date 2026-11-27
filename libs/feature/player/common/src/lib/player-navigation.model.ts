@@ -12,7 +12,11 @@ export const updateActivityNavigationState = (
       exercise.state = AnswerStates.STARTED
     }
   }
-  if (settings?.navigation?.mode === 'manual' || settings?.navigation?.mode === 'next') {
+  if (
+    settings?.navigation?.mode === 'manual' ||
+    settings?.navigation?.mode === 'next' ||
+    settings?.navigation?.mode === 'validation'
+  ) {
     navigation.current = navigation.exercises.find((item) => {
       if (item.sessionId === currentSessionId) {
         markAsStarted(item)

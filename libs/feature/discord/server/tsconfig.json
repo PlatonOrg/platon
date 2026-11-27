@@ -5,10 +5,10 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    "ignoreDeprecations": "6.0"
   },
   "files": [],
   "include": [],

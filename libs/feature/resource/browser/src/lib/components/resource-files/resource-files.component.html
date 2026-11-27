@@ -1,157 +1,158 @@
-<ng-container *ngIf="!loading; else spinner">
-  <div class="files">
-    <div class="row" [ngClass]="{ 'has-exercises': exerciseTree?.length }">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>
-            Fichiers
-            <span>
-              <ng-container *ngIf="code"> &#64;{{ code }}:{{ version }} </ng-container>
-            </span>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <nz-tree *ngIf="nodes.length; else noFiles" nzBlockNode [nzData]="nodes" [nzTreeTemplate]="nzTreeTemplate">
-          </nz-tree>
-        </mat-card-content>
-      </mat-card>
-      <mat-card *ngIf="exerciseTree?.length">
-        <mat-card-header>
-          <mat-card-title>
-            Exercices
-            <span>
-              <ng-container *ngIf="code"> &#64;{{ code }}:{{ version }} </ng-container>
-            </span>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <nz-tree
-            nzBlockNode
-            [nzData]="exerciseTree ?? []"
-            nzExpandAll="true"
-            [nzTreeTemplate]="nzTreeExercisesTemplate"
-          >
-            <ng-template #nzTreeExercisesTemplate let-node let-origin="origin">
-              <ng-container>
-                @if (!node.isLeaf) {
-                <div class="node">
-                  <ui-icon
-                    [icon]="node.title | iconFile : { alt: node.title, expanded: node.isExpanded, isDirectory: true }"
-                  />
-                  <div class="folder-name">{{ node.title }}</div>
-                </div>
-                } @else {
-                <div class="node" (dblclick)="openUrl(origin.url)">
-                  <ui-icon [icon]="'exercise.ple' | iconFile : { alt: 'exercise.ple' }" />
-                  <div class="file-name">{{ node.title }}</div>
-                </div>
-                }
-              </ng-container>
-            </ng-template>
-          </nz-tree>
-        </mat-card-content>
-      </mat-card>
-    </div>
-    <div class="row">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Historique des fichiers</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div *ngFor="let commit of commits">
-            @if (commit.isMore) {
-            <div class="more">
-              {{ commit.message }}
-              <button nz-button nzType="link" nzSize="small" (click)="refreshGitLog(false)">(Voir plus)</button>
-            </div>
-            } @else {
-            <div class="timeline-item">
-              @if (commit.displayAuthor) {
-              <user-avatar showUsername="inline" [userIdOrName]="commit.author" />
-              <span> - {{ commit.date | date : 'dd/MM/yyyy à HH:mm' }}</span>
-              }
-              <div class="commit-message">
-                <span class="hidden-date">{{ commit.date | date : 'HH:mm' }}</span>
-                <span class="message">
-                  <div class="message-content">{{ commit.message }}</div>
-                  <div *ngFor="let tag of commit.tags" class="tag">{{ tag }}</div>
-                </span>
-              </div>
-            </div>
+@if (!loading) {
+<div class="files">
+  <div class="row" [ngClass]="{ 'has-exercises': $safeNavigationMigration(exerciseTree?.length) }">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          Fichiers
+          <span>
+            @if (code) { &#64;{{ code }}:{{ version }}
             }
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+          </span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (nodes.length) {
+        <nz-tree nzBlockNode [nzData]="nodes" [nzTreeTemplate]="nzTreeTemplate"> </nz-tree>
+        } @else {
+        <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="noFilesContent">
+          <ng-template #noFilesContent>
+            <p>Aucun fichier à afficher</p>
+          </ng-template>
+        </nz-empty>
+        }
+      </mat-card-content>
+    </mat-card>
+    @if (exerciseTree?.length) {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          Exercices
+          <span>
+            @if (code) { &#64;{{ code }}:{{ version }}
+            }
+          </span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <nz-tree
+          nzBlockNode
+          [nzData]="exerciseTree ?? []"
+          nzExpandAll="true"
+          [nzTreeTemplate]="nzTreeExercisesTemplate"
+        >
+          <ng-template #nzTreeExercisesTemplate let-node let-origin="origin">
+            <ng-container>
+              @if (!node.isLeaf) {
+              <div class="node">
+                <ui-icon
+                  [icon]="node.title | iconFile : { alt: node.title, expanded: node.isExpanded, isDirectory: true }"
+                />
+                <div class="folder-name">{{ node.title }}</div>
+              </div>
+              } @else {
+              <div class="node" (dblclick)="openUrl(origin.url)">
+                <ui-icon [icon]="'exercise.ple' | iconFile : { alt: 'exercise.ple' }" />
+                <div class="file-name">{{ node.title }}</div>
+              </div>
+              }
+            </ng-container>
+          </ng-template>
+        </nz-tree>
+      </mat-card-content>
+    </mat-card>
+    }
   </div>
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Documentation (readme.md)</mat-card-title>
-      <mat-card-subtitle>
-        Nous vous conseillons de documenter vos ressources pour faciliter leur utilisation par les autres enseignants.
-        Vous pouvez facilement le faire en modifiant le fichier
-        <b>README.md</b> dans les fichiers de la ressource.
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <nge-markdown *ngIf="readme; else noDoc" [file]="readme.url" />
-    </mat-card-content>
-  </mat-card>
-</ng-container>
+  <div class="row">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Historique des fichiers</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @for (commit of commits; track commit) {
+        <div>
+          @if (commit.isMore) {
+          <div class="more">
+            {{ commit.message }}
+            <button nz-button nzType="link" nzSize="small" (click)="refreshGitLog(false)">(Voir plus)</button>
+          </div>
+          } @else {
+          <div class="timeline-item">
+            @if (commit.displayAuthor) {
+            <user-avatar showUsername="inline" [userIdOrName]="commit.author" />
+            <span> - {{ commit.date | date : 'dd/MM/yyyy à HH:mm' }}</span>
+            }
+            <div class="commit-message">
+              <span class="hidden-date">{{ commit.date | date : 'HH:mm' }}</span>
+              <span class="message">
+                <div class="message-content">{{ commit.message }}</div>
+                @for (tag of commit.tags; track tag) {
+                <div class="tag">{{ tag }}</div>
+                }
+              </span>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Documentation (readme.md)</mat-card-title>
+    <mat-card-subtitle>
+      Nous vous conseillons de documenter vos ressources pour faciliter leur utilisation par les autres enseignants.
+      Vous pouvez facilement le faire en modifiant le fichier
+      <b>README.md</b> dans les fichiers de la ressource.
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (readme) {
+    <nge-markdown [file]="readme.url" />
+    } @else {
+    <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="noDocContent">
+      <ng-template #noDocContent>
+        <p>Aucune documentation</p>
+      </ng-template>
+    </nz-empty>
+    }
+  </mat-card-content>
+</mat-card>
+} @else {
+<nz-spin nzSimple nzSize="large"></nz-spin>
+}
 
 <nz-dropdown-menu #menu="nzDropdownMenu">
   <ul nz-menu>
-    <ng-container *ngIf="selection">
-      <ng-container *ngIf="selection.type === 'file'">
-        <li nz-menu-item (click)="selected.emit(selection)">Ouvrir</li>
-      </ng-container>
-      <li
-        nz-menu-item
-        *ngIf="selection.version === 'latest' && selection.type === 'folder'"
-        (click)="upload(selection)"
-      >
-        Importer
-      </li>
-      <li nz-menu-item (click)="download()">Télécharger</li>
-      <li nz-menu-item (click)="copyPath()">Copier le code y faire référence dans un PL</li>
-    </ng-container>
+    @if (selection) { @if (selection.type === 'file') {
+    <li nz-menu-item (click)="selected.emit(selection)">Ouvrir</li>
+    } @if (selection.version === 'latest' && selection.type === 'folder') {
+    <li nz-menu-item (click)="upload(selection)">Importer</li>
+    }
+    <li nz-menu-item (click)="download()">Télécharger</li>
+    <li nz-menu-item (click)="copyPath()">Copier le code y faire référence dans un PL</li>
+    }
   </ul>
 </nz-dropdown-menu>
 
 <ng-template #nzTreeTemplate let-node let-origin="origin">
   <ng-container>
-    <div class="node" *ngIf="!node.isLeaf" (contextmenu)="contextMenu($event, menu, node)">
+    @if (!node.isLeaf) {
+    <div class="node" (contextmenu)="contextMenu($event, menu, node)">
       <ui-icon [icon]="node.title | iconFile : { alt: node.title, expanded: node.isExpanded, isDirectory: true }" />
       <div class="folder-name">{{ node.title }}</div>
     </div>
+    } @if (node.isLeaf) {
     <div
       class="node"
-      *ngIf="node.isLeaf"
       (dblclick)="selected.emit($any(index.get(node.key)))"
       (contextmenu)="contextMenu($event, menu, node)"
     >
       <ui-icon [icon]="node.title | iconFile : { alt: node.title }" />
       <div class="file-name">{{ node.title }}</div>
     </div>
+    }
   </ng-container>
-</ng-template>
-
-<ng-template #noFiles>
-  <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="content">
-    <ng-template #content>
-      <p>Aucun fichier à afficher</p>
-    </ng-template>
-  </nz-empty>
-</ng-template>
-
-<ng-template #noDoc>
-  <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="content">
-    <ng-template #content>
-      <p>Aucune documentation</p>
-    </ng-template>
-  </nz-empty>
-</ng-template>
-
-<ng-template #spinner>
-  <nz-spin nzSimple nzSize="large"></nz-spin>
 </ng-template>

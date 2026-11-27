@@ -6,8 +6,8 @@ branding:
 
 inputs:
   node-version:
-    description: 'The version of Node.js that will be used'
-    required: true
+    description: 'The version of Node.js that will be used (falls back to .nvmrc if not set)'
+    required: false
 
 outputs:
   cache-hit:
@@ -20,15 +20,27 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4.0.3
       with:
-        node-version: ${{inputs.node-version}}
+        node-version: ${{ inputs.node-version }}
+        node-version-file: '.nvmrc'
 
-    - name: Cache ~/.cache
+    - name: Install system dependencies for native modules
+      run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
+      shell: bash
+
+    - name: Cache dependencies
       id: cache
       uses: actions/cache@v4
       with:
-        path: ~/.cache
-        key: ${{ runner.os }}-cache-${{ hashFiles('./yarn.lock') }}
+        path: |
+          ~/.cache
+          node_modules
+        key: ${{ runner.os }}-node${{ inputs.node-version }}-${{ hashFiles('./yarn.lock') }}
 
     - name: Install
+      if: steps.cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
       shell: bash
+
+    - name: Generate Graphql Types
+      shell: bash
+      run: ./bin/graphql/generate.sh

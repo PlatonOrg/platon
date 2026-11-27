@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { Subscription } from 'rxjs'
 import { CoursePresenter } from '../../course.presenter'
@@ -34,6 +34,12 @@ import { DialogService } from '@platon/core/browser'
   ],
 })
 export class CourseDemoPage implements OnInit, OnDestroy {
+  private readonly presenter = inject(CoursePresenter)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly clipboard = inject(Clipboard)
+  private readonly dialogService = inject(DialogService)
+  private document = inject(DOCUMENT)
+
   private readonly subscriptions: Subscription[] = []
 
   protected context = this.presenter.defaultContext()
@@ -41,14 +47,6 @@ export class CourseDemoPage implements OnInit, OnDestroy {
   protected demoUri = ''
   protected hasDemo = false
   protected saving = false
-
-  constructor(
-    private readonly presenter: CoursePresenter,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly clipboard: Clipboard,
-    private readonly dialogService: DialogService,
-    @Inject(DOCUMENT) private document: Document
-  ) {}
 
   protected get canEdit(): boolean {
     const { user } = this.context

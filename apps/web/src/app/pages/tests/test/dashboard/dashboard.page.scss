@@ -4,7 +4,7 @@
 
 .dashboard {
   display: flex;
-  height: 70vh;;
+  height: 70vh;
   gap: 16px;
   padding: 16px;
   box-sizing: border-box;
@@ -127,7 +127,7 @@ course-member-table {
   flex-direction: column;
   padding: 16px;
   border-radius: 12px;
-  background-color: var(--mdc-elevated-card-container-color);
+  background-color: var(--mat-card-elevated-container-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e0e0e0;
   margin-bottom: 16px;
@@ -213,7 +213,7 @@ course-member-table {
 .activity-stats {
   padding: 16px;
   border-radius: 12px;
-  background-color: var(--mdc-elevated-card-container-color);
+  background-color: var(--mat-card-elevated-container-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e0e0e0;
   margin-bottom: 16px;

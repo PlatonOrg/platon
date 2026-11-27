@@ -4,9 +4,9 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "ignoreDeprecations": "6.0"
   },
   "files": [],
   "include": [],
@@ -16,6 +16,12 @@
     },
     {
       "path": "./tsconfig.spec.json"
+    },
+    {
+      "path": "./tsconfig.integration.json"
+    },
+    {
+      "path": "./tsconfig.e2e.json"
     }
   ],
   "extends": "../../../../tsconfig.base.json",

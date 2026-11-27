@@ -3,32 +3,29 @@
     <ng-content></ng-content>
   </section>
 </nz-skeleton>
-<section *ngIf="state === 'READY'">
-  <nz-tabset [nzLinkExact]="false" nzSize="default" nzType="line" [nzSelectedIndex]="selectedTabIndex">
-    <ng-container *ngFor="let tab of tabs; trackBy: trackByIndex">
-      <nz-tab>
-        <a *nzTabLink nz-tab-link [routerLink]="tab.link" [queryParams]="tab.linkParams">
-          <ng-container *ngTemplateOutlet="tab.templateRef"></ng-container>
-        </a>
-      </nz-tab>
-    </ng-container>
-  </nz-tabset>
+@if (state === 'READY') {
+<section>
+  <nz-tabs [nzLinkExact]="false" nzSize="default" nzType="line" [nzSelectedIndex]="selectedTabIndex">
+    @for (tab of tabs; track $index) {
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="tab.link" [queryParams]="tab.linkParams">
+        <ng-container *ngTemplateOutlet="tab.templateRef"></ng-container>
+      </a>
+    </nz-tab>
+    }
+  </nz-tabs>
 </section>
+}
 <nz-skeleton [nzActive]="state === 'LOADING'" [nzLoading]="state === 'LOADING'">
   <section>
-    <ng-container [ngSwitch]="state">
-      <ng-container *ngSwitchCase="'READY'">
-        <router-outlet />
-      </ng-container>
-      <ng-container *ngSwitchCase="'SERVER_ERROR'">
-        <ui-error-500 />
-      </ng-container>
-      <ng-container *ngSwitchCase="'FORBIDDEN'">
-        <ui-error-403 />
-      </ng-container>
-      <ng-container *ngSwitchCase="'NOT_FOUND'">
-        <ui-error-404 />
-      </ng-container>
-    </ng-container>
+    @switch (state) { @case ('READY') {
+    <router-outlet />
+    } @case ('SERVER_ERROR') {
+    <ui-error-500 />
+    } @case ('FORBIDDEN') {
+    <ui-error-403 />
+    } @case ('NOT_FOUND') {
+    <ui-error-404 />
+    } }
   </section>
 </nz-skeleton>

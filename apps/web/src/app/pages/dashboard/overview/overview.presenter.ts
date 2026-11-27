@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core'
 import { AuthService } from '@platon/core/browser'
-import { User } from '@platon/core/common'
+import { User, UserRoles } from '@platon/core/common'
 import { ResultService, UserDashboardModel } from '@platon/feature/result/browser'
 import { LayoutState, layoutStateFromError } from '@platon/shared/ui'
 import { BehaviorSubject, firstValueFrom } from 'rxjs'
@@ -23,10 +23,12 @@ export class OverviewPresenter {
 
   private async refresh(): Promise<void> {
     try {
-      const [user, dashboard] = await Promise.all([
-        this.authService.ready(),
-        firstValueFrom(this.resultService.userDashboard()),
-      ])
+      const [user] = await Promise.all([this.authService.ready()])
+      let dashboard: UserDashboardModel | undefined = undefined
+
+      if (user?.role === UserRoles.student) {
+        dashboard = await firstValueFrom(this.resultService.userDashboard())
+      }
 
       this.updateContext({
         state: 'READY',

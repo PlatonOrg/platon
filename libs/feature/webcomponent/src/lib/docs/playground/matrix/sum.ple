@@ -1,0 +1,54 @@
+sandbox = "node"
+
+// Matrice saisie par l'apprenant : rows × cols cellules, lues ligne par ligne dans cells.
+resultat = :wc-matrix
+resultat.rows = 2
+resultat.cols = 2
+
+// Matrices de l'énoncé, en lecture seule.
+matA = :wc-matrix
+matA.disabled = true
+matB = :wc-matrix
+matB.disabled = true
+
+builder == #!lang=js
+const alea = () => Math.floor(Math.random() * 19) - 9
+A = [[alea(), alea()], [alea(), alea()]]
+B = [[alea(), alea()], [alea(), alea()]]
+
+const versCellules = (m) => m.flat().map((v) => ({ value: String(v) }))
+matA.rows = 2; matA.cols = 2; matA.cells = versCellules(A)
+matB.rows = 2; matB.cols = 2; matB.cells = versCellules(B)
+resultat.cells = [{ value: '' }, { value: '' }, { value: '' }, { value: '' }]
+==
+
+title ==
+Somme de deux matrices
+==
+
+statement ==
+Calculez \( A + B \) avec :
+
+<div style="display: flex; gap: 24px; align-items: center">
+<span>\( A = \)</span> {{ matA }} <span>\( B = \)</span> {{ matB }}
+</div>
+==
+
+form ==
+{{ resultat }}
+==
+
+grader == #!lang=js
+const attendu = A.flat().map((v, i) => v + B.flat()[i])
+let corrects = 0
+resultat.cells.forEach((cellule, i) => {
+  const ok = Number(cellule.value) === attendu[i] && String(cellule.value).trim() !== ''
+  if (ok) corrects++
+  // Colore chaque cellule selon sa justesse.
+  cellule.css = ok ? 'success-state' : 'error-state'
+})
+
+grade = Math.round((100 * corrects) / attendu.length)
+feedback.type = grade === 100 ? 'success' : 'error'
+feedback.content = `${corrects} coefficient(s) correct(s) sur ${attendu.length}.`
+==

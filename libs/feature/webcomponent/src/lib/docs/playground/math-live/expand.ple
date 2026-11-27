@@ -1,0 +1,94 @@
+sandbox = "node"
+
+// wc-math-live est un champ de saisie mathématique avec clavier virtuel.
+// La saisie est transmise au grader en LaTeX dans reponse.value.
+reponse = :wc-math-live
+
+builder == #!lang=js
+// a ≥ 2 pour éviter d'afficher « 1x » dans l'énoncé et la solution.
+a = 2 + Math.floor(Math.random() * 4)
+b = 1 + Math.floor(Math.random() * 5)
+==
+
+title ==
+Développer une identité remarquable
+==
+
+statement ==
+Développez et réduisez l'expression : \( ({{ a }}x + {{ b }})^2 \)
+==
+
+form ==
+{{ reponse }}
+==
+
+grader == #!lang=js
+// Conversion d'une expression LaTeX simple en expression JavaScript.
+function versJs(latex) {
+  return latex
+    .replace(/\\left|\\right/g, '')
+    .replace(/\\cdot|\\times/g, '*')
+    .replace(/[{}\s]/g, '')
+    .replace(/\^/g, '**')
+    .replace(/(\d)(x|\()/g, '$1*$2')
+    .replace(/(x|\))(x|\(|\d)/g, '$1*$2')
+}
+
+const saisie = reponse.value || ''
+const expression = versJs(saisie)
+
+// On n'évalue que des expressions en x : une autre lettre (y, \pi...) ou une commande LaTeX
+// non prise en charge ferait échouer le grader.
+const valide = /^[x\d+\-*/().]+$/.test(expression)
+
+let egal = false
+if (valide) {
+  try {
+    const f = new Function('x', 'return ' + expression)
+    const valeurs = [-2, -1, 0, 1, 2, 3]
+    egal = valeurs.every((x) => Math.abs(f(x) - (a * x + b) ** 2) < 1e-9)
+  } catch (e) {
+    egal = false
+  }
+}
+
+// Une expression réduite contient au plus un terme de chaque degré (x², x et constante).
+function estReduite(latex) {
+  const degres = latex
+    .replace(/[{}\s]/g, '')
+    .split(/[+-]/)
+    .filter((terme) => terme !== '')
+    .map((terme) => (terme.includes('^') ? 2 : terme.includes('x') ? 1 : 0))
+  return new Set(degres).size === degres.length
+}
+
+if (!saisie.trim()) {
+  grade = -2 // Donner une note inférieure à 0 permet de ne pas compter la soumission comme une tentative.
+  feedback.type = 'warning'
+  feedback.content = 'Saisissez une expression avant de valider.'
+} else if (!valide) {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = "Votre expression ne doit contenir que la variable x, des nombres et les opérations +, −, × et puissance."
+} else if (!egal) {
+  grade = 0
+  feedback.type = 'error'
+  feedback.content = "Votre expression n'est pas égale à l'expression de départ."
+} else if (saisie.includes('(')) {
+  grade = 50
+  feedback.type = 'warning'
+  feedback.content = "Votre expression est juste, mais elle n'est pas développée."
+} else if (!estReduite(saisie)) {
+  grade = 50
+  feedback.type = 'warning'
+  feedback.content = "Votre expression est juste et développée, mais elle n'est pas réduite."
+} else {
+  grade = 100
+  feedback.type = 'success'
+  feedback.content = 'Bravo !'
+}
+==
+
+solution ==
+\( ({{ a }}x + {{ b }})^2 = {{ a * a }}x^2 + {{ 2 * a * b }}x + {{ b * b }} \)
+==

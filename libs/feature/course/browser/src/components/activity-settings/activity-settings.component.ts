@@ -12,6 +12,8 @@ import {
   computed,
   signal,
   ViewChild,
+  output,
+  inject,
 } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
@@ -21,6 +23,7 @@ import differenceInMilliseconds from 'date-fns/differenceInMilliseconds'
 
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
+import { MatDialog, MatDialogModule } from '@angular/material/dialog'
 
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker'
@@ -41,10 +44,12 @@ import { NzTimePickerModule } from 'ng-zorro-antd/time-picker'
 
 import { AuthService, DialogModule, DialogService } from '@platon/core/browser'
 import {
-  Activity,
+  type Activity,
+  ActivityReloadPreview,
   calculateActivityOpenState,
   CourseGroup,
   CourseMember,
+  ReloadActivity,
   Restriction,
   RestrictionConfig,
   RestrictionList,
@@ -52,6 +57,7 @@ import {
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { firstValueFrom } from 'rxjs'
 import { CourseService } from '../../api/course.service'
+import { ActivityReloadDialogComponent } from './activity-reload-dialog.component'
 import { RestrictionManagerComponent } from './restriction-manager/restriction-manager.component'
 import { CourseColorPickerComponent } from '../color-picker/color-picker.component'
 import { User } from '@platon/core/common'
@@ -59,13 +65,13 @@ import { ActivityRestrictionsValidatorService } from '../../services/activity-re
 import { ActivitySettings } from '@platon/feature/compiler'
 
 @Component({
-  standalone: true,
   selector: 'course-activity-settings',
   templateUrl: './activity-settings.component.html',
   styleUrls: ['./activity-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    MatDialogModule,
     FormsModule,
     ReactiveFormsModule,
     DragDropModule,
@@ -96,8 +102,15 @@ import { ActivitySettings } from '@platon/feature/compiler'
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CourseActivitySettingsComponent implements OnInit {
+  private readonly courseService = inject(CourseService)
+  private readonly dialogService = inject(DialogService)
+  private readonly dialog = inject(MatDialog)
+  private readonly authService = inject(AuthService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly validatorService = inject(ActivityRestrictionsValidatorService)
+
   @Input() activity!: Activity
-  @Output() activityChange = new EventEmitter<Activity>()
+  activityChange = output<Activity>()
   @Output() saveRequested = new EventEmitter<void>()
   protected accessPeriods = signal<RestrictionList[]>([])
 
@@ -106,6 +119,7 @@ export class CourseActivitySettingsComponent implements OnInit {
     seedPerExercise: false,
     navigation: {
       mode: 'manual',
+      random: false,
     },
     actions: {
       retry: 0,
@@ -128,7 +142,7 @@ export class CourseActivitySettingsComponent implements OnInit {
   // Getters pour garantir que les objets ne sont jamais undefined
   get navigation() {
     if (!this.activitySettings.navigation) {
-      this.activitySettings.navigation = { mode: 'manual' }
+      this.activitySettings.navigation = { mode: 'manual', random: false }
     }
     return this.activitySettings.navigation
   }
@@ -168,7 +182,7 @@ export class CourseActivitySettingsComponent implements OnInit {
   }
 
   currentHue = 210
-
+  protected hidden = false
   protected editOpenDate = false
   protected editCloseDate = false
   protected tempOpenDate?: Date
@@ -190,17 +204,9 @@ export class CourseActivitySettingsComponent implements OnInit {
   protected activityColors: number[] = []
   private user?: User
 
-  constructor(
-    private readonly courseService: CourseService,
-    private readonly dialogService: DialogService,
-    private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly validatorService: ActivityRestrictionsValidatorService
-  ) {}
-
   async ngOnInit(): Promise<void> {
     this.currentHue = this.activity.colorHue ?? 210
-
+    this.hidden = this.activity.hidden ? this.activity.hidden : false
     this.activityColors = await firstValueFrom(this.courseService.getCourseColors(this.activity.courseId))
 
     this.loadingSignal.set(true)
@@ -230,7 +236,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.tempOpenDate = this.activity.openAt ? new Date(this.activity.openAt) : undefined
     this.tempCloseDate = this.activity.closeAt ? new Date(this.activity.closeAt) : undefined
 
-    // Initialiser les paramètres de l'activité
     if (this.activity.activitySettings) {
       this.activitySettings = { ...this.activitySettings, ...this.activity.activitySettings }
     }
@@ -254,6 +259,10 @@ export class CourseActivitySettingsComponent implements OnInit {
         return updated
       }
     })
+  }
+
+  protected updateHidden() {
+    this.hidden = !this.hidden
   }
 
   protected newAccessPeriod() {
@@ -409,6 +418,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
+            hidden: this.hidden,
             ignoreRestrictions: false,
             activitySettings: settingsToSend,
           })
@@ -419,6 +429,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             colorHue: this.currentHue,
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
+            hidden: this.hidden,
             ignoreRestrictions: true,
             activitySettings: settingsToSend,
           })
@@ -432,6 +443,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             colorHue: this.currentHue,
             openAt: this.tempOpenDate,
             closeAt: this.tempCloseDate,
+            hidden: this.hidden,
             activitySettings: settingsToSend,
           })
         )
@@ -441,6 +453,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         await firstValueFrom(
           this.courseService.updateActivity(this.activity, {
             colorHue: this.currentHue,
+            hidden: this.hidden,
             activitySettings: settingsToSend,
           })
         )
@@ -462,6 +475,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             closeAt: userSpecificDate.end,
             state: calculateActivityOpenState({ openAt: userSpecificDate.start, closeAt: userSpecificDate.end }),
             colorHue: this.currentHue,
+            hidden: this.hidden,
           })
         )
       } else {
@@ -472,6 +486,7 @@ export class CourseActivitySettingsComponent implements OnInit {
             closeAt: this.activity.closeAt,
             state: result[0].state,
             colorHue: this.currentHue,
+            hidden: this.hidden,
           })
         )
       }
@@ -492,7 +507,7 @@ export class CourseActivitySettingsComponent implements OnInit {
 
       this.dialogService.success('Activité mise à jour !')
       this.saveRequested.emit()
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error(
         "Une erreur est survenue lors de la mise à jour de l'activité, veuillez réessayer un peu plus tard !"
       )
@@ -502,7 +517,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
-  // Getter pour obtenir la durée sous forme de Date (pour le time-picker)
   get durationAsDate(): Date {
     const duration = this.activitySettings.duration || 0
     const hours = Math.floor(duration / 3600)
@@ -513,7 +527,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     return date
   }
 
-  // Setter pour mettre à jour la durée à partir d'un objet Date (depuis le time-picker)
   set durationAsDate(date: Date) {
     if (date) {
       const hours = date.getHours()
@@ -525,7 +538,6 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
-  // Getters et Setters pour les inputs séparés heures, minutes, secondes
   get durationHours(): number {
     const duration = this.activitySettings.duration || 0
     return Math.floor(duration / 3600)
@@ -579,7 +591,20 @@ export class CourseActivitySettingsComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
 
     try {
-      const activity = await firstValueFrom(this.courseService.reloadActivity(this.activity))
+      const preview = await firstValueFrom(this.courseService.reloadActivityPreview(this.activity))
+      const input = await firstValueFrom(
+        this.dialog
+          .open<ActivityReloadDialogComponent, ActivityReloadPreview, ReloadActivity>(ActivityReloadDialogComponent, {
+            data: preview,
+            width: '40rem',
+          })
+          .afterClosed()
+      )
+      if (!input) {
+        return
+      }
+
+      const activity = await firstValueFrom(this.courseService.reloadActivity(this.activity, input))
 
       this.activityChange.emit((this.activity = activity))
 
@@ -610,6 +635,10 @@ export class CourseActivitySettingsComponent implements OnInit {
     }
   }
 
+  private resetTempDates(): void {
+    this.tempOpenDate = undefined
+    this.tempCloseDate = undefined
+  }
   protected async close(): Promise<void> {
     this.updatingSignal.set(true)
     this.changeDetectorRef.markForCheck()
@@ -624,7 +653,6 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
-
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }
@@ -643,6 +671,7 @@ export class CourseActivitySettingsComponent implements OnInit {
         state: activity.state,
       })
     )
+    this.resetTempDates()
     this.updatingSignal.set(false)
     this.changeDetectorRef.markForCheck()
   }

@@ -1,3 +1,10 @@
 nz-button i {
   color: var(--brand-text-primary);
 }
+
+.current-user-label {
+  font-size: 0.8em;
+  color: var(--brand-text-secondary);
+  font-style: italic;
+  margin-left: 6px;
+}

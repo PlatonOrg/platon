@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { CreateResourceInvitation, Resource, ResourceInvitation } from '@platon/feature/resource/common'
 import { Observable } from 'rxjs'
@@ -8,9 +8,7 @@ import { ResourceInvitationProvider } from '../models/resource-invitation-provid
 
 @Injectable()
 export class RemoteResourceInvitationProvider extends ResourceInvitationProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   createInvitation(resource: string | Resource, input: CreateResourceInvitation): Observable<ResourceInvitation> {
     return this.http

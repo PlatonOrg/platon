@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { AuthService, DialogService } from '@platon/core/browser'
@@ -13,15 +12,14 @@ import { firstValueFrom } from 'rxjs'
 import { ResourceService } from '../../api/resource.service'
 import { TemplateCardComponent } from '../template-card/template-card.component'
 import { User } from '@platon/core/common'
+import { createExerciseBuilderDefaultName } from '@platon/feature/builder/browser'
 
 @Component({
-  standalone: true,
   selector: 'resource-template-selection',
   templateUrl: './template-selection.component.html',
   styleUrls: ['./template-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     NzIconModule,
     NzTableModule,
     NzButtonModule,
@@ -44,17 +42,26 @@ export class TemplateSelectionComponent implements OnInit {
   protected templates: Resource[] = []
 
   async ngOnInit(): Promise<void> {
-    this.templates = (
-      await firstValueFrom(
+    const [user, templates] = await Promise.all([
+      this.authService.ready(),
+      firstValueFrom(
         this.resourceService.search({
           types: [ResourceTypes.EXERCISE],
           configurable: true,
           certifiedTemplate: true,
           expands: ['metadata', 'statistic', 'permissions'],
         })
-      )
-    ).resources
-    this.user = (await this.authService.ready()) as User
+      ),
+    ])
+
+    this.templates = templates.resources
+    this.user = user || undefined
+
+    this.templates.sort((a, b) => {
+      const aRefs = a.statistic?.exercise?.references?.template ?? 0
+      const bRefs = b.statistic?.exercise?.references?.template ?? 0
+      return bRefs - aRefs
+    })
 
     this.changeDetector.markForCheck()
   }
@@ -66,15 +73,7 @@ export class TemplateSelectionComponent implements OnInit {
     try {
       const personalCircle = await firstValueFrom(this.resourceService.circle(this.user.username))
 
-      const timestamp = new Date().toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-      const templateName = 'Exercice'
-      const defaultName = `${templateName} - ${timestamp}`
+      const defaultName = createExerciseBuilderDefaultName()
 
       const resource = await firstValueFrom(
         this.resourceService.create({
@@ -90,9 +89,8 @@ export class TemplateSelectionComponent implements OnInit {
           topics: [],
         })
       )
-
-      await this.router.navigate(['/builder', resource.id], { replaceUrl: true })
-    } catch (error) {
+      await this.router.navigate(['/builder', resource.id])
+    } catch (_error) {
       this.dialogService.error('Une erreur est survenue lors de la création de la ressource')
 
       this.router
@@ -110,7 +108,6 @@ export class TemplateSelectionComponent implements OnInit {
   }
 
   protected async selectTemplate(template: Resource): Promise<void> {
-    console.log(template)
     await this.createQuickResource(template)
   }
 }

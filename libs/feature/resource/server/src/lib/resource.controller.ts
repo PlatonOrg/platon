@@ -224,6 +224,8 @@ export class ResourceController {
         ownerId: req.user.id,
         parentId: userCircle.id,
         name: `${existing.name} (Copie)`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         status: ResourceStatus.DRAFT,
       })
       await this.fileService.copy(existing.id, duplicatedResourceEntity.id, req)

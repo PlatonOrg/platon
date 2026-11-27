@@ -6,14 +6,14 @@ import { Repository } from 'typeorm'
 import { Optional } from 'typescript-optional'
 import { CasEntity } from './entities/cas.entity'
 import { CreateCasDTO, UpdateCasDTO } from './cas.dto'
-import { LTIService } from '@platon/feature/lti/server'
+import { LTIOldService } from '@platon/feature/lti/server'
 
 @Injectable()
 export class CasService {
   constructor(
     @InjectRepository(CasEntity)
     private readonly casRepo: Repository<CasEntity>,
-    private readonly LtiService: LTIService
+    private readonly LtiService: LTIOldService
   ) {}
 
   async findCasById(id: string): Promise<Optional<CasEntity>> {
@@ -30,6 +30,20 @@ export class CasService {
     )
   }
 
+  /**
+   * Ids of the LMSes linked to the CAS, read directly from the join table: unlike `cas.lmses`,
+   * they include deleted LTI 1.1 LMSes whose id was taken over by an LTI 1.3 platform.
+   */
+  async findLmsIds(casId: string): Promise<string[]> {
+    const rows = await this.casRepo.manager
+      .createQueryBuilder()
+      .select('link."lmsesId"', 'id')
+      .from('cas_lmses_lmses', 'link')
+      .where('link."casId" = :casId', { casId })
+      .getRawMany<{ id: string }>()
+    return rows.map((row) => row.id)
+  }
+
   async searchCas(filters: CasFilters = {}): Promise<[CasEntity[], number]> {
     const query = this.casRepo.createQueryBuilder('cas')
     query.leftJoinAndSelect('cas.lmses', 'lmses')
@@ -37,7 +51,7 @@ export class CasService {
     if (filters.search) {
       query.andWhere(
         `(
-        name ILIKE :search
+        cas.name ILIKE :search
       )`,
         { search: `%${filters.search}%` }
       )
@@ -45,9 +59,9 @@ export class CasService {
 
     if (filters.order) {
       const fields: Record<CasOrdering, string> = {
-        NAME: 'name',
-        CREATED_AT: 'created_at',
-        UPDATED_AT: 'updated_at',
+        NAME: 'cas.name',
+        CREATED_AT: 'cas.created_at',
+        UPDATED_AT: 'cas.updated_at',
       }
 
       const orderings: Record<CasOrdering, keyof typeof OrderingDirections> = {

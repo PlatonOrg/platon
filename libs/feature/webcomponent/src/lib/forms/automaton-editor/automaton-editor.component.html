@@ -1,10 +1,10 @@
 <div #container class="automaton-editor-container" [style.height]="state.height + 'px'">
   <div class="automaton-editor-actions-top">
-    <ng-container *ngFor="let action of actions">
-      <button nz-button (click)="$event.stopPropagation(); run(action)">
-        {{ action.name }}
-      </button>
-    </ng-container>
+    @for (action of actions; track action) {
+    <button nz-button (click)="$event.stopPropagation(); run(action)">
+      {{ action.name }}
+    </button>
+    }
   </div>
   <div id="canvas-view">
     <div class="automaton-editor-canvas"></div>

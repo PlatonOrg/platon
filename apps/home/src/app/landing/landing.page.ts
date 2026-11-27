@@ -14,7 +14,6 @@ import { CommonModule } from '@angular/common'
 gsap.registerPlugin(TextPlugin, ScrollTrigger)
 
 @Component({
-  standalone: true,
   selector: 'app-landing',
   templateUrl: './landing.page.html',
   styleUrl: './landing.page.scss',

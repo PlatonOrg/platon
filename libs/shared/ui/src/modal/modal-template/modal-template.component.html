@@ -1,5 +1,5 @@
+@if (visible) {
 <nz-modal
-  *ngIf="visible"
   [(nzVisible)]="visible"
   [nzBodyStyle]="customBodyStyle"
   nzClassName="ui-modal-template"
@@ -11,12 +11,18 @@
   nzCentered
   (nzOnOk)="close(true)"
   (nzOnCancel)="close()"
-  [nzFooter]="footer ?? (templates.length > 1 ? templates.last : noFooter)"
+  [nzFooter]="footerRender"
 >
   <ng-container *nzModalContent>
-    <ng-container *ngIf="visible">
-      <ng-container *ngTemplateOutlet="templates.first"></ng-container>
-    </ng-container>
+    @if (visible) {
+    <ng-container *ngTemplateOutlet="templates.first"></ng-container>
+    }
   </ng-container>
 </nz-modal>
+}
+
+<ng-template #footerRender>
+  <ng-container *ngTemplateOutlet="footer ?? (templates.length > 1 ? templates.last : noFooter)"></ng-container>
+</ng-template>
+
 <ng-template #noFooter />

@@ -3,14 +3,14 @@ import { Component, inject } from '@angular/core'
 import { NgeMarkdownModule } from '@cisstech/nge/markdown'
 import { ClipboardService } from '@cisstech/nge/services'
 import { DialogModule, DialogService } from '@platon/core/browser'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 @Component({
   standalone: true,
   selector: 'wc-editor-css',
   templateUrl: './css.component.html',
   styleUrls: ['./css.component.scss'],
-  imports: [CommonModule, NgeMarkdownModule, DialogModule, NzToolTipModule],
+  imports: [CommonModule, NgeMarkdownModule, DialogModule, NzTooltipModule],
 })
 export class CssComponent {
   private readonly dialogService = inject(DialogService)

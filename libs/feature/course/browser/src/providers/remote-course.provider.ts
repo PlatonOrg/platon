@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { buildExpandableHttpParams, buildHttpParams } from '@platon/core/browser'
 import { ItemResponse, ListResponse } from '@platon/core/common'
 import { Course, FindCourse, CourseFilters, CreateCourse, UpdateCourse } from '@platon/feature/course/common'
@@ -9,9 +9,7 @@ import { CourseProvider } from '../models/course-provider'
 
 @Injectable()
 export class RemoteCourseProvider extends CourseProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   search(filters?: CourseFilters): Observable<ListResponse<Course>> {
     filters = filters || {}
@@ -47,6 +45,12 @@ export class RemoteCourseProvider extends CourseProvider {
       .post<ItemResponse<Course>>('/api/v1/courses', input, {
         params,
       })
+      .pipe(map((response) => response.resource))
+  }
+
+  duplicate(sourceCourseId: string, targetCourseId: string): Observable<Course> {
+    return this.http
+      .post<ItemResponse<Course>>(`/api/v1/courses/${targetCourseId}/duplicate`, { sourceCourseId })
       .pipe(map((response) => response.resource))
   }
 }

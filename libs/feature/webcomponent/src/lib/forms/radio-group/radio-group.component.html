@@ -7,25 +7,25 @@
   [ngClass]="state.css | css : 'class'"
   [ngStyle]="state.css | css : 'style'"
 >
-  <ng-container *ngFor="let item of state.items; let i = index; trackBy: trackBy">
-    <div
-      class="radio-item"
-      [ngClass]="item.css | css : 'class'"
-      [ngStyle]="item.css | css : 'style'"
-      [class.selected]="i === state.selectedIndex"
-      [class.checked]="state.selection === item.content"
-      (click)="onClick(item, i)"
+  @for (item of state.items; track trackBy(i, item); let i = $index) {
+  <div
+    class="radio-item"
+    [ngClass]="item.css | css : 'class'"
+    [ngStyle]="item.css | css : 'style'"
+    [class.selected]="i === state.selectedIndex"
+    [class.checked]="state.selection === item.content"
+    (click)="onClick(item, i)"
+  >
+    <mat-radio-button
+      color="primary"
+      [name]="item.content"
+      [value]="item.content"
+      [checked]="state.selection === item.content"
+      (change)="onClick(item, i)"
     >
-      <mat-radio-button
-        color="primary"
-        [name]="item.content"
-        [value]="item.content"
-        [checked]="state.selection === item.content"
-        (change)="onClick(item, i)"
-      >
-        <nge-markdown [data]="item.content"></nge-markdown>
-      </mat-radio-button>
-    </div>
-  </ng-container>
+      <nge-markdown [data]="item.content"></nge-markdown>
+    </mat-radio-button>
+  </div>
+  }
 </mat-radio-group>
 <wc-base [(state)]="state"></wc-base>

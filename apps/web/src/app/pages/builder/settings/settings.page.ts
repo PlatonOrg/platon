@@ -9,19 +9,19 @@ import {
   OnInit,
   CUSTOM_ELEMENTS_SCHEMA,
 } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
-import { DialogService, ThemeService, TagService } from '@platon/core/browser'
+import { DialogService, ThemeService, TagSelectComponent } from '@platon/core/browser'
 import { ResourceService, RESOURCE_STATUS_NAMES } from '@platon/feature/resource/browser'
 import { Resource, UpdateResource, ResourceStatus } from '@platon/feature/resource/common'
-import { Level, Topic } from '@platon/core/common'
 import { firstValueFrom } from 'rxjs'
 import { NzSelectModule } from 'ng-zorro-antd/select'
 import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 
 export interface SettingItem {
   id: string
@@ -32,46 +32,39 @@ export interface SettingItem {
 
 @Component({
   selector: 'app-builder-settings',
-  standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     NzSelectModule,
+    TagSelectComponent,
     NzSpinModule,
+    NzButtonModule,
   ],
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  host: {
+    '(window:keydown)': 'onKeyDown($event)',
+  },
 })
 export class SettingsPage implements OnInit {
   private readonly themeService = inject(ThemeService)
   private readonly dialogService = inject(DialogService)
-  private readonly tagService = inject(TagService)
   private readonly resourceService = inject(ResourceService)
 
   selectedSetting = input<SettingItem | null>(null)
   resource = input.required<Resource>()
 
   protected currentTheme = signal<string | null>('light')
-  protected topics = signal<Topic[]>([])
-  protected levels = signal<Level[]>([])
   protected loading = signal(false)
   protected saving = signal(false)
+  protected hasFormChanges = signal(false)
 
-  close = output<void>()
-  resourceUpdated = output<Resource>()
-
-  readonly settingItems = signal<SettingItem[]>([
-    { id: 'theme', label: 'Thème', icon: 'palette', type: 'theme' },
-    { id: 'preview', label: 'Mode prévisualisation', icon: 'preview', type: 'preview' },
-    { id: 'developer', label: 'Mode développeur', icon: 'code', type: 'developer' },
-    { id: 'save', label: 'Informations', icon: 'info', type: 'save' },
-  ])
+  protected resourceUpdated = output<Resource>()
 
   readonly isDarkTheme = computed(() => this.themeService.isDark)
   readonly isLightTheme = computed(() => this.themeService.isLight)
@@ -98,19 +91,16 @@ export class SettingsPage implements OnInit {
       this.currentTheme.set('system')
     }
 
-    await this.loadTagsAndInitForm()
+    await this.initForm()
+
+    this.form.valueChanges.subscribe(() => {
+      this.hasFormChanges.set(true)
+    })
   }
 
-  private async loadTagsAndInitForm(): Promise<void> {
+  private async initForm(): Promise<void> {
     try {
       this.loading.set(true)
-
-      const [topics, levels] = await Promise.all([
-        firstValueFrom(this.tagService.listTopics()),
-        firstValueFrom(this.tagService.listLevels()),
-      ])
-      this.topics.set(topics)
-      this.levels.set(levels)
 
       const currentResource = this.resource()
       if (currentResource) {
@@ -121,8 +111,9 @@ export class SettingsPage implements OnInit {
           topics: currentResource.topics?.map((t) => t.id) || [],
           levels: currentResource.levels?.map((l) => l.id) || [],
         })
+        setTimeout(() => this.hasFormChanges.set(false), 0)
       }
-    } catch (error) {
+    } catch (_error) {
       this.dialogService.error('Erreur lors du chargement des données')
     } finally {
       this.loading.set(false)
@@ -149,10 +140,9 @@ export class SettingsPage implements OnInit {
       }
 
       const updatedResource = await firstValueFrom(this.resourceService.update(currentResource.id, update))
-
-      this.dialogService.success('Informations mises à jour avec succès')
       this.resourceUpdated.emit(updatedResource)
-    } catch (error) {
+      this.hasFormChanges.set(false)
+    } catch (_error) {
       this.dialogService.error('Erreur lors de la sauvegarde des informations')
     } finally {
       this.saving.set(false)
@@ -169,7 +159,7 @@ export class SettingsPage implements OnInit {
 
   protected async openInEditor(): Promise<void> {
     if (this.resource) {
-      window.open(`/editor/${this.resource().id}?version=latest`, '_blank')
+      window.location.href = `/editor/${this.resource().id}?version=latest`
     }
   }
 
@@ -195,5 +185,15 @@ export class SettingsPage implements OnInit {
       document.body.style.transition = 'none'
       this.dialogService.success(`Thème ${theme} appliqué`)
     }, 500)
+  }
+
+  protected async onKeyDown(event: KeyboardEvent): Promise<void> {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault()
+      if (this.selectedSetting()?.type === 'save' && this.canSubmit) {
+        event.stopPropagation()
+        await this.saveResourceInfo()
+      }
+    }
   }
 }

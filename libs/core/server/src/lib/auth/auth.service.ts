@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { JwtService } from '@nestjs/jwt'
+import { JwtService, JwtSignOptions } from '@nestjs/jwt'
 import {
   AuthToken,
   CreateCandidateAccountInput,
@@ -16,6 +16,8 @@ import { Configuration } from '../config/configuration'
 import { UserService } from '../users/user.service'
 import { UserRoles } from '@platon/core/common'
 import { randomUUID } from 'crypto'
+import { IRequest } from './auth.types'
+import { JwtPayload, JwtTokenType } from './strategies/jwt-payload'
 
 @Injectable()
 export class AuthService {
@@ -68,8 +70,12 @@ export class AuthService {
     }
   }
 
-  async resetPassword(input: ResetPasswordInput): Promise<AuthToken> {
+  async resetPassword(input: ResetPasswordInput, req: IRequest): Promise<AuthToken> {
+    const reqUser = req.user
     const user = (await this.userService.findByUsername(input.username)).get()
+    if (reqUser.username !== user.username && reqUser.role !== UserRoles.admin) {
+      throw new ForbiddenResponse('You are not allowed to reset this password')
+    }
     if (user.password && !(await bcrypt.compare(input.password || '', user.password))) {
       throw new ForbiddenResponse('Password is incorrect')
     }
@@ -85,28 +91,13 @@ export class AuthService {
     return this.authenticate(user.id, user.username)
   }
 
+  /**
+   * Signs in the user: issues a new access token and a new refresh token, and records the login.
+   */
   async authenticate(userId: string, username: string): Promise<AuthToken> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        {
-          sub: userId,
-          username,
-        },
-        {
-          secret: this.configService.get('secret', { infer: true }),
-          expiresIn: this.configService.get('auth.accessLifetime', { infer: true }),
-        }
-      ),
-      this.jwtService.signAsync(
-        {
-          sub: userId,
-          username,
-        },
-        {
-          secret: this.configService.get('secret', { infer: true }),
-          expiresIn: this.configService.get('auth.refreshLifetime', { infer: true }),
-        }
-      ),
+      this.signToken(userId, username, 'access', this.configService.get('auth.accessLifetime', { infer: true })),
+      this.signToken(userId, username, 'refresh', this.configService.get('auth.refreshLifetime', { infer: true })),
     ])
     // Intentionally not blocking authentication if login tracking fails
     this.userService.touchLastLogin(userId).catch((error) => {
@@ -117,6 +108,49 @@ export class AuthService {
       accessToken,
       refreshToken,
     }
+  }
+
+  /**
+   * Issues a new access token from a refresh token that has already been verified.
+   *
+   * The refresh token is not renewed (no rotation): a session lasts at most `auth.refreshLifetime` from the
+   * sign-in, after which the user has to sign in again. The new access token never outlives the refresh token,
+   * so a session cannot be extended by refreshing.
+   *
+   * @param refreshToken The verified refresh token, returned as is.
+   */
+  async refresh(userId: string, username: string, refreshToken: string): Promise<AuthToken> {
+    const { exp: sessionExpiration } = this.jwtService.decode<JwtPayload>(refreshToken)
+
+    let accessToken = await this.signToken(
+      userId,
+      username,
+      'access',
+      this.configService.get('auth.accessLifetime', { infer: true })
+    )
+    const { exp: accessExpiration } = this.jwtService.decode<JwtPayload>(accessToken)
+    if (sessionExpiration && accessExpiration && accessExpiration > sessionExpiration) {
+      const remainingSeconds = Math.max(sessionExpiration - Math.floor(Date.now() / 1000), 0)
+      accessToken = await this.signToken(userId, username, 'access', remainingSeconds)
+    }
+
+    return {
+      accessToken,
+      refreshToken,
+    }
+  }
+
+  private signToken(
+    userId: string,
+    username: string,
+    type: JwtTokenType,
+    expiresIn: JwtSignOptions['expiresIn']
+  ): Promise<string> {
+    const payload: JwtPayload = { sub: userId, username, type }
+    return this.jwtService.signAsync(payload, {
+      secret: this.configService.get('secret', { infer: true }),
+      expiresIn,
+    })
   }
 
   private async hash(data: string): Promise<string> {

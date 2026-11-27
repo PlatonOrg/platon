@@ -1,15 +1,13 @@
-import { CommonModule } from '@angular/common'
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Inject,
   OnInit,
   Input,
   Output,
-  signal,
   CUSTOM_ELEMENTS_SCHEMA,
+  inject,
 } from '@angular/core'
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { MatDatepickerModule } from '@angular/material/datepicker'
@@ -27,6 +25,7 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
+import { NzAlertModule } from 'ng-zorro-antd/alert'
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog'
 import { FormsModule } from '@angular/forms'
@@ -48,9 +47,7 @@ import { AnnouncementService } from '../../api/announcement.service'
 
 @Component({
   selector: 'lib-announcement-create-drawer',
-  standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -66,6 +63,7 @@ import { AnnouncementService } from '../../api/announcement.service'
     NzInputNumberModule,
     NzCheckboxModule,
     NzTagModule,
+    NzAlertModule,
     MatDialogModule,
     MatIconModule,
     MatTooltipModule,
@@ -81,6 +79,14 @@ import { AnnouncementService } from '../../api/announcement.service'
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AnnouncementCreateDrawerComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<AnnouncementCreateDrawerComponent>>(MatDialogRef)
+  private readonly fb = inject(FormBuilder)
+  private readonly announcementService = inject(AnnouncementService)
+  private readonly dialogService = inject(DialogService)
+  private readonly changeDetectorRef = inject(ChangeDetectorRef)
+  private readonly dialog = inject(MatDialog)
+  data = inject(MAT_DIALOG_DATA)
+
   @Input() announcement?: Announcement
   @Output() created = new EventEmitter<Announcement>()
   @Output() updated = new EventEmitter<Announcement>()
@@ -88,18 +94,9 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
   protected form!: FormGroup
   loading = false
   protected hasUnsavedChanges = false
+  protected errorMessage: string | null = null
 
   terms: OutputData = emptyEditorJsData()
-
-  constructor(
-    public dialogRef: MatDialogRef<AnnouncementCreateDrawerComponent>,
-    private readonly fb: FormBuilder,
-    private readonly announcementService: AnnouncementService,
-    private readonly dialogService: DialogService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
 
   ngOnInit(): void {
     this.createForm()
@@ -250,6 +247,13 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
     this.changeDetectorRef.markForCheck()
 
     try {
+      if (!this.form.valid) {
+        this.errorMessage = 'Veuillez remplir tous les champs requis'
+        this.changeDetectorRef.markForCheck()
+        return
+      }
+
+      this.errorMessage = null
       this.updateTargetedRoles()
 
       const formData = {
@@ -284,7 +288,7 @@ export class AnnouncementCreateDrawerComponent implements OnInit {
           this.dialogService.error("Erreur lors de la création de l'annonce")
         }
       }
-    } catch (error) {
+    } catch (_error) {
       const action = this.announcement ? 'la mise à jour' : 'la création'
       this.dialogService.error(`Erreur lors de ${action} de l'annonce`)
     } finally {

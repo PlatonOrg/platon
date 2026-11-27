@@ -4,7 +4,7 @@
   <div class="activity-grid-item">
     <app-activity-card
       [item]="item"
-      [selected]="selectedId() === item.id"
+      [selected]="selectedIds().includes(item.id)"
       (activityClicked)="activityClicked.emit($event)"
     />
   </div>

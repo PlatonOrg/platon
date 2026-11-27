@@ -6,13 +6,14 @@ import {
   ActivityFilters,
   ActivityOpenStates,
   CreateActivity,
+  EXERCISE_MERGE_RULES,
+  ExerciseMergeRule,
   ReloadActivity,
   UpdateActivity,
 } from '@platon/feature/course/common'
 import { Exclude, Transform, Type } from 'class-transformer'
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator'
+import { IsArray, IsBoolean, IsDate, IsIn, IsNumber, IsOptional, IsString, IsUUID, Matches } from 'class-validator'
 import { ActivityPermissionsDTO } from '../permissions/permissions.dto'
-import { Res } from '@nestjs/common'
 import { RestrictionListDTO } from './activity-restriction.dto'
 
 export class ActivityDTO extends BaseDTO implements Activity {
@@ -86,6 +87,14 @@ export class ActivityDTO extends BaseDTO implements Activity {
   @ApiProperty()
   @IsOptional()
   readonly activitySettings?: ActivitySettings
+
+  @IsString()
+  readonly code!: string
+
+  @IsBoolean()
+  @ApiProperty()
+  @IsOptional()
+  readonly hidden?: boolean
 }
 
 export class ActivityFiltersDTO implements ActivityFilters {
@@ -167,6 +176,12 @@ export class UpdateCourseActivityDTO implements UpdateActivity {
   @ApiProperty()
   @IsOptional()
   readonly activitySettings?: ActivitySettings
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z0-9]{6}$/)
+  @ApiProperty()
+  readonly code?: string
 }
 
 export class ReloadCourseActivityDTO implements ReloadActivity {
@@ -174,4 +189,27 @@ export class ReloadCourseActivityDTO implements ReloadActivity {
   @IsOptional()
   @ApiProperty()
   readonly version?: string
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  @ApiProperty()
+  readonly exerciseKeys?: string[]
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  @ApiProperty()
+  readonly keepAnswersKeys?: string[]
+
+  @IsIn(EXERCISE_MERGE_RULES)
+  @IsOptional()
+  @ApiProperty({ enum: EXERCISE_MERGE_RULES })
+  readonly mergeRule?: ExerciseMergeRule
+}
+
+export class CreateCourseActivitiesBatchDTO {
+  @Type(() => CreateCourseActivityDTO)
+  @ApiProperty({ type: [CreateCourseActivityDTO] })
+  readonly activities!: CreateCourseActivityDTO[]
 }

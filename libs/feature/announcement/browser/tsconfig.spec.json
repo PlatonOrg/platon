@@ -2,12 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../../dist/out-tsc",
-    "module": "commonjs",
+    "module": "preserve",
     "target": "es2016",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"],
+    "moduleResolution": "bundler",
+    "isolatedModules": true
   },
   "include": [
     "jest.config.ts",
@@ -15,5 +14,13 @@
     "src/**/*.spec.ts",
     "src/**/*.d.ts",
     "../../../../types/index.d.ts"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

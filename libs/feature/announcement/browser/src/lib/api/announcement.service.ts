@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Observable } from 'rxjs'
 import { AnnouncementProvider } from '../models/announcement-provider'
 import { ListResponse } from '@platon/core/common'
@@ -11,7 +11,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class AnnouncementService {
-  constructor(private readonly announcementProvider: AnnouncementProvider) {}
+  private readonly announcementProvider = inject(AnnouncementProvider)
 
   /**
    * Recherche des annonces avec filtres (admin uniquement)
@@ -54,5 +54,9 @@ export class AnnouncementService {
    */
   getActiveAnnouncements(): Observable<ListResponse<Announcement>> {
     return this.getVisibleForUser({ active: true })
+  }
+
+  findByIdForUser(id: string): Observable<Announcement> {
+    return this.announcementProvider.findByIdForUser(id)
   }
 }

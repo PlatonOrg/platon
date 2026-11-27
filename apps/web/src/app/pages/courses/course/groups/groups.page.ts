@@ -9,24 +9,22 @@ import { Subscription } from 'rxjs'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
 import { CourseGroupDetail, CourseMember } from '@platon/feature/course/common'
 import { CourseMemberSearchModalComponent } from '@platon/feature/course/browser'
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
-import { CommonModule } from '@angular/common'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { NzEmptyComponent } from 'ng-zorro-antd/empty'
 
 @Component({
-  standalone: true,
   selector: 'app-course-groups',
   templateUrl: './groups.page.html',
   styleUrls: ['./groups.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatCardModule,
     NzIconModule,
     NzCollapseModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzEmptyComponent,
     CourseMemberSearchModalComponent,
     CourseMemberTableComponent,

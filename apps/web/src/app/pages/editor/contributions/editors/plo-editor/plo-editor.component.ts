@@ -1,20 +1,47 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core'
 import { Editor, FileService, NotificationService, OpenRequest } from '@cisstech/nge-ide/core'
-import { EXERCISE_CONFIG_FILE, EXERCISE_MAIN_FILE, PleInput, Variables } from '@platon/feature/compiler'
+import { EXERCISE_CONFIG_FILE, PleInput, Variables } from '@platon/feature/compiler'
 import { Subscription } from 'rxjs'
 import { EditorPresenter } from '../../../editor.presenter'
+import { ActivatedRoute } from '@angular/router'
+import { InputFileService } from '@platon/feature/resource/browser'
+import { CommonModule } from '@angular/common'
 
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzListModule } from 'ng-zorro-antd/list'
+
+import { FormsModule } from '@angular/forms'
+import { MatIconModule } from '@angular/material/icon'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzSwitchModule } from 'ng-zorro-antd/switch'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
+import { PleInputEditorModule } from '../ple-input/ple-input.module'
 @Component({
   selector: 'app-plo-editor',
   templateUrl: './plo-editor.component.html',
   styleUrls: ['./plo-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    NzButtonModule,
+    NzListModule,
+    FormsModule,
+    MatIconModule,
+    NzIconModule,
+    NzSwitchModule,
+    NzTooltipModule,
+    PleInputEditorModule,
+  ],
 })
 export class PloEditorComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute)
+
   private readonly fileService = inject(FileService)
   private readonly presenter = inject(EditorPresenter)
   private readonly notificationService = inject(NotificationService)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
+
+  private readonly inputFileService = inject(InputFileService)
 
   private readonly subscriptions: Subscription[] = []
   private request!: OpenRequest
@@ -29,6 +56,9 @@ export class PloEditorComponent implements OnInit, OnDestroy {
   protected overrides: Variables = {}
   protected selection: PleInput | undefined
   protected selectionIndex = -1
+
+  resourceId = this.route.snapshot.paramMap.get('id')
+  version = this.route.snapshot.queryParamMap.get('version')
 
   async ngOnInit(): Promise<void> {
     this.subscriptions.push(
@@ -81,7 +111,10 @@ export class PloEditorComponent implements OnInit, OnDestroy {
         this.notificationService.publishError(`No config file found in the template ${template}:${version}`)
         return
       }
-
+      if (this.resourceId && this.version) {
+        //should always work
+        this.inputFileService.init(this.resourceId, this.version, false)
+      }
       const config = JSON.parse(configContent)
       this.inputs = config.inputs
       this.inputs.forEach((input) => {

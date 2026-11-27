@@ -3,7 +3,7 @@ title: TextSelect
 description: Outil d'analyse textuelle permettant la sélection de segments spécifiques dans un texte. Parfaitement adapté aux exercices d'analyse grammaticale, d'identification de structures syntaxiques, de repérage d'éléments littéraires, de correction de textes, ou pour tout type d'exercice nécessitant une interaction précise avec des parties d'un texte.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -62,16 +62,22 @@ Ce mode utilise une expression régulière pour identifier dynamiquement les par
 
 Dans les modes `free` et `units`, vous pouvez enrichir votre texte avec du HTML pour créer des mises en forme spécifiques:
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-text-select',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Repérer les verbes",
+    "url": "/playground/exercises/text-select/verbs.ple"
+  }
+]
   ]}
 />
 

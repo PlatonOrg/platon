@@ -30,8 +30,16 @@ hint = ["Un des choix n'est plus une planète depuis 2006"]
 
 # Builder
 builder == #!lang=js
-// Mélangement aléatoire des choix
-checkboxGroup.items = checkboxGroup.items.sort(() => Math.random() - 0.5);
+// Mélange de Fisher-Yates : chaque ordre a la même probabilité, ce que ne garantit pas
+// un tri avec un comparateur aléatoire comme sort(() => Math.random() - 0.5).
+function melanger(liste) {
+  for (let i = liste.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[liste[i], liste[j]] = [liste[j], liste[i]]
+  }
+  return liste
+}
+checkboxGroup.items = melanger(checkboxGroup.items)
 ==
 
 

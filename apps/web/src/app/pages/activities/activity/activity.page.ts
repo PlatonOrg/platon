@@ -3,13 +3,10 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { firstValueFrom, Subscription } from 'rxjs'
-
 import { MatIconModule } from '@angular/material/icon'
-
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb'
 import { NzGridModule } from 'ng-zorro-antd/grid'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
-
 import { DialogModule } from '@platon/core/browser'
 import { CourseActivityCardComponent } from '@platon/feature/course/browser'
 import {
@@ -20,7 +17,6 @@ import {
   ResultService,
   ResultBoxPlotComponent,
 } from '@platon/feature/result/browser'
-
 import { DurationPipe, UiLayoutBlockComponent, UiStatisticCardComponent } from '@platon/shared/ui'
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header'
 import { ActivityPresenter } from './activity.presenter'
@@ -33,7 +29,6 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number'
 import { PeerTreeComponent } from '@platon/feature/peer/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-course-activity',
   templateUrl: './activity.page.html',
   styleUrls: ['./activity.page.scss'],
@@ -43,10 +38,8 @@ import { PeerTreeComponent } from '@platon/feature/peer/browser'
     CommonModule,
     FormsModule,
     RouterModule,
-
     MatIconModule,
     MatCardModule,
-
     NzGridModule,
     NzBreadCrumbModule,
     NzTypographyModule,
@@ -55,10 +48,8 @@ import { PeerTreeComponent } from '@platon/feature/peer/browser'
     NzSelectModule,
     NzSliderModule,
     NzInputNumberModule,
-
     DialogModule,
     DurationPipe,
-
     CourseActivityCardComponent,
     ResultByMembersComponent,
     ResultByExercisesComponent,
@@ -66,7 +57,6 @@ import { PeerTreeComponent } from '@platon/feature/peer/browser'
     KCileComponent,
     ResultBoxPlotComponent,
     PeerTreeComponent,
-
     UiStatisticCardComponent,
     UiLayoutBlockComponent,
   ],

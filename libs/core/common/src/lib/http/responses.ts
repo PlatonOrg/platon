@@ -56,9 +56,9 @@ export class ErrorResponse implements HttpResponse<null> {
   statusCode: number
   message: string
 
-  constructor(options: { status: number; message: string }) {
+  constructor(options: { status: number; message: string | string[] }) {
     this.statusCode = options.status
-    this.message = options.message
+    this.message = Array.isArray(options.message) ? options.message.join(', ') : options.message
   }
 }
 
@@ -85,6 +85,20 @@ export class BadRequestResponse extends ErrorResponse {
   constructor(message: string) {
     super({
       status: HTTP_STATUS_CODE.BAD_REQUEST,
+      message,
+    })
+  }
+}
+
+/**
+ * Official Documentation @ https://tools.ietf.org/html/rfc7231#section-6.5.8
+ *
+ * The request conflicts with the current state of the resource.
+ */
+export class ConflictResponse extends ErrorResponse {
+  constructor(message: string) {
+    super({
+      status: HTTP_STATUS_CODE.CONFLICT,
       message,
     })
   }

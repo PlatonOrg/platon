@@ -1,6 +1,5 @@
-/* eslint-disable */
-export default {
-  displayName: 'common',
+module.exports = {
+  displayName: 'feature-announcement-common',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../../../coverage/libs/feature/announcement/common',

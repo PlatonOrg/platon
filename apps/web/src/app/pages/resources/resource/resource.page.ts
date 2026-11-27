@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterModule, ActivatedRoute } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { Title } from '@angular/platform-browser'
-
+import { Location } from '@angular/common'
 import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
 
@@ -21,48 +20,43 @@ import { CircleTreeComponent, ResourcePipesModule, ResourceSharingComponent } fr
 import { ExerciseResourceMeta, ResourceStatus, ResourceTypes } from '@platon/feature/resource/common'
 import { UiLayoutTabDirective, UiLayoutTabsComponent, UiModalIFrameComponent } from '@platon/shared/ui'
 
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 import { ResourcePresenter } from './resource.presenter'
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { ResourcePageTutorialService, ResourcesTutorialService } from '@platon/feature/tuto/browser'
 
 @Component({
-  standalone: true,
   selector: 'app-resource',
   templateUrl: './resource.page.html',
   styleUrls: ['./resource.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ResourcePresenter],
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
-
     MatIconModule,
     MatChipsModule,
-
     NzIconModule,
     NzSelectModule,
     NzButtonModule,
     NzPopoverModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzBreadCrumbModule,
     NzTypographyModule,
     NzPageHeaderModule,
     NzPopconfirmModule,
-
     DialogModule,
-
     UiLayoutTabsComponent,
     UiModalIFrameComponent,
     UiLayoutTabDirective,
-
     CircleTreeComponent,
     ResourcePipesModule,
     ResourceSharingComponent,
   ],
 })
 export class ResourcePage implements OnInit, OnDestroy {
+  private titleService = inject(Title)
+
   private readonly subscriptions: Subscription[] = []
   private readonly presenter = inject(ResourcePresenter)
   private readonly changeDetectorRef = inject(ChangeDetectorRef)
@@ -72,6 +66,9 @@ export class ResourcePage implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute)
   private readonly resourcesTutorialService = inject(ResourcesTutorialService)
 
+  private readonly location = inject(Location)
+  private returnUrl: string | null = null
+
   protected context = this.presenter.defaultContext()
 
   readonly status = Object.values(ResourceStatus)
@@ -80,9 +77,6 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected configurable = false
   protected certifiedTemplate = false
-
-  // for the tab name
-  constructor(private titleService: Title) {}
 
   get isOtherPersonal(): boolean {
     return this.context.resource!.personal && this.context.resource!.ownerId !== this.context.user!.id
@@ -107,6 +101,10 @@ export class ResourcePage implements OnInit, OnDestroy {
       })
     )
     this.checkForTutorialContinuation()
+    const state = this.location.getState() as {
+      returnUrl?: unknown
+    }
+    this.returnUrl = typeof state.returnUrl === 'string' ? state.returnUrl : null
   }
 
   ngOnDestroy(): void {
@@ -159,6 +157,10 @@ export class ResourcePage implements OnInit, OnDestroy {
     window.open(url, '_blank')
   }
 
+  protected urlPath(url: string): string {
+    return new URL(url, window.location.origin).pathname
+  }
+
   protected async duplicate(): Promise<void> {
     const duplicatedResourceId = await this.presenter.duplicate()
     if (duplicatedResourceId) {
@@ -176,12 +178,26 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   protected async moveToOwnerCircle(): Promise<void> {
     await this.presenter.moveToOwnerCircle()
-    await this.router.navigate(['/resources'])
+    if (this.router.navigated) {
+      this.location.back()
+    } else {
+      await this.router.navigate(['/resources'])
+    }
   }
 
   protected async delete(): Promise<void> {
     await this.presenter.delete()
-    await this.router.navigate(['/resources'])
+    if (this.returnUrl) {
+      await this.router.navigateByUrl(this.returnUrl, { replaceUrl: true })
+      return
+    }
+
+    if (this.router.navigated) {
+      this.location.back()
+    } else {
+      const target = this.context.parent ? ['/resources', this.context.parent.id] : ['/resources']
+      await this.router.navigate(target, { replaceUrl: true })
+    }
   }
 
   protected referencesNumber(): number {
@@ -190,16 +206,19 @@ export class ResourcePage implements OnInit, OnDestroy {
 
   private checkForTutorialContinuation(): void {
     this.activatedRoute.queryParams.subscribe((params) => {
-      const fromTutorial = params['fromTutorial']
+      const fromTutorial = params['fromTutorial'] as string
       const isFromTutorialService = this.resourcesTutorialService.getIsFromTutorial()
-
       if (fromTutorial === 'true' || isFromTutorialService) {
-        setTimeout(() => {
-          this.startResourcePageTutorial()
-        }, 1000)
-
-        this.cleanTutorialParams()
-        this.resourcesTutorialService.resetTutorialFlag()
+        // Attendre que le contexte soit chargé avant de lancer le tuto
+        const sub = this.presenter.contextChange.subscribe((ctx) => {
+          if (ctx.resource) {
+            sub.unsubscribe()
+            setTimeout(() => this.startResourcePageTutorial(), 500)
+            this.cleanTutorialParams()
+            this.resourcesTutorialService.resetTutorialFlag()
+          }
+        })
+        this.subscriptions.push(sub)
       }
     })
   }

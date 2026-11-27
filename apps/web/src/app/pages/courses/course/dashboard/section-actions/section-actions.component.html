@@ -13,8 +13,11 @@
   </button>
   <ng-template #sectionActions>
     <nz-space nzDirection="vertical">
-      <button nz-button (click)="moveUp.emit()" *ngIf="section.order !== 0">Monter</button>
-      <button nz-button (click)="moveDown.emit()" *ngIf="section.order !== sectionCount">Descendre</button>
+      @if (section.order !== 0) {
+      <button nz-button (click)="moveUp.emit()">Monter</button>
+      } @if (section.order !== sectionCount) {
+      <button nz-button (click)="moveDown.emit()">Descendre</button>
+      }
       <button
         nz-button
         [routerLink]="['/activities/create']"
@@ -24,6 +27,9 @@
         }"
       >
         Ajouter une activité
+      </button>
+      <button nz-button (click)="hiddeToStudent.emit(section)">
+        {{ section.hidden ? 'Montrer aux étudiants' : 'Cacher aux étudiants' }}
       </button>
       <button nz-button (click)="insertBelow.emit(section)">Insérer une section après</button>
       @if (!editMode) {
@@ -37,6 +43,7 @@
         nz-popconfirm
         nzOkText="Supprimer"
         nzOkType="danger"
+        nzPopconfirmPlacement="left"
         [nzPopconfirmTitle]="removeGuard"
         (nzOnConfirm)="remove.emit()"
       >
@@ -51,7 +58,8 @@
   </ng-template>
 </nz-space>
 <ng-template #removeGuard>
-  <h2>Voulez-vous vraiment supprimer la section “{{ section.name }}”?</h2>
-  <br />
-  <p>En supprimant cette section, vous supprimer aussi toutes les activités et données liées.</p>
+  <div>
+    <h2>Voulez-vous vraiment supprimer la section “{{ section.name }}”?</h2>
+    <p>En supprimant cette section, vous supprimer aussi toutes les activités et données liées.</p>
+  </div>
 </ng-template>

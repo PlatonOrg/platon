@@ -84,5 +84,6 @@ export const RadioGroupComponentDefinition = defineWebComponent({
   },
   playgrounds: {
     'Système solaire': 'solar-system.ple',
+    'QCM généré en Python': 'python-generated.ple',
   },
 })

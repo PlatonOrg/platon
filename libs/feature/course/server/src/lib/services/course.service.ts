@@ -1,17 +1,26 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { NotFoundResponse, OrderingDirections } from '@platon/core/common'
+import { NotFoundResponse } from '@platon/core/common'
 import { CourseFilters, CourseOrderings, COURSE_ORDERING_DIRECTIONS } from '@platon/feature/course/common'
-import { Repository } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 import { Optional } from 'typescript-optional'
 import { CourseMemberView } from '../course-member/course-member.view'
 import { CourseEntity } from '../entites/course.entity'
+import { CourseSectionEntity } from '../section/section.entity'
+import { ActivityEntity } from '../activity/activity.entity'
 
 type CourseGuard = (course: CourseEntity) => void | Promise<void>
+
+interface DuplicateGuards {
+  sourceGuard: CourseGuard
+  targetGuard: CourseGuard
+}
 
 @Injectable()
 export class CourseService {
   constructor(
+    private readonly dataSource: DataSource,
+
     @InjectRepository(CourseEntity)
     private readonly courseRepository: Repository<CourseEntity>
   ) {}
@@ -24,7 +33,6 @@ export class CourseService {
     filters = {
       ...filters,
       order: filters.order || CourseOrderings.UPDATED_AT,
-      direction: filters.direction || OrderingDirections.DESC,
       isTest: filters.isTest || false,
     }
 
@@ -39,6 +47,30 @@ export class CourseService {
     const search = filters.search?.trim()
     if (search) {
       query.andWhere(`(f_unaccent(course.name) ILIKE f_unaccent(:search))`, { search: `%${search}%` })
+    }
+
+    if (filters.archived !== undefined && filters.members?.length) {
+      if (filters.archived) {
+        query.andWhere(
+          `EXISTS (
+            SELECT 1 FROM "CourseMembers" cm
+            WHERE cm.course_id = course.id
+            AND cm.user_id IN (:...archivedMemberIds)
+            AND cm.archived = TRUE
+          )`,
+          { archivedMemberIds: filters.members }
+        )
+      } else {
+        query.andWhere(
+          `NOT EXISTS (
+            SELECT 1 FROM "CourseMembers" cm
+            WHERE cm.course_id = course.id
+            AND cm.user_id IN (:...archivedMemberIds)
+            AND cm.archived = TRUE
+          )`,
+          { archivedMemberIds: filters.members }
+        )
+      }
     }
 
     if (filters.period) {
@@ -80,7 +112,15 @@ export class CourseService {
   }
 
   async create(input: Partial<CourseEntity>): Promise<CourseEntity> {
-    return this.courseRepository.save(input)
+    return this.dataSource.transaction(async (manager) => {
+      const course = await manager.save(CourseEntity, input)
+      await manager.save(CourseSectionEntity, {
+        courseId: course.id,
+        name: 'Section 1',
+        order: 0,
+      })
+      return course
+    })
   }
 
   async update(id: string, changes: Partial<CourseEntity>, guard?: CourseGuard): Promise<CourseEntity> {
@@ -109,5 +149,79 @@ export class CourseService {
     }
 
     await this.courseRepository.remove(course)
+  }
+
+  async duplicate(sourceCourseId: string, targetCourseId: string, guards?: DuplicateGuards): Promise<CourseEntity> {
+    if (sourceCourseId === targetCourseId) {
+      throw new BadRequestException('Source and target courses cannot be the same')
+    }
+
+    const sourceCourse = await this.courseRepository.findOne({ where: { id: sourceCourseId } })
+    const targetCourse = await this.courseRepository.findOne({ where: { id: targetCourseId } })
+    if (!sourceCourse) {
+      throw new NotFoundResponse('Source course not found')
+    }
+    if (!targetCourse) {
+      throw new NotFoundResponse('Target course not found')
+    }
+    if (guards?.sourceGuard) {
+      await guards.sourceGuard(sourceCourse)
+    }
+    if (guards?.targetGuard) {
+      await guards.targetGuard(targetCourse)
+    }
+    return this.dataSource.transaction(async (manager) => {
+      const sourceSections = await manager.find(CourseSectionEntity, {
+        where: { courseId: sourceCourseId },
+        order: { order: 'ASC' },
+      })
+
+      const sourceActivities = await manager.find(ActivityEntity, {
+        where: { courseId: sourceCourseId },
+        order: { sectionId: 'ASC', order: 'ASC' },
+      })
+
+      const targetSectionsNumber = await manager.count(CourseSectionEntity, { where: { courseId: targetCourseId } })
+
+      for (const section of sourceSections) {
+        const newSection = await manager.save(CourseSectionEntity, {
+          courseId: targetCourseId,
+          name: section.name,
+          order: section.order + targetSectionsNumber,
+        })
+        const sectionAcitivities = sourceActivities.filter((a) => a.sectionId === section.id)
+        for (const activity of sectionAcitivities) {
+          const { id: _oldId, createdAt: _c, updatedAt: _u, ...activityProps } = activity
+          await manager.save(ActivityEntity, {
+            ...activityProps,
+            courseId: targetCourseId,
+            sectionId: newSection.id,
+            openAt: this.adjustDate(activity.openAt),
+            closeAt: this.adjustDate(activity.closeAt),
+          })
+        }
+      }
+
+      return manager.findOneOrFail(CourseEntity, { where: { id: targetCourseId } })
+    })
+  }
+
+  /** update the date for the duplication. */
+  private adjustDate(dateInput?: Date | string | null): Date | null {
+    if (!dateInput) {
+      return null
+    }
+    const date = new Date(dateInput)
+    if (isNaN(date.getTime())) {
+      return null
+    }
+    const currentYear = new Date().getFullYear()
+    const yearDiff = currentYear - date.getFullYear()
+    if (yearDiff >= 0) {
+      date.setFullYear(date.getFullYear() + yearDiff + 1)
+    } else {
+      date.setFullYear(date.getFullYear() + 1) // already in the futur but update to be in order with the other date
+    }
+    return date
   }
 }

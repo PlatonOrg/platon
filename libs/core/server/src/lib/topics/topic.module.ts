@@ -3,11 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { TopicController } from './topic.controller'
 import { TopicEntity } from './topic.entity'
 import { TopicService } from './topic.service'
-import { StringUtilsService } from '../utils'
+import { NameSimilarityService } from '../utils'
 
 @Module({
   controllers: [TopicController],
-  providers: [TopicService, StringUtilsService],
+  providers: [TopicService, NameSimilarityService],
   imports: [TypeOrmModule.forFeature([TopicEntity])],
   exports: [TopicService],
 })

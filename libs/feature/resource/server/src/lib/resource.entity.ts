@@ -76,7 +76,7 @@ export class ResourceEntity extends BaseEntity {
   @JoinColumn({ name: 'parent_id' })
   parent?: ResourceEntity
 
-  @Index('Resources_parent_idx')
+  @Index('Resources_template_idx')
   @Column({ name: 'template_id', nullable: true })
   templateId?: string
 

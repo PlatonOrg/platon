@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CreateLevel, CreateTopic, Level, Topic, UpdateLevel, UpdateTopic } from '@platon/core/common'
 import { Observable } from 'rxjs'
 import { TagProvider } from '../models/tag-provider'
 
 @Injectable({ providedIn: 'root' })
 export class TagService {
-  constructor(private readonly provider: TagProvider) {}
+  private readonly provider = inject(TagProvider)
 
   listTopics(): Observable<Topic[]> {
     return this.provider.listTopics()

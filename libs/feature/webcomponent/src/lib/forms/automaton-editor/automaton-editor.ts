@@ -130,4 +130,7 @@ export const AutomatonEditorComponentDefinition = defineWebComponent({
     },
   },
   showcase: {},
+  playgrounds: {
+    'Langage des mots terminant par b': 'ends-with-b.ple',
+  },
 })

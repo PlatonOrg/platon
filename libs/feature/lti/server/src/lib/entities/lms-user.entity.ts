@@ -1,19 +1,17 @@
 import { BaseEntity, UserEntity } from '@platon/core/server'
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm'
-import { LmsEntity } from './lms.entity'
+
+/** An LMS user maps to a single PLaTon account (see `LmsUserService.findOrCreate`). */
+export const LMS_USERS_UNIQUE_INDEX = 'LmsUsers_platform_user_unique_idx'
 
 @Entity('LmsUsers')
-@Unique('LmsUsers_unique_idx', ['lmsId', 'lmsUserId', 'userId'])
+@Unique(LMS_USERS_UNIQUE_INDEX, ['ltiPlatformId', 'lmsUserId'])
 export class LmsUserEntity extends BaseEntity {
   @Column({ name: 'lms_user_id' })
   lmsUserId!: string
 
-  @Column({ name: 'lms_id' })
-  lmsId!: string
-
-  @ManyToOne(() => LmsEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'lms_id' })
-  lms!: LmsEntity
+  @Column({ name: 'lti_platform_id', type: 'uuid' })
+  ltiPlatformId!: string
 
   @Column({ name: 'user_id' })
   userId!: string

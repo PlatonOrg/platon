@@ -5,6 +5,7 @@ import {
   EvalExerciseInput,
   EvalExerciseOutput,
   ExercisePlayer,
+  MAX_EXTRA_TIME_SECONDS,
   PlayActivityInput,
   PlayActivityOuput,
   PlayAnswersInput,
@@ -16,7 +17,15 @@ import {
   PreviewInput,
   PreviewOuput,
 } from '@platon/feature/player/common'
-import { IsEnum, IsObject, IsOptional, IsString, IsUUID } from 'class-validator'
+import { IsEnum, IsInt, IsObject, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator'
+
+export class AddExtraTimeInputDTO {
+  @IsInt()
+  @Min(1)
+  @Max(MAX_EXTRA_TIME_SECONDS)
+  @ApiProperty({ description: 'Extra time in seconds' })
+  seconds!: number
+}
 
 export class PreviewInputDTO implements PreviewInput {
   @IsString()

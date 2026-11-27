@@ -1,0 +1,11 @@
+.admin-box {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  border: 0.7vh solid red;
+  pointer-events: none;
+  z-index: 9999;
+  box-sizing: border-box;
+}

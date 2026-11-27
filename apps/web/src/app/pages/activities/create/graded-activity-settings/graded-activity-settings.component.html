@@ -1,0 +1,88 @@
+<section class="graded-settings">
+  <div class="graded-settings-header">
+    <mat-icon>fact_check</mat-icon>
+    <div>
+      <h4>Paramètres de l'examen</h4>
+      <p>
+        Les boutons "Aides", "Théories", "Solution" et "Autre question" sont automatiquement désactivés pour ce type
+        d'activité.
+      </p>
+    </div>
+  </div>
+
+  <div class="setting-row">
+    <label class="setting-label" nz-tooltip="Laissez à 0 pour une durée illimitée">Durée maximale</label>
+    <div class="time-input-group">
+      <div class="time-input-field">
+        <nz-input-number
+          [ngModel]="durationHours()"
+          (ngModelChange)="durationHours.set($event)"
+          [nzMin]="0"
+          [nzMax]="23"
+          [nzStep]="1"
+          nzPlaceHolder="HH"
+        />
+        <span class="time-unit">h</span>
+      </div>
+      <div class="time-input-field">
+        <nz-input-number
+          [ngModel]="durationMinutes()"
+          (ngModelChange)="durationMinutes.set($event)"
+          [nzMin]="0"
+          [nzMax]="59"
+          [nzStep]="1"
+          nzPlaceHolder="MM"
+        />
+        <span class="time-unit">m</span>
+      </div>
+      <div class="time-input-field">
+        <nz-input-number
+          [ngModel]="durationSeconds()"
+          (ngModelChange)="durationSeconds.set($event)"
+          [nzMin]="0"
+          [nzMax]="59"
+          [nzStep]="1"
+          nzPlaceHolder="SS"
+        />
+        <span class="time-unit">s</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="setting-row">
+    <label class="setting-label" nz-tooltip="Nombre maximum de tentatives par exercice. 0 = illimité">
+      Tentatives maximales
+    </label>
+    <nz-input-number [ngModel]="maxAttempts()" (ngModelChange)="maxAttempts.set($event)" [nzMin]="0" [nzStep]="1" />
+  </div>
+
+  <div class="setting-row code-row">
+    <label
+      class="setting-label"
+      nz-tooltip="Code demandé à l'élève pour se débloquer si l'activité s'est auto-terminée suite au non-respect des paramètres de sécurité (changement d'onglet, perte de focus...)"
+    >
+      Code de déblocage
+    </label>
+    <div class="code-generator">
+      <span class="generated-code">{{ code() }}</span>
+      <button mat-icon-button type="button" (click)="regenerateCode()" nz-tooltip="Générer un nouveau code">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="setting-row security-row">
+    <label class="setting-label">Sécurité</label>
+    <div class="security-options">
+      <label nz-checkbox [ngModel]="noCopyPaste()" (ngModelChange)="noCopyPaste.set($event)">
+        Désactiver copier-coller
+      </label>
+      <label nz-checkbox [ngModel]="terminateOnLeavePage()" (ngModelChange)="terminateOnLeavePage.set($event)">
+        Terminer si changement d'onglet
+      </label>
+      <label nz-checkbox [ngModel]="terminateOnLoseFocus()" (ngModelChange)="terminateOnLoseFocus.set($event)">
+        Terminer si perte de focus
+      </label>
+    </div>
+  </div>
+</section>

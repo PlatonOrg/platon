@@ -3,7 +3,7 @@ title: DragDrop
 description: Composant permettant de créer des éléments déplaçables par glisser-déposer. Parfait pour les exercices de tri et classement, reconstitution de séquences, placement d'éléments sur une carte ou un schéma, ordonner des phrases, ou organiser des concepts dans un diagramme.
 ---
 
-import { Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs, Tab } from 'nextra/components'
 import { ComponentProperties, Playground } from '../../../components'
 import { useAbsoluteUrl } from '../../../hooks'
 
@@ -24,11 +24,54 @@ Le composant fonctionne avec deux types d'éléments:
 - **Éléments déplaçables** (`draggable=true`): Ces éléments peuvent être saisis et déplacés.
 - **Zones de dépôt** (`draggable=false`): Ces zones peuvent recevoir des éléments déplaçables.
 
-Lorsqu'un élément déplaçable est déposé dans une zone de dépôt, le contenu (`content`) de l'élément déplaçable est automatiquement copié dans la zone de dépôt. Un même élément déplaçable peut être utilisé plusieurs fois dans différentes zones.
+Lorsqu'un élément déplaçable est déposé dans une zone de dépôt, le contenu (`content`) de l'élément déplaçable est automatiquement copié dans la zone de dépôt. Un même élément déplaçable peut être utilisé plusieurs fois dans différentes zones : c'est ce qui permet, par exemple, d'attribuer une catégorie à chaque ligne d'un tableau.
+
+Le contenu d'une zone remplie peut aussi être glissé vers une autre zone :
+
+- vers une zone vide, il y est **déplacé** et la zone de départ se vide ;
+- vers une zone remplie, les contenus des deux zones sont **échangés**.
 
 ### Regroupement et restrictions
 
 Pour limiter quels éléments peuvent être déposés dans quelles zones, utilisez la propriété `group`. Les éléments ne peuvent être déposés que dans les zones ayant le même identifiant de groupe.
+
+### Créer un exercice avec plusieurs zones
+
+Un composant `wc-drag-drop` représente **un seul** élément : une étiquette ou une zone. Un exercice en utilise donc
+toujours plusieurs, déclarés un par un ou générés par le `builder` avec la fonction `component` :
+
+```ple
+etiquette1 = :wc-drag-drop
+etiquette1.draggable = true
+etiquette1.content = "Chat"
+
+etiquette2 = :wc-drag-drop
+etiquette2.draggable = true
+etiquette2.content = "Aigle"
+
+mammifere = :wc-drag-drop
+oiseau = :wc-drag-drop
+
+form ==
+{{ etiquette1 }} {{ etiquette2 }}
+
+Mammifère : {{ mammifere }}
+
+Oiseau : {{ oiseau }}
+==
+
+grader == #!lang=js
+grade = (mammifere.content === "Chat" && oiseau.content === "Aigle") ? 100 : 0
+==
+```
+
+Le grader lit la propriété `content` de chaque **zone de dépôt**. L'exemple interactif en bas de page génère les
+étiquettes et les zones à partir d'une liste.
+
+### Une seule réponse par zone
+
+Une zone contient **un seul** contenu à la fois : déposer une étiquette dans une zone déjà remplie remplace son
+contenu. Pour accepter plusieurs réponses dans une même catégorie, prévoyez plusieurs zones.
 
 ### Réinitialisation des zones
 
@@ -46,16 +89,26 @@ Ce composant est idéal pour créer des exercices comme:
 - Placement d'étiquettes sur un schéma ou une image
 - Reconstitution de séquences ou d'ordres logiques
 
+
 ## Exemple interactif
 
 <Playground
-  width="100%"
+  width='100%'
   items={[
     {
       name: 'Visualisation',
       url: 'playground/components/wc-drag-drop',
     },
-    ...[],
+    ...[
+  {
+    "name": "Exemple: Associer termes et définitions",
+    "url": "/playground/exercises/drag-drop/definitions.ple"
+  },
+  {
+    "name": "Exemple: Classer par catégories",
+    "url": "/playground/exercises/drag-drop/edible-plants.ple"
+  }
+]
   ]}
 />
 

@@ -3,7 +3,6 @@ import { DocsModule, WebComponentDefinition, WebComponentService } from '@platon
 import { UiError404Component } from '@platon/shared/ui'
 
 @Component({
-  standalone: true,
   imports: [DocsModule, UiError404Component],
   selector: 'app-wc-plaground',
   templateUrl: 'wc-playground.page.html',

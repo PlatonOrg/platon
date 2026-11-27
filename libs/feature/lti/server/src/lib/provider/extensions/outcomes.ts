@@ -247,19 +247,19 @@ export class OutcomeService {
       } else {
         return response
       }
-    } catch (err) {
+    } catch (_err) {
       throw new OutcomeResponseError('The server responsed with an invalid XML document')
     }
   }
 
   static fromProvider(provider: LTIProvider): OutcomeService | undefined {
-    if (provider.body.lis_outcome_service_url && provider.body.lis_result_sourcedid) {
-      const acceptedVals = provider.body.ext_outcome_data_values_accepted
+    if (provider.body.lis_outcome_service_url && provider.body['lis_result_sourcedid']) {
+      const acceptedVals = provider.body['ext_outcome_data_values_accepted']
       return new OutcomeService({
         consumerKey: provider.consumerKey,
         consumerSecret: provider.consumerSecret,
         serviceUrl: provider.body.lis_outcome_service_url,
-        sourceDID: provider.body.lis_result_sourcedid,
+        sourceDID: provider.body['lis_result_sourcedid'],
         resultDataTypes: acceptedVals ? acceptedVals.split(',') : [],
         signer: provider.signer,
       })

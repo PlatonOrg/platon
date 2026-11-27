@@ -3,8 +3,11 @@
   height: 100vh;
   display: grid;
   grid-template-columns: 50% 50%;
+  font-family: var(--brand-font);
+  color: var(--brand-text-primary);
   box-sizing: border-box;
   overflow: hidden;
+  background: var(--brand-background-primary);
 }
 
 mat-divider {
@@ -21,6 +24,7 @@ section {
   justify-content: center;
   box-sizing: border-box;
   text-align: center;
+  padding: 1.5rem;
 }
 
 .logo {
@@ -29,23 +33,42 @@ section {
   margin: 2rem 0;
 }
 
-.login-illustration {
-  background-color: white;
-  img {
-    width: 100%;
-    height: auto;
-  }
+h1 {
+  margin: 0 0 1.25rem;
+  color: var(--brand-text-primary);
+  font-size: 2.2rem;
 }
 
-@media (max-width: 720px) {
-  :host {
-    display: block;
-  }
-  section:last-child {
-    display: none;
-  }
+main {
+  width: min(100%, 380px);
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  color: var(--brand-text-primary);
+}
+
+iframe {
+  max-width: 720px;
 }
 
 .no-account {
   margin-top: 3rem;
+
+  a {
+    font-size: 0.9rem;
+    color: var(--brand-color-primary);
+    text-decoration: none;
+  }
+}
+
+@media (max-width: 900px) {
+  :host {
+    display: block;
+  }
+
+  section:last-child {
+    display: none;
+  }
 }

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
@@ -9,7 +8,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm'
 import { Subscription, firstValueFrom } from 'rxjs'
 import { ResourcePresenter } from '../../resource.presenter'
 import { NzModalService } from 'ng-zorro-antd/modal'
-import { UiFilePreviewComponent } from '@platon/shared/ui'
 import { ResourceFileService, ResourceService, ResourceVersionComponent } from '@platon/feature/resource/browser'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { NzInputModule } from 'ng-zorro-antd/input'
@@ -18,15 +16,12 @@ import { FileVersion, FileVersions, LATEST, Resource } from '@platon/feature/res
 import { RouterModule } from '@angular/router'
 
 @Component({
-  standalone: true,
   selector: 'app-resource-template',
   templateUrl: './template.page.html',
   styleUrls: ['./template.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
-    UiFilePreviewComponent,
     NzSelectModule,
     NzPopconfirmModule,
     FormsModule,
@@ -108,7 +103,7 @@ export class ResourceTemplatePage implements OnInit, OnDestroy {
           this.changeDetectorRef.markForCheck()
           return
         }
-      } catch (e) {
+      } catch (_error) {
         this.invalidTemplateId = true
         this.errorMessage = "Cette ressource n'existe pas"
         this.changeDetectorRef.markForCheck()

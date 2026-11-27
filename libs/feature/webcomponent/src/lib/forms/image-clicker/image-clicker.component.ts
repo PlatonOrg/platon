@@ -10,20 +10,26 @@ import {
   OnDestroy,
   ElementRef,
   ViewChild,
+  inject,
 } from '@angular/core'
 import { WebComponent, WebComponentHooks } from '../../web-component'
 import { WebComponentService } from '../../web-component.service'
-import { ImageClickerComponentDefinition, ImageClickerState, ClickDisplayMode, ClickPoint } from './image-clicker'
+import { ImageClickerComponentDefinition, type ImageClickerState, ClickPoint } from './image-clicker'
 import { deepCopy } from '@cisstech/nge/utils'
+import { BaseModule } from '../../shared/components/base/base.module'
 
 @Component({
   selector: 'wc-image-clicker',
   templateUrl: 'image-clicker.component.html',
   styleUrls: ['image-clicker.component.scss'],
+  imports: [BaseModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(ImageClickerComponentDefinition)
 export class ImageClickerComponent implements WebComponentHooks<ImageClickerState>, OnInit, OnDestroy {
+  readonly injector = inject(Injector)
+  private cdr = inject(ChangeDetectorRef)
+
   private readonly webComponentService!: WebComponentService
 
   @Input() state!: ImageClickerState
@@ -37,7 +43,9 @@ export class ImageClickerComponent implements WebComponentHooks<ImageClickerStat
     return this.state.clickPoints || []
   }
 
-  constructor(readonly injector: Injector, private cdr: ChangeDetectorRef) {
+  constructor() {
+    const injector = this.injector
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.webComponentService = injector.get(WebComponentService)!
   }

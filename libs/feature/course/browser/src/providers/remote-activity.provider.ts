@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { buildHttpParams } from '@platon/core/browser'
 import { ItemResponse, ListResponse, NoContentResponse } from '@platon/core/common'
 import {
   Activity,
   ActivityFilters,
+  ActivityReloadPreview,
   Course,
   CreateActivity,
+  ReloadActivity,
   RestrictionList,
   UpdateActivity,
 } from '@platon/feature/course/common'
@@ -16,9 +18,7 @@ import { ActivityProvider } from '../models/activity-provider'
 
 @Injectable()
 export class RemoteActivityProvider extends ActivityProvider {
-  constructor(private readonly http: HttpClient) {
-    super()
-  }
+  private readonly http = inject(HttpClient)
 
   find(courseId: string, activityId: string): Observable<Activity> {
     return this.http
@@ -41,6 +41,12 @@ export class RemoteActivityProvider extends ActivityProvider {
       .pipe(map((response) => response.resource))
   }
 
+  createActivities(course: Course, inputs: CreateActivity[]): Observable<ListResponse<Activity>> {
+    return this.http
+      .post<ListResponse<Activity>>(`/api/v1/courses/${course.id}/activities/batch`, { activities: inputs })
+      .pipe(map((response) => response))
+  }
+
   update(activity: Activity, input: UpdateActivity): Observable<Activity> {
     return this.http
       .patch<ItemResponse<Activity>>(`/api/v1/courses/${activity.courseId}/activities/${activity.id}`, input)
@@ -53,12 +59,17 @@ export class RemoteActivityProvider extends ActivityProvider {
       .pipe(map(() => undefined))
   }
 
-  reload(activity: Activity, version?: string): Observable<Activity> {
+  reloadPreview(activity: Activity): Observable<ActivityReloadPreview> {
     return this.http
-      .put<ItemResponse<Activity>>(
-        `/api/v1/courses/${activity.courseId}/activities/${activity.id}`,
-        version ? { version } : {}
+      .get<ItemResponse<ActivityReloadPreview>>(
+        `/api/v1/courses/${activity.courseId}/activities/${activity.id}/reload-preview`
       )
+      .pipe(map((response) => response.resource))
+  }
+
+  reload(activity: Activity, input: ReloadActivity = {}): Observable<Activity> {
+    return this.http
+      .put<ItemResponse<Activity>>(`/api/v1/courses/${activity.courseId}/activities/${activity.id}`, input)
       .pipe(map((response) => response.resource))
   }
 
@@ -75,6 +86,15 @@ export class RemoteActivityProvider extends ActivityProvider {
   reopen(activity: Activity): Observable<Activity> {
     return this.http
       .post<ItemResponse<Activity>>(`/api/v1/courses/${activity.courseId}/activities/${activity.id}/reopen`, {})
+      .pipe(map((response) => response.resource))
+  }
+
+  regenerateCode(activity: Activity): Observable<Activity> {
+    return this.http
+      .post<ItemResponse<Activity>>(
+        `/api/v1/courses/${activity.courseId}/activities/${activity.id}/regenerate-code`,
+        {}
+      )
       .pipe(map((response) => response.resource))
   }
 

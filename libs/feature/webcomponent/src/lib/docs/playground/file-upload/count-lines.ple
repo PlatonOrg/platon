@@ -1,0 +1,49 @@
+// Les fichiers déposés par l'apprenant sont copiés dans le dossier submission/
+// de l'environnement d'exécution : ils ne sont accessibles qu'avec la sandbox Python.
+// Le dépôt de fichiers nécessite d'être connecté à PLaTon.
+sandbox = "python"
+
+fichier = :wc-file-upload
+fichier.maxFiles = 1
+fichier.allowedExtensions = ["txt", "csv"]
+fichier.acceptedFormats = ".txt,.csv"
+fichier.maxFileSize = 1048576
+
+title ==
+Déposer un fichier texte
+==
+
+statement ==
+Déposez un fichier `.txt` ou `.csv` contenant **au moins 3 lignes**.
+Le grader lit le fichier et compte ses lignes.
+==
+
+form ==
+{{ fichier }}
+==
+
+grader == #!lang=py
+import os
+
+# Le dossier submission/ peut encore contenir des fichiers supprimés entre deux validations :
+# on lit donc le fichier indiqué par le composant (uploadedFiles) plutôt que le contenu du dossier.
+deposes = [f["name"] for f in fichier.get("uploadedFiles", []) if f.get("status") == "success"]
+chemin = os.path.join("submission", os.path.basename(deposes[-1])) if deposes else None
+
+if chemin is None or not os.path.isfile(chemin):
+    grade = -2  // Donner une note inférieure à 0 permet de ne pas compter la soumission comme une tentative.
+    feedback["type"] = "warning"
+    feedback["content"] = "Aucun fichier reçu : déposez un fichier avant de valider."
+else:
+    nom = os.path.basename(chemin)
+    with open(chemin, encoding="utf-8", errors="replace") as f:
+        lignes = [ligne for ligne in f.read().splitlines() if ligne.strip()]
+    if len(lignes) >= 3:
+        grade = 100
+        feedback["type"] = "success"
+        feedback["content"] = f"Le fichier « {nom} » contient {len(lignes)} lignes non vides."
+    else:
+        grade = 0
+        feedback["type"] = "error"
+        feedback["content"] = f"Le fichier « {nom} » ne contient que {len(lignes)} ligne(s) non vide(s)."
+==

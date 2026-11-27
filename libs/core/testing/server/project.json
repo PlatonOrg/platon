@@ -1,0 +1,19 @@
+{
+  "name": "core-testing-server",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/core/testing/server/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:core", "target:server", "purpose:testing"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/core/testing/server/jest.config.ts"
+      }
+    }
+  }
+}

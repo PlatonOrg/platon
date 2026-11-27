@@ -1,0 +1,57 @@
+---
+title: Accès démo d'un cours
+description: Créer un lien d'accès démo pour faire découvrir un cours PLaTon à des personnes sans compte, avec QR code, et comprendre ce que deviennent les comptes démo.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Accès démo d'un cours
+
+L'**accès démo** donne accès à un cours à n'importe qui, **sans compte PLaTon** : il suffit d'ouvrir un lien (ou de
+scanner un QR code). C'est pratique pour une présentation, une journée portes ouvertes ou pour faire tester un cours à
+un collègue.
+
+## Créer un accès démo
+
+<Steps>
+
+### Ouvrir les paramètres du cours
+
+Dans la page du cours, ouvrez l'onglet **Paramètres** (réservé aux enseignants du cours).
+
+### Créer l'accès
+
+Dans le cadre **Demo**, cliquez sur **Créer accès démo**.
+
+### Partager le lien
+
+L'adresse de l'accès apparaît dans le champ **URL**, de la forme `https://<votre-plateforme>/demo/<identifiant>`.
+Copiez-la avec le bouton à droite du champ ou faites scanner le **QR code** affiché à côté.
+
+</Steps>
+
+## Ce qui se passe à l'ouverture du lien
+
+| Situation de la personne                  | Effet                                                                                                                                         |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Elle n'est pas connectée à PLaTon         | Un **compte démo anonyme** est créé (identifiant `demo.…`, nom « anon ymous »), elle est connectée avec ce compte et inscrite au cours comme **étudiant**. |
+| Elle est déjà connectée à PLaTon          | Son propre compte est inscrit au cours comme **étudiant** s'il ne l'était pas déjà.                                                           |
+
+Dans les deux cas, elle est ensuite redirigée vers la page du cours.
+
+<Callout type="warning">
+  Toute personne qui possède le lien peut rejoindre le cours. Ne l'utilisez pas pour un cours contenant des évaluations
+  ou des données que vous ne souhaitez pas exposer, et supprimez l'accès quand il n'est plus utile.
+</Callout>
+
+## Les comptes démo
+
+- Un compte démo n'a pas de mot de passe : la personne le perd si elle se déconnecte ou change de navigateur.
+- Les comptes démo **inactifs depuis plus de deux semaines** sont supprimés automatiquement (tâche planifiée chaque
+  lundi).
+- Les comptes démo apparaissent dans les membres et les résultats du cours comme les autres étudiants.
+
+## Supprimer l'accès démo
+
+Dans **Paramètres** › **Demo**, cliquez sur **Supprimer l'accès démo**. Le lien ne fonctionne plus ; les personnes déjà
+inscrites restent membres du cours tant que vous ne les retirez pas (voir [Membres](/main/courses/members)).

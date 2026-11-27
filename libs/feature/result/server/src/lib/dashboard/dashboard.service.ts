@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { BadRequestResponse, NotFoundResponse, UserRoles, isTeacherRole } from '@platon/core/common'
 import { UserEntity } from '@platon/core/server'
-import { ActivityEntity, ActivityMemberView, CourseMemberView } from '@platon/feature/course/server'
+import {
+  ActivityEntity,
+  ActivityMemberView,
+  CourseMemberView,
+  CourseGroupEntity,
+  CourseGroupMemberEntity,
+} from '@platon/feature/course/server'
 import { ResourceTypes } from '@platon/feature/resource/common'
 import { ResourceEntity, ResourceService } from '@platon/feature/resource/server'
 import {
@@ -57,7 +63,11 @@ export class DashboardService {
     @InjectRepository(ActivityEntity)
     private readonly activityRepository: Repository<ActivityEntity>,
     @InjectRepository(ActivityMemberView)
-    private readonly activityMemberView: Repository<ActivityMemberView>
+    private readonly activityMemberView: Repository<ActivityMemberView>,
+    @InjectRepository(CourseGroupEntity)
+    private readonly courseGroup: Repository<CourseGroupEntity>,
+    @InjectRepository(CourseGroupMemberEntity)
+    private readonly courseGroupMember: Repository<CourseGroupMemberEntity>
   ) {}
 
   async ofUser(user: UserEntity): Promise<DashboardOutput> {
@@ -238,7 +248,7 @@ export class DashboardService {
     if (!activity) {
       throw new NotFoundResponse(`Activity: ${activityId}`)
     }
-    const [sessions, activityMembers] = await Promise.all([
+    const [sessions, activityMembers, groups, memberships] = await Promise.all([
       this.sessionData.find({
         where: { activityId, userId: Not(IsNull()) },
         relations: { user: true },
@@ -247,7 +257,32 @@ export class DashboardService {
       this.activityMemberView.find({
         where: { courseId: activity.courseId, activityId: activity.id },
       }),
+
+      this.courseGroup.find({
+        where: { courseId: activity.courseId },
+      }),
+
+      this.courseGroupMember
+        .createQueryBuilder('member')
+        .innerJoin(CourseGroupEntity, 'group', 'group.groupId = member.groupId AND group.courseId = :courseId', {
+          courseId: activity.courseId,
+        })
+        .select(['member.userId AS "userId"', 'member.groupId AS "groupId"'])
+        .getRawMany<{
+          userId: string
+          groupId: string
+        }>(),
     ])
+
+    const groupIdsByUser = new Map<string, string[]>()
+    for (const { userId, groupId } of memberships) {
+      const list = groupIdsByUser.get(userId)
+      if (list) {
+        list.push(groupId)
+      } else {
+        groupIdsByUser.set(userId, [groupId])
+      }
+    }
 
     const activitySessions = sessions.filter((session) => !session.parentId)
     const exerciseSessions = sessions.filter((session) => !!session.parentId)
@@ -270,6 +305,7 @@ export class DashboardService {
         activityMembers,
         exerciseSessions,
         resourceMap,
+        groupIdsByUser,
       }),
 
       new ActivityExerciseResults({
@@ -283,6 +319,7 @@ export class DashboardService {
       output[aggregator.id] = aggregator.complete()
     })
 
+    output['groups'] = groups.map((group) => ({ id: group.groupId, name: group.name }))
     return output
   }
 

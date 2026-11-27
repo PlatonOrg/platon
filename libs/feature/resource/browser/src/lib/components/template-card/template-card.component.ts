@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   CUSTOM_ELEMENTS_SCHEMA,
   ChangeDetectionStrategy,
@@ -8,7 +7,7 @@ import {
   Output,
   inject,
 } from '@angular/core'
-import { Resource } from '@platon/feature/resource/common'
+import { type Resource } from '@platon/feature/resource/common'
 import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -22,12 +21,11 @@ import { getPreviewOverridesStorageKey } from '../resource-item/resource-item.co
 import { Variables } from '@platon/feature/compiler'
 
 @Component({
-  standalone: true,
   selector: 'resource-template-card',
   templateUrl: './template-card.component.html',
   styleUrls: ['./template-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatTooltipModule, NzIconModule, UiModalIFrameComponent],
+  imports: [MatIconModule, MatTooltipModule, NzIconModule, UiModalIFrameComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class TemplateCardComponent {

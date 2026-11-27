@@ -1,6 +1,6 @@
 ### STAGE 1: Build ###
 
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 
 # Install python3, make, g++, Git, and NodeGit dependencies
 RUN apk add --no-cache --update \
@@ -19,6 +19,21 @@ WORKDIR /src
 # Copy dependencies
 COPY --chown=node:node package.json yarn.lock ./
 COPY --chown=node:node shared ./shared
+
+RUN apk add --no-cache \
+  build-base \
+  g++ \
+  cairo-dev \
+  jpeg-dev \
+  pango-dev \
+  giflib-dev \
+  librsvg-dev \
+  pixman-dev
+
+# Install yarn
+RUN npm install -g corepack \
+  && corepack enable \
+  && corepack prepare yarn@1.22.22 --activate
 
 # Install dependencies
 RUN yarn install --frozen-lockfile --non-interactive --network-timeout 600000
@@ -40,9 +55,15 @@ COPY --chown=node:node bin/cli/wc-docs.sh ./bin/cli/wc-docs.sh
 RUN yarn graphql:generate
 
 # Build NestJS API, Angular web app and docs
-RUN yarn build:web
-RUN NX_VERBOSE_LOGGING=true yarn build:api --verbose
+RUN NODE_OPTIONS="--max-old-space-size=8192" yarn build:web
+# Increase memory limit and disable daemon for API build
+RUN NODE_OPTIONS="--max-old-space-size=4096" NX_DAEMON=false yarn build:api --verbose
 RUN yarn build:docs
+
+# Compile TypeScript migrations to JS (prod-safe, no ts-node needed at runtime)
+COPY --chown=node:node migrations ./migrations
+COPY --chown=node:node tsconfig.migrations.json ./tsconfig.migrations.json
+RUN yarn build:migrations
 
 # Rebuild node_modules with only production dependencies
 ENV NODE_ENV=production
@@ -51,12 +72,12 @@ RUN yarn install --frozen-lockfile --non-interactive --production
 USER node
 
 ### STAGE 2: Frontend Extractor (pour extraction externe) ###
-FROM node:22-alpine AS frontend-extractor
+FROM node:26-alpine AS frontend-extractor
 WORKDIR /src
 COPY --chown=node:node --from=build /src/dist ./dist
 
 ### STAGE 3: Production API Only ###
-FROM node:22-alpine AS production
+FROM node:26-alpine AS production
 RUN apk add --no-cache --update \
   bash \
   openssh \
@@ -66,9 +87,18 @@ RUN apk add --no-cache --update \
 
 WORKDIR /src
 
+# Makes `fetch` and the `http`/`https` modules follow http_proxy, https_proxy and no_proxy
+ENV NODE_USE_ENV_PROXY=1
+
 COPY --chown=node:node --from=build /src/node_modules ./node_modules
 COPY --chown=node:node --from=build /src/dist/apps/api ./dist/apps/api
+COPY --chown=node:node --from=build /src/dist/migrations ./dist/migrations
+COPY --chown=node:node --from=build /src/dist/tools/datasource.prod.js ./dist/tools/datasource.prod.js
 COPY --chown=node:node --from=build /src/schema.gql ./schema.gql
 COPY --chown=node:node templates ./templates
+COPY --chown=node:node .docker/node/docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
 USER node
+
+ENTRYPOINT ["./docker-entrypoint.sh"]

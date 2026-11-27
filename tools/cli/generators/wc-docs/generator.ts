@@ -83,14 +83,18 @@ export default async function (tree: Tree, options: WcDocsGeneratorSchema) {
       const templatesDir = path.join(__dirname, 'templates/component')
 
       // Generate files using the NX generateFiles function
-      const playgrounds = componentDefinition.playgrounds || {}
+      const playgrounds: Record<string, string> = componentDefinition.playgrounds || {}
+      Object.values(playgrounds).forEach((file) => {
+        if (!fs.existsSync(path.join(sourceDir, 'docs/playground', component.name, file))) {
+          console.warn(`Example ${file} not found for component ${component.name}`)
+        }
+      })
       generateFiles(tree, templatesDir, typeOutputDir, {
         ...componentDefinition,
         playgrounds: JSON.stringify(
-          Object.keys(playgrounds).map((name) => ({
+          Object.entries(playgrounds).map(([name, file]) => ({
             name: `Exemple: ${name}`,
-            url: `/playground/exercises/${component.name}/${playgrounds[name]}`,
-            code: fs.readFileSync(path.join(sourceDir, 'docs/playground', component.name, playgrounds[name]), 'utf-8'),
+            url: `/playground/exercises/${component.name}/${file}`,
           })),
           null,
           2
