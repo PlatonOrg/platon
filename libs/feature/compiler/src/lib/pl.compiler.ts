@@ -32,6 +32,9 @@ export const TEMPLATE_OVERRIDE_FILE_EXTENSION = '.plo'
 export const ACTIVITY_NEXT_FILE_PYTHON = 'next.py'
 export const ACTIVITY_NEXT_FILE_NODE = 'next.js'
 
+/** Variable name segments that would let an exercise reach a prototype instead of a plain variable. */
+const UNSAFE_VARIABLE_PROPS = new Set(['__proto__', 'constructor', 'prototype'])
+
 /**
  * File reference resolver for the PL compiler.
  * This interface is used to abstract the resolving the files so each plateform (browser, server) can use the PL compiler.
@@ -519,7 +522,9 @@ export class PLCompiler implements PLVisitor {
    */
   private upsertVariable(variables: Variables, name: string, required = false): [string | null, Variables | null] {
     const props = name.split('.')
-    if (props.find((prop) => !prop)) {
+    // `__proto__` lets an assignment reach Object.prototype instead of the variable object; `constructor`
+    // and `prototype` climb to a class and its instances the same way.
+    if (props.find((prop) => !prop || UNSAFE_VARIABLE_PROPS.has(prop))) {
       this.error(`SyntaxError: ${name}`)
       return [null, null]
     }
