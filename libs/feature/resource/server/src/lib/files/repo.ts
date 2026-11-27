@@ -39,6 +39,23 @@ type Node = ResourceFile
 
 const removeLeadingSlash = (path: string) => (path.startsWith('/') ? path.slice(1) : path)
 
+const isInside = (root: string, path: string) => path.startsWith(root + Path.sep)
+
+// Git reads commands to run from its directory, whose name some file systems match whatever the case
+const isInGitDir = (root: string, path: string) =>
+  Path.relative(root, path)
+    .split(Path.sep)
+    .some((segment) => segment.toLowerCase() === '.git')
+
+const exists = (path: string): boolean => {
+  try {
+    fs.lstatSync(path)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export class Repo {
   private ignoreCommits = false
   private readonly resource = this.root.split('/').pop() as string
@@ -349,6 +366,7 @@ export class Repo {
     const dstpath = Path.dirname(abspath)
 
     const zip = new AdmZip(abspath)
+    this.checkEntries(dstpath, zip.getEntries())
 
     const asyncUnzip = promisify(zip.extractAllToAsync.bind(zip))
     await asyncUnzip(dstpath, true, false)
@@ -379,6 +397,14 @@ export class Repo {
     if (!entry) {
       throw new FileNotFoundError(file)
     }
+
+    // A directory comes with everything under it
+    const extracted = zip
+      .getEntries()
+      .filter(
+        ({ entryName }) => entryName === entry.entryName || (entry.isDirectory && entryName.startsWith(entry.entryName))
+      )
+    this.checkEntries(dstpath, extracted)
 
     zip.extractEntryTo(entry, dstpath, true, true)
 
@@ -543,27 +569,49 @@ export class Repo {
     }
   }
 
+  /**
+   * The absolute form of `path`, relative to the repository or already absolute.
+   * @throws `PermissionError` if it leads outside the repository or into its git directory.
+   */
   private abspath(path = ROOT, authorizeRoot = false) {
     path = (path || ROOT).trim()
-    if (path.startsWith('/')) {
-      // ensure that path does not point to a file outside of self.root
-      if (!path.startsWith(this.root + '/')) {
-        throw new PermissionError(`${path}: points to an invalid file`)
-      }
-      return path
-    }
 
-    if (path === '.') {
+    if (path === ROOT || (authorizeRoot && Path.resolve(this.root, path) === this.root)) {
       if (authorizeRoot) return this.root
       throw new PermissionError('path should not points to root.')
     }
 
-    // ensure that path does not point to a file outside of self.root
-    const abspath = Path.resolve(Path.join(this.root, path))
-    if (!abspath.startsWith(this.root + '/')) {
+    // Resolved first: `..` segments must not survive the check, even in an absolute path
+    const abspath = Path.resolve(this.root, path)
+    if (!isInside(this.root, abspath) || isInGitDir(this.root, abspath) || this.linksAway(abspath)) {
       throw new PermissionError(`${path}: points to an invalid file`)
     }
     return abspath
+  }
+
+  /** Whether a symbolic link on the way to `abspath` leads outside the repository or into its git directory. */
+  private linksAway(abspath: string): boolean {
+    let existing = abspath
+    while (existing !== this.root && !exists(existing)) {
+      existing = Path.dirname(existing)
+    }
+    if (existing === this.root) return false
+
+    try {
+      const root = fs.realpathSync(this.root)
+      const target = fs.realpathSync(existing)
+      return (target !== root && !isInside(root, target)) || isInGitDir(root, target)
+    } catch {
+      return true // a link to nothing: writing to it would create its target
+    }
+  }
+
+  private checkEntries(dstpath: string, entries: AdmZip.IZipEntry[]): void {
+    entries.forEach(({ entryName }) => {
+      // The name under which AdmZip writes the entry: `\` read as `/`, `..` stopping at the destination
+      const written = Path.posix.normalize(`/${entryName.split('\\').join('/')}`)
+      this.abspath(Path.join(dstpath, written), true)
+    })
   }
 
   async log() {
