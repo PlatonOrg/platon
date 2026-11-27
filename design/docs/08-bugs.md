@@ -543,6 +543,15 @@ already been destroyed` dans la console.
   `apps/web/src/app/pages/courses/course/dashboard/section-actions/section-actions.component.html`
 - **Piste** : comparer à `sectionCount - 1`.
 
+### B51. Fichiers : déplacer ou supprimer ne vérifie pas la cible
+
+- [ ] Corrigé
+- **Symptôme** : déplacer vers un fichier, ou supprimer un fichier absent, échoue avec une erreur
+  du système au lieu du message prévu.
+- **Cause** : `move` et `remove` testent une promesse sans `await`, toujours vraie.
+- **Où** : `libs/feature/resource/server/src/lib/files/repo.ts`
+- **Piste** : attendre `isDirectory` et `exists`.
+
 ## Code mort
 
 - [ ] Pages `informations` et `demo` des paramètres de cours, jamais routées
