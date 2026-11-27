@@ -5,7 +5,13 @@ import { ThomasColorizerService } from './thomas-colorizer.service'
 /** Colore comme Monaco : une balise <span> par ligne, séparées par des <br>. */
 const colorizeElement = jest.fn(async (element: HTMLElement) => {
   const lines = (element.textContent ?? '').split('\n')
-  element.innerHTML = lines.map((line) => `<span>${line}</span>`).join('<br>')
+  element.replaceChildren(
+    ...lines.flatMap((line, index) => {
+      const span = document.createElement('span')
+      span.textContent = line
+      return index ? [document.createElement('br'), span] : [span]
+    })
+  )
 })
 
 describe('ThomasColorizerService', () => {
